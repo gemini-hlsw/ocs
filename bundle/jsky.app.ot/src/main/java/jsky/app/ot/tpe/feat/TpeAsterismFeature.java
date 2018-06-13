@@ -1,9 +1,16 @@
 package jsky.app.ot.tpe.feat;
 
+import edu.gemini.pot.sp.ISPObsComponent;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.Coordinates;
+import edu.gemini.spModel.gemini.ghost.GhostAsterism;
+import edu.gemini.spModel.target.SPCoordinates;
+import edu.gemini.spModel.target.SPSkyObject;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
@@ -52,14 +59,38 @@ public class TpeAsterismFeature extends TpePositionFeature {
         final TargetObsComp obsComp = getTargetObsComp();
         if (obsComp != null) {
             for (final SPTarget spt: obsComp.getAsterism().allSpTargetsJava()) {
-              final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(spt);
+              final PosMapEntry<SPSkyObject> pme = pm.getPositionMapEntry(spt);
               if ((pme != null) && (positionIsClose(pme, x, y)) && getContext().targets().shell().isDefined()) {
-                  TargetSelection.setTargetForNode(getContext().targets().envOrNull(), getContext().targets().shell().get(), pme.taggedPos);
+                  final TargetEnvironment env = getContext().targets().envOrNull();
+                  final ISPObsComponent ispObsComponent = getContext().targets().shell().get();
+                  if (pme.taggedPos instanceof SPTarget)
+                    TargetSelection.setTargetForNode(env, ispObsComponent, (SPTarget) pme.taggedPos);
+                  return pme.taggedPos;
+              }
+          }
+          for (final SPCoordinates spc: obsComp.getAsterism().allSpCoordinatesJava()) {
+              final PosMapEntry<SPSkyObject> pme = pm.getPositionMapEntry(spc);
+              if ((pme != null) && (positionIsClose(pme, x, y)) && getContext().targets().shell().isDefined()) {
+                  final TargetEnvironment env = getContext().targets().envOrNull();
+                  final ISPObsComponent ispObsComponent = getContext().targets().shell().get();
+                  if (pme.taggedPos instanceof SPCoordinates)
+                      TargetSelection.setCoordinatesForNode(env, ispObsComponent, (SPCoordinates) pme.taggedPos);
                   return pme.taggedPos;
               }
           }
         }
         return null;
+    }
+
+    private void drawItem(final Graphics g, final Color color, final Point2D.Double base) {
+        if (base == null)
+            return;
+        final int r = MARKER_SIZE;
+        final int d = 2 * r;
+        g.setColor(color);
+        g.drawOval((int) (base.x - r), (int) (base.y - r), d, d);
+        g.drawLine((int) base.x, (int) (base.y - r), (int) base.x, (int) (base.y + r));
+        g.drawLine((int) (base.x - r), (int) base.y, (int) (base.x + r), (int) base.y);
     }
 
     public void draw(final Graphics g, final TpeImageInfo tii) {
@@ -68,19 +99,38 @@ public class TpeAsterismFeature extends TpePositionFeature {
         final TargetEnvironment env = getTargetEnvironment();
         if (env == null) return;
 
-        for (final SPTarget spt: env.getAsterism().allSpTargetsJava()) {
-          final Point2D.Double base = pm.getLocationFromTag(spt);
-          if (base == null) continue;
-
-          final int r = MARKER_SIZE;
-          final int d = 2 * r;
-
-          // Draw crosshairs
-          g.setColor(Color.yellow);
-          g.drawOval((int) (base.x - r), (int) (base.y - r), d, d);
-          g.drawLine((int) base.x, (int) (base.y - r), (int) base.x, (int) (base.y + r));
-          g.drawLine((int) (base.x - r), (int) base.y, (int) (base.x + r), (int) base.y);
+        // Draw the base position if it does not explicitly exist: otherwise,
+        // it will be handled by the coordinate drawing below. This is a bit
+        // hacky, but it is what we want because since this position does not
+        // appear in the PosMap, we cannot move it, which is precisely what
+        // we want for GHOST dual target mode.
+        final Asterism a = env.getAsterism();
+        if (a instanceof GhostAsterism) {
+            final GhostAsterism ga = (GhostAsterism) a;
+            if (ga.base().isEmpty()) {
+                final Option<Coordinates> cOpt = ImOption.fromScalaOpt(ga.basePosition(ImOption.scalaNone()));
+                cOpt.foreach(c -> {
+                    try {
+                        final SPCoordinates spC = new SPCoordinates(c);
+                        final Point2D.Double p = _iw.taggedPosToScreenCoords(spC);
+                        drawItem(g, Color.pink, p);
+                    } catch (Exception e) {
+                        // Nothing to do here.
+                    }
+                });
+            }
         }
+
+        // Draw the sky positions first, so that overlapping targets will take precedence.
+        a.allSpCoordinatesJava().foreach(spc ->
+                drawItem(g, Color.cyan, pm.getLocationFromTag(spc))
+        );
+
+        // Draw the targets.
+        a.allSpTargetsJava().foreach(spt ->
+            drawItem(g, Color.yellow, pm.getLocationFromTag(spt))
+        );
+
     }
 
     /**
@@ -90,13 +140,23 @@ public class TpeAsterismFeature extends TpePositionFeature {
         if (env == null) return None.instance();
 
         final TpePositionMap pm = TpePositionMap.getMap(_iw);
-        // find any asterism member close to the drag target
+
+        // Look for targets close to drag position.
         for (final SPTarget spt: env.getAsterism().allSpTargetsJava()) {
-          final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(spt);
-          if (pme != null && positionIsClose(pme, tme.xWidget, tme.yWidget)) {
-              _dragObject = pme;
-              return new Some<>(pme.taggedPos);
-          }
+            final PosMapEntry<SPSkyObject> pme = pm.getPositionMapEntry(spt);
+            if (pme != null && positionIsClose(pme, tme.xWidget, tme.yWidget)) {
+                _dragObject = pme;
+                return new Some<>(pme.taggedPos);
+            }
+        }
+
+        // Look for coordinates close to drag position.
+        for (final SPCoordinates spc: env.getAsterism().allSpCoordinatesJava()) {
+            final PosMapEntry<SPSkyObject> pme = pm.getPositionMapEntry(spc);
+            if (pme != null && positionIsClose(pme, tme.xWidget, tme.yWidget)) {
+                _dragObject = pme;
+                return new Some<>(pme.taggedPos);
+            }
         }
 
         return None.instance();
@@ -113,7 +173,7 @@ public class TpeAsterismFeature extends TpePositionFeature {
                 _dragObject.screenPos.y = tme.yWidget;
             }
 
-            final SPTarget tp = _dragObject.taggedPos;
+            final SPSkyObject tp = _dragObject.taggedPos;
             tp.setRaDecDegrees(tme.pos.ra().toDegrees(), tme.pos.dec().toDegrees());
         }
     }

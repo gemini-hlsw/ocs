@@ -33,7 +33,7 @@ import scala.swing.{ComboBox, GridBagPanel, Label, Swing}
 import scalaz.Scalaz._
 
 
-final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor with ReentrancyHack {
+final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor[SPTarget] with ReentrancyHack {
 
   // ==== The current program ID
   private[this] var programId: SPProgramID = SPProgramID.toProgramID("")  // this is needed for getting the SED aux files list

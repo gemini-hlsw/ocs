@@ -13,7 +13,7 @@ import jsky.app.ot.gemini.editor.targetComponent.{TargetFeedbackEditor, TargetFe
 import scala.collection.JavaConverters._
 import scalaz.syntax.id._
 
-final class TargetDetailPanel extends JPanel with TelescopePosEditor with ReentrancyHack {
+final class TargetDetailPanel extends JPanel with TelescopePosEditor[SPTarget] with ReentrancyHack {
 
   private val nonsidereal = new NonSiderealDetailEditor
   private val sidereal    = new SiderealDetailEditor
@@ -25,7 +25,7 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
   // This doodad will ensure that any change event coming from the SPTarget will get turned into
   // a call to `edit`, so we don't have to worry about that case everywhere. Everything from here
   // on down only needs to care about implementing `edit`.
-  val tpw = new ForwardingTelescopePosWatcher(this)
+  val tpw = new ForwardingTelescopePosWatcher(this, () => new SPTarget())
 
   // Fields
   private[this] var tde: TargetDetailEditor  = null

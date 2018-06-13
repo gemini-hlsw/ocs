@@ -9,7 +9,7 @@ import edu.gemini.spModel.too.TooType
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import jsky.util.gui.{DropDownListBoxWidgetWatcher, DropDownListBoxWidget}
 
-final class TargetTypeEditor extends DropDownListBoxWidget[AnyRef] with TelescopePosEditor with ReentrancyHack {
+final class TargetTypeEditor extends DropDownListBoxWidget[AnyRef] with TelescopePosEditor[SPTarget] with ReentrancyHack {
 
   private[this] var spt: SPTarget = new SPTarget
 

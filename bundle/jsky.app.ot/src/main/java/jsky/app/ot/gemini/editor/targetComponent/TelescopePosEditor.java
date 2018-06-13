@@ -3,6 +3,7 @@ package jsky.app.ot.gemini.editor.targetComponent;
 import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.obs.context.ObsContext;
+import edu.gemini.spModel.target.SPSkyObject;
 import edu.gemini.spModel.target.SPTarget;
 
 /**
@@ -10,10 +11,10 @@ import edu.gemini.spModel.target.SPTarget;
  * {@link SPTarget}.
  */
 @FunctionalInterface
-public interface TelescopePosEditor {
+public interface TelescopePosEditor<T extends SPSkyObject> {
 
     /**
      * Informs the editor of which target position to edit.
      */
-    void edit(Option<ObsContext> ctx, SPTarget target, ISPNode node);
+    void edit(Option<ObsContext> ctx, T obj, ISPNode node);
 }

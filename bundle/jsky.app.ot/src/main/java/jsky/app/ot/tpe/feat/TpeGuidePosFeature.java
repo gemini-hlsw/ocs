@@ -4,6 +4,7 @@ import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
+import edu.gemini.spModel.target.SPSkyObject;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
@@ -288,17 +289,21 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
         final TpePositionMap pm = TpePositionMap.getMap(_iw);
 
-        final Iterator<PosMapEntry<SPTarget>> it = pm.getAllPositionMapEntries();
+        final Iterator<PosMapEntry<SPSkyObject>> it = pm.getAllPositionMapEntries();
         while (it.hasNext()) {
-            final PosMapEntry<SPTarget> pme = it.next();
-            final SPTarget tp = pme.taggedPos;
+            final PosMapEntry<SPSkyObject> pme = it.next();
+            final SPSkyObject tp = pme.taggedPos;
 
+            if (!(tp instanceof SPTarget))
+                return None.instance();
+
+            final SPTarget t = (SPTarget) tp;
             final TargetEnvironment env = obsComp.getTargetEnvironment();
             for (final GuideProbeTargets gt : env.getPrimaryGuideGroup()) {
-                if (!gt.getTargets().contains(tp)) continue;
+                if (!gt.getTargets().contains(t)) continue;
 
                 if (positionIsClose(pme, tme.xWidget, tme.yWidget)) {
-                    final Tuple2<GuideProbe, SPTarget> tup = new Pair<>(gt.getGuider(), tp);
+                    final Tuple2<GuideProbe, SPTarget> tup = new Pair<>(gt.getGuider(), t);
                     return new Some<>(tup);
                 }
 
@@ -416,7 +421,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
                                 String.format("%s (%d)", tagBase, index++);
 
                 // Find the position map entry for this star, if present.
-                final PosMapEntry<SPTarget> pme = TpePositionMap.getMap(_iw).getPositionMapEntry(target);
+                final PosMapEntry<SPSkyObject> pme = TpePositionMap.getMap(_iw).getPositionMapEntry(target);
                 if (pme == null) continue;
                 final Point2D.Double p = pme.screenPos;
                 if (p == null) continue;
@@ -480,13 +485,16 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
         final TpePositionMap pm = TpePositionMap.getMap(_iw);
 
-        final Iterator<PosMapEntry<SPTarget>> it = pm.getAllPositionMapEntries();
+        final Iterator<PosMapEntry<SPSkyObject>> it = pm.getAllPositionMapEntries();
         while (it.hasNext()) {
-            final PosMapEntry<SPTarget> pme = it.next();
+            final PosMapEntry<SPSkyObject> pme = it.next();
 
-            if (positionIsClose(pme, tme.xWidget, tme.yWidget) && env.isGuidePosition(pme.taggedPos)) {
-                _dragObject = pme;
-                return new Some<>(pme.taggedPos);
+            if (pme.taggedPos instanceof SPTarget) {
+                final SPTarget t = (SPTarget) pme.taggedPos;
+                if (positionIsClose(pme, tme.xWidget, tme.yWidget) && env.isGuidePosition(t)) {
+                    _dragObject = pme;
+                    return new Some<>(pme.taggedPos);
+                }
             }
         }
         return None.instance();
@@ -499,7 +507,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
             _dragObject.screenPos.x = tme.xWidget;
             _dragObject.screenPos.y = tme.yWidget;
 
-            final SPTarget tp = _dragObject.taggedPos;
+            final SPSkyObject tp = _dragObject.taggedPos;
             tp.setRaDecDegrees(tme.pos.ra().toDegrees(), tme.pos.dec().toDegrees());
         }
     }

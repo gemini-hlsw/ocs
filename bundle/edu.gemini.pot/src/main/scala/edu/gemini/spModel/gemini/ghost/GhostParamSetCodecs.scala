@@ -1,6 +1,7 @@
 package edu.gemini.spModel.gemini.ghost
 
 import edu.gemini.spModel.gemini.ghost.GhostAsterism._
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.HighResolution._
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.StandardResolution._
 import edu.gemini.spModel.pio.codec._
 import edu.gemini.spModel.target.TargetParamSetCodecs._
@@ -44,9 +45,15 @@ object GhostParamSetCodecs {
       .withParamSet(IFU2, SkyPlusTargetIFU2)
       .withOptionalParamSet(Base, SkyPlusTargetBase)
 
-  implicit val HighResolutionParamSetCodec: ParamSetCodec[HighResolution] =
-    ParamSetCodec.initial(HighResolution.empty)
-      .withParamSet(IFU1, HighResolution.IFU1)
-      .withOptionalParamSet(IFU2, HighResolution.IFU2)
-      .withOptionalParamSet(Base, HighResolution.Base)
+  implicit val HRTargetParamSetCodec: ParamSetCodec[HighResolutionTarget] =
+    ParamSetCodec.initial(emptyHRTarget)
+      .withParamSet(IFU1, HRTargetIFU1)
+      .withOptionalParamSet(Base, HRTargetBase)
+
+
+  implicit val HRTargetPlusSkyParamSetCodec: ParamSetCodec[HighResolutionTargetPlusSky] =
+    ParamSetCodec.initial(emptyHRTargetPlusSky)
+      .withParamSet(IFU1, HRTargetPlusSkyIFU1)
+      .withParamSet(IFU2, HRTargetPlusSkyIFU2)
+      .withOptionalParamSet(Base, HRTargetPlusSkyBase)
 }

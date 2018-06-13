@@ -5,15 +5,18 @@ import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.SPNodeKey;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.ags.*;
-import edu.gemini.spModel.core.HorizonsDesignation;
+import edu.gemini.spModel.core.Coordinates;
 import edu.gemini.spModel.core.Magnitude;
 import edu.gemini.spModel.core.NonSiderealTarget;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.core.Target;
+import edu.gemini.spModel.gemini.ghost.GhostAsterism;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
+import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
+import edu.gemini.spModel.target.SPCoordinates;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.env.*;
@@ -22,6 +25,7 @@ import edu.gemini.spModel.target.obsComp.TargetSelection;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.ags.*;
 import jsky.app.ot.editor.OtItemEditor;
+import jsky.app.ot.gemini.editor.targetComponent.tableSelection.*;
 import jsky.app.ot.tpe.GuideStarSupport;
 import jsky.app.ot.tpe.TelescopePosEditor;
 import jsky.app.ot.tpe.TpeManager;
@@ -34,6 +38,7 @@ import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
+import java.time.Instant;
 import java.util.*;
 import java.util.List;
 
@@ -50,7 +55,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private final TelescopeForm _w;
 
     // The current selection. This will not be defined until after init is run.
-    private Option<ImEither<SPTarget, IndexedGuideGroup>> _curSelection;
+    private TableSelection selection;
 
     // A collection of the JMenuItems that allow the addition of guide stars.
     private final Map<GuideProbe,Component> _guideStarAdders = new HashMap<>();
@@ -66,11 +71,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         });
 
-        _w.removeButton   .addActionListener(removeListener);
-        _w.copyButton     .addActionListener(copyListener);
-        _w.pasteButton    .addActionListener(pasteListener);
-        _w.duplicateButton.addActionListener(duplicateListener);
-        _w.primaryButton  .addActionListener(primaryListener);
+        _w.removeButton    .addActionListener(removeListener);
+        _w.copyButton      .addActionListener(copyListener);
+        _w.pasteButton     .addActionListener(pasteListener);
+        _w.duplicateButton .addActionListener(duplicateListener);
+        _w.primaryButton   .addActionListener(primaryListener);
+        _w.linkBaseToTarget.addActionListener(linkedBaseListener);
 
         _w.guidingControls.manualGuideStarButton().peer().addActionListener(manualGuideStarListener);
         _w.guidingControls.autoGuideStarGuiderSelector().addSelectionListener(strategy ->
@@ -108,7 +114,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         _agsPub.subscribe((obs, oldOptions, newOptions) -> updateGuiding());
 
-        _curSelection = None.instance();
+        selection = TableNoSelection.instance;
 
         BagsManager.addBagsStateListener((key, oldStatus, newStatus) -> {
             if (Optional.ofNullable(getContextObservation()).map(co -> key.equals(co.getNodeKey())).orElse(false)) {
@@ -130,6 +136,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             // update them explicitly so they behave as if they were contained
             // in the panel.
             updateDetailEditorEnabledState(enabled);
+            updateCoordinateEditorEnabledState(enabled);
         }
 
         final SPInstObsComp inst = getContextInstrumentDataObject();
@@ -156,26 +163,127 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     private void updateDetailEditorEnabledState(final boolean enabled) {
         // Update enabled state for all detail widgets.
-        _w.detailEditor.allEditorsJava().stream().forEach(ed -> updateEnabledState(new Component[]{ed}, enabled));
+        _w.detailEditor.allEditorsJava().forEach(ed -> updateEnabledState(new Component[]{ed}, enabled));
+    }
+
+    private void updateCoordinateEditorEnabledState(final boolean enabled) {
+        updateEnabledState(new Component[]{_w.coordinateEditor}, enabled);
     }
 
     /**
-     * Simplifications for dealing with the Either representing selection.
+     * Simplifications for dealing with the current selection.
      */
     private Option<SPTarget> selectedTarget() {
-        return _curSelection.flatMap(t -> ImOption.fromOptional(t.toOptionalLeft()));
+        if (selection instanceof TableTargetSelection)
+            return new Some<>(((TableTargetSelection) selection).getTarget());
+        else
+            return None.instance();
     }
 
     private Option<IndexedGuideGroup> selectedGroup() {
-        return _curSelection.flatMap(g -> ImOption.fromOptional(g.toOptional()));
+        if (selection instanceof TableGroupSelection)
+            return new Some<>(((TableGroupSelection) selection).getGroup());
+        else
+            return None.instance();
+    }
+
+    private Option<SPCoordinates> selectedCoordinates() {
+        if (selection instanceof TableCoordinateSelection)
+            return new Some<>(((TableCoordinateSelection) selection).getCoordinates());
+        else
+            return None.instance();
     }
 
     /**
-     * Auxiliary method to determine if the current selection is the base position.
+     * Extract the base position out of the asterism.
+     * It could be a target or a sky position.
+     * Due to type inference issues with map, we have to do this in a horrible way.
+     */
+    private ImEither<SPTarget, SPCoordinates> basePosition() {
+        final TargetEnvironment env = getDataObject().getTargetEnvironment();
+        final Asterism a            = env.getAsterism();
+
+        switch (a.asterismType()) {
+            case Single:
+                return new Left<>(((Asterism.Single) a).t());
+            case GhostSingleTarget:
+                final GhostAsterism.SingleTarget gsa = (GhostAsterism.SingleTarget) a;
+                return ImOption.fromScalaOpt(gsa.base()).toRight(() -> gsa.target().spTarget());
+            case GhostDualTarget:
+                // This case is more complicated as it always returns Right.
+                final GhostAsterism.DualTarget gda = (GhostAsterism.DualTarget) a;
+                if (gda.base().isDefined()) return new Right<>(gda.base().get());
+                else {
+                    final Option<Instant> sbi = ((SPObservation)getContextObservation().getDataObject())
+                            .getSchedulingBlockStart()
+                            .map(Instant::ofEpochMilli);
+                    final Option<Coordinates> cOpt = ImOption.fromScalaOpt(gda.basePosition(ImOption.toScalaOpt(sbi)));
+                    return new Right<>(cOpt.map(SPCoordinates::new).getOrElse(SPCoordinates::new));
+                }
+            case GhostTargetPlusSky:
+                final GhostAsterism.TargetPlusSky gtsa = (GhostAsterism.TargetPlusSky) a;
+                return ImOption.fromScalaOpt(gtsa.base()).toRight(() -> gtsa.target().spTarget());
+            case GhostSkyPlusTarget:
+                final GhostAsterism.SkyPlusTarget gsta = (GhostAsterism.SkyPlusTarget) a;
+                return ImOption.fromScalaOpt(gsta.base()).toRight(() -> gsta.target().spTarget());
+            case GhostHighResolutionTarget:
+                final GhostAsterism.HighResolutionTarget ghta = (GhostAsterism.HighResolutionTarget) a;
+                return ImOption.fromScalaOpt(ghta.base()).toRight(() -> ghta.target().spTarget());
+            case GhostHighResolutionTargetPlusSky:
+                final GhostAsterism.HighResolutionTargetPlusSky ghtsa = (GhostAsterism.HighResolutionTargetPlusSky) a;
+                return ImOption.fromScalaOpt(ghtsa.base()).toRight(() -> ghtsa.target().spTarget());
+        }
+
+        // We shouldn't get here.
+        throw new RuntimeException("The asterism type could not be determined.");
+    }
+
+    /**
+     * Auxiliary method to determine if the current selection is base target.
+     */
+    private boolean selectionIsBaseTarget() {
+        final ISPObsComponent node = getContextTargetObsComp();
+        if (TargetSelection.getIndex(node).forall(i -> i != 0))
+            return false;
+        final Option<SPTarget> t = basePosition().toOptionLeft();
+        return selectedTarget().exists(st -> t.exists(st::equals));
+    }
+
+    /**
+     * Ensure that there is at most one selection for this node in TargetSelection.
+     */
+    static void checkTargetSelectionConsistency(final TargetEnvironment env,
+                                                final ISPObsComponent node) {
+        final Option<SPTarget> tOpt = TargetSelection.getTargetForNode(env, node);
+        final Option<SPCoordinates> cOpt = TargetSelection.getCoordinatesForNode(env, node);
+        final Option<IndexedGuideGroup> gOpt = TargetSelection.getIndexedGuideGroupForNode(env, node);
+        if ((tOpt.isDefined() && (cOpt.isDefined() || gOpt.isDefined()))
+                || (cOpt.isDefined() && gOpt.isDefined()))
+            throw new RuntimeException("Illegal node state: more than one selection recorded for node");
+    }
+
+    /**
+     * Ensure that there is at most one selection for the current node in TargetSelection.
+     */
+    void checkTargetSelectionConsistency() {
+        final TargetEnvironment env = getDataObject().getTargetEnvironment();
+        final ISPObsComponent  node = getNode();
+        checkTargetSelectionConsistency(env, node);
+    }
+
+    /**
+     * Auxiliary method to determine if the current selection is base coordinates.
+     */
+    private boolean selectionIsBaseCoordinates() {
+        final ISPObsComponent node = getContextTargetObsComp();
+        return selectionIsCoordinates() && TargetSelection.getIndex(node).exists(i -> i == 0);
+    }
+
+    /**
+     * Put them together to determine if the base position is selected.
      */
     private boolean selectionIsBasePosition() {
-        final TargetEnvironment env = getDataObject().getTargetEnvironment();
-        return selectedTarget().exists((target) -> target == env.getArbitraryTargetFromAsterism());
+        return selectionIsBaseTarget() || selectionIsBaseCoordinates();
     }
 
     /**
@@ -222,22 +330,39 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      */
     private boolean selectionIsUserTarget() {
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
-        return selectedTarget().exists(t -> env.isUserPosition(t));
+        return selectedTarget().exists(env::isUserPosition);
     }
 
     /**
-     * Auxiliary method to set the selection to the specified target.
+     * Auxiliary method to determine if the current selection is coordinates.
+     */
+    private boolean selectionIsCoordinates() {
+        return selectedCoordinates().isDefined();
+    }
+
+    /**
+     * Auxiliary method to determine if the base coordinates are explicitly defined.
+     */
+    private boolean isGhostAsterismWithExplicitlyDefinedBaseCoordinates() {
+        // Editable if coords are sky position, or base is defined.
+        final TargetEnvironment env = getDataObject().getTargetEnvironment();
+        final Asterism a = env.getAsterism();
+        return (a instanceof GhostAsterism) && ((GhostAsterism)a).base().isDefined();
+    }
+
+    /**
+     * Set the selection.
      */
     private void setSelectionToTarget(final SPTarget t) {
-        _curSelection = ImOption.apply(t).map(Left::new);
+        selection = new TableTargetSelection(t);
     }
 
-    /**
-     * Auxiliary method to set the selection to the specified group.
-     */
     private void setSelectionToGroup(final IndexedGuideGroup igg) {
-        //_curSelection = ImOption.apply(igg).map(g -> new Right<>(igg));
-        _curSelection = ImOption.apply(igg).map(Right::new);
+        selection = new TableGroupSelection(igg);
+    }
+
+    private void setSelectionToCoordinates(final SPCoordinates c) {
+        selection = new TableCoordinateSelection(c);
     }
 
     /**
@@ -276,6 +401,22 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     /**
+     * Update the UI components when coordinates become selected.
+     */
+    private void updateUIForCoordinates() {
+        if (selectedCoordinates().isEmpty()) return;
+
+        final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+        _w.removeButton.setEnabled(false);
+        _w.primaryButton.setEnabled(false);
+        _w.pasteButton.setEnabled(editable);
+        _w.duplicateButton.setEnabled(false);
+        _w.tag.setEnabled(false);
+        updateCoordinateEditorEnabledState(editable &&
+                (isGhostAsterismWithExplicitlyDefinedBaseCoordinates() || !selectionIsBaseCoordinates()));
+    }
+
+    /**
      * Update the menu items that allow the addition of guide stars. These must be disabled for the automatic group
      * or if we are currently on the base or a user target.
      *
@@ -302,14 +443,19 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final TargetEnvironment env = obsComp.getTargetEnvironment();
         if (env == null || !env.getTargets().contains(target)) return false;
 
-        // If current selection is a target, remove the posWatcher.
+        // If current selection is a target or coordinates, remove the posWatcher.
         selectedTarget().foreach(t -> t.deleteWatcher(posWatcher));
+        selectedCoordinates().foreach(c -> c.deleteWatcher(posWatcher));
 
         action.run();
 
-        // If the current selection is a target, then readd the posWatcher and refresh the UI.
+        // If the current selection is a target or coordinates, then readd the posWatcher and refresh the UI.
         selectedTarget().foreach(t -> {
             t.addWatcher(posWatcher);
+            refreshAll();
+        });
+        selectedCoordinates().foreach(c -> {
+            c.addWatcher(posWatcher);
             refreshAll();
         });
         return true;
@@ -411,6 +557,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // If more than the auto group has changed, we need to maintain the selection, or default to the base.
         if (!isBagsUpdate) {
+            checkTargetSelectionConsistency();
             final boolean targetSet = TargetSelection.getTargetForNode(env, node).map(t ->
                     manageCurPosIfEnvContainsTarget(t, () -> setSelectionToTarget(t))
             ).getOrElse(false);
@@ -418,8 +565,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 setSelectionToGroup(igg);
                 return true;
             }).getOrElse(false);
-            if (!(targetSet || groupSet)) {
-                setSelectionToTarget(env.getArbitraryTargetFromAsterism());
+            final boolean coordsSet = TargetSelection.getCoordinatesForNode(env, node).map(c -> {
+                setSelectionToCoordinates(c);
+                return true;
+            }).getOrElse(false);
+            if (!(targetSet || groupSet || coordsSet)) {
+                setSelectionToTarget(env.getAsterism().allSpTargetsJava().head());
             }
         }
 
@@ -433,7 +584,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             _w.newMenu.setEnabled(true);
             if (inst.hasGuideProbes()) {
                 final List<GuideProbe> guiders = new ArrayList<>(GuideProbeUtil.instance.getAvailableGuiders(getContextObservation()));
-                Collections.sort(guiders, GuideProbe.KeyComparator.instance);
+                guiders.sort(GuideProbe.KeyComparator.instance);
                 guiders.forEach(probe -> {
                     final JMenuItem guideStarAdder = new JMenuItem(probe.getKey()) {{
                         addActionListener(new AddGuideStarAction(newTOC, probe, _w.positionTable));
@@ -459,6 +610,22 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
 
         _w.positionTable.reinit(newTOC, isBagsUpdate);
+
+
+        // The linkBaseToTarget checkbox is:
+        // 1. visible if the asterism type is a GHOST asterism; and
+        // 2. checked if the base position is None, i.e. linked to the science targets.
+        final Asterism a = env.getAsterism();
+        _w.linkBaseToTarget.removeActionListener(linkedBaseListener);
+        if (a.asterismType() == AsterismType.Single) {
+            _w.linkBaseToTarget.setVisible(false);
+        } else {
+            final GhostAsterism ga = ((GhostAsterism) a);
+            _w.linkBaseToTarget.setVisible(true);
+            _w.linkBaseToTarget.setSelected(ga.base().isEmpty());
+        }
+        _w.linkBaseToTarget.addActionListener(linkedBaseListener);
+
 
         _w.guidingControls.manualGuideStarButton().peer().setVisible(GuideStarSupport.supportsManualGuideStarSelection(getNode()));
         updateGuiding();
@@ -527,14 +694,16 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private void updateTargetFeedback(final TargetEnvironment env) {
         final Option<ObsContext> ctx = getObsContext(env);
         final ISPObsComponent node   = getContextTargetObsComp();
-        final SPTarget target        = TargetSelection.getTargetForNode(env, node).getOrElse(env.getArbitraryTargetFromAsterism());
+        final SPTarget target        = TargetSelection.getTargetForNode(env, node)
+                .getOrElse(env.getAsterism().allSpTargets().head());
         _w.detailEditor.targetFeedbackEditor().edit(ctx, target, node);
     }
 
-
     private void refreshAll() {
+        // We will either have coordinates or a target selected at this point.
         _w.guideGroupPanel.setVisible(false);
-        _w.detailEditor.setVisible(true);
+        _w.coordinateEditor.setVisible(selectionIsCoordinates());
+        _w.detailEditor.setVisible(!selectionIsCoordinates());
 
         // Get all the legally available guiders in the current context.
         final Set<GuideProbe> avail = GuideProbeUtil.instance.getAvailableGuiders(getContextObservation());
@@ -558,7 +727,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // Sort the list of guiders.
         final List<GuideProbe> guidersList = new ArrayList<>(guiders);
-        Collections.sort(guidersList, GuideProbe.KeyComparator.instance);
+        guidersList.sort(GuideProbe.KeyComparator.instance);
 
         // Make a list of PositionTypes that are legal in the current observation context.
         int index = 0;
@@ -572,23 +741,34 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             ptA[index++] = new UserPositionType(t);
         }
 
+        // We don't allow the tag to be changed for the base position or for coordinates.
         _w.tag.removeActionListener(_tagListener);
         _w.tag.setModel(new DefaultComboBoxModel<>(ptA));
-        _w.tag.setEnabled(isEnabled() && (!selectionIsBasePosition()));
+        _w.tag.setEnabled(isEnabled() && !selectionIsCoordinates() && !selectionIsBaseTarget());
         _w.tag.addActionListener(_tagListener);
-
         _w.tag.setRenderer(tagRenderer);
         showTargetTag();
 
-        updateTargetDetails(env);
+        // Update the editors for targets and coordinates.
+        // This only acts on the one selected.
+        if (selectionIsCoordinates())
+            updateCoordinateDetails(env);
+        else
+            updateTargetDetails(env);
 
         // Set the status of the buttons and detail editors.
+        // We do this for both coordinates and targets, as the methods check which is selected.
         updateUIForTarget();
+        updateUIForCoordinates();
         updateGuideStarAdders();
     }
 
-    private void updateTargetDetails(TargetEnvironment env) {
+    private void updateTargetDetails(final TargetEnvironment env) {
         selectedTarget().foreach(t -> _w.detailEditor.edit(getObsContext(env), t, getNode()));
+    }
+
+    private void updateCoordinateDetails(final TargetEnvironment env) {
+        selectedCoordinates().foreach(c -> _w.coordinateEditor.edit(getObsContext(env), c, getNode()));
     }
 
     private void showTargetTag() {
@@ -748,7 +928,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     };
 
     private final TelescopePosWatcher posWatcher = tp -> {
-        if (tp != selectedTarget().getOrNull()) {
+        if (tp != selectedTarget().getOrNull() && tp != selectedCoordinates().getOrNull()) {
             // This shouldn't happen ...
             System.out.println(getClass().getName() + ": received a position " +
                     " update for a position other than the current one: " + tp);
@@ -774,26 +954,46 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private void setSelectionFromNode() {
         final ISPObsComponent node = getContextTargetObsComp();
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
+
+        checkTargetSelectionConsistency();
         final Option<SPTarget> targetOpt = TargetSelection.getTargetForNode(env, node);
+        final Option<SPCoordinates> coordsOpt = TargetSelection.getCoordinatesForNode(env, node);
         final Option<IndexedGuideGroup> iggOpt = TargetSelection.getIndexedGuideGroupForNode(env, node);
 
         // If a target, process it.
         targetOpt.foreach(target -> manageCurPosIfEnvContainsTarget(target, () -> setSelectionToTarget(target)));
 
+        // If it is coordinates, process.
+        coordsOpt.foreach(coords -> {
+            selectedTarget().foreach(t -> t.deleteWatcher(posWatcher));
+            selectedCoordinates().foreach(c -> c.deleteWatcher(posWatcher));
+            setSelectionToCoordinates(coords);
+
+            _w.guideGroupPanel.setVisible(false);
+            _w.coordinateEditor.setVisible(true);
+            _w.detailEditor.setVisible(false);
+
+            updateCoordinateEditorEnabledState(isGhostAsterismWithExplicitlyDefinedBaseCoordinates() || !selectionIsBaseCoordinates());
+            updateCoordinateDetails(env);
+            updateUIForCoordinates();
+
+            selectedCoordinates().foreach(c -> c.addWatcher(posWatcher));
+            selectedTarget().foreach(t -> t.addWatcher(posWatcher));
+        });
+
         // If it is a guide group, process it.
         iggOpt.filter(igg -> env.getGroups().contains(igg.group())).foreach(igg -> {
             selectedTarget().foreach(t -> t.deleteWatcher(posWatcher));
-
             setSelectionToGroup(igg);
 
             _w.guideGroupPanel.setVisible(true);
+            _w.coordinateEditor.setVisible(false);
             _w.detailEditor.setVisible(false);
 
             // N.B. don't trim, otherwise user can't include space in group name
             final String name;
             final boolean enabled;
             if (selectionIsAutoGroup()) {
-                // TODO: Possibly change this for different AutomaticGroup types?
                 name = "Automatic Group";
                 enabled = false;
             } else {
@@ -811,17 +1011,24 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     private final PropertyChangeListener selectionListener = e -> setSelectionFromNode();
 
-    // Updates the enabled state of the primary guide target button when the target environment changes.
+    /**
+     * Updates the enabled state of the primary guide target button when the target environment changes.
+     * We only allow this if:
+     * 1. The selection is a target in a guide group; or
+     * 2. The selection is a guide group.
+     */
     private final PropertyChangeListener primaryButtonUpdater = new PropertyChangeListener() {
         @Override public void propertyChange(final PropertyChangeEvent evt) {
-            final boolean enabled = _curSelection.map(c -> c.biFold(
-                    t -> {
-                        final TargetEnvironment env = getDataObject().getTargetEnvironment();
-                        final ImList<GuideProbeTargets> gtList = env.getPrimaryGuideGroup().getAllContaining(t);
-                        return gtList.nonEmpty() && !selectionIsAutoTarget();
-                    },
-                    igg -> true
-            )).getOrElse(false);
+            final boolean enabled;
+            if (selection instanceof TableTargetSelection) {
+                final SPTarget t = ((TableTargetSelection) selection).getTarget();
+                final TargetEnvironment env = getDataObject().getTargetEnvironment();
+                final ImList<GuideProbeTargets> gtList = env.getPrimaryGuideGroup().getAllContaining(t);
+                enabled = gtList.nonEmpty() && !selectionIsAutoTarget();
+            }
+            else
+                enabled = selection instanceof TableGroupSelection;
+
             _w.primaryButton.setEnabled(enabled && OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation()));
         }
     };
@@ -837,7 +1044,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private final ActionListener removeListener = evt -> {
         final TargetEnvironment envOld = getDataObject().getTargetEnvironment();
 
-        // If there is a selection, then handle it, separately for targets and guide groups.)
+        // If there is a selection, then handle it, separately for targets and guide groups.
+        // We don't worry about coordinates as we don't allow them to be removed.
         final Option<TargetEnvironment> envNewOpt = selectedTarget().flatMap(t -> {
             // Handle targets.
             if (selectionIsBasePosition()) {
@@ -866,7 +1074,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 setSelectionToGroup(new IndexedGuideGroup(groupIndex, group));
                 return new Some<>(envNew);
             }
-            return None.<TargetEnvironment>instance();
+            return None.instance();
         }));
 
         // Permitted changes were made only if envNewOpt is defined.
@@ -893,67 +1101,67 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final TargetObsComp dataObject = getDataObject();
         if ((obsComponent == null) || (dataObject == null)) return;
 
+        // We don't allow this for coordinates.
+        checkTargetSelectionConsistency();
         final Option<SPTarget> targetOpt = TargetSelection.getTargetForNode(dataObject.getTargetEnvironment(), obsComponent);
-        if (targetOpt.isDefined()) {
-            targetOpt.foreach(target -> {
+        final Option<IndexedGuideGroup> iggOpt =
+                TargetSelection.getIndexedGuideGroupForNode(dataObject.getTargetEnvironment(), obsComponent);
+        targetOpt.foreach(target -> {
 
-                // Clone the target.
-                final SPTarget newTarget = new SPTarget();
-                newTarget.setTarget(target.getTarget());
+            // Clone the target.
+            final SPTarget newTarget = new SPTarget();
+            newTarget.setTarget(target.getTarget());
 
-                // Add it to the environment.  First we have to figure out what it is.
-                final TargetEnvironment env = dataObject.getTargetEnvironment();
+            // Add it to the environment.  First we have to figure out what it is.
+            final TargetEnvironment env = dataObject.getTargetEnvironment();
 
-                // See if it is a guide star and duplicate it in the correct GuideTargets list.
-                boolean duplicated = false;
-                env.getPrimaryGuideGroup();
-                final List<GuideGroup> groups = new ArrayList<>();
-                for (GuideGroup group : env.getGroups()) {
-                    for (GuideProbeTargets gt : group) {
-                        if (gt.getTargets().contains(target)) {
-                            group = group.put(gt.update(OptionsList.UpdateOps.append(newTarget)));
-                            duplicated = true;
-                            break;
-                        }
+            // See if it is a guide star and duplicate it in the correct GuideTargets list.
+            boolean duplicated = false;
+            env.getPrimaryGuideGroup();
+            final List<GuideGroup> groups = new ArrayList<>();
+            for (GuideGroup group : env.getGroups()) {
+                for (GuideProbeTargets gt : group) {
+                    if (gt.getTargets().contains(target)) {
+                        group = group.put(gt.update(OptionsList.UpdateOps.append(newTarget)));
+                        duplicated = true;
+                        break;
                     }
-                    groups.add(group);
                 }
+                groups.add(group);
+            }
 
-                final TargetEnvironment newEnv;
+            final TargetEnvironment newEnv;
 
-                if (duplicated) {
-                    newEnv = env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups)));
-                } else {
-                    // Wasn't a guide star so check which user target needs to
-                    // be copied.
-                    final ImList<UserTarget> us = env.getUserTargets();
-                    newEnv = us.find(u -> u.target.equals(target)).map(u ->
+            if (duplicated) {
+                newEnv = env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups)));
+            } else {
+                // Wasn't a guide star so check which user target needs to
+                // be copied.
+                final ImList<UserTarget> us = env.getUserTargets();
+                newEnv = us.find(u -> u.target.equals(target)).map(u ->
                         env.setUserTargets(us.append(new UserTarget(u.type, newTarget)))
-                    ).getOrElse(env);
-                }
-                dataObject.setTargetEnvironment(newEnv);
-            });
-        } else {
-            final Option<IndexedGuideGroup> iggOpt =
-                    TargetSelection.getIndexedGuideGroupForNode(dataObject.getTargetEnvironment(), obsComponent);
-            iggOpt.foreach(igg -> {
-                final GuideGroup origGroup    = igg.group();
+                ).getOrElse(env);
+            }
+            dataObject.setTargetEnvironment(newEnv);
+        });
 
-                // This used to be done with origGroup.cloneTargets(), but if origGroup is an auto group, this creates
-                // another auto group, which is problematic, so we specifically force a manual group to be created
-                // and receive an appropriate name.
-                final String newGroupName     = origGroup.getName().filter(s -> !s.isEmpty()).getOrElse("Manual");
-                final GuideGroup newGroup     = origGroup.toManualGroup().setName(newGroupName);
+        iggOpt.foreach(igg -> {
+            final GuideGroup origGroup = igg.group();
 
-                final TargetEnvironment env   = dataObject.getTargetEnvironment();
-                final List<GuideGroup> groups = new ArrayList<>();
-                groups.addAll(env.getGroups().toList());
-                groups.add(newGroup);
+            // This used to be done with origGroup.cloneTargets(), but if origGroup is an auto group, this creates
+            // another auto group, which is problematic, so we specifically force a manual group to be created
+            // and receive an appropriate name.
+            final String newGroupName = origGroup.getName().filter(s -> !s.isEmpty()).getOrElse("Manual");
+            final GuideGroup newGroup = origGroup.toManualGroup().setName(newGroupName);
 
-                final TargetEnvironment newEnv = env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups)));
-                dataObject.setTargetEnvironment(newEnv);
-            });
-        }
+            final TargetEnvironment env = dataObject.getTargetEnvironment();
+            final List<GuideGroup> groups = new ArrayList<>();
+            groups.addAll(env.getGroups().toList());
+            groups.add(newGroup);
+
+            final TargetEnvironment newEnv = env.setGuideEnvironment(env.getGuideEnvironment().setOptions(DefaultImList.create(groups)));
+            dataObject.setTargetEnvironment(newEnv);
+        });
     };
 
     @SuppressWarnings("FieldCanBeLocal")
@@ -971,15 +1179,81 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
         @Override public void actionPerformed(final ActionEvent e) {
             // As long as something is selected, we can paste it.
-            _curSelection.forEach(c -> c.forEach(ignored -> pasteSelectedPosition(getNode(), getDataObject())));
-            _curSelection.forEach(c -> c.forEachLeft(ignored -> pasteSelectedPosition(getNode(), getDataObject())));
+            if (!(selection instanceof TableNoSelection))
+                pasteSelectedPosition(getNode(), getDataObject());
         }
     };
 
-    @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener primaryListener = new ActionListener() {
         public void actionPerformed(final ActionEvent e) {
             _w.positionTable.updatePrimaryStar();
+        }
+    };
+
+    private final ActionListener linkedBaseListener = new ActionListener() {
+        private scala.Option<SPCoordinates> coords(final GhostAsterism ga, final boolean linked) {
+                if (linked)
+                    return ImOption.scalaNone();
+
+                // Try to get the scheduling block start, convert to Instant, and look up base.
+                final Option<Instant> sbi = ((SPObservation)getContextObservation().getDataObject())
+                        .getSchedulingBlockStart()
+                        .map(Instant::ofEpochMilli);
+                return ImOption.toScalaOpt(
+                        ImOption.fromScalaOpt(ga.basePosition(ImOption.toScalaOpt(sbi)))
+                        .map(SPCoordinates::new)
+                );
+        }
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            final JCheckBox cb = (JCheckBox) e.getSource();
+
+            final TargetObsComp toc = getDataObject();
+            if (toc == null) return;
+            final TargetEnvironment env = toc.getTargetEnvironment();
+            if (env == null) return;
+            final Asterism oldA = env.getAsterism();
+            if (oldA == null) return;
+
+            // Now depending on the kind of asterism, either make a base SPCoordinates
+            // or eliminate one.
+            final boolean linked = cb.isSelected();
+            final Asterism newA;
+
+            switch (oldA.asterismType()) {
+                case GhostSingleTarget:
+                    final GhostAsterism.SingleTarget gsa = (GhostAsterism.SingleTarget) oldA;
+                    newA = gsa.copy(gsa.target(), coords(gsa, linked));
+                    break;
+                case GhostDualTarget:
+                    final GhostAsterism.DualTarget gda = (GhostAsterism.DualTarget) oldA;
+                    newA = gda.copy(gda.target1(), gda.target2(), coords(gda, linked));
+                    break;
+                case GhostTargetPlusSky:
+                    final GhostAsterism.TargetPlusSky gtsa = (GhostAsterism.TargetPlusSky) oldA;
+                    newA = gtsa.copy(gtsa.target(), gtsa.sky(), coords(gtsa, linked));
+                    break;
+                case GhostSkyPlusTarget:
+                    final GhostAsterism.SkyPlusTarget gsta = (GhostAsterism.SkyPlusTarget) oldA;
+                    newA = gsta.copy(gsta.sky(), gsta.target(), coords(gsta, linked));
+                    break;
+                case GhostHighResolutionTarget:
+                    final GhostAsterism.HighResolutionTarget ghta = (GhostAsterism.HighResolutionTarget) oldA;
+                    newA = ghta.copy(ghta.target(), coords(ghta, linked));
+                    break;
+                case GhostHighResolutionTargetPlusSky:
+                    final GhostAsterism.HighResolutionTargetPlusSky ghtsa = (GhostAsterism.HighResolutionTargetPlusSky) oldA;
+                    newA = ghtsa.copy(ghtsa.target(), ghtsa.sky(), coords(ghtsa, linked));
+                    break;
+                default: // This should never happen.
+                    newA = oldA;
+            }
+
+            if (newA != oldA) {
+                final TargetEnvironment newEnv = env.setAsterism(newA);
+                toc.setTargetEnvironment(newEnv);
+            }
         }
     };
 
@@ -1002,50 +1276,82 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         }
 
-        private Option<ImEither<TargetDetails,GuideGroup>> contents = None.instance();
+        private TableSelection contents = TableNoSelection.instance;
 
         static Option<TargetClipboard> copy(final TargetEnvironment env, final ISPObsComponent obsComponent) {
             if (obsComponent == null) return None.instance();
-            return TargetSelection.getTargetForNode(env, obsComponent).map(TargetClipboard::new)
-                    .orElse(TargetSelection.getIndexedGuideGroupForNode(env, obsComponent).map(IndexedGuideGroup::group).map(TargetClipboard::new));
+            checkTargetSelectionConsistency(env, obsComponent);
+            final Option<SPTarget> tOpt = TargetSelection.getTargetForNode(env, obsComponent);
+            final Option<SPCoordinates> cOpt = TargetSelection.getCoordinatesForNode(env, obsComponent);
+            final Option<IndexedGuideGroup> gOpt = TargetSelection.getIndexedGuideGroupForNode(env, obsComponent);
+
+            if (tOpt.isDefined())
+                return new Some<>(new TargetClipboard(tOpt.getValue()));
+            if (cOpt.isDefined())
+                return new Some<>(new TargetClipboard(cOpt.getValue()));
+            if (gOpt.isDefined())
+                return new Some<>(new TargetClipboard(gOpt.getValue()));
+
+            return None.instance();
         }
 
 
         TargetClipboard(final SPTarget target) {
-            contents = new Some<>(new Left<>(new TargetDetails(target)));
+            contents = new TableTargetSelection(target);
+        }
+        TargetClipboard(final SPCoordinates coords) {
+            contents = new TableCoordinateSelection(coords);
+        }
+        TargetClipboard(final IndexedGuideGroup group) {
+            contents = new TableGroupSelection(group);
         }
 
-        TargetClipboard(final GuideGroup group) {
-            contents = new Some<>(new Right<>(group));
-        }
-
-        // Groups in their entirety should be copied, pasted, and duplicated by the existing
-        // copy, paste, and duplicate buttons.  Disallow pasting a group on top of an individual target.
-        // Pasting on top of a group should replace the group contents just as the target paste replaces
-        // the coordinates of the selected target.
+        /**
+         * Rules for pasting:
+         *
+         * 1. Groups in their entirety, should be copied, pasted, and duplicated by
+         *    the existing copy, paste, and duplicate buttons.
+         *
+         * 2. Disallow pasting a group on top of an individual target.
+         *
+         * 3. Pasting on top of a group, target, or coordinate should change all their contents.
+         */
         void paste(final ISPObsComponent obsComponent, final TargetObsComp dataObject) {
             if ((obsComponent == null) || (dataObject == null)) return;
+            final TargetEnvironment env = dataObject.getTargetEnvironment();
 
-            contents.forEach(c -> c.forEachLeft(targetDetails -> {
-                final Option<SPTarget> tOpt = TargetSelection.getTargetForNode(dataObject.getTargetEnvironment(), obsComponent);
+            if (contents instanceof TableTargetSelection) {
+                final TableTargetSelection s = (TableTargetSelection) contents;
+                final SPTarget tSrc = s.getTarget();
+
+                final Option<SPTarget> tOpt = TargetSelection.getTargetForNode(env, obsComponent);
                 tOpt.foreach(t -> {
-                    t.setTarget(targetDetails.getTarget());
-                    t.setMagnitudes(targetDetails.getMag());
+                    t.setTarget(tSrc.getTarget());
+                    t.setMagnitudes(tSrc.getMagnitudesJava());
                 });
-            }));
-            contents.forEach(c -> c.forEach(group -> {
-                final Option<IndexedGuideGroup> gpOpt = TargetSelection.getIndexedGuideGroupForNode(dataObject.getTargetEnvironment(), obsComponent);
+            }
+            else if (contents instanceof TableCoordinateSelection) {
+                final TableCoordinateSelection s = (TableCoordinateSelection) contents;
+                final Coordinates cSrc = s.getCoordinates().getCoordinates();
+
+                final Option<SPCoordinates> cOpt = TargetSelection.getCoordinatesForNode(env, obsComponent);
+                cOpt.foreach(c -> c.setCoordinates(cSrc));
+            }
+            else if (contents instanceof TableGroupSelection) {
+                final TableGroupSelection s = (TableGroupSelection) contents;
+                final IndexedGuideGroup iggSrc = s.getGroup();
+
+                final Option<IndexedGuideGroup> gpOpt = TargetSelection.getIndexedGuideGroupForNode(env, obsComponent);
                 gpOpt.foreach(igg -> {
                     final int idx                    = igg.index();
-                    final GuideGroup newGroup        = igg.group().setAll(group.cloneTargets().getAll());
-                    final TargetEnvironment env      = dataObject.getTargetEnvironment();
+                    final GuideGroup newGroup        = igg.group().setAll(iggSrc.group().cloneTargets().getAll());
                     final GuideEnvironment ge        = env.getGuideEnvironment();
                     final ImList<GuideGroup> options = ge.getOptions();
                     final ArrayList<GuideGroup> list = new ArrayList<>(options.size());
                     options.zipWithIndex().foreach(tup -> list.add(tup._2() == idx ? newGroup : tup._1()));
                     dataObject.setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(DefaultImList.create(list))));
                 });
-            }));
+            }
         }
     }
 }
@@ -1129,6 +1435,7 @@ final class GuidePositionType implements PositionType {
         } else {
             resultOpt = EdCompTargetList.appendNewGroup(env, positionTable);
         }
+        
         resultOpt.foreach(tup -> {
             final TargetEnvironment envNew = tup._1();
             final IndexedGuideGroup igg    = tup._2();

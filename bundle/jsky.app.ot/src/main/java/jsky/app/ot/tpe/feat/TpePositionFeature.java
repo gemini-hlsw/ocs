@@ -1,5 +1,6 @@
 package jsky.app.ot.tpe.feat;
 
+import edu.gemini.spModel.target.SPSkyObject;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
@@ -17,7 +18,7 @@ import java.awt.geom.Point2D;
 public abstract class TpePositionFeature extends TpeImageFeature
         implements TpeDraggableFeature, TpeEraseableFeature, TpeSelectableFeature {
 
-    protected PosMapEntry<SPTarget> _dragObject;
+    protected PosMapEntry<SPSkyObject> _dragObject;
 
     /**
      * Construct the feature with its name and description.
@@ -40,7 +41,7 @@ public abstract class TpePositionFeature extends TpeImageFeature
 
     /**
      */
-    public boolean positionIsClose(PosMapEntry<SPTarget> pme, int x, int y) {
+    public boolean positionIsClose(PosMapEntry<SPSkyObject> pme, int x, int y) {
         Point2D.Double p = pme.screenPos;
         if (p == null) {
             return false;

@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.shared.util.immutable;
 
 import junit.framework.TestCase;
@@ -10,9 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-/**
- *
- */
 public class OptionTest extends TestCase {
     public void testNone() throws Exception {
         Option<Integer> o = None.instance();

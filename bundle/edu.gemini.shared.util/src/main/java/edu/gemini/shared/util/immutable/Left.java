@@ -1,12 +1,13 @@
 package edu.gemini.shared.util.immutable;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public final class Left<L,R> implements ImEither<L,R> {
+public final class Left<L,R> implements ImEither<L,R>, Serializable {
     private final L value;
 
     public Left(final L value) throws NullPointerException {

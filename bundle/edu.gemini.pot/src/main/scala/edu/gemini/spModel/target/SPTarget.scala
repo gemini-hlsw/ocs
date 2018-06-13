@@ -22,7 +22,7 @@ object SPTarget {
     SPTargetPio.fromParamSet(pset)
 }
 
-final class SPTarget(private var target: Target) extends WatchablePos {
+final class SPTarget(private var target: Target) extends SPSkyObject {
 
   def this() =
     this(SiderealTarget.empty)
@@ -81,32 +81,32 @@ final class SPTarget(private var target: Target) extends WatchablePos {
   def setName(s: String): Unit =
     setTarget(Target.name.set(target, s))
 
-  def setRaDegrees(value: Double): Unit =
+  override def setRaDegrees(value: Double): Unit =
     Target.ra.set(target, RightAscension.fromDegrees(value)).foreach(setTarget)
 
-  def setRaHours(value: Double): Unit =
+  override def setRaHours(value: Double): Unit =
     Target.ra.set(target, RightAscension.fromHours(value)).foreach(setTarget)
 
-  def setRaString(hms: String): Unit =
+  override def setRaString(hms: String): Unit =
     for {
       a <- Angle.parseHMS(hms).toOption
       t <- Target.ra.set(target, RightAscension.fromAngle(a))
     } setTarget(t)
 
-  def setDecDegrees(value: Double): Unit =
+  override def setDecDegrees(value: Double): Unit =
     for {
       d <- Declination.fromDegrees(value)
       t <- Target.dec.set(target, d)
     } setTarget(t)
 
-  def setDecString(dms: String): Unit =
+  override def setDecString(dms: String): Unit =
     for {
       a <- Angle.parseDMS(dms).toOption
       d <- Declination.fromAngle(a)
       t <- Target.dec.set(target, d)
     } setTarget(t)
 
-  def setRaDecDegrees(ra: Double, dec: Double): Unit =
+  override def setRaDecDegrees(ra: Double, dec: Double): Unit =
     for {
       cs <- Coordinates.fromDegrees(ra, dec)
       t  <- Target.coords.set(target, cs)
@@ -133,37 +133,32 @@ final class SPTarget(private var target: Target) extends WatchablePos {
   def isNonSidereal: Boolean =
     target.fold(_ => false, _ => false, _ => true)
 
-  def getCoordinates(when: Option[Long]): Option[Coordinates] =
+  override def getCoordinates(when: Option[Long]): Option[Coordinates] =
     target.fold(
       _ => None,
       s => Some(s.coordinates),
       n => when.flatMap(n.coords)
     )
 
-  // Accessors for Java that use Gemini's Option type and boxed primitives
-
-  type GOLong   = GOption[java.lang.Long]
-  type GODouble = GOption[java.lang.Double]
-
   private def gcoords[A](when: GOLong)(f: Coordinates => A): GOption[A] =
     getCoordinates(when.asScalaOpt.map(_.longValue())).map(f).asGeminiOpt
 
-  def getRaHours(time: GOLong): GODouble =
+  override def getRaHours(time: GOLong): GODouble =
     gcoords(time)(_.ra.toHours)
 
-  def getRaDegrees(time: GOLong):GODouble =
+  override def getRaDegrees(time: GOLong):GODouble =
     gcoords(time)(_.ra.toDegrees)
 
-  def getRaString(time: GOLong): GOption[String] =
+  override def getRaString(time: GOLong): GOption[String] =
     gcoords(time)(_.ra.toAngle.formatHMS)
 
-  def getDecDegrees(time: GOLong): GODouble =
+  override def getDecDegrees(time: GOLong): GODouble =
     gcoords(time)(_.dec.toDegrees)
 
-  def getDecString(time: GOLong): GOption[String] =
+  override def getDecString(time: GOLong): GOption[String] =
     gcoords(time)(_.dec.formatDMS)
 
-  def getSkycalcCoordinates(time: GOLong): GOption[SCoordinates] =
+  override def getSkycalcCoordinates(time: GOLong): GOption[SCoordinates] =
     gcoords(time)(cs => new SCoordinates(cs.ra.toDegrees, cs.dec.toDegrees))
 
   def getSiderealTarget: Option[SiderealTarget] =

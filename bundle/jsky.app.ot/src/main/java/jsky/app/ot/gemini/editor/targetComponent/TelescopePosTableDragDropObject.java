@@ -1,5 +1,8 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
+import jsky.app.ot.gemini.editor.targetComponent.telescopePosTableModel.Row;
+import jsky.app.ot.gemini.editor.targetComponent.telescopePosTableModel.TelescopePosTableModel;
+
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.util.Objects;
@@ -24,19 +27,19 @@ final class TelescopePosTableDragDropObject implements Transferable {
     private TelescopePosTableWidget _currentOwner;
 
     // The item(s) being dragged.
-    private final TelescopePosTableWidget.TelescopePosTableModel.Row _node;
+    private final Row _node;
 
     /**
      * This constructor should be used when dragging an object that currently
      * exists in a tree.
      */
-    TelescopePosTableDragDropObject(final TelescopePosTableWidget.TelescopePosTableModel.Row node, final TelescopePosTableWidget tree) {
+    TelescopePosTableDragDropObject(final Row node, final TelescopePosTableWidget tree) {
         _node = Objects.requireNonNull(node);
         _currentOwner = tree;
     }
 
     /** Get the TelescopePosTableWidget.TableData.Row. */
-    TelescopePosTableWidget.TelescopePosTableModel.Row getNode() {
+    Row getNode() {
         return _node;
     }
 

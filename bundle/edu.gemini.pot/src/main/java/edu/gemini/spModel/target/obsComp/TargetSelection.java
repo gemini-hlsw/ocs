@@ -5,11 +5,11 @@ import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.pot.sp.SPUtil;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.Coordinates;
+import edu.gemini.spModel.gemini.ghost.GhostAsterism;
+import edu.gemini.spModel.target.SPCoordinates;
 import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.target.env.GuideGroup;
-import edu.gemini.spModel.target.env.IndexedGuideGroup;
-import edu.gemini.spModel.target.env.TargetEnvironment;
-import edu.gemini.spModel.target.env.UserTarget;
+import edu.gemini.spModel.target.env.*;
 
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * Manages target and guide group selection transient client data for clients.
+ * Manages target, coordinate, and guide group selection transient client data for clients.
  */
 public final class TargetSelection {
     private TargetSelection() {}
@@ -80,6 +80,8 @@ public final class TargetSelection {
             return None.instance();
         }
 
+        public Option<SPCoordinates> getCoordinates() { return None.instance(); }
+
         /**
          * Create a list of Selection from the target environment, consisting of:
          * 1. The base;
@@ -92,8 +94,67 @@ public final class TargetSelection {
             int idx = 0;
             final List<Selection> res = new ArrayList<>();
 
-            // TODO:ASTERISM: How do we handle multiples? For now just select the a random target.
-            res.add(new NormalTargetSelection(idx++, env.getArbitraryTargetFromAsterism()));
+            // We have to handle all types of asterisms here.
+            final Asterism a = env.getAsterism();
+            switch (a.asterismType()) {
+                case Single:
+                    final Asterism.Single sa = (Asterism.Single) a;
+                    res.add(new NormalTargetSelection(idx++, sa.t()));
+                    break;
+                case GhostSingleTarget:
+                    final GhostAsterism.SingleTarget gsa = (GhostAsterism.SingleTarget) a;
+                    if (gsa.base().isDefined())
+                        res.add(new CoordinatesSelection(idx++, gsa.base().get()));
+                    else
+                        res.add(new CoordinatesSelection(idx++, gsa.basePosition(ImOption.scalaNone()).get()));
+                    res.add(new NormalTargetSelection(idx++, gsa.target().spTarget()));
+                    break;
+                case GhostDualTarget:
+                    final GhostAsterism.DualTarget gda = (GhostAsterism.DualTarget) a;
+                    if (gda.base().isDefined())
+                        res.add(new CoordinatesSelection(idx++, gda.base().get()));
+                    else
+                        res.add(new CoordinatesSelection(idx++, gda.basePosition(ImOption.scalaNone()).get()));
+                    res.add(new NormalTargetSelection(idx++, gda.target1().spTarget()));
+                    res.add(new NormalTargetSelection(idx++, gda.target2().spTarget()));
+                    break;
+                case GhostTargetPlusSky:
+                    final GhostAsterism.TargetPlusSky gtsa = (GhostAsterism.TargetPlusSky) a;
+                    if (gtsa.base().isDefined())
+                        res.add(new CoordinatesSelection(idx++, gtsa.base().get()));
+                    else
+                        res.add(new CoordinatesSelection(idx++, gtsa.basePosition(ImOption.scalaNone()).get()));
+                    res.add(new NormalTargetSelection(idx++, gtsa.target().spTarget()));
+                    res.add(new CoordinatesSelection(idx++, gtsa.sky()));
+                    break;
+                case GhostSkyPlusTarget:
+                    final GhostAsterism.SkyPlusTarget gsta = (GhostAsterism.SkyPlusTarget) a;
+                    if (gsta.base().isDefined())
+                        res.add(new CoordinatesSelection(idx++, gsta.base().get()));
+                    else
+                        res.add(new CoordinatesSelection(idx++, gsta.basePosition(ImOption.scalaNone()).get()));
+                    res.add(new CoordinatesSelection(idx++, gsta.sky()));
+                    res.add(new NormalTargetSelection(idx++, gsta.target().spTarget()));
+                    break;
+                case GhostHighResolutionTarget:
+                    final GhostAsterism.HighResolutionTarget ghta = (GhostAsterism.HighResolutionTarget) a;
+                    if (ghta.base().isDefined())
+                        res.add(new CoordinatesSelection(idx++, ghta.base().get()));
+                    else
+                        res.add(new CoordinatesSelection(idx++, ghta.basePosition(ImOption.scalaNone()).get()));
+                    res.add(new NormalTargetSelection(idx++, ghta.target().spTarget()));
+                    break;
+                case GhostHighResolutionTargetPlusSky:
+                    final GhostAsterism.HighResolutionTargetPlusSky ghtsa = (GhostAsterism.HighResolutionTargetPlusSky) a;
+                    if (ghtsa.base().isDefined())
+                        res.add(new CoordinatesSelection(idx++, ghtsa.base().get()));
+                    else
+                        res.add(new CoordinatesSelection(idx++, ghtsa.basePosition(ImOption.scalaNone()).get()));
+                    res.add(new NormalTargetSelection(idx++, ghtsa.target().spTarget()));
+                    res.add(new CoordinatesSelection(idx++, ghtsa.sky()));
+                    break;
+            }
+
             for (final GuideGroup g : env.getGroups()) {
                 res.add(new GuideGroupSelection(idx++, g));
                 for (final SPTarget t : g.getTargets()) {
@@ -127,8 +188,25 @@ public final class TargetSelection {
         static ImList<GuideGroupSelection> toGuideGroupSelections(final TargetEnvironment env) {
             if (env == null) return ImCollections.emptyList();
 
-            // Start at 1 to omit base positon.
-            int idx = 1;
+            // We need to start after all of the asterism information.
+            final Asterism a = env.getAsterism();
+            int idx = 0;
+            switch (a.asterismType()) {
+                case Single:
+                    idx = 1;
+                    break;
+                case GhostSingleTarget:
+                case GhostHighResolutionTarget:
+                    idx = 2;
+                    break;
+                case GhostDualTarget:
+                case GhostTargetPlusSky:
+                case GhostSkyPlusTarget:
+                case GhostHighResolutionTargetPlusSky:
+                    idx = 3;
+                    break;
+            }
+
             final List<GuideGroupSelection> res = new ArrayList<>();
             for (final GuideGroup g : env.getGroups()) {
                 res.add(new GuideGroupSelection(idx++, g));
@@ -172,24 +250,58 @@ public final class TargetSelection {
         }
     }
 
-    public static Option<Integer> indexOfTarget(final TargetEnvironment env, final SPTarget target) {
+    private static final class CoordinatesSelection extends Selection {
+        final SPCoordinates spCoordinates;
+        final boolean skyPosition;
+
+        // This constructor is called with mutable SPCoordinates, indicating
+        // that these can be changed.
+        CoordinatesSelection(int index, final SPCoordinates spCoordinates) {
+            super(index);
+            this.spCoordinates = spCoordinates;
+            this.skyPosition = true;
+        }
+
+        // This constructor is called with immutable Coordinates, indicating
+        // that these cannot be changed and are dependent on one or more
+        // targets.
+        CoordinatesSelection(int index, final Coordinates coordinates) {
+            super(index);
+            this.spCoordinates = new SPCoordinates(coordinates);
+            this.skyPosition = false;
+        }
+
+        @Override public Option<SPCoordinates> getCoordinates() {
+            return new Some<>(spCoordinates);
+        }
+
+        public boolean isSkyPosition() {
+            return skyPosition;
+        }
+    }
+
+    private static Option<Integer> indexOfTarget(final TargetEnvironment env, final SPTarget target) {
         return Selection.toSelections(env).find(sel -> sel.getTarget().exists(target::equals)).map(sel -> sel.index);
     }
 
     /**
      * Given an index of a guide group in the list of all guide groups, find the corresponding node index.
      */
-    public static Option<Integer> indexOfGuideGroupByIndex(final TargetEnvironment env,
+    private static Option<Integer> indexOfGuideGroupByIndex(final TargetEnvironment env,
                                                            final int guideGroupIndex) {
         final ImList<GuideGroupSelection> selections = GuideGroupSelection.toGuideGroupSelections(env);
         return selections.getOption(guideGroupIndex).map(GuideGroupSelection::getIndex);
+    }
+
+    private static Option<Integer> indexOfCoordinates(final TargetEnvironment env, final SPCoordinates coords) {
+        return Selection.toSelections(env).find(sel -> sel.getCoordinates().exists(coords::equals)).map(sel -> sel.index).orElse(new Some<>(0));
     }
 
     private static Option<Selection> selectionAtIndex(final TargetEnvironment env, final int index) {
         return Selection.toSelections(env).getOption(index);
     }
 
-    public static Option<SPTarget> getTargetAtIndex(final TargetEnvironment env, final int index) {
+    private static Option<SPTarget> getTargetAtIndex(final TargetEnvironment env, final int index) {
         return selectionAtIndex(env, index).flatMap(Selection::getTarget);
     }
 
@@ -199,6 +311,18 @@ public final class TargetSelection {
 
     public static void setTargetForNode(final TargetEnvironment env, final ISPNode node, final SPTarget target) {
         indexOfTarget(env, target).foreach(i -> setIndex(node, i));
+    }
+
+    private static Option<SPCoordinates> getCoordinatesAtIndex(final TargetEnvironment env, final int index) {
+        return selectionAtIndex(env, index).flatMap(Selection::getCoordinates);
+    }
+
+    public static Option<SPCoordinates> getCoordinatesForNode(final TargetEnvironment env, final ISPNode node) {
+        return getIndex(node).flatMap(i -> getCoordinatesAtIndex(env, i));
+    }
+
+    public static void setCoordinatesForNode(final TargetEnvironment env, final ISPNode node, final SPCoordinates coords) {
+        indexOfCoordinates(env, coords).foreach(i -> setIndex(node, i));
     }
 
     /**

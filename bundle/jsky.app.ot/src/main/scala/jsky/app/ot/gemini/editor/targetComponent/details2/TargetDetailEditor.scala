@@ -7,7 +7,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 
-abstract class TargetDetailEditor extends JPanel with TelescopePosEditor {
+abstract class TargetDetailEditor extends JPanel with TelescopePosEditor[SPTarget] {
   def edit(ctx: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
     require(ctx      != null, "obsContext should never be null")
     require(spTarget != null, "spTarget should never be null")

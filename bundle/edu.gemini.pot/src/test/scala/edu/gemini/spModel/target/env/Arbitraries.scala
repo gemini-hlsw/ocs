@@ -5,14 +5,12 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core.{Angle, Coordinates, Declination, RightAscension, SiderealTarget}
 import edu.gemini.spModel.gemini.ghost.GhostAsterism
 import edu.gemini.spModel.guide.{GuideProbe, GuideProbeMap}
-import edu.gemini.spModel.target.SPTarget
-
+import edu.gemini.spModel.target.{SPCoordinates, SPTarget}
 import org.scalacheck._
 import org.scalacheck.Gen._
 import org.scalacheck.Arbitrary._
 
 import scala.collection.JavaConverters._
-
 import scalaz._
 import Scalaz._
 
@@ -205,7 +203,7 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
       for {
         bc :: tc :: _ <- coordinateGen(2)
         t <- ghostTargetWithCoords(tc)
-      } yield SingleTarget(t, Some(bc))
+      } yield SingleTarget(t, Some(new SPCoordinates(bc)))
 
     // DUAL TARGET GENERATORS
     val genDualTargetsNoBase: Gen[DualTarget] =
@@ -220,20 +218,20 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
         bc :: tc1 :: tc2 :: _ <- coordinateGen(3)
         t1 <- ghostTargetWithCoords(tc1)
         t2 <- ghostTargetWithCoords(tc2)
-      } yield DualTarget(t1, t2, Some(bc))
+      } yield DualTarget(t1, t2, Some(new SPCoordinates(bc)))
 
     // TARGET + SKY
     val genTargetPlusSkyNoBase: Gen[TargetPlusSky] =
       for {
         tc :: s :: _ <- coordinateGen(2)
         t <- ghostTargetWithCoords(tc)
-      } yield TargetPlusSky(t, s, None)
+      } yield TargetPlusSky(t, new SPCoordinates(s), None)
 
     val genTargetPlusSkyWithBase: Gen[TargetPlusSky] =
       for {
         bc :: tc :: s :: _ <- coordinateGen(3)
         t <- ghostTargetWithCoords(tc)
-      } yield TargetPlusSky(t, s, Some(bc))
+      } yield TargetPlusSky(t, new SPCoordinates(s), Some(new SPCoordinates(bc)))
 
     // SKY + TARGET
     val genSkyPlusTargetNoBase: Gen[SkyPlusTarget] =
@@ -246,27 +244,28 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
         case TargetPlusSky(t, s, Some(bc)) => SkyPlusTarget(s, t, Some(bc))
       }
 
-    // HIGH RESOLUTION
-    val genHighResNoSkyNoBase: Gen[HighResolution] =
-      arbitrary[GhostTarget].map(t => HighResolution(t, None, None))
+    // HIGH RESOLUTION TARGET
+    val genHighResTargetNoBase: Gen[HighResolutionTarget] =
+      arbitrary[GhostTarget].map(t => HighResolutionTarget(t, None))
 
-    val genHighResWithSkyNoBase: Gen[HighResolution] =
-      for {
-        tc :: s :: _ <- coordinateGen(2)
-        t <- ghostTargetWithCoords(tc)
-      } yield HighResolution(t, Some(s), None)
-
-    val genHighResNoSkyWithBase: Gen[HighResolution] =
+    val genHighResTargetWithBase: Gen[HighResolutionTarget] =
       for {
         bc :: tc :: _ <- coordinateGen(2)
         t <- ghostTargetWithCoords(tc)
-      } yield HighResolution(t, None, Some(bc))
+      } yield HighResolutionTarget(t, Some(new SPCoordinates(bc)))
 
-    val genHighResWithSkyWithBase: Gen[HighResolution] =
+    // HIGH RESOLUTION TARGET + SKY
+    val genHighResTargetPlusSkyNoBase: Gen[HighResolutionTargetPlusSky] =
+      for {
+        tc :: s :: _ <- coordinateGen(2)
+        t <- ghostTargetWithCoords(tc)
+      } yield HighResolutionTargetPlusSky(t, new SPCoordinates(s), None)
+
+    val genHighResTargetPlusSkyWithBase: Gen[HighResolutionTargetPlusSky] =
       for {
         bc :: tc :: s :: _ <- coordinateGen(3)
         t <- ghostTargetWithCoords(tc)
-      } yield HighResolution(t, Some(s), Some(bc))
+      } yield HighResolutionTargetPlusSky(t, new SPCoordinates(s), Some(new SPCoordinates(bc)))
   }
 
   implicit val arbGuideFiberState: Arbitrary[GhostAsterism.GuideFiberState] =
@@ -312,12 +311,23 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
       arbitrary[GhostAsterism.SkyPlusTarget]
     ))
 
+  implicit val arbGhostHighResolutionTargetAsterism: Arbitrary[GhostAsterism.HighResolutionTarget] =
+    Arbitrary(Gen.oneOf(
+      GhostGens.genHighResTargetNoBase,
+      GhostGens.genHighResTargetWithBase
+    ))
+
+  implicit val arbGhostHighResolutionTargetPlusSkyAsterism: Arbitrary[GhostAsterism.HighResolutionTargetPlusSky] =
+    Arbitrary(Gen.oneOf(
+      GhostGens.genHighResTargetPlusSkyNoBase,
+      GhostGens.genHighResTargetPlusSkyWithBase
+    ))
+
+
   implicit val arbGhostHighResolutionAsterism: Arbitrary[GhostAsterism.HighResolution] =
     Arbitrary(Gen.oneOf(
-      GhostGens.genHighResNoSkyNoBase,
-      GhostGens.genHighResWithSkyNoBase,
-      GhostGens.genHighResNoSkyWithBase,
-      GhostGens.genHighResWithSkyWithBase
+      arbitrary[GhostAsterism.HighResolutionTarget],
+      arbitrary[GhostAsterism.HighResolutionTargetPlusSky]
     ))
 
   implicit val arbGhostAsterism: Arbitrary[GhostAsterism] =
@@ -342,8 +352,10 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
     createTargetEnvironmentGen(arbitrary[GhostAsterism.TargetPlusSky])
   val genGhostSkyPlusTargetTargetEnvironment: Gen[TargetEnvironment] =
     createTargetEnvironmentGen(arbitrary[GhostAsterism.SkyPlusTarget])
-  val genHighResAsterismTargetEnvironment: Gen[TargetEnvironment] =
-    createTargetEnvironmentGen(arbitrary[GhostAsterism.HighResolution])
+  val genGhostHighResTargetAsterismTargetEnvironment: Gen[TargetEnvironment] =
+    createTargetEnvironmentGen(arbitrary[GhostAsterism.HighResolutionTarget])
+  val genGhostHighResTargetPlusSkyAsterismTargetEnvironment: Gen[TargetEnvironment] =
+    createTargetEnvironmentGen(arbitrary[GhostAsterism.HighResolutionTargetPlusSky])
   val genGhostAsterismTargetEnvironment: Gen[TargetEnvironment] =
     createTargetEnvironmentGen(arbitrary[GhostAsterism])
   val genSingleAsterismTargetEnvironment: Gen[TargetEnvironment] =

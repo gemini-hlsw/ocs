@@ -5,11 +5,10 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.skycalc.{Coordinates => SCoordinates}
 import edu.gemini.spModel.core.{Coordinates, ProperMotion, SiderealTarget, Target}
 import edu.gemini.spModel.gemini.ghost.{GhostAsterism, GhostParamSetCodecs}
-import edu.gemini.spModel.target.{SPTarget, TargetParamSetCodecs}
+import edu.gemini.spModel.target.{SPCoordinates, SPTarget, TargetParamSetCodecs}
 import edu.gemini.spModel.pio.{ParamSet, Pio}
 import edu.gemini.spModel.pio.codec.{MissingKey, ParamSetCodec, PioError, UnknownTag}
 import edu.gemini.spModel.pio.xml.PioXmlFactory
-
 import java.time.Instant
 
 import scalaz._
@@ -32,6 +31,13 @@ trait Asterism {
 
   /** All Targets that comprise the asterism. */
   def allTargets: NonEmptyList[Target]
+
+  /** All SPCoordinates that comprise the asterism. */
+  def allSpCoordinates: List[SPCoordinates]
+
+  /** All SPCoordinates that comprise the asterism, as a Gemini ImList. */
+  def allSpCoordinatesJava: ImList[SPCoordinates] =
+    allSpCoordinates.asImList
 
   /** Slew coordinates and AGS calculation base position. */
   def basePosition(time: Option[Instant]): Option[Coordinates]
@@ -100,6 +106,7 @@ object Asterism {
   final case class Single(t: SPTarget) extends Asterism {
     override def allSpTargets = NonEmptyList(t) // def because Nel isn't serializable
     override def allTargets = NonEmptyList(t.getTarget)
+    override def allSpCoordinates: List[SPCoordinates] = Nil
     override def basePosition(time: Option[Instant]) = t.getCoordinates(time.map(_.toEpochMilli))
     override def copyWithClonedTargets() = Single(t.clone)
     override def basePositionProperMotion = Target.pm.get(t.getTarget)
@@ -134,12 +141,13 @@ object Asterism {
       def encode(key: String, a: Asterism): ParamSet = {
         val tag = a.asterismType.tag
         val ps = a match {
-          case a: Single                       => Single.SingleParamSetCodec.encode(key, a)
-          case a: GhostAsterism.SingleTarget   => GhostParamSetCodecs.SingleTargetParamSetCodec.encode(key, a)
-          case a: GhostAsterism.DualTarget     => GhostParamSetCodecs.DualTargetParamSetCodec.encode(key, a)
-          case a: GhostAsterism.TargetPlusSky  => GhostParamSetCodecs.TargetPlusSkyParamSetCodec.encode(key, a)
-          case a: GhostAsterism.SkyPlusTarget  => GhostParamSetCodecs.SkyPlusTargetParamSetCodec.encode(key, a)
-          case a: GhostAsterism.HighResolution => GhostParamSetCodecs.HighResolutionParamSetCodec.encode(key, a)
+          case a: Single                                    => Single.SingleParamSetCodec.encode(key, a)
+          case a: GhostAsterism.SingleTarget                => GhostParamSetCodecs.SingleTargetParamSetCodec.encode(key, a)
+          case a: GhostAsterism.DualTarget                  => GhostParamSetCodecs.DualTargetParamSetCodec.encode(key, a)
+          case a: GhostAsterism.TargetPlusSky               => GhostParamSetCodecs.TargetPlusSkyParamSetCodec.encode(key, a)
+          case a: GhostAsterism.SkyPlusTarget               => GhostParamSetCodecs.SkyPlusTargetParamSetCodec.encode(key, a)
+          case a: GhostAsterism.HighResolutionTarget        => GhostParamSetCodecs.HRTargetParamSetCodec.encode(key, a)
+          case a: GhostAsterism.HighResolutionTargetPlusSky => GhostParamSetCodecs.HRTargetPlusSkyParamSetCodec.encode(key, a)
         }
         Pio.addParam(pf, ps, "tag", tag)
         ps
@@ -147,13 +155,14 @@ object Asterism {
 
       def decode(ps: ParamSet): PioError \/ Asterism =
         (Option(ps.getParam("tag")).map(_.getValue) \/> MissingKey("tag")) flatMap {
-          case AsterismType.Single.tag              => Single.SingleParamSetCodec.decode(ps)
-          case AsterismType.GhostSingleTarget.tag   => GhostParamSetCodecs.SingleTargetParamSetCodec.decode(ps)
-          case AsterismType.GhostDualTarget.tag     => GhostParamSetCodecs.DualTargetParamSetCodec.decode(ps)
-          case AsterismType.GhostTargetPlusSky.tag  => GhostParamSetCodecs.TargetPlusSkyParamSetCodec.decode(ps)
-          case AsterismType.GhostSkyPlusTarget.tag  => GhostParamSetCodecs.SkyPlusTargetParamSetCodec.decode(ps)
-          case AsterismType.GhostHighResolution.tag => GhostParamSetCodecs.HighResolutionParamSetCodec.decode(ps)
-          case other                   => UnknownTag(other, "Asterism").left
+          case AsterismType.Single.tag                           => Single.SingleParamSetCodec.decode(ps)
+          case AsterismType.GhostSingleTarget.tag                => GhostParamSetCodecs.SingleTargetParamSetCodec.decode(ps)
+          case AsterismType.GhostDualTarget.tag                  => GhostParamSetCodecs.DualTargetParamSetCodec.decode(ps)
+          case AsterismType.GhostTargetPlusSky.tag               => GhostParamSetCodecs.TargetPlusSkyParamSetCodec.decode(ps)
+          case AsterismType.GhostSkyPlusTarget.tag               => GhostParamSetCodecs.SkyPlusTargetParamSetCodec.decode(ps)
+          case AsterismType.GhostHighResolutionTarget.tag        => GhostParamSetCodecs.HRTargetParamSetCodec.decode(ps)
+          case AsterismType.GhostHighResolutionTargetPlusSky.tag => GhostParamSetCodecs.HRTargetPlusSkyParamSetCodec.decode(ps)
+          case other                                             => UnknownTag(other, "Asterism").left
         }
     }
 

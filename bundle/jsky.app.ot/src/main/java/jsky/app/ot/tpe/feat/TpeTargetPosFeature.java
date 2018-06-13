@@ -5,7 +5,9 @@ import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.core.SiderealTarget;
+import edu.gemini.spModel.target.SPSkyObject;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.WatchablePos;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.env.UserTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
@@ -149,16 +151,18 @@ public class TpeTargetPosFeature extends TpePositionFeature
 
         final TpePositionMap pm = TpePositionMap.getMap(_iw);
 
-        final Iterator<PosMapEntry<SPTarget>> it = pm.getAllPositionMapEntries();
+        final Iterator<PosMapEntry<SPSkyObject>> it = pm.getAllPositionMapEntries();
         while (it.hasNext()) {
-            final PosMapEntry<SPTarget> pme = it.next();
-            final SPTarget tp = pme.taggedPos;
+            final PosMapEntry<SPSkyObject> pme = it.next();
+            if (!(pme.taggedPos instanceof SPTarget))
+                continue;
 
+            final SPTarget tp = (SPTarget) pme.taggedPos;
             final TargetEnvironment env = obsComp.getTargetEnvironment();
             if (!env.isUserPosition(tp)) continue;
 
             if (positionIsClose(pme, tme.xWidget, tme.yWidget)) {
-                ImList<UserTarget> us = env.getUserTargets().remove(t -> t.target.equals(tp));
+                final ImList<UserTarget> us = env.getUserTargets().remove(t -> t.target.equals(tp));
                 obsComp.setTargetEnvironment(env.setUserTargets(us));
                 _iw.getContext().targets().commit();
                 return true;
@@ -175,9 +179,10 @@ public class TpeTargetPosFeature extends TpePositionFeature
         if (obsComp == null) return null;
 
         final TpePositionMap pm = TpePositionMap.getMap(_iw);
-        final SPTarget tp = (SPTarget) pm.locatePos(tme.xWidget, tme.yWidget);
-        if (tp == null) return null;
+        final WatchablePos wp = pm.locatePos(tme.xWidget, tme.yWidget);
+        if (wp == null || !(wp instanceof SPTarget)) return null;
 
+        final SPTarget tp = (SPTarget) wp;
         final TargetEnvironment env = obsComp.getTargetEnvironment();
         if (!env.isUserPosition(tp)) return null;
 
@@ -202,8 +207,8 @@ public class TpeTargetPosFeature extends TpePositionFeature
 
         int index = 1;
         for (UserTarget u : env.getUserTargets()) {
-            final PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(u.target);
-            if (pme == null) continue;
+            final PosMapEntry<SPSkyObject> pme = pm.getPositionMapEntry(u.target);
+            if (pme == null || !(pme.taggedPos instanceof SPTarget)) continue;
 
             final String tag = String.format("%s (%d)", u.type.displayName, index++);
 
@@ -230,12 +235,15 @@ public class TpeTargetPosFeature extends TpePositionFeature
 
         final TpePositionMap pm = TpePositionMap.getMap(_iw);
 
-        final Iterator<PosMapEntry<SPTarget>> it = pm.getAllPositionMapEntries();
+        final Iterator<PosMapEntry<SPSkyObject>> it = pm.getAllPositionMapEntries();
         while (it.hasNext()) {
-            final PosMapEntry<SPTarget> pme = it.next();
+            final PosMapEntry<SPSkyObject> pme = it.next();
+            if (!(pme.taggedPos instanceof SPTarget))
+                continue;
 
+            final SPTarget t = (SPTarget) pme.taggedPos;
             if (positionIsClose(pme, tme.xWidget, tme.yWidget) &&
-                    env.isUserPosition(pme.taggedPos)) {
+                    env.isUserPosition(t)) {
 
                 _dragObject = pme;
                 return new Some<>(pme.taggedPos);
@@ -244,4 +252,3 @@ public class TpeTargetPosFeature extends TpePositionFeature
         return None.instance();
     }
 }
-

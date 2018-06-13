@@ -444,7 +444,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     /**
      * Convert a TaggedPos to a screen coordinates.
      */
-    Point2D.Double taggedPosToScreenCoords(final WatchablePos tp) {
+    public Point2D.Double taggedPosToScreenCoords(final WatchablePos tp) {
         if (tp instanceof OffsetPosBase) {
             final double x = ((OffsetPosBase) tp).getXaxis();
             final double y = ((OffsetPosBase) tp).getYaxis();
@@ -452,12 +452,16 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         }
 
         // Get the equinox assumed by the coordinate conversion methods (depends on current image)
-        final SPTarget target = (SPTarget) tp;
-        final Option<Long> when = _ctx.schedulingBlockStartJava();
-        final double x = target.getRaDegrees(when).getOrElse(0.0);
-        final double y = target.getDecDegrees(when).getOrElse(0.0);
-        final WorldCoords pos = new WorldCoords(x, y, 2000.);
-        return worldToScreenCoords(pos);
+        if (tp instanceof SPSkyObject) {
+            final SPSkyObject so = (SPSkyObject) tp;
+            final Option<Long> when = _ctx.schedulingBlockStartJava();
+            final double x = so.getRaDegrees(when).getOrElse(0.0);
+            final double y = so.getDecDegrees(when).getOrElse(0.0);
+            final WorldCoords pos = new WorldCoords(x, y, 2000.);
+            return worldToScreenCoords(pos);
+        }
+
+        return null;
     }
 
 
@@ -603,7 +607,9 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         }
 
         if (_ctx.targets().asterism().isDefined()) {
-            _ctx.targets().asterism().get().allSpTargetsJava().foreach(a -> a.deleteWatcher(this));
+            final Asterism a = _ctx.targets().asterism().get();
+            a.allSpTargetsJava().foreach(t -> t.deleteWatcher(this));
+            a.allSpCoordinatesJava().foreach(c -> c.deleteWatcher(this));
         }
 
         _ctx = ctx;
@@ -626,9 +632,9 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         }
 
         if (_ctx.targets().asterism().isDefined()) {
-            for (final SPTarget base: _ctx.targets().asterism().get().allSpTargetsJava()) {
-              base.addWatcher(this);
-            }
+            final Asterism a = _ctx.targets().asterism().get();
+            a.allSpTargetsJava().foreach(t -> t.addWatcher(this));
+            a.allSpCoordinatesJava().foreach(c -> c.addWatcher(this));
         }
         resetBaseFromAsterism(); // ok even if asterism is undefined (goes to 0,0 in this case)
 

@@ -20,7 +20,7 @@ import jsky.util.gui.{DialogUtil, TextBoxWidget, TextBoxWidgetWatcher}
 import scala.swing.Swing
 import scalaz._, Scalaz._, effect.IO, concurrent.Task
 
-final class NonSiderealNameEditor extends TelescopePosEditor with ReentrancyHack {
+final class NonSiderealNameEditor extends TelescopePosEditor[SPTarget] with ReentrancyHack {
   import HorizonsService2.{ Search, Row }, Search._
 
   private[this] var site  = Option.empty[Site]
