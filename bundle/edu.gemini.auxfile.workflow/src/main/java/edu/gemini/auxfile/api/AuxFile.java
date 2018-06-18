@@ -5,9 +5,12 @@
 package edu.gemini.auxfile.api;
 
 import edu.gemini.spModel.core.SPProgramID;
+import edu.gemini.shared.util.immutable.Option;
 
 import java.io.File;
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.Date;
 
@@ -73,6 +76,12 @@ public final class AuxFile implements Serializable, Comparable<AuxFile> {
             return (af2.isChecked() == af1.isChecked() ? 0 : (af1.isChecked() ? 1 : -1));
         }
 
+        public int compareLastEmailed(AuxFile af1, AuxFile af2) {
+            final Instant i1 = af1.getLastEmailed().getOrElse(Instant.MIN);
+            final Instant i2 = af2.getLastEmailed().getOrElse(Instant.MIN);
+            return i1.compareTo(i2);
+        }
+
         public int compare(AuxFile af1, AuxFile af2) {
             int res = compareIdsAndNames(af1, af2);
             if (res != 0) return res;
@@ -86,7 +95,10 @@ public final class AuxFile implements Serializable, Comparable<AuxFile> {
             res = compareDescriptions(af1, af2);
             if (res != 0) return res;
 
-            return compareChecked(af1, af2);
+            res = compareChecked(af1, af2);
+            if (res != 0) return res;
+
+            return compareLastEmailed(af1, af2);
         }
     }
 
@@ -112,14 +124,22 @@ public final class AuxFile implements Serializable, Comparable<AuxFile> {
     private final long size;
     private final long lastMod;
     private final boolean checked;
+    private final Option<Instant> lastEmailed;
 
-    public AuxFile(SPProgramID progId, String name, String description,
-                       long size, long lastMod, boolean checked) {
-
+    public AuxFile(
+            SPProgramID progId,
+            String name,
+            String description,
+            long size,
+            long lastMod,
+            boolean checked,
+            Option<Instant> lastEmailed
+    ) {
         if (progId == null) throw new NullPointerException("missing progID");
         if (name == null) throw new NullPointerException("missing name");
         if (size < 0) throw new IllegalArgumentException("negative file size: " + size);
         if (lastMod < 0) throw new IllegalArgumentException("negative lastMod: " + lastMod);
+        if (lastEmailed == null) throw new NullPointerException("missing lastEmailed");
 
         this.pid         = progId;
         this.name        = name;
@@ -127,10 +147,18 @@ public final class AuxFile implements Serializable, Comparable<AuxFile> {
         this.size        = size;
         this.lastMod     = lastMod;
         this.checked     = checked;
+        this.lastEmailed = lastEmailed;
     }
 
-    public AuxFile(SPProgramID progId, File file, String description, boolean checked) {
+    public AuxFile(
+            SPProgramID progId,
+            File file,
+            String description,
+            boolean checked,
+            Option<Instant> lastEmailed
+    ) {
         if (progId == null) throw new NullPointerException("missing progID");
+        if (lastEmailed == null) throw new NullPointerException("missing lastEmailed");
 
         this.pid         = progId;
         this.name        = file.getName();
@@ -138,6 +166,7 @@ public final class AuxFile implements Serializable, Comparable<AuxFile> {
         this.size        = file.length();
         this.lastMod     = file.lastModified();
         this.checked     = checked;
+        this.lastEmailed = lastEmailed;
     }
 
     /**
@@ -180,6 +209,11 @@ public final class AuxFile implements Serializable, Comparable<AuxFile> {
      */
     public boolean isChecked() { return checked; }
 
+    /**
+     * Returns the time at which a warning email was last sent, if any.
+     */
+    public Option<Instant> getLastEmailed() { return lastEmailed; }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -187,6 +221,7 @@ public final class AuxFile implements Serializable, Comparable<AuxFile> {
 
         AuxFile auxFile = (AuxFile) o;
 
+        if (!lastEmailed.equals(auxFile.lastEmailed)) return false;
         if (checked != auxFile.checked) return false;
         if (lastMod != auxFile.lastMod) return false;
         if (size != auxFile.size) return false;
@@ -206,6 +241,7 @@ public final class AuxFile implements Serializable, Comparable<AuxFile> {
         result = 31 * result + (int) (size ^ (size >>> 32));
         result = 31 * result + (int) (lastMod ^ (lastMod >>> 32));
         result = 31 * result + (checked ? 1 : 0);
+        result = 31 * result + lastEmailed.hashCode();
         return result;
     }
 
@@ -231,6 +267,7 @@ public final class AuxFile implements Serializable, Comparable<AuxFile> {
             buf.append(" [").append(getDescription()).append(']');
         }
         buf.append(" [checked=" + isChecked() + "]");
+        buf.append(" [lastEmailed=" + lastEmailed.map(i -> DateTimeFormatter.ISO_INSTANT.format(i)).getOrElse("") + "]");
         return buf.toString();
     }
 }

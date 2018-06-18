@@ -5,9 +5,11 @@
 package edu.gemini.auxfile.workflow;
 
 import edu.gemini.auxfile.api.AuxFileListener;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SPProgramID;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -166,6 +168,10 @@ public final class Workflow implements AuxFileListener {
     }
 
     public void descriptionUpdated(SPProgramID progId, String description, Collection<File> files) {
+        // ignore
+    }
+
+    public void lastEmailedUpdated(SPProgramID progId, Option<Instant> lastEmailed, Collection<File> files) {
         // ignore
     }
 

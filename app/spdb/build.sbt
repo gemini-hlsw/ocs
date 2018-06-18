@@ -58,6 +58,7 @@ def common(version: Version) = AppConfig(
     "-Duser.country=US"
   ),
   props = Map(
+    "cron.odbMail.mailer.type"                         -> "development",
     "edu.gemini.auxfile.chunkSize"                     -> "32768",
     "edu.gemini.auxfile.fits.dest"                     -> "/please/specify/in/host/specific/property/file",
     "edu.gemini.auxfile.other.dest"                    -> "/please/specify/in/host/specific/property/file",
@@ -71,6 +72,7 @@ def common(version: Version) = AppConfig(
     "edu.gemini.dataman.poll.summit.tonight"           -> "PT15S",
     "edu.gemini.dataman.poll.summit.thisWeek"          -> "PT15M",
     "edu.gemini.dataman.poll.summit.allPrograms"       -> "P1D",
+    "edu.gemini.dbTools.maskcheck.nagdelay"            -> "P7D",
     "edu.gemini.filefilter.excludes"                   -> "tmp.*",
     "edu.gemini.filefilter.excludes.2"                 -> ".*b\\.fits",
     "edu.gemini.filefilter.includes"                   -> ".*\\.fits",
@@ -211,6 +213,7 @@ def swalker(version: Version) = AppConfig(
     "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005",
     "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
     "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/swalker/sftp",
+    "-Dcron.odbMail.SITE_SMTP_SERVER=dummy.cl.gemini.edu",
     "-Dcron.reports.edu.gemini.spdb.reports.public.host=localhost",
     "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/Users/swalker/cron",
     "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=localhost",
@@ -222,6 +225,7 @@ def swalker(version: Version) = AppConfig(
     "edu.gemini.auxfile.other.dest"              -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.root"                    -> "/Users/swalker/.auxfile",
     "edu.gemini.dataman.gsa.summit.host"         -> "cpofits-lv1new.cl.gemini.edu",
+    "edu.gemini.dbTools.maskcheck.nagdelay"      -> "PT1M",
     "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/Users/swalker/.ephemeris",
     "edu.gemini.services.server.start"           -> "false",
     "edu.gemini.smartgcal.host"                  -> "localhost",
@@ -447,8 +451,10 @@ def odbtest(version: Version) = AppConfig(
     "-XX:+UseConcMarkSweepGC"
   ),
   props = Map(
+    "cron.odbMail.mailer.type"                   -> "test",
     "edu.gemini.auxfile.root"                    -> "/home/software/ugemini/auxfile",
     "edu.gemini.dbTools.archive.directory"       -> "/home/software/ugemini/spdb/spdb.archive",
+    "edu.gemini.dbTools.maskcheck.nagdelay"      -> "PT10M",
     "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/home/software/ugemini/ephemerides",
     "edu.gemini.smartgcal.svnRootUrl"            -> "http://source.gemini.edu/gcal/branches/development/calibrations",
     "edu.gemini.spdb.dir"                        -> "/home/software/ugemini/spdb/spdb.active",
@@ -472,6 +478,7 @@ def odbproduction(version: Version) = AppConfig(
     "-XX:+UseConcMarkSweepGC"
   ),
   props = Map(
+    "cron.odbMail.mailer.type"                         -> "production",
     "edu.gemini.dbTools.tcs.ephemeris.directory"       -> "/gemsoft/var/ephemerides",
     "edu.gemini.smartgcal.host"                        -> "gsodb",
     "edu.gemini.smartgcal.svnRootUrl"                  -> "http://source.gemini.edu/gcal/trunk/calibrations",

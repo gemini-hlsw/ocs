@@ -8,15 +8,18 @@ import edu.gemini.auxfile.api.AuxFile;
 import edu.gemini.auxfile.api.AuxFileException;
 import edu.gemini.auxfile.server.AuxFileChunk;
 import edu.gemini.auxfile.server.AuxFileServer;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SPProgramID;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Collection;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,9 +35,8 @@ public final class BackendFileSystemImpl implements AuxFileServer {
 
     private AuxFile _list(SPProgramID progId, File f) throws AuxFileException {
         if (!f.exists()) return null;
-        String description = getDescription(progId, f.getName());
-        boolean checked = isChecked(progId, f.getName());
-        return new AuxFile(progId, f, description, checked);
+        final MetaData md = getMetaData(progId, f.getName());
+        return new AuxFile(progId, f, md.getDescription(), md.isChecked(), md.getLastEmailed());
     }
 
     @Override
@@ -204,59 +206,45 @@ public final class BackendFileSystemImpl implements AuxFileServer {
         return token;
     }
 
-
-    public String getDescription(SPProgramID programId, String fileName)
-            throws AuxFileException {
+    public MetaData getMetaData(SPProgramID programId, String fileName) throws AuxFileException {
         try {
-           	return MetaData.forFile(programId, fileName).getDescription();
+            return MetaData.forFile(programId, fileName);
         } catch (IOException ex) {
-            String msg = "problem reading meta file: " +
-                         programId + ", " + fileName;
+            final String msg = String.format("problem reading meta file: %s, %s", programId, fileName);
             LOG.log(Level.SEVERE, msg, ex);
             throw AuxFileException.create(msg, ex);
         }
     }
 
-    public boolean isChecked(SPProgramID programId, String fileName)
-			throws AuxFileException {
-		try {
-			return MetaData.forFile(programId, fileName).isChecked();
-		} catch (IOException ex) {
-			String msg = "problem reading meta file: " + programId + ", "
-					+ fileName;
-			LOG.log(Level.SEVERE, msg, ex);
-			throw AuxFileException.create(msg, ex);
-		}
-	}
+    @FunctionalInterface
+    interface IOExceptionThrowingConsumer<A> {
+        void accept(A a) throws IOException;
+    }
 
-    @Override
-    public void setDescription(SPProgramID progId, Collection<String> fileNames, String newDescription)
-            throws AuxFileException {
-    	for (String fileName: fileNames) {
-            try {
-            	MetaData.forFile(progId, fileName).setDescription(newDescription);
-            } catch (IOException ex) {
-                String msg = "problem writing meta file: " +
-                             progId + ", " + fileName;
-                LOG.log(Level.SEVERE, msg, ex);
-                throw AuxFileException.create(msg, ex);
-            }
-    	}
-
+    private void setValue(SPProgramID progId, Collection<String> fileNames, IOExceptionThrowingConsumer<MetaData> setter) throws AuxFileException {
+        for (String fileName: fileNames) {
+           try {
+               setter.accept(MetaData.forFile(progId, fileName));
+           } catch (IOException ex) {
+               final String msg = String.format("problem writing meta file: %s, %s", progId, fileName);
+               LOG.log(Level.SEVERE, msg, ex);
+               throw AuxFileException.create(msg, ex);
+           }
+       	}
     }
 
     @Override
-    public void setChecked(SPProgramID progId, Collection<String> fileNames, boolean newChecked)
-            throws AuxFileException {
-        for (String fileName : fileNames) {
-			try {
-				MetaData.forFile(progId, fileName).setChecked(newChecked);
-			} catch (IOException ex) {
-				String msg = "problem writing meta file: " + progId + ", "
-						+ fileName;
-				LOG.log(Level.SEVERE, msg, ex);
-				throw AuxFileException.create(msg, ex);
-			}
-		}
+    public void setDescription(SPProgramID progId, Collection<String> fileNames, String newDescription) throws AuxFileException {
+        setValue(progId, fileNames, m -> m.setDescription(newDescription));
+    }
+
+    @Override
+    public void setChecked(SPProgramID progId, Collection<String> fileNames, boolean newChecked) throws AuxFileException {
+        setValue(progId, fileNames, m -> m.setChecked(newChecked));
+    }
+
+    @Override
+    public void setLastEmailed(SPProgramID progId, Collection<String> fileNames, Option<Instant> newEmailed) throws AuxFileException {
+        setValue(progId, fileNames, m -> m.setLastEmailed(newEmailed));
     }
 }

@@ -2,8 +2,10 @@ package edu.gemini.auxfile.server;
 
 import edu.gemini.auxfile.api.AuxFile;
 import edu.gemini.auxfile.api.AuxFileException;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SPProgramID;
 
+import java.time.Instant;
 import java.util.Collection;
 
 /**
@@ -54,5 +56,10 @@ public abstract class AuxFileServerDecorator implements AuxFileServer {
     @Override
     public void setChecked(SPProgramID progId, Collection<String> fileNames, boolean newChecked) throws AuxFileException {
         delegate.setChecked(progId, fileNames, newChecked);
+    }
+
+    @Override
+    public void setLastEmailed(SPProgramID progId, Collection<String> fileNames, Option<Instant> newLastEmailed) throws AuxFileException {
+        delegate.setLastEmailed(progId, fileNames, newLastEmailed);
     }
 }
