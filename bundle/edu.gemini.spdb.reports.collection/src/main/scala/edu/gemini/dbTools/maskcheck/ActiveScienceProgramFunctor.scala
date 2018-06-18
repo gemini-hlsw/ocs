@@ -39,8 +39,8 @@ object ActiveScienceProgramFunctor {
     new ActiveScienceProgramFunctor |>
             (f => db.getQueryRunner(user).queryPrograms(f).results.toList)
 
-  def query(db: IDBDatabaseService, user: JSet[Principal]): MC[List[SPProgramID]] =
-    MC.catchLeft(unsafeQuery(db, user))
+  def query(db: IDBDatabaseService, user: JSet[Principal]): Action[List[SPProgramID]] =
+    Action.catchLeft(unsafeQuery(db, user))
 }
 
 private class ActiveScienceProgramFunctor extends DBAbstractQueryFunctor {

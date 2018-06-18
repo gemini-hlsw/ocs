@@ -14,7 +14,7 @@ sealed abstract class MaskCheckMailer(mailer: Mailer) {
     pid:   SPProgramID,
     to:    ProgramAddresses,
     files: List[AuxFile]
-  ): MC[Unit] = {
+  ): Action[Unit] = {
 
     val subject   =
       s"${pid.stringValue} Mask Checks Still Pending"

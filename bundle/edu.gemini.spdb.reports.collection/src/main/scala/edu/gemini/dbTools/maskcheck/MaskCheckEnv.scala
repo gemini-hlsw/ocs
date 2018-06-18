@@ -45,33 +45,33 @@ object MaskCheckEnv {
   // week..
   val MaskCheckNagDelayProp = "edu.gemini.dbTools.maskcheck.nagdelay"
 
-  private def service[C](ctx: BundleContext, c: Class[C]): MC[C] =
+  private def service[C](ctx: BundleContext, c: Class[C]): Action[C] =
     for {
-      r <- MC.fromNullableOp(s"No ${c.getName} service reference")(ctx.getServiceReference(c))
-      s <- MC.fromNullableOp(s"Mo ${c.getName} service"          )(ctx.getService(r))
+      r <- Action.fromNullableOp(s"No ${c.getName} service reference")(ctx.getServiceReference(c))
+      s <- Action.fromNullableOp(s"Mo ${c.getName} service"          )(ctx.getService(r))
     } yield s
 
-  private def prop(ctx: BundleContext, n: String): MC[String] =
-    MC.fromNullableOp(s"Missing $n property")(ctx.getProperty(n))
+  private def prop(ctx: BundleContext, n: String): Action[String] =
+    Action.fromNullableOp(s"Missing $n property")(ctx.getProperty(n))
 
-  private def parsedProp[A](ctx: BundleContext, n: String)(f: String => Option[A]): MC[A] =
+  private def parsedProp[A](ctx: BundleContext, n: String)(f: String => Option[A]): Action[A] =
     prop(ctx, n).flatMap { s =>
-      MC.fromOption(s"Could not parse $n property value '$s'")(f(s))
+      Action.fromOption(s"Could not parse $n property value '$s'")(f(s))
     }
 
-  private def mailer(ctx: BundleContext): MC[MaskCheckMailer] =
+  private def mailer(ctx: BundleContext): Action[MaskCheckMailer] =
     for {
       s <- parsedProp(ctx, SiteProperty.NAME)(s => Option(Site.tryParse(s)))
       m <- prop(ctx, SmtpProp)
       t <- parsedProp(ctx, MailerTypeProp)(MailerType.fromString)
     } yield MaskCheckMailer(t, s, m)
 
-  private def nagDelay(ctx: BundleContext): MC[Duration] =
+  private def nagDelay(ctx: BundleContext): Action[Duration] =
     parsedProp(ctx, MaskCheckNagDelayProp) { s =>
       \/.fromTryCatchNonFatal(Duration.parse(s)).toOption
     }
 
-  def fromBundleContext(ctx: BundleContext): MC[MaskCheckEnv] =
+  def fromBundleContext(ctx: BundleContext): Action[MaskCheckEnv] =
     for {
       a <- service(ctx, classOf[AuxFileServer     ])
       o <- service(ctx, classOf[IDBDatabaseService])

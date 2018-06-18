@@ -48,9 +48,9 @@ object MaskCheckCron {
     pid: SPProgramID,
     now: Instant,
     nag: Duration
-  ): MC[List[AuxFile]] =
+  ): Action[List[AuxFile]] =
 
-    MC.catchLeft(afs.listAll(pid)).map(_.asScala.toList.filter { f =>
+    Action.catchLeft(afs.listAll(pid)).map(_.asScala.toList.filter { f =>
       val lastMod   = Instant.ofEpochMilli(f.getLastModified)
       val nagAt     = lastMod.plus(nag)
       val lastEmail = f.getLastEmailed.asScalaOpt.getOrElse(Instant.MIN)
@@ -66,27 +66,27 @@ object MaskCheckCron {
     pids: List[SPProgramID],
     now:  Instant,
     nag:  Duration
-  ): MC[List[(SPProgramID, List[AuxFile])]] =
+  ): Action[List[(SPProgramID, List[AuxFile])]] =
 
     pids.traverseU { pid => pending(afs, pid, now, nag).strengthL(pid) }
 
-  case class MCLogger(logger: Logger) {
-    def log(level: Level, msg: String): MC[Unit] =
-      MC.delay(logger.log(level, msg))
+  case class ActionLogger(logger: Logger) {
+    def log(level: Level, msg: String): Action[Unit] =
+      Action.delay(logger.log(level, msg))
   }
 
   private def sendEmails(
-    log: MCLogger,
+    log: ActionLogger,
     afs: AuxFileServer,
     now: Instant,
     odb: IDBDatabaseService,
     mcm: MaskCheckMailer,
     ps:  List[(SPProgramID, List[AuxFile])]
-  ): MC[Unit] =
+  ): Action[Unit] =
 
     ps.traverseU {
       case (_, Nil)       =>
-        MC.mcUnit
+        Action.unit
 
       case (pid, pending) =>
         EitherT(ProgramAddresses.fromProgramId(odb, pid).catchLeft).flatMap {
@@ -98,7 +98,7 @@ object MaskCheckCron {
 
           case Some(Success(pa))  =>
             mcm.notifyPendingCheck(pid, pa, pending) *>
-              MC.catchLeft(afs.setLastEmailed(pid, pending.map(_.getName).asJava, ImOption.apply(now)))
+              Action.catchLeft(afs.setLastEmailed(pid, pending.map(_.getName).asJava, ImOption.apply(now)))
         }
     }.void
 
@@ -107,10 +107,10 @@ object MaskCheckCron {
 
     val action = for {
       env  <- MaskCheckEnv.fromBundleContext(ctx)
-      now  <- MC.delay(Instant.now)
+      now  <- Action.delay(Instant.now)
       pids <- ActiveScienceProgramFunctor.query(env.odb, user)
       ps   <- allPending(env.auxFileServer, pids, now, env.nagDelay)
-      _    <- sendEmails(MCLogger(logger), env.auxFileServer, now, env.odb, env.mailer, ps)
+      _    <- sendEmails(ActionLogger(logger), env.auxFileServer, now, env.odb, env.mailer, ps)
     } yield ()
 
     action.run.unsafePerformIO() match {

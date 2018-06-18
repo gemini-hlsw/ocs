@@ -6,26 +6,26 @@ import scalaz.effect.IO
 
 package object maskcheck {
 
-  type MC[A] = EitherT[IO, Throwable, A]
+  type Action[A] = EitherT[IO, Throwable, A]
 
-  object MC {
+  object Action {
 
-    def mcUnit: MC[Unit] =
+    def unit: Action[Unit] =
       EitherT.right(IO.ioUnit)
 
-    def fromNullableOp[A](failMessage: => String)(a: => A): MC[A] =
+    def fromNullableOp[A](failMessage: => String)(a: => A): Action[A] =
       fromOption(failMessage)(Option(a))
 
-    def fromOption[A](failMessage: => String)(oa: => Option[A]): MC[A] =
+    def fromOption[A](failMessage: => String)(oa: => Option[A]): Action[A] =
       EitherT.fromDisjunction[IO](oa \/> new RuntimeException(failMessage))
 
-    def catchLeft[A](a: => A): MC[A] =
+    def catchLeft[A](a: => A): Action[A] =
       EitherT(IO(a).catchLeft)
 
-    def delay[A](a: => A): MC[A] =
+    def delay[A](a: => A): Action[A] =
       EitherT.right(IO(a))
 
-    def fail[A](failMessage: => String): MC[A] =
+    def fail[A](failMessage: => String): Action[A] =
       EitherT.left(IO(new RuntimeException(failMessage)))
 
   }
