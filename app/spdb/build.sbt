@@ -454,7 +454,7 @@ def odbtest(version: Version) = AppConfig(
     "cron.odbMail.mailer.type"                   -> "test",
     "edu.gemini.auxfile.root"                    -> "/home/software/ugemini/auxfile",
     "edu.gemini.dbTools.archive.directory"       -> "/home/software/ugemini/spdb/spdb.archive",
-    "edu.gemini.dbTools.maskcheck.nagdelay"      -> "PT5S",
+    "edu.gemini.dbTools.maskcheck.nagdelay"      -> "PT10M",
     "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/home/software/ugemini/ephemerides",
     "edu.gemini.smartgcal.svnRootUrl"            -> "http://source.gemini.edu/gcal/branches/development/calibrations",
     "edu.gemini.spdb.dir"                        -> "/home/software/ugemini/spdb/spdb.active",
