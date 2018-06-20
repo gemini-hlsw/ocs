@@ -18,7 +18,7 @@ public class PhoenixSupport implements ITccInstrumentSupport {
     }
 
     /**
-     * Factory for creating a new TReCS Instrument Support.
+     * Factory for creating a new Phoenix Instrument Support.
      *
      * @param oe The current ObservationEnvironment
      * @return A new instance

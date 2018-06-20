@@ -34,4 +34,8 @@ abstract class SPSkyObject extends WatchablePos {
   def getDecDegrees(time: GOLong): GODouble
 
   def getDecString(time: GOLong): GOption[String]
+
+  def getName: String
+
+  def setName(name: String): Unit
 }

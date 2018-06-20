@@ -18,7 +18,7 @@ public final class GMOSSupport implements ITccInstrumentSupport {
     }
 
     /**
-     * Factory for creating a new TReCS Instrument Support.
+     * Factory for creating a new GMOS Instrument Support.
      *
      * @param oe The current ObservationEnvironment
      * @return A new instance

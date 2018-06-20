@@ -12,6 +12,13 @@ public class GhostSupport implements ITccInstrumentSupport {
         this.oe = oe;
     }
 
+    /**
+     * Factor for creating a new GHOST Instrument Support.
+     *
+     * @param oe The current ObservationEnvironment
+     * @return A new instance
+     * @throws NullPointerException returned if the ObservationEnvironment is null.
+     */
     static public ITccInstrumentSupport create(final ObservationEnvironment oe) throws NullPointerException {
         return new GhostSupport(oe);
     }
@@ -34,7 +41,7 @@ public class GhostSupport implements ITccInstrumentSupport {
 
     @Override
     public String getTccConfigInstrumentOrigin() {
-        return null;
+        return "ghost";
     }
 
     @Override

@@ -1,11 +1,13 @@
 package edu.gemini.spModel.target.env;
 
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.gemini.ghost.GhostAsterism;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.SPCoordinates;
+import edu.gemini.spModel.target.SPSkyObject;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.SPTargetPio;
 
@@ -89,10 +91,25 @@ public final class TargetEnvironment implements Serializable, TargetContainer {
     }
 
     /** Returns an arbitrary target from the asterism. This method will be removed for 18A. */
+    public SPSkyObject getPrimaryTargetFromAsterism() {
+        if (asterism instanceof GhostAsterism) {
+            final GhostAsterism ga = (GhostAsterism) asterism;
+            if (ga.base().isDefined())
+                return ga.base().get();
+            else if (ga instanceof GhostAsterism.DualTarget) {
+                final Option<SPCoordinates> c =
+                        ImOption.fromScalaOpt(ga.basePosition(ImOption.scalaNone())).map(SPCoordinates::new);
+                if (c.isDefined())
+                    return c.getValue();
+            }
+        }
+        return asterism.allSpTargets().head();
+    }
+
     // TODO:ASTERISM
     @Deprecated
     public SPTarget getArbitraryTargetFromAsterism() {
-      return getAsterism().allSpTargets().head();
+        return getAsterism().allSpTargets().head();
     }
 
     /**

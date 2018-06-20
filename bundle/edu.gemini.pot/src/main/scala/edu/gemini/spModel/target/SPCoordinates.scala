@@ -98,9 +98,15 @@ final class SPCoordinates(var coordinates: Coordinates) extends SPSkyObject {
 
   override def getDecString(time: GOLong): GOption[String] =
     Some(coordinates.dec.toAngle.formatHMS).asGeminiOpt
+
+  override val getName: String = SPCoordinates.Name
+
+  override def setName(name: String): Unit =
+    throw new UnsupportedOperationException("Cannot set name of coordinates")
 }
 
 object SPCoordinates {
   val ParamSetName = "spCoordinates"
   val CoordinatesName   = "coordinates"
+  val Name = "Sky Position"
 }
