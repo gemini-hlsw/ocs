@@ -140,7 +140,7 @@ public final class ObservationEnvironment {
             }
         }
 
-        return _targetEnv.getPrimaryTargetFromAsterism().getName();
+        return _targetEnv.getSlewPositionObjectFromAsterism().getName();
     }
 
     public boolean isNorth() {

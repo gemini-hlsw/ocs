@@ -25,7 +25,7 @@ public final class TargetGroupConfig extends ParamSet {
         final ImList<SPTarget> scienceTargets = env.getAsterism().allSpTargetsJava();
         final ImList<SPTarget> userTargets    = env.getUserTargets().map(u -> u.target);
         final ImList<SPTarget> targets        = scienceTargets.append(userTargets);
-        return new TargetGroupConfig(TccNames.BASE, targets, ImOption.apply(env.getPrimaryTargetFromAsterism()));
+        return new TargetGroupConfig(TccNames.BASE, targets, ImOption.apply(env.getSlewPositionObjectFromAsterism()));
     }
 
     public static TargetGroupConfig createGuideGroup(final GuideProbeTargets gt) {
@@ -41,7 +41,7 @@ public final class TargetGroupConfig extends ParamSet {
         addAttribute(TYPE, TYPE_VALUE);
 
         primaryTarget.map(SPSkyObject::getName)
-                .filter(n -> !n.isEmpty())
+                .filter(n -> !"".equals(n))
                 .foreach(n -> putParameter(TccNames.PRIMARY, n));
 
         final List<String> targetNames = targets.toList().stream().map(SPSkyObject::getName).collect(Collectors.toList());

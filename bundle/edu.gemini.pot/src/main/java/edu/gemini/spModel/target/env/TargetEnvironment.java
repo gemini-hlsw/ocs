@@ -90,8 +90,8 @@ public final class TargetEnvironment implements Serializable, TargetContainer {
         this.user     = user;
     }
 
-    /** Returns an arbitrary target from the asterism. This method will be removed for 18A. */
-    public SPSkyObject getPrimaryTargetFromAsterism() {
+    /** Returns the sky object from the asterism that dictates the slew position. */
+    public SPSkyObject getSlewPositionObjectFromAsterism() {
         if (asterism instanceof GhostAsterism) {
             final GhostAsterism ga = (GhostAsterism) asterism;
             if (ga.base().isDefined())

@@ -4,8 +4,8 @@ import edu.gemini.spModel.gemini.ghost.Ghost;
 
 import java.util.Objects;
 
-public class GhostSupport implements ITccInstrumentSupport {
-    private ObservationEnvironment oe;
+final public class GhostSupport implements ITccInstrumentSupport {
+    final private ObservationEnvironment oe;
 
     private GhostSupport(final ObservationEnvironment oe) {
         Objects.requireNonNull(oe, "Observation environment can not be null");
