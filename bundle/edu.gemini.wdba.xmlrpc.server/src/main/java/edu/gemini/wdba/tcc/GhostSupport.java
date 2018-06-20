@@ -9,6 +9,8 @@ final public class GhostSupport implements ITccInstrumentSupport {
 
     private GhostSupport(final ObservationEnvironment oe) {
         Objects.requireNonNull(oe, "Observation environment can not be null");
+        if (!(oe.getInstrument() instanceof Ghost))
+            throw new RuntimeException("Incompatible instrument in ObservationEnvironment.");
         this.oe = oe;
     }
 
