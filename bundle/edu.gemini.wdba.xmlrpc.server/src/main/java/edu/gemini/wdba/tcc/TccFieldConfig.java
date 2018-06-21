@@ -99,8 +99,7 @@ public class TccFieldConfig extends ParamSet {
     }
 
     private void addBaseGroup(TargetEnvironment env) throws WdbaGlueException {
-        System.out.println("*** In TccFieldConfig.addBaseGroup");
-        // Add the base target itself.
+        // Add the base target / position.
         final SPSkyObject so = env.getSlewPositionObjectFromAsterism();
 
         if (so instanceof SPTarget) {
@@ -108,9 +107,7 @@ public class TccFieldConfig extends ParamSet {
             if (isEmpty(spt.getName()))
                 spt.setName(TccNames.BASE);
             add(new TargetConfig(spt, TccNames.BASE));
-        }
-
-        if (so instanceof SPCoordinates) {
+        } else if (so instanceof SPCoordinates) {
             add(new TargetConfig((SPCoordinates)so, TccNames.BASE));
         }
 
@@ -127,7 +124,6 @@ public class TccFieldConfig extends ParamSet {
 
         // Add the "group" for the base position.
         add(TargetGroupConfig.createBaseGroup(env));
-        System.out.println("*** Leaving TccFieldConfig.addBaseGroup");
     }
 
     private void addGuideGroup(GuideProbeTargets gt) throws WdbaGlueException {
