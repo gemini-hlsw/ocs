@@ -50,7 +50,7 @@ public final class TargetConfig extends ParamSet {
 
     public TargetConfig(final SPCoordinates spc, final String tag) throws WdbaGlueException {
         super(spc.getName());
-
+        System.out.println("*** Creating SPCoordinates TargetConfig with name=" + spc.getName() + ", tag=" + tag);
         // The coordinates are fixed.
         final Coordinates cs = spc.coordinates();
         addAttribute(TYPE, "hmsdegTarget");
@@ -64,6 +64,7 @@ public final class TargetConfig extends ParamSet {
 
     public TargetConfig(final SPTarget spt, final String tag) throws WdbaGlueException {
         super(spt.getName());
+        System.out.println("*** Creating SPTarget TargetConfig with name=" + spt.getName() + ", tag=" + tag);
         final Target t = spt.getTarget();
 
         // Get coordinates right now

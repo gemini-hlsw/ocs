@@ -129,17 +129,17 @@ public final class ObservationEnvironment {
     }
 
     public String getBasePositionName() {
-        final Asterism a = _targetEnv.getAsterism();
-
-        // A dual asterism always has a sky position, and an asterism with an
-        // overridden base has a sky position.
-        if (a instanceof GhostAsterism) {
-            if (a instanceof GhostAsterism.DualTarget
-                || ((GhostAsterism)a).base().isDefined()) {
-                return SPCoordinates.Name();
-            }
-        }
-
+//        final Asterism a = _targetEnv.getAsterism();
+//
+//        // A dual asterism always has a sky position, and an asterism with an
+//        // overridden base has a sky position.
+//        if (a instanceof GhostAsterism) {
+//            if (a instanceof GhostAsterism.DualTarget
+//                || ((GhostAsterism)a).base().isDefined()) {
+//                return SPCoordinates.Name();
+//            }
+//        }
+        System.out.println("*** ObservationEnvironment.getBasePositionName: " + _targetEnv.getSlewPositionObjectFromAsterism().getName());
         return _targetEnv.getSlewPositionObjectFromAsterism().getName();
     }
 

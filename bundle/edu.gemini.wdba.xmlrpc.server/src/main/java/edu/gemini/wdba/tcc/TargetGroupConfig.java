@@ -22,9 +22,12 @@ public final class TargetGroupConfig extends ParamSet {
     public static final String TYPE_VALUE="targetgroup";
 
     public static TargetGroupConfig createBaseGroup(final TargetEnvironment env) {
+        System.out.println("*** In TargetGroupConfig.createBaseGroup");
         final ImList<SPTarget> scienceTargets = env.getAsterism().allSpTargetsJava();
         final ImList<SPTarget> userTargets    = env.getUserTargets().map(u -> u.target);
         final ImList<SPTarget> targets        = scienceTargets.append(userTargets);
+        System.out.println("*** Adding targets: " + targets.size());
+        System.out.println("*** Leaving TargetGroupConfig.createBaseGroup");
         return new TargetGroupConfig(TccNames.BASE, targets, ImOption.apply(env.getSlewPositionObjectFromAsterism()));
     }
 
