@@ -17,6 +17,7 @@ import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPCoordinates;
+import edu.gemini.spModel.target.SPSkyObject;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.env.*;
@@ -1375,17 +1376,20 @@ enum BasePositionType implements PositionType {
         if (isMember(env, target)) return;
         env = env.removeTarget(target);
 
-        final SPTarget base = env.getArbitraryTargetFromAsterism();
+        final SPSkyObject base = env.getSlewPositionObjectFromAsterism();
+        if (!(base instanceof SPTarget))
+            return;
+        final SPTarget baseTarget = (SPTarget) base;
 
         final GuideEnvironment   genv = env.getGuideEnvironment();
-        final ImList<UserTarget> user = env.getUserTargets().append(new UserTarget(UserTarget.Type.other, base));
+        final ImList<UserTarget> user = env.getUserTargets().append(new UserTarget(UserTarget.Type.other, baseTarget));
 
-        final TargetEnvironment newEnv = TargetEnvironment.create(target, genv, user);
+        final TargetEnvironment newEnv = TargetEnvironment.create(baseTarget, genv, user);
         obsComp.setTargetEnvironment(newEnv);
     }
 
     @Override public boolean isMember(final TargetEnvironment env, final SPTarget target) {
-        return (env.getArbitraryTargetFromAsterism() == target);
+        return (env.getSlewPositionObjectFromAsterism() == target);
     }
 
     @Override public String toString() {

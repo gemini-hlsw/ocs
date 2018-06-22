@@ -13,6 +13,7 @@ import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw;
 import edu.gemini.spModel.guide.GuideProbe;
+import edu.gemini.spModel.target.SPSkyObject;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
@@ -319,7 +320,7 @@ public final class TargetGroupTest extends TestBase {
             guiderNameMap.put(guider, name);
         }
 
-        public String getTargetName(SPTarget target) {
+        public String getTargetName(SPSkyObject target) {
             String name = targetNameMap.get(target);
             return (name == null) ? target.getName() : name;
         }
@@ -332,7 +333,7 @@ public final class TargetGroupTest extends TestBase {
     private static final String DEFAULT_PARAM_PATH = "param[@name='" + TccNames.PRIMARY + "']";
     private static final String TARGETS_PATH = "param[@name='" + TccNames.TARGETS + "']";
 
-    private void validateGroup(Element targetGroup, String groupName, String defaultTarget, ImList<SPTarget> targets) {
+    private void validateGroup(Element targetGroup, String groupName, String defaultTarget, ImList<SPSkyObject> targets) {
         // Check the group name.
         assertEquals(groupName, targetGroup.attributeValue(ParamSet.NAME));
 
@@ -422,10 +423,10 @@ public final class TargetGroupTest extends TestBase {
         // Check the base element.
         Element baseGroupElement = getGroupElement(TccNames.BASE, groupElements);
         assertNotNull(baseGroupElement);
-        ImList<SPTarget> targets = env.getUserTargets().map(u -> u.target);
-        targets = targets.cons(env.getArbitraryTargetFromAsterism());
+        ImList<SPSkyObject> targets = env.getUserTargets().map(u -> u.target);
+        targets = targets.cons(env.getSlewPositionObjectFromAsterism());
 
-        String baseName = nameMap.getTargetName(env.getArbitraryTargetFromAsterism());
+        String baseName = nameMap.getTargetName(env.getSlewPositionObjectFromAsterism());
         validateGroup(baseGroupElement, TccNames.BASE, baseName, targets);
 
         // Check each guide group.
@@ -444,7 +445,9 @@ public final class TargetGroupTest extends TestBase {
             Option<SPTarget> primary = gt.getPrimary();
             String primaryName = null;
             if (!primary.isEmpty()) primaryName = nameMap.getTargetName(primary.getValue());
-            validateGroup(guideGroupElement, name, primaryName, gt.getTargets());
+
+            final ImList<SPSkyObject> gObjects = gt.getTargets().map(o -> (SPSkyObject)o);
+            validateGroup(guideGroupElement, name, primaryName, gObjects);
         }
     }
 

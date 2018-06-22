@@ -6,7 +6,7 @@ import javax.swing._
 import com.jgoodies.forms.factories.DefaultComponentFactory
 import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
-import edu.gemini.spModel.core.Target
+import edu.gemini.spModel.core.{NonSiderealTarget, SiderealTarget, Target}
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.{InstGmosNorth, InstGmosSouth}
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS
@@ -24,6 +24,7 @@ import scala.swing._
 import scala.swing.event._
 import scala.util.{Failure, Success}
 import scalaz._
+import Scalaz._
 
 object ItcPanel {
 
@@ -47,12 +48,7 @@ sealed trait ItcPanel extends GridBagPanel {
   def display: Component
   def visibleFor(t: SPComponentType): Boolean
 
-  /** TODO:ASTERISM: we need to display a list of asterism members and let the user select one. For now we
-    * just select the first target in the asterism.
-    */
-  def selectedTarget: Option[Target] =
-    Option(owner.getContextTargetEnv).map(_.getArbitraryTargetFromAsterism.getTarget)
-
+  private val targetsPanel           = new TargetsPanel(owner)
   private val conditionsPanel        = new ConditionsPanel(owner)
   private val aperturePanel          = new AnalysisApertureMethodPanel(owner)
   private val apertureFixedSkyPanel  = new AnalysisApertureMethodPanel(owner, fixedSkyValue = true)
@@ -62,8 +58,10 @@ sealed trait ItcPanel extends GridBagPanel {
 
   private var analysisMethod: AnalysisMethodPanel = aperturePanel
 
+  def selectedTarget: Option[Target] = targetsPanel.selectedTarget
+
   border = BorderFactory.createEmptyBorder(5, 10, 5, 10)
-  layout(separator("Conditions:")) = new Constraints {
+  layout(separator("Target:")) = new Constraints {
     anchor    = Anchor.West
     gridx     = 0
     gridy     = 0
@@ -71,13 +69,13 @@ sealed trait ItcPanel extends GridBagPanel {
     fill      = Fill.Horizontal
     insets    = new Insets(10, 0, 0, 0)
   }
-  layout(conditionsPanel) = new Constraints {
+  layout(targetsPanel) = new Constraints {
     anchor    = Anchor.West
     gridx     = 0
     gridy     = 1
     insets    = new Insets(5, 20, 0, 0)
   }
-  layout(separator("Analysis Method:")) = new Constraints {
+  layout(separator("Conditions:")) = new Constraints {
     anchor    = Anchor.West
     gridx     = 0
     gridy     = 2
@@ -85,9 +83,23 @@ sealed trait ItcPanel extends GridBagPanel {
     fill      = Fill.Horizontal
     insets    = new Insets(10, 0, 0, 0)
   }
-  layout(display) = new Constraints {
+  layout(conditionsPanel) = new Constraints {
+    anchor    = Anchor.West
+    gridx     = 0
+    gridy     = 3
+    insets    = new Insets(5, 20, 0, 0)
+  }
+  layout(separator("Analysis Method:")) = new Constraints {
+    anchor    = Anchor.West
     gridx     = 0
     gridy     = 4
+    weightx   = 1
+    fill      = Fill.Horizontal
+    insets    = new Insets(10, 0, 0, 0)
+  }
+  layout(display) = new Constraints {
+    gridx     = 0
+    gridy     = 6
     weightx   = 1
     weighty   = 1
     gridwidth = 2
@@ -97,25 +109,26 @@ sealed trait ItcPanel extends GridBagPanel {
   layout(messagePanel) = new Constraints {
     anchor    = Anchor.West
     gridx     = 0
-    gridy     = 5
+    gridy     = 7
     gridwidth = 2
     weightx   = 1
     fill      = Fill.Horizontal
     insets    = new Insets(10, 0, 0, 0)
   }
 
-  listenTo(conditionsPanel, analysisMethod)
+  listenTo(targetsPanel, conditionsPanel, analysisMethod)
   reactions += {
     case SelectionChanged(_) => table.update()
   }
 
   def update(): Unit = {
-    deafTo(conditionsPanel, analysisMethod)
+    deafTo(targetsPanel, conditionsPanel, analysisMethod)
     updateAnalysisPanel()
+    targetsPanel.update()
     conditionsPanel.update()
     analysisMethod.update()
     table.update()
-    listenTo(conditionsPanel, analysisMethod)
+    listenTo(targetsPanel, conditionsPanel, analysisMethod)
   }
 
   def analysis: Option[AnalysisMethod] = analysisMethod.analysisMethod
@@ -137,7 +150,7 @@ sealed trait ItcPanel extends GridBagPanel {
     layout(analysisMethod) = new Constraints {
       anchor    = Anchor.West
       gridx     = 0
-      gridy     = 3
+      gridy     = 5
       insets    = new Insets(5, 20, 5, 0)
     }
     revalidate()
