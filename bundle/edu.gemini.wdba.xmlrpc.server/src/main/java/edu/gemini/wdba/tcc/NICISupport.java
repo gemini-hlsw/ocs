@@ -23,7 +23,7 @@ public class NICISupport implements ITccInstrumentSupport {
     }
 
     /**
-     * Factory for creating a new TReCS Instrument Support.
+     * Factory for creating a new NICI Instrument Support.
      *
      * @param oe The current ObservationEnvironment
      * @return A new instance

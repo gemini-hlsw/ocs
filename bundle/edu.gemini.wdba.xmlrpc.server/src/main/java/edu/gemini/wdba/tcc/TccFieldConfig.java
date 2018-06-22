@@ -2,6 +2,8 @@ package edu.gemini.wdba.tcc;
 
 import edu.gemini.pot.sp.SPObservationID;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.target.SPCoordinates;
+import edu.gemini.spModel.target.SPSkyObject;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
@@ -97,12 +99,17 @@ public class TccFieldConfig extends ParamSet {
     }
 
     private void addBaseGroup(TargetEnvironment env) throws WdbaGlueException {
-        // Add the target itself.
-        SPTarget base = env.getArbitraryTargetFromAsterism();
-        if (isEmpty(base.getName())) {
-            base.setName(TccNames.BASE);
+        // Add the base target / position.
+        final SPSkyObject so = env.getSlewPositionObjectFromAsterism();
+
+        if (so instanceof SPTarget) {
+            final SPTarget spt = (SPTarget) so;
+            if (isEmpty(spt.getName()))
+                spt.setName(TccNames.BASE);
+            add(new TargetConfig(spt, TccNames.BASE));
+        } else if (so instanceof SPCoordinates) {
+            add(new TargetConfig((SPCoordinates)so, TccNames.BASE));
         }
-        add(new TargetConfig(base, TccNames.BASE));
 
         // Add the user targets.
         int pos = 1;
@@ -146,7 +153,7 @@ public class TccFieldConfig extends ParamSet {
     // private method to log and throw and exception
     private void _logAbort(String message, Exception ex) throws WdbaGlueException {
         //LOG.error(message);
-        throw new WdbaGlueException(message, (ex != null) ? ex : null);
+        throw new WdbaGlueException(message, ex);
     }
 
 }

@@ -10,10 +10,13 @@ import edu.gemini.spModel.ext.*;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.gems.Gems;
+import edu.gemini.spModel.gemini.ghost.GhostAsterism;
 import edu.gemini.spModel.gemini.seqcomp.SeqRepeatOffsetBase;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
+import edu.gemini.spModel.target.SPCoordinates;
+import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.wdba.glue.api.WdbaGlueException;
@@ -126,7 +129,7 @@ public final class ObservationEnvironment {
     }
 
     public String getBasePositionName() {
-        return _targetEnv.getArbitraryTargetFromAsterism().getName();
+        return _targetEnv.getSlewPositionObjectFromAsterism().getName();
     }
 
     public boolean isNorth() {

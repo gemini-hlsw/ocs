@@ -2,6 +2,7 @@ package edu.gemini.wdba.tcc;
 
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.*;
+import edu.gemini.spModel.target.SPCoordinates;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw;
@@ -45,6 +46,20 @@ public final class TargetConfig extends ParamSet {
 
     public static String formatName(final String tag, final int position) {
         return String.format("%s (%d)", tag, position);
+    }
+
+    public TargetConfig(final SPCoordinates spc, final String tag) throws WdbaGlueException {
+        super(spc.getName());
+
+        // The coordinates are fixed.
+        final Coordinates cs = spc.coordinates();
+        addAttribute(TYPE, "hmsdegTarget");
+        putParameter(TccNames.OBJNAME,     spc.getName());
+        putParameter(TccNames.BRIGHTNESS, "");
+        putParameter(TccNames.TAG,         tag);
+        putParameter(TccNames.SYSTEM,     "J2000");
+        putParameter(TccNames.C1,          cs.ra().toAngle().formatHMS());
+        putParameter(TccNames.C2,          cs.dec().formatDMS());
     }
 
     public TargetConfig(final SPTarget spt, final String tag) throws WdbaGlueException {

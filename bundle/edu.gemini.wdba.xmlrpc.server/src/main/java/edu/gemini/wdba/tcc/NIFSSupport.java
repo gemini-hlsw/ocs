@@ -21,7 +21,7 @@ public class NIFSSupport implements ITccInstrumentSupport {
     }
 
     /**
-     * Factory for creating a new TReCS Instrument Support.
+     * Factory for creating a new NIFS Instrument Support.
      *
      * @param oe The current ObservationEnvironment
      * @return A new instance
