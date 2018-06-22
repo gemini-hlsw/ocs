@@ -230,10 +230,10 @@ object GuidingQualityColumn {
   // Calculate if the target is inside the probe FOV
   def target2FOV(info: Option[ObservationInfo], t: Target): Option[GuideInFOV] = {
     for {
-      o                                           <- info
-      gp                                          <- o.guideProbe
-      ctx                                         <- o.toContext
-      c <- t.coords(None)
+      o   <- info
+      gp  <- o.guideProbe
+      ctx <- o.toContext
+      c   <- t.coords(None)
       st = new SPTarget(SiderealTarget.empty.copy(coordinates = c))
     } yield (gp.validate(st, ctx) === GuideStarValidation.VALID).fold(InsideFOV, OutsideFOV)
   }
@@ -334,7 +334,7 @@ case class TargetsModel(info: Option[ObservationInfo], base: Coordinates, radius
   // Required to give limits to the existential type list
   type ColumnsList = List[CatalogNavigatorColumn[A] forSome { type A >: Null <: AnyRef}]
 
-  def baseColumnNames(base: Coordinates): ColumnsList = List(GuidingQualityColumn(info, ""), InFOVColumn(info, "fov"), IdColumn("Id"), RAColumn("RA"), DECColumn("Dec"), DistanceColumn(base, "Dist. [arcmin]"))
+  def baseColumnNames(base: Coordinates): ColumnsList = List(GuidingQualityColumn(info, ""), InFOVColumn(info, "FOV"), IdColumn("Id"), RAColumn("RA"), DECColumn("Dec"), DistanceColumn(base, "Dist. [arcmin]"))
   val pmColumns: ColumnsList  = List(PMRAColumn("µ RA"), PMDecColumn("µ Dec"))
   val magColumns: List[MagnitudeColumn] = MagnitudeBand.all.map(MagnitudeColumn)
 

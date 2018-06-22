@@ -104,7 +104,7 @@ object adapters {
     val quality: Option[AgsGuideQuality] = DeliversRequestedIq.some
     val inFOV: Option[GuideInFOV] = OutsideFOV.some
     setFg(Color.green)
-    setShape(TablePlotSymbol.CROSS)
+    setShape(TablePlotSymbol.CIRCLE)
   }
 
   case object PossibleIqDegradationSymbolInFOV extends GuideQualitySymbol {
@@ -118,42 +118,42 @@ object adapters {
     val quality: Option[AgsGuideQuality] = PossibleIqDegradation.some
     val inFOV: Option[GuideInFOV] = OutsideFOV.some
     setFg(Color.green)
-    setShape(TablePlotSymbol.CROSS)
+    setShape(TablePlotSymbol.CIRCLE)
   }
 
   case object IqDegradationSymbolInFOV extends GuideQualitySymbol {
     val quality: Option[AgsGuideQuality] = IqDegradation.some
     val inFOV: Option[GuideInFOV] = InsideFOV.some
-    setFg(Color.yellow)
+    setFg(Color.orange)
     setShape(TablePlotSymbol.CIRCLE)
   }
 
   case object IqDegradationSymbolOutFOV extends GuideQualitySymbol {
     val quality: Option[AgsGuideQuality] = IqDegradation.some
     val inFOV: Option[GuideInFOV] = OutsideFOV.some
-    setFg(Color.yellow)
-    setShape(TablePlotSymbol.CROSS)
+    setFg(Color.orange)
+    setShape(TablePlotSymbol.CIRCLE)
   }
 
   case object PossiblyUnusableSymbolInFOV extends GuideQualitySymbol {
     val quality: Option[AgsGuideQuality] = PossiblyUnusable.some
     val inFOV: Option[GuideInFOV] = InsideFOV.some
-    setFg(Color.orange)
+    setFg(Color.red)
     setShape(TablePlotSymbol.CIRCLE)
   }
 
   case object PossiblyUnusableSymbolOutFOV extends GuideQualitySymbol {
     val quality: Option[AgsGuideQuality] = PossiblyUnusable.some
     val inFOV: Option[GuideInFOV] = OutsideFOV.some
-    setFg(Color.orange)
-    setShape(TablePlotSymbol.CROSS)
+    setFg(Color.red)
+    setShape(TablePlotSymbol.CIRCLE)
   }
 
   case object UnusableSymbolInFOV extends GuideQualitySymbol {
     val quality: Option[AgsGuideQuality] = Unusable.some
     val inFOV: Option[GuideInFOV] = InsideFOV.some
     setFg(Color.red)
-    setShape(TablePlotSymbol.CIRCLE)
+    setShape(TablePlotSymbol.CROSS)
   }
 
   case object UnusableSymbolOutFOV extends GuideQualitySymbol {
