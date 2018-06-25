@@ -109,8 +109,8 @@ public final class TargetEnvironment implements Serializable, TargetContainer {
     public SPSkyObject getSlewPositionObjectFromAsterism() {
         if (asterism instanceof GhostAsterism) {
             final GhostAsterism ga = (GhostAsterism) asterism;
-            if (ga.base().isDefined())
-                return ga.base().get();
+            if (ga.overriddenBase().isDefined())
+                return ga.overriddenBase().get();
             else if (ga instanceof GhostAsterism.DualTarget) {
                 final Option<SPCoordinates> c =
                         ImOption.fromScalaOpt(ga.basePosition(ImOption.scalaNone())).map(SPCoordinates::new);

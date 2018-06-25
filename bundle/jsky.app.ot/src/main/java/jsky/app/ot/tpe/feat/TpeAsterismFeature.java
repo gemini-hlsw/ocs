@@ -107,7 +107,7 @@ public class TpeAsterismFeature extends TpePositionFeature {
         final Asterism a = env.getAsterism();
         if (a instanceof GhostAsterism) {
             final GhostAsterism ga = (GhostAsterism) a;
-            if (ga.base().isEmpty()) {
+            if (ga.overriddenBase().isEmpty()) {
                 final Option<Coordinates> cOpt = ImOption.fromScalaOpt(ga.basePosition(ImOption.scalaNone()));
                 cOpt.foreach(c -> {
                     try {

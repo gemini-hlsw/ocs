@@ -138,36 +138,36 @@ trait Almosts {
   implicit val GhostSingleTargetAlmostEqual: AlmostEqual[GhostAsterism.SingleTarget] =
     new AlmostEqual[GhostAsterism.SingleTarget] {
       override def almostEqual(a: GhostAsterism.SingleTarget, b: GhostAsterism.SingleTarget): Boolean =
-        (a.target ~= b.target) && (a.base ~= b.base)
+        (a.target ~= b.target) && (a.overriddenBase ~= b.overriddenBase)
     }
 
   implicit val GhostDualTargetAlmostEqual: AlmostEqual[GhostAsterism.DualTarget] =
     new AlmostEqual[GhostAsterism.DualTarget] {
       override def almostEqual(a: GhostAsterism.DualTarget, b: GhostAsterism.DualTarget): Boolean =
-        (a.target1 ~= b.target1) && (a.target2 ~= b.target2) && (a.base ~= b.base)
+        (a.target1 ~= b.target1) && (a.target2 ~= b.target2) && (a.overriddenBase ~= b.overriddenBase)
     }
 
   implicit val GhostTargetPlusSkyAlmostEqual: AlmostEqual[GhostAsterism.TargetPlusSky] =
     new AlmostEqual[GhostAsterism.TargetPlusSky] {
       override def almostEqual(a: GhostAsterism.TargetPlusSky, b: GhostAsterism.TargetPlusSky): Boolean =
-        (a.target ~= b.target) && (a.sky ~= b.sky) && (a.base ~= b.base)
+        (a.target ~= b.target) && (a.sky ~= b.sky) && (a.overriddenBase ~= b.overriddenBase)
     }
   implicit val GhostSkyPlusTargetAlmostEqual: AlmostEqual[GhostAsterism.SkyPlusTarget] =
     new AlmostEqual[GhostAsterism.SkyPlusTarget] {
       override def almostEqual(a: GhostAsterism.SkyPlusTarget, b: GhostAsterism.SkyPlusTarget): Boolean =
-        (a.target ~= b.target) && (a.sky ~= b.sky) && (a.base ~= b.base)
+        (a.target ~= b.target) && (a.sky ~= b.sky) && (a.overriddenBase ~= b.overriddenBase)
     }
 
   implicit val GhostAsterismHighResTargetAlmostEqual: AlmostEqual[GhostAsterism.HighResolutionTarget] =
     new AlmostEqual[GhostAsterism.HighResolutionTarget] {
       override def almostEqual(a: GhostAsterism.HighResolutionTarget, b: GhostAsterism.HighResolutionTarget): Boolean =
-        (a.target ~= b.target) && (a.base ~= b.base)
+        (a.target ~= b.target) && (a.overriddenBase ~= b.overriddenBase)
     }
 
   implicit val GhostAsterismHighResTargetPlusSkyAlmostEqual: AlmostEqual[GhostAsterism.HighResolutionTargetPlusSky] =
     new AlmostEqual[GhostAsterism.HighResolutionTargetPlusSky] {
       override def almostEqual(a: GhostAsterism.HighResolutionTargetPlusSky, b: GhostAsterism.HighResolutionTargetPlusSky): Boolean =
-        (a.target ~= b.target) && (a.sky ~= b.sky) && (a.base ~= b.base)
+        (a.target ~= b.target) && (a.sky ~= b.sky) && (a.overriddenBase ~= b.overriddenBase)
     }
 
   implicit val AsterismAlmostEqual: AlmostEqual[Asterism] =

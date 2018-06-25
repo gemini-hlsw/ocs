@@ -25,35 +25,35 @@ object GhostParamSetCodecs {
   implicit val SingleTargetParamSetCodec: ParamSetCodec[SingleTarget] =
     ParamSetCodec.initial(emptySingleTarget)
       .withParamSet(IFU1, SingleTargetIFU1)
-      .withOptionalParamSet(Base, SingleTargetBase)
+      .withOptionalParamSet(Base, SingleTargetOverriddenBase)
 
   implicit val DualTargetParamSetCodec: ParamSetCodec[DualTarget] =
     ParamSetCodec.initial(emptyDualTarget)
       .withParamSet(IFU1, DualTargetIFU1)
       .withParamSet(IFU2, DualTargetIFU2)
-      .withOptionalParamSet(Base, DualTargetBase)
+      .withOptionalParamSet(Base, DualTargetOverriddenBase)
 
   implicit val TargetPlusSkyParamSetCodec: ParamSetCodec[TargetPlusSky] =
     ParamSetCodec.initial(emptyTargetPlusSky)
       .withParamSet(IFU1, TargetPlusSkyIFU1)
       .withParamSet(IFU2, TargetPlusSkyIFU2)
-      .withOptionalParamSet(Base, TargetPlusSkyBase)
+      .withOptionalParamSet(Base, TargetPlusSkyOverriddenBase)
 
   implicit val SkyPlusTargetParamSetCodec: ParamSetCodec[SkyPlusTarget] =
     ParamSetCodec.initial(emptySkyPlusTarget)
       .withParamSet(IFU1, SkyPlusTargetIFU1)
       .withParamSet(IFU2, SkyPlusTargetIFU2)
-      .withOptionalParamSet(Base, SkyPlusTargetBase)
+      .withOptionalParamSet(Base, SkyPlusTargetOverriddenBase)
 
   implicit val HRTargetParamSetCodec: ParamSetCodec[HighResolutionTarget] =
     ParamSetCodec.initial(emptyHRTarget)
       .withParamSet(IFU1, HRTargetIFU1)
-      .withOptionalParamSet(Base, HRTargetBase)
+      .withOptionalParamSet(Base, HRTargetOverriddenBase)
 
 
   implicit val HRTargetPlusSkyParamSetCodec: ParamSetCodec[HighResolutionTargetPlusSky] =
     ParamSetCodec.initial(emptyHRTargetPlusSky)
       .withParamSet(IFU1, HRTargetPlusSkyIFU1)
       .withParamSet(IFU2, HRTargetPlusSkyIFU2)
-      .withOptionalParamSet(Base, HRTargetPlusSkyBase)
+      .withOptionalParamSet(Base, HRTargetPlusSkyOverriddenBase)
 }

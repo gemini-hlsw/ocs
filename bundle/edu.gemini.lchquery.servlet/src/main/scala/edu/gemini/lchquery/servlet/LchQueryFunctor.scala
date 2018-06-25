@@ -101,6 +101,10 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
             }
           }
 
+        // The LCH doesn't handle TOOs.
+        case t: SPTarget if t.isTooTarget =>
+          None
+
         case c: SPCoordinates =>
           // For now, we pass off sky coordinates as a nonsidereal target to
           // avoid having to significantly modify LTTS.
@@ -109,7 +113,8 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
             setType(targetType.orNull)
           })
 
-        case _ => None
+        case _ =>
+          throw new RuntimeException("Illegal object passed to LchQueryFunctor.makeTargetNode.");
       }
     }
 
