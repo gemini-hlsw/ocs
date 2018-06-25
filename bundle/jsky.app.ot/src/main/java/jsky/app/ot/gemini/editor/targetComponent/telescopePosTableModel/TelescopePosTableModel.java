@@ -127,8 +127,8 @@ final public class TelescopePosTableModel extends AbstractTableModel {
         // the targets, link the row to it; otherwise, just stuff the interpolated
         // coordinates into an SPCoordinates.
         if (a.asterismType() == AsterismType.GhostDualTarget) {
-            if (a.base().isDefined()) {
-                row = new BaseCoordinatesRow(a.base().get(), true);
+            if (a.overriddenBase().isDefined()) {
+                row = new BaseCoordinatesRow(a.overriddenBase().get(), true);
             }
             else {
                 final Coordinates c = Utils.getCoordinates(a, when).getOrElse(Coordinates.zero());
@@ -139,8 +139,8 @@ final public class TelescopePosTableModel extends AbstractTableModel {
             // The logic here is more complicated: we need to determine if the
             // base position corresponds to a target or is set to a sky
             // position, which means checking if a.base (the override) exists.
-            if (a.base().isDefined())
-                row = new BaseCoordinatesRow(a.base().get(), true);
+            if (a.overriddenBase().isDefined())
+                row = new BaseCoordinatesRow(a.overriddenBase().get(), true);
             else {
                 // This is mildly annoying because all non-dual-target asterisms
                 // have their own individual target() member.

@@ -17,6 +17,7 @@ import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPCoordinates;
+import edu.gemini.spModel.target.SPSkyObject;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.env.*;
@@ -208,11 +209,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 return new Left<>(((Asterism.Single) a).t());
             case GhostSingleTarget:
                 final GhostAsterism.SingleTarget gsa = (GhostAsterism.SingleTarget) a;
-                return ImOption.fromScalaOpt(gsa.base()).toRight(() -> gsa.target().spTarget());
+                return ImOption.fromScalaOpt(gsa.overriddenBase()).toRight(() -> gsa.target().spTarget());
             case GhostDualTarget:
                 // This case is more complicated as it always returns Right.
                 final GhostAsterism.DualTarget gda = (GhostAsterism.DualTarget) a;
-                if (gda.base().isDefined()) return new Right<>(gda.base().get());
+                if (gda.overriddenBase().isDefined()) return new Right<>(gda.overriddenBase().get());
                 else {
                     final Option<Instant> sbi = ((SPObservation)getContextObservation().getDataObject())
                             .getSchedulingBlockStart()
@@ -222,16 +223,16 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 }
             case GhostTargetPlusSky:
                 final GhostAsterism.TargetPlusSky gtsa = (GhostAsterism.TargetPlusSky) a;
-                return ImOption.fromScalaOpt(gtsa.base()).toRight(() -> gtsa.target().spTarget());
+                return ImOption.fromScalaOpt(gtsa.overriddenBase()).toRight(() -> gtsa.target().spTarget());
             case GhostSkyPlusTarget:
                 final GhostAsterism.SkyPlusTarget gsta = (GhostAsterism.SkyPlusTarget) a;
-                return ImOption.fromScalaOpt(gsta.base()).toRight(() -> gsta.target().spTarget());
+                return ImOption.fromScalaOpt(gsta.overriddenBase()).toRight(() -> gsta.target().spTarget());
             case GhostHighResolutionTarget:
                 final GhostAsterism.HighResolutionTarget ghta = (GhostAsterism.HighResolutionTarget) a;
-                return ImOption.fromScalaOpt(ghta.base()).toRight(() -> ghta.target().spTarget());
+                return ImOption.fromScalaOpt(ghta.overriddenBase()).toRight(() -> ghta.target().spTarget());
             case GhostHighResolutionTargetPlusSky:
                 final GhostAsterism.HighResolutionTargetPlusSky ghtsa = (GhostAsterism.HighResolutionTargetPlusSky) a;
-                return ImOption.fromScalaOpt(ghtsa.base()).toRight(() -> ghtsa.target().spTarget());
+                return ImOption.fromScalaOpt(ghtsa.overriddenBase()).toRight(() -> ghtsa.target().spTarget());
         }
 
         // We shouldn't get here.
@@ -347,7 +348,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         // Editable if coords are sky position, or base is defined.
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
         final Asterism a = env.getAsterism();
-        return (a instanceof GhostAsterism) && ((GhostAsterism)a).base().isDefined();
+        return (a instanceof GhostAsterism) && ((GhostAsterism)a).overriddenBase().isDefined();
     }
 
     /**
@@ -622,7 +623,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         } else {
             final GhostAsterism ga = ((GhostAsterism) a);
             _w.linkBaseToTarget.setVisible(true);
-            _w.linkBaseToTarget.setSelected(ga.base().isEmpty());
+            _w.linkBaseToTarget.setSelected(ga.overriddenBase().isEmpty());
         }
         _w.linkBaseToTarget.addActionListener(linkedBaseListener);
 
@@ -774,6 +775,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private void showTargetTag() {
         selectedTarget().foreach(t -> {
             final TargetEnvironment env = getDataObject().getTargetEnvironment();
+
+            // We hide the target tag if we are working with GHOST, as it is
+            // unclear how the morph things in that case.
+            boolean visible = !(env.getAsterism() instanceof  GhostAsterism);
+            _w.tag.setVisible(visible);
+
             for (int i = 0; i < _w.tag.getItemCount(); ++i) {
                 final PositionType pt = _w.tag.getItemAt(i);
                 if (pt.isMember(env, t)) {
@@ -1375,17 +1382,20 @@ enum BasePositionType implements PositionType {
         if (isMember(env, target)) return;
         env = env.removeTarget(target);
 
-        final SPTarget base = env.getArbitraryTargetFromAsterism();
+        final SPSkyObject base = env.getSlewPositionObjectFromAsterism();
+        if (!(base instanceof SPTarget))
+            return;
+        final SPTarget baseTarget = (SPTarget) base;
 
         final GuideEnvironment   genv = env.getGuideEnvironment();
-        final ImList<UserTarget> user = env.getUserTargets().append(new UserTarget(UserTarget.Type.other, base));
+        final ImList<UserTarget> user = env.getUserTargets().append(new UserTarget(UserTarget.Type.other, baseTarget));
 
-        final TargetEnvironment newEnv = TargetEnvironment.create(target, genv, user);
+        final TargetEnvironment newEnv = TargetEnvironment.create(baseTarget, genv, user);
         obsComp.setTargetEnvironment(newEnv);
     }
 
     @Override public boolean isMember(final TargetEnvironment env, final SPTarget target) {
-        return (env.getArbitraryTargetFromAsterism() == target);
+        return (env.getSlewPositionObjectFromAsterism() == target);
     }
 
     @Override public String toString() {

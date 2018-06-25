@@ -1,13 +1,11 @@
 package edu.gemini.wdba.tcc
 
 import edu.gemini.spModel.core._
+import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.spModel.util.SPTreeUtil
 import org.junit.Assert._
 import org.junit.Test
-
-import scalaz.==>>
-
 
 final class TcsConfigTest extends TestBase {
 
@@ -15,7 +13,7 @@ final class TcsConfigTest extends TestBase {
     val oc  = SPTreeUtil.findTargetEnvNode(obs)
     val toc = oc.getDataObject.asInstanceOf[TargetObsComp]
     val env = toc.getTargetEnvironment
-    env.getArbitraryTargetFromAsterism.setTarget(target)
+    env.getSlewPositionObjectFromAsterism.asInstanceOf[SPTarget].setTarget(target)
 
     oc.setDataObject(toc)
   }

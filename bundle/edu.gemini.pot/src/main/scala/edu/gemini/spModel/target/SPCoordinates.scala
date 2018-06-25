@@ -106,4 +106,5 @@ object SPCoordinates {
   val ParamSetName = "spCoordinates"
   val CoordinatesName   = "coordinates"
   val Name = "Sky"
+  val Tag = Name
 }

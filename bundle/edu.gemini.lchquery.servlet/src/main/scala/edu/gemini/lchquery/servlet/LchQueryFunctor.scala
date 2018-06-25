@@ -14,13 +14,13 @@ import edu.gemini.skycalc.{DDMMSS, HHMMSS}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.rich.shared.immutable._
-import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.{SPCoordinates, SPSkyObject, SPTarget}
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.too.Too
 
 import scala.collection.JavaConverters._
-
-import scalaz._, Scalaz._
+import scalaz._
+import Scalaz._
 
 class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
                       programParams: List[(LchQueryParam[ISPProgram], String)],
@@ -59,43 +59,63 @@ class LchQueryFunctor(queryType: LchQueryFunctor.QueryType,
   private def addProgram(prog: ISPProgram, obsList: List[ISPObservation]): Unit = {
     import LchQueryParam.{ISPProgramExtractors, ISPObservationExtractors}
 
-    def makeTargetNode(target: SPTarget, env: TargetEnvironment): Option[Serializable] = {
-      def targetType: Option[String] = {
-        if (env.getArbitraryTargetFromAsterism eq target) Some("Base")
-        else if (env.isUserPosition(target)) Some("User")
-        else if (env.isGuidePosition(target)) {
-          for {
-            gg  <- env.getGroups.asScala
-            gpt <- gg.getAll.asScala
-            if gpt.containsTarget(target)
-          } yield gpt.getGuider.getKey
-        }.headOption
-        else None
+    def makeTargetNode(skyObj: SPSkyObject, env: TargetEnvironment): Option[Serializable] = {
+      def extractGuiderKey(t: SPTarget): Option[String] = {
+        for {
+          gg  <- env.getGroups.asScala
+          gpt <- gg.getAll.asScala
+          if gpt.containsTarget(t)
+        } yield gpt.getGuider.getKey
+      }.headOption
+
+      def targetType: Option[String] = skyObj match {
+        case o: SPSkyObject if env.getSlewPositionObjectFromAsterism eq o => Some("Base")
+        case c: SPCoordinates                                             => Some(SPCoordinates.Tag)
+        case t: SPTarget    if env.isUserPosition(t)                      => Some("User")
+        case t: SPTarget    if env.isGuidePosition(t)                     => extractGuiderKey(t)
+        case _                                                            => None
       }
 
-      if (target.isNonSidereal) {
-        Some(new NonSidereal() {
-          setName(target.getName)
-          setType(targetType.orNull)
-          for {
-            n <- target.getNonSiderealTarget
-            h <- n.horizonsDesignation
-          } {
-            setHorizonsObjectId(h.show)
-          }
-        })
-      } else if (target.isSidereal) {
-        target.getSkycalcCoordinates(None.asGeminiOpt).asScalaOpt.map { coords =>
-          new Sidereal() {
-            setName(target.getName)
+      skyObj match {
+        case t: SPTarget if t.isNonSidereal =>
+          Some(new NonSidereal() {
+            setName(t.getName)
             setType(targetType.orNull)
-            setHmsDms(new HmsDms() {
-              setRa(HHMMSS.valStr(coords.getRa.getMagnitude))
-              setDec(DDMMSS.valStr(coords.getDec.getMagnitude))
-            })
+            for {
+              n <- t.getNonSiderealTarget
+              h <- n.horizonsDesignation
+            } {
+              setHorizonsObjectId(h.show)
+            }
+          })
+
+        case t: SPTarget if t.isSidereal =>
+          t.getSkycalcCoordinates(None.asGeminiOpt).asScalaOpt.map { coords =>
+            new Sidereal() {
+              setName(t.getName)
+              setType(targetType.orNull)
+              setHmsDms(new HmsDms() {
+                setRa(HHMMSS.valStr(coords.getRa.getMagnitude))
+                setDec(DDMMSS.valStr(coords.getDec.getMagnitude))
+              })
+            }
           }
-        }
-      } else None
+
+        // The LCH doesn't handle TOOs.
+        case t: SPTarget if t.isTooTarget =>
+          None
+
+        case c: SPCoordinates =>
+          // For now, we pass off sky coordinates as a nonsidereal target to
+          // avoid having to significantly modify LTTS.
+          Some(new NonSidereal() {
+            setName(c.getName)
+            setType(targetType.orNull)
+          })
+
+        case _ =>
+          throw new RuntimeException("Illegal object passed to LchQueryFunctor.makeTargetNode.");
+      }
     }
 
 

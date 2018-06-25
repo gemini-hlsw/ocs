@@ -41,7 +41,7 @@ public final class TargetEnvironment implements Serializable, TargetContainer {
      *
      * @param base the science or main target for the observation
      */
-    public static TargetEnvironment create(SPTarget base) {
+    public static TargetEnvironment create(final SPTarget base) {
         return create(new Asterism.Single(base));
     }
 
@@ -51,9 +51,9 @@ public final class TargetEnvironment implements Serializable, TargetContainer {
    *
    * @param asterism the asterism for the observation
    */
-    public static TargetEnvironment create(Asterism asterism) {
-      ImList<UserTarget> user = ImCollections.emptyList();
-      return new TargetEnvironment(asterism, GuideEnvironment$.MODULE$.Initial(), user);
+    public static TargetEnvironment create(final Asterism asterism) {
+      return new TargetEnvironment(asterism, GuideEnvironment$.MODULE$.Initial(),
+              ImCollections.emptyList());
     }
 
   /**
@@ -68,9 +68,24 @@ public final class TargetEnvironment implements Serializable, TargetContainer {
      *
      * @param user list of user targets
      */
-    @Deprecated
-    public static TargetEnvironment create(SPTarget base, GuideEnvironment guide, ImList<UserTarget> user) {
+    public static TargetEnvironment create(final SPTarget base, final GuideEnvironment guide, final ImList<UserTarget> user) {
         return new TargetEnvironment(new Asterism.Single(base), guide, user);
+    }
+
+    /**
+     * Creates a new TargetEnvironment with the given asterism, guide
+     * stars, and user targets. No references to the guide or user targets are
+     * maintained, though it will share the references to the {@link SPTarget}s
+     * themselves.
+     *
+     * @param a asterism for the observation
+     *
+     * @param guide collection of guide targets for the environment
+     *
+     * @param user list of user targets
+     */
+    public static TargetEnvironment create(final Asterism a, final GuideEnvironment guide, final ImList<UserTarget> user) {
+        return new TargetEnvironment(a, guide, user);
     }
 
     private final Asterism asterism;
@@ -94,8 +109,8 @@ public final class TargetEnvironment implements Serializable, TargetContainer {
     public SPSkyObject getSlewPositionObjectFromAsterism() {
         if (asterism instanceof GhostAsterism) {
             final GhostAsterism ga = (GhostAsterism) asterism;
-            if (ga.base().isDefined())
-                return ga.base().get();
+            if (ga.overriddenBase().isDefined())
+                return ga.overriddenBase().get();
             else if (ga instanceof GhostAsterism.DualTarget) {
                 final Option<SPCoordinates> c =
                         ImOption.fromScalaOpt(ga.basePosition(ImOption.scalaNone())).map(SPCoordinates::new);
@@ -104,12 +119,6 @@ public final class TargetEnvironment implements Serializable, TargetContainer {
             }
         }
         return asterism.allSpTargets().head();
-    }
-
-    // TODO:ASTERISM
-    @Deprecated
-    public SPTarget getArbitraryTargetFromAsterism() {
-        return getAsterism().allSpTargets().head();
     }
 
     /**
