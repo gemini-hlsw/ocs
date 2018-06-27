@@ -246,6 +246,10 @@ public class ScheduleDocument {
         return TimeUtils.msToHHMM(ms);
     }
 
+    public TimePreference getTimePreference() {
+        return (utc) ? TimePreference.UNIVERSAL : TimePreference.LOCAL;
+    }
+
     public String getColor(Severity sev) {
         if (sev != null) {
             switch (sev) {

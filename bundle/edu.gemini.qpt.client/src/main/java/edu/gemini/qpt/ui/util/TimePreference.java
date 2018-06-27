@@ -13,15 +13,14 @@ public enum TimePreference {
 	LOCAL,
 	UNIVERSAL,
 	SIDEREAL
-	
 	;
-	
+
 	public static EnumBox<TimePreference> BOX = new EnumBox<TimePreference>(LOCAL);
 
-    public static String format(Site site, Long timestamp, String pattern) {
+    public String format(Site site, Long timestamp, String pattern) {
 		final String timeString;
 		final DateTimeFormatter f = DateTimeFormatter.ofPattern(pattern);
-		switch (TimePreference.BOX.get()) {
+		switch (this) {
 			case LOCAL:
 				timeString = f.withZone(site.timezone().toZoneId()).format(Instant.ofEpochMilli(timestamp));
 				break;
