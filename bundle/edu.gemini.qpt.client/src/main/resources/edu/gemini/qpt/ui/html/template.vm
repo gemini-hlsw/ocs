@@ -29,9 +29,9 @@
 	#if(!$doc.isEmpty($doc.Schedule.Comment))
 	<div class="comment">$doc.Schedule.Comment</div>
 	#end
-	
+
 	<!--
-	
+
 	<h2>Sky Almanac</h2>
 
 	<table>
@@ -43,7 +43,7 @@
 	-->
 
 	<h2>Resource Summary</h2>
-	
+
 	<table align="center">
 		<tr>
 		#foreach ($variant in $doc.Schedule.Variants)
@@ -62,11 +62,11 @@
 		</tr>
 	</table>
 
-	
+
 	#foreach ($variant in $doc.Schedule.Variants)
-	
+
 		#if(!$doc.isEmpty($variant.Comment) || !$variant.isEmpty())
-	
+
 		<h2 class="visit" style="page-break-before:always;margin-bottom:0pt;"><a name="$variant.Conditions.toShortString()">$variant</a><br><span style="font-size:9pt; font-weight: normal">$variant.Conditions</span></h2>
 		#if(!$doc.isEmpty($variant.Comment))
 		<div class="comment" style="margin-top:0pt">$variant.Comment</div>
@@ -95,14 +95,14 @@
 				<th>Trans</th>
 				<th>Set</th>
 			</tr>
-			
+
 			#foreach($a in $doc.getEvents($variant))
 
 				#set($style=$doc.getStyle($a))
-			
+
 				#if($doc.isAlloc($a))
 					#set($conds=$a.Obs.Conditions)
-					
+
 					<!--
 					#if($doc.isGroupStart($a))
 					<tr style="color:#999999">
@@ -111,7 +111,7 @@
 					</tr>
 					#end
 					-->
-					
+
 					<tr style="xbackground-color:#f0f0f0">
 						<td nowrap style="$style">$doc.formatDate("HH:mm", $a.Start)</td>
 						<td nowrap>$doc.formatHHMMSS($a.Length)</td>
@@ -126,9 +126,9 @@
 						<td align="center" nowrap>$doc.getCond($conds.CC)</td>
 						<td align="center" nowrap>$doc.getCond($conds.WV)</td>
 						<td align="center" nowrap>$doc.getCond($conds.SB)</td>
-						
+
 						#set($rts=$doc.getRTS($a))
-						
+
 						<td nowrap>$doc.formatDate("HH:mm", $rts.Rise)</td>
 						<td nowrap>$doc.formatDate("HH:mm", $rts.Transit)</td>
 						<td nowrap>$doc.formatDate("HH:mm", $rts.Set)</td>
@@ -139,11 +139,11 @@
 						<tr>
 							<td class="comment" style="$style">&nbsp;</td>
 							<td colspan="16" class="comment">
-							
+
 							$!a.Comment
-							
+
 							#foreach($m in $markers)
-								<div style="margin:0px;color:$doc.getColor($m.Severity)">$m.Severity: $m.getFilteredUnionText($doc.getSchedule().getSite())</div>
+								<div style="margin:0px;color:$doc.getColor($m.Severity)">$m.Severity: $m.getFilteredUnionText($doc.getSchedule().getSite(), $doc.getTimePreference())</div>
 							#end
 
                             #foreach($w in $clearanceWindows)
@@ -151,20 +151,20 @@
                             #end
 
 							</td>
-						</tr>			
-					#end	
-				
+						</tr>
+					#end
+
 				#else
-				
+
 				<tr style="color:#999999">
 					<td nowrap style="$style">$doc.formatDate("HH:mm", $a.Time)</td>
 					<td nowrap colspan="15">$a.Text</td>
 				</tr>
-				
+
 				#end
-			
+
 			#end
-			
+
 		</table>
 
 		#end
@@ -172,6 +172,6 @@
 		#end
 
 	#end
-  
+
 </body>
 </html>
