@@ -97,26 +97,44 @@ public class LimitsListener extends MarkerModelListener<Variant> {
                 mm.addMarker(false, this, Severity.Warning, msg, v, a);
             }
 
-			// Function to create markers that report solver intervals.
-			final BiFunction<String, String, Option<Marker>> createSolverMarker =
-				(cacheName, prefix) -> {
+            final Supplier<Union<Interval>> wholeNight = () -> new Union<>(new Interval(v.getSchedule().getStart(), v.getSchedule().getEnd()));
+
+			final Predicate<String> contributes =
+				(cacheName) -> {
 					final Map<Obs, Union<Interval>> c = v.getSchedule().getCache(cacheName);
+					final Union<Interval> u = c.getOrDefault(a.getObs(), new Union<>());
+
+					final Union<Interval> r = wholeNight.get();
+					r.remove(u);
+					return !r.isEmpty();
+				};
+
+			// Function to create markers that report solver intervals.
+			final Function<String, Option<Marker>> createSolverMarker =
+				(prefix) -> {
+					final Map<Obs, Union<Interval>> c = v.getSchedule().getCache(Variant.CONSTRAINED_UNION_CACHE);
 					final Union<Interval>       valid = c.getOrDefault(a.getObs(), new Union<>());
-
-					final Union<Interval>     invalid = new Union<>(new Interval(v.getSchedule().getStart(), v.getSchedule().getEnd()));
+					final Union<Interval>     invalid = wholeNight.get();
 					invalid.remove(valid);
-
 					final ImList<Interval>         is = DefaultImList.create(valid.getIntervals());
 
 					if (is.isEmpty() || invalid.isEmpty()) {
 						return None.instance();
 					} else {
-						return new Some<>(new Marker(false, this, Severity.Notice, prefix, new Some<>(valid), v, a));
+					    final List<String> attrs = new ArrayList<>();
+						if (contributes.test(Variant.VISIBLE_UNION_CACHE)) { attrs.add("airmass"); }
+					    if (contributes.test(Variant.DARK_UNION_CACHE))    { attrs.add("background"); }
+						if (contributes.test(Variant.TIMING_UNION_CACHE))  { attrs.add("timing window"); }
+
+                        final String s = attrs.isEmpty() ?
+							"" : DefaultImList.create(attrs).mkString(" (", ", ", ")");
+
+						return new Some<>(new Marker(false, this, Severity.Notice, prefix + s, new Some<>(valid), v, a));
 					}
 				};
 
 			// Report intersection of constraints.
-			createSolverMarker.apply(Variant.CONSTRAINED_UNION_CACHE, "Must be observed between").foreach(m -> mm.addMarker(m));
+			createSolverMarker.apply("Must be observed between").foreach(m -> mm.addMarker(m));
 
 
             // Elevation Constraint
