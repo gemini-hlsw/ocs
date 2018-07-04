@@ -40,8 +40,7 @@ ocsAppManifest := {
 def common(version: Version) = AppConfig(
   id = "common",
   vmargs = List(
-    "-Xmx1024M",
-    "-XX:MaxPermSize=196M",
+    "-Xmx2048M",
     "-Duser.language=en",
     "-Duser.country=US"
   ),
