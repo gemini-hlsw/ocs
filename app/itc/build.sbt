@@ -103,7 +103,6 @@ def itc(version: Version) = AppConfig(
   distribution = List(TestDistro),
   vmargs = List(
     "-Xmx1024M",
-    "-XX:MaxPermSize=196M",
     "-Dedu.gemini.site=north"
   ),
   props = Map.empty
