@@ -5,12 +5,15 @@ import edu.gemini.itc.base.SampledSpectrumVisitor;
 import edu.gemini.itc.gems.GemsFluxAttenuationVisitor;
 import edu.gemini.itc.shared.AltairParameters;
 import edu.gemini.spModel.gemini.altair.AltairParams;
+import java.util.logging.Logger;
 
 /**
  * Altair AO class
  */
 public class Altair implements AOSystem {
-    /**
+    private static final Logger Log = Logger.getLogger( Altair.class.getName() );
+
+   /**
      * Related files will be in this subdir of lib
      */
     public static final String ALTAIR_LIB = "/altair";
@@ -36,19 +39,22 @@ public class Altair implements AOSystem {
     private final double wavelength;
     private final double telescopeDiameter;
     private final double uncorrectedSeeing;
+    private final double extinction;
     private final double fwhmInst;
 
     private final AltairBackgroundVisitor altairBackground;
     private final AltairTransmissionVisitor altairTransmission;
 
-    public Altair(double wavelength, double telescopeDiameter, double uncorrectedSeeing, AltairParameters altair, double fwhmInst) {
+    public Altair(double wavelength, double telescopeDiameter, double uncorrectedSeeing, double extinction, AltairParameters altair, double fwhmInst) {
         this.altair = altair;
         this.wavelength = wavelength;
         this.telescopeDiameter = telescopeDiameter;
+        this.extinction = extinction;
         this.uncorrectedSeeing = uncorrectedSeeing;
         this.fwhmInst = fwhmInst;
         this.altairBackground = new AltairBackgroundVisitor();
         this.altairTransmission = new AltairTransmissionVisitor();
+        Log.fine(String.format("Extinction = %.1f mag", extinction));
 
         validateInputParameters(altair);
     }
@@ -134,7 +140,7 @@ public class Altair implements AOSystem {
             rgs0 = 17.0; //if LGS
         }
 
-        return Math.exp(-1 * Math.pow(altair.guideStarMagnitude() / rgs0, 16) * Math.pow(1650 / wavelength, 2));
+        return Math.exp(-1 * Math.pow((altair.guideStarMagnitude() + extinction) / rgs0, 16) * Math.pow(1650 / wavelength, 2));
     }
 
     // Calculates the strehl noise from the guide star distance
