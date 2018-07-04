@@ -137,19 +137,19 @@ object GhostAsterism {
       allTargets.map(Target.pm.get).fold
 
     def ifu1GuideFiberState(cc: CloudCover): GuideFiberState =
-      StandardResolution.guideFiberState(ifu1, cc)
+      StandardResolution.guideFiberState(srifu1, cc)
 
     def ifu2GuideFiberState(cc: CloudCover): GuideFiberState = {
-      ifu2.map(t => StandardResolution.guideFiberState(t, cc)).getOrElse(GuideFiberState.Disabled)
+      srifu2.map(t => StandardResolution.guideFiberState(t, cc)).getOrElse(GuideFiberState.Disabled)
     }
 
-    def ifu1: Either[SPCoordinates, GhostTarget] = this match {
+    def srifu1: Either[SPCoordinates, GhostTarget] = this match {
       case SingleTarget(t,_)    => Right(t)
       case DualTarget(t,_,_)    => Right(t)
       case TargetPlusSky(t,_,_) => Right(t)
       case SkyPlusTarget(s,_,_) => Left(s)
     }
-    def ifu2: Option[Either[SPCoordinates, GhostTarget]] = this match {
+    def srifu2: Option[Either[SPCoordinates, GhostTarget]] = this match {
       case SingleTarget(_,_)    => None
       case DualTarget(_,t,_)    => Some(Right(t))
       case TargetPlusSky(_,s,_) => Some(Left(s))
@@ -268,6 +268,15 @@ object GhostAsterism {
     override def asterismType: AsterismType = this match {
       case HighResolutionTarget(_,_)          => AsterismType.GhostHighResolutionTarget
       case HighResolutionTargetPlusSky(_,_,_) => AsterismType.GhostHighResolutionTargetPlusSky
+    }
+
+    def hrifu1: GhostTarget = this match {
+      case HighResolutionTarget(t,_)          => t
+      case HighResolutionTargetPlusSky(t,_,_) => t
+    }
+    def hrifu2: Option[SPCoordinates] = this match {
+      case HighResolutionTarget(_,_)          => None
+      case HighResolutionTargetPlusSky(_,s,_) => Some(s)
     }
   }
 

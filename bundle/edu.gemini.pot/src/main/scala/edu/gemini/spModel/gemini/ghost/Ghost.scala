@@ -105,6 +105,36 @@ object Ghost {
   // The name of the Ghost instrument configuration.
   val INSTRUMENT_NAME_PROP: String = "GHOST"
 
+  // The names of the base position / IFUs.
+  val BaseRADegrees: String  = "baseRADeg"
+  val BaseRAHMS: String      = "baseRAHMS"
+  val BaseDecDegrees: String = "baseDecDeg"
+  val BaseDecDMS: String     = "baseDecDMS"
+
+  val SRIFU1Name: String     = "srifu1Name"
+  val SRIFU1RADeg: String    = "srifu1RADeg"
+  val SRIFU1DecDeg: String   = "srifu1DecDeg"
+  val SRIFU1RAHMS: String    = "srifu1RAHMS"
+  val SRIFU1DecDMS: String   = "srifu1DecDMS"
+
+  val SRIFU2Name: String     = "srifu2Name"
+  val SRIFU2RADeg: String    = "srifu2RADeg"
+  val SRIFU2DecDeg: String   = "srifu2DecDeg"
+  val SRIFU2RAHMS: String    = "srifu2RAHMS"
+  val SRIFU2DecDMS: String   = "srifu2DecDMS"
+
+  val HRIFU1Name: String     = "hrifu1Name"
+  val HRIFU1RADeg: String    = "hrifu1RADeg"
+  val HRIFU1DecDeg: String   = "hrifu1DecDeg"
+  val HRIFU1RAHMS: String    = "hrifu1RAHMS"
+  val HRIFU1DecDMS: String   = "hrifu1DecDMS"
+
+  val HRIFU2Name: String     = "hrifu2Name"
+  val HRIFU2RADeg: String    = "hrifu2RADeg"
+  val HRIFU2DecDeg: String   = "hrifu2DecDeg"
+  val HRIFU2RAHMS: String    = "hrifu2RAHMS"
+  val HRIFU2DecDMS: String   = "hrifu2DecDMS"
+
   /** The properties supported by this class. */
   private def initProp(propName: String, query: Boolean, iter: Boolean): PropertyDescriptor = {
     PropertySupport.init(propName, classOf[Ghost], query, iter)

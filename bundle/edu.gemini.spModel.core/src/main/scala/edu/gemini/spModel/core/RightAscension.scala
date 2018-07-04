@@ -39,6 +39,20 @@ sealed trait RightAscension extends java.io.Serializable {
   override final def hashCode =
     toAngle.hashCode
 
+  /**
+    * @see [[Angle.formatDegrees]]
+    * @group Formatters
+    */
+  def formatDegrees: String =
+    this.toAngle.formatDegrees
+
+  /**
+    * @see [[Angle.formatHMS]]
+    * @group Formatters
+    */
+  def formatHMS: String =
+    this.toAngle.formatHMS
+
 }
 
 object RightAscension {
