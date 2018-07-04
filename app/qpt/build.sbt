@@ -34,7 +34,7 @@ ocsAppManifest := {
 def common(version: Version) = AppConfig(
   id = "common",
   vmargs = List(
-    "-Xmx1024M",
+    "-Xmx2048M",
     "-Duser.language=en",
     "-Duser.country=US"
   ),
