@@ -97,7 +97,7 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
               Ghost.HRIFU2RAHMS, Ghost.HRIFU2DecDMS))
 
           case _ =>
-            throw new RuntimeException("Illegal asterism for GHOST instrument")
+            // The asterism may not have been configured by this point.
         }}
     }
   }
