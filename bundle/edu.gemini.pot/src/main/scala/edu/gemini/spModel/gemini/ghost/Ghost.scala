@@ -105,6 +105,36 @@ object Ghost {
   // The name of the Ghost instrument configuration.
   val INSTRUMENT_NAME_PROP: String = "GHOST"
 
+  // The names of the base position / IFUs.
+  val BaseRADegrees: String  = "baseRADeg"
+  val BaseRAHMS: String      = "baseRAHMS"
+  val BaseDecDegrees: String = "baseDecDeg"
+  val BaseDecDMS: String     = "baseDecDMS"
+
+  val SRIFU1Name: String     = "srifu1Name"
+  val SRIFU1RADeg: String    = "srifu1CoordsRADeg"
+  val SRIFU1DecDeg: String   = "srifu1CoordsDecDeg"
+  val SRIFU1RAHMS: String    = "srifu1CoordsRAHMS"
+  val SRIFU1DecDMS: String   = "srifu1CoordsDecDMS"
+
+  val SRIFU2Name: String     = "srifu2Name"
+  val SRIFU2RADeg: String    = "srifu2CoordsRADeg"
+  val SRIFU2DecDeg: String   = "srifu2CoordsDecDeg"
+  val SRIFU2RAHMS: String    = "srifu2CoordsRAHMS"
+  val SRIFU2DecDMS: String   = "srifu2CoordsDecDMS"
+
+  val HRIFU1Name: String     = "hrifu1Name"
+  val HRIFU1RADeg: String    = "hrifu1CoordsRADeg"
+  val HRIFU1DecDeg: String   = "hrifu1CoordsDecDeg"
+  val HRIFU1RAHMS: String    = "hrifu1CoordsRAHMS"
+  val HRIFU1DecDMS: String   = "hrifu1CoordsDecDMS"
+
+  val HRIFU2Name: String     = "hrifu2Name"
+  val HRIFU2RADeg: String    = "hrifu2CoordsRADeg"
+  val HRIFU2DecDeg: String   = "hrifu2CoordsDecDeg"
+  val HRIFU2RAHMS: String    = "hrifu2CoordsRAHMS"
+  val HRIFU2DecDMS: String   = "hrifu2CoordsDecDMS"
+
   /** The properties supported by this class. */
   private def initProp(propName: String, query: Boolean, iter: Boolean): PropertyDescriptor = {
     PropertySupport.init(propName, classOf[Ghost], query, iter)
