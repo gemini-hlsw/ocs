@@ -60,12 +60,17 @@ public class Altair implements AOSystem {
     }
 
     public void validateInputParameters(final AltairParameters p) {
-        // validation
-        if (p.wfsMode().equals(AltairParams.GuideStarType.LGS) && p.guideStarMagnitude() > 19.5)
-            throw new IllegalArgumentException(" Altair Guide star Magnitude must be <= 19.5 in R for LGS mode. ");
+        // Limiting magnitudes from the public Altair web pages:
+        double maglimit_NGS = 15.1;
+        double maglimit_LGS = 18.5;
 
-        if (p.wfsMode().equals(AltairParams.GuideStarType.NGS) && p.guideStarMagnitude() > 15.5)
-            throw new IllegalArgumentException(" Altair Guide star Magnitude must be <= 15.5 in R for NGS mode. ");
+        if (p.wfsMode().equals(AltairParams.GuideStarType.LGS) && (p.guideStarMagnitude() + extinction) > maglimit_LGS)
+            throw new IllegalArgumentException(
+                    String.format("Laser guide star must be at least R=%.1f in these conditions.", maglimit_LGS - extinction));
+
+        if (p.wfsMode().equals(AltairParams.GuideStarType.NGS) && (p.guideStarMagnitude() + extinction) > maglimit_NGS)
+            throw new IllegalArgumentException(
+                    String.format("Natural guide star must be at least R=%.1f in these conditions.", maglimit_NGS - extinction));
 
         if (p.wfsMode().equals(AltairParams.GuideStarType.LGS) && p.fieldLens().equals(AltairParams.FieldLens.OUT))
             throw new IllegalArgumentException("The field Lens must be IN when Altair is in LGS mode.");
