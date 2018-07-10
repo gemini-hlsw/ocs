@@ -21,99 +21,99 @@ import edu.gemini.ui.gface.GViewer;
 
 public class CandidateObsDecorator implements GSubElementDecorator<Schedule, Obs, CandidateObsAttribute>, PropertyChangeListener {
 
-	@SuppressWarnings("unused")
-	private static final Logger LOGGER = Logger.getLogger(CandidateObsDecorator.class.getName());
+    @SuppressWarnings("unused")
+    private static final Logger LOGGER = Logger.getLogger(CandidateObsDecorator.class.getName());
 
-	private GViewer<Schedule, Obs> viewer;
-	private Variant variant;
+    private GViewer<Schedule, Obs> viewer;
+    private Variant variant;
 
-	public void decorate(JLabel label, Obs obs, CandidateObsAttribute subElement, Object value) {
+    public void decorate(JLabel label, Obs obs, CandidateObsAttribute subElement, Object value) {
 
-//		if (obs == null || subElement == null || value == null) {
-//			LOGGER.warning("obs == " + obs + ", subElement == " + subElement + ", value == " + value);
-////			return;
-//		}
+//        if (obs == null || subElement == null || value == null) {
+//            LOGGER.warning("obs == " + obs + ", subElement == " + subElement + ", value == " + value);
+////            return;
+//        }
 
-		// Alignment (and value, in the case of Score)
-		switch (subElement) {
-		case SB:
-		case P:
-		case Score:
-		case RA: label.setHorizontalAlignment(SwingConstants.CENTER); break;
-		default: label.setHorizontalAlignment(SwingConstants.LEFT); break;
-		}
+        // Alignment (and value, in the case of Score)
+        switch (subElement) {
+        case SB:
+        case P:
+        case Score:
+        case RA: label.setHorizontalAlignment(SwingConstants.CENTER); break;
+        default: label.setHorizontalAlignment(SwingConstants.LEFT); break;
+        }
 
-		// Format
-		switch (subElement) {
+        // Format
+        switch (subElement) {
 
-		case P:
+        case P:
 
-			label.setText(value.toString().substring(0, 1));
-			break;
+            label.setText(value.toString().substring(0, 1));
+            break;
 
-		case Score:
+        case Score:
 
-			int score = (variant == null) ? 0 : (int) (10000 * variant.getScore(obs));
-			label.setText(Integer.toString(score));
-			break;
+            int score = (variant == null) ? 0 : (int) (10000 * variant.getScore(obs));
+            label.setText(Integer.toString(score));
+            break;
 
-		case RA:
+        case RA:
 
-			String hhmmss = HHMMSS.valStr((Double) value);
-			int pos = hhmmss.indexOf('.');
-			label.setText((pos == -1) ? hhmmss : hhmmss.substring(0, pos));
-			break;
+            String hhmmss = HHMMSS.valStr((Double) value);
+            int pos = hhmmss.indexOf('.');
+            label.setText((pos == -1) ? hhmmss : hhmmss.substring(0, pos));
+            break;
 
-		case Dur:
+        case Dur:
 
-			label.setText(TimeUtils.msToHHMMSS((Long) value));
-			break;
+            label.setText(TimeUtils.msToHHMMSS((Long) value));
+            break;
 
-		}
+        }
 
-		// Color
-		Set<Flag> flags = (variant != null) ? variant.getFlags(obs) : Collections.<Flag>emptySet();
-		label.setForeground(CandidateDecorator.getColor(flags));
+        // Color
+        Set<Flag> flags = (variant != null) ? variant.getFlags(obs) : Collections.<Flag>emptySet();
+        label.setForeground(CandidateDecorator.getColor(flags));
 
-		// Icon
-		switch (subElement) {
-		case Observation: label.setIcon(CandidateDecorator.getIcon(flags, obs)); break;
-		default: label.setIcon(null);
-		}
+        // Icon
+        switch (subElement) {
+        case Observation: label.setIcon(CandidateDecorator.getIcon(flags, obs)); break;
+        default: label.setIcon(null);
+        }
 
 
-	}
+    }
 
-	public void propertyChange(PropertyChangeEvent evt) {
+    public void propertyChange(PropertyChangeEvent evt) {
 
-		// If the current variant changed, we need to swap our listeners.
-		if (Schedule.PROP_CURRENT_VARIANT.equals(evt.getPropertyName())) {
-			if (variant != null) variant.removePropertyChangeListener(Variant.PROP_FLAGS, this);
-			variant = (Variant) evt.getNewValue();
-			if (variant != null) variant.addPropertyChangeListener(Variant.PROP_FLAGS, this);
-		}
+        // If the current variant changed, we need to swap our listeners.
+        if (Schedule.PROP_CURRENT_VARIANT.equals(evt.getPropertyName())) {
+            if (variant != null) variant.removePropertyChangeListener(Variant.PROP_FLAGS, this);
+            variant = (Variant) evt.getNewValue();
+            if (variant != null) variant.addPropertyChangeListener(Variant.PROP_FLAGS, this);
+        }
 
-//		LOGGER.info("Change: " + evt.getPropertyName());
+//        LOGGER.info("Change: " + evt.getPropertyName());
 
-		// And refresh the viewer.
-		viewer.refresh();
+        // And refresh the viewer.
+        viewer.refresh();
 
-	}
+    }
 
-	public void modelChanged(GViewer<Schedule, Obs> viewer, Schedule oldModel, Schedule newModel) {
+    public void modelChanged(GViewer<Schedule, Obs> viewer, Schedule oldModel, Schedule newModel) {
 
-		// Ok, we need to track the current variant because its flags will determine how we want
-		// to decorate stuff. So we want to unhook the old listeners, if any, then hook the new.
-		if (variant != null) variant.removePropertyChangeListener(Variant.PROP_FLAGS, this);
-		if (oldModel != null) oldModel.removePropertyChangeListener(Schedule.PROP_CURRENT_VARIANT, this);
-		variant = newModel == null ? null : newModel.getCurrentVariant();
-		if (newModel != null) newModel.addPropertyChangeListener(Schedule.PROP_CURRENT_VARIANT, this);
-		if (variant != null) variant.addPropertyChangeListener(Variant.PROP_FLAGS, this);
+        // Ok, we need to track the current variant because its flags will determine how we want
+        // to decorate stuff. So we want to unhook the old listeners, if any, then hook the new.
+        if (variant != null) variant.removePropertyChangeListener(Variant.PROP_FLAGS, this);
+        if (oldModel != null) oldModel.removePropertyChangeListener(Schedule.PROP_CURRENT_VARIANT, this);
+        variant = newModel == null ? null : newModel.getCurrentVariant();
+        if (newModel != null) newModel.addPropertyChangeListener(Schedule.PROP_CURRENT_VARIANT, this);
+        if (variant != null) variant.addPropertyChangeListener(Variant.PROP_FLAGS, this);
 
-		// Don't need to refresh yet (the viewer will do it), but keep track of the viewer.
-		this.viewer = viewer;
+        // Don't need to refresh yet (the viewer will do it), but keep track of the viewer.
+        this.viewer = viewer;
 
-	}
+    }
 
 }
 

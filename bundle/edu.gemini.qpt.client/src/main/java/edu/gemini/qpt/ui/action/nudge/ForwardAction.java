@@ -10,13 +10,13 @@ import edu.gemini.ui.workspace.IShell;
 @SuppressWarnings("serial")
 public class ForwardAction extends NudgeAction {
 
-	public ForwardAction(IShell shell) {
-		super("Nudge Forward", shell);
-		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, Platform.MENU_ACTION_MASK));
-	}
+    public ForwardAction(IShell shell) {
+        super("Nudge Forward", shell);
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, Platform.MENU_ACTION_MASK));
+    }
 
-	protected long getNudgeDelta() {
-		return Resolution.value();
-	}
-	
+    protected long getNudgeDelta() {
+        return Resolution.value();
+    }
+    
 }

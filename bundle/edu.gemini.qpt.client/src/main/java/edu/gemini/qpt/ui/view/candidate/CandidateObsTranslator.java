@@ -12,21 +12,21 @@ import edu.gemini.ui.gface.GViewer;
 
 public class CandidateObsTranslator implements GTranslator<Schedule, Obs> {
 
-	public Set<Obs> translate(Object o) {
-		
-		if (o instanceof Marker)
-			o = ((Marker) o).getTarget();
-		
-		if (o instanceof Obs) {
-			return Collections.singleton((Obs) o);
-		} else if (o instanceof Alloc) {
-			return Collections.singleton(((Alloc) o).getObs());
-		} else {
-			return Collections.emptySet();
-		}
-	}
+    public Set<Obs> translate(Object o) {
+        
+        if (o instanceof Marker)
+            o = ((Marker) o).getTarget();
+        
+        if (o instanceof Obs) {
+            return Collections.singleton((Obs) o);
+        } else if (o instanceof Alloc) {
+            return Collections.singleton(((Alloc) o).getObs());
+        } else {
+            return Collections.emptySet();
+        }
+    }
 
-	public void modelChanged(GViewer<Schedule, Obs> viewer, Schedule oldModel, Schedule newModel) {
-	}
+    public void modelChanged(GViewer<Schedule, Obs> viewer, Schedule oldModel, Schedule newModel) {
+    }
 
 }

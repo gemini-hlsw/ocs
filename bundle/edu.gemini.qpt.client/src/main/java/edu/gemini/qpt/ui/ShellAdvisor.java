@@ -300,9 +300,9 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
                 new OpenURLAction(rootURL + "/doc/troubleshooting.html", "Troubleshooting Guide"),
                 new OpenURLAction(rootURL + "/doc/v" + version + "-notes.html", "Release Notes")
 
-//			,
-//			null,
-//			updateAction
+//            ,
+//            null,
+//            updateAction
 
         );
 
@@ -314,18 +314,18 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
 // This is what we want to do, but in order to make it buildable on Linux
 // we need to do it all with introspection.
 
-//		import com.apple.eawt.Application;
-//		import com.apple.eawt.ApplicationAdapter;
-//		import com.apple.eawt.ApplicationEvent;
+//        import com.apple.eawt.Application;
+//        import com.apple.eawt.ApplicationAdapter;
+//        import com.apple.eawt.ApplicationEvent;
 //
-//		Application app = Application.getApplication();
-//		app.removeAboutMenuItem();
-//		app.addApplicationListener(new ApplicationAdapter(){
-//			public void handleQuit(ApplicationEvent ae) {
-//				ae.setHandled(false);
-//				context.getShell().close(); // will prompt for save, etc
-//			}
-//		});
+//        Application app = Application.getApplication();
+//        app.removeAboutMenuItem();
+//        app.addApplicationListener(new ApplicationAdapter(){
+//            public void handleQuit(ApplicationEvent ae) {
+//                ae.setHandled(false);
+//                context.getShell().close(); // will prompt for save, etc
+//            }
+//        });
 
         try {
 
@@ -381,7 +381,7 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
         for (Action a : actions) {
             if (a != null) {
                 String id = Integer.toString(System.identityHashCode(a));
-//				System.out.println("Adding " + id + " as " + rel + " " + path);
+//                System.out.println("Adding " + id + " as " + rel + " " + path);
                 mgr.addAction(rel, path, id, a);
                 path = menu.name() + "/" + id;
                 rel = NextSiblingOf;
@@ -395,7 +395,7 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
                 path = menu.name() + "/" + id;
                 rel = NextSiblingOf;
             } else {
-//				System.out.println("Adding ----- as " + rel + " " + path);
+//                System.out.println("Adding ----- as " + rel + " " + path);
                 mgr.addSeparator(rel, path);
             }
         }

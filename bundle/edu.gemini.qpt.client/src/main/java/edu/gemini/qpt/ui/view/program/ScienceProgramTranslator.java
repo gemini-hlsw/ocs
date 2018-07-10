@@ -11,16 +11,16 @@ import edu.gemini.ui.gface.GViewer;
 
 public class ScienceProgramTranslator implements GTranslator<Prog, Object> {
 
-	public Set<Object> translate(Object o) {
-		if (o instanceof Alloc) {
-			o = ((Alloc) o).getObs();
-		} else if (o instanceof Marker) {
-			return translate(((Marker) o).getTarget());
-		}
-		return Collections.singleton(o);
-	}
+    public Set<Object> translate(Object o) {
+        if (o instanceof Alloc) {
+            o = ((Alloc) o).getObs();
+        } else if (o instanceof Marker) {
+            return translate(((Marker) o).getTarget());
+        }
+        return Collections.singleton(o);
+    }
 
-	public void modelChanged(GViewer<Prog, Object> viewer, Prog oldModel, Prog newModel) {
-	}
-	
+    public void modelChanged(GViewer<Prog, Object> viewer, Prog oldModel, Prog newModel) {
+    }
+    
 }

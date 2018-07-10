@@ -14,15 +14,15 @@ import edu.gemini.qpt.shared.util.TimeUtils;
  */
 public class SetupListener extends MarkerModelListener<Variant> {
 
-	public void propertyChange(PropertyChangeEvent evt) {
-		Variant v = (Variant) evt.getSource();
-		MarkerManager mm = getMarkerManager(v);		
-		mm.clearMarkers(this, v);
+    public void propertyChange(PropertyChangeEvent evt) {
+        Variant v = (Variant) evt.getSource();
+        MarkerManager mm = getMarkerManager(v);        
+        mm.clearMarkers(this, v);
 
-		Alloc prev = null;
-		for (Alloc a: v.getAllocs()) {
+        Alloc prev = null;
+        for (Alloc a: v.getAllocs()) {
 
-			boolean compatible = compatible(prev, a);
+            boolean compatible = compatible(prev, a);
 
             // give an informational message about setup that's going to be used for compatible allocations
             if (compatible) {
@@ -46,22 +46,22 @@ public class SetupListener extends MarkerModelListener<Variant> {
                     mm.addMarker(false, this, Severity.Error, "Reacquisition is not enough, full setup is required here.", v, a);
                 }
             }
-			
-			prev = a;
-		}
-		
-	}
+            
+            prev = a;
+        }
+        
+    }
 
-	private boolean compatible(Alloc pred, Alloc succ) {
-		return 
-			pred != null &&
-			pred.getObs().getInstrumentString().equals(succ.getObs().getInstrumentString()) &&
-			pred.getObs().getCoords(pred.getEnd()).equals(succ.getObs().getCoords((pred.getEnd())));
-	}
+    private boolean compatible(Alloc pred, Alloc succ) {
+        return 
+            pred != null &&
+            pred.getObs().getInstrumentString().equals(succ.getObs().getInstrumentString()) &&
+            pred.getObs().getCoords(pred.getEnd()).equals(succ.getObs().getCoords((pred.getEnd())));
+    }
 
-	@Override
-	protected MarkerManager getMarkerManager(Variant t) {
-		return t.getSchedule().getMarkerManager();
-	}
-	
+    @Override
+    protected MarkerManager getMarkerManager(Variant t) {
+        return t.getSchedule().getMarkerManager();
+    }
+    
 }

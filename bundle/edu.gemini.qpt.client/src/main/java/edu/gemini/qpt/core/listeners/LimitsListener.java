@@ -29,8 +29,8 @@ import edu.gemini.spModel.obscomp.SPGroup.GroupType;
  */
 public class LimitsListener extends MarkerModelListener<Variant> {
 
-	@SuppressWarnings("unused")
-	private static final Logger LOGGER = Logger.getLogger(LimitsListener.class.getName());
+    @SuppressWarnings("unused")
+    private static final Logger LOGGER = Logger.getLogger(LimitsListener.class.getName());
 
     /**
      * LGS obs have a 40 deg limit by default
@@ -38,60 +38,60 @@ public class LimitsListener extends MarkerModelListener<Variant> {
     public static final int MIN_ELEVATION_ERROR_LIMIT = 40;
     public static final int MIN_ELEVATION_WARN_LIMIT = 42;
 
-	public void propertyChange(PropertyChangeEvent evt) {
-		Variant v = (Variant) evt.getSource();
-		MarkerManager mm = v.getSchedule().getMarkerManager();
-		mm.clearMarkers(this, v);
+    public void propertyChange(PropertyChangeEvent evt) {
+        Variant v = (Variant) evt.getSource();
+        MarkerManager mm = v.getSchedule().getMarkerManager();
+        mm.clearMarkers(this, v);
 
-		final TimeZone zone = v.getSchedule().getSite().timezone();
+        final TimeZone zone = v.getSchedule().getSite().timezone();
 
-		for (Alloc a: v.getAllocs()) {
+        for (Alloc a: v.getAllocs()) {
 
-			// Add a marker if better-scoring observations are unscheduled
-			ScoreMarker.add(this, mm, v, a);
+            // Add a marker if better-scoring observations are unscheduled
+            ScoreMarker.add(this, mm, v, a);
 
-			// Solo in scheduling group
-			Group g = a.getObs().getGroup();
-			if (g != null && g.getType() == GroupType.TYPE_SCHEDULING && a.getGroupIndex() == -1 && g.getObservations().size() > 1 /* QPT-226 */)
-				mm.addMarker(false, this, Severity.Warning, "Observation is part of a scheduling group, but no other members appear in plan.", v, a);
+            // Solo in scheduling group
+            Group g = a.getObs().getGroup();
+            if (g != null && g.getType() == GroupType.TYPE_SCHEDULING && a.getGroupIndex() == -1 && g.getObservations().size() > 1 /* QPT-226 */)
+                mm.addMarker(false, this, Severity.Warning, "Observation is part of a scheduling group, but no other members appear in plan.", v, a);
 
-			// Below horizon!
-			if (a.getMin(Circumstance.AIRMASS, true) == 0.0) {
-				mm.addMarker(false, this, Severity.Error, "Target is below horizon.", v, a);
-			}
+            // Below horizon!
+            if (a.getMin(Circumstance.AIRMASS, true) == 0.0) {
+                mm.addMarker(false, this, Severity.Error, "Target is below horizon.", v, a);
+            }
 
-			// Lower tracking limit
-			final Double absoluteMinElevation = a.getMin(Circumstance.ELEVATION, true);
-			if (absoluteMinElevation < 17.5) {
-				mm.addMarker(false, this, Severity.Error, String.format("Tracking: target reaches %1.2f\u00B0.", absoluteMinElevation), v, a);
-			} else if (absoluteMinElevation < 20.0) {
-				mm.addMarker(false, this, Severity.Warning, String.format("Tracking: target reaches %1.2f\u00B0.", absoluteMinElevation), v, a);
-			}
+            // Lower tracking limit
+            final Double absoluteMinElevation = a.getMin(Circumstance.ELEVATION, true);
+            if (absoluteMinElevation < 17.5) {
+                mm.addMarker(false, this, Severity.Error, String.format("Tracking: target reaches %1.2f\u00B0.", absoluteMinElevation), v, a);
+            } else if (absoluteMinElevation < 20.0) {
+                mm.addMarker(false, this, Severity.Warning, String.format("Tracking: target reaches %1.2f\u00B0.", absoluteMinElevation), v, a);
+            }
 
-			// Upper tracking limit
-			final Double maxElevation = a.getMax(Circumstance.ELEVATION, true);
-			if (maxElevation > 88.0) {
-				mm.addMarker(false, this, Severity.Warning, String.format("Tracking: target reaches %1.2f\u00B0.", maxElevation), v, a);
-			}
+            // Upper tracking limit
+            final Double maxElevation = a.getMax(Circumstance.ELEVATION, true);
+            if (maxElevation > 88.0) {
+                mm.addMarker(false, this, Severity.Warning, String.format("Tracking: target reaches %1.2f\u00B0.", maxElevation), v, a);
+            }
 
-			// Timing window
-			int percentVisible = (int) (100 * a.getMean(Circumstance.TIMING_WINDOW_OPEN, false));
-			switch (percentVisible) {
-			case 100: // good!
-				if (a.getObs().getTimingWindows().size() > 0) {
-					mm.addMarker(true, this, Severity.Info, "Timing constraint is met.", v, a);
-				}
+            // Timing window
+            int percentVisible = (int) (100 * a.getMean(Circumstance.TIMING_WINDOW_OPEN, false));
+            switch (percentVisible) {
+            case 100: // good!
+                if (a.getObs().getTimingWindows().size() > 0) {
+                    mm.addMarker(true, this, Severity.Info, "Timing constraint is met.", v, a);
+                }
                 break;
-			case 0:
-				mm.addMarker(false, this, Severity.Error, "Timing constraint is violated for entire scheduled visit.", v, a);
-				break;
-			default:
-				mm.addMarker(false, this, Severity.Error, String.format("Timing constraint is violated for %d%% of scheduled visit.", 100 - percentVisible), v, a);
-				break;
+            case 0:
+                mm.addMarker(false, this, Severity.Error, "Timing constraint is violated for entire scheduled visit.", v, a);
+                break;
+            default:
+                mm.addMarker(false, this, Severity.Error, String.format("Timing constraint is violated for %d%% of scheduled visit.", 100 - percentVisible), v, a);
+                break;
 
-			}
+            }
 
-			// LCH Laser Shutter Warnings
+            // LCH Laser Shutter Warnings
             String msg = LttsServicesClient.getInstance().getShutterWindowWarningMessage(a);
             if (msg != null) {
                 mm.addMarker(false, this, Severity.Warning, msg, v, a);
@@ -99,203 +99,203 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 
             final Supplier<Union<Interval>> wholeNight = () -> new Union<>(new Interval(v.getSchedule().getStart(), v.getSchedule().getEnd()));
 
-			final Predicate<String> contributes =
-				(cacheName) -> {
-					final Map<Obs, Union<Interval>> c = v.getSchedule().getCache(cacheName);
-					final Union<Interval> u = c.getOrDefault(a.getObs(), new Union<>());
+            final Predicate<String> contributes =
+                (cacheName) -> {
+                    final Map<Obs, Union<Interval>> c = v.getSchedule().getCache(cacheName);
+                    final Union<Interval> u = c.getOrDefault(a.getObs(), new Union<>());
 
-					final Union<Interval> r = wholeNight.get();
-					r.remove(u);
-					return !r.isEmpty();
-				};
+                    final Union<Interval> r = wholeNight.get();
+                    r.remove(u);
+                    return !r.isEmpty();
+                };
 
-			// Function to create markers that report solver intervals.
-			final Function<String, Option<Marker>> createSolverMarker =
-				(prefix) -> {
-					final Map<Obs, Union<Interval>> c = v.getSchedule().getCache(Variant.CONSTRAINED_UNION_CACHE);
-					final Union<Interval>       valid = c.getOrDefault(a.getObs(), new Union<>());
-					final Union<Interval>     invalid = wholeNight.get();
-					invalid.remove(valid);
-					final ImList<Interval>         is = DefaultImList.create(valid.getIntervals());
+            // Function to create markers that report solver intervals.
+            final Function<String, Option<Marker>> createSolverMarker =
+                (prefix) -> {
+                    final Map<Obs, Union<Interval>> c = v.getSchedule().getCache(Variant.CONSTRAINED_UNION_CACHE);
+                    final Union<Interval>       valid = c.getOrDefault(a.getObs(), new Union<>());
+                    final Union<Interval>     invalid = wholeNight.get();
+                    invalid.remove(valid);
+                    final ImList<Interval>         is = DefaultImList.create(valid.getIntervals());
 
-					if (is.isEmpty() || invalid.isEmpty()) {
-						return None.instance();
-					} else {
-					    final List<String> attrs = new ArrayList<>();
-						if (contributes.test(Variant.VISIBLE_UNION_CACHE)) { attrs.add("airmass"); }
-					    if (contributes.test(Variant.DARK_UNION_CACHE))    { attrs.add("background"); }
-						if (contributes.test(Variant.TIMING_UNION_CACHE))  { attrs.add("timing window"); }
+                    if (is.isEmpty() || invalid.isEmpty()) {
+                        return None.instance();
+                    } else {
+                        final List<String> attrs = new ArrayList<>();
+                        if (contributes.test(Variant.VISIBLE_UNION_CACHE)) { attrs.add("airmass"); }
+                        if (contributes.test(Variant.DARK_UNION_CACHE))    { attrs.add("background"); }
+                        if (contributes.test(Variant.TIMING_UNION_CACHE))  { attrs.add("timing window"); }
 
                         final String s = attrs.isEmpty() ?
-							"" : DefaultImList.create(attrs).mkString(" (", ", ", ")");
+                            "" : DefaultImList.create(attrs).mkString(" (", ", ", ")");
 
-						return new Some<>(new Marker(false, this, Severity.Notice, prefix + s, new Some<>(valid), v, a));
-					}
-				};
+                        return new Some<>(new Marker(false, this, Severity.Notice, prefix + s, new Some<>(valid), v, a));
+                    }
+                };
 
-			// Report intersection of constraints.
-			createSolverMarker.apply("Must be observed between").foreach(m -> mm.addMarker(m));
+            // Report intersection of constraints.
+            createSolverMarker.apply("Must be observed between").foreach(m -> mm.addMarker(m));
 
 
             // Elevation Constraint
-			final Double maxAirmass = a.getMax(Circumstance.AIRMASS, false);
-			final Double minAirmass = a.getMin(Circumstance.AIRMASS, false);
+            final Double maxAirmass = a.getMax(Circumstance.AIRMASS, false);
+            final Double minAirmass = a.getMin(Circumstance.AIRMASS, false);
 
-			switch (a.getObs().getElevationConstraintType()) {
+            switch (a.getObs().getElevationConstraintType()) {
 
-			case NONE:
+            case NONE:
 
 
-				// [QPT-225]
-//				if (a.getObs().getOptions().contains(AltairParams.GuideStarType.LGS)) {
+                // [QPT-225]
+//                if (a.getObs().getOptions().contains(AltairParams.GuideStarType.LGS)) {
                 if (a.getObs().getLGS()) {
 
-					// LGS obs have a 40 deg limit by default
+                    // LGS obs have a 40 deg limit by default
                     // LCH-190: copy "\u00B0" pastes as "°" in Idea, but that didn't display correctly on user's machine for some reason...
-					final Double minElevation = a.getMin(Circumstance.ELEVATION, false);
-					if (minElevation < MIN_ELEVATION_ERROR_LIMIT) {
-						mm.addMarker(false, this, Severity.Error, String.format("LGS observation reaches elevation %1.2f\u00B0.", minElevation), v, a);
-					} else if (minElevation < MIN_ELEVATION_WARN_LIMIT) {
-						mm.addMarker(false, this, Severity.Warning, String.format("LGS observation reaches elevation %1.2f\u00B0.", minElevation), v, a);
-					}
+                    final Double minElevation = a.getMin(Circumstance.ELEVATION, false);
+                    if (minElevation < MIN_ELEVATION_ERROR_LIMIT) {
+                        mm.addMarker(false, this, Severity.Error, String.format("LGS observation reaches elevation %1.2f\u00B0.", minElevation), v, a);
+                    } else if (minElevation < MIN_ELEVATION_WARN_LIMIT) {
+                        mm.addMarker(false, this, Severity.Warning, String.format("LGS observation reaches elevation %1.2f\u00B0.", minElevation), v, a);
+                    }
 
-				} else {
+                } else {
 
-					// Legacy behavior; airmass 2.0 limit
-					if (maxAirmass > 2.0) {
-						mm.addMarker(false, this, Severity.Error, String.format("Observation reaches airmass %1.2f.", maxAirmass), v, a);
-					} else if (maxAirmass > 1.75) {
-						mm.addMarker(false, this, Severity.Warning, String.format("Observation reaches airmass %1.2f.", maxAirmass), v, a);
-					}
-				}
+                    // Legacy behavior; airmass 2.0 limit
+                    if (maxAirmass > 2.0) {
+                        mm.addMarker(false, this, Severity.Error, String.format("Observation reaches airmass %1.2f.", maxAirmass), v, a);
+                    } else if (maxAirmass > 1.75) {
+                        mm.addMarker(false, this, Severity.Warning, String.format("Observation reaches airmass %1.2f.", maxAirmass), v, a);
+                    }
+                }
 
-				break;
+                break;
 
-			case AIRMASS:
+            case AIRMASS:
 
-				final double airmassLimitMin = a.getObs().getElevationConstraintMin();
-				final double airmassLimitMax = a.getObs().getElevationConstraintMax();
+                final double airmassLimitMin = a.getObs().getElevationConstraintMin();
+                final double airmassLimitMax = a.getObs().getElevationConstraintMax();
 
-				if (maxAirmass > airmassLimitMax) {
-					mm.addMarker(false, this, Severity.Error, String.format("Airmass constraint violated (%1.2f > %1.2f).", maxAirmass, airmassLimitMax), v, a);
-				} else if (maxAirmass > airmassLimitMax * 0.975) {
-					mm.addMarker(false, this, Severity.Warning, String.format("Observation reaches airmass %1.2f.", maxAirmass), v, a);
-				}
-				if (airmassLimitMin > 1.0) {
-					if (minAirmass < airmassLimitMin) {
-						mm.addMarker(false, this, Severity.Error, String.format("Airmass constraint violated (%1.2f < %1.2f).", minAirmass, airmassLimitMin), v, a);
-					} else if (maxAirmass < airmassLimitMin * 1.025) {
-						mm.addMarker(false, this, Severity.Warning, String.format("Observation reaches airmass %1.2f.", maxAirmass), v, a);
-					}
-				}
+                if (maxAirmass > airmassLimitMax) {
+                    mm.addMarker(false, this, Severity.Error, String.format("Airmass constraint violated (%1.2f > %1.2f).", maxAirmass, airmassLimitMax), v, a);
+                } else if (maxAirmass > airmassLimitMax * 0.975) {
+                    mm.addMarker(false, this, Severity.Warning, String.format("Observation reaches airmass %1.2f.", maxAirmass), v, a);
+                }
+                if (airmassLimitMin > 1.0) {
+                    if (minAirmass < airmassLimitMin) {
+                        mm.addMarker(false, this, Severity.Error, String.format("Airmass constraint violated (%1.2f < %1.2f).", minAirmass, airmassLimitMin), v, a);
+                    } else if (maxAirmass < airmassLimitMin * 1.025) {
+                        mm.addMarker(false, this, Severity.Warning, String.format("Observation reaches airmass %1.2f.", maxAirmass), v, a);
+                    }
+                }
 
-				break;
-
-
-			case HOUR_ANGLE:
-
-				double haLimitMin = a.getObs().getElevationConstraintMin();
-				double haLimitMax = a.getObs().getElevationConstraintMax();
-				double minHA = a.getMin(Circumstance.HOUR_ANGLE, false);
-				double maxHA = a.getMax(Circumstance.HOUR_ANGLE, false);
-
-				double minDelta = Math.abs(haLimitMin - minHA);
-				double maxDelta = Math.abs(haLimitMax - maxHA);
-
-				if (minHA < haLimitMin) {
-					mm.addMarker(false, this, Severity.Error, String.format("Hour angle constraint violated (%s < %s).", TimeUtils.hoursToHHMMSS(minHA), TimeUtils.hoursToHHMMSS(haLimitMin)), v, a);
-				} else if (minDelta < 1. / 15.) {
-					mm.addMarker(false, this, Severity.Warning, "Target comes within 1\u00B0 of lower HA constraint.", v, a);
-				}
-
-				if (maxHA > haLimitMax) {
-					mm.addMarker(false, this, Severity.Error, String.format("Hour angle constraint violated (%s > %s).", TimeUtils.hoursToHHMMSS(maxHA), TimeUtils.hoursToHHMMSS(haLimitMax)), v, a);
-				} else if (maxDelta < 1. / 15.) {
-					mm.addMarker(false, this, Severity.Warning, "Target comes within 1\u00B0 of upper HA constraint.", v, a);
-				}
-
-				break;
-			}
-
-			// Lunar proximity warnings
-			double obj_moon = a.getMin(Circumstance.LUNAR_DISTANCE, false);
-			if (obj_moon < 5.) {
-				mm.addMarker(false, this, Severity.Error, String.format("Target approaches within %1.2f\u00B0 of the moon.", obj_moon), v, a);
-			} else if (obj_moon < 15.) {
-				mm.addMarker(false, this, Severity.Warning, String.format("Target approaches within %1.2f\u00B0 of the moon.", obj_moon), v, a);
-			}
-
-			// Sky brightness warnings
-
-			Double sb = a.getMin(Circumstance.TOTAL_SKY_BRIGHTNESS, false);
-
-			if (sb != null && !a.getObs().getConditions().containsSkyBrightness(sb)) {
-				mm.addMarker(false, this, Severity.Error, "Sky brightness constraint violated.", v, a);
-			}
+                break;
 
 
-			// Variant Obs Flags
-			for (Flag flag: v.getFlags(a.getObs())) {
-				switch (flag) {
+            case HOUR_ANGLE:
+
+                double haLimitMin = a.getObs().getElevationConstraintMin();
+                double haLimitMax = a.getObs().getElevationConstraintMax();
+                double minHA = a.getMin(Circumstance.HOUR_ANGLE, false);
+                double maxHA = a.getMax(Circumstance.HOUR_ANGLE, false);
+
+                double minDelta = Math.abs(haLimitMin - minHA);
+                double maxDelta = Math.abs(haLimitMax - maxHA);
+
+                if (minHA < haLimitMin) {
+                    mm.addMarker(false, this, Severity.Error, String.format("Hour angle constraint violated (%s < %s).", TimeUtils.hoursToHHMMSS(minHA), TimeUtils.hoursToHHMMSS(haLimitMin)), v, a);
+                } else if (minDelta < 1. / 15.) {
+                    mm.addMarker(false, this, Severity.Warning, "Target comes within 1\u00B0 of lower HA constraint.", v, a);
+                }
+
+                if (maxHA > haLimitMax) {
+                    mm.addMarker(false, this, Severity.Error, String.format("Hour angle constraint violated (%s > %s).", TimeUtils.hoursToHHMMSS(maxHA), TimeUtils.hoursToHHMMSS(haLimitMax)), v, a);
+                } else if (maxDelta < 1. / 15.) {
+                    mm.addMarker(false, this, Severity.Warning, "Target comes within 1\u00B0 of upper HA constraint.", v, a);
+                }
+
+                break;
+            }
+
+            // Lunar proximity warnings
+            double obj_moon = a.getMin(Circumstance.LUNAR_DISTANCE, false);
+            if (obj_moon < 5.) {
+                mm.addMarker(false, this, Severity.Error, String.format("Target approaches within %1.2f\u00B0 of the moon.", obj_moon), v, a);
+            } else if (obj_moon < 15.) {
+                mm.addMarker(false, this, Severity.Warning, String.format("Target approaches within %1.2f\u00B0 of the moon.", obj_moon), v, a);
+            }
+
+            // Sky brightness warnings
+
+            Double sb = a.getMin(Circumstance.TOTAL_SKY_BRIGHTNESS, false);
+
+            if (sb != null && !a.getObs().getConditions().containsSkyBrightness(sb)) {
+                mm.addMarker(false, this, Severity.Error, "Sky brightness constraint violated.", v, a);
+            }
+
+
+            // Variant Obs Flags
+            for (Flag flag: v.getFlags(a.getObs())) {
+                switch (flag) {
 
                 case LGS_UNAVAILABLE:
                     mm.addMarker(false, this, Severity.Error, "LGS observation is not allowed in non-LGS variant.", v, a);
                     break;
 
-				case CONFIG_UNAVAILABLE:
-					mm.addMarker(false, this, Severity.Error, "Required instrument configuration is unavailable.", v, a);
-					break;
+                case CONFIG_UNAVAILABLE:
+                    mm.addMarker(false, this, Severity.Error, "Required instrument configuration is unavailable.", v, a);
+                    break;
 
-				case MASK_IN_CABINET:
-					mm.addMarker(false, this, Severity.Error, "Required custom mask is in cabinet.", v, a);
-					break;
+                case MASK_IN_CABINET:
+                    mm.addMarker(false, this, Severity.Error, "Required custom mask is in cabinet.", v, a);
+                    break;
 
-				case MASK_UNAVAILABLE:
-					mm.addMarker(false, this, Severity.Error, "Required custom mask is unavailable.", v, a);
-					break;
+                case MASK_UNAVAILABLE:
+                    mm.addMarker(false, this, Severity.Error, "Required custom mask is unavailable.", v, a);
+                    break;
 
-				case INSTRUMENT_UNAVAILABLE:
-					mm.addMarker(false, this, Severity.Error, "Required instrument is unavailable.", v, a);
-					break;
+                case INSTRUMENT_UNAVAILABLE:
+                    mm.addMarker(false, this, Severity.Error, "Required instrument is unavailable.", v, a);
+                    break;
 
-				case CC_UQUAL:
-					mm.addMarker(false, this, Severity.Error, "Variant CC is under-qualified for this observation.", v, a);
-					break;
+                case CC_UQUAL:
+                    mm.addMarker(false, this, Severity.Error, "Variant CC is under-qualified for this observation.", v, a);
+                    break;
 
-				case WV_UQUAL:
-					mm.addMarker(false, this, Severity.Error, "Variant WV is under-qualified for this observation.", v, a);
-					break;
+                case WV_UQUAL:
+                    mm.addMarker(false, this, Severity.Error, "Variant WV is under-qualified for this observation.", v, a);
+                    break;
 
-				case IQ_UQUAL:
-					mm.addMarker(false, this, Severity.Error, "Variant IQ is under-qualified for this observation.", v, a);
-					break;
+                case IQ_UQUAL:
+                    mm.addMarker(false, this, Severity.Error, "Variant IQ is under-qualified for this observation.", v, a);
+                    break;
 
-				case INACTIVE:
-					mm.addMarker(false, this, Severity.Error, "Science program is inactive.", v, a);
-					break;
+                case INACTIVE:
+                    mm.addMarker(false, this, Severity.Error, "Science program is inactive.", v, a);
+                    break;
 
-				case OVER_QUALIFIED:
-					mm.addMarker(true, this, Severity.Info, "Variant conditions are better than necessary.", v, a);
-					break;
+                case OVER_QUALIFIED:
+                    mm.addMarker(true, this, Severity.Info, "Variant conditions are better than necessary.", v, a);
+                    break;
 
-				case IN_PROGRESS:
-				case ELEVATION_CNS:
-				case SCHEDULED:
-				case BLOCKED:
-					// ...
-					// No markers for these guys.
-					break;
+                case IN_PROGRESS:
+                case ELEVATION_CNS:
+                case SCHEDULED:
+                case BLOCKED:
+                    // ...
+                    // No markers for these guys.
+                    break;
 
-				}
-			}
-		}
+                }
+            }
+        }
 
-	}
+    }
 
-	@Override
-	protected MarkerManager getMarkerManager(Variant t) {
-		return t.getSchedule().getMarkerManager();
-	}
+    @Override
+    protected MarkerManager getMarkerManager(Variant t) {
+        return t.getSchedule().getMarkerManager();
+    }
 
 }
 
@@ -303,52 +303,52 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 // REL-397: warn if another unscheduled obs in the same program has a higher score and is within 1.5h in RA.
 class ScoreMarker {
 
-	private static final double RA_LIMIT_H = 1.5; // we only care about other observations within this distance in RA
-	private static final double RA_LIMIT_DEG = RA_LIMIT_H * 15; // 15 degrees per hour
-	private static final String PREFIX = String.format("Higher-scoring observation(s) within %2.1fH: ", RA_LIMIT_H);
+    private static final double RA_LIMIT_H = 1.5; // we only care about other observations within this distance in RA
+    private static final double RA_LIMIT_DEG = RA_LIMIT_H * 15; // 15 degrees per hour
+    private static final String PREFIX = String.format("Higher-scoring observation(s) within %2.1fH: ", RA_LIMIT_H);
 
-	public static void add(Object owner, MarkerManager mm, Variant v, Alloc a) {
-		if (a.getObs().getObsClass() == ObsClass.SCIENCE) {
+    public static void add(Object owner, MarkerManager mm, Variant v, Alloc a) {
+        if (a.getObs().getObsClass() == ObsClass.SCIENCE) {
 
-			// science observations
-			final Predicate<Obs> science = obs ->
-				obs.getObsClass() == ObsClass.SCIENCE;
+            // science observations
+            final Predicate<Obs> science = obs ->
+                obs.getObsClass() == ObsClass.SCIENCE;
 
-			// unscheduled observations
-			final Predicate<Obs> unscheduled = obs ->
-				!v.getFlags(obs).contains(Flag.SCHEDULED);
+            // unscheduled observations
+            final Predicate<Obs> unscheduled = obs ->
+                !v.getFlags(obs).contains(Flag.SCHEDULED);
 
-			// observations within RA_LIMIT_DEG of `a`
-			final Predicate<Obs> nearby = otherObs -> {
-				final double myRaDeg = a.getObs().getRa(a.getStart()); // My RA at scheduling time
-				final double otherRaDeg = otherObs.getRa(a.getStart());
-				final double raDiffDeg = Math.abs(myRaDeg - otherRaDeg);
-				return raDiffDeg <= RA_LIMIT_DEG;
-			};
+            // observations within RA_LIMIT_DEG of `a`
+            final Predicate<Obs> nearby = otherObs -> {
+                final double myRaDeg = a.getObs().getRa(a.getStart()); // My RA at scheduling time
+                final double otherRaDeg = otherObs.getRa(a.getStart());
+                final double raDiffDeg = Math.abs(myRaDeg - otherRaDeg);
+                return raDiffDeg <= RA_LIMIT_DEG;
+            };
 
-			// observations with a better score than `a.getObs`
-			final Predicate<Obs> higherScoring = otherObs -> {
-				final double myScore = v.getScore(a.getObs());
-				final double otherScore = v.getScore(otherObs);
-				return otherScore > myScore;
-			};
+            // observations with a better score than `a.getObs`
+            final Predicate<Obs> higherScoring = otherObs -> {
+                final double myScore = v.getScore(a.getObs());
+                final double otherScore = v.getScore(otherObs);
+                return otherScore > myScore;
+            };
 
-			// all of the above, ordered by cost to compute
-			final Predicate<Obs> all =
-				science.and(unscheduled).and(nearby).and(higherScoring);
+            // all of the above, ordered by cost to compute
+            final Predicate<Obs> all =
+                science.and(unscheduled).and(nearby).and(higherScoring);
 
-			// observations in the same program as `a` that meet all filter conditions
-			final List<Obs> alternatives =
-				a.getObs().getProg().getFullObsSet().stream().filter(all).collect(Collectors.toList());
+            // observations in the same program as `a` that meet all filter conditions
+            final List<Obs> alternatives =
+                a.getObs().getProg().getFullObsSet().stream().filter(all).collect(Collectors.toList());
 
-			// if there are any, add a marker
-			if (!alternatives.isEmpty()) {
-				final String msg =
-					alternatives.stream().map(Obs::getObsId).collect(Collectors.joining(" ", PREFIX, ""));
-				mm.addMarker(true, owner, Severity.Warning, msg, v, a);
-			}
+            // if there are any, add a marker
+            if (!alternatives.isEmpty()) {
+                final String msg =
+                    alternatives.stream().map(Obs::getObsId).collect(Collectors.joining(" ", PREFIX, ""));
+                mm.addMarker(true, owner, Severity.Warning, msg, v, a);
+            }
 
-		}
-	}
+        }
+    }
 
 }

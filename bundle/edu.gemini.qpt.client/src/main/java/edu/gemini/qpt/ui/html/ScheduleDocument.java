@@ -406,7 +406,7 @@ public class ScheduleDocument {
     }
 
 
-    //	private static final DateFormat DF_MMMM= new  SimpleDateFormat("MMMM");
+    //    private static final DateFormat DF_MMMM= new  SimpleDateFormat("MMMM");
     private static final DateFormat DF_MMMM_D = new SimpleDateFormat("MMMM d");
     private static final DateFormat DF_D_YYYY = new SimpleDateFormat("d, yyyy");
     private static final DateFormat DF_MMMM_D_YYYY = new SimpleDateFormat("MMMM d, yyyy");
@@ -449,15 +449,15 @@ public class ScheduleDocument {
         return getDateRangeString(new Date(start), new Date(end));
     }
 
-//	public static void main(String[] args) {
-//		ScheduleDocument doc = new ScheduleDocument(null, null, null, null);
-//		long start = System.currentTimeMillis();
-//		long end = start + 1;
-//		for (int i = 1; i < 30; i++) {
-//			System.out.println(doc.getDateRangeString(start, end));
-//			end += TimeUtils.MS_PER_DAY * 7;
-//		}
-//	}
+//    public static void main(String[] args) {
+//        ScheduleDocument doc = new ScheduleDocument(null, null, null, null);
+//        long start = System.currentTimeMillis();
+//        long end = start + 1;
+//        for (int i = 1; i < 30; i++) {
+//            System.out.println(doc.getDateRangeString(start, end));
+//            end += TimeUtils.MS_PER_DAY * 7;
+//        }
+//    }
 
     public String getStyle(Object o) {
 

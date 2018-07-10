@@ -492,7 +492,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
         Variant prev = currentVariant;
         currentVariant = v;
         firePropertyChange(PROP_CURRENT_VARIANT, prev, currentVariant);
-//		setDirty(true);
+//        setDirty(true);
     }
 
     public Variant getCurrentVariant() {

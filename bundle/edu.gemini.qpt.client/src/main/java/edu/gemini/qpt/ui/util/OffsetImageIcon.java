@@ -15,17 +15,17 @@ import javax.swing.ImageIcon;
 @SuppressWarnings("serial")
 public class OffsetImageIcon extends ImageIcon {
 
-	private final int xoffset, yoffset;
-	
-	public OffsetImageIcon(URL url, int xoffset, int yoffset) {
-		super(url);
-		this.xoffset = xoffset;
-		this.yoffset = yoffset;
-	}
-	
-	@Override
-	public synchronized void paintIcon(Component arg0, Graphics arg1, int arg2, int arg3) {
-		super.paintIcon(arg0, arg1, arg2 + xoffset, arg3 + yoffset);
-	}
-	
+    private final int xoffset, yoffset;
+    
+    public OffsetImageIcon(URL url, int xoffset, int yoffset) {
+        super(url);
+        this.xoffset = xoffset;
+        this.yoffset = yoffset;
+    }
+    
+    @Override
+    public synchronized void paintIcon(Component arg0, Graphics arg1, int arg2, int arg3) {
+        super.paintIcon(arg0, arg1, arg2 + xoffset, arg3 + yoffset);
+    }
+    
 }

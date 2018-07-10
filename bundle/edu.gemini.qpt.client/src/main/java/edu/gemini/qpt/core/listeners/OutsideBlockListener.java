@@ -19,37 +19,37 @@ import edu.gemini.qpt.core.util.Interval.Overlap;
  */
 public class OutsideBlockListener extends MarkerModelListener<Variant> {
 
-	public void propertyChange(PropertyChangeEvent evt) {
-		Variant v = (Variant) evt.getSource();
-		Schedule s = v.getSchedule();
-		MarkerManager mm = s.getMarkerManager();
-		mm.clearMarkers(this, v);
-		
-		// Find allocs that overlap with a block partially.
-		Set<Alloc> outsiders = new TreeSet<Alloc>();
-		for (final Block b: s.getBlocks()) {
-			SortedSet<Alloc> allocs = v.getAllocs(b, Overlap.PARTIAL);
-			outsiders.addAll(allocs);
-		}
-		for (Alloc a: outsiders) {
-			mm.addMarker(false, this, Marker.Severity.Warning, "Observation extends past scheduling block boundary.", v, a);
-		}
-		
-		// Find allocs that don't fall into any block
-		Set<Alloc> orphans = new TreeSet<Alloc>(v.getAllocs());
-		for (final Block b: s.getBlocks()) {
-			SortedSet<Alloc> allocs = v.getAllocs(b, Overlap.EITHER);
-			orphans.removeAll(allocs);
-		}
-		for (Alloc a: orphans) {
-			mm.addMarker(false, this, Marker.Severity.Warning, "Observation lies outside scheduling block.", v, a);
-		}
-		
-	}
-	
-	@Override
-	protected MarkerManager getMarkerManager(Variant t) {
-		return t.getSchedule().getMarkerManager();
-	}
-	
+    public void propertyChange(PropertyChangeEvent evt) {
+        Variant v = (Variant) evt.getSource();
+        Schedule s = v.getSchedule();
+        MarkerManager mm = s.getMarkerManager();
+        mm.clearMarkers(this, v);
+        
+        // Find allocs that overlap with a block partially.
+        Set<Alloc> outsiders = new TreeSet<Alloc>();
+        for (final Block b: s.getBlocks()) {
+            SortedSet<Alloc> allocs = v.getAllocs(b, Overlap.PARTIAL);
+            outsiders.addAll(allocs);
+        }
+        for (Alloc a: outsiders) {
+            mm.addMarker(false, this, Marker.Severity.Warning, "Observation extends past scheduling block boundary.", v, a);
+        }
+        
+        // Find allocs that don't fall into any block
+        Set<Alloc> orphans = new TreeSet<Alloc>(v.getAllocs());
+        for (final Block b: s.getBlocks()) {
+            SortedSet<Alloc> allocs = v.getAllocs(b, Overlap.EITHER);
+            orphans.removeAll(allocs);
+        }
+        for (Alloc a: orphans) {
+            mm.addMarker(false, this, Marker.Severity.Warning, "Observation lies outside scheduling block.", v, a);
+        }
+        
+    }
+    
+    @Override
+    protected MarkerManager getMarkerManager(Variant t) {
+        return t.getSchedule().getMarkerManager();
+    }
+    
 }

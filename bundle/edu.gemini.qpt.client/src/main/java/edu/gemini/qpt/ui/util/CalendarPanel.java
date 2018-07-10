@@ -20,9 +20,9 @@ import org.jdesktop.swingx.JXMonthView;
 @SuppressWarnings("serial")
 public class CalendarPanel extends JPanel {
 
-	private final JXMonthView monthView;
+    private final JXMonthView monthView;
 
-	private long startDate, endDate;
+    private long startDate, endDate;
 
     private static long truncateToMidnight(TimeZone timeZone, long date) {
         final Calendar cal = Calendar.getInstance(timeZone);
@@ -35,47 +35,47 @@ public class CalendarPanel extends JPanel {
     }
 
 
-	public CalendarPanel(final TimeZone timeZone, long _startDate, long _endDate) {
+    public CalendarPanel(final TimeZone timeZone, long _startDate, long _endDate) {
 
-		this.startDate = truncateToMidnight(timeZone, _startDate);
-		this.endDate   = truncateToMidnight(timeZone, _endDate);
+        this.startDate = truncateToMidnight(timeZone, _startDate);
+        this.endDate   = truncateToMidnight(timeZone, _endDate);
 
-		monthView = new JXMonthView() {{
+        monthView = new JXMonthView() {{
             setTimeZone(timeZone);
 
-			// The crazy borders and insets were arrived at by experimentation.
-			// The default geometry is really bad. This is better. Due to the use
-			// of negative insets, modifications to this code may have surprising
-			// results.
+            // The crazy borders and insets were arrived at by experimentation.
+            // The default geometry is really bad. This is better. Due to the use
+            // of negative insets, modifications to this code may have surprising
+            // results.
 
-			Border b1 = BorderFactory.createCompoundBorder(
-					BorderFactory.createMatteBorder(1, 1, 1, 1, Color.GRAY),
-					BorderFactory.createEmptyBorder(11, 4, 0, 4));
+            Border b1 = BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(1, 1, 1, 1, Color.GRAY),
+                    BorderFactory.createEmptyBorder(11, 4, 0, 4));
 
-			setBorder(BorderFactory.createCompoundBorder(
-					BorderFactory.createEmptyBorder(0, 0, 1, 1), b1));
+            setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createEmptyBorder(0, 0, 1, 1), b1));
 
-			setMonthStringInsets(new Insets(-3, 0, -3, 0));
+            setMonthStringInsets(new Insets(-3, 0, -3, 0));
 
             setPreferredColumnCount(2);
             setFirstDisplayedDay(new Date(startDate));
             setSelectionInterval(new Date(startDate), new Date(endDate));
             setSelectionMode(DateSelectionModel.SelectionMode.SINGLE_SELECTION);
-			addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
+            addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
                     startDate = getFirstSelectionDate().getTime();
                     endDate   = getLastSelectionDate().getTime();
-				}
-			});
-		}};
+                }
+            });
+        }};
 
-		setLayout(new BorderLayout());
-		add(monthView, BorderLayout.CENTER);
+        setLayout(new BorderLayout());
+        add(monthView, BorderLayout.CENTER);
 
-		add(new NavButton("<", -1), BorderLayout.WEST);
-		add(new NavButton(">",  1), BorderLayout.EAST);
+        add(new NavButton("<", -1), BorderLayout.WEST);
+        add(new NavButton(">",  1), BorderLayout.EAST);
 
-	}
+    }
 
     public void setTimeZone(TimeZone tz) {
         if (tz == monthView.getTimeZone()) return;
@@ -100,27 +100,27 @@ public class CalendarPanel extends JPanel {
         monthView.setSelectionInterval(newStart, newStart);
     }
 
-	public long getStartDate() {
-		return startDate;
-	}
+    public long getStartDate() {
+        return startDate;
+    }
 
-	public long getEndDate() {
-		return endDate;
-	}
+    public long getEndDate() {
+        return endDate;
+    }
 
-	private class NavButton extends JButton {
-		public NavButton(String text, final int delta) {
-			super(text);
-			setFocusable(false);
-			addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					Calendar cal = Calendar.getInstance();
-					cal.setTimeInMillis(monthView.getFirstDisplayedDay().getTime());
-					cal.add(Calendar.MONTH, delta);
-					monthView.setFirstDisplayedDay(new Date(cal.getTimeInMillis()));
-				}
-			});
-		}
-	}
+    private class NavButton extends JButton {
+        public NavButton(String text, final int delta) {
+            super(text);
+            setFocusable(false);
+            addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTimeInMillis(monthView.getFirstDisplayedDay().getTime());
+                    cal.add(Calendar.MONTH, delta);
+                    monthView.setFirstDisplayedDay(new Date(cal.getTimeInMillis()));
+                }
+            });
+        }
+    }
 
 }
