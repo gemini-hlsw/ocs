@@ -12,22 +12,22 @@ import java.awt.geom.AffineTransform;
  */
 public class Graphics2DAttributes {
 
-	private final Graphics2D g2d;
-	private final Paint paint;
-	private final Stroke stroke;
-	private final AffineTransform xf;
-	
-	public Graphics2DAttributes(Graphics2D g2d) {
-		this.g2d = g2d;
-		this.paint = g2d.getPaint();
-		this.stroke = g2d.getStroke();
-		this.xf = g2d.getTransform();
-	}
-	
-	public void restore() {
-		g2d.setPaint(paint);
-		g2d.setStroke(stroke);
-		g2d.setTransform(xf);
-	}
-	
+    private final Graphics2D g2d;
+    private final Paint paint;
+    private final Stroke stroke;
+    private final AffineTransform xf;
+    
+    public Graphics2DAttributes(Graphics2D g2d) {
+        this.g2d = g2d;
+        this.paint = g2d.getPaint();
+        this.stroke = g2d.getStroke();
+        this.xf = g2d.getTransform();
+    }
+    
+    public void restore() {
+        g2d.setPaint(paint);
+        g2d.setStroke(stroke);
+        g2d.setTransform(xf);
+    }
+    
 }

@@ -11,37 +11,37 @@ import java.io.Serializable;
  */
 public final class Note implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public enum Scope {
-		Program, Group, Observation, Sequence
-	}
-	
-	private final Scope scope;
-	private final String title;
-	private final CompressedString text;
-	
-	public Note(Scope scope, String title, String text) {
-		this.scope = scope;
-		this.title = title;
-		this.text = new CompressedString(text);
-	}
+    public enum Scope {
+        Program, Group, Observation, Sequence
+    }
+    
+    private final Scope scope;
+    private final String title;
+    private final CompressedString text;
+    
+    public Note(Scope scope, String title, String text) {
+        this.scope = scope;
+        this.title = title;
+        this.text = new CompressedString(text);
+    }
 
-	public Scope getScope() {
-		return scope;
-	}
+    public Scope getScope() {
+        return scope;
+    }
 
-	public String getText() {
-		return text.get();
-	}
+    public String getText() {
+        return text.get();
+    }
 
-	public String getTitle() {
-		return title;
-	}
+    public String getTitle() {
+        return title;
+    }
 
-	@Override
-	public String toString() {
-		return title;
-	}
-	
+    @Override
+    public String toString() {
+        return title;
+    }
+    
 }

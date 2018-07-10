@@ -16,19 +16,19 @@ import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
  */
 public class ContextClasspathResourceLoader extends ClasspathResourceLoader {
 
-	@Override
-	public synchronized InputStream getResourceStream(String name)	throws ResourceNotFoundException {
-		if (name == null || name.length() == 0) {
-			throw new ResourceNotFoundException("No template name provided");
-		}
-		try {
-			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-			InputStream is = classLoader.getResourceAsStream(name);
-			return is;
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new ResourceNotFoundException(e.getMessage());
-		}
-	}
+    @Override
+    public synchronized InputStream getResourceStream(String name)    throws ResourceNotFoundException {
+        if (name == null || name.length() == 0) {
+            throw new ResourceNotFoundException("No template name provided");
+        }
+        try {
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            InputStream is = classLoader.getResourceAsStream(name);
+            return is;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ResourceNotFoundException(e.getMessage());
+        }
+    }
 
 }

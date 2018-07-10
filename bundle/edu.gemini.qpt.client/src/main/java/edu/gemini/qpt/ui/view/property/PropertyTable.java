@@ -151,20 +151,20 @@ public class PropertyTable extends LinkedHashMap<String, Object> {
     }
 
 
-//	public static void main(String[] args) {
-//		
-//		adapters.put(String.class, new Adapter<String>() {
-//		
-//			public void setProperties(String target, PropertyTable table) {
-//				table.put(PROP_TYPE, "String");
-//				table.put("Value", target);
-//				table.put("Length", target.length());
-//			}
-//		
-//		});
-//		
-//		System.out.println(forObjects(new GSelection<Object>("foo", "bar", "bar")));
-//		
-//	}
+//    public static void main(String[] args) {
+//        
+//        adapters.put(String.class, new Adapter<String>() {
+//        
+//            public void setProperties(String target, PropertyTable table) {
+//                table.put(PROP_TYPE, "String");
+//                table.put("Value", target);
+//                table.put("Length", target.length());
+//            }
+//        
+//        });
+//        
+//        System.out.println(forObjects(new GSelection<Object>("foo", "bar", "bar")));
+//        
+//    }
 
 }

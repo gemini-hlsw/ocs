@@ -6,9 +6,9 @@ package edu.gemini.qpt.core.listeners;
  */
 public interface ModelListener<T> {
 
-	void subscribe(T o);
-	
-	void unsubscribe(T o);
-	
+    void subscribe(T o);
+    
+    void unsubscribe(T o);
+    
 }
 

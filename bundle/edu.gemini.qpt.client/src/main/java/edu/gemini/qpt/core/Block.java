@@ -24,17 +24,17 @@ public final class Block implements Comparable<Block>, IntervalType<Block>, PioS
 
     private final Interval interval;
 
-	public Block(final Long low, final Long high) {
-	    interval = new Interval(low, high);
-	}
+    public Block(final Long low, final Long high) {
+        interval = new Interval(low, high);
+    }
 
     public Block(final Interval interval) {
         this.interval = interval;
     }
 
-	public Block(final ParamSet params) {
-		interval = new Interval(params);
-	}
+    public Block(final ParamSet params) {
+        interval = new Interval(params);
+    }
 
     //
     // Interval type contract
@@ -71,14 +71,14 @@ public final class Block implements Comparable<Block>, IntervalType<Block>, PioS
     @Override
     public Block create(final long start, final long end) { return new Block(start, end); }
 
-	public String getName() {
-		return FORMAT.format(Instant.ofEpochMilli(getStart()));
-	}
+    public String getName() {
+        return FORMAT.format(Instant.ofEpochMilli(getStart()));
+    }
 
-	@Override
-	public String toString() {
-		return "Block " + getName();
-	}
+    @Override
+    public String toString() {
+        return "Block " + getName();
+    }
 
     ///
     /// PIO

@@ -15,20 +15,20 @@ import edu.gemini.ui.workspace.IShell;
 @SuppressWarnings("serial")
 public class ResolutionLowerAction extends AbstractAction implements PropertyChangeListener {
 
-	private final IShell shell;
-	
-	public ResolutionLowerAction(IShell shell) {
-		super("Faster Nudging");
-		this.shell = shell;
-		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_UP, Platform.MENU_ACTION_MASK));
-	}
-	
-	public synchronized void actionPerformed(ActionEvent e) {
-		Resolution.lower();
-		Flash.flash(shell.getPeer(), Resolution.caption());
-	}
+    private final IShell shell;
+    
+    public ResolutionLowerAction(IShell shell) {
+        super("Faster Nudging");
+        this.shell = shell;
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_UP, Platform.MENU_ACTION_MASK));
+    }
+    
+    public synchronized void actionPerformed(ActionEvent e) {
+        Resolution.lower();
+        Flash.flash(shell.getPeer(), Resolution.caption());
+    }
 
-	public void propertyChange(PropertyChangeEvent evt) {		
-	}
+    public void propertyChange(PropertyChangeEvent evt) {        
+    }
 
 }

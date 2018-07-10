@@ -11,63 +11,63 @@ import edu.gemini.qpt.shared.sp.Obs;
 
 public abstract class ElevationConstraintSolver extends Solver {
 
-	@SuppressWarnings("unused")
-	private static final Logger LOGGER = Logger.getLogger(ElevationConstraintSolver.class.getName());
-	
-	protected final ImprovedSkyCalc calc;
-	protected final Function<Long, WorldCoords> coords;
-	protected final double min, max;
-	
-	protected ElevationConstraintSolver(Site site, Function<Long, WorldCoords> coords, double min, double max) {
-		super(TimeUtils.MS_PER_HOUR / 4, TimeUtils.MS_PER_MINUTE);
-		this.coords = coords;
-		this.calc = new ImprovedSkyCalc(site);
-		this.max = max;
-		this.min = min;
-	}
+    @SuppressWarnings("unused")
+    private static final Logger LOGGER = Logger.getLogger(ElevationConstraintSolver.class.getName());
+    
+    protected final ImprovedSkyCalc calc;
+    protected final Function<Long, WorldCoords> coords;
+    protected final double min, max;
+    
+    protected ElevationConstraintSolver(Site site, Function<Long, WorldCoords> coords, double min, double max) {
+        super(TimeUtils.MS_PER_HOUR / 4, TimeUtils.MS_PER_MINUTE);
+        this.coords = coords;
+        this.calc = new ImprovedSkyCalc(site);
+        this.max = max;
+        this.min = min;
+    }
 
-	public static ElevationConstraintSolver forObs(Site site, Obs obs) {
-		switch (obs.getElevationConstraintType()) {
-		case AIRMASS:    return new AirmassSolver(site, obs);
-		case HOUR_ANGLE: return new HourAngleSolver(site, obs);
-		case NONE:       return new AirmassSolver(site, obs, 1.0, 2.0);
-		default:
-			throw new Error("Unknown ElevationConstraintType: " + obs.getElevationConstraintType());
-		}		
-	}
-	
-	static class AirmassSolver extends ElevationConstraintSolver {
+    public static ElevationConstraintSolver forObs(Site site, Obs obs) {
+        switch (obs.getElevationConstraintType()) {
+        case AIRMASS:    return new AirmassSolver(site, obs);
+        case HOUR_ANGLE: return new HourAngleSolver(site, obs);
+        case NONE:       return new AirmassSolver(site, obs, 1.0, 2.0);
+        default:
+            throw new Error("Unknown ElevationConstraintType: " + obs.getElevationConstraintType());
+        }        
+    }
+    
+    static class AirmassSolver extends ElevationConstraintSolver {
 
-		protected AirmassSolver(Site site, Obs obs) {
-			super(site, obs::getCoords, obs.getElevationConstraintMin(), obs.getElevationConstraintMax());
-		}
+        protected AirmassSolver(Site site, Obs obs) {
+            super(site, obs::getCoords, obs.getElevationConstraintMin(), obs.getElevationConstraintMax());
+        }
 
-		protected AirmassSolver(Site site, Obs obs, double min, double max) {
-			super(site, obs::getCoords, min, max);
-		}
+        protected AirmassSolver(Site site, Obs obs, double min, double max) {
+            super(site, obs::getCoords, min, max);
+        }
 
-		@Override
-		protected boolean f(long t) {
-			calc.calculate(coords.apply(t), new Date(t), false);
-			double airmass = calc.getAirmass();
-			return (min <= airmass) && (airmass <= max);
-		}
+        @Override
+        protected boolean f(long t) {
+            calc.calculate(coords.apply(t), new Date(t), false);
+            double airmass = calc.getAirmass();
+            return (min <= airmass) && (airmass <= max);
+        }
 
-	}
+    }
 
-	static class HourAngleSolver extends ElevationConstraintSolver {
-		
-		protected HourAngleSolver(Site site, Obs obs) {
-			super(site, obs::getCoords, obs.getElevationConstraintMin(), obs.getElevationConstraintMax());
-		}
+    static class HourAngleSolver extends ElevationConstraintSolver {
+        
+        protected HourAngleSolver(Site site, Obs obs) {
+            super(site, obs::getCoords, obs.getElevationConstraintMin(), obs.getElevationConstraintMax());
+        }
 
-		@Override
-		protected boolean f(long t) {
-			calc.calculate(coords.apply(t), new Date(t), false);
-			double ha = calc.getHourAngle();
-			return (min <= ha) && (ha <= max);
-		}
+        @Override
+        protected boolean f(long t) {
+            calc.calculate(coords.apply(t), new Date(t), false);
+            double ha = calc.getHourAngle();
+            return (min <= ha) && (ha <= max);
+        }
 
-	}
+    }
 
 }

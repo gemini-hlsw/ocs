@@ -16,18 +16,18 @@ import edu.gemini.ui.workspace.IShell;
  */
 public class QuitAction extends AbstractAction {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final IShell shell;
-	
-	public QuitAction(IShell shell) {
-		super("Quit");
-		this.shell = shell;
-		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Q, Platform.MENU_ACTION_MASK));
-	}
-	
-	public void actionPerformed(ActionEvent e) {
-		shell.close();
-	}
-	
+    private final IShell shell;
+    
+    public QuitAction(IShell shell) {
+        super("Quit");
+        this.shell = shell;
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Q, Platform.MENU_ACTION_MASK));
+    }
+    
+    public void actionPerformed(ActionEvent e) {
+        shell.close();
+    }
+    
 }

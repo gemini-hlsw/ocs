@@ -7,10 +7,10 @@ import edu.gemini.qpt.ui.view.property.PropertyTable.Adapter;
 
 public class GroupAdapter implements Adapter<Group> {
 
-	public void setProperties(Variant variant, Group group, PropertyTable table) {
-		table.put(PROP_TYPE, "Scheduling Group");
-		table.put(PROP_SUBTYPE, group.getType());
-		table.put(PROP_TITLE, group.getName());		
-	}
+    public void setProperties(Variant variant, Group group, PropertyTable table) {
+        table.put(PROP_TYPE, "Scheduling Group");
+        table.put(PROP_SUBTYPE, group.getType());
+        table.put(PROP_TITLE, group.getName());        
+    }
 
 }

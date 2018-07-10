@@ -7,22 +7,22 @@ import edu.gemini.ui.gface.GViewer;
 
 public class ScienceProgramFilter implements GFilter<Prog, Object> {
 
-	public boolean accept(Object element) {
-		
-		// Throw out groups with no Obs in them.
-		if (element instanceof Group) {
-			Group g = (Group) element;
-			if (g.getObservations().size() == 0) 
-				return false;
-		}
-		
-		return true;
-		
-	}
+    public boolean accept(Object element) {
+        
+        // Throw out groups with no Obs in them.
+        if (element instanceof Group) {
+            Group g = (Group) element;
+            if (g.getObservations().size() == 0) 
+                return false;
+        }
+        
+        return true;
+        
+    }
 
-	public void modelChanged(GViewer<Prog, Object> viewer, Prog oldModel, Prog newModel) {
-		// TODO Auto-generated method stub
-		
-	}
-	
+    public void modelChanged(GViewer<Prog, Object> viewer, Prog oldModel, Prog newModel) {
+        // TODO Auto-generated method stub
+        
+    }
+    
 }
