@@ -28,49 +28,49 @@ public class LchWindowViewAdvisor implements IViewAdvisor, PropertyChangeListene
     private final LchWindowType windowType;
     private final LchWindowController controller;
 
-	// The table viewer
+    // The table viewer
     private final GTableViewer<Schedule, LchWindow, LchWindowAttribute> tableViewer;
 
-	// The scroll bar
+    // The scroll bar
     private final JScrollPane scroll;
 
-	public LchWindowViewAdvisor(LchWindowType windowType) {
+    public LchWindowViewAdvisor(LchWindowType windowType) {
         this.windowType = windowType;
         controller = new LchWindowController(windowType);
         tableViewer = new GTableViewer<Schedule, LchWindow, LchWindowAttribute>(controller);
         scroll = Factory.createStrippedScrollPane(tableViewer.getTable());
 
-//		// Set up the viewer
-		tableViewer.setColumns(Start, End, Length, Type, Name);
-		tableViewer.setColumnSize(Start, 80);
-		tableViewer.setColumnSize(End, 80);
+//        // Set up the viewer
+        tableViewer.setColumns(Start, End, Length, Type, Name);
+        tableViewer.setColumnSize(Start, 80);
+        tableViewer.setColumnSize(End, 80);
         tableViewer.setColumnSize(Length, 80);
         // LCH-191: Let name and type fill rest of table, since they may contain multiple values
 
-		tableViewer.setDecorator(new LchWindowDecorator());
-		tableViewer.setFilter(new LchWindowFilter());
+        tableViewer.setDecorator(new LchWindowDecorator());
+        tableViewer.setFilter(new LchWindowFilter());
         tableViewer.getTable().setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 
-		// And the scroll pane
-		ScrollPanes.setViewportHeight(scroll, 5);
+        // And the scroll pane
+        ScrollPanes.setViewportHeight(scroll, 5);
 
-	}
+    }
 
-	public void close(IViewContext context) {
-	}
+    public void close(IViewContext context) {
+    }
 
-	public void open(IViewContext context) {
-		context.setTitle(windowType == clearance ? "Clearance" : "Shutter");
-		context.setContent(scroll);
-		context.getShell().addPropertyChangeListener(IShell.PROP_MODEL, this);
+    public void open(IViewContext context) {
+        context.setTitle(windowType == clearance ? "Clearance" : "Shutter");
+        context.setContent(scroll);
+        context.getShell().addPropertyChangeListener(IShell.PROP_MODEL, this);
         context.getShell().addPropertyChangeListener(IShell.PROP_SELECTION, this);
-	}
+    }
 
-	public void setFocus() {
-		tableViewer.getControl().requestFocus();
-	}
+    public void setFocus() {
+        tableViewer.getControl().requestFocus();
+    }
 
-	public void propertyChange(PropertyChangeEvent evt) {
+    public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals(IShell.PROP_SELECTION)) {
             GSelection<?> selection = (GSelection) evt.getNewValue();
             if (selection.size() == 1 && selection.first() instanceof Alloc) {

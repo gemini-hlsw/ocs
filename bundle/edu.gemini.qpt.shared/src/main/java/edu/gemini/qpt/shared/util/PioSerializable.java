@@ -5,6 +5,6 @@ import edu.gemini.spModel.pio.PioFactory;
 
 public interface PioSerializable {
 
-	ParamSet getParamSet(PioFactory factory, String name);
-	
+    ParamSet getParamSet(PioFactory factory, String name);
+    
 }

@@ -10,38 +10,38 @@ import edu.gemini.ui.gface.GViewer;
 
 public class ScienceProgramController implements GTreeController<Prog, Object> {
 
-	private Prog root;
+    private Prog root;
 
-	public Object getRoot() {
-		return root;
-	}
+    public Object getRoot() {
+        return root;
+    }
 
-	public Collection<Object> getChildren(Object parent) {		
-		ArrayList<Object> ret = new ArrayList<Object>();	
-		
-		if (parent instanceof Prog) {
-			
-			// Program has three kinds of children
-			Prog prog = (Prog) parent;
-			ret.addAll(prog.getNoteList());
-			ret.addAll(prog.getObsList());
-			ret.addAll(prog.getGroupList());
-			
-		} else if (parent instanceof Group) {
-			
-			// Group has two kinds
-			Group group = (Group) parent;
-			ret.addAll(group.getNoteList());
-			ret.addAll(group.getObservations());
-			
-		} // others have none.
-		
-		return ret;
-		
-	}
+    public Collection<Object> getChildren(Object parent) {        
+        ArrayList<Object> ret = new ArrayList<Object>();    
+        
+        if (parent instanceof Prog) {
+            
+            // Program has three kinds of children
+            Prog prog = (Prog) parent;
+            ret.addAll(prog.getNoteList());
+            ret.addAll(prog.getObsList());
+            ret.addAll(prog.getGroupList());
+            
+        } else if (parent instanceof Group) {
+            
+            // Group has two kinds
+            Group group = (Group) parent;
+            ret.addAll(group.getNoteList());
+            ret.addAll(group.getObservations());
+            
+        } // others have none.
+        
+        return ret;
+        
+    }
 
-	public void modelChanged(GViewer<Prog, Object> viewer, Prog oldModel, Prog newModel) {
-		root = newModel;
-	}
+    public void modelChanged(GViewer<Prog, Object> viewer, Prog oldModel, Prog newModel) {
+        root = newModel;
+    }
 
 }

@@ -15,111 +15,111 @@ import edu.gemini.spModel.core.Site;
  */
 public class Marker implements Comparable<Marker> {
 
-	public enum Severity {
-		Error, Warning, Notice, Info
-	}
+    public enum Severity {
+        Error, Warning, Notice, Info
+    }
 
-	private final Object owner;
-	private final Object[] path;
-	private final String text;
-	private final Severity severity;
-	private final boolean qcOnly;
-	private final Option<Union<Interval>> union;
+    private final Object owner;
+    private final Object[] path;
+    private final String text;
+    private final Severity severity;
+    private final boolean qcOnly;
+    private final Option<Union<Interval>> union;
 
-	public Marker(boolean qcOnly, Object owner, Severity severity, String text, Option<Union<Interval>> union, Object... path) {
-		this.qcOnly = qcOnly;
-		this.owner = owner;
-		this.path = path;
-		this.text = text;
-		this.severity = severity;
-		this.union = union;
-	}
+    public Marker(boolean qcOnly, Object owner, Severity severity, String text, Option<Union<Interval>> union, Object... path) {
+        this.qcOnly = qcOnly;
+        this.owner = owner;
+        this.path = path;
+        this.text = text;
+        this.severity = severity;
+        this.union = union;
+    }
 
-	public Marker(boolean qcOnly, Object owner, Severity severity, String text, Object... path) {
-		this(qcOnly, owner, severity, text, None.instance(), path);
-	}
+    public Marker(boolean qcOnly, Object owner, Severity severity, String text, Object... path) {
+        this(qcOnly, owner, severity, text, None.instance(), path);
+    }
 
-	public boolean isQcOnly() {
-		return qcOnly;
-	}
+    public boolean isQcOnly() {
+        return qcOnly;
+    }
 
-	public Object getOwner() {
-		return owner;
-	}
+    public Object getOwner() {
+        return owner;
+    }
 
-	public Object[] getPath() {
-		return path;
-	}
+    public Object[] getPath() {
+        return path;
+    }
 
-	public Object getTarget() {
-		return path[path.length - 1];
-	}
+    public Object getTarget() {
+        return path[path.length - 1];
+    }
 
-	public String getText() {
-		return text;
-	}
+    public String getText() {
+        return text;
+    }
 
-	private static final String formatInterval(Site site, Interval interval, TimePreference p) {
-		return String.format(
-				"%s - %s",
-				p.format(site, interval.getStart(), "HH:mm"),
-				p.format(site, interval.getEnd(), "HH:mm")
-		);
-	}
+    private static final String formatInterval(Site site, Interval interval, TimePreference p) {
+        return String.format(
+                "%s - %s",
+                p.format(site, interval.getStart(), "HH:mm"),
+                p.format(site, interval.getEnd(), "HH:mm")
+        );
+    }
 
-	public String getUnionText(Site site) {
-		return getUnionText(site, TimePreference.BOX.get());
-	}
+    public String getUnionText(Site site) {
+        return getUnionText(site, TimePreference.BOX.get());
+    }
 
     public String getUnionText(Site site, TimePreference p) {
 
-		final Union<Interval> intervals = this.getUnion().getOrElse(new Union<>());
+        final Union<Interval> intervals = this.getUnion().getOrElse(new Union<>());
 
-		final ImList<Interval> is = DefaultImList.create(intervals.getIntervals());
+        final ImList<Interval> is = DefaultImList.create(intervals.getIntervals());
 
-		String msg;
-		if (is.nonEmpty()) {
-			final String m = is.map(i -> formatInterval(site, i, p)).mkString(" ", ", ", ".");
-			msg = this.getText() + m;
-		} else {
-			msg = this.getText();
-		}
-		return msg;
-	}
+        String msg;
+        if (is.nonEmpty()) {
+            final String m = is.map(i -> formatInterval(site, i, p)).mkString(" ", ", ", ".");
+            msg = this.getText() + m;
+        } else {
+            msg = this.getText();
+        }
+        return msg;
+    }
 
-	public String getFilteredUnionText(Site site, TimePreference p) {
-		return this.getUnionText(site, p).replace("\u00B0", "&deg;");
-	}
+    public String getFilteredUnionText(Site site, TimePreference p) {
+        return this.getUnionText(site, p).replace("\u00B0", "&deg;");
+    }
 
     public Severity getSeverity() {
-		return severity;
-	}
+        return severity;
+    }
 
-	public Option<Union<Interval>> getUnion() { return union; }
+    public Option<Union<Interval>> getUnion() { return union; }
 
-	@Override
-	public String toString() {
-		return text;
-	}
+    @Override
+    public String toString() {
+        return text;
+    }
 
-	@SuppressWarnings("unchecked")
-	public int compareTo(Marker o) {
+    @SuppressWarnings("unchecked")
+    public int compareTo(Marker o) {
 
-		// Sort first on severity
-		int diff = severity.compareTo(o.severity);
-		if (diff != 0) return diff;
+        // Sort first on severity
+        int diff = severity.compareTo(o.severity);
+        if (diff != 0) return diff;
 
-		// Next sort by target, if they are the same type and
-		// are comparable.
-		Object t1 = getTarget();
-		Object t2 = o.getTarget();
-		if (t1 instanceof Comparable && t1.getClass().isInstance(t2) && !t1.equals(t2))
-			return ((Comparable) t1).compareTo(t2);
+        // Next sort by target, if they are the same type and
+        // are comparable.
+        Object t1 = getTarget();
+        Object t2 = o.getTarget();
+        if (t1 instanceof Comparable && t1.getClass().isInstance(t2) && !t1.equals(t2))
+            return ((Comparable) t1).compareTo(t2);
 
-		// Otherwise order predictably but arbitrarily, grouping by target.
-		diff = t1.toString().compareTo(t2.toString());
-		return (diff == 0) ? System.identityHashCode(this) - System.identityHashCode(o) : diff;
+        // Otherwise order predictably but arbitrarily, grouping by target.
+        diff = t1.toString().compareTo(t2.toString());
+        return (diff == 0) ? System.identityHashCode(this) - System.identityHashCode(o) : diff;
 
-	}
+    }
 
 }

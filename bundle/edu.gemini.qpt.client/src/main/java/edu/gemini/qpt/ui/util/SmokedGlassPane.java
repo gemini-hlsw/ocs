@@ -12,9 +12,9 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class SmokedGlassPane extends JPanel {
 
-	public SmokedGlassPane() {
-		setOpaque(true);
-		setBackground(new Color(128, 128, 128, 32));
-	}
-	
+    public SmokedGlassPane() {
+        setOpaque(true);
+        setBackground(new Color(128, 128, 128, 32));
+    }
+    
 }

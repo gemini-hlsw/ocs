@@ -16,31 +16,31 @@ import edu.gemini.ui.workspace.IShell;
 
 @SuppressWarnings("serial")
 public class CutAction extends AbstractAction implements PropertyChangeListener {
-	
-	private final IShell shell;
-	private final GViewer<Variant, Alloc> viewer;
-	
-	public CutAction(final IShell shell, final GViewer<Variant, Alloc> viewer) {
-		this.shell = shell;
-		this.viewer = viewer;
-		setEnabled(false);
-		viewer.addPropertyChangeListener(GViewer.PROP_SELECTION, this);
-	}
-	
-	public void actionPerformed(ActionEvent e) {
-		GSelection<Alloc> sel = viewer.getSelection();
-		VariantEditHelper veh = new VariantEditHelper(shell.getPeer());
-		try {
-			GSelection<Alloc> cut = veh.cut(viewer.getModel(), sel);
-			shell.getWorkspaceClipboard().setContents(cut, null);
-		} catch (CancelledException e1) {
-			// user hit cancel; this is ok
-		}
-	}
+    
+    private final IShell shell;
+    private final GViewer<Variant, Alloc> viewer;
+    
+    public CutAction(final IShell shell, final GViewer<Variant, Alloc> viewer) {
+        this.shell = shell;
+        this.viewer = viewer;
+        setEnabled(false);
+        viewer.addPropertyChangeListener(GViewer.PROP_SELECTION, this);
+    }
+    
+    public void actionPerformed(ActionEvent e) {
+        GSelection<Alloc> sel = viewer.getSelection();
+        VariantEditHelper veh = new VariantEditHelper(shell.getPeer());
+        try {
+            GSelection<Alloc> cut = veh.cut(viewer.getModel(), sel);
+            shell.getWorkspaceClipboard().setContents(cut, null);
+        } catch (CancelledException e1) {
+            // user hit cancel; this is ok
+        }
+    }
 
-	public void propertyChange(PropertyChangeEvent evt) {
-		GSelection<?> sel = (GSelection<?>) evt.getNewValue();
-		setEnabled(sel.isSelectionOf(Alloc.class));
-	}	
-	
+    public void propertyChange(PropertyChangeEvent evt) {
+        GSelection<?> sel = (GSelection<?>) evt.getNewValue();
+        setEnabled(sel.isSelectionOf(Alloc.class));
+    }    
+    
 }

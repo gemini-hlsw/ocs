@@ -14,35 +14,35 @@ import edu.gemini.qpt.core.util.Interval.Overlap;
  */
 public class OverlappingAllocListener extends MarkerModelListener<Variant> {
 
-	public void propertyChange(PropertyChangeEvent evt) {
-		Variant v = (Variant) evt.getSource();
-		MarkerManager mm = getMarkerManager(v);		
-		mm.clearMarkers(this, v);
+    public void propertyChange(PropertyChangeEvent evt) {
+        Variant v = (Variant) evt.getSource();
+        MarkerManager mm = getMarkerManager(v);        
+        mm.clearMarkers(this, v);
 
-		// Allocs are sequential, so we only need to see if one overlaps with adjacent
-		// ones in the array. TODO: optimize
-		Alloc[] allocs = v.getAllocs().toArray(new Alloc[v.getAllocs().size()]);		
-		for (int i = 0; i < allocs.length; i++) {
-			for (int j = i + 1; j < allocs.length; j++) {
-				if (allocs[i].overlaps(allocs[j], Overlap.EITHER)) {
-					mm.addMarker(false, this, Severity.Error, "Observation overlaps with " + allocs[j] + ".", v, allocs[i]);
-					mm.addMarker(false, this, Severity.Error, "Observation overlaps with " + allocs[i] + ".", v, allocs[j]);
-				} else {
-					break;
-				}
-			}
+        // Allocs are sequential, so we only need to see if one overlaps with adjacent
+        // ones in the array. TODO: optimize
+        Alloc[] allocs = v.getAllocs().toArray(new Alloc[v.getAllocs().size()]);        
+        for (int i = 0; i < allocs.length; i++) {
+            for (int j = i + 1; j < allocs.length; j++) {
+                if (allocs[i].overlaps(allocs[j], Overlap.EITHER)) {
+                    mm.addMarker(false, this, Severity.Error, "Observation overlaps with " + allocs[j] + ".", v, allocs[i]);
+                    mm.addMarker(false, this, Severity.Error, "Observation overlaps with " + allocs[i] + ".", v, allocs[j]);
+                } else {
+                    break;
+                }
+            }
 
-		}
-		
-		
-	}
+        }
+        
+        
+    }
 
-	// TODO: add quick fixes
-	
+    // TODO: add quick fixes
+    
 
-	@Override
-	protected MarkerManager getMarkerManager(Variant t) {
-		return t.getSchedule().getMarkerManager();
-	}
-	
+    @Override
+    protected MarkerManager getMarkerManager(Variant t) {
+        return t.getSchedule().getMarkerManager();
+    }
+    
 }

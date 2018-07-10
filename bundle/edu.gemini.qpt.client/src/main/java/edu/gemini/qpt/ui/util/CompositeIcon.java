@@ -11,27 +11,27 @@ import javax.swing.Icon;
  * @author rnorris
  */
 public class CompositeIcon implements Icon {
-	
-	private final Icon primary, overlay;
+    
+    private final Icon primary, overlay;
 
-	public CompositeIcon(Icon primary, Icon overlay) {
-		this.primary = primary;
-		this.overlay = overlay;
-	}
+    public CompositeIcon(Icon primary, Icon overlay) {
+        this.primary = primary;
+        this.overlay = overlay;
+    }
 
-	public void paintIcon(Component c, Graphics g, int x, int y) {
-		primary.paintIcon(c, g, x, y);
-		overlay.paintIcon(c, g, primary.getIconWidth() - overlay.getIconWidth(),
-				primary.getIconHeight() - overlay.getIconHeight() - 1);
-	}
+    public void paintIcon(Component c, Graphics g, int x, int y) {
+        primary.paintIcon(c, g, x, y);
+        overlay.paintIcon(c, g, primary.getIconWidth() - overlay.getIconWidth(),
+                primary.getIconHeight() - overlay.getIconHeight() - 1);
+    }
 
-	public int getIconWidth() {
-		return primary.getIconWidth();
-	}
+    public int getIconWidth() {
+        return primary.getIconWidth();
+    }
 
-	public int getIconHeight() { 
-		return primary.getIconHeight();
-	}
-	
-	
+    public int getIconHeight() { 
+        return primary.getIconHeight();
+    }
+    
+    
 }

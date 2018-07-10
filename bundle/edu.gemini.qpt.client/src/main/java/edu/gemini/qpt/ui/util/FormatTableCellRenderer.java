@@ -13,19 +13,19 @@ import javax.swing.table.DefaultTableCellRenderer;
 @SuppressWarnings("serial")
 public class FormatTableCellRenderer extends DefaultTableCellRenderer {
 
-	private final Format format;
-	
-	public FormatTableCellRenderer(Format format) {
-		this.format = format;
-//		setHorizontalAlignment(SwingConstants.RIGHT);
-	}
+    private final Format format;
+    
+    public FormatTableCellRenderer(Format format) {
+        this.format = format;
+//        setHorizontalAlignment(SwingConstants.RIGHT);
+    }
 
-	@Override
-	public Component getTableCellRendererComponent(JTable table, Object value, boolean arg2, boolean arg3, int arg4, int arg5) {
-		Component ret = super.getTableCellRendererComponent(table, value, arg2, arg3, arg4, arg5);
-		if (value != null) setText(format.format(value));
-		return ret;		
-	}
-	
+    @Override
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean arg2, boolean arg3, int arg4, int arg5) {
+        Component ret = super.getTableCellRendererComponent(table, value, arg2, arg3, arg4, arg5);
+        if (value != null) setText(format.format(value));
+        return ret;        
+    }
+    
 
 }

@@ -11,19 +11,19 @@ import edu.gemini.qpt.core.util.MarkerManager;
  * @author rnorris
  */
 abstract class MarkerModelListener<T extends BaseMutableBean> implements ModelListener<T>, PropertyChangeListener {
-	
-	public void subscribe(T t) {
-		t.addPropertyChangeListener(this);		
-		this.propertyChange(new PropertyChangeEvent(t, null, null, null));
-	}
-	
-	public void unsubscribe(T t) {
-		t.removePropertyChangeListener(this);
-		getMarkerManager(t).clearMarkers(this, t);
-	}
-	
-	protected abstract MarkerManager getMarkerManager(T t);
-	
+    
+    public void subscribe(T t) {
+        t.addPropertyChangeListener(this);        
+        this.propertyChange(new PropertyChangeEvent(t, null, null, null));
+    }
+    
+    public void unsubscribe(T t) {
+        t.removePropertyChangeListener(this);
+        getMarkerManager(t).clearMarkers(this, t);
+    }
+    
+    protected abstract MarkerManager getMarkerManager(T t);
+    
 }
 
 

@@ -578,13 +578,13 @@ public final class Obs implements Serializable, Comparable<Obs> {
         return obsNumber;
     }
 
-	public double getRa(Long when) {
+    public double getRa(Long when) {
         return (targetEnvironment != null ? targetEnvironment.getAsterism().getRaDegrees(new Some<>(when)).getOrElse(0.0) : 0.0);
-	}
+    }
 
-	public double getDec(Long when) {
+    public double getDec(Long when) {
         return (targetEnvironment != null ? targetEnvironment.getAsterism().getDecDegrees(new Some<>(when)).getOrElse(0.0) : 0.0);
-	}
+    }
 
     public Conds getConditions() {
         return conditions;

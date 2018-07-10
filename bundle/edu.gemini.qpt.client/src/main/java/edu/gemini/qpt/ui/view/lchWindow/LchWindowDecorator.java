@@ -58,7 +58,7 @@ public class LchWindowDecorator implements GSubElementDecorator<Schedule, LchWin
         label.setFont(label.getFont().deriveFont(e.overlap ? Font.BOLD : Font.PLAIN));
     }
 
-	public void modelChanged(GViewer<Schedule, LchWindow> viewer, Schedule oldModel, Schedule newModel) {
+    public void modelChanged(GViewer<Schedule, LchWindow> viewer, Schedule oldModel, Schedule newModel) {
         schedule = newModel;
-	}
+    }
 }
