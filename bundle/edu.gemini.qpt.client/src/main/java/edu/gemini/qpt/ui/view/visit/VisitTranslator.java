@@ -12,31 +12,31 @@ import edu.gemini.ui.gface.GViewer;
 
 public class VisitTranslator implements GTranslator<Variant, Alloc> {
 
-	private Variant variant;
-	
-	public Set<Alloc> translate(Object o) {
-		
-		if (o instanceof Alloc)
-			return Collections.singleton((Alloc) o);	
+    private Variant variant;
+    
+    public Set<Alloc> translate(Object o) {
+        
+        if (o instanceof Alloc)
+            return Collections.singleton((Alloc) o);    
 
-		if (o instanceof Marker)
-			for (Object e: ((Marker) o).getPath())
-				if (e instanceof Alloc)
-					return Collections.singleton((Alloc) e);
-				
-		if (o instanceof Obs && variant != null)
-			return variant.getAllocs((Obs) o);
-			
-//	Hmm, this is a little too intense. Let's not do this.
+        if (o instanceof Marker)
+            for (Object e: ((Marker) o).getPath())
+                if (e instanceof Alloc)
+                    return Collections.singleton((Alloc) e);
+                
+        if (o instanceof Obs && variant != null)
+            return variant.getAllocs((Obs) o);
+            
+//    Hmm, this is a little too intense. Let's not do this.
 //
-//		if (o instanceof Variant && variant != null)
-//			return variant.getAllocs();
-		
-		return Collections.emptySet();
-	}
+//        if (o instanceof Variant && variant != null)
+//            return variant.getAllocs();
+        
+        return Collections.emptySet();
+    }
 
-	public void modelChanged(GViewer<Variant, Alloc> viewer, Variant oldModel, Variant newModel) {
-		variant = newModel;
-	}
+    public void modelChanged(GViewer<Variant, Alloc> viewer, Variant oldModel, Variant newModel) {
+        variant = newModel;
+    }
 
 }

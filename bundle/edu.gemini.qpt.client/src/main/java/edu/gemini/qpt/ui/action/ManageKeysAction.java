@@ -22,24 +22,24 @@ import java.util.logging.Logger;
  */
 public class ManageKeysAction extends AbstractAction {
 
-	@SuppressWarnings("unused")
-	private static final Logger LOGGER = Logger.getLogger(ManageKeysAction.class.getName());
-	private static final long serialVersionUID = 1L;
+    @SuppressWarnings("unused")
+    private static final Logger LOGGER = Logger.getLogger(ManageKeysAction.class.getName());
+    private static final long serialVersionUID = 1L;
 
-	private final IShell shell;
-	private final KeyChain authClient;
+    private final IShell shell;
+    private final KeyChain authClient;
 
-	public ManageKeysAction(IShell shell, KeyChain authClient) {
-		super("Manage Keys...");
-		this.shell = shell;
+    public ManageKeysAction(IShell shell, KeyChain authClient) {
+        super("Manage Keys...");
+        this.shell = shell;
         this.authClient = authClient;
-	}
+    }
 
-	/**
-	 * Save the current schedule if it needs it, then set the model to null.
-	 */
-	@SuppressWarnings("unchecked")
-	public void actionPerformed(ActionEvent e) {
+    /**
+     * Save the current schedule if it needs it, then set the model to null.
+     */
+    @SuppressWarnings("unchecked")
+    public void actionPerformed(ActionEvent e) {
         AuthDialog$.MODULE$.open(authClient, (JComponent) shell.getPeer().getContentPane());
     }
 

@@ -12,26 +12,26 @@ import edu.gemini.qpt.core.util.MarkerManager;
  */
 public class EmptyScheduleListener extends MarkerModelListener<Schedule> {
 
-	public void propertyChange(PropertyChangeEvent evt) {
-		Schedule s = (Schedule) evt.getSource();
-		MarkerManager mm = s.getMarkerManager();
+    public void propertyChange(PropertyChangeEvent evt) {
+        Schedule s = (Schedule) evt.getSource();
+        MarkerManager mm = s.getMarkerManager();
 
-		mm.clearMarkers(this, s);
-		
-		if (s.getBlocks().size() == 0) {
-			mm.addMarker(true, this, Severity.Info, "Schedule contains no blocks.", s);
-		}
-		
-		if (s.getVariants().size() == 0) {
-			mm.addMarker(true, this, Severity.Info, "Schedule contains no variants.", s);
-		}
+        mm.clearMarkers(this, s);
+        
+        if (s.getBlocks().size() == 0) {
+            mm.addMarker(true, this, Severity.Info, "Schedule contains no blocks.", s);
+        }
+        
+        if (s.getVariants().size() == 0) {
+            mm.addMarker(true, this, Severity.Info, "Schedule contains no variants.", s);
+        }
 
-	}
+    }
 
-	protected MarkerManager getMarkerManager(Schedule t) {
-		return t.getMarkerManager();
-	}
-	
+    protected MarkerManager getMarkerManager(Schedule t) {
+        return t.getMarkerManager();
+    }
+    
 }
 
-					
+                    

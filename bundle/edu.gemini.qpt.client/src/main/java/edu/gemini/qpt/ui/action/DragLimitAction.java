@@ -15,26 +15,26 @@ import edu.gemini.ui.workspace.IShell;
 @SuppressWarnings("serial")
 public class DragLimitAction extends AbstractAction implements PropertyChangeListener {
 
-	private final IShell shell;
-	private final boolean up;
-	
-	public DragLimitAction(IShell shell, boolean up) {
-		super("Drag Limit " + (up ? "Higher" : "Lower"));
-		this.up = up;
-		this.shell = shell;
-		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(up ? KeyEvent.VK_UP : KeyEvent.VK_DOWN, Platform.MENU_ACTION_MASK | KeyEvent.SHIFT_DOWN_MASK));
-	}
-	
-	/**
-	 * Save the current schedule if it needs it, then set the model to null.
-	 */
-	public synchronized void actionPerformed(ActionEvent e) {
-		if (up) DragLimit.higher(); else DragLimit.lower();
-		Flash.flash(shell.getPeer(), DragLimit.caption());
-	}
+    private final IShell shell;
+    private final boolean up;
+    
+    public DragLimitAction(IShell shell, boolean up) {
+        super("Drag Limit " + (up ? "Higher" : "Lower"));
+        this.up = up;
+        this.shell = shell;
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(up ? KeyEvent.VK_UP : KeyEvent.VK_DOWN, Platform.MENU_ACTION_MASK | KeyEvent.SHIFT_DOWN_MASK));
+    }
+    
+    /**
+     * Save the current schedule if it needs it, then set the model to null.
+     */
+    public synchronized void actionPerformed(ActionEvent e) {
+        if (up) DragLimit.higher(); else DragLimit.lower();
+        Flash.flash(shell.getPeer(), DragLimit.caption());
+    }
 
-	public void propertyChange(PropertyChangeEvent evt) {		
-	}
+    public void propertyChange(PropertyChangeEvent evt) {        
+    }
 
 }
 

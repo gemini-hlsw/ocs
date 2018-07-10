@@ -47,15 +47,15 @@ public final class ImprovedSkyCalc extends ImprovedSkyCalcMethods {
 
     public void calculate(final WorldCoords obj, final Date date, final boolean calculateMoon) {
 
-    	// Early exit if the parameters haven't changed.
-    	if (obj.equals(cachedCoordinates) &&
-    		date.equals(cachedDate) &&
-    		calculateMoon == cachedCalculateMoon)
-    		return;
+        // Early exit if the parameters haven't changed.
+        if (obj.equals(cachedCoordinates) &&
+            date.equals(cachedDate) &&
+            calculateMoon == cachedCalculateMoon)
+            return;
 
-    	cachedCoordinates = obj;
-    	cachedDate = date;
-    	cachedCalculateMoon = calculateMoon;
+        cachedCoordinates = obj;
+        cachedDate = date;
+        cachedCalculateMoon = calculateMoon;
 
         final DateTime dateTime = new DateTime(date);
         final DoubleRef jdut = new DoubleRef();
@@ -91,45 +91,45 @@ public final class ImprovedSkyCalc extends ImprovedSkyCalcMethods {
         parallacticAngle = par.d;
         hourAngle = ha;
 
-		if (calculateMoon) {
+        if (calculateMoon) {
 
-			final DoubleRef ramoon = new DoubleRef();
-			final DoubleRef decmoon= new DoubleRef();
-			final DoubleRef distmoon = new DoubleRef();
-			final DoubleRef georamoon = new DoubleRef();
-			final DoubleRef geodecmoon = new DoubleRef();
-			final DoubleRef geodistmoon = new DoubleRef();
-			final DoubleRef rasun = new DoubleRef();
-			final DoubleRef decsun = new DoubleRef();
-			final DoubleRef distsun = new DoubleRef();
-			final DoubleRef x = new DoubleRef();
-			final DoubleRef y = new DoubleRef();
-			final DoubleRef z = new DoubleRef();
-			final DoubleRef toporasun = new DoubleRef();
-			final DoubleRef topodecsun = new DoubleRef();
-			final double elevsea = siteAltitude;
+            final DoubleRef ramoon = new DoubleRef();
+            final DoubleRef decmoon= new DoubleRef();
+            final DoubleRef distmoon = new DoubleRef();
+            final DoubleRef georamoon = new DoubleRef();
+            final DoubleRef geodecmoon = new DoubleRef();
+            final DoubleRef geodistmoon = new DoubleRef();
+            final DoubleRef rasun = new DoubleRef();
+            final DoubleRef decsun = new DoubleRef();
+            final DoubleRef distsun = new DoubleRef();
+            final DoubleRef x = new DoubleRef();
+            final DoubleRef y = new DoubleRef();
+            final DoubleRef z = new DoubleRef();
+            final DoubleRef toporasun = new DoubleRef();
+            final DoubleRef topodecsun = new DoubleRef();
+            final double elevsea = siteAltitude;
 
-			accusun(jdut.d,sid,degreesLatitude,rasun,decsun,distsun, toporasun,topodecsun,x,y,z);
-			sunAltitude=altit(topodecsun.d,(sid-toporasun.d),degreesLatitude,az, new DoubleRef() /* [out] parang, ignored */);
+            accusun(jdut.d,sid,degreesLatitude,rasun,decsun,distsun, toporasun,topodecsun,x,y,z);
+            sunAltitude=altit(topodecsun.d,(sid-toporasun.d),degreesLatitude,az, new DoubleRef() /* [out] parang, ignored */);
 
-			accumoon(jdut.d,degreesLatitude,sid,elevsea,georamoon,geodecmoon,geodistmoon, ramoon,decmoon,distmoon);
-			lunarElevation=altit(decmoon.d,(sid-ramoon.d),degreesLatitude,az, new DoubleRef()  /* [out] parang, ignored */);
+            accumoon(jdut.d,degreesLatitude,sid,elevsea,georamoon,geodecmoon,geodistmoon, ramoon,decmoon,distmoon);
+            lunarElevation=altit(decmoon.d,(sid-ramoon.d),degreesLatitude,az, new DoubleRef()  /* [out] parang, ignored */);
 
-			// Sky brightness
-			lunarSkyBrightness = null;
-			lunarDistance = DEG_IN_RADIAN * subtend(ramoon.d,decmoon.d,objra,objdec);
-			lunarPhaseAngle = DEG_IN_RADIAN * subtend(ramoon.d,decmoon.d,toporasun.d,topodecsun.d);
-			if(lunarElevation > -2.) {
-				if((lunarElevation > 0.) && (altitude > 0.5) && (sunAltitude < -9.)) {
-				  lunarSkyBrightness =
-				     lunskybright(lunarPhaseAngle,lunarDistance,KZEN,lunarElevation,
-						altitude,distmoon.d);
-				}
-			}
-			totalSkyBrightness = sb(180. - lunarPhaseAngle, lunarDistance, 90 - lunarElevation, 90 - altitude, 90 - sunAltitude);
-			lunarIlluminatedFraction=(float) (0.5*(1.-cos(subtend(ramoon.d,decmoon.d,rasun.d,decsun.d))));
+            // Sky brightness
+            lunarSkyBrightness = null;
+            lunarDistance = DEG_IN_RADIAN * subtend(ramoon.d,decmoon.d,objra,objdec);
+            lunarPhaseAngle = DEG_IN_RADIAN * subtend(ramoon.d,decmoon.d,toporasun.d,topodecsun.d);
+            if(lunarElevation > -2.) {
+                if((lunarElevation > 0.) && (altitude > 0.5) && (sunAltitude < -9.)) {
+                  lunarSkyBrightness =
+                     lunskybright(lunarPhaseAngle,lunarDistance,KZEN,lunarElevation,
+                        altitude,distmoon.d);
+                }
+            }
+            totalSkyBrightness = sb(180. - lunarPhaseAngle, lunarDistance, 90 - lunarElevation, 90 - altitude, 90 - sunAltitude);
+            lunarIlluminatedFraction=(float) (0.5*(1.-cos(subtend(ramoon.d,decmoon.d,rasun.d,decsun.d))));
 
-		}
+        }
     }
 
     /**
@@ -158,35 +158,35 @@ public final class ImprovedSkyCalc extends ImprovedSkyCalcMethods {
         return airmass;
     }
 
-	public double getHourAngle() {
-		return hourAngle;
-	}
+    public double getHourAngle() {
+        return hourAngle;
+    }
 
     public float getLunarIlluminatedFraction() {
-		return lunarIlluminatedFraction;
-	}
+        return lunarIlluminatedFraction;
+    }
 
     public Double getLunarSkyBrightness() {
-    	return lunarSkyBrightness;
+        return lunarSkyBrightness;
     }
 
     public Double getTotalSkyBrightness() {
-    	return totalSkyBrightness;
+        return totalSkyBrightness;
     }
 
     public double getLunarPhaseAngle() {
-		return lunarPhaseAngle;
-	}
+        return lunarPhaseAngle;
+    }
     public double getSunAltitude() {
-		return sunAltitude;
-	}
+        return sunAltitude;
+    }
 
     public double getLunarDistance() {
-    	return lunarDistance;
+        return lunarDistance;
     }
 
     public double getLunarElevation() {
-    	return lunarElevation;
+        return lunarElevation;
     }
 
 }

@@ -143,7 +143,7 @@ class VariantEditor extends JDialog {
                     });
                 }});
                 add(new JButton("Cancel") {{
-//					NewDialog.this.getRootPane().set;
+//                    NewDialog.this.getRootPane().set;
                     addActionListener(e -> {
                         result = CANCEL_OPTION;
                         VariantEditor.this.setVisible(false);

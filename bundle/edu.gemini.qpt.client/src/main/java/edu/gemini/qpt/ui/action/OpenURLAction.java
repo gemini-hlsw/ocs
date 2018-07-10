@@ -13,26 +13,26 @@ import edu.gemini.qpt.ui.util.Platform;
 @SuppressWarnings("serial")
 public class OpenURLAction extends AbstractAction {
 
-	private static final Logger LOGGER = Logger.getLogger(OpenURLAction.class.getName());
-	
-	private final String url;
-	
-	public OpenURLAction(String url, String title) {
-		super(title);
-		this.url = url;
-	}
+    private static final Logger LOGGER = Logger.getLogger(OpenURLAction.class.getName());
+    
+    private final String url;
+    
+    public OpenURLAction(String url, String title) {
+        super(title);
+        this.url = url;
+    }
 
-	public OpenURLAction(String url, String title, KeyStroke ks) {
-		this(url, title);
-		putValue(ACCELERATOR_KEY, ks);
-	}
+    public OpenURLAction(String url, String title, KeyStroke ks) {
+        this(url, title);
+        putValue(ACCELERATOR_KEY, ks);
+    }
 
-	public void actionPerformed(ActionEvent e) {
-		try {
-			Platform.displayURL(url);
-		} catch (IOException ioe) {
-			LOGGER.log(Level.SEVERE, "Trouble opening " + url, ioe);
-		}
-	}
+    public void actionPerformed(ActionEvent e) {
+        try {
+            Platform.displayURL(url);
+        } catch (IOException ioe) {
+            LOGGER.log(Level.SEVERE, "Trouble opening " + url, ioe);
+        }
+    }
 
 }

@@ -121,7 +121,7 @@ public class PlotViewer extends GViewer<Variant, Alloc> {
             if (extend) {
 
                 // Shift-clicking on nothig is a meaningless operation. Ignore it.
-                if (a == null)	return;
+                if (a == null)    return;
 
                 // Ok, we will mimic Java-style selection extension. The anchor is
                 // always the first element of the current selection, which is extended
@@ -157,7 +157,7 @@ public class PlotViewer extends GViewer<Variant, Alloc> {
             } else {
 
                 // The selection is simply what we clicked on.
-                sel = a == null ? GSelection.<Alloc>emptySelection() :	new GSelection<Alloc>(a);
+                sel = a == null ? GSelection.<Alloc>emptySelection() :    new GSelection<Alloc>(a);
 
                 // If it's already selected, we don't want to do anything yet because
                 // the user might make a drag gesture. If the mouseup is on the same

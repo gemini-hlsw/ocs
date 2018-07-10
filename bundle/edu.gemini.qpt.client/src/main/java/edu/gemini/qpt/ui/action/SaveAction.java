@@ -26,73 +26,73 @@ import edu.gemini.util.security.auth.keychain.KeyChain;
  */
 public class SaveAction extends AbstractAsyncAction implements PropertyChangeListener {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	protected final IShell shell;
+    protected final IShell shell;
 
-	public SaveAction(IShell shell, KeyChain authClient) {
-		this("Save", shell, authClient);
-		setEnabled(false);
-	}
+    public SaveAction(IShell shell, KeyChain authClient) {
+        this("Save", shell, authClient);
+        setEnabled(false);
+    }
 
-	protected SaveAction(String name, IShell shell, KeyChain authClient) {
-		super(name, authClient);
-		this.shell = shell;
-		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, Platform.MENU_ACTION_MASK));
-		shell.addPropertyChangeListener(this);
-	}
+    protected SaveAction(String name, IShell shell, KeyChain authClient) {
+        super(name, authClient);
+        this.shell = shell;
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, Platform.MENU_ACTION_MASK));
+        shell.addPropertyChangeListener(this);
+    }
 
-	public void asyncActionPerformed(ActionEvent e) {
+    public void asyncActionPerformed(ActionEvent e) {
 
-		Schedule sched = (Schedule) shell.getModel();
+        Schedule sched = (Schedule) shell.getModel();
 
-		if (sched.getFile() == null) {
+        if (sched.getFile() == null) {
 
-			// [SCT-318] delegate to Save As in this case
-			new SaveAsAction(shell, authClient).actionPerformed(e);
+            // [SCT-318] delegate to Save As in this case
+            new SaveAsAction(shell, authClient).actionPerformed(e);
 
-		} else {
+        } else {
 
-			shell.getPeer().getGlassPane().setVisible(true);
+            shell.getPeer().getGlassPane().setVisible(true);
 
-			ProgressModel pm = new ProgressModel("Saving...", 0);
-			pm.setIndeterminate(true);
-			ProgressDialog pd = new ProgressDialog(shell.getPeer(), getName(), false, pm);
-			pd.setVisible(true);
+            ProgressModel pm = new ProgressModel("Saving...", 0);
+            pm.setIndeterminate(true);
+            ProgressDialog pd = new ProgressDialog(shell.getPeer(), getName(), false, pm);
+            pd.setVisible(true);
 
-			try {
-				ScheduleIO.write(sched, sched.getFile());
-				sched.setDirty(false);
-				updateEnabledState(sched);
-			} catch (IOException ioe) {
-				pd.setVisible(false);
-				JOptionPane.showMessageDialog(shell.getPeer(),
-					"This schedule could not be saved. The error was:\n" + ioe.getMessage(),
-					"Problem Saving Schedule", JOptionPane.ERROR_MESSAGE);
-			} finally {
-				pd.setVisible(false);
-				pd.dispose();
-				shell.getPeer().getGlassPane().setVisible(false);
-			}
+            try {
+                ScheduleIO.write(sched, sched.getFile());
+                sched.setDirty(false);
+                updateEnabledState(sched);
+            } catch (IOException ioe) {
+                pd.setVisible(false);
+                JOptionPane.showMessageDialog(shell.getPeer(),
+                    "This schedule could not be saved. The error was:\n" + ioe.getMessage(),
+                    "Problem Saving Schedule", JOptionPane.ERROR_MESSAGE);
+            } finally {
+                pd.setVisible(false);
+                pd.dispose();
+                shell.getPeer().getGlassPane().setVisible(false);
+            }
 
-		}
-	}
+        }
+    }
 
-	public void propertyChange(PropertyChangeEvent evt) {
-		if (evt.getPropertyName().equals(IShell.PROP_MODEL)) {
-			Schedule prev = (Schedule) evt.getOldValue();
-			Schedule next = (Schedule) evt.getNewValue();
-			if (prev != null) prev.removePropertyChangeListener(this);
-			if (next != null) next.addPropertyChangeListener(Schedule.PROP_DIRTY, this);
-			updateEnabledState(next);
-		} else if (evt.getPropertyName().equals(Schedule.PROP_DIRTY)) {
-			Schedule s = (Schedule) evt.getSource();
-			updateEnabledState(s);
-		}
-	}
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getPropertyName().equals(IShell.PROP_MODEL)) {
+            Schedule prev = (Schedule) evt.getOldValue();
+            Schedule next = (Schedule) evt.getNewValue();
+            if (prev != null) prev.removePropertyChangeListener(this);
+            if (next != null) next.addPropertyChangeListener(Schedule.PROP_DIRTY, this);
+            updateEnabledState(next);
+        } else if (evt.getPropertyName().equals(Schedule.PROP_DIRTY)) {
+            Schedule s = (Schedule) evt.getSource();
+            updateEnabledState(s);
+        }
+    }
 
-	protected void updateEnabledState(Schedule s) {
-		setEnabled(s != null && s.isDirty());
-	}
+    protected void updateEnabledState(Schedule s) {
+        setEnabled(s != null && s.isDirty());
+    }
 
 }
