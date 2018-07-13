@@ -1,5 +1,6 @@
 package edu.gemini.qpt.core;
 
+import edu.gemini.ictd.CustomMaskKey;
 import edu.gemini.qpt.core.Marker.Severity;
 import edu.gemini.qpt.core.util.*;
 import edu.gemini.qpt.core.util.Interval.Overlap;
@@ -11,7 +12,6 @@ import edu.gemini.qpt.shared.sp.*;
 import edu.gemini.qpt.shared.util.PioSerializable;
 import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.shared.util.immutable.ImOption;
-import edu.gemini.spModel.core.ProgramId;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.ictd.Availability;
 import edu.gemini.spModel.obs.SPObservation.Priority;
@@ -689,15 +689,20 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
                 // custom mask, check its availability.
                 final EnumSet<Flag> maskFlags = EnumSet.noneOf(Flag.class);
                 ImOption.apply(obs.getCustomMask()).filter(m -> !m.trim().isEmpty() && shouldCheckMaskAvailability(obs)).foreach(m -> {
-                    final ProgramId pid = obs.getProg().getStructuredProgramId();
-                    if (pid instanceof ProgramId.Science) {
-                        final Availability a = owner.maskAvailability((ProgramId.Science) pid, m);
-                        if (a == Availability.SummitCabinet) {
-                            maskFlags.add(Flag.MASK_IN_CABINET);
-                        } else if (a != Availability.Installed) {
-                            maskFlags.add(Flag.MASK_UNAVAILABLE);
-                        }
+
+                    // We parse the custom mask name into a CustomMaskKey if
+                    // possible and use it to lookup the Availability.
+                    final Availability a =
+                        ImOption.fromScalaOpt(CustomMaskKey.parse(m))
+                            .map(k -> owner.maskAvailability(k))
+                            .getOrElse(Availability.Missing);
+
+                    if (a == Availability.SummitCabinet) {
+                        maskFlags.add(Flag.MASK_IN_CABINET);
+                    } else if (a != Availability.Installed) {
+                        maskFlags.add(Flag.MASK_UNAVAILABLE);
                     }
+
                 });
                 facilitiesFlags.addAll(maskFlags);
 

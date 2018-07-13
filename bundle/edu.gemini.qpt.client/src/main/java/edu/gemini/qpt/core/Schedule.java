@@ -256,12 +256,9 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
      * Determines the availability of the indicated custom mask.  Note, if there
      * is no ICTD data, we assume that the mask is available.
      */
-    public Availability maskAvailability(ProgramId.Science pid, String name) {
-        final CustomMaskKey k = new CustomMaskKey(pid, name);
-
-        // Assume Installed if there is no ICTD data whatsoever.
-        return getIctd().map(i -> i.maskAvailability.getOrDefault(k, Availability.Missing))
-                        .getOrElse(Availability.Installed);
+    public Availability maskAvailability(CustomMaskKey key) {
+        return getIctd().map(i -> i.maskAvailability.getOrDefault(key, Availability.Missing))
+                        .getOrElse(Availability.Installed); // no ICTD => assume installed
     }
 
     public void moveAllocs(long offset) {
