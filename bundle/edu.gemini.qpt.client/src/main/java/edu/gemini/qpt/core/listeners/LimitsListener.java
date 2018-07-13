@@ -20,8 +20,11 @@ import edu.gemini.qpt.core.util.MarkerManager;
 import edu.gemini.qpt.shared.sp.Obs;
 import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.skycalc.TwilightBoundedNight;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.SPGroup.GroupType;
+
+import static edu.gemini.skycalc.TwilightBoundType.NAUTICAL;
 
 /**
  * Generates Alloc markers.
@@ -97,7 +100,8 @@ public class LimitsListener extends MarkerModelListener<Variant> {
                 mm.addMarker(false, this, Severity.Warning, msg, v, a);
             }
 
-            final Supplier<Union<Interval>> wholeNight = () -> new Union<>(new Interval(v.getSchedule().getStart(), v.getSchedule().getEnd()));
+            final TwilightBoundedNight tbn = TwilightBoundedNight.forTime(NAUTICAL, a.getStart(), v.getSchedule().getSite());
+            final Supplier<Union<Interval>> wholeNight = () -> new Union<>(new Interval(tbn.getStartTime(), tbn.getEndTime()));
 
             final Predicate<String> contributes =
                 (cacheName) -> {
