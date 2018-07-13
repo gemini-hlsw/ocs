@@ -3,7 +3,9 @@ package edu.gemini.qpt.shared.sp;
 import edu.gemini.ictd.CustomMaskKey;
 import edu.gemini.ictd.IctdDatabase;
 import edu.gemini.shared.util.immutable.ImEither;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Left;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Right;
 import edu.gemini.spModel.core.ProgramId;
 import edu.gemini.spModel.core.ProgramId$;
@@ -81,7 +83,6 @@ public final class Ictd implements Serializable, PioSerializable {
     public static final String MASK    = "mask";
     public static final String ENTRY   = "entry";
     public static final String AVAIL   = "avail";
-    public static final String PID     = "pid";
     public static final String NAME    = "name";
 
 
@@ -108,11 +109,21 @@ public final class Ictd implements Serializable, PioSerializable {
         final ParamSet mask = params.getParamSet(MASK);
         final Map<CustomMaskKey, Availability> m = new HashMap<>();
         for (ParamSet entry : mask.getParamSets(ENTRY)) {
-            final String            ps = Pio.getValue(entry, PID);
-            final ProgramId.Science p  = (ProgramId.Science) ProgramId$.MODULE$.parse(ps);
-            final String            n  = Pio.getValue(entry, NAME);
-            final Availability      a  = Pio.getEnumValue(entry, AVAIL, Availability.Missing);
-            m.put(new CustomMaskKey(p, n), a);
+
+            // Mask Key
+            final Option<CustomMaskKey> ok =
+                ImOption.apply(Pio.getValue(entry, NAME))
+                        .flatMap(s -> ImOption.fromScalaOpt(CustomMaskKey.parse(s)));
+
+            if (ok.isEmpty()) {
+                LOGGER.warning("Missing or unparseable mask key: " + Pio.getValue(entry, NAME));
+            }
+
+            // Availability
+            final Availability a = Pio.getEnumValue(entry, AVAIL, Availability.Missing);
+
+            // Add an entry to the map
+            ok.foreach(k -> m.put(k, a));
         }
 
         this.featureAvailability = Collections.unmodifiableMap(f);
@@ -133,8 +144,7 @@ public final class Ictd implements Serializable, PioSerializable {
         final ParamSet mask = factory.createParamSet(MASK);
         for (Map.Entry<CustomMaskKey, Availability> me: maskAvailability.entrySet()) {
             final ParamSet e = factory.createParamSet(ENTRY);
-            Pio.addParam(factory, e, PID,   me.getKey().id().toString());
-            Pio.addParam(factory, e, NAME,  me.getKey().name());
+            Pio.addParam    (factory, e, NAME,  me.getKey().format());
             Pio.addEnumParam(factory, e, AVAIL, me.getValue());
             mask.addParamSet(e);
         }

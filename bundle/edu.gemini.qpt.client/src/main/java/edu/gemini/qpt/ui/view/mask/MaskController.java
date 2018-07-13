@@ -29,7 +29,7 @@ public final class MaskController implements GTableController<Schedule, Map.Entr
     @Override
     public Object getSubElement(Map.Entry<CustomMaskKey, Availability> element, MaskAttribute subElement) {
         switch (subElement) {
-            case Name:         return element.getKey().name();
+            case Name:         return element.getKey().format();
             case Availability: return element.getValue();
             default:           throw new IllegalArgumentException(subElement.name());
         }
@@ -72,7 +72,7 @@ public final class MaskController implements GTableController<Schedule, Map.Entr
         Arrays.sort(entries, new Comparator<Map.Entry<CustomMaskKey, Availability>>() {
             @Override
             public int compare(Map.Entry<CustomMaskKey, Availability> e1, Map.Entry<CustomMaskKey, Availability> e2) {
-                return e1.getKey().name().compareTo(e2.getKey().name());
+                return CustomMaskKey.OrderingCustomMaskKey().compare(e1.getKey(), e2.getKey());
             }
         });
     }

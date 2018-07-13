@@ -59,8 +59,11 @@ object ProgramId {
 
     lazy val toSp: SPProgramID     = SPProgramID.toProgramID(toString)
 
-    override def toString: String =
+    def format: String =
       s"${siteVal.abbreviation}-${semesterVal.toString}-${ptypeVal.abbreviation}-$index"
+
+    override def toString: String =
+      format
   }
 
   case class Daily(siteVal: Site, ptypeVal: ProgramType, year: Int, month: Int, day: Int) extends StandardProgramId {
@@ -137,6 +140,12 @@ object ProgramId {
     parse(s) match {
       case s: StandardProgramId => Some(s)
       case _                    => None
+    }
+
+  def parseScienceId(s: String): Option[Science] =
+    parse(s) match {
+      case pid: Science => Some(pid)
+      case _            => None
     }
 }
 
