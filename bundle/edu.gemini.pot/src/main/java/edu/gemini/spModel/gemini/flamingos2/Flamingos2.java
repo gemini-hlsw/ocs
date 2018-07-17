@@ -867,9 +867,9 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     }
 
 
-    public static double getImagingSetupSec(Config[] conf) {
-        if (conf[0].containsItem(GUIDE_WITH_OIWFS_KEY)) {
-            String guideWithOIWFS = conf[0].getItemValue(GUIDE_WITH_OIWFS_KEY).toString();
+    public static double getImagingSetupSec(Config conf) {
+        if (conf.containsItem(GUIDE_WITH_OIWFS_KEY)) {
+            String guideWithOIWFS = conf.getItemValue(GUIDE_WITH_OIWFS_KEY).toString();
             if (guideWithOIWFS.equals("guide")) {
                 return IMAGING_SETUP_TIME_OIWFS;
             }
@@ -915,23 +915,26 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     }
 
     // for ITC overheads
-    public double getSetupTime(Config[] conf) {
-        if (isImaging(conf)) return getImagingSetupSec(conf);
+    public double getSetupTime(Config conf) {
+        if (isImagingConfig(conf)) return getImagingSetupSec(conf);
         return getSpectroscopySetupSec();
     }
 
     /**
      * Is the instrument in imaging mode.
      */
-    private boolean isImaging() {
-        return (_fpu == FPUnit.FPU_NONE) && (_disperser == Disperser.NONE);
+    private static boolean isImagingConfig(FPUnit fpu, Disperser disperser) {
+        return (fpu == FPUnit.FPU_NONE) && (disperser == Disperser.NONE);
     }
 
-    private boolean isImaging(Config[] conf) {
-        _fpu = (FPUnit) conf[0].getItemValue(FPUnit.KEY);
-        _disperser = (Disperser) conf[0].getItemValue(Disperser.KEY);
+    private static boolean isImagingConfig(Config conf) {
+        return isImagingConfig(
+                (FPUnit) conf.getItemValue(FPUnit.KEY),
+                (Disperser) conf.getItemValue(Disperser.KEY));
+    }
 
-        return (_fpu == FPUnit.FPU_NONE) && (_disperser == Disperser.NONE);
+    private boolean isImaging() {
+        return isImagingConfig(_fpu, _disperser);
     }
 
 

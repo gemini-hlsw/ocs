@@ -436,8 +436,8 @@ public abstract class InstGmosCommon<
         return SETUP_TIME_IFU_MOS;
     }
 
-    public double getSetupTime(Config[] conf) {
-        String fpu_name = (String) conf[0].getItemValue(FPU_KEY);
+    public double getSetupTime(Config conf) {
+        String fpu_name = (String) conf.getItemValue(FPU_KEY);
         if (!fpu_name.equals("None")) {
             if (!fpu_name.startsWith("IFU")) {
                 return SETUP_TIME_LS_SPECTROSCOPY;

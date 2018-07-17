@@ -61,8 +61,7 @@ public final class NifsPrinter extends PrinterBase implements OverheadTablePrint
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
-        OverheadTablePrinter overheadTablePrinter = new OverheadTablePrinter(this, p, getReadoutTimePerCoadd(), result, s);
-        _println(overheadTablePrinter.printOverheadTable());
+        _print(OverheadTablePrinter.print(this, p, getReadoutTimePerCoadd(), result, s));
 
         _print("<HR align=left SIZE=3>");
 

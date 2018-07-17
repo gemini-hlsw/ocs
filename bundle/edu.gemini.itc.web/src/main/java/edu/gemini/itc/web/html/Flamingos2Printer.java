@@ -73,8 +73,7 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
-        OverheadTablePrinter overheadTablePrinter = new OverheadTablePrinter(this, p, result);
-        _println(overheadTablePrinter.printOverheadTable());
+        _print(OverheadTablePrinter.print(this, p, result));
 
         _print("<HR align=left SIZE=3>");
 
@@ -113,8 +112,7 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
-        OverheadTablePrinter overheadTablePrinter = new OverheadTablePrinter(this, p, result);
-        _println(overheadTablePrinter.printOverheadTable());
+        _print(OverheadTablePrinter.print(this, p, result));
 
         printConfiguration((Flamingos2) result.instrument(), result.parameters());
     }

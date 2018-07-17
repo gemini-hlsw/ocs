@@ -121,8 +121,7 @@ public final class NiriPrinter extends PrinterBase implements OverheadTablePrint
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
-        OverheadTablePrinter overheadTablePrinter = new OverheadTablePrinter(this, p, getReadoutTimePerCoadd(), result);
-        _println(overheadTablePrinter.printOverheadTable());
+        _print(OverheadTablePrinter.print(this, p, getReadoutTimePerCoadd(), result));
 
         printConfiguration(result.parameters(), instrument, result.aoSystem());
 

@@ -270,10 +270,10 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
         return (altair == null) ? getSetupTime(mode) : getSetupTime(mode, altair.getMode());
     }
 
-    public double getSetupTime(Config[] conf) {
-        String aoSystem = (String) conf[0].getItemValue(AOConstants.AO_SYSTEM_KEY);
-        String guideStarType = (String) conf[0].getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
-        String disperser = (String) conf[0].getItemValue(DISPERSER_KEY);
+    public double getSetupTime(Config conf) {
+        String aoSystem = (String) conf.getItemValue(AOConstants.AO_SYSTEM_KEY);
+        String guideStarType = (String) conf.getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
+        String disperser = (String) conf.getItemValue(DISPERSER_KEY);
 
         Mode mode;
         AltairParams.Mode altairMode = null;
@@ -283,7 +283,7 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
             mode = Mode.spectroscopy;
         }
 
-        if (conf[0].containsItem(AOConstants.AO_SYSTEM_KEY) && aoSystem.equals("Altair")) {
+        if (conf.containsItem(AOConstants.AO_SYSTEM_KEY) && aoSystem.equals("Altair")) {
             if (guideStarType.equals("LGS")) {
                 altairMode = AltairParams.Mode.LGS;
             } else if (guideStarType.equals("NGS")) {
@@ -291,7 +291,7 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
             }
         }
 
-        if (!conf[0].containsItem(AOConstants.AO_SYSTEM_KEY))  {
+        if (!conf.containsItem(AOConstants.AO_SYSTEM_KEY))  {
             return getSetupTime(mode);
         } else {
             return getSetupTime(mode, altairMode);

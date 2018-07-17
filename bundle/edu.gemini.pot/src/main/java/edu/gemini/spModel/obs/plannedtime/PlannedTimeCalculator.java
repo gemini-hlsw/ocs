@@ -74,13 +74,12 @@ public enum PlannedTimeCalculator {
     // for use in ITC
     public PlannedTime calc(Config[] conf, ItcOverheadProvider instr)  {
         ChargeClass obsChargeClass = ChargeClass.PROGRAM;
-        conf[0].getItemValue(InstConstants.INST_INSTRUMENT_KEY);
 
         // add the setup time for the instrument
         double setupTime = 15 * 60; // default setup time
         double reacqTime = 0;       // default reacquisition time
         if (instr != null) {
-            setupTime = instr.getSetupTime(conf);
+            setupTime = instr.getSetupTime(conf[0]);
             reacqTime = instr.getReacquisitionTime();
         }
         Setup setup = Setup.fromSeconds(setupTime, reacqTime, obsChargeClass);

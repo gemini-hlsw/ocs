@@ -1,16 +1,14 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.base.ImagingResult;
-import edu.gemini.itc.base.Result;
 import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.gmos.Gmos;
 import edu.gemini.itc.gmos.GmosRecipe;
 import edu.gemini.itc.gmos.GmosSaturLimitRule;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.config2.Config;
+import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.gmos.*;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
-import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
 
 import java.io.PrintWriter;
 import java.util.*;
@@ -91,8 +89,7 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
             }
         }
 
-        OverheadTablePrinter overheadTablePrinter = new OverheadTablePrinter(this, p, results[0], s);
-        _println(overheadTablePrinter.printOverheadTable());
+        _print(OverheadTablePrinter.print(this, p, results[0], s));
 
         _print("<HR align=left SIZE=3>");
 
@@ -173,8 +170,7 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
             }
         }
 
-        OverheadTablePrinter overheadTablePrinter = new OverheadTablePrinter(this, p, results[0]);
-        _println(overheadTablePrinter.printOverheadTable());
+        _print(OverheadTablePrinter.print(this, p, results[0]));
 
 
         printConfiguration(results[0].parameters(), instrument);
@@ -255,9 +251,9 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
     }
 
     public PlannedTime.ItcOverheadProvider getInst() {
-        if (instr.site().displayName.equals("Gemini North")) {
+        if (instr.site().equals(Site.GN)) {
             return new InstGmosNorth();
-        } else if (instr.site().displayName.equals("Gemini South")) {
+        } else if (instr.site().equals(Site.GS)) {
             return new InstGmosSouth();
         } else {
             throw new Error("invalid site");

@@ -60,15 +60,6 @@ sealed abstract class ITCRequest {
       }
   }
 
-  /** Gets the named value as an integer. */
-  def intParameterCoadd(name: String): Int = parameter(name).trim() match {
-    case ""   => 0
-    case i    =>
-      try i.toInt catch {
-        case _: IllegalArgumentException => 1
-      }
-  }
-
   /** Gets the named value as a boolean, it accepts several types of strings as true/false. */
   def booleanParameter(name: String): Boolean = java.lang.Boolean.parseBoolean(parameter(name).trim())
 

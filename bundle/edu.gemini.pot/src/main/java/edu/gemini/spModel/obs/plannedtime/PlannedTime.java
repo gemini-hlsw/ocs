@@ -48,7 +48,7 @@ public final class PlannedTime implements Serializable {
     }
 
     public interface ItcOverheadProvider {
-        double getSetupTime(Config[] conf);
+        double getSetupTime(Config conf);
         double getReacquisitionTime();
         CategorizedTimeGroup calc(Config stepConfig, Option<Config> prevStepConfig);
     }

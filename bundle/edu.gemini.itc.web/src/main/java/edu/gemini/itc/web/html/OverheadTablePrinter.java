@@ -28,13 +28,47 @@ public class OverheadTablePrinter {
     private Map<PlannedTime.Category, ImList<PlannedTime.CategorizedTime>> m;
     private ImList<PlannedTime.CategorizedTime> cts;
 
+    private class OverheadTablePrinterException extends Exception {
+        public OverheadTablePrinterException(String message) {
+            super(message);
+        }
+    }
+
     public interface PrinterWithOverhead {
         ConfigCreator.ConfigCreatorResult createInstConfig(int numberExposures);
         PlannedTime.ItcOverheadProvider getInst();
         double getReadoutTimePerCoadd(); // this should return "0" for instruments with no coadds
     }
 
-    public OverheadTablePrinter(PrinterWithOverhead printer, final ItcParameters params, final double readoutTimePerCoadd, Result result, ItcSpectroscopyResult sResult) {
+    public static String print (PrinterWithOverhead printer, final ItcParameters params, final double readoutTimePerCoadd, Result result, ItcSpectroscopyResult sResult) {
+        try {
+            OverheadTablePrinter otp = new OverheadTablePrinter(printer, params, readoutTimePerCoadd, result, sResult);
+
+            return otp.printOverheadTable();
+        }
+        catch (OverheadTablePrinterException exc) {
+            return exc.getMessage();
+        }
+    }
+
+    // instruments with no coadds, case of spectroscopy for instruments with IFU
+    public static String print (PrinterWithOverhead printer, ItcParameters p, Result r, ItcSpectroscopyResult sr) {
+        return print(printer, p, 0, r, sr);
+    }
+
+    // instruments with coadds, case of imaging, or case of spectroscopy for instruments with no IFU
+    public static String print(PrinterWithOverhead printer, ItcParameters p,  double readoutTimePerCoadd, Result r) {
+        return print(printer, p, readoutTimePerCoadd, r, null);
+    }
+
+    // instruments with no coadds, case of imaging, or case of spectroscopy for instruments with no IFU
+    public static String print(PrinterWithOverhead printer, ItcParameters p, Result r) {
+        return print(printer, p, 0, r, null);
+    }
+
+    private OverheadTablePrinter(PrinterWithOverhead printer, final ItcParameters params, final double readoutTimePerCoadd, Result result, ItcSpectroscopyResult sResult)
+            throws OverheadTablePrinterException
+    {
 
         final ObservationDetails obs = result.observation();
         final CalculationMethod calcMethod = obs.calculationMethod();
@@ -50,31 +84,19 @@ public class OverheadTablePrinter {
             this.numOfExposures = 1;
         }
 
-        this.r = sResult;
-        this.p = params;
-        this.ccResult = printer.createInstConfig(this.numOfExposures);
-        this.readoutTimePerCoadd = readoutTimePerCoadd;
-        this.pta = PlannedTimeCalculator.instance.calc(this.ccResult.getConfig(), printer.getInst());
-        this.instrumentName = (String) ccResult.getConfig()[0].getItemValue(ConfigCreator.InstInstrumentKey);
+        if (this.numOfExposures > 0) {
+            this.r = sResult;
+            this.p = params;
+            this.ccResult = printer.createInstConfig(this.numOfExposures);
+            this.readoutTimePerCoadd = readoutTimePerCoadd;
+            this.pta = PlannedTimeCalculator.instance.calc(this.ccResult.getConfig(), printer.getInst());
+            this.instrumentName = (String) ccResult.getConfig()[0].getItemValue(ConfigCreator.InstInstrumentKey);
+        } else {
+            throw new OverheadTablePrinterException("<b>Observation Overheads</b><br> Warning: Observation overheads cannot be calculated for the number of exposures = 0.");
+        }
     }
 
-    // instruments with no coadds, case of spectroscopy for instruments with IFU
-    public OverheadTablePrinter(PrinterWithOverhead printer, ItcParameters p, Result r, ItcSpectroscopyResult sr) {
-        this(printer, p, 0, r, sr);
-    }
-
-    // instruments with coadds, case of imaging, or case of spectroscopy for instruments with no IFU
-    public OverheadTablePrinter(PrinterWithOverhead printer, ItcParameters p,  double readoutTimePerCoadd, Result r) {
-        this(printer, p, readoutTimePerCoadd, r, null);
-    }
-
-    // instruments with no coadds, case of imaging, or case of spectroscopy for instruments with no IFU
-    public OverheadTablePrinter(PrinterWithOverhead printer, ItcParameters p, Result r) {
-        this(printer, p, 0, r, null);
-    }
-
-
-    public int getGsaoiLgsReacqNum() {
+    private int getGsaoiLgsReacqNum() {
         int gsaoiLgsReacqNum = 0;
 
         for (int i = 0; i < ccResult.getConfig().length; i++) {
@@ -97,7 +119,7 @@ public class OverheadTablePrinter {
     /**
      *  get number of reacquisitions
      */
-    public int getNumRecenter() {
+    private int getNumRecenter() {
         int numReacq = 0;
         if (p.observation().calculationMethod() instanceof Spectroscopy) {
             numReacq = pta.numRecenter(ccResult.getConfig()[0]);
@@ -111,7 +133,7 @@ public class OverheadTablePrinter {
         return numReacq;
     }
 
-    public boolean isIFU() {
+    private boolean isIFU() {
         String fpu = null;
         if (ccResult.getConfig()[0].containsItem(ConfigCreator.FPUKey)) {
             fpu = ccResult.getConfig()[0].getItemValue(ConfigCreator.FPUKey).toString();
@@ -123,7 +145,7 @@ public class OverheadTablePrinter {
         return false;
     }
 
-    public Map<Double, Integer> getOffsetsByOverhead() {
+    private Map<Double, Integer> getOffsetsByOverhead() {
         Map<Double, Integer> offsetsByOverhead = new HashMap<>();
 
         for (int i = 0; i < ccResult.getConfig().length; i++) {
@@ -143,8 +165,7 @@ public class OverheadTablePrinter {
         return offsetsByOverhead;
     }
 
-
-    public String printOverheadTable() {
+    private String printOverheadTable() {
         StringBuilder buf = new StringBuilder("<html><body>");
         buf.append("<table><tr><th>Observation Overheads</th></tr>");
 

@@ -665,7 +665,7 @@ public final class Gsaoi extends SPInstObsComp
         return MCAO_SETUP_TIME * 60;//MCAO setup time: 30m
     }
 
-    public double getSetupTime(Config[] conf) {
+    public double getSetupTime(Config conf) {
         return MCAO_SETUP_TIME * 60;//MCAO setup time: 30m
     }
 

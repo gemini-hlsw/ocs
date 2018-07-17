@@ -57,9 +57,9 @@ public class ConfigCreator {
     public static final double GSAOI_LARGE_SKY_OFFSET = 310.0; // arcsec (assumed in case of sky offset >5')
 
     public class ConfigCreatorResult {
-        private List<String> warnings;
+        private final List<String> warnings;
         private String offsetMessage;
-        Config[] config;
+        private final Config[] config;
 
         public ConfigCreatorResult(Config[] config) {
             warnings = new ArrayList<>();
@@ -101,6 +101,9 @@ public class ConfigCreator {
     public ConfigCreatorResult createCommonConfig(int numberExposures) {
         final CalculationMethod calcMethod = obsDetailParams.calculationMethod();
         ConfigCreatorResult result = new ConfigCreatorResult(new DefaultConfig[numberExposures]);
+        if (numberExposures < 1) {
+            result.addWarning("Warning: Observation overheads cannot be calculated for the number of exposures = 0.");
+        }
         int numberCoadds = calcMethod.coaddsOrElse(1);
         String offset = Double.toString(calcMethod.offset());
         // for spectroscopic observations we consider ABBA offset pattern
@@ -182,9 +185,9 @@ public class ConfigCreator {
         ConfigCreatorResult result = createCommonConfig(numExp);
 
         for (Config step : result.getConfig()) {
-            if (gmosParams.site().displayName.equals(Site.GN.displayName)) {
+            if (gmosParams.site().equals(Site.GN)) {
                 step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GMOS.readableStr);
-            } else if (gmosParams.site().displayName.equals(Site.GS.displayName)) {
+            } else if (gmosParams.site().equals(Site.GS)) {
                 step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GMOSSOUTH.readableStr);
             } else {
                 throw new Error("Invalid site");
@@ -262,7 +265,7 @@ public class ConfigCreator {
 
         if (!error) {
             if (numLargeOffsets == 0) {
-                if (sourceFraction == 1) {
+                if (sourceFraction == 1.0) {
                     Collections.fill(guideStatusList, g);
                     result.setOffsetMessage("ABAB dithering pattern and no sky offsets");
                 } else if (sourceFraction == 0.5) {
@@ -287,7 +290,7 @@ public class ConfigCreator {
                 int leftOver = numExp % numLargeOffsets;
 
                 if (numLargeOffsets > numExp / 2) {
-                    result.addWarning("Warning: Observation overheads cannot be calculated: number of sky offsets >5' is too large.");
+                    result.addWarning("Warning: Observation overheads cannot be calculated: number of sky offsets >5' is greater than half of the total science exposures.");
                     error = true;
                 }
 
@@ -297,7 +300,7 @@ public class ConfigCreator {
                 }
 
                 if ((exposuresPerGroup % 2 != 0) || (leftOver % 2 != 0)) {
-                    result.addWarning("Warning: Observation overheads cannot be calculated: uneven number of object and sky exposures. Please change number of exposures, or number of sky offsets >5'.");
+                    result.addWarning("Warning: Observation overheads cannot be calculated: uneven numbers of object and sky exposures. Please change the number of exposures, or the number of sky offsets >5'.");
                     error = true;
                 }
 
