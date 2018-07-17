@@ -22,7 +22,7 @@ object CustomMaskDao {
     */
   final case class Mos(
     pid:        ProgramId.Science,
-    name:       String,
+    index:      Int,
     location:   Location
   ) {
 
@@ -31,7 +31,7 @@ object CustomMaskDao {
       * mask name itself without the _ODF.fits suffix.
       */
     def toKey: CustomMaskKey =
-      CustomMaskKey(pid, name.stripSuffix("_ODF.fits").stripSuffix(".fits"))
+      CustomMaskKey.unsafeFromIdAndIndex(pid, index)
 
     def toMapEntry: (CustomMaskKey, Availability) =
       (toKey, location.availability)
@@ -65,7 +65,7 @@ object CustomMaskDao {
                m.Semester,
                m.ProgramType,
                m.ProgramNo,
-               m.ODF,
+               m.RunningNo,
                c.Location
           FROM MOS m
                LEFT OUTER JOIN Component c

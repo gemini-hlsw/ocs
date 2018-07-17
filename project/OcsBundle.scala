@@ -58,7 +58,7 @@ trait OcsBundle {
     project.in(file("bundle/edu.gemini.ictd")).dependsOn(
       bundle_edu_gemini_pot,
       bundle_edu_gemini_shared_util,
-      bundle_edu_gemini_spModel_core,
+      bundle_edu_gemini_spModel_core % "test->test;compile->compile",
       bundle_edu_gemini_spModel_pio
     )
 
