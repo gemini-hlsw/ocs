@@ -56,6 +56,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.lang.String;
+import java.util.Optional;
 
 /**
  * The GMOS instrument.
@@ -436,17 +437,13 @@ public abstract class InstGmosCommon<
         return SETUP_TIME_IFU_MOS;
     }
 
+
     public double getSetupTime(Config conf) {
-        String fpu_name = (String) conf.getItemValue(FPU_KEY);
-        if (!fpu_name.equals("None")) {
-            if (!fpu_name.startsWith("IFU")) {
-                return SETUP_TIME_LS_SPECTROSCOPY;
-            } else {
-                return SETUP_TIME_IFU_MOS;
-            }
-        } else {
-            return SETUP_TIME_IMAGING;
-        }
+        return Optional.ofNullable(conf.getItemValue(FPU_KEY))
+                .map(c -> (GmosCommonType.FPUnit) c)
+                .filter(f -> !f.isImaging())
+                .map(f -> f.isIFU() ? SETUP_TIME_IFU_MOS : SETUP_TIME_LS_SPECTROSCOPY)
+                .orElse(SETUP_TIME_IMAGING);
     }
 
     /**

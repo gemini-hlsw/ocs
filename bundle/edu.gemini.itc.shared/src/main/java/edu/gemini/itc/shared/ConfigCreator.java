@@ -193,11 +193,12 @@ public class ConfigCreator {
                 throw new Error("Invalid site");
             }
 
-            step.putItem(FPUKey, (gmosParams.fpMask().displayValue()));
+            step.putItem(FPUKey, (gmosParams.fpMask()));
             step.putItem(AmpReadModeKey, (gmosParams.ampReadMode()));
             step.putItem(DetectorManufacturerKey, (gmosParams.ccdType()));
             step.putItem(BuiltinROIKey, (gmosParams.builtinROI()));
-            step.putItem(DisperserKey, (gmosParams.grating().displayValue()));
+            step.putItem(DisperserKey, (gmosParams.grating()));
+
             GmosCommonType.Binning xbin = GmosCommonType.Binning.getBinningByValue(gmosParams.spectralBinning());
             GmosCommonType.Binning ybin = GmosCommonType.Binning.getBinningByValue(gmosParams.spatialBinning());
             step.putItem(CcdXBinning, xbin);
