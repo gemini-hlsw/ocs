@@ -341,6 +341,8 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
             return SPSiteQuality.read(s, values());
         }
 
+        public double getExtinction() { return -1.0 * _magAdjustment; }
+
         @Override
         public double getAdjustment(final BandsList bl) {
             return _magAdjustment;

@@ -5,12 +5,15 @@ import edu.gemini.itc.base.SampledSpectrumVisitor;
 import edu.gemini.itc.gems.GemsFluxAttenuationVisitor;
 import edu.gemini.itc.shared.AltairParameters;
 import edu.gemini.spModel.gemini.altair.AltairParams;
+import java.util.logging.Logger;
 
 /**
  * Altair AO class
  */
 public class Altair implements AOSystem {
-    /**
+    private static final Logger Log = Logger.getLogger( Altair.class.getName() );
+
+   /**
      * Related files will be in this subdir of lib
      */
     public static final String ALTAIR_LIB = "/altair";
@@ -36,30 +39,38 @@ public class Altair implements AOSystem {
     private final double wavelength;
     private final double telescopeDiameter;
     private final double uncorrectedSeeing;
+    private final double extinction;
     private final double fwhmInst;
 
     private final AltairBackgroundVisitor altairBackground;
     private final AltairTransmissionVisitor altairTransmission;
 
-    public Altair(double wavelength, double telescopeDiameter, double uncorrectedSeeing, AltairParameters altair, double fwhmInst) {
+    public Altair(double wavelength, double telescopeDiameter, double uncorrectedSeeing, double extinction, AltairParameters altair, double fwhmInst) {
         this.altair = altair;
         this.wavelength = wavelength;
         this.telescopeDiameter = telescopeDiameter;
+        this.extinction = extinction;
         this.uncorrectedSeeing = uncorrectedSeeing;
         this.fwhmInst = fwhmInst;
         this.altairBackground = new AltairBackgroundVisitor();
         this.altairTransmission = new AltairTransmissionVisitor();
+        Log.fine(String.format("Extinction = %.1f mag", extinction));
 
         validateInputParameters(altair);
     }
 
     public void validateInputParameters(final AltairParameters p) {
-        // validation
-        if (p.wfsMode().equals(AltairParams.GuideStarType.LGS) && p.guideStarMagnitude() > 19.5)
-            throw new IllegalArgumentException(" Altair Guide star Magnitude must be <= 19.5 in R for LGS mode. ");
+        // Limiting magnitudes from the public Altair web pages:
+        double maglimit_NGS = 15.1;
+        double maglimit_LGS = 18.5;
 
-        if (p.wfsMode().equals(AltairParams.GuideStarType.NGS) && p.guideStarMagnitude() > 15.5)
-            throw new IllegalArgumentException(" Altair Guide star Magnitude must be <= 15.5 in R for NGS mode. ");
+        if (p.wfsMode().equals(AltairParams.GuideStarType.LGS) && (p.guideStarMagnitude() + extinction) > maglimit_LGS)
+            throw new IllegalArgumentException(
+                    String.format("Laser guide star must be at least R=%.1f in these conditions.", maglimit_LGS - extinction));
+
+        if (p.wfsMode().equals(AltairParams.GuideStarType.NGS) && (p.guideStarMagnitude() + extinction) > maglimit_NGS)
+            throw new IllegalArgumentException(
+                    String.format("Natural guide star must be at least R=%.1f in these conditions.", maglimit_NGS - extinction));
 
         if (p.wfsMode().equals(AltairParams.GuideStarType.LGS) && p.fieldLens().equals(AltairParams.FieldLens.OUT))
             throw new IllegalArgumentException("The field Lens must be IN when Altair is in LGS mode.");
@@ -134,7 +145,7 @@ public class Altair implements AOSystem {
             rgs0 = 17.0; //if LGS
         }
 
-        return Math.exp(-1 * Math.pow(altair.guideStarMagnitude() / rgs0, 16) * Math.pow(1650 / wavelength, 2));
+        return Math.exp(-1 * Math.pow((altair.guideStarMagnitude() + extinction) / rgs0, 16) * Math.pow(1650 / wavelength, 2));
     }
 
     // Calculates the strehl noise from the guide star distance

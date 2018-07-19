@@ -79,7 +79,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // Altair specific section
         final Option<AOSystem> altair;
         if (niriParameters.altair().isDefined()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), niriParameters.altair().get(), 0.0);
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _obsConditionParameters.cc().getExtinction(), niriParameters.altair().get(), 0.0);
             altair = Option.<AOSystem>apply((AOSystem) ao);
         } else {
             altair = Option.<AOSystem>empty();
@@ -137,7 +137,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         //
         // inputs: instrument, SED
         // calculates: redshifted SED
-        // output: redshifteed SED
+        // output: redshifted SED
 
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
@@ -146,7 +146,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // Altair specific section
         final Option<AOSystem> altair;
         if (niriParameters.altair().isDefined()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), niriParameters.altair().get(), 0.0);
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _obsConditionParameters.cc().getExtinction(), niriParameters.altair().get(), 0.0);
             altair = Option.<AOSystem>apply((AOSystem) ao);
         } else {
             altair = Option.<AOSystem>empty();
