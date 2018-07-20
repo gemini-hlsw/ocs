@@ -34,16 +34,24 @@ object CustomMaskKey {
 
   private val MaskDef = """(G[NS])(\d\d\d\d)([AB])([A-Z]+)(\d+)-(\d+)""".r
 
-  def parse(s: String): Option[CustomMaskKey] =
+  def parse(s: String): Option[CustomMaskKey] = {
+
+    def parseScienceId(s: String): Option[ProgramId.Science] =
+      ProgramId.parse(s) match {
+        case pid: ProgramId.Science => Some(pid)
+        case _                      => None
+      }
+
     s match {
       case MaskDef(site, year, ab, t, pidx, midx) =>
         for {
-          pid <- ProgramId.parseScienceId(s"$site-$year$ab-$t-$pidx")
+          pid <- parseScienceId(s"$site-$year$ab-$t-$pidx")
           key <- CustomMaskKey.fromIdAndIndex(pid, midx.toInt)
         } yield key
       case _                                      =>
         None
     }
+  }
 
   def unsafeParse(s: String): CustomMaskKey =
     parse(s).getOrElse(sys.error(s"Could not parse $s as a CustomMaskKey"))
