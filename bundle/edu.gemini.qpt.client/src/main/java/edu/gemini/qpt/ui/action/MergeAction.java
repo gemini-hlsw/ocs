@@ -10,7 +10,7 @@ import javax.swing.JOptionPane;
 import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.core.Variant;
-import edu.gemini.skycalc.TwilightBoundType;
+import edu.gemini.qpt.core.util.Twilight;
 import edu.gemini.skycalc.TwilightBoundedNight;
 import edu.gemini.ui.workspace.IShell;
 import edu.gemini.util.security.auth.keychain.KeyChain;
@@ -69,8 +69,8 @@ public class MergeAction extends AbstractOpenAction implements PropertyChangeLis
                 }
 
                 // Can't merge plans from different nights (yet)
-                TwilightBoundedNight prevNight = new TwilightBoundedNight(TwilightBoundType.NAUTICAL, current.getStart(), current.getSite());
-                TwilightBoundedNight nextNight = new TwilightBoundedNight(TwilightBoundType.NAUTICAL, other.getStart(), other.getSite());
+                final TwilightBoundedNight prevNight = Twilight.startingOnDate(current.getStart(), current.getSite());
+                final TwilightBoundedNight nextNight = Twilight.startingOnDate(other.getStart(), other.getSite());
                 if (prevNight.getStartTime() != nextNight.getStartTime()) {
                     JOptionPane.showMessageDialog(shell.getPeer(), ERR_NIGHT, "Cannot Merge", JOptionPane.ERROR_MESSAGE);
                     return;
