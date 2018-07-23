@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.TexturePaint;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -40,6 +41,7 @@ import edu.gemini.qpt.shared.sp.Obs;
 import edu.gemini.qpt.core.util.ImprovedSkyCalc;
 import edu.gemini.qpt.core.util.Interval;
 import edu.gemini.qpt.shared.util.TimeUtils;
+import edu.gemini.qpt.core.util.AirmassLimit;
 import edu.gemini.qpt.core.util.TimingWindowSolver;
 import edu.gemini.qpt.ui.util.BooleanViewPreference;
 import edu.gemini.qpt.ui.util.ColorWheel;
@@ -395,6 +397,11 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
         }
     }
 
+    private Shape elevationLine(double elevation) {
+        return alt2Y.createTransformedShape(
+            new Line2D.Double(0, elevation, getSize().getWidth(), elevation)
+        );
+    }
 
     private void paintElevationLines(Graphics2D g2d) {
         Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
@@ -403,14 +410,12 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
         switch (ElevationPreference.BOX.get()) {
         case AIRMASS:
 
-            // Draw airmass lines every so often from 0 - 90 deg. The one at 30 is special
-            // because it represents airmass 2.0 (more or less), so we use a different style.
+            // Draw airmass lines every so often from 0 - 90 deg.
             for (int elevation = 10 * ((int) MIN_DEG / 10); elevation < MAX_DEG; elevation += 10) {
 
                 // Create and draw the line.
-                Shape line = new Line2D.Double(0, elevation, getSize().getWidth(), elevation);
-                line = alt2Y.createTransformedShape(line);
-                g2d.setStroke(elevation == 30 ? SOLID_STROKE_LIGHT : DOTTED_STROKE_LIGHT);
+                final Shape line = elevationLine(elevation);
+                g2d.setStroke(DOTTED_STROKE_LIGHT);
                 g2d.draw(line);
 
                 // And the label, off to the left. Don't need one at zero.
@@ -426,19 +431,25 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
                 }
 
             }
+
+            // Draw a special airmass line at the error limit.
+            {
+                final Shape line = elevationLine(AirmassLimit.ERROR.elevation.toDegrees());
+                g2d.setStroke(SOLID_STROKE_LIGHT);
+                g2d.draw(line);
+            }
+
             break;
 
 
         case ELEVATION:
 
-            // Draw elevation lines every so often from 0 - 90 deg. The one at 30 is special
-            // because it represents airmass 2.0 (more or less), so we use a different style.
+            // Draw elevation lines every so often from 0 - 90 deg.
             for (int elevation = 10 * ((int) MIN_DEG / 10); elevation < MAX_DEG; elevation += 10) {
 
                 // Create and draw the line.
-                Shape line = new Line2D.Double(0, elevation, getSize().getWidth(), elevation);
-                line = alt2Y.createTransformedShape(line);
-                g2d.setStroke(elevation == 30 ? SOLID_STROKE_LIGHT : DOTTED_STROKE_LIGHT);
+                final Shape line = elevationLine(elevation);
+                g2d.setStroke(DOTTED_STROKE_LIGHT);
                 g2d.draw(line);
 
                 // And the label, off to the left. Don't need one at zero.
@@ -449,6 +460,14 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
                 }
 
             }
+
+            // Draw a special airmass line at the error limit.
+            {
+                final Shape line = elevationLine(AirmassLimit.ERROR.elevation.toDegrees());
+                g2d.setStroke(SOLID_STROKE_LIGHT);
+                g2d.draw(line);
+            }
+
             break;
 
         }

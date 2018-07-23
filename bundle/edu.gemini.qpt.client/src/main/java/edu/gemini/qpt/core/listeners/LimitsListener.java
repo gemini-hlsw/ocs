@@ -15,6 +15,7 @@ import edu.gemini.qpt.core.Marker.Severity;
 import edu.gemini.qpt.core.Variant.Flag;
 import edu.gemini.qpt.core.util.*;
 import edu.gemini.qpt.shared.sp.Group;
+import edu.gemini.qpt.core.util.AirmassLimit;
 import edu.gemini.qpt.core.util.LttsServicesClient;
 import edu.gemini.qpt.core.util.MarkerManager;
 import edu.gemini.qpt.shared.sp.Obs;
@@ -165,10 +166,10 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 
                 } else {
 
-                    // Legacy behavior; airmass 2.0 limit
-                    if (maxAirmass > 2.0) {
+                    // Legacy behavior; airmass limit
+                    if (maxAirmass > AirmassLimit.ERROR.airmass) {
                         mm.addMarker(false, this, Severity.Error, String.format("Observation reaches airmass %1.2f.", maxAirmass), v, a);
-                    } else if (maxAirmass > 1.75) {
+                    } else if (maxAirmass > AirmassLimit.WARNING.airmass) {
                         mm.addMarker(false, this, Severity.Warning, String.format("Observation reaches airmass %1.2f.", maxAirmass), v, a);
                     }
                 }
