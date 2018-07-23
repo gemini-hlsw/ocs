@@ -34,6 +34,7 @@ import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.core.ScheduleIO;
 import edu.gemini.qpt.core.util.LttsServicesClient;
+import edu.gemini.qpt.core.util.Twilight;
 import edu.gemini.qpt.ui.util.AbstractAsyncAction;
 import edu.gemini.qpt.ui.util.CalendarPanel;
 import edu.gemini.qpt.ui.util.ConfigErrorDialog;
@@ -273,7 +274,7 @@ class OpenFromWebDialog extends JDialog {
     public URL getURL() {
 
         // Get the night for the selected day
-        TwilightBoundedNight night = new TwilightBoundedNight(TwilightBoundType.NAUTICAL, calendarPanel.getStartDate(), site);
+        final TwilightBoundedNight night = Twilight.startingOnDate(calendarPanel.getStartDate(), site);
 
         // Get yy mmm dd
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

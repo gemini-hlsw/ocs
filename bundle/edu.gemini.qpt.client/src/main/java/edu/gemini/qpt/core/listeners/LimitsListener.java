@@ -25,8 +25,6 @@ import edu.gemini.skycalc.TwilightBoundedNight;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.SPGroup.GroupType;
 
-import static edu.gemini.skycalc.TwilightBoundType.NAUTICAL;
-
 /**
  * Generates Alloc markers.
  * @author rnorris
@@ -101,8 +99,9 @@ public class LimitsListener extends MarkerModelListener<Variant> {
                 mm.addMarker(false, this, Severity.Warning, msg, v, a);
             }
 
-            final TwilightBoundedNight tbn = TwilightBoundedNight.forTime(NAUTICAL, a.getStart(), v.getSchedule().getSite());
-            final Supplier<Union<Interval>> wholeNight = () -> new Union<>(new Interval(tbn.getStartTime(), tbn.getEndTime()));
+            final TwilightBoundedNight tbn = Twilight.forTime(a.getStart(), v.getSchedule().getSite());
+            final Interval nightInterval   = new Interval(tbn.getStartTime(), tbn.getEndTime());
+            final Supplier<Union<Interval>> wholeNight = () -> new Union<>(nightInterval);
 
             final Predicate<String> contributes =
                 (cacheName) -> {

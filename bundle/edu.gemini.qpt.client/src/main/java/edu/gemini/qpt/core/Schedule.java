@@ -11,11 +11,9 @@ import edu.gemini.qpt.shared.sp.MiniModel;
 import edu.gemini.qpt.shared.util.EnumPio;
 import edu.gemini.qpt.shared.util.PioSerializable;
 import edu.gemini.qpt.shared.util.TimeUtils;
-import edu.gemini.skycalc.TwilightBoundType;
 import edu.gemini.skycalc.TwilightBoundedNight;
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.spModel.core.ProgramId;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.PreImagingType;
 import edu.gemini.spModel.ictd.Availability;
@@ -66,9 +64,6 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
     public static final String PROP_EXTRA_SEMESTERS = "extraSemesters";
     public static final String PROP_MINI_MODEL = "miniModel";
     public static final String PROP_ICTD = "ictd";
-
-    // Constants for internal use (probably will move)
-    private static final TwilightBoundType TYPE = TwilightBoundType.NAUTICAL;
 
     // Persistent Members
     private final BlockUnion blocks;
@@ -522,7 +517,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
 
     public void addObservingNights(long start, long end) {
         for (long i = start; i <= end; i += MS_PER_DAY) {
-            TwilightBoundedNight night = new TwilightBoundedNight(TYPE, i, miniModel.getSite());
+            final TwilightBoundedNight night = Twilight.startingOnDate(i, miniModel.getSite());
             addBlock(night.getStartTime(), night.getEndTime());
         }
     }
