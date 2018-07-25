@@ -34,6 +34,7 @@ import edu.gemini.qpt.core.Alloc.Grouping;
 import edu.gemini.qpt.core.Marker.Severity;
 import edu.gemini.qpt.core.util.ImprovedSkyCalc;
 import edu.gemini.qpt.core.util.Interval;
+import edu.gemini.qpt.core.util.Twilight;
 import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.qpt.ui.util.CancelledException;
 import edu.gemini.qpt.ui.util.ColorWheel;
@@ -299,10 +300,6 @@ public class ScheduleDocument {
         return (a.getFirstStep() + 1) + " - " + (a.getLastStep() + 1);
     }
 
-    public TwilightBoundedNight getTwilightBoundedNight() {
-        return new TwilightBoundedNight(TwilightBoundType.NAUTICAL, schedule.getStart(), schedule.getSite());
-    }
-
     public SortedSet<Object> getEvents(Variant v) {
 
         SortedSet<Object> ret = new TreeSet<Object>(new Comparator<Object>() {
@@ -329,15 +326,16 @@ public class ScheduleDocument {
         ret.addAll(allocs);
         ret.add(new SimpleEvent(allocs.last().getEnd(), "End of plan variant."));
 
-        // Add nautical twilight info.
-        TwilightBoundedNight nautical = new TwilightBoundedNight(TwilightBoundType.NAUTICAL, schedule.getStart(), schedule.getSite());
+        // Add twilight info.
+        final TwilightBoundedNight twilight = Twilight.startingOnDate(schedule.getStart(), schedule.getSite());
         final TimeZone timezone = utc ? TimeZone.getTimeZone("UTC") : schedule.getSite().timezone();
-        ret.add(new SimpleEvent(nautical.getStartTimeRounded(timezone), "Evening 12&deg; Twilight"));
-        ret.add(new SimpleEvent(nautical.getEndTimeRounded(timezone), "Morning 12&deg; Twilight"));
+        final int hAngle = (int) Twilight.TYPE.getHorizonAngle();
+        ret.add(new SimpleEvent(twilight.getStartTimeRounded(timezone), String.format("Evening %d&deg; Twilight", hAngle)));
+        ret.add(new SimpleEvent(twilight.getEndTimeRounded(timezone), String.format("Morning %d&deg; Twilight", hAngle)));
 
         // Find illuminated fraction
         Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(nautical.getEndTime());
+        cal.setTimeInMillis(twilight.getEndTime());
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
