@@ -165,9 +165,9 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
             g2d.setRenderingHints(RENDERING_HINTS);
 
             // Background stuff: night, blocks, sun, moon, elevation lines
-            paintNight(g2d);
-            for (Block b: blocks) paintBlock(g2d, b);
-             paintSun(g2d);
+            paintOfficialNight(g2d);
+            paintNauticalNight(g2d);
+            paintSun(g2d);
             paintMoon(g2d);
             paintElevationLines(g2d);
 
@@ -432,9 +432,9 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 
             }
 
-            // Draw a special airmass line at the error limit.
+            // Draw a special airmass line at the warning limit.
             {
-                final Shape line = elevationLine(AirmassLimit.ERROR.elevation.toDegrees());
+                final Shape line = elevationLine(AirmassLimit.WARNING.elevation.toDegrees());
                 g2d.setStroke(SOLID_STROKE_LIGHT);
                 g2d.draw(line);
             }
@@ -461,9 +461,9 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
 
             }
 
-            // Draw a special airmass line at the error limit.
+            // Draw a special airmass line at the warning limit.
             {
-                final Shape line = elevationLine(AirmassLimit.ERROR.elevation.toDegrees());
+                final Shape line = elevationLine(AirmassLimit.WARNING.elevation.toDegrees());
                 g2d.setStroke(SOLID_STROKE_LIGHT);
                 g2d.draw(line);
             }
@@ -524,35 +524,28 @@ public final class Visualizer extends VisualizerBase implements VisualizerConsta
         g2da.restore();
     }
 
-    private void paintNight(Graphics2D g2d) {
+    private void paintNight(Graphics2D g2d, TwilightBoundType boundType, Color color) {
+        final Site site = model.getSchedule().getSite();
 
-        Site site = model.getSchedule().getSite();
+        final TwilightBoundedNight night = new TwilightBoundedNight(boundType, model.getSchedule().getStart(), site);
 
-        TwilightBoundedNight night = new TwilightBoundedNight(TwilightBoundType.OFFICIAL, model.getSchedule().getStart(), site);
-
-        Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
+        final Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
 
         // Night is just a colored rectangle.
-        Rectangle2D.Double rect = new Rectangle2D.Double(night.getStartTime(), 0, night.getTotalTime(), getSize().getHeight());
-        Shape rect2 = time2X.createTransformedShape(rect);
-        g2d.setColor(NIGHT_COLOR);
+        final Rectangle2D.Double rect = new Rectangle2D.Double(night.getStartTime(), 0, night.getTotalTime(), getSize().getHeight());
+        final Shape rect2 = time2X.createTransformedShape(rect);
+        g2d.setColor(color);
         g2d.fill(rect2);
 
         g2da.restore();
-
-
     }
 
-    private void paintBlock(Graphics2D g2d, Block b) {
-        Graphics2DAttributes g2da = new Graphics2DAttributes(g2d);
+    private void paintOfficialNight(Graphics2D g2d) {
+        paintNight(g2d, TwilightBoundType.OFFICIAL, NIGHT_COLOR);
+    }
 
-        // Blocks are just colored rectangles.
-        Rectangle2D.Double rect = new Rectangle2D.Double(b.getStart(), 0, b.getLength(), getSize().getHeight());
-        Shape rect2 = time2X.createTransformedShape(rect);
-        g2d.setColor(BLOCK_COLOR);
-        g2d.fill(rect2);
-
-        g2da.restore();
+    private void paintNauticalNight(Graphics2D g2d) {
+        paintNight(g2d, TwilightBoundType.NAUTICAL, BLOCK_COLOR);
     }
 
     private void paintShutteringWindows(Graphics2D g2d, Alloc a, boolean selected) {
