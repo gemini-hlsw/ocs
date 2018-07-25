@@ -1,12 +1,7 @@
 package edu.gemini.qpt.core;
 
-import edu.gemini.qpt.core.util.Interval;
-import edu.gemini.qpt.core.util.Union;
 import edu.gemini.qpt.ui.util.TimePreference;
-import edu.gemini.shared.util.immutable.DefaultImList;
-import edu.gemini.shared.util.immutable.ImList;
-import edu.gemini.shared.util.immutable.None;
-import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.Site;
 
 /**
@@ -24,19 +19,19 @@ public class Marker implements Comparable<Marker> {
     private final String text;
     private final Severity severity;
     private final boolean qcOnly;
-    private final Option<Union<Interval>> union;
+    private final ImList<Long> timestamps;
 
-    public Marker(boolean qcOnly, Object owner, Severity severity, String text, Option<Union<Interval>> union, Object... path) {
+    public Marker(boolean qcOnly, Object owner, Severity severity, String text, ImList<Long> timestamps, Object... path ) {
         this.qcOnly = qcOnly;
         this.owner = owner;
         this.path = path;
         this.text = text;
         this.severity = severity;
-        this.union = union;
+        this.timestamps = timestamps;
     }
 
     public Marker(boolean qcOnly, Object owner, Severity severity, String text, Object... path) {
-        this(qcOnly, owner, severity, text, None.instance(), path);
+        this(qcOnly, owner, severity, text, ImCollections.emptyList(), path);
     }
 
     public boolean isQcOnly() {
@@ -59,32 +54,14 @@ public class Marker implements Comparable<Marker> {
         return text;
     }
 
-    private static final String formatInterval(Site site, Interval interval, TimePreference p) {
-        return String.format(
-                "%s - %s",
-                p.format(site, interval.getStart(), "HH:mm"),
-                p.format(site, interval.getEnd(), "HH:mm")
-        );
-    }
-
     public String getUnionText(Site site) {
         return getUnionText(site, TimePreference.BOX.get());
     }
 
     public String getUnionText(Site site, TimePreference p) {
-
-        final Union<Interval> intervals = this.getUnion().getOrElse(new Union<>());
-
-        final ImList<Interval> is = DefaultImList.create(intervals.getIntervals());
-
-        String msg;
-        if (is.nonEmpty()) {
-            final String m = is.map(i -> formatInterval(site, i, p)).mkString(" ", ", ", ".");
-            msg = this.getText() + m;
-        } else {
-            msg = this.getText();
-        }
-        return msg;
+        return timestamps.foldLeft(
+            text, (s, t) -> s.replaceFirst("%t", p.format(site, t, "HH:mm"))
+        );
     }
 
     public String getFilteredUnionText(Site site, TimePreference p) {
@@ -94,8 +71,6 @@ public class Marker implements Comparable<Marker> {
     public Severity getSeverity() {
         return severity;
     }
-
-    public Option<Union<Interval>> getUnion() { return union; }
 
     @Override
     public String toString() {
