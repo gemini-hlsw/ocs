@@ -17,7 +17,7 @@ import java.util.Map;
 public final class GnirsReadoutTime {
     private static final double DHS_WRITE_TIME = 8.5;
 
-    //Maps from the read mode to an array containing the overhead per coadd per frame
+    //Maps from the read mode to overhead per coadd
     private static final Map<GNIRSParams.ReadMode, Double> map;
 
     static{

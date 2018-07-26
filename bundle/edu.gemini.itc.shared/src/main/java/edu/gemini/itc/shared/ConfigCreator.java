@@ -105,12 +105,12 @@ public class ConfigCreator {
             result.addWarning("Warning: Observation overheads cannot be calculated for the number of exposures = 0.");
         }
         int numberCoadds = calcMethod.coaddsOrElse(1);
-        String offset = Double.toString(calcMethod.offset());
+        Double offset = calcMethod.offset();
         // for spectroscopic observations we consider ABBA offset pattern
-        List<String> spectroscopyOffsets = new ArrayList<>(Arrays.asList("0", offset, offset, "0"));
+        List<Double> spectroscopyOffsets = new ArrayList<>(Arrays.asList(0.0, offset, offset, 0.0));
         // for imaging observations we consider ABAB offset pattern
-        List<String> imagingOffsets = new ArrayList<>(Arrays.asList("0", offset, "0", offset));
-        List<String> offsetList = new ArrayList<>();
+        List<Double> imagingOffsets = new ArrayList<>(Arrays.asList(0.0, offset, 0.0, offset));
+        List<Double> offsetList = new ArrayList<>();
 
         for (int i = 0; i < (1 + numberExposures / 4); i++) {
             if (calcMethod instanceof Imaging) {
@@ -129,7 +129,7 @@ public class ConfigCreator {
             step.putItem(ObserveTypeKey, InstConstants.SCIENCE_OBSERVE_TYPE);
             step.putItem(ObserveClassKey, ObsClass.SCIENCE);
             step.putItem(CoaddsKey, numberCoadds);
-            step.putItem(TelescopePKey, "0");
+            step.putItem(TelescopePKey, 0.0);
             step.putItem(TelescopeQKey, offsetList.get(i));
 
 
@@ -151,13 +151,13 @@ public class ConfigCreator {
 
         for (Config step : result.getConfig()) {
             step.putItem(ReadModeKey, (gnirsParams.readMode()));
-            step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GNIRS.readableStr);
-            step.putItem(SlitWidthKey, gnirsParams.slitWidth().logValue());
+            step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GNIRS);
+            step.putItem(SlitWidthKey, gnirsParams.slitWidth());
 
             if (gnirsParams.altair().isDefined()) {
                 AltairParameters altairParameters = gnirsParams.altair().get();
-                step.putItem(AOGuideStarTypeKey, altairParameters.wfsMode().displayValue());
-                step.putItem(AOSystemKey, SPComponentType.AO_ALTAIR.narrowType);
+                step.putItem(AOGuideStarTypeKey, altairParameters.wfsMode());
+                step.putItem(AOSystemKey, SPComponentType.AO_ALTAIR);
             }
         }
         return result;
@@ -168,14 +168,14 @@ public class ConfigCreator {
 
         for (Config step : result.getConfig()) {
             step.putItem(ReadModeKey, (niriParams.readMode()));
-            step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_NIRI.readableStr);
+            step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_NIRI);
             step.putItem(BuiltinROIKey, (niriParams.builtinROI()));
-            step.putItem(DisperserKey, (niriParams.grism().displayValue()));
+            step.putItem(DisperserKey, (niriParams.grism()));
 
             if (niriParams.altair().isDefined()) {
                 AltairParameters altairParameters = niriParams.altair().get();
-                step.putItem(AOGuideStarTypeKey, altairParameters.wfsMode().displayValue());
-                step.putItem(AOSystemKey, SPComponentType.AO_ALTAIR.narrowType);
+                step.putItem(AOGuideStarTypeKey, altairParameters.wfsMode());
+                step.putItem(AOSystemKey, SPComponentType.AO_ALTAIR);
             }
         }
         return result;
@@ -186,9 +186,9 @@ public class ConfigCreator {
 
         for (Config step : result.getConfig()) {
             if (gmosParams.site().equals(Site.GN)) {
-                step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GMOS.readableStr);
+                step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GMOS);
             } else if (gmosParams.site().equals(Site.GS)) {
-                step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GMOSSOUTH.readableStr);
+                step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GMOSSOUTH);
             } else {
                 throw new Error("Invalid site");
             }
@@ -220,12 +220,12 @@ public class ConfigCreator {
 
         for (Config step : result.getConfig()) {
             step.putItem(ReadModeKey, (nifsParams.readMode()));
-            step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_NIFS.readableStr);
+            step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_NIFS);
 
             if (nifsParams.altair().isDefined()) {
                 AltairParameters altairParameters = nifsParams.altair().get();
-                step.putItem(AOGuideStarTypeKey, altairParameters.wfsMode().displayValue());
-                step.putItem(AOSystemKey, SPComponentType.AO_ALTAIR.narrowType);
+                step.putItem(AOGuideStarTypeKey, altairParameters.wfsMode());
+                step.putItem(AOSystemKey, SPComponentType.AO_ALTAIR);
             }
         }
         return result;
@@ -331,7 +331,7 @@ public class ConfigCreator {
 
         for (Config step : result.getConfig()) {
             step.putItem(ReadModeKey, (gsaoiParams.readMode()));
-            step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GSAOI.readableStr);
+            step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GSAOI);
             if (!guideStatusList.isEmpty()) {
                 currentGuideStatus = guideStatusList.get(stepNum);
 
@@ -339,9 +339,9 @@ public class ConfigCreator {
                 if (previousGuideStatus != null) {
                     if (!currentGuideStatus.equals(previousGuideStatus)) {
                         if (numLargeOffsets == 0) {
-                            step.putItem(TelescopeQKey, Double.toString(GSAOI_SMALL_SKY_OFFSET + Double.parseDouble((String) step.getItemValue(TelescopeQKey))));
+                            step.putItem(TelescopeQKey, GSAOI_SMALL_SKY_OFFSET + (double)step.getItemValue(TelescopeQKey));
                         } else {
-                            step.putItem(TelescopeQKey, Double.toString(GSAOI_LARGE_SKY_OFFSET + Double.parseDouble((String) step.getItemValue(TelescopeQKey))));
+                            step.putItem(TelescopeQKey, GSAOI_LARGE_SKY_OFFSET + (double)step.getItemValue(TelescopeQKey));
                         }
                     }
                 }
@@ -357,7 +357,7 @@ public class ConfigCreator {
 
         for (Config step : result.getConfig()) {
             step.putItem(ReadModeKey, (f2Params.readMode()));
-            step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_FLAMINGOS2.readableStr);
+            step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_FLAMINGOS2);
             step.putItem(DisperserKey, f2Params.grism());
             step.putItem(FPUKey, f2Params.mask());
             if (itcParams.telescope().getWFS().equals(GuideProbe.Type.PWFS)) {

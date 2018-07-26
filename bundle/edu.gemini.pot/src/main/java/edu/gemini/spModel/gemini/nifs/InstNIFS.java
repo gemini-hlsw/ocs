@@ -19,6 +19,8 @@ import edu.gemini.spModel.data.config.DefaultSysConfig;
 import edu.gemini.spModel.data.config.ISysConfig;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
+import edu.gemini.spModel.gemini.altair.AltairParams;
+import edu.gemini.spModel.gemini.altair.AltairParams.GuideStarType;
 import edu.gemini.spModel.gemini.calunit.calibration.CalConfigBuilderUtil;
 import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKey;
 import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKeyProvider;
@@ -191,10 +193,9 @@ public final class InstNIFS extends SPInstObsComp implements PropertyProvider, G
     }
 
     public double getSetupTime(Config conf) {
-        String aoSystem = (String) conf.getItemValue(AOConstants.AO_SYSTEM_KEY);
-        String guideStarType = (String) conf.getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
-        if (conf.containsItem(AOConstants.AO_SYSTEM_KEY) && aoSystem.equals("Altair") &&
-                guideStarType.equals("LGS")) {
+        final GuideStarType guideStarType = (GuideStarType) conf.getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
+        if (conf.containsItem(AOConstants.AO_SYSTEM_KEY) &&
+                guideStarType.equals(AltairParams.GuideStarType.LGS)) {
                 return NifsSetupTimeService.BASE_LGS_SETUP_TIME_SEC;
         } else {
             return NifsSetupTimeService.BASE_SETUP_TIME_SEC;

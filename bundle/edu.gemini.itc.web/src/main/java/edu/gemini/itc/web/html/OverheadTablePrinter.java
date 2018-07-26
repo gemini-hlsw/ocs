@@ -3,7 +3,9 @@ package edu.gemini.itc.web.html;
 import edu.gemini.itc.base.ImagingResult;
 import edu.gemini.itc.base.Result;
 import edu.gemini.itc.shared.*;
+import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.ImList;
+import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.obs.plannedtime.OffsetOverheadCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
@@ -21,7 +23,7 @@ public class OverheadTablePrinter {
     private final double readoutTimePerCoadd;
     private final PlannedTime pta;
     private final ItcSpectroscopyResult r;
-    private final String instrumentName;
+    private final SPComponentType instrumentName;
     private final int numOfExposures;
 
     private PlannedTime.Step s;
@@ -90,7 +92,7 @@ public class OverheadTablePrinter {
             this.ccResult = printer.createInstConfig(this.numOfExposures);
             this.readoutTimePerCoadd = readoutTimePerCoadd;
             this.pta = PlannedTimeCalculator.instance.calc(this.ccResult.getConfig(), printer.getInst());
-            this.instrumentName = (String) ccResult.getConfig()[0].getItemValue(ConfigCreator.InstInstrumentKey);
+            this.instrumentName = (SPComponentType) ccResult.getConfig()[0].getItemValue(ConfigCreator.InstInstrumentKey);
         } else {
             throw new OverheadTablePrinterException("<b>Observation Overheads</b><br> Warning: Observation overheads cannot be calculated for the number of exposures = 0.");
         }
@@ -134,12 +136,13 @@ public class OverheadTablePrinter {
     }
 
     private boolean isIFU() {
-        String fpu = null;
-        if (ccResult.getConfig()[0].containsItem(ConfigCreator.FPUKey)) {
-            fpu = ccResult.getConfig()[0].getItemValue(ConfigCreator.FPUKey).toString();
-        }
-        if ((instrumentName.contains("GMOS") && fpu.contains("IFU"))
-                || instrumentName.equals("NIFS")) {
+        if (instrumentName.equals(SPComponentType.INSTRUMENT_GMOS) ||
+                instrumentName.equals(SPComponentType.INSTRUMENT_GMOSSOUTH)) {
+            GmosCommonType.FPUnit fpu = (GmosCommonType.FPUnit) ccResult.getConfig()[0].getItemValue(ConfigCreator.FPUKey);
+            if (fpu.isIFU()) {
+                return true;
+            }
+        } else if (instrumentName.equals(SPComponentType.INSTRUMENT_NIFS)) {
             return true;
         }
         return false;

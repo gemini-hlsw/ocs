@@ -18,6 +18,7 @@ import edu.gemini.spModel.data.config.*;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
 import edu.gemini.spModel.gemini.altair.AltairParams;
+import edu.gemini.spModel.gemini.altair.AltairParams.GuideStarType;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.calunit.calibration.CalConfigBuilderUtil;
 import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKey;
@@ -249,14 +250,15 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     }
 
     public double getSetupTime(Config conf) {
-        String aoSystem = (String) conf.getItemValue(AOConstants.AO_SYSTEM_KEY);
-        String guideStarType = (String) conf.getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
-        String slitWidth = (String) conf.getItemValue(GNIRSConstants.SLIT_WIDTH_KEY);
-        
-        if (conf.containsItem(AOConstants.AO_SYSTEM_KEY) && aoSystem.equals(SPComponentType.AO_ALTAIR.narrowType) &&
-                guideStarType.equals(AltairParams.GuideStarType.LGS.displayValue())) {
-            return getSetupTimeLgs();
+
+        if (conf.containsItem(AOConstants.AO_SYSTEM_KEY)) {
+            GuideStarType guideStarType = (GuideStarType) conf.getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
+            if (guideStarType.equals(AltairParams.GuideStarType.LGS)) {
+                return getSetupTimeLgs();
+            }
         }
+
+        SlitWidth slitWidth = (SlitWidth) conf.getItemValue(GNIRSConstants.SLIT_WIDTH_KEY);
 
         if (slitWidth.equals(GNIRSParams.SlitWidth.IFU)) {
             return getSetupTimeIfu();

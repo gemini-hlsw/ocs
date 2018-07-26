@@ -22,6 +22,7 @@ import edu.gemini.spModel.data.config.StringParameter;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
 import edu.gemini.spModel.gemini.altair.AltairParams;
+import edu.gemini.spModel.gemini.altair.AltairParams.GuideStarType;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.calunit.calibration.CalConfigBuilderUtil;
 import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKey;
@@ -176,10 +177,18 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
         private static Mode getMode(InstNIRI niri) {
             return niri._disperser == Disperser.NONE ? imaging : spectroscopy;
         }
+
+        private static Mode getMode(Config conf) {
+            return conf.getItemValue(DISPERSER_KEY) == Disperser.NONE ? imaging : spectroscopy;
+        }
     }
 
     public Mode getMode() {
         return Mode.getMode(this);
+    }
+
+    public Mode getMode(Config conf) {
+        return Mode.getMode(conf);
     }
 
     private static class SetupTimeKey {
@@ -269,7 +278,7 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
         final InstAltair altair = InstAltair.lookupAltair(obs);
         return (altair == null) ? getSetupTime(mode) : getSetupTime(mode, altair.getMode());
     }
-
+/*
     public double getSetupTime(Config conf) {
         String aoSystem = (String) conf.getItemValue(AOConstants.AO_SYSTEM_KEY);
         String guideStarType = (String) conf.getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
@@ -295,6 +304,26 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
             return getSetupTime(mode);
         } else {
             return getSetupTime(mode, altairMode);
+        }
+    }
+    */
+
+    public double getSetupTime(Config conf) {
+        final GuideStarType guideStarType = (GuideStarType) conf.getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
+        final Mode mode = getMode(conf);
+        final AltairParams.Mode altairMode;
+
+        if (conf.containsItem(AOConstants.AO_SYSTEM_KEY))  {
+            if (guideStarType.equals(AltairParams.GuideStarType.LGS)) {
+                altairMode = AltairParams.Mode.LGS;
+            } else if (guideStarType.equals(AltairParams.GuideStarType.NGS)) {
+                altairMode = AltairParams.Mode.NGS;
+            } else {
+                throw new Error("Invalid guide star type");
+            }
+            return getSetupTime(mode, altairMode);
+        } else {
+            return getSetupTime(mode);
         }
     }
 

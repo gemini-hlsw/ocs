@@ -29,6 +29,7 @@ import edu.gemini.spModel.gemini.parallacticangle.ParallacticAngleSupportInst;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
 import edu.gemini.spModel.guide.GuideProbeUtil;
+import edu.gemini.spModel.guide.GuideOption;
 import edu.gemini.spModel.ictd.*;
 import edu.gemini.spModel.inst.ElectronicOffsetProvider;
 import edu.gemini.spModel.inst.ScienceAreaGeometry;
@@ -868,14 +869,10 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
 
 
     public static double getImagingSetupSec(Config conf) {
-        if (conf.containsItem(GUIDE_WITH_OIWFS_KEY)) {
-            String guideWithOIWFS = conf.getItemValue(GUIDE_WITH_OIWFS_KEY).toString();
-            if (guideWithOIWFS.equals("guide")) {
-                return IMAGING_SETUP_TIME_OIWFS;
-            }
+            return ImOption.apply(conf.getItemValue(GUIDE_WITH_OIWFS_KEY))
+                    .exists(g -> ((GuideOption) g).isActive()) ? IMAGING_SETUP_TIME_OIWFS : IMAGING_SETUP_TIME_PWFS2;
         }
-        return  IMAGING_SETUP_TIME_PWFS2;
-    }
+
 
     // Imaging setup differs based on the guide probe in use, OI vs. anything
     // else (PWFS2 presumably).  See REL-1678.
