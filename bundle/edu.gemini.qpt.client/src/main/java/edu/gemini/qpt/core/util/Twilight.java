@@ -5,7 +5,9 @@ import edu.gemini.skycalc.TwilightBoundedNight;
 import edu.gemini.skycalc.TwilightBoundType;
 
 /**
- * Twilight night bound calculations used throughout the QPT.
+ * Twilight night bound calculations used for block limits. Note, we display
+ * nautical twilight bounds in the visualizer and property sheet, but the
+ * twilight calculations are based on civil twilight.
  */
 public final class Twilight {
     private Twilight() {}
