@@ -3,7 +3,6 @@ package edu.gemini.qpt.core.listeners;
 import java.beans.PropertyChangeEvent;
 import java.util.*;
 import java.util.function.*;
-import java.util.TimeZone;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -15,6 +14,7 @@ import edu.gemini.qpt.core.Marker.Severity;
 import edu.gemini.qpt.core.Variant.Flag;
 import edu.gemini.qpt.core.util.*;
 import edu.gemini.qpt.shared.sp.Group;
+import edu.gemini.qpt.core.util.AirmassLimit;
 import edu.gemini.qpt.core.util.LttsServicesClient;
 import edu.gemini.qpt.core.util.MarkerManager;
 import edu.gemini.qpt.shared.sp.Obs;
@@ -23,8 +23,6 @@ import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.TwilightBoundedNight;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.SPGroup.GroupType;
-
-import static edu.gemini.skycalc.TwilightBoundType.NAUTICAL;
 
 /**
  * Generates Alloc markers.
@@ -45,8 +43,6 @@ public class LimitsListener extends MarkerModelListener<Variant> {
         Variant v = (Variant) evt.getSource();
         MarkerManager mm = v.getSchedule().getMarkerManager();
         mm.clearMarkers(this, v);
-
-        final TimeZone zone = v.getSchedule().getSite().timezone();
 
         for (Alloc a: v.getAllocs()) {
 
@@ -100,22 +96,43 @@ public class LimitsListener extends MarkerModelListener<Variant> {
                 mm.addMarker(false, this, Severity.Warning, msg, v, a);
             }
 
-            final TwilightBoundedNight tbn = TwilightBoundedNight.forTime(NAUTICAL, a.getStart(), v.getSchedule().getSite());
-            final Supplier<Union<Interval>> wholeNight = () -> new Union<>(new Interval(tbn.getStartTime(), tbn.getEndTime()));
+            final TwilightBoundedNight tbn = Twilight.forTime(a.getStart(), v.getSchedule().getSite());
+            final Interval nightInterval   = new Interval(tbn.getStartTime(), tbn.getEndTime());
+            final Supplier<Union<Interval>> wholeNight = () -> new Union<>(nightInterval);
 
-            final Predicate<String> contributes =
-                (cacheName) -> {
-                    final Map<Obs, Union<Interval>> c = v.getSchedule().getCache(cacheName);
-                    final Union<Interval> u = c.getOrDefault(a.getObs(), new Union<>());
+            final BiFunction<Function<Interval, Long>, String, Predicate<Long>> matchWith =
+                (f, cacheName) ->
+                    ts -> {
+                        final Map<Obs, Union<Interval>> c = v.getSchedule().getCache(cacheName);
+                        final Union<Interval> u = c.getOrDefault(a.getObs(), new Union<>());
 
-                    final Union<Interval> r = wholeNight.get();
-                    r.remove(u);
-                    return !r.isEmpty();
+                        return u.getIntervals().stream().anyMatch(i -> f.apply(i) == ts);
+                    };
+
+            final BiFunction<Function<Interval, Long>, Interval, Option<String>> explainLimit =
+                (f, i) -> {
+                    if (matchWith.apply(f, Variant.VISIBLE_UNION_CACHE).test(f.apply(i))) {
+                        switch (a.getObs().getElevationConstraintType()) {
+                            case HOUR_ANGLE:
+                                new Some<>("%t(H)");
+                                break;
+                            default:
+                                new Some<>("%t(A)");
+                                break;
+                        }
+                        return new Some<>("%t(A)");
+                    } else if (matchWith.apply(f, Variant.DARK_UNION_CACHE).test(f.apply(i))) {
+                        return new Some<>("%t(B)");
+                    } else if (matchWith.apply(f, Variant.TIMING_UNION_CACHE).test(f.apply(i))) {
+                        return new Some<>("%t(T)");
+                    } else {
+                        return None.instance();
+                    }
                 };
 
             // Function to create markers that report solver intervals.
-            final Function<String, Option<Marker>> createSolverMarker =
-                (prefix) -> {
+            final Supplier<Option<Marker>> createSolverMarker =
+                () -> {
                     final Map<Obs, Union<Interval>> c = v.getSchedule().getCache(Variant.CONSTRAINED_UNION_CACHE);
                     final Union<Interval>       valid = c.getOrDefault(a.getObs(), new Union<>());
                     final Union<Interval>     invalid = wholeNight.get();
@@ -125,21 +142,34 @@ public class LimitsListener extends MarkerModelListener<Variant> {
                     if (is.isEmpty() || invalid.isEmpty()) {
                         return None.instance();
                     } else {
-                        final List<String> attrs = new ArrayList<>();
-                        if (contributes.test(Variant.VISIBLE_UNION_CACHE)) { attrs.add("airmass"); }
-                        if (contributes.test(Variant.DARK_UNION_CACHE))    { attrs.add("background"); }
-                        if (contributes.test(Variant.TIMING_UNION_CACHE))  { attrs.add("timing window"); }
 
-                        final String s = attrs.isEmpty() ?
-                            "" : DefaultImList.create(attrs).mkString(" (", ", ", ")");
+                        final ImList<Long> timestamps =
+                            DefaultImList.create(valid.getIntervals()).flatMap(
+                                i -> DefaultImList.create(i.getStart(), i.getEnd())
+                            );
 
-                        return new Some<>(new Marker(false, this, Severity.Notice, prefix + s, new Some<>(valid), v, a));
+                        final String m = is.map(i -> {
+                           final String start = explainLimit.apply(Interval::getStart, i).getOrElse("%t(sunset)");
+                           final String end   = explainLimit.apply(Interval::getEnd, i).getOrElse("%t(sunrise)");
+                           return start + '-' + end;
+                        }).mkString("Must be observed between ", ", ", ".");
+
+                    return new Some<>(
+                        new Marker(
+                            false,
+                            this,
+                            Severity.Notice,
+                            m,
+                            timestamps,
+                            v,
+                            a
+                        )
+                    );
                     }
-                };
+            };
 
             // Report intersection of constraints.
-            createSolverMarker.apply("Must be observed between").foreach(m -> mm.addMarker(m));
-
+            createSolverMarker.get().foreach(m -> mm.addMarker(m));
 
             // Elevation Constraint
             final Double maxAirmass = a.getMax(Circumstance.AIRMASS, false);
@@ -165,10 +195,10 @@ public class LimitsListener extends MarkerModelListener<Variant> {
 
                 } else {
 
-                    // Legacy behavior; airmass 2.0 limit
-                    if (maxAirmass > 2.0) {
+                    // Legacy behavior; airmass limit
+                    if (maxAirmass > AirmassLimit.ERROR.airmass) {
                         mm.addMarker(false, this, Severity.Error, String.format("Observation reaches airmass %1.2f.", maxAirmass), v, a);
-                    } else if (maxAirmass > 1.75) {
+                    } else if (maxAirmass > AirmassLimit.WARNING.airmass) {
                         mm.addMarker(false, this, Severity.Warning, String.format("Observation reaches airmass %1.2f.", maxAirmass), v, a);
                     }
                 }

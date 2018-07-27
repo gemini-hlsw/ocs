@@ -299,10 +299,6 @@ public class ScheduleDocument {
         return (a.getFirstStep() + 1) + " - " + (a.getLastStep() + 1);
     }
 
-    public TwilightBoundedNight getTwilightBoundedNight() {
-        return new TwilightBoundedNight(TwilightBoundType.NAUTICAL, schedule.getStart(), schedule.getSite());
-    }
-
     public SortedSet<Object> getEvents(Variant v) {
 
         SortedSet<Object> ret = new TreeSet<Object>(new Comparator<Object>() {
@@ -329,11 +325,11 @@ public class ScheduleDocument {
         ret.addAll(allocs);
         ret.add(new SimpleEvent(allocs.last().getEnd(), "End of plan variant."));
 
-        // Add nautical twilight info.
-        TwilightBoundedNight nautical = new TwilightBoundedNight(TwilightBoundType.NAUTICAL, schedule.getStart(), schedule.getSite());
+        // Add twilight info.
+        final TwilightBoundedNight nautical = new TwilightBoundedNight(TwilightBoundType.NAUTICAL, schedule.getStart(), schedule.getSite());
         final TimeZone timezone = utc ? TimeZone.getTimeZone("UTC") : schedule.getSite().timezone();
         ret.add(new SimpleEvent(nautical.getStartTimeRounded(timezone), "Evening 12&deg; Twilight"));
-        ret.add(new SimpleEvent(nautical.getEndTimeRounded(timezone), "Morning 12&deg; Twilight"));
+        ret.add(new SimpleEvent(nautical.getEndTimeRounded(timezone),   "Morning 12&deg; Twilight"));
 
         // Find illuminated fraction
         Calendar cal = Calendar.getInstance();
