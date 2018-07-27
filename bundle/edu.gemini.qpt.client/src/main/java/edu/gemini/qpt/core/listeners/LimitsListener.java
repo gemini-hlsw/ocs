@@ -106,7 +106,7 @@ public class LimitsListener extends MarkerModelListener<Variant> {
                         final Map<Obs, Union<Interval>> c = v.getSchedule().getCache(cacheName);
                         final Union<Interval> u = c.getOrDefault(a.getObs(), new Union<>());
 
-                        return u.getIntervals().stream().anyMatch(i -> f.apply(i) == ts);
+                        return u.getIntervals().stream().anyMatch(i -> f.apply(i).equals(ts));
                     };
 
             final BiFunction<Function<Interval, Long>, Interval, Option<String>> explainLimit =
@@ -114,13 +114,10 @@ public class LimitsListener extends MarkerModelListener<Variant> {
                     if (matchWith.apply(f, Variant.VISIBLE_UNION_CACHE).test(f.apply(i))) {
                         switch (a.getObs().getElevationConstraintType()) {
                             case HOUR_ANGLE:
-                                new Some<>("%t(H)");
-                                break;
+                                return new Some<>("%t(H)");
                             default:
-                                new Some<>("%t(A)");
-                                break;
+                                return new Some<>("%t(A)");
                         }
-                        return new Some<>("%t(A)");
                     } else if (matchWith.apply(f, Variant.DARK_UNION_CACHE).test(f.apply(i))) {
                         return new Some<>("%t(B)");
                     } else if (matchWith.apply(f, Variant.TIMING_UNION_CACHE).test(f.apply(i))) {
@@ -144,9 +141,7 @@ public class LimitsListener extends MarkerModelListener<Variant> {
                     } else {
 
                         final ImList<Long> timestamps =
-                            DefaultImList.create(valid.getIntervals()).flatMap(
-                                i -> DefaultImList.create(i.getStart(), i.getEnd())
-                            );
+                            is.flatMap(i -> DefaultImList.create(i.getStart(), i.getEnd()));
 
                         final String m = is.map(i -> {
                            final String start = explainLimit.apply(Interval::getStart, i).getOrElse("%t(sunset)");
