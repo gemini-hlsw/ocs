@@ -109,27 +109,31 @@ public class LimitsListener extends MarkerModelListener<Variant> {
                         return u.getIntervals().stream().anyMatch(i -> f.apply(i).equals(ts));
                     };
 
-            final BiFunction<Pair<String, Function<Interval, Long>>, Interval, String> explainLimit =
-                (p, i) -> {
-                    final Function<Interval, Long> f = p._2();
-                    final Long ts = f.apply(i);
+            final BiFunction<Function<Interval, Long>, Interval, String> explainLimit =
+                (extractTimestamp, interval) -> {
+                    final Long ts = extractTimestamp.apply(interval);
 
-                    if (ts.equals(f.apply(nightInterval))) {
-                        return "%t(" + p._1() + ")";
-                    } else if (matchWith.apply(f, Variant.VISIBLE_UNION_CACHE).test(ts)) {
+                    final String boundaryIndicator;
+                    if (ts.equals(extractTimestamp.apply(nightInterval))) {
+                        boundaryIndicator = "twilight";
+                    } else if (matchWith.apply(extractTimestamp, Variant.VISIBLE_UNION_CACHE).test(ts)) {
                         switch (a.getObs().getElevationConstraintType()) {
                             case HOUR_ANGLE:
-                                return "%t(H)";
+                                boundaryIndicator = "H";
+                                break;
                             default:
-                                return "%t(A)";
+                                boundaryIndicator = "A";
+                                break;
                         }
-                    } else if (matchWith.apply(f, Variant.DARK_UNION_CACHE).test(ts)) {
-                        return "%t(B)";
-                    } else if (matchWith.apply(f, Variant.TIMING_UNION_CACHE).test(ts)) {
-                        return "%t(T)";
+                    } else if (matchWith.apply(extractTimestamp, Variant.DARK_UNION_CACHE).test(ts)) {
+                        boundaryIndicator = "B";
+                    } else if (matchWith.apply(extractTimestamp, Variant.TIMING_UNION_CACHE).test(ts)) {
+                        boundaryIndicator = "T";
                     } else {
                         throw new RuntimeException("This should be impossible");
                     }
+
+                    return String.format("%%t(%s)", boundaryIndicator);
                 };
 
             // Function to create markers that report solver intervals.
@@ -149,8 +153,8 @@ public class LimitsListener extends MarkerModelListener<Variant> {
                             is.flatMap(i -> DefaultImList.create(i.getStart(), i.getEnd()));
 
                         final String m = is.map(i -> {
-                           final String start = explainLimit.apply(new Pair<>("sunset", Interval::getStart), i);
-                           final String end   = explainLimit.apply(new Pair<>("sunrise", Interval::getEnd), i);
+                           final String start = explainLimit.apply(Interval::getStart, i);
+                           final String end   = explainLimit.apply(Interval::getEnd, i);
                            return start + '-' + end;
                         }).mkString("Must be observed between ", ", ", ".");
 
@@ -163,8 +167,7 @@ public class LimitsListener extends MarkerModelListener<Variant> {
                             timestamps,
                             v,
                             a
-                        )
-                    );
+                        ));
                     }
             };
 
