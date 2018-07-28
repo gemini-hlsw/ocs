@@ -106,27 +106,29 @@ public class LimitsListener extends MarkerModelListener<Variant> {
                         final Map<Obs, Union<Interval>> c = v.getSchedule().getCache(cacheName);
                         final Union<Interval> u = c.getOrDefault(a.getObs(), new Union<>());
 
-                        return u.getIntervals().stream().anyMatch(i -> f.apply(i) == ts);
+                        return u.getIntervals().stream().anyMatch(i -> f.apply(i).equals(ts));
                     };
 
-            final BiFunction<Function<Interval, Long>, Interval, Option<String>> explainLimit =
-                (f, i) -> {
-                    if (matchWith.apply(f, Variant.VISIBLE_UNION_CACHE).test(f.apply(i))) {
+            final BiFunction<Pair<String, Function<Interval, Long>>, Interval, String> explainLimit =
+                (p, i) -> {
+                    final Function<Interval, Long> f = p._2();
+                    final Long ts = f.apply(i);
+
+                    if (ts.equals(f.apply(nightInterval))) {
+                        return "%t(" + p._1() + ")";
+                    } else if (matchWith.apply(f, Variant.VISIBLE_UNION_CACHE).test(ts)) {
                         switch (a.getObs().getElevationConstraintType()) {
                             case HOUR_ANGLE:
-                                new Some<>("%t(H)");
-                                break;
+                                return "%t(H)";
                             default:
-                                new Some<>("%t(A)");
-                                break;
+                                return "%t(A)";
                         }
-                        return new Some<>("%t(A)");
-                    } else if (matchWith.apply(f, Variant.DARK_UNION_CACHE).test(f.apply(i))) {
-                        return new Some<>("%t(B)");
-                    } else if (matchWith.apply(f, Variant.TIMING_UNION_CACHE).test(f.apply(i))) {
-                        return new Some<>("%t(T)");
+                    } else if (matchWith.apply(f, Variant.DARK_UNION_CACHE).test(ts)) {
+                        return "%t(B)";
+                    } else if (matchWith.apply(f, Variant.TIMING_UNION_CACHE).test(ts)) {
+                        return "%t(T)";
                     } else {
-                        return None.instance();
+                        throw new RuntimeException("This should be impossible");
                     }
                 };
 
@@ -144,13 +146,11 @@ public class LimitsListener extends MarkerModelListener<Variant> {
                     } else {
 
                         final ImList<Long> timestamps =
-                            DefaultImList.create(valid.getIntervals()).flatMap(
-                                i -> DefaultImList.create(i.getStart(), i.getEnd())
-                            );
+                            is.flatMap(i -> DefaultImList.create(i.getStart(), i.getEnd()));
 
                         final String m = is.map(i -> {
-                           final String start = explainLimit.apply(Interval::getStart, i).getOrElse("%t(sunset)");
-                           final String end   = explainLimit.apply(Interval::getEnd, i).getOrElse("%t(sunrise)");
+                           final String start = explainLimit.apply(new Pair<>("sunset", Interval::getStart), i);
+                           final String end   = explainLimit.apply(new Pair<>("sunrise", Interval::getEnd), i);
                            return start + '-' + end;
                         }).mkString("Must be observed between ", ", ", ".");
 
