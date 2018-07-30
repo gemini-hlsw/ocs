@@ -6,7 +6,7 @@ organization in Global := "edu.gemini.ocs"
 
 ocsVersion in ThisBuild := OcsVersion("2016A", true, 1, 1, 1)
 
-pitVersion in ThisBuild := OcsVersion("2018B", false, 2, 2, 0)
+pitVersion in ThisBuild := OcsVersion("2019A", true, 1, 1, 0)
 
 // Bundles by default use the ocsVersion; this is overridden in bundles used only by the PIT
 version in ThisBuild := ocsVersion.value.toOsgiVersion
