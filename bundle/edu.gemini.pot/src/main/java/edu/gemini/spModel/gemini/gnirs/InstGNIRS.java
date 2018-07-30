@@ -962,7 +962,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     }
 
     public static ReadMode selectReadMode(double exposure) {
-        if (exposure <= 1.0) {
+        if (exposure < 0.6) {
             return ReadMode.VERY_BRIGHT;
         } else if (exposure <= 20.0) {
             return ReadMode.BRIGHT;
