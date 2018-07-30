@@ -6,9 +6,8 @@ import edu.gemini.model.p1.immutable._
 import edu.gemini.pit.ui.editor.Institutions
 import edu.gemini.pit.util.PDF
 import edu.gemini.pit.catalog._
-
 import edu.gemini.spModel.core.MagnitudeBand
-import view.obs.ObsListGrouping
+import view.obs.{ObsListGrouping, ObsListView}
 import edu.gemini.model.p1.visibility.TargetVisibilityCalc
 import edu.gemini.pit.ui.view.tac.TacView
 import java.time.{Instant, ZoneId}
@@ -19,7 +18,7 @@ import edu.gemini.pit.model.{AppPreferences, Model}
 import edu.gemini.pit.catalog.NotFound
 import edu.gemini.pit.catalog.Error
 
-import scalaz.{ Band => _, _ }
+import scalaz.{Band => _, _}
 import Scalaz._
 
 object ProblemRobot {
@@ -433,21 +432,17 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     }
 
     private lazy val missingObsElementCheck = {
-      def fix[A](b: Band, g: ObsListGrouping[A]) {
-        s.inObsListView(b, _.Fixes.fixEmpty(g))
-      }
-
-      def check[A](s: String, g: ObsListGrouping[A]) =
-        p.observations.filter(g.lens.get(_).isEmpty) match {
+      def check[A](msg: String, g: ObsListGrouping[A], adder: ObsListView => Unit) =
+        p.observations.filter(o => g.lens.get(o).isEmpty) match {
           case Nil => None
-          case h :: Nil => Some(new Problem(Severity.Error, s"One observation has no $s.", "Observations", fix(h.band, g)))
-          case h :: tail => Some(new Problem(Severity.Error, s"${1 + tail.length} observations have no $s.", "Observations", fix(h.band, g)))
+          case o :: Nil => Some(new Problem(Severity.Error, s"One observation has no $msg.", "Observations", s.inObsListView(o.band, adder)))
+          case o :: tail => Some(new Problem(Severity.Error, s"${1 + tail.length} observations have no $msg.", "Observations", s.inObsListView(o.band, adder)))
         }
 
       List(
-        check("instrument configuration", ObsListGrouping.Blueprint),
-        check("target", ObsListGrouping.Target),
-        check("observing conditions", ObsListGrouping.Condition)).flatten
+        check("instrument configuration", ObsListGrouping.Blueprint, _.Fixes.addBlueprint()),
+        check("target", ObsListGrouping.Target, _.Fixes.addTarget()),
+        check("observing conditions", ObsListGrouping.Condition, _.Fixes.addConditions())).flatten
     }
 
     private def indicateObservation(o: Observation) {
@@ -455,7 +450,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     }
 
     private lazy val missingObsDetailsCheck =
-      p.observations.filter(_.calculatedTimes.isEmpty) match {
+      p.observations.filter(o => o.nonEmpty && o.calculatedTimes.isEmpty) match {
         case Nil => None
         case h :: Nil => Some(new Problem(Severity.Error, "One observation has no observation time.", "Observations", indicateObservation(h)))
         case h :: tail => Some(new Problem(Severity.Error, s"${1 + tail.length} observations have no observation times.", "Observations", indicateObservation(h)))
@@ -603,7 +598,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       })
     }
 
-    private lazy val noObs = when (p.observations.isEmpty) {
+    private lazy val noObs = when (!p.hasNonEmptyObservations) {
       new Problem(Severity.Todo, "Please create observations with conditions, targets, and resources.", "Observations", ())
     }
 
