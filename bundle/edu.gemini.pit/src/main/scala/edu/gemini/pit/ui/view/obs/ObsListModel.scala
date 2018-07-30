@@ -24,7 +24,7 @@ case class ObsListModel(all:List[Observation], band:Band, gs:(ObsListGrouping[_]
   lazy val elems = {
 
     // Sort the observations, turn them into ObsElems, and expand the list
-    val es = visible.sortBy(_.toString).map(ObsElem(_))
+    val es = visible.sortBy(_.toString).map(ObsElem)
     expand(es)
 
   }
@@ -181,15 +181,18 @@ case class ObsListModel(all:List[Observation], band:Band, gs:(ObsListGrouping[_]
 
   }
 
-
-
-  def cut(elem:ObsListElem):ObsListModel = elem match {
-    case target:ObsGroup[_] =>
+  def cut(elem: ObsListElem): ObsListModel = elem match {
+    case target: ObsGroup[_] =>
       val (_, toClear) = Seq(gs._1, gs._2, gs._3).splitAt(depth(target))
-      def clear(o:Observation) = (o.copy(progTime = None) /: toClear)((o, g) => g.clear(o))
+
+      def clear(o: Observation) =
+        toClear.foldLeft(o.copy(progTime = None))((o, g) => g.clear(o))
+
       val os = selected(target)
-      (this /: os.zip(os.map(clear)))(_.replacePair(_))
-    case o:ObsElem          => this - o
+      os.zip(os.map(clear)).foldLeft(this)(_.replacePair(_))
+    case o:ObsElem          =>
+      val newModel = this - o
+      if (newModel.all.empty) newModel + Observation.empty else newModel
   }
 
   // Group the given ObsElems (which is just a trivally wrapped Observation) by three levels of grouping, then

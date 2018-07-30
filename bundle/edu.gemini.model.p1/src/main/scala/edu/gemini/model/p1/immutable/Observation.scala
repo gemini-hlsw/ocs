@@ -94,6 +94,7 @@ class Observation private (val blueprint:Option[BlueprintBase],
   }
 
   def isEmpty = blueprint.isEmpty && condition.isEmpty && target.isEmpty && calculatedTimes.isEmpty
+  def nonEmpty = !isEmpty
 
   override def equals(a:Any) = a match {
     case o:Observation => kernel == o.kernel
