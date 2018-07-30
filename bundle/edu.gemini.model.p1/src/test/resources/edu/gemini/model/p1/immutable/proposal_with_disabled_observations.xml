@@ -21,9 +21,18 @@
     </investigators>
     <targets/>
     <conditions/>
-    <blueprints/>
+    <blueprints>
+        <visitor>
+            <visitor id="blueprint-0">
+                <name>Visitor - Gemini South - Visitor Instrument</name>
+                <visitor>true</visitor>
+                <site>Gemini South</site>
+                <custom-name>Visitor Instrument</custom-name>
+            </visitor>
+        </visitor>
+    </blueprints>
     <observations>
-        <observation enabled="false" band="Band 1/2"/>
+        <observation blueprint="blueprint-0" enabled="false" band="Band 1/2"/>
     </observations>
     <proposalClass>
         <queue tooOption="None"/>

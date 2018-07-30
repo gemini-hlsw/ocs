@@ -216,7 +216,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
       }
     }
 
-    // Add button for an observation, which does't quite work with the abstraction above
+    // Add button for an observation, which doesn't quite work with the abstraction above
     lazy val addObservation = ToolButton(ICON_CLOCK, ICON_CLOCK_DIS, "Add Observation Time") {
       for {
         m <- model
@@ -296,42 +296,45 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
       }
     }
 
+    // Method for handling the editing of the target group, since this is quite unique.
+    def editTargetGroup(tg: TargetGroup): Unit = {
+
+      // generic edit doesn't work for targets anymore; we have more work to do now.
+      for {
+        m            <- panel.model
+        olm          <- model
+        newT         <- TargetEditor.open(Semester.current, tg.t, canEdit, panel)
+      } {
+
+        val included = ~model.map(_.childrenOf(tg))
+
+        val os = olm.map {
+          case o if included.contains(o) => Observation.target.set(o, Some(newT)).copy(meta = None)
+          case o                         => o
+        }.all
+
+        val ts = Proposal.targets.get(m)
+        val p0 = Proposal.observations.set(m, os)
+        val p1 = tg.t match {
+          case None    => Proposal.targets.set(p0, newT :: ts)
+          case Some(t) => ts.indexOf(t) match {
+            case -1 => Proposal.targets.set(p0, newT :: ts)
+            case n  => Proposal.targets.set(p0, ts.updated(n, newT))
+          }
+        }
+
+        panel.model = Some(p1)
+      }
+    }
+
+
     // Our double-click handler for editing
     onDoubleClick {
 
       // Edit handlers for groups
       case cg:ConditionGroup => edit(cg, p => ConditionEditor.open(cg.c, canEdit, panel), Observation.condition)
       case bg:BlueprintGroup => edit(bg, BlueprintEditor.open(_, bg.b, canEdit, panel), Observation.blueprint)
-      case tg:TargetGroup    =>
-
-        // generic edit doesn't work for targets anymore; we have more work to do now.
-        for {
-          m            <- panel.model
-          olm          <- model
-          newT         <- TargetEditor.open(Semester.current, tg.t, canEdit, panel)
-        } {
-
-          val included = ~model.map(_.childrenOf(tg))
-
-          val os = olm.map {
-            case o if included.contains(o) => Observation.target.set(o, Some(newT)).copy(meta = None)
-            case o                         => o
-          }.all
-
-          val ts = Proposal.targets.get(m)
-          val p0 = Proposal.observations.set(m, os)
-          val p1 = tg.t match {
-            case None    => Proposal.targets.set(p0, newT :: ts)
-            case Some(t) => ts.indexOf(t) match {
-              case -1 => Proposal.targets.set(p0, newT :: ts)
-              case n  => Proposal.targets.set(p0, ts.updated(n, newT))
-            }
-          }
-
-          panel.model = Some(p1)
-
-        }
-
+      case tg:TargetGroup    => editTargetGroup(tg)
 
       // Edit an obs
       case ObsElem(o) =>
@@ -623,54 +626,78 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
 
     val lens = olmLens
 
+    // General fix-it method.
+    def fixer(findAndProcess: ObsListElem => Boolean): Unit = {
+      model.foreach(_.elems.find(findAndProcess))
+    }
+
     // Public method for fix-its
-    def fixEmpty[A](grouping:ObsListGrouping[A]) {
-      model.foreach { m =>
-        m.elems.find {
-          case g:ObsGroup[_] if (g.grouping == grouping) && g.grouping.get(g).isEmpty =>
-            viewer.selection = Some(g)
-            true
-          case _                                                                      => false
-        }
-      }
+    def fixEmpty[A](grouping:ObsListGrouping[A]) = fixer {
+      case g: ObsGroup[_] if (g.grouping == grouping) && g.grouping.get(g).isEmpty =>
+        viewer.selection = Some(g)
+        true
+      case _ => false
+    }
+
+    // Add missing conditions.
+    def addConditions() = fixer {
+      case g@ConditionGroup(None, _, _) =>
+        viewer.edit(g, p => ConditionEditor.open(None, canEdit, panel), Observation.condition)
+        viewer.selection = Some(g)
+        true
+      case _ => false
     }
 
     // Edit the conditions
-    def fixConditions(c: Condition) {
-      model.foreach { m =>
-        m.elems.find {
-          case g @ ConditionGroup(Some(gc), _, _) if c == gc =>
-            viewer.edit(g, p => ConditionEditor.open(Some(c), canEdit, panel), Observation.condition)
-            viewer.selection = Some(g)
-            true
-          case _                                             => false
-        }
-      }
+    def fixConditions(c: Condition) = fixer {
+      case g@ConditionGroup(Some(gc), _, _) if c == gc =>
+        viewer.edit(g, p => ConditionEditor.open(Some(c), canEdit, panel), Observation.condition)
+        viewer.selection = Some(g)
+        true
+      case _ => false
+    }
+
+    // Add a missing blueprint.
+    def addBlueprint() = fixer {
+      case g@BlueprintGroup(_, None, _) =>
+        viewer.edit(g, p => BlueprintEditor.open(p, None, canEdit, panel), Observation.blueprint)
+        viewer.selection = Some(g)
+        true
+      case _ => false
     }
 
     // Edit the blueprint
-    def fixBlueprint(b: BlueprintBase) {
-      model.foreach { m =>
-        m.elems.find {
-          case g @ BlueprintGroup(_, Some(gb), _) if b == gb =>
-            viewer.edit(g, p => BlueprintEditor.open(p, b.some, canEdit, panel), Observation.blueprint)
-            viewer.selection = Some(g)
-            true
-          case _                                             => false
-        }
-      }
+    def fixBlueprint(b: BlueprintBase) = fixer {
+      case g@BlueprintGroup(_, Some(gb), _) if b == gb =>
+        viewer.edit(g, p => BlueprintEditor.open(p, b.some, canEdit, panel), Observation.blueprint)
+        viewer.selection = Some(g)
+        true
+      case _ => false
     }
 
-    def indicateObservation(o:Observation) {
-      model.foreach { m =>
-        m.elems.find {
-          case e:ObsElem if e.o == o =>
-            viewer.selection = Some(e)
-            true
-          case _                     => false
-        }
-      }
+    // Add a missing target.
+    def addTarget() = fixer {
+      case g@TargetGroup(_, _, None) =>
+        viewer.editTargetGroup(g)
+        viewer.selection = Some(g)
+        true
+      case _ => false
+    }
+
+    // Edit the target
+    def fixTarget(t: Target) = fixer {
+      case g@TargetGroup(_, _, Some(gt)) if t == gt =>
+        viewer.edit(g, p => TargetEditor.open(p.semester, t.some, canEdit, panel), Observation.target)
+        viewer.selection = Some(g)
+        true
+      case _ => false
+    }
+
+    def indicateObservation(o:Observation) = fixer {
+      case e: ObsElem if e.o == o =>
+        viewer.selection = Some(e)
+        true
+      case _ => false
     }
   }
-
 }
