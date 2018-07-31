@@ -38,7 +38,7 @@ object Proposal {
       o1 <- os
     } yield ((o0, o1), o0.isPartialObservationOf(o1))).toMap
 
-    (os :\ List.empty[Observation]) {(o, os) =>
+    val obsList = (os :\ List.empty[Observation]) {(o, os) =>
       if (os.exists(x => partial((o, x)))) {
         os
       } else if (os.exists(x => partial((x, o)))) {
@@ -51,6 +51,8 @@ object Proposal {
       }
     } filterNot (_.isEmpty)
 
+    // We always want a non-empty list of observations: the empty observation if nothing.
+    obsList.nonEmpty ? obsList | List(Observation.empty)
   }
 
   private val validate = Option(System.getProperty("edu.gemini.model.p1.validate")).isDefined
@@ -74,12 +76,16 @@ object Proposal {
     List.empty[Keyword],
     Investigators.empty,
     List.empty[Target],
-    List.empty[Observation],
+    List(Observation.empty),
     ProposalClass.empty,
     currentSchemaVersion)
 
   def apply(m:M.Proposal) = new Proposal(m)
 
+  // REL-3290: Create a non-empty list of observations, i.e. make sure that if there are no defined observations,
+  // then an empty one is provided to serve as a dummy observation for users to edit.
+  def nonEmptyObsList(olist: List[Observation]): List[Observation] =
+    olist.nonEmpty ? olist | List(Observation.empty)
 }
 
 case class Proposal(meta:Meta,
@@ -115,6 +121,13 @@ case class Proposal(meta:Meta,
 
   def resetObservationMeta:Proposal = copy(observations = observations.map(_.copy(meta = None)))
 
+  // REL-3290: Now that we always have an observation (an empty one if there are no others), when we access the
+  // list of observations for processing, we want to filter this dummy observation out.
+  def nonEmptyObservations: List[Observation] = observations.filterNot(_ == Observation.empty)
+
+  // REL-3290: Check to see if there are observations that are non-empty.
+  def hasNonEmptyObservations: Boolean = nonEmptyObservations.nonEmpty
+
   private def this(m:M.Proposal) = this(
     Meta(m.getMeta),
     Semester(m.getSemester),
@@ -125,7 +138,7 @@ case class Proposal(meta:Meta,
     m.getKeywords.getKeyword.asScala.toList,
     Investigators(m),
     m.getTargets.getSiderealOrNonsiderealOrToo.asScala.map(Target(_)).toList,
-    m.getObservations.getObservation.asScala.map(Observation(_)).toList,
+    Proposal.nonEmptyObsList(m.getObservations.getObservation.asScala.map(Observation(_)).toList),
     Option(m.getProposalClass).map(ProposalClass(_)).getOrElse(ProposalClass.empty),  // TODO: get rid of the empty case
     m.getSchemaVersion)
 
@@ -158,7 +171,7 @@ case class Proposal(meta:Meta,
     m.setConditions(cs)
 
     val os = Factory.createObservations()
-    os.getObservation.addAll(observations.map(_.mutable(n)).asJava)
+    os.getObservation.addAll(nonEmptyObservations.map(_.mutable(n)).asJava)
     m.setObservations(os)
 
     m.setProposalClass(ProposalClass.mutable(this, n))
