@@ -559,25 +559,13 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           (result \\ "gmosN") must \\("name") \>~ ".*1.0 arcsec slit.*"
       }
     }
-    "proposal with GmosN with Altair mode must have it set to AltairNone for 2018B, REL-3363" in {
-      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_gmosn_altair_lgs.xml")))
-
-      val converted = UpConverter.convert(xml)
-      converted must beSuccessful.like {
-        case StepResult(changes, result) =>
-          changes must contain(SemesterConverter2018ATo2018B.gmosnAltairRemoverMessage)
-          (result \\ "gmosN" \\ "altair") must \\("none")
-          (result \\ "gmosN") must \\("name") \> "GMOS-N Imaging z (925 nm)"
-      }
-
-    }
     "proposal with Gnirs that doesn't have a central wavelength, REL-1254" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_gnirs_no_centralwavelength.xml")))
 
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 6
+          changes must have length 7
           changes must contain("GNIRS observation doesn't have a central wavelength range, assigning to '< 2.5um'")
           // Check that the centralWavelength node is added
           result must \\("centralWavelength") \> "< 2.5um"
@@ -755,7 +743,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 5
+          changes must have length 6
           result \\ "niri" must \\("filter") \> "HeI (1.083 um)"
           result \\ "niri" must not(\\("filter") \> "J-continuum (1.122 um)")
           result \\ "niri" must not(\\("filter") \> "Jcont (1.065 um)")
