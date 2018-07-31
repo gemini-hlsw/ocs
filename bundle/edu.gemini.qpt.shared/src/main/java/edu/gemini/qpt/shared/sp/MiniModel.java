@@ -68,6 +68,17 @@ public class MiniModel {
         for (Obs obs: allObservations) obsMap.put(obs.getObsId(), obs);
     }
 
+    public static MiniModel empty(Site site) {
+        return new MiniModel(
+                site,
+                Collections.emptySortedSet(),
+                Collections.emptySortedSet(),
+                Collections.emptySortedSet(),
+                Collections.emptyMap(),
+                Collections.emptyMap()
+        );
+    }
+
     public SortedSet<Prog> getPrograms() {
         return programs;
     }

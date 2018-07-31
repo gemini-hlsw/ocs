@@ -40,7 +40,8 @@ public class ScheduleIO {
     static final int VERSION_104 = 104;   // 1.0.4
     static final int VERSION_1030 = 1030; // 1.0.30 (new infrastructure, Dec 2013)
     static final int VERSION_1031 = 1031; // 1.0.31 (additional facilities (enums) as part of QV, Jan 2014)
-    static final int VERSION_CURRENT = VERSION_1031;
+    static final int VERSION_1032 = 1032; // 18B.1.1.5 (switch to civil twilight)
+    static final int VERSION_CURRENT = VERSION_1032;
 
     public static void write(Schedule sched, File file) throws IOException {
         try {
