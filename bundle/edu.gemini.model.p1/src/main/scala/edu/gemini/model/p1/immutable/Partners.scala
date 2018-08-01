@@ -22,7 +22,7 @@ object Partners {
   )
 
   // REL-2248 Contains a list of partners that are not allowed on joint proposals
-  val jointProposalNotAllowed = List[NgoPartner](NgoPartner.KR, NgoPartner.AU)
+  val jointProposalNotAllowed = List[NgoPartner](NgoPartner.AU)
 
   // REL-2670 A partner affiliation for an FT proposal can be either Ngo or Subaru
   type FtPartner = Option[NgoPartner \/ ExchangePartner.SUBARU.type]
