@@ -361,7 +361,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         ~(((requiredBands & observationBands) =/= requiredBands) option {List((Severity.Error, "The magnitude information in the GPI target component should include the bandpasses I, Y, J, H, and K."))})
       }
 
-      def gpiIChecks(target: SiderealTarget):List[(Severity.Value, String)] = for {
+      def gpiIChecks(target: SiderealTarget, cond: Condition):List[(Severity.Value, String)] = for {
           m <- target.magnitudes
           if m.band == MagnitudeBand.I
           iMag = m.value
@@ -406,7 +406,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           obsMode = b.asInstanceOf[GpiBlueprint].observingMode
           disperser = b.asInstanceOf[GpiBlueprint].disperser
           t @ SiderealTarget(_, _, _, _, _, mag) <- o.target
-        } yield (t, (gpiMagnitudesPresent(t) :: gpiIChecks(t) :: gpiLowfsChecks(obsMode, t) :: gpiIfsChecks(obsMode, disperser, t) :: Nil).flatten)
+          c <- o.condition
+        } yield (t, (gpiMagnitudesPresent(t) :: gpiIChecks(t, c) :: gpiLowfsChecks(obsMode, t) :: gpiIfsChecks(obsMode, disperser, t) :: Nil).flatten)
 
       for {
         gpiProblems <- gpiTargetsWithProblems
