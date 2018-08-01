@@ -254,7 +254,7 @@ public class ConfigCreator {
          *    2. on-source fraction = 1.0, large sky offsets !=0: Warning, no overheads calculation (using large sky offsets implies some steps being taken off-source).
          *    3. on-source fraction = 0.5, large sky offsets = 0: Sequence has obj-sky-sky-obj structure, with 4-point ABAB dithering at each position
          *                   (the last block can have less steps depending on requested number of exposures). Sky is unguided. Offset to the sky and back = 120"
-         *    4. on-source fraction = 0.5, large sky offsets !=0: Sequence has obj-sky-obj-sky structure, with ABAB dithering at each position. Sky is unguided. Offset to the sky and back = 310"
+         *    4. on-source fraction = 0.5, large sky offsets !=0: Sequence has obj-sky-obj-sky structure, with ABAB dithering at each position. Sky is unguided. Offset to the sky and back = 310". When changing from unguided to guided, the LGS reacquisition overhead is added.
          *    5. on-source fraction !=1.0 && !=0.5: Warning, no overhead calculations.
          *
          */
@@ -300,26 +300,17 @@ public class ConfigCreator {
                     error = true;
                 }
 
-                if ((exposuresPerGroup % 2 != 0) || (leftOver % 2 != 0)) {
+                if ((exposuresPerGroup % 2 != 0) || (leftOver != 0)) {
                     result.addWarning("Warning: Observation overheads cannot be calculated: uneven numbers of object and sky exposures. Please change the number of exposures, or the number of sky offsets >5'.");
                     error = true;
                 }
 
 
                 if (!error) {
-                    int[] ditheringPoints = new int[numLargeOffsets];
-                    int totalAssigned = 0;
                     result.setOffsetMessage("science-sky-science-sky pattern with " + GSAOI_LARGE_SKY_OFFSET + "\" sky offset and ABAB dithering at each position");
+                    int sub = exposuresPerGroup / 2;
 
-                    for (int i = 0; i < (numLargeOffsets - 1); i++) {
-                        ditheringPoints[i] = exposuresPerGroup;
-                        totalAssigned += exposuresPerGroup;
-                    }
-                    ditheringPoints[numLargeOffsets - 1] = numExp - totalAssigned;
-
-                    for (int exps : ditheringPoints) {
-                        int sub = exps / 2;
-
+                    for (int i = 0; i < numLargeOffsets; i++) {
                         guideStatusList.addAll(Collections.nCopies(sub, g));
                         guideStatusList.addAll(Collections.nCopies(sub, p));
                     }
@@ -327,7 +318,6 @@ public class ConfigCreator {
             }
         }
         GuideOption currentGuideStatus;
-        GuideOption previousGuideStatus = null;
 
         for (Config step : result.getConfig()) {
             step.putItem(ReadModeKey, (gsaoiParams.readMode()));
@@ -336,8 +326,7 @@ public class ConfigCreator {
                 currentGuideStatus = guideStatusList.get(stepNum);
 
                 step.putItem(GuideWithCWFS1, currentGuideStatus);
-                if (previousGuideStatus != null) {
-                    if (!currentGuideStatus.equals(previousGuideStatus)) {
+                    if (currentGuideStatus.equals(StandardGuideOptions.Value.park)  ) {
                         if (numLargeOffsets == 0) {
                             step.putItem(TelescopeQKey, GSAOI_SMALL_SKY_OFFSET + (double)step.getItemValue(TelescopeQKey));
                         } else {
@@ -345,8 +334,6 @@ public class ConfigCreator {
                         }
                     }
                 }
-                previousGuideStatus = currentGuideStatus;
-            }
             stepNum = stepNum + 1;
         }
         return result;
