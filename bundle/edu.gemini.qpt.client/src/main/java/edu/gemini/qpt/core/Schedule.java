@@ -12,6 +12,10 @@ import edu.gemini.qpt.shared.util.EnumPio;
 import edu.gemini.qpt.shared.util.PioSerializable;
 import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.skycalc.TwilightBoundedNight;
+import static edu.gemini.skycalc.TwilightBoundType.CIVIL;
+import static edu.gemini.skycalc.TwilightBoundType.NAUTICAL;
+import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.Site;
@@ -32,6 +36,7 @@ import edu.gemini.spModel.gemini.trecs.TReCSParams;
 import edu.gemini.spModel.pio.Param;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
+import edu.gemini.spModel.pio.PioPath;
 import edu.gemini.spModel.pio.PioFactory;
 import jsky.coords.WorldCoordinates;
 import jsky.util.DateUtil;
@@ -173,6 +178,38 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
                         facilities.addAll(Arrays.asList(Niri.Camera.values()));
                         break;
                 }
+
+                // Intentionally no break here, versions may need more than one migration step!
+
+            // MIGRATE 1031 to 1032
+            case ScheduleIO.VERSION_1031:
+                LOGGER.info("Upgrading serial version " + ScheduleIO.VERSION_1031 + " to " + ScheduleIO.VERSION_1032);
+
+                // Here the block boundaries are set at nautical twilight, which
+                // clips all the caches (like VISIBLE_UNION_CACHE) at nautical
+                // twilight. We expect blocks trimmed by 12 degree twilight
+                // bounds.  If we find one, swap it for one trimmed by 6 degree
+                // twilight.
+
+                final Site s = model.getSite();
+
+                ImOption.apply(params.getParamSet("blocks")).foreach(bs -> {
+                    DefaultImList.create(bs.getParamSets("block")).foreach(b -> {
+                        final Param ps = b.getParam("start");
+                        final Param pe = b.getParam("end");
+
+                        final Long ts = Long.valueOf(ps.getValue());
+                        final Long te = Long.valueOf(pe.getValue());
+
+                        final TwilightBoundedNight n = TwilightBoundedNight.forTime(NAUTICAL, ts, s);
+
+                        if (ts == n.getStartTime() && te == n.getEndTime()) {
+                            final TwilightBoundedNight c = TwilightBoundedNight.forTime(CIVIL, ts, s);
+                            ps.setValue(String.valueOf(c.getStartTime()));
+                            pe.setValue(String.valueOf(c.getEndTime()));
+                        }
+                    });
+                });
 
                 // Intentionally no break here, versions may need more than one migration step!
 
