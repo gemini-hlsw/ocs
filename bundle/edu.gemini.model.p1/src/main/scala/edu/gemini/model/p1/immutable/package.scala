@@ -38,6 +38,7 @@ package object immutable {
   type CloudCover = M.CloudCover
   object CloudCover extends EnumObject[M.CloudCover] {
     val BEST = M.CloudCover.cc50
+    val CC70 = M.CloudCover.cc70
     val CC80 = M.CloudCover.cc80
     val ANY  = M.CloudCover.cc100
   }
@@ -366,6 +367,7 @@ package object immutable {
     val BEST = M.ImageQuality.iq20
     val IQ70 = M.ImageQuality.iq70
     val IQ85 = M.ImageQuality.iq85
+    val IQANY = M.ImageQuality.iq100
   }
 
   type InvestigatorStatus = M.InvestigatorStatus
