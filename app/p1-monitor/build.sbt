@@ -18,9 +18,8 @@ ocsAppManifest := {
       common(ov, pv),
         dev(ov, pv),
         staging(ov, pv),
-        v2017B(ov, pv),
-        v2018A(ov, pv),
-        v2018B(ov, pv)
+        v2018B(ov, pv),
+        v2019A(ov, pv)
     )
   )
 }
@@ -78,30 +77,6 @@ def staging(ov: Version, pv: Version) = AppConfig(
   distribution = List(Linux32, Linux64)
 ) extending List(common(ov, pv))
 
-// 2017B
-def v2017B(ov: Version, pv: Version) = AppConfig(
-  id = "2017B",
-  props = Map(
-    "org.osgi.framework.storage" -> "${user.home}/.edu.gemini.p1monitor.2017B/felix-cache",
-    "p1monitor.config" -> "conf.production-2017B.xml",
-    "org.osgi.service.http.port" -> "9003",
-    "p1monitor.host" -> "phase1.gemini.edu"
-  ),
-  distribution = List(Linux32, Linux64)
-) extending List(common(ov, pv))
-
-// 2018A
-def v2018A(ov: Version, pv: Version) = AppConfig(
-  id = "2018A",
-  props = Map(
-    "org.osgi.framework.storage" -> "${user.home}/.edu.gemini.p1monitor.2018A/felix-cache",
-    "p1monitor.config" -> "conf.production-2018A.xml",
-    "org.osgi.service.http.port" -> "9004",
-    "p1monitor.host" -> "phase1.gemini.edu"
-  ),
-  distribution = List(Linux32, Linux64)
-) extending List(common(ov, pv))
-
 // 2018B
 def v2018B(ov: Version, pv: Version) = AppConfig(
   id = "2018B",
@@ -109,6 +84,18 @@ def v2018B(ov: Version, pv: Version) = AppConfig(
     "org.osgi.framework.storage" -> "${user.home}/.edu.gemini.p1monitor.2018B/felix-cache",
     "p1monitor.config" -> "conf.production-2018B.xml",
     "org.osgi.service.http.port" -> "9005",
+    "p1monitor.host" -> "phase1.gemini.edu"
+  ),
+  distribution = List(Linux32, Linux64)
+) extending List(common(ov, pv))
+
+// 2019A
+def v2019A(ov: Version, pv: Version) = AppConfig(
+  id = "2019A",
+  props = Map(
+    "org.osgi.framework.storage" -> "${user.home}/.edu.gemini.p1monitor.2019A/felix-cache",
+    "p1monitor.config" -> "conf.production-2019A.xml",
+    "org.osgi.service.http.port" -> "9006",
     "p1monitor.host" -> "phase1.gemini.edu"
   ),
   distribution = List(Linux32, Linux64)
