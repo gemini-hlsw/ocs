@@ -361,20 +361,46 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         ~(((requiredBands & observationBands) =/= requiredBands) option {List((Severity.Error, "The magnitude information in the GPI target component should include the bandpasses I, Y, J, H, and K."))})
       }
 
-      def gpiIChecks(target: SiderealTarget):List[(Severity.Value, String)] = for {
+      def magAdjust(cond: Condition): Double = {
+        val ccAdjust = cond.cc match {
+          case CloudCover.BEST                  =>  0.0
+          case CloudCover.CC70                  =>  1.5
+          case CloudCover.CC80 | CloudCover.ANY => 10.0
+        }
+        val iqAdjust = cond.iq match {
+          case ImageQuality.BEST | ImageQuality.IQ70 =>  0.0
+          case ImageQuality.IQ85                     =>  1.5
+          case ImageQuality.IQANY                    => 10.0
+        }
+        ccAdjust + iqAdjust
+      }
+
+      def gpiIChecks(target: SiderealTarget, cond: Condition):List[(Severity.Value, String)] = {
+        // REL-3413: Apply adjustments to magnitude faintness limits.
+        val magAdj = magAdjust(cond)
+        for {
           m <- target.magnitudes
           if m.band == MagnitudeBand.I
           iMag = m.value
-          if iMag < 3.0 || iMag > 8.0
-          severity = if (iMag <= 1.0 || iMag > 10.0) Severity.Error else Severity.Warning
-          message = if (iMag < 3.0 && iMag > 1.0) {
-              s"""GPI Target "${target.name}" may be too bright for the OIWFS."""
-            } else if (iMag <= 1.0) {
-              s"""GPI Target "${target.name}" too bright to work with the OIWFS."""
-            } else {
-              s"""GPI Target "${target.name}" is too faint for proper AO (OIWFS) operation, the AO performance will be poor."""
-            }
+          iMagCondFaint = iMag + magAdj
+          if iMag < 3.0 || iMagCondFaint > 9.0
+          severity = if (iMag <= 1.0 || iMagCondFaint > 10.0) Severity.Error else Severity.Warning
+
+          // We give priority to:
+          // 1. Problems due to conditions affecting faintness levels.
+          // 2. Problems due to brightness.
+          // 3. Problems due to faintness.
+          message = if (iMagCondFaint > 9.0) {
+            s"""GPI Target ${target.name}" is too faint due to non-optimal conditions for proper AO (OIWFS) operation: the AO performance will be poor."""
+          } else if (iMag > 1.0 && iMag < 3.0) {
+            s"""GPI Target "${target.name}" may be too bright for the OIWFS."""
+          } else if (iMag <= 1.0) {
+            s"""GPI Target "${target.name}" too bright to work with the OIWFS."""
+          } else {
+            s"""GPI Target "${target.name}" is too faint for proper AO (OIWFS) operation: the AO performance will be poor."""
+          }
         } yield (severity, message)
+      }
 
       def gpiIfsChecks(obsMode: GpiObservingMode, disperser: GpiDisperser, target: SiderealTarget):List[(Severity.Value, String)] = for {
           m <- target.magnitudes
@@ -387,17 +413,29 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           if (scienceMag < coronographLimit && GpiObservingMode.isCoronographMode(obsMode)) || (scienceMag < directLimit && GpiObservingMode.isDirectMode(obsMode))
         } yield (Severity.Warning, s"""GPI Target "${target.name}" risks saturating the science detector even for short exposure times.""")
 
-      def gpiLowfsChecks(obsMode: GpiObservingMode, target: SiderealTarget):List[(Severity.Value, String)] = for {
-        m <- target.magnitudes
-        if m.band == MagnitudeBand.H && GpiObservingMode.isCoronographMode(obsMode)
-        hMag = m.value
-        if hMag < 2.0 || hMag > 10.0
-        message = if (hMag < 2.0) {
+      def gpiLowfsChecks(obsMode: GpiObservingMode, target: SiderealTarget, cond: Condition): List[(Severity.Value, String)] = {
+        // REL-3413: Apply adjustments to magnitude faintness limits.
+        val magAdj = magAdjust(cond)
+        for {
+          m <- target.magnitudes
+          if m.band == MagnitudeBand.H && GpiObservingMode.isCoronographMode(obsMode)
+          hMag = m.value
+          hMagCondFaint = hMag + magAdj
+
+          // We give priority to:
+          // 1. Problems due to conditions affecting faintness levels.
+          // 2. Problems due to brightness.
+          // 3. Problems due to faintness.
+          if hMag < 2.0 || hMagCondFaint > 9.0
+          message = if (hMagCondFaint > 9.0) {
+            s"""GPI Target "${target.name}" is too faint due to non-optimal conditions for proper CAL (LOWFS) operation, and thus mask centering on the coronogrph will be severely affected."""
+          } else if (hMag < 2.0) {
             s"""GPI Target "${target.name}" is too bright, it will saturate the LOWFS."""
           } else  {
             s"""GPI Target "${target.name}" is too faint for proper CAL (LOWFS) operation and thus mask centering on the coronograph will be severely affected."""
           }
-      } yield (Severity.Warning, message)
+        } yield (Severity.Warning, message)
+      }
 
       val gpiTargetsWithProblems: List[(SiderealTarget, List[(Severity, String)])] = for {
           o <- p.observations
@@ -406,7 +444,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           obsMode = b.asInstanceOf[GpiBlueprint].observingMode
           disperser = b.asInstanceOf[GpiBlueprint].disperser
           t @ SiderealTarget(_, _, _, _, _, mag) <- o.target
-        } yield (t, (gpiMagnitudesPresent(t) :: gpiIChecks(t) :: gpiLowfsChecks(obsMode, t) :: gpiIfsChecks(obsMode, disperser, t) :: Nil).flatten)
+          c <- o.condition
+        } yield (t, (gpiMagnitudesPresent(t) :: gpiIChecks(t, c) :: gpiLowfsChecks(obsMode, t, c) :: gpiIfsChecks(obsMode, disperser, t) :: Nil).flatten)
 
       for {
         gpiProblems <- gpiTargetsWithProblems
