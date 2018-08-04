@@ -299,6 +299,12 @@ public class ScheduleDocument {
         return (a.getFirstStep() + 1) + " - " + (a.getLastStep() + 1);
     }
 
+    // WARNING: like other methods in this class, there appear to be no usages
+    // of this method but in fact it is required by the template.vm file.
+    public TwilightBoundedNight getNauticalTwilight() {
+        return new TwilightBoundedNight(TwilightBoundType.NAUTICAL, schedule.getStart(), schedule.getSite());
+    }
+
     public SortedSet<Object> getEvents(Variant v) {
 
         SortedSet<Object> ret = new TreeSet<Object>(new Comparator<Object>() {
