@@ -35,7 +35,7 @@
 	<h2>Sky Almanac</h2>
 
 	<table>
-		#set($night=$doc.TwilightBoundedNight)
+		#set($night=$doc.NauticalTwilight)
 		<tr><td>$doc.formatDate("HH:mm", $night.StartTime)</td><td>Nautical Twilight</td></tr>
 		<tr><td>$doc.formatDate("HH:mm", $night.EndTime)</td><td>Nautical Twilight</td></tr>
 	</table>
