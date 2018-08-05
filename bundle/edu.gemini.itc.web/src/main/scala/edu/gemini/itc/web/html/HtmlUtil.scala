@@ -13,7 +13,7 @@ object HtmlUtil {
   def sourceDistributionString(sd: SourceDefinition): String = sd.distribution match {
 
     case EmissionLine(wavelength, width, flux, cont) =>
-      s"n emission line, at a wavelength of $wavelength, and with a width of $width.\n" +
+      s"n emission line at a wavelength of $wavelength with a width of $width.\n" +
       s"It's total flux is $flux on a flat continuum of flux density $cont."
 
     case BlackBody(temp) =>
@@ -29,7 +29,7 @@ object HtmlUtil {
       s" ${sd.norm} ${sd.units.displayValue} user defined SED in the ${sd.normBand.name} band with the name: ${u.name}"
 
     case PowerLaw(index) =>
-      s" power-law with an index of $index and ${sd.norm} ${sd.units.displayValue} in the ${sd.normBand.name} band."
+      s" power-law with an index of $index, and ${sd.norm} ${sd.units.displayValue} in the ${sd.normBand.name} band."
 
   }
 
