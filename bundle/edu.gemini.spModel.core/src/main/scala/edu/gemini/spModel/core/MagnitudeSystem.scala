@@ -20,8 +20,8 @@ sealed abstract class SurfaceBrightness(val name: String) extends BrightnessUnit
   */
 object MagnitudeSystem {
 
-  case object Vega                extends MagnitudeSystem("Vega mag")
-  case object AB                  extends MagnitudeSystem("AB mag")
+  case object Vega                extends MagnitudeSystem("Vega")
+  case object AB                  extends MagnitudeSystem("AB")
   case object Jy                  extends MagnitudeSystem("Jy")
 
   // currently not supported in OT, only available in ITC web app
