@@ -34,8 +34,8 @@ object UpConverter {
   }
 
   // Sequence of conversions for proposals from a given semester. Cleaned up for 2017A since older conversion multiples to increment version no longer necessary.
-  val from2018B:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2018BTo2019A, LastStepConverter(Semester(2019, SemesterOption.A)))
-  val from2018A:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2018BTo2019A, SemesterConverter2018ATo2018B, LastStepConverter(Semester(2018, SemesterOption.B)))
+  val from2018B:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2018BTo2019A, LastStepConverter(Semester(2018, SemesterOption.B)))
+  val from2018A:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2018BTo2019A, SemesterConverter2018ATo2018B, LastStepConverter(Semester(2018, SemesterOption.A)))
   val from2017B:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2018BTo2019A, SemesterConverter2018ATo2018B, SemesterConverter2017BTo2018A, LastStepConverter(Semester(2017, SemesterOption.B)))
   val from2017A:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2018BTo2019A, SemesterConverter2018ATo2018B, SemesterConverter2017BTo2018A, SemesterConverter2017ATo2017B, LastStepConverter(Semester(2017, SemesterOption.A)))
   val from2016B:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2018BTo2019A, SemesterConverter2018ATo2018B, SemesterConverter2017BTo2018A, SemesterConverter2016BTo2017A, SemesterConverter2017ATo2017B, LastStepConverter(Semester(2016, SemesterOption.B)))
@@ -133,7 +133,7 @@ object SemesterConverter {
  * This converter is to include any possible last message to the conversion log without
  */
 case class LastStepConverter(semester: Semester) extends SemesterConverter {
-  val notifyToUseOlderPIT:TransformFunction = {
+  val notifyToUseOlderPIT: TransformFunction = {
     case n =>
       StepResult(s"Please use the PIT from semester ${semester.display} to view the unmodified proposal", n).successNel
   }
