@@ -57,8 +57,8 @@ object MagnitudeSystem {
 /** Units for uniform surface brightness values. */
 object SurfaceBrightness {
 
-  case object Vega                extends SurfaceBrightness("Vega/arcsec²")
-  case object AB                  extends SurfaceBrightness("AB/arcsec²")
+  case object Vega                extends SurfaceBrightness("Vega mag/arcsec²")
+  case object AB                  extends SurfaceBrightness("AB mag/arcsec²")
   case object Jy                  extends SurfaceBrightness("Jy/arcsec²")
   case object Watts               extends SurfaceBrightness("W/m²/µm/arcsec²")
   case object ErgsWavelength      extends SurfaceBrightness("erg/s/cm²/Å/arcsec²")
