@@ -111,9 +111,8 @@ final class HorizonsLookup(editor: TargetEditor, site: Site, when: Long) {
       val d1 = new Date(n.getStartTime)
       val d2 = new Date(n.getEndTime)
       for {
-        e1 <- HorizonsService2.lookupEphemerisWithPadding(d, site, 1000, s)
-        e2 <- HorizonsService2.lookupEphemeris(d, site, d1, d2, 300)
-      } yield Ephemeris(site, e1.data.union(e2.data))
+        e1 <- HorizonsService2.lookupEphemerisWithPadding(d, site, 200, s)
+      } yield Ephemeris(site, e1.data)
     }
 
   /** Create a new phase 1 target from a name and phase-2 (!) ephemeris. */
