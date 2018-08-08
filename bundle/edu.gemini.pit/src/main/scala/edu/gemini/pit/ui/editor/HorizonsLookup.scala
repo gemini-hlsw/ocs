@@ -105,15 +105,9 @@ final class HorizonsLookup(editor: TargetEditor, site: Site, when: Long) {
 
   /** Fetch the ephemeris for the given designation. */
   private def fetchEphemeris(d: HorizonsDesignation): HS2[Ephemeris] =
-    show(s"Fetching Ephemeris ...") *> {
-      val s  = new Semester(site, when)
-      val n  = new ObservingNight(site, when)
-      val d1 = new Date(n.getStartTime)
-      val d2 = new Date(n.getEndTime)
-      for {
-        e1 <- HorizonsService2.lookupEphemerisWithPadding(d, site, 200, s)
-      } yield Ephemeris(site, e1.data)
-    }
+    show(s"Fetching Ephemeris ...") *>
+      HorizonsService2.lookupEphemerisWithPadding(d, site, 200, new Semester(site, when)).
+        map(e => Ephemeris(site, e.data))
 
   /** Create a new phase 1 target from a name and phase-2 (!) ephemeris. */
   def p1target(name: String, ephemeris: Ephemeris): HS2[NonSiderealTarget] =
