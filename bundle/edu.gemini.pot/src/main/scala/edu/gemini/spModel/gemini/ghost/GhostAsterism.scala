@@ -238,7 +238,7 @@ object GhostAsterism {
     * guide fibers will be used by default because the target must be bright,
     * but can be explicitly turned off.
     */
-  sealed abstract class HighResolution(target: GhostTarget) extends GhostAsterism {
+  sealed abstract class HighResolution(target: GhostTarget) extends GhostAsterism with Serializable {
     override def allSpTargets: NonEmptyList[SPTarget] =
       NonEmptyList(target.spTarget)
 
