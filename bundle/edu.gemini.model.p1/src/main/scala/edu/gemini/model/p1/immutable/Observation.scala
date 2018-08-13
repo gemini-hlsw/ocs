@@ -25,8 +25,8 @@ object Observation {
   def unapply(o:Observation) = Some((o.blueprint, o.condition, o.target, o.progTime, o.band))
 
   // REL-3290: We need an empty band 3 observation to add to the band 3 tab.
-  val empty = new Observation(None, None, None, None, M.Band.BAND_1_2)
-  val emptyBand3 = new Observation(None, None, None, None, M.Band.BAND_3)
+  val empty = new Observation(None, None, None, None, M.Band.BAND_1_2, None, true)
+  val emptyBand3 = new Observation(None, None, None, None, M.Band.BAND_3, None, true)
 }
 
 // REL-2985: It is unfortunate that we have to pass progTime here, but it is necessary for the migration to 2017B,
@@ -104,7 +104,7 @@ class Observation private (val blueprint:Option[BlueprintBase],
     case _             => false
   }
 
-  private lazy val kernel = (blueprint, condition, target, progTime, band, meta)
+  private lazy val kernel = (blueprint, condition, target, progTime, band, meta, enabled)
 
   override lazy val hashCode = kernel.hashCode()
 

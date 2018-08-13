@@ -230,7 +230,6 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          println(s"${(result \\ "observations").toString()}")
           (result \\ "observations") must ==/(<observations>
             <observation band="Band 1/2" enabled="false"/>
           </observations>)
