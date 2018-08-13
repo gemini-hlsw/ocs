@@ -24,7 +24,9 @@ object Observation {
 
   def unapply(o:Observation) = Some((o.blueprint, o.condition, o.target, o.progTime, o.band))
 
-  val empty = new Observation(None, None, None, None, M.Band.BAND_1_2)
+  // REL-3290: We need an empty band 3 observation to add to the band 3 tab.
+  val empty = new Observation(None, None, None, None, M.Band.BAND_1_2, None, true)
+  val emptyBand3 = new Observation(None, None, None, None, M.Band.BAND_3, None, true)
 }
 
 // REL-2985: It is unfortunate that we have to pass progTime here, but it is necessary for the migration to 2017B,
@@ -93,7 +95,8 @@ class Observation private (val blueprint:Option[BlueprintBase],
     m
   }
 
-  def isEmpty = blueprint.isEmpty && condition.isEmpty && target.isEmpty && calculatedTimes.isEmpty
+  def isEmpty = this == Observation.empty || this == Observation.emptyBand3
+
   def nonEmpty = !isEmpty
 
   override def equals(a:Any) = a match {
@@ -101,14 +104,14 @@ class Observation private (val blueprint:Option[BlueprintBase],
     case _             => false
   }
 
-  private lazy val kernel = (blueprint, condition, target, progTime, band, meta)
+  private lazy val kernel = (blueprint, condition, target, progTime, band, meta, enabled)
 
   override lazy val hashCode = kernel.hashCode()
 
   def isPartialObservationOf(o:Observation) =
     progTime.isEmpty  && // If I have time defined, I might be incomplete but I'm not partial
     (band == o.band) && // must be the same band
-    (blueprint.isEmpty || target.isEmpty || condition.isEmpty || calculatedTimes.isEmpty) && // Must have *some* empty component
+    isEmpty && // Must have *some* empty component
     isPartial(blueprint, o.blueprint) &&
     isPartial(target, o.target) &&
     isPartial(condition, o.condition) &&
