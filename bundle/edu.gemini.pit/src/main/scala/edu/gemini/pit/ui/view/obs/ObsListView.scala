@@ -322,10 +322,9 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
             case n  => Proposal.targets.set(p0, ts.updated(n, newT))
           }
         }
-        println(s"${p1}")
+        
         panel.model = Some(p1)
       }
-      println(s"Finally: ${panel.model}")
     }
 
 
