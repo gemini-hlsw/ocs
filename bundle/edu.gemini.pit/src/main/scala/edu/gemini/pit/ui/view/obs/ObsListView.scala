@@ -281,7 +281,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
       this.viewer.getTable.setDragEnabled(canEdit)
     }
 
-    // Repaint everything when the catalog or guidstar state changes
+    // Repaint everything when the catalog or guide star state changes
     AgsRobot.addListener {_:Any => refresh()}
     GsaRobot.addListener {_:Any => refresh()}
 
@@ -322,9 +322,10 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
             case n  => Proposal.targets.set(p0, ts.updated(n, newT))
           }
         }
-
+        println(s"${p1}")
         panel.model = Some(p1)
       }
+      println(s"Finally: ${panel.model}")
     }
 
 

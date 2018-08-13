@@ -38,7 +38,7 @@ object Proposal {
       o1 <- os
     } yield ((o0, o1), o0.isPartialObservationOf(o1))).toMap
 
-    val obsList = (os :\ List.empty[Observation]) {(o, os) =>
+    val obsList = os.foldRight(List.empty[Observation]) {(o, os) =>
       if (os.exists(x => partial((o, x)))) {
         os
       } else if (os.exists(x => partial((x, o)))) {
@@ -51,8 +51,8 @@ object Proposal {
       }
     } filterNot (_.isEmpty)
 
-    // We always want a non-empty list of observations: the empty observation if nothing.
-    obsList.nonEmpty ? obsList | List(Observation.empty)
+    // We always want a non-empty list of observations: the empty observations if nothing.
+    nonEmptyObsList(os)
   }
 
   private val validate = Option(System.getProperty("edu.gemini.model.p1.validate")).isDefined
@@ -76,7 +76,7 @@ object Proposal {
     List.empty[Keyword],
     Investigators.empty,
     List.empty[Target],
-    List(Observation.empty),
+    List(Observation.empty, Observation.emptyBand3), // REL-3290: Template observations
     ProposalClass.empty,
     currentSchemaVersion)
 
@@ -84,8 +84,13 @@ object Proposal {
 
   // REL-3290: Create a non-empty list of observations, i.e. make sure that if there are no defined observations,
   // then an empty one is provided to serve as a dummy observation for users to edit.
-  def nonEmptyObsList(olist: List[Observation]): List[Observation] =
-    olist.nonEmpty ? olist | List(Observation.empty)
+  def nonEmptyObsList(olist: List[Observation]): List[Observation] = {
+    // Make sure we have one observation for bands 1/2, and one for band 3.
+    val band12missing = olist.exists(_.band === M.Band.BAND_1_2)
+    val band3missing  = olist.exists(_.band === M.Band.BAND_3)
+    (band12missing ? List(Observation.empty) | olist.filter(_.band === Band.BAND_1_2)) ++
+      (band3missing ? List(Observation.emptyBand3) | olist.filter(_.band === Band.BAND_3))
+  }
 }
 
 case class Proposal(meta:Meta,
@@ -123,7 +128,7 @@ case class Proposal(meta:Meta,
 
   // REL-3290: Now that we always have an observation (an empty one if there are no others), when we access the
   // list of observations for processing, we want to filter this dummy observation out.
-  def nonEmptyObservations: List[Observation] = observations.filterNot(_ == Observation.empty)
+  def nonEmptyObservations: List[Observation] = observations.filterNot(_.isEmpty)
 
   // REL-3290: Check to see if there are observations that are non-empty.
   def hasNonEmptyObservations: Boolean = nonEmptyObservations.nonEmpty
