@@ -62,7 +62,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
         case q:QueueProposalClass         => q.band3request.isDefined
         case f:FastTurnaroundProgramClass => f.band3request.isDefined
         case _                    => false
-      }) || p.observations.exists(_.band == Band.BAND_3)
+      }) || p.observations.exists(o => o.band == Band.BAND_3 && o.nonEmpty)
 
       if (tabEnabled) {
 

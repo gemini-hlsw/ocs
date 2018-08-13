@@ -86,10 +86,10 @@ object Proposal {
   // then an empty one is provided to serve as a dummy observation for users to edit.
   def nonEmptyObsList(olist: List[Observation]): List[Observation] = {
     // Make sure we have one observation for bands 1/2, and one for band 3.
-    val band12missing = olist.exists(_.band === M.Band.BAND_1_2)
-    val band3missing  = olist.exists(_.band === M.Band.BAND_3)
+    val band12missing = !olist.exists(o => o.band === M.Band.BAND_1_2 && o.nonEmpty)
+    val band3missing  = !olist.exists(o => o.band === M.Band.BAND_3 && o.nonEmpty)
     (band12missing ? List(Observation.empty) | olist.filter(_.band === Band.BAND_1_2)) ++
-      (band3missing ? List(Observation.emptyBand3) | olist.filter(_.band === Band.BAND_3))
+       (band3missing ? List(Observation.emptyBand3) | olist.filter(_.band === Band.BAND_3))
   }
 }
 
