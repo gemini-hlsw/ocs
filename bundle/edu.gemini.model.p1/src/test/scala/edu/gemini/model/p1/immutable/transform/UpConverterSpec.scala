@@ -30,7 +30,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           proposal.targets must beEmpty
           proposal.conditions must beEmpty
           proposal.blueprints must have size 1
-          proposal.observations must have size 1
+          proposal.observations must have size 2
           Option(proposal.proposalClass) must beSome
 
           // Check the instruments
@@ -72,7 +72,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           proposal.targets must beEmpty
           proposal.conditions must beEmpty
           proposal.blueprints must have size 1
-          proposal.observations must have size 1
+          proposal.observations must have size 2
           Option(proposal.proposalClass) must beSome
 
           // Check the instruments
@@ -116,7 +116,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           proposal.targets must beEmpty
           proposal.conditions must beEmpty
           proposal.blueprints must have size 1
-          proposal.observations must have size 1
+          proposal.observations must have size 2
           Option(proposal.proposalClass) must beSome
 
           proposal.schemaVersion must beEqualTo(Proposal.currentSchemaVersion)
@@ -230,8 +230,9 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
+          println(s"${(result \\ "observations").toString()}")
           (result \\ "observations") must ==/(<observations>
-            <observation enabled="false" band="Band 1/2"/>
+            <observation band="Band 1/2" enabled="false"/>
           </observations>)
 
           val proposal = ProposalIo.read(result.toString())
