@@ -71,11 +71,10 @@ object QvToolMenu {
       prepare()
       SolutionProvider(ctx).clear()
 
-      val oldObservations = ctx.dataSource.observations
       for {
-        observations <- ctx.dataSource.refresh                                 // wait for new observations loaded
-        result <- SolutionProvider(ctx).update(ctx, observations, oldObservations)  // wait for all constraints updated
-      } yield result
+        os <- ctx.dataSource.refresh                 // wait for new observations loaded
+        _  <- SolutionProvider(ctx).update(ctx, os)  // wait for all constraints updated
+      } yield ()
 
     }
 
@@ -89,7 +88,7 @@ class QvToolMenu(frame: Frame, ctx: QvContext) extends MenuBar {
   private val reloadAction = Action("Change Data and Reload") {
     new RefreshDialog(frame, ctx).open()
   }
-  
+
   private val refreshAction = new RefreshAction("Refresh", ctx)
 
   private def exportFilterAction(c: Component) = Action("Export Filter...") { new StoreExporter(c, QvStore.filters) }

@@ -67,7 +67,7 @@ sealed class SolutionProvider(site: Site) extends Publisher {
   }
 
   /** Reloads and recalculates all constraints in the background. */
-  def update(ctx: QvContext, newObservations: Set[Obs], oldObservations: Set[Obs]): Future[Unit] = {
+  def update(ctx: QvContext, newObservations: Set[Obs]): Future[Unit] = {
     scheduleCache.update(ctx.peer, range)
     constraintsCache.update(ctx, nights, newObservations)
   }

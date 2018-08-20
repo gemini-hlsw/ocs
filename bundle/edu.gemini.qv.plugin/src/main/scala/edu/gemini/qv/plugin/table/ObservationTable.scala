@@ -130,7 +130,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
       }
     }
   }
-  
+
   class HeaderTableGrid extends ObservationTableGrid {
 
     // store a copy of the all columns of the table's column model, do this before we make any changes to it by
