@@ -5,9 +5,9 @@ import edu.gemini.itc.gems.Gems;
 import edu.gemini.itc.gsaoi.Camera;
 import edu.gemini.itc.gsaoi.Gsaoi;
 import edu.gemini.itc.gsaoi.GsaoiRecipe;
-import edu.gemini.itc.shared.GsaoiParameters;
-import edu.gemini.itc.shared.ItcImagingResult;
-import edu.gemini.itc.shared.ItcParameters;
+import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.config2.Config;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -15,13 +15,19 @@ import java.io.StringWriter;
 /**
  * Helper class for printing GSAOI calculation results to an output stream.
  */
-public final class GsaoiPrinter extends PrinterBase {
+public final class GsaoiPrinter extends PrinterBase
+    implements OverheadTablePrinter.PrinterWithOverhead
+{
 
     private final GsaoiRecipe recipe;
+    private final ItcParameters p;
+    private final GsaoiParameters instr;
 
     public GsaoiPrinter(final ItcParameters p, final GsaoiParameters instr, final PrintWriter out) {
         super(out);
+        this.instr      = instr;
         recipe = new GsaoiRecipe(p, instr);
+        this.p          = p;
     }
 
     /**
@@ -48,6 +54,8 @@ public final class GsaoiPrinter extends PrinterBase {
 
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
+
+        _print(OverheadTablePrinter.print(this, p, getReadoutTimePerCoadd(), result));
 
         _print("<HR align=left SIZE=3>");
 
@@ -84,6 +92,20 @@ public final class GsaoiPrinter extends PrinterBase {
         s += "Pixel Size: " + instrument.getPixelSize() + "<BR>";
 
         return s;
+    }
+
+    public ConfigCreator.ConfigCreatorResult createInstConfig(int numberExposures) {
+        ConfigCreator cc = new ConfigCreator(p);
+        return cc.createGsaoiConfig(instr, numberExposures);
+    }
+
+    public PlannedTime.ItcOverheadProvider getInst() {
+        return new edu.gemini.spModel.gemini.gsaoi.Gsaoi();
+    }
+
+    public double getReadoutTimePerCoadd() {
+        edu.gemini.spModel.gemini.gsaoi.Gsaoi gsaoi = new edu.gemini.spModel.gemini.gsaoi.Gsaoi();
+        return gsaoi.readout(1, gsaoi.getNonDestructiveReads());
     }
 
 }

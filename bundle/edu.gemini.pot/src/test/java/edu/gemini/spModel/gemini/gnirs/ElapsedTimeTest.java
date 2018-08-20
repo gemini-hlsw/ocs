@@ -24,6 +24,8 @@ import java.util.Map;
 
 /**
  * work in progress test cases for GNIRS elapsed times
+ *
+ * 20180105: modified according to the latest read time measurements
  */
 public class ElapsedTimeTest extends InstrumentSequenceTestBase<InstGNIRS, SeqConfigGNIRS> {
     @Override
@@ -31,17 +33,16 @@ public class ElapsedTimeTest extends InstrumentSequenceTestBase<InstGNIRS, SeqCo
     @Override
     protected SPComponentType getSeqCompSpType() { return SeqConfigGNIRS.SP_TYPE; }
 
-    private static final Map<ReadMode, double[]> overheads = new HashMap<ReadMode, double[]>();
+    private static final Map<ReadMode, Double> overheads = new HashMap<>();
 
     // DHS overhead in secs
-    private static final double dhsSecs = 2.8; // REL-1678
-
+    private static final double dhsSecs = 8.5;
 
     static{
-        overheads.put(ReadMode.VERY_BRIGHT, new double[]{0.8, 0.14});
-        overheads.put(ReadMode.BRIGHT, new double[]{0.5, 0.7});
-        overheads.put(ReadMode.FAINT, new double[]{2.8, 11.0});
-        overheads.put(ReadMode.VERY_FAINT, new double[]{5.0, 21.9});
+        overheads.put(ReadMode.VERY_BRIGHT, 0.19);
+        overheads.put(ReadMode.BRIGHT, 0.69);
+        overheads.put(ReadMode.FAINT, 11.14);
+        overheads.put(ReadMode.VERY_FAINT, 22.31);
     }
 
     private void verifyElapsedTimes(double... expected) throws Exception {
@@ -65,7 +66,7 @@ public class ElapsedTimeTest extends InstrumentSequenceTestBase<InstGNIRS, SeqCo
         ISysConfig sc = createSysConfig();
         sc.putParameter(getParam(InstConstants.OBSERVING_WAVELENGTH_PROP,GNIRSConstants.DEF_CENTRAL_WAVELENGTH));
         setSysConfig(sc);
-        verifyElapsedTimes(2*10 + 2.8+(2*11.0) + dhsSecs);
+        verifyElapsedTimes(2*10 + 2*11.14 + dhsSecs);
     }
     @Test
     public void testBasicSequence() throws Exception {
@@ -88,9 +89,9 @@ public class ElapsedTimeTest extends InstrumentSequenceTestBase<InstGNIRS, SeqCo
                 sc.putParameter(getCoaddsParam(coadds[0], coadds[1]));
                 sc.putParameter(getParam(GNIRSConstants.READ_MODE_PROP,rm));
                 setSysConfig(sc);
-                double[] oh=overheads.get(rm);
-                verifyElapsedTimes(coadds[0]*expTime + oh[0]+(coadds[0]*oh[1]) + dhsSecs,
-                        coadds[1]*expTime + oh[0]+(coadds[1]*oh[1]) + dhsSecs);
+                Double oh=overheads.get(rm);
+                verifyElapsedTimes(coadds[0]*expTime + (coadds[0]*oh) + dhsSecs,
+                        coadds[1]*expTime + (coadds[1]*oh) + dhsSecs);
             }
         }
     }
@@ -138,13 +139,13 @@ public class ElapsedTimeTest extends InstrumentSequenceTestBase<InstGNIRS, SeqCo
         nestedSeq.setDataObject(nestedDataObj);
 
 
-        double[] ohFaint=overheads.get(ReadMode.FAINT);
-        double[] ohVeryFaint=overheads.get(ReadMode.VERY_FAINT);
+        final double ohFaint = overheads.get(ReadMode.FAINT);
+        final double ohVeryFaint = overheads.get(ReadMode.VERY_FAINT);
 
-        verifyElapsedTimes(coadds[0]*expTime + ohFaint[0]+(coadds[0]*ohFaint[1]) + dhsSecs,
-                coadds[1]*expTime + ohFaint[0]+(coadds[1]*ohFaint[1]) + dhsSecs,
-                coadds[0]*expTime + ohVeryFaint[0]+(coadds[0]*ohVeryFaint[1]) + dhsSecs,
-                coadds[1]*expTime + ohVeryFaint[0]+(coadds[1]*ohVeryFaint[1]) + dhsSecs);
+        verifyElapsedTimes(coadds[0]*expTime + (coadds[0]*ohFaint) + dhsSecs,
+                coadds[1]*expTime + (coadds[1]*ohFaint) + dhsSecs,
+                coadds[0]*expTime + (coadds[0]*ohVeryFaint) + dhsSecs,
+                coadds[1]*expTime + (coadds[1]*ohVeryFaint) + dhsSecs);
     }
 
     /**
@@ -193,15 +194,15 @@ public class ElapsedTimeTest extends InstrumentSequenceTestBase<InstGNIRS, SeqCo
         nestedSeq.setDataObject(nestedDataObj);
 
 
-        double[] ohFaint=overheads.get(ReadMode.FAINT);
-        double[] ohVeryFaint=overheads.get(ReadMode.VERY_FAINT);
+        Double ohFaint=overheads.get(ReadMode.FAINT);
+        Double ohVeryFaint=overheads.get(ReadMode.VERY_FAINT);
 
-        verifyElapsedTimes(coadds[0]*expTime + ohFaint[0]+(coadds[0]*ohFaint[1]) + dhsSecs,
-                coadds[1]*expTime + ohFaint[0]+(coadds[1]*ohFaint[1]) + dhsSecs,
-                coadds[1]*expTime + ohFaint[0]+(coadds[1]*ohFaint[1]) + dhsSecs,
-                coadds[0]*expTime + ohVeryFaint[0]+(coadds[0]*ohVeryFaint[1]) + dhsSecs,
-                coadds[1]*expTime + ohVeryFaint[0]+(coadds[1]*ohVeryFaint[1]) + dhsSecs,
-                coadds[1]*expTime + ohVeryFaint[0]+(coadds[1]*ohVeryFaint[1]) + dhsSecs);
+        verifyElapsedTimes(coadds[0]*expTime + (coadds[0]*ohFaint) + dhsSecs,
+                coadds[1]*expTime + (coadds[1]*ohFaint) + dhsSecs,
+                coadds[1]*expTime + (coadds[1]*ohFaint) + dhsSecs,
+                coadds[0]*expTime + (coadds[0]*ohVeryFaint) + dhsSecs,
+                coadds[1]*expTime + (coadds[1]*ohVeryFaint) + dhsSecs,
+                coadds[1]*expTime + (coadds[1]*ohVeryFaint) + dhsSecs);
 
     }
     /**
@@ -235,11 +236,11 @@ public class ElapsedTimeTest extends InstrumentSequenceTestBase<InstGNIRS, SeqCo
         gnirsDataObj.setSysConfig(sc);
         gnirsSeq.setDataObject(gnirsDataObj);
 
-        double[] ohFaint=overheads.get(ReadMode.FAINT);
+        final double ohFaint = overheads.get(ReadMode.FAINT);
 
 
-        verifyElapsedTimes(coadds[0]*expTime + ohFaint[0]+(coadds[0]*ohFaint[1]) + dhsSecs,
-                coadds[1]*expTime + ohFaint[0]+(coadds[1]*ohFaint[1]) + dhsSecs,
-                coadds[0]*expTime + ohFaint[0]+(coadds[0]*ohFaint[1]) + dhsSecs);
+        verifyElapsedTimes(coadds[0]*expTime + (coadds[0]*ohFaint) + dhsSecs,
+                coadds[1]*expTime + (coadds[1]*ohFaint) + dhsSecs,
+                coadds[0]*expTime + (coadds[0]*ohFaint) + dhsSecs);
     }
 }

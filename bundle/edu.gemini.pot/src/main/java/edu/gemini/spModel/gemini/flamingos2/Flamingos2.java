@@ -29,6 +29,7 @@ import edu.gemini.spModel.gemini.parallacticangle.ParallacticAngleSupportInst;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
 import edu.gemini.spModel.guide.GuideProbeUtil;
+import edu.gemini.spModel.guide.GuideOption;
 import edu.gemini.spModel.ictd.*;
 import edu.gemini.spModel.inst.ElectronicOffsetProvider;
 import edu.gemini.spModel.inst.ScienceAreaGeometry;
@@ -39,6 +40,7 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTimeGroup;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.Category;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime.ItcOverheadProvider;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
@@ -49,6 +51,7 @@ import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
+import edu.gemini.spModel.target.obsComp.TargetObsCompConstants;
 import edu.gemini.spModel.telescope.IssPort;
 import edu.gemini.spModel.telescope.IssPortProvider;
 import edu.gemini.spModel.telescope.PosAngleConstraint;
@@ -61,10 +64,12 @@ import java.util.*;
 
 import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_CONFIG_NAME;
 import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
+import static edu.gemini.spModel.seqcomp.SeqConfigNames.TELESCOPE_KEY;
 
 public final class Flamingos2 extends ParallacticAngleSupportInst
         implements PropertyProvider, GuideProbeProvider, IssPortProvider, ElectronicOffsetProvider,
-        PlannedTime.StepCalculator, PosAngleConstraintAware, CalibrationKeyProvider, VignettableScienceAreaInstrument {
+        PlannedTime.StepCalculator, PosAngleConstraintAware, CalibrationKeyProvider, VignettableScienceAreaInstrument,
+        ItcOverheadProvider {
 
     // for serialization
     private static final long serialVersionUID = 3L;
@@ -626,7 +631,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
             SPComponentType.INSTRUMENT_FLAMINGOS2;
 
     public static final ISPNodeInitializer<ISPObsComponent, Flamingos2> NI =
-        new ComponentNodeInitializer<>(SP_TYPE, () -> new Flamingos2(), c -> new Flamingos2CB(c));
+        new ComponentNodeInitializer<>(SP_TYPE, Flamingos2::new, Flamingos2CB::new);
 
     private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public  static final Map<String, PropertyDescriptor> PROPERTY_MAP     = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
@@ -649,6 +654,10 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     public static final PropertyDescriptor DECKER_PROP;
     public static final PropertyDescriptor READOUT_MODE_PROP;
     public static final PropertyDescriptor READS_PROP;
+
+    private static final double IMAGING_SETUP_TIME_OIWFS = 60 * 15;
+    private static final double IMAGING_SETUP_TIME_PWFS2 = 60 * 6;
+    private static final ItemKey GUIDE_WITH_OIWFS_KEY = new ItemKey(TELESCOPE_KEY, TargetObsCompConstants.GUIDE_WITH_OIWFS_PROP);
 
     /**
     * The name of the Flamingos2 instrument configuration
@@ -831,7 +840,8 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         return 95.0;
     }
 
-    @Override public CategorizedTimeGroup calc(final Config cur, final Option<Config> prev) {
+    @Override
+    public CategorizedTimeGroup calc(final Config cur, final Option<Config> prev) {
         final Collection<CategorizedTime> times = new ArrayList<>();
 
         if (PlannedTime.isUpdated(cur, prev, FPUnit.KEY)) {
@@ -852,9 +862,17 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         return CommonStepCalculator.instance.calc(cur, prev).addAll(times);
     }
 
+
     public static double getImagingSetupSec(ISPObservation obs) {
-        return 60 * (usesF2Oiwfs(obs) ? 15 : 6);
+        return usesF2Oiwfs(obs) ? IMAGING_SETUP_TIME_OIWFS : IMAGING_SETUP_TIME_PWFS2;
     }
+
+
+    public static double getImagingSetupSec(Config conf) {
+            return ImOption.apply(conf.getItemValue(GUIDE_WITH_OIWFS_KEY))
+                    .exists(g -> ((GuideOption) g).isActive()) ? IMAGING_SETUP_TIME_OIWFS : IMAGING_SETUP_TIME_PWFS2;
+        }
+
 
     // Imaging setup differs based on the guide probe in use, OI vs. anything
     // else (PWFS2 presumably).  See REL-1678.
@@ -879,21 +897,43 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         return 30 * 60;
     }
 
+    @Override
+    public double getReacquisitionTime() {
+        return 6 * 60;
+    }
+
 
     /**
      * Return the setup time in seconds before observing can begin
      */
-    public double getSetupTime(ISPObservation obs) {
+    public double getSetupTime(final ISPObservation obs) {
         if (isImaging()) return getImagingSetupSec(obs);
         else if (getFpu() == FPUnit.CUSTOM_MASK) return getCustomMaskSetupSec();
+        return getSpectroscopySetupSec();
+    }
+
+    // for ITC overheads
+    @Override
+    public double getSetupTime(final Config conf) {
+        if (isImagingConfig(conf)) return getImagingSetupSec(conf);
         return getSpectroscopySetupSec();
     }
 
     /**
      * Is the instrument in imaging mode.
      */
+    public static boolean isImagingConfig(FPUnit fpu, Disperser disperser) {
+        return (fpu == FPUnit.FPU_NONE) && (disperser == Disperser.NONE);
+    }
+
+    public static boolean isImagingConfig(final Config conf) {
+        return isImagingConfig(
+                (FPUnit) conf.getItemValue(FPUnit.KEY),
+                (Disperser) conf.getItemValue(Disperser.KEY));
+    }
+
     private boolean isImaging() {
-        return (_fpu == FPUnit.FPU_NONE) && (_disperser == Disperser.NONE);
+        return isImagingConfig(_fpu, _disperser);
     }
 
 

@@ -133,7 +133,7 @@ public final class PlannedTimeTest {
     @Test
     public void testEmptySequence() throws Exception {
         final NiriReadoutTime nrt = NiriReadoutTime.lookup(Niri.BuiltinROI.DEFAULT, Niri.ReadMode.DEFAULT).getValue();
-        cycleSetups(nrt.dhsWrite, nrt.getReadout(1));
+        cycleSetups(nrt.getDhsWriteTime(), nrt.getReadout(1));
     }
 
     private <T> IParameter getParam(PropertyDescriptor desc, T... vals) {
@@ -157,7 +157,7 @@ public final class PlannedTimeTest {
                 System.out.println(mode.toString() + ", " + roi.toString());
 
                 final NiriReadoutTime nrt = NiriReadoutTime.lookup(roi, mode).getValue();
-                cycleSetups(nrt.dhsWrite, 60 + nrt.getReadout(1));
+                cycleSetups(nrt.getDhsWriteTime(), 60 + nrt.getReadout(1));
             }
         }
     }
@@ -183,7 +183,7 @@ public final class PlannedTimeTest {
         final NiriReadoutTime nrt = NiriReadoutTime.lookup(roi, mode).getValue();
         double setup   = InstNIRI.getSetupTime(Mode.imaging);
         double readout = 2 * (60 + nrt.getReadout(1));
-        double dhs     = 2 * nrt.dhsWrite;
+        double dhs     = 2 * nrt.getDhsWriteTime();
 
         verify(setup + readout + InstNIRI.getFilterChangeOverheadSec() + dhs);
     }

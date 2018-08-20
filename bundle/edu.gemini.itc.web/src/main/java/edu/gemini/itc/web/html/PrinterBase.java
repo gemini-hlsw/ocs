@@ -1,9 +1,6 @@
 package edu.gemini.itc.web.html;
 
-import edu.gemini.itc.base.AOSystem;
-import edu.gemini.itc.base.Instrument;
-import edu.gemini.itc.base.Result;
-import edu.gemini.itc.base.SpectroscopyResult;
+import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.servlets.FilesServlet;
 import edu.gemini.itc.web.servlets.ServerInfo;
@@ -155,7 +152,7 @@ public abstract class PrinterBase {
                 _println(String.format("software aperture extent along slit = %.2f arcsec", slitWidth));
             } else if (result.source().profile() == PointSource$.MODULE$) {
                 if (result.aoSystem().nonEmpty()) {
-                     AOSystem ao = result.aoSystem().get();
+                    AOSystem ao = result.aoSystem().get();
                     _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * ao.getAOCorrectedFWHM()));
                 } else {
                     _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
@@ -177,7 +174,7 @@ public abstract class PrinterBase {
     protected void _printRequestedIntegrationTime(final SpectroscopyResult result, final int correction) {
         if (result.observation().calculationMethod() instanceof S2NMethod) {
             final double numExposures = ((S2NMethod) result.observation().calculationMethod()).exposures();
-            final double exposureTime = result.observation().calculationMethod().exposureTime() * correction;
+            final double exposureTime = result.observation().calculationMethod().exposureTime() * correction * result.observation().calculationMethod().coaddsOrElse(1);
             _printRequestedIntegrationTime(result, exposureTime, numExposures);
         } else {
             throw new Error("Unsupported analysis method");
@@ -205,7 +202,7 @@ public abstract class PrinterBase {
             return "";
         } else {
             return "&" + FilesServlet.ParamLoLimit + "=" + pd.getPlotWaveL() +
-                   "&" + FilesServlet.ParamHiLimit + "=" + pd.getPlotWaveU();
+                    "&" + FilesServlet.ParamHiLimit + "=" + pd.getPlotWaveU();
         }
     }
 

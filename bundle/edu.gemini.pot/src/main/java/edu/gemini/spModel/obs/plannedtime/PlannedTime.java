@@ -4,6 +4,7 @@ import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
+import edu.gemini.spModel.guide.StandardGuideOptions;
 import edu.gemini.spModel.time.ChargeClass;
 
 import java.io.Serializable;
@@ -43,6 +44,12 @@ public final class PlannedTime implements Serializable {
     }
 
     public interface StepCalculator {
+        CategorizedTimeGroup calc(Config stepConfig, Option<Config> prevStepConfig);
+    }
+
+    public interface ItcOverheadProvider {
+        double getSetupTime(Config conf);
+        double getReacquisitionTime();
         CategorizedTimeGroup calc(Config stepConfig, Option<Config> prevStepConfig);
     }
 
@@ -329,6 +336,10 @@ public final class PlannedTime implements Serializable {
             return true;
         }
 
+        private Step(CategorizedTimeGroup times) {
+            this(times, ChargeClass.PROGRAM, false, "OBJECT");
+        }
+
         @Override public int hashCode() {
             int result = times.hashCode();
             result = 31 * result + chargeClass.hashCode();
@@ -348,6 +359,11 @@ public final class PlannedTime implements Serializable {
         public static Step apply(CategorizedTimeGroup times, ChargeClass chargeClass, boolean executed, String obsType) {
             return new Step(times, chargeClass, executed, obsType);
         }
+
+        public static Step apply(CategorizedTimeGroup times) {
+            return new Step(times);
+        }
+
     }
 
     public final Setup setup;
@@ -404,4 +420,67 @@ public final class PlannedTime implements Serializable {
         steps = Collections.unmodifiableList(new ArrayList<>(steps));
         return new PlannedTime(setup, steps, sequence);
     }
+
+    /**
+     * The following methods are for use in the ITC.
+     *
+     */
+
+    public static final double VISIT_TIME = 7200; // visit time, sec
+    public static final double RECENTERING_INTERVAL = 3600; // sec
+
+    // total science time (time without setup and re-centering)
+    public long scienceTime() {
+        long scienceTime = 0;
+        for (Step step : steps) scienceTime += step.totalTime();
+        return scienceTime / 1000;
+    }
+
+    private int numReacq(double obsTime, double reacqInterval) {
+        int numReacq = 0;
+        if ((obsTime > reacqInterval) && (obsTime % reacqInterval == 0)) {
+            numReacq = (int) (obsTime / reacqInterval) - 1;
+        } else if ((obsTime > reacqInterval) && (obsTime % reacqInterval != 0)) {
+            numReacq = (int) (obsTime / reacqInterval);
+        }
+        return numReacq;
+    }
+
+    // number of acquisitions (setups) per observation
+    public int numAcq() {
+        return numReacq(scienceTime(), VISIT_TIME) + 1;
+    }
+
+    // Number of re-centerings on the slit for spectroscopic observations using PWFS2
+    public int numRecenter(Config config) {
+        int numRecenter = 0;
+        ItemKey guideWithPWFS2 = new ItemKey("telescope:guideWithPWFS2");
+
+        if (config.containsItem(guideWithPWFS2) &&
+                config.getItemValue(guideWithPWFS2).equals(StandardGuideOptions.Value.guide)) {
+            long scienceTime = scienceTime();
+            double visitTime = (numAcq() == 1) ? scienceTime : VISIT_TIME;
+            double lastVisitTime = scienceTime % VISIT_TIME;
+            // number of re-centerings per visit
+            int visitRecenteringNum = numReacq(visitTime, RECENTERING_INTERVAL);
+            // number of re-centerings in the last visit
+            int lastVisitRecenteringNum = numReacq(lastVisitTime, RECENTERING_INTERVAL);
+
+            if (VISIT_TIME > RECENTERING_INTERVAL) {
+                numRecenter = (numAcq() - 1) * visitRecenteringNum + lastVisitRecenteringNum;
+            } else {
+                throw new Error("Visit time is smaller than re-centering time");
+            }
+        }
+        return numRecenter;
+    }
+
+    // total time with acquisitions and re-acquisitions.
+    // Uses the parameter because of GSAOI LGS re-acquisitions.
+    public long totalTimeWithReacq(int numReacq) {
+        long totalTimeWithReacq = setup.time * numAcq() + setup.reacquisitionTime * numReacq;
+        for (Step step : steps) totalTimeWithReacq += step.totalTime();
+        return totalTimeWithReacq;
+    }
+
 }

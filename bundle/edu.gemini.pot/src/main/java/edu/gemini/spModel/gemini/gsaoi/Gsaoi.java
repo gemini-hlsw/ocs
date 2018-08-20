@@ -8,6 +8,7 @@ import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
+import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.config.injector.ConfigInjector;
 import edu.gemini.spModel.config.injector.obswavelength.ObsWavelengthCalc1;
 import edu.gemini.spModel.config2.Config;
@@ -39,6 +40,7 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTimeGroup;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.Category;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.StepCalculator;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime.ItcOverheadProvider;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.pio.ParamSet;
@@ -64,7 +66,7 @@ import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
  * This class defines the GS AOI instrument.
  */
 public final class Gsaoi extends SPInstObsComp
-   implements PropertyProvider, GuideProbeProvider, IssPortProvider, StepCalculator, PosAngleConstraintAware {
+   implements PropertyProvider, GuideProbeProvider, IssPortProvider, StepCalculator, PosAngleConstraintAware, ItcOverheadProvider {
 //    From REL-439:
 //    ----
 //    OT changes:
@@ -455,10 +457,13 @@ public final class Gsaoi extends SPInstObsComp
     // REL-2645 offset overhead is 15 secs
     static final double GUIDED_OFFSET_OVERHEAD = 15.0; // sec
     private static final int MCAO_SETUP_TIME = 30; // min
-    private static final int GSAOI_REACQUISITION_TIME = 10; // min
+    private static final int GSAOI_REACQUISITION_TIME = 10; // sec
 
     private static final CategorizedTime GUIDED_OFFSET_OVERHEAD_CATEGORIZED_TIME =
             CategorizedTime.fromSeconds(Category.CONFIG_CHANGE, GUIDED_OFFSET_OVERHEAD, OffsetOverheadCalculator.DETAIL);
+
+    public static final CategorizedTime LGS_REACQUISITION_OVERHEAD_CATEGORIZED_TIME =
+            CategorizedTime.fromSeconds(Category.CONFIG_CHANGE, GSAOI_REACQUISITION_TIME * 60, "LGS Reacquisition");
 
     public static final PropertyDescriptor FILTER_PROP;
     public static final PropertyDescriptor READ_MODE_PROP;
@@ -660,6 +665,11 @@ public final class Gsaoi extends SPInstObsComp
         return MCAO_SETUP_TIME * 60;//MCAO setup time: 30m
     }
 
+    @Override
+    public double getSetupTime(final Config conf) {
+        return MCAO_SETUP_TIME * 60; //MCAO setup time: 30m
+    }
+
     /**
      * Time needed to re-setup the instrument before the Observation following a previous full setup.
      *
@@ -667,6 +677,11 @@ public final class Gsaoi extends SPInstObsComp
      * @return time in seconds
      */
     public double getReacquisitionTime(ISPObservation obs) {
+        return getReacquisitionTime();
+    }
+
+    @Override
+    public double getReacquisitionTime() {
         return GSAOI_REACQUISITION_TIME * 60; // 10 mins as defined in REL-1346
     }
 
@@ -680,7 +695,13 @@ public final class Gsaoi extends SPInstObsComp
              (ct.detail.equals(OffsetOverheadCalculator.DETAIL)));
 
     private static double getOffsetArcsec(Config c, ItemKey k) {
-        final String d = (String) c.getItemValue(k); // yes a string :/
+        final String d;
+        try {
+            d = (String) c.getItemValue(k); // yes a string :/
+
+        } catch (ClassCastException cce) {
+            return (double) c.getItemValue(k);
+        }
         return (d == null) ? 0.0 : Double.parseDouble(d);
     }
 
@@ -705,7 +726,7 @@ public final class Gsaoi extends SPInstObsComp
         return (go != null) && go.isActive();
     }
 
-    private static boolean isGuided(Config c) {
+    public static boolean isGuided(Config c) {
         for (final GsaoiOdgw odgw : GsaoiOdgw.values()) {
             if (isActive(c, odgw.getSequenceProp())) return true;
         }
@@ -726,35 +747,71 @@ public final class Gsaoi extends SPInstObsComp
         return curGuided || isGuided(prev);
 
     }
+    // This is for use in the ITC overheads calculations only.
+    // LGS reacquisition is required when coming back from sky offset >5'
+    private static boolean lgsReacquisitionRequired(Config cur, Option<Config> prev) {
+        if (!isOffset(cur, prev)) {
+            return false;
+        }
 
-    // REL-1103
+        if (prev.isDefined()) {
+            Offset curOff  = OffsetOverheadCalculator.instance.extract(cur);
+            Offset prevOff = OffsetOverheadCalculator.instance.extract(prev);
+            double distance = curOff.distance(prevOff).toArcsecs().getMagnitude();
+
+            if (isGuided(cur) && !isGuided(prev)) {
+
+                if (distance > 300.0) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+        // REL-1103
     // Get correct offset overhead in the common group.  If a guided offset
     // or a switch from guided to non-guided, it is expensive.  If going from
     // a sky position to another sky position, it counts as a normal offset.
     private CategorizedTimeGroup commonGroup(Config cur, Option<Config> prev) {
         CategorizedTimeGroup ctg = CommonStepCalculator.instance.calc(cur, prev);
-        return (isExpensiveOffset(cur, prev)) ?
-            ctg.filter(RM_OFFSET_OVERHEAD).add(GUIDED_OFFSET_OVERHEAD_CATEGORIZED_TIME) :
-            ctg;
+
+        // This is used only for the ITC overhead calculations, since in the OT the sky
+        // observations with large offsets are made into separate observations
+        if (lgsReacquisitionRequired(cur,prev)) {
+            ctg = ctg.add(LGS_REACQUISITION_OVERHEAD_CATEGORIZED_TIME);
+        }
+        if (isExpensiveOffset(cur, prev)) {
+            ctg = ctg.filter(RM_OFFSET_OVERHEAD).add(GUIDED_OFFSET_OVERHEAD_CATEGORIZED_TIME);
+        }
+        return ctg;
     }
 
 
-    @Override public CategorizedTimeGroup calc(Config cur, Option<Config> prev) {
+    public double readout(int coadds, int lowNoiseReads) {
+        return 21 + 2.8 * lowNoiseReads * coadds + 6.5 * (coadds - 1);
+    }  // REL-445
+
+    @Override
+    public CategorizedTimeGroup calc(final Config cur, final Option<Config> prev) {
         // Add wheel move overhead
-        Collection<CategorizedTime> times = new ArrayList<>();
-        if (PlannedTime.isUpdated(cur, prev, Filter.KEY, UtilityWheel.KEY)) {
-            times.add(getWheelMoveOverhead());
+        final Collection<CategorizedTime> times = new ArrayList<>();
+        if (cur.containsItem(Filter.KEY)) {
+            if (PlannedTime.isUpdated(cur, prev, Filter.KEY, UtilityWheel.KEY)) {
+                times.add(getWheelMoveOverhead());
+            }
         }
 
         // Add exposure time
-        double exposureTime = ExposureCalculator.instance.exposureTimeSec(cur);
-        int coadds = ExposureCalculator.instance.coadds(cur);
+        final double exposureTime = ExposureCalculator.instance.exposureTimeSec(cur);
+        final int coadds = ExposureCalculator.instance.coadds(cur);
         times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, exposureTime * coadds));
 
         // Add readout overhead
-        int lowNoiseReads = getNonDestructiveReads();
-        double readout = 21 + 2.8 * lowNoiseReads * coadds + 6.5 * (coadds - 1); // REL-445
-        times.add(CategorizedTime.fromSeconds(Category.READOUT, readout).add(- Category.DHS_OVERHEAD.time)); // REL-1678
+        final int lowNoiseReads = getNonDestructiveReads();
+
+        times.add(CategorizedTime.fromSeconds(Category.READOUT, readout(coadds, lowNoiseReads)).add(- Category.DHS_OVERHEAD.time)); // REL-1678
         times.add(Category.DHS_OVERHEAD); // REL-1678
 
         return commonGroup(cur, prev).addAll(times);

@@ -435,17 +435,12 @@
             	<input value="4" name="specBinning" type="radio" /> 4 pixels</td>
 			</tr>
 			<tr>
-				<td colspan="2">
-					Amp gain:
-					<select name="AmpGain" size="1">
-						<option value="LOW">Low</option>
-						<option value="HIGH">High</option>
-					</select> &nbsp; &nbsp;
-					Amp read mode:
-					<select name="AmpReadMode" size="1">
-						<option value="SLOW">Slow</option>
-						<option value="FAST">Fast</option>
-					</select>
+				<td colspan="4">Regions of Interest: <input value="FULL_FRAME" name="BuiltinROI" checked="checked" type="radio" /> Full Frame Readout <input value="CENTRAL_SPECTRUM" name="BuiltinROI" type="radio" /> Central Spectrum: spectroscopy of central 80" FOV  </td>
+			</tr>
+			<tr>
+				<td colspan="4">
+					Amp gain:      <select name="AmpGain" size="1"><option value="LOW">Low</option><option value="HIGH">High</option></select>
+					Amp read mode: <select name="AmpReadMode" size="1"><option value="SLOW">Slow</option><option value="FAST">Fast</option></select>
 				</td>
 			</tr>
 
@@ -471,8 +466,9 @@
 				side-looking (3 reflections) </td>
 			</tr>
 			<tr>
-				<td colspan="2">Wavefront sensor for tip-tilt compensation:
-					<input value="OIWFS" name="Type" checked="checked" type="radio" /> OIWFS / PWFS </td>
+				<td colspan="4">Wavefront sensor for tip-tilt compensation:
+					<input value="PWFS" name="Type" type="radio" /> PWFS
+					<input value="OIWFS" name="Type" checked="checked" type="radio" /> OIWFS </td>
 			</tr>
 			<tr>
 				<td colspan="2">
@@ -575,6 +571,12 @@
 				<td><input value="intTime" name="calcMethod" type="radio" /></td>
 				<td>Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" /> using an exposure time for each exposure of <input name="expTimeC" size="5" value="900" type="text" /> secs and with a fraction <input name="fracOnSourceC" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
 
+			</tr>
+			<tr>
+				<td colspan="2" height="40" valign="bottom"><b>Telescope offset:</b><i><span>(<a href="#" onclick="window.open('https://www.gemini.edu/sciops/instruments/gmos','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
+			</tr>
+			<tr>
+				<td colspan="2">Dither offset size: <input name="offset" size="5" value="5.0" type="text" />  arcsec</td>
 			</tr>
 			<!-- analysis methods-->
 			<tr>

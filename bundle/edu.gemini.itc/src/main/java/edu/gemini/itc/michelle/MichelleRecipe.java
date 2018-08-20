@@ -56,17 +56,17 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final int correctedNumExposures = new Double(correctedTotalObservationTime / instrument.getFrameTime() + 0.5).intValue();
         if (odp.calculationMethod() instanceof ImagingInt) {
             return new ObservationDetails(
-                    new ImagingInt(((ImagingInt) odp.calculationMethod()).sigma(), correctedExposureTime, odp.sourceFraction()),
+                    new ImagingInt(((ImagingInt) odp.calculationMethod()).sigma(), correctedExposureTime, odp.coadds(), odp.sourceFraction(), odp.offset()),
                     odp.analysisMethod()
             );
         } else if (odp.calculationMethod() instanceof ImagingS2N) {
             return new ObservationDetails(
-                    new ImagingS2N(correctedNumExposures, correctedExposureTime, odp.sourceFraction()),
+                    new ImagingS2N(correctedNumExposures, odp.coadds(), correctedExposureTime, odp.sourceFraction(), odp.offset()),
                     odp.analysisMethod()
             );
         } else if (odp.calculationMethod() instanceof SpectroscopyS2N) {
             return new ObservationDetails(
-                    new SpectroscopyS2N(correctedNumExposures, correctedExposureTime, odp.sourceFraction()),
+                    new SpectroscopyS2N(correctedNumExposures, odp.coadds(), correctedExposureTime, odp.sourceFraction(), odp.offset()),
                     odp.analysisMethod()
             );
         } else {
