@@ -31,7 +31,6 @@ object Proposal {
 
   // Remove [partial] duplicates from appearing in the observation list
   def clean(os:List[Observation]) = {
-
     // Calculate what's a partial obs of what. O(N^2) sadly
     val partial:Map[(Observation, Observation), Boolean] = (for {
       o0 <- os
@@ -39,7 +38,7 @@ object Proposal {
     } yield ((o0, o1), o0.isPartialObservationOf(o1))).toMap
 
     val obsList = os.foldRight(List.empty[Observation]) {(o, os) =>
-      if (os.exists(x => partial((o, x)))) {
+      if (o.isEmpty || os.exists(x => partial((o, x)))) {
         os
       } else if (os.exists(x => partial((x, o)))) {
         os.map {
@@ -49,10 +48,10 @@ object Proposal {
       } else {
         o :: os
       }
-    } filterNot (_.isEmpty)
+    }
 
     // We always want a non-empty list of observations: the empty observations if nothing.
-    nonEmptyObsList(os)
+    nonEmptyObsList(obsList)
   }
 
   private val validate = Option(System.getProperty("edu.gemini.model.p1.validate")).isDefined
@@ -88,8 +87,8 @@ object Proposal {
     // Make sure we have one observation for bands 1/2, and one for band 3.
     val band12missing = !olist.exists(o => o.band === M.Band.BAND_1_2 && o.nonEmpty)
     val band3missing  = !olist.exists(o => o.band === M.Band.BAND_3 && o.nonEmpty)
-    (band12missing ? List(Observation.empty) | olist.filter(_.band === Band.BAND_1_2)) ++
-       (band3missing ? List(Observation.emptyBand3) | olist.filter(_.band === Band.BAND_3))
+    (band12missing ? List(Observation.empty) | olist.filter(o => o.nonEmpty && o.band === Band.BAND_1_2)) ++
+       (band3missing ? List(Observation.emptyBand3) | olist.filter(o =>  o.nonEmpty && o.band === Band.BAND_3))
   }
 }
 
