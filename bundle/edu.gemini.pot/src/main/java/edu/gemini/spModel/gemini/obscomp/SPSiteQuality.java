@@ -21,6 +21,7 @@ import edu.gemini.spModel.type.SpTypeUtil;
 
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -101,6 +102,10 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
 
         public long getStart() {
             return start;
+        }
+
+        public Option<Instant> getEnd() {
+            return this.repeat == -1 ? None.instance() : new Some<>(Instant.ofEpochMilli(this.start + this.repeat * this.period + this.duration));
         }
 
         ParamSet getParamSet(final PioFactory factory) {
