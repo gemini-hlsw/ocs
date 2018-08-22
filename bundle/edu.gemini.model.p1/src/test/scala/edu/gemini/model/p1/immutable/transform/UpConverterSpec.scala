@@ -787,7 +787,8 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 4
+          changes must have length 5
+          changes must contain("Flamingos2 Multi-Object Spectroscopy is not offered")
           result \\ "flamingos2" must not(\\("filter") \> "J-lo (1.122 um)")
           result \\ "flamingos2" must not(\\("filter") \> "Y (1.020 um)")
           result \\ "flamingos2" must not(\\("name") \>~ ".*Y (1.020 um).*")
