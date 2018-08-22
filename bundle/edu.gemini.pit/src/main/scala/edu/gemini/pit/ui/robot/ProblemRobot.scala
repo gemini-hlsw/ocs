@@ -199,7 +199,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     // REL-3453: Altair LGS not available for 2019A.
     private lazy val altairLgsCheck = for {
-      o <- p.observations
+      o <- p.nonEmptyObservations
       b <- o.blueprint if bpIsLgs(b) && !bpIsGemsLgs(b)
     } yield new Problem(Severity.Error, "Altair Laser Guidestar is currently not offered.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
 
@@ -227,28 +227,28 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       }
 
     private val lgsIQ70Check = for {
-      o  <- p.observations
+      o  <- p.nonEmptyObservations
       c  <- o.condition
       b  <- o.blueprint
       if bpIsLgs(b) && (!bpIsGemsLgs(b)) && (!List(ImageQuality.IQ70, ImageQuality.BEST).contains(c.iq))
     } yield new Problem(Severity.Error, s"LGS requires IQ70 or better.", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
     private val lgsGemsIQ85Check = for {
-      o <- p.observations
+      o <- p.nonEmptyObservations
       c <- o.condition
       b <- o.blueprint
       if bpIsGemsLgs(b) && (!List(ImageQuality.IQ85, ImageQuality.IQ70, ImageQuality.BEST).contains(c.iq))
     } yield new Problem(Severity.Error, s"GeMS LGS requires IQ85 or better.", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
     private val lgsCC50Check = for {
-      o  <- p.observations
+      o  <- p.nonEmptyObservations
       c  <- o.condition
       b  <- o.blueprint
       if bpIsLgs(b) && (c.cc != CloudCover.BEST)
     } yield new Problem(Severity.Error, s"LGS requires CC50 conditions.", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
     private val texesCCCheck = for {
-      o  <- p.observations
+      o  <- p.nonEmptyObservations
       c  <- o.condition
       b  <- o.blueprint
       if b.isInstanceOf[TexesBlueprint]
@@ -256,7 +256,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     } yield new Problem(Severity.Warning, s"TEXES is not recommended for worse than CC70.", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
     private val texesWVCheck = for {
-      o  <- p.observations
+      o  <- p.nonEmptyObservations
       c  <- o.condition
       b  <- o.blueprint
       if b.isInstanceOf[TexesBlueprint]
@@ -264,7 +264,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     } yield new Problem(Severity.Warning, s"TEXES is not recommended for worse than WV80.", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
     private val gmosWVCheck = for {
-      o  <- p.observations
+      o  <- p.nonEmptyObservations
       c  <- o.condition
       b  <- o.blueprint
       if b.isInstanceOf[GmosNBlueprintBase] || b.isInstanceOf[GmosSBlueprintBase]
@@ -285,7 +285,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       case _: ClassicalProposalClass => Nil
       case _                         =>
         for {
-          o <- p.observations
+          o <- p.nonEmptyObservations
           b <- o.blueprint
           if gmosNDisperser(b, GmosNDisperser.R600) || gmosSDisperser(b, GmosSDisperser.R600)
         } yield new Problem(Severity.Warning, s"The R600 is little used and may be difficult to schedule.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
@@ -302,14 +302,14 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
                 })
 
     private val band3IQ = for {
-      o  <- p.observations
+      o  <- p.nonEmptyObservations
       if isBand3(o)
       c  <- o.condition
       if c.iq == ImageQuality.BEST
     } yield new Problem(Severity.Warning, s"IQ20 observations are unlikely to be executed in Band-3.", "Band 3", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
 
     private val band3LGS = for {
-      o  <- p.observations
+      o  <- p.nonEmptyObservations
       b  <- o.blueprint
       if bpIsLgs(b) && isBand3(o)
     } yield new Problem(Severity.Error, s"LGS cannot be scheduled in Band 3.", "Band 3", s.showObsListView(Band.BAND_3))
@@ -322,12 +322,12 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     }
 
     private val band3RapidToO = for {
-      o  <- p.observations
+      o  <- p.nonEmptyObservations
       to <- proposalToO(p.proposalClass)
       if isBand3(o) && to == ToOChoice.Rapid
     } yield new Problem(Severity.Error, s"Rapid ToO observations cannot be scheduled in Band 3.", "Time Requests", s.showPartnersView())
 
-    private val band3Obs = (!p.observations.exists(_.band == Band.BAND_3) && isBand3(p)) option
+    private val band3Obs = (!p.nonEmptyObservations.exists(_.band == Band.BAND_3) && isBand3(p)) option
       new Problem(Severity.Todo, s"Please create Band 3 observations with conditions, targets, and resources.", "Band 3", s.showObsListView(Band.BAND_3))
 
     def isIR(b: BlueprintBase): Boolean = b match {
@@ -348,7 +348,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     }
 
     private val sbIrObservation = for {
-      o  <- p.observations
+      o  <- p.nonEmptyObservations
       b  <- o.blueprint
       c  <- o.condition
       if isIR(b) && !bpIsLgs(b) && c.sb != SkyBackground.ANY
@@ -438,7 +438,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       }
 
       val gpiTargetsWithProblems: List[(SiderealTarget, List[(Severity, String)])] = for {
-          o <- p.observations
+          o <- p.nonEmptyObservations
           b <- o.blueprint
           if b.isInstanceOf[GpiBlueprint]
           obsMode = b.asInstanceOf[GpiBlueprint].observingMode
@@ -458,7 +458,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     private lazy val missingObsElementCheck = {
       def check[A](msg: String, g: ObsListGrouping[A], adder: ObsListView => Unit) =
-        p.observations.filter(o => g.lens.get(o).isEmpty) match {
+        p.nonEmptyObservations.filter(o => g.lens.get(o).isEmpty) match {
           case Nil => None
           case o :: Nil => Some(new Problem(Severity.Error, s"One observation has no $msg.", "Observations", s.inObsListView(o.band, adder)))
           case o :: tail => Some(new Problem(Severity.Error, s"${1 + tail.length} observations have no $msg.", "Observations", s.inObsListView(o.band, adder)))
@@ -475,7 +475,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     }
 
     private lazy val missingObsDetailsCheck =
-      p.observations.filter(o => o.nonEmpty && o.calculatedTimes.isEmpty) match {
+      p.nonEmptyObservations.filter(o => o.nonEmpty && o.calculatedTimes.isEmpty) match {
         case Nil => None
         case h :: Nil => Some(new Problem(Severity.Error, "One observation has no observation time.", "Observations", indicateObservation(h)))
         case h :: tail => Some(new Problem(Severity.Error, s"${1 + tail.length} observations have no observation times.", "Observations", indicateObservation(h)))
@@ -493,13 +493,13 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     }
 
     private lazy val badGuiding = for {
-      o <- p.observations
+      o <- p.nonEmptyObservations
       m <- o.meta
       g <- m.guiding if g.evaluation == GuidingEvaluation.FAILURE
     } yield new Problem(Severity.Warning, guidingMessage(o), "Observations", indicateObservation(o))
 
     private lazy val cwfsCorrectionsIssue = for {
-      o <- p.observations
+      o <- p.nonEmptyObservations
       b <- o.blueprint if b.isInstanceOf[GsaoiBlueprint]
       m <- o.meta
       g <- m.guiding if g.evaluation != GuidingEvaluation.SUCCESS
@@ -516,7 +516,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       )
 
     private lazy val badVisibility = for {
-      o @ Observation(Some(_), Some(_), Some(t), _, _) <- p.observations
+      o @ Observation(Some(_), Some(_), Some(t), _, _) <- p.nonEmptyObservations
       v                                                <- if (p.proposalClass.isSpecial) TargetVisibilityCalc.getOnDec(p.semester, o) else TargetVisibilityCalc.get(p.semester, o)
       if v == TargetVisibility.Bad
     } yield new Problem(Severity.Error,
@@ -525,7 +525,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         indicateObservation(o))
 
     private lazy val iffyVisibility = for {
-      o @ Observation(Some(_), Some(_), Some(_), _, _) <- p.observations
+      o @ Observation(Some(_), Some(_), Some(_), _, _) <- p.nonEmptyObservations
       v                                                <- if (p.proposalClass.isSpecial) TargetVisibilityCalc.getOnDec(p.semester, o) else TargetVisibilityCalc.get(p.semester, o)
       if v == TargetVisibility.Limited
     } yield new Problem(Severity.Warning,
@@ -569,7 +569,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     }
 
     private lazy val band3Orphan2 = for {
-      o <- p.observations
+      o <- p.nonEmptyObservations
       if o.band == Band.BAND_3 && (p.proposalClass match {
         case q: QueueProposalClass if q.band3request.isDefined => false
         case _                                                 => true
@@ -602,7 +602,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
             })
 
     private lazy val wrongSite = for {
-      o <- p.observations
+      o <- p.nonEmptyObservations
       b <- o.blueprint if (p.proposalClass match {
       case e: ExchangeProposalClass if e.partner == ExchangePartner.KECK   => b.site != Site.Keck
       case e: ExchangeProposalClass if e.partner == ExchangePartner.SUBARU => b.site != Site.Subaru
@@ -707,14 +707,14 @@ case class Semester2018BProblems(p: Proposal, s: ShellAdvisor) {
   private val semester2018B = Semester(2018, SemesterOption.B)
 
   private val texesNotOfferedCheck = for {
-    o <- p.observations
+    o <- p.nonEmptyObservations
     b <- o.blueprint
     if b.isInstanceOf[TexesBlueprint]
     if p.semester == semester2018B
   } yield new Problem(Severity.Error, "Texes is not offered for 2018B.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
 
   private val gmosnAltairNotOfferedCheck = for {
-    o <- p.observations
+    o <- p.nonEmptyObservations
     b <- o.blueprint
     if b.isInstanceOf[GmosNBlueprintBase]
     if p.semester == semester2018B
@@ -722,7 +722,7 @@ case class Semester2018BProblems(p: Proposal, s: ShellAdvisor) {
   } yield new Problem(Severity.Error, "GMOS-N does not offer Altair in 2018B.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
 
   private val dssiOnlyGS = for {
-    o <- p.observations
+    o <- p.nonEmptyObservations
     b <- o.blueprint
     if b.isInstanceOf[DssiBlueprint]
     if b.site == Site.GN
@@ -730,7 +730,7 @@ case class Semester2018BProblems(p: Proposal, s: ShellAdvisor) {
   } yield new Problem(Severity.Error, "DSSI is not offered at Gemini North for 2018B.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
 
   private val phoenixOnlyGS = for {
-    o <- p.observations
+    o <- p.nonEmptyObservations
     b <- o.blueprint
     if b.isInstanceOf[PhoenixBlueprint]
     if b.site == Site.GN
@@ -742,7 +742,7 @@ case class Semester2018BProblems(p: Proposal, s: ShellAdvisor) {
 case class TimeProblems(p: Proposal, s: ShellAdvisor) {
   lazy val requested = p.proposalClass.requestedTime
   def obsTimeSum(b: Band) = TimeAmount.sum(for {
-    o <- p.observations if o.band == b
+    o <- p.nonEmptyObservations if o.band == b
     t <- o.totalTime
   } yield t)
   lazy val obs = obsTimeSum(Band.BAND_1_2)

@@ -109,13 +109,15 @@ class Observation private (val blueprint:Option[BlueprintBase],
   override lazy val hashCode = kernel.hashCode()
 
   def isPartialObservationOf(o:Observation) =
-    progTime.isEmpty  && // If I have time defined, I might be incomplete but I'm not partial
-    (band == o.band) && // must be the same band
-    isEmpty && // Must have *some* empty component
-    isPartial(blueprint, o.blueprint) &&
-    isPartial(target, o.target) &&
-    isPartial(condition, o.condition) &&
-    isPartial(calculatedTimes, o.calculatedTimes)
+    band == o.band &&
+      (isEmpty ||
+        (o.nonEmpty &&
+          progTime.isEmpty && // If I have time defined, I might be incomplete but I'm not partial
+          (blueprint.isEmpty || target.isEmpty || condition.isEmpty || calculatedTimes.isEmpty) && // Must have *some* empty component
+          isPartial(blueprint, o.blueprint) &&
+          isPartial(target, o.target) &&
+          isPartial(condition, o.condition) &&
+          isPartial(calculatedTimes, o.calculatedTimes)))
 
   private def isPartial[A](a:Option[A], b:Option[A]) = a.isEmpty || a == b
 
