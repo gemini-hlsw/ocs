@@ -293,8 +293,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     private val f2MOSCheck = for {
       o <- p.nonEmptyObservations
-      b <- o.blueprint
-      if b.isInstanceOf[Flamingos2BlueprintMos]
+      b <- o.blueprint.collect { case mos: Flamingos2BlueprintMos => mos }
     } yield new Problem(Severity.Error, "Flamingos2 Multi-Object Spectroscopy is not offered.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
 
 
