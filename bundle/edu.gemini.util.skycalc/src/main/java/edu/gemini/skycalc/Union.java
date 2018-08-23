@@ -2,6 +2,7 @@ package edu.gemini.skycalc;
 
 import edu.gemini.skycalc.Interval.Overlap;
 
+import java.time.Instant;
 import java.util.*;
 import java.io.Serializable;
 
@@ -168,6 +169,9 @@ public class Union<T extends Interval> implements Iterable<T>, Serializable {
 	}
 
 
+	public boolean contains(Instant i) {
+	    return contains(i.toEpochMilli());
+	}
 
 
 	/**

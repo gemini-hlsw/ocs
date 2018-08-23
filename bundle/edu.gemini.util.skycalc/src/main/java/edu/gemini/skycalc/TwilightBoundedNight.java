@@ -3,6 +3,7 @@ package edu.gemini.skycalc;
 import edu.gemini.spModel.core.Site;
 import jsky.util.DateUtil;
 
+import java.time.Instant;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -94,6 +95,10 @@ public final class TwilightBoundedNight implements Night {
         // Okay, the current time is during the day so return the night that
         // is coming.
         return tonight;
+    }
+
+    public static TwilightBoundedNight forInstant(TwilightBoundType type, Instant i, Site site) {
+        return TwilightBoundedNight.forTime(type, i.toEpochMilli(), site);
     }
 
     /**
@@ -228,8 +233,16 @@ public final class TwilightBoundedNight implements Night {
         return _start;
     }
 
+    public Instant getStartInstant() {
+        return Instant.ofEpochMilli(_start);
+    }
+
     public long getEndTime() {
         return _end;
+    }
+
+    public Instant getEndInstant() {
+        return Instant.ofEpochMilli(_end);
     }
 
     /** Start time rounded to the nearest minute in the given timezone. */
