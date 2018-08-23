@@ -150,7 +150,14 @@ case object SemesterConverter2018BTo2019A extends SemesterConverter {
     case a @ <altair>{ns@_*}</altair> if (a \\ "lgs").nonEmpty =>
       StepResult(s"Altair Laser Guidestar is currently not offered", a).successNel
   }
-  override val transformers = List(altairLgsNotAvailable)
+
+  // REL-3485: F2 MOS not available for 2019A.
+  val f2MOSNotAvailable: TransformFunction = {
+    case f @ <flamingos2>{ns @ _*}</flamingos2> if (f \ "mos").nonEmpty =>
+      StepResult("Flamingos2 Multi-Object Spectroscopy is not offered", f).successNel
+  }
+
+  override val transformers = List(altairLgsNotAvailable, f2MOSNotAvailable)
 }
 
 /**

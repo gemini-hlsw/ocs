@@ -3,6 +3,9 @@ package edu.gemini.model.p1.dtree.inst
 import edu.gemini.model.p1.dtree._
 import edu.gemini.model.p1.immutable._
 
+import scalaz._
+import Scalaz._
+
 object Flamingos2 {
 
   object F2Mode extends Enumeration {
@@ -11,6 +14,7 @@ object Flamingos2 {
     val Mos      = Value("Multi-object Spectroscopy")
     type F2Mode = Value
   }
+  implicit val F2ModeEq: Equal[F2Mode.Value] = Equal.equalA[F2Mode.Value]
 
   import F2Mode._
 
@@ -34,7 +38,8 @@ object Flamingos2 {
   class ModeNode extends SingleSelectNode[Unit, F2Mode, Unit](()) {
     val title       = "Select Instrument Mode"
     val description = "Flamingos2 can be used for both imaging and spectroscopy."
-    def choices     = F2Mode.values.toList
+    // REL-3485: MOS is not available in 2019A.
+    def choices     = F2Mode.values.toList.filterNot(_ === Mos)
 
     def apply(m: F2Mode) = m match {
       case Imaging   => Left(new ImagingFilterNode)
