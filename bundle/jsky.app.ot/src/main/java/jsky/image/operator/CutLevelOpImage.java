@@ -11,15 +11,8 @@
 package jsky.image.operator;
 
 import java.awt.geom.Rectangle2D;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferInt;
-import java.awt.image.DataBufferShort;
-import java.awt.image.DataBufferUShort;
-import java.awt.image.Raster;
-import java.awt.image.RenderedImage;
+import java.awt.image.*;
 
-import java.awt.image.DataBufferFloat;
 import javax.media.jai.ImageLayout;
 import javax.media.jai.ROI;
 import javax.media.jai.StatisticsOpImage;
@@ -154,8 +147,19 @@ class CutLevelOpImage extends StatisticsOpImage {
                 }
                 break;
 
+            case DataBuffer.TYPE_DOUBLE:
+                {
+                    DataBufferDouble dataBuffer = (DataBufferDouble) source.getDataBuffer();
+                    double[] data = dataBuffer.getData();
+                    double ignore = (float) this.ignore;
+                    double median = (float) this.median;
+                    getCutLevelsDouble(data, ignore, median, x0, y0, x1, y1, w, stats);
+                }
+                break;
+
+
             default:
-                throw new IllegalArgumentException("CutLevel not implemented for this data type");
+                throw new IllegalArgumentException("CutLevel not implemented for this data type: " + dbuf.getDataType());
         }
     }
 
@@ -525,6 +529,60 @@ class CutLevelOpImage extends StatisticsOpImage {
         stats[1] = hcut;
     }
 
+    void getCutLevelsDouble(double[] data, double ignore, double median, int x0, int y0, int x1, int y1, int w,
+                           double[] stats) {
+        int nmed = 7;		       // length of median filter
+        int xskip = nmed * 3, yskip = 3; // skip pixels for speed
+        int i, j, k, l, p = 0;
+        double tmp, val, lcut = 0.0f, hcut = 0.0f;
+        double[] medary = new double[nmed];
+
+        if (!Double.isNaN(stats[0])) {
+            lcut = (float) stats[0];
+            hcut = (float) stats[1];
+        } else {
+            lcut = median;
+            hcut = median;
+        }
+
+        if (x1 - x0 <= nmed || y1 - y0 <= nmed)
+            return;
+
+        for (i = y0; i <= y1; i += yskip) {
+            for (j = x0; j <= x1; j += xskip) {
+                p = i * w + j;
+
+                // get array for finding meadian
+                for (k = 0; k < nmed; k++) {
+                    medary[k] = data[p++];
+                    // ignore ignore pixels
+                    if (Double.isNaN(medary[k]) || (medary[k] == ignore)) {
+                        medary[k] = median;
+                    }
+                }
+
+                // get meadian value
+                for (k = 0; k < nmed; k++) {
+                    for (l = k; l < nmed; l++) {
+                        if (medary[k] < medary[l]) {
+                            tmp = medary[l];
+                            medary[l] = medary[k];
+                            medary[k] = tmp;
+                        }
+                    }
+                }
+                val = medary[nmed / 2];
+
+                // compare meadian with lcut, hcut
+                if (val < lcut)
+                    lcut = val;
+                if (val > hcut)
+                    hcut = val;
+            }
+        }
+        stats[0] = lcut;
+        stats[1] = hcut;
+    }
 
     /**
      * Returns an object that will be used to gather the named statistic.

@@ -58,5 +58,19 @@ public class TpeImageDisplayFrame extends ImageDisplayControlFrame {
         return tpeToolBar;
     }
 
+    /**
+     * usage: java TpeImageDisplayFrame [fileOrUrl]
+     */
+    public static void main(String[] args) {
+        String fileOrUrl = null;
+
+        if (args.length >= 1)
+            fileOrUrl = args[0];
+
+        ImageDisplayControlFrame frame = new TpeImageDisplayFrame(fileOrUrl);
+
+        frame.setVisible(true);
+    }
+
 }
 

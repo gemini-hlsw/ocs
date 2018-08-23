@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.nio.DoubleBuffer;
 import java.nio.MappedByteBuffer;
 
-import javax.media.jai.DataBufferDouble;
+import java.awt.image.DataBufferDouble;
 
 // -------------------------------------------------------------------
 // Note: The FITSData<type> classes can be generated from FITSDataDouble
