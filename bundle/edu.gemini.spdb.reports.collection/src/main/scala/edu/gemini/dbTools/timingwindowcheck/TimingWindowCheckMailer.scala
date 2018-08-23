@@ -1,17 +1,20 @@
 package edu.gemini.dbTools.timingwindowcheck
 
-import edu.gemini.dbTools.mailer.{ Mailer, MailerType, ProgramAddresses }
-import edu.gemini.spModel.core.{ Site, SPProgramID }
+import java.time.Instant
 
+import edu.gemini.dbTools.mailer.{Mailer, MailerType, ProgramAddresses}
+import edu.gemini.spModel.core.{SPProgramID, Site}
 import scalaz._
 import Scalaz._
+import edu.gemini.pot.sp.SPObservationID
 import scalaz.effect.IO
 
 sealed abstract class TimingWindowCheckMailer(mailer: Mailer) {
 
   def notifyPendingCheck(
-    pid:   SPProgramID,
-    to:    ProgramAddresses
+    pid: SPProgramID,
+    to:  ProgramAddresses,
+    tws: List[(SPObservationID, Instant)]
   ): Action[Unit] = {
 
     val subject   =

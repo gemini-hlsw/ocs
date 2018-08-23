@@ -1,6 +1,7 @@
 package edu.gemini.skycalc;
 
 import java.io.Serializable;
+import java.time.Instant;
 
 /**
  * Pair of longs representing the interval <code>(start .. end]</code>.
@@ -59,6 +60,10 @@ public class Interval implements Comparable<Interval>, Serializable /*, PioSeria
 		if (start > end) throw new IllegalArgumentException(start + " > " + end);
 		this.start = start;
 		this.end = end;
+	}
+
+	public Interval(Instant start, Instant end) {
+		this(start.toEpochMilli(), end.toEpochMilli());
 	}
 
 	/**
@@ -177,11 +182,19 @@ public class Interval implements Comparable<Interval>, Serializable /*, PioSeria
 		return end;
 	}
 
+	public Instant getEndInstant() {
+		return Instant.ofEpochMilli(end);
+	}
+
 	/**
 	 * Returns the start point for this Interval.
 	 */
 	public long getStart() {
 		return start;
+	}
+
+	public Instant getStartInstant() {
+		return Instant.ofEpochMilli(start);
 	}
 
 	/**

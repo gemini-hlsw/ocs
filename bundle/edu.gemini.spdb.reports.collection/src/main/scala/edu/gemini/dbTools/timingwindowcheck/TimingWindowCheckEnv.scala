@@ -13,7 +13,7 @@ import scalaz._
 import Scalaz._
 
 
-final case class TimingWindowCheckEnv( odb: IDBDatabaseService, mailer: TimingWindowCheckMailer)
+final case class TimingWindowCheckEnv(odb: IDBDatabaseService, mailer: TimingWindowCheckMailer, site: Site)
 
 object TimingWindowCheckEnv {
 
@@ -36,9 +36,8 @@ object TimingWindowCheckEnv {
       Action.fromOption(s"Could not parse $n property value '$s'")(f(s))
     }
 
-  private def mailer(ctx: BundleContext): Action[TimingWindowCheckMailer] =
+  private def mailer(s: Site, ctx: BundleContext): Action[TimingWindowCheckMailer] =
     for {
-      s <- parsedProp(ctx, SiteProperty.NAME)(s => Option(Site.tryParse(s)))
       m <- prop(ctx, SmtpProp)
       t <- parsedProp(ctx, MailerTypeProp)(MailerType.fromString)
     } yield TimingWindowCheckMailer(t, s, m)
@@ -46,6 +45,7 @@ object TimingWindowCheckEnv {
   def fromBundleContext(ctx: BundleContext): Action[TimingWindowCheckEnv] =
     for {
       o <- service(ctx, classOf[IDBDatabaseService])
-      m <- mailer(ctx)
-    } yield TimingWindowCheckEnv(o, m)
+      s <- parsedProp(ctx, SiteProperty.NAME)(s => Option(Site.tryParse(s)))
+      m <- mailer(s, ctx)
+    } yield TimingWindowCheckEnv(o, m, s)
 }

@@ -33,7 +33,7 @@ object TimingWindowFunctor {
 
   private def isActive(p: ISPProgram): Boolean = {
     val obj = p.getDataObject.asInstanceOf[SPProgram]
-    obj.isActive && !obj.isCompleted
+    if (obj == null) { false } else obj.isActive && !obj.isCompleted
   }
 
   def unsafeQuery(db: IDBDatabaseService, user: JSet[Principal]): TimingWindows =
@@ -47,7 +47,7 @@ object TimingWindowFunctor {
 private class TimingWindowFunctor extends DBAbstractQueryFunctor {
   import TimingWindowFunctor.{ isActive, isScience }
 
-  val results: Buffer[(SPProgramID, List[(SPObservationID, Instant)])] = Buffer.empty
+  var results: Buffer[(SPProgramID, List[(SPObservationID, Instant)])] = Buffer.empty
 
   override def execute(db: IDBDatabaseService, node: ISPNode, principals: JSet[Principal]): Unit = {
 
