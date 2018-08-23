@@ -34,6 +34,17 @@ public class Activator implements BundleActivator {
      */
     public static final String BUNDLE_PROP_DIR = "edu.gemini.spdb.dir";
 
+    /**
+     * Bundle property specifying the ICTD database user.
+     */
+    public static final String ICTD_USER_PROP = "edu.gemini.ictd.user";
+
+    /**
+     * Bundle property specifying the ICTD database password.
+     */
+    public static final String ICTD_PASS_PROP = "edu.gemini.ictd.password";
+
+
     // Mutable state
     private DatabaseLoader loader;
 
@@ -95,11 +106,11 @@ public class Activator implements BundleActivator {
             this.db = db;
 
             LOGGER.info("Exporting database to OSGi.");
-            final Dictionary<String, Object> properties1 = new Hashtable<String, Object>();
+            final Dictionary<String, Object> properties1 = new Hashtable<>();
             dbReg = ctx.registerService(IDBDatabaseService.class, db, properties1);
 
             LOGGER.info("Exporting query runner to OSGi and TRPC.");
-            final Dictionary<String, Object> properties2 = new Hashtable<String, Object>();
+            final Dictionary<String, Object> properties2 = new Hashtable<>();
             properties2.put("trpc", ""); // publish just the QueryRunner as TRPC service
             // A factory to make a new query runner for each TRPC user
             final SecureServiceFactoryForJava<IDBQueryRunner> factory = new SecureServiceFactoryForJava<IDBQueryRunner>() {

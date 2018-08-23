@@ -4,7 +4,7 @@ import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.ui.util.ScrollPanes;
 import static edu.gemini.qpt.ui.view.mask.MaskAttribute.*;
 
-import edu.gemini.ictd.CustomMaskKey;
+import edu.gemini.spModel.ictd.CustomMaskKey;
 import edu.gemini.spModel.ictd.Availability;
 
 import edu.gemini.ui.gface.GTableViewer;

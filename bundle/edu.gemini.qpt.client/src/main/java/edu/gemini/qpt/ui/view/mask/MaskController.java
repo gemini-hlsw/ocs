@@ -1,9 +1,8 @@
 package edu.gemini.qpt.ui.view.mask;
 
-import edu.gemini.ictd.CustomMaskKey;
+import edu.gemini.spModel.ictd.CustomMaskKey;
 import edu.gemini.spModel.ictd.Availability;
 import edu.gemini.shared.util.immutable.ImOption;
-import edu.gemini.shared.util.immutable.Option;
 
 import edu.gemini.ui.gface.GTableController;
 import edu.gemini.ui.gface.GViewer;

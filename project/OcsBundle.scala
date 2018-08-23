@@ -59,7 +59,9 @@ trait OcsBundle {
       bundle_edu_gemini_pot,
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_spModel_core % "test->test;compile->compile",
-      bundle_edu_gemini_spModel_pio
+      bundle_edu_gemini_spModel_pio,
+      bundle_edu_gemini_util_osgi,
+      bundle_edu_gemini_util_security
     )
 
   lazy val bundle_edu_gemini_itc_shared =

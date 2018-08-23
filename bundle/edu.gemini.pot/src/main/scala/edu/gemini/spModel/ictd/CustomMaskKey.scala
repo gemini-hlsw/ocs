@@ -1,9 +1,6 @@
-package edu.gemini.ictd
+package edu.gemini.spModel.ictd
 
-import edu.gemini.spModel.core.{ ProgramId, Site }
-import edu.gemini.spModel.ictd.Availability
-
-import scala.collection.immutable.TreeMap
+import edu.gemini.spModel.core.ProgramId
 
 import scalaz._
 import Scalaz._

@@ -1,14 +1,12 @@
 package edu.gemini.qpt.shared.sp;
 
-import edu.gemini.ictd.CustomMaskKey;
+import edu.gemini.spModel.ictd.CustomMaskKey;
 import edu.gemini.ictd.IctdDatabase;
 import edu.gemini.shared.util.immutable.ImEither;
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Left;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Right;
-import edu.gemini.spModel.core.ProgramId;
-import edu.gemini.spModel.core.ProgramId$;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.ictd.Availability;
 import edu.gemini.spModel.pio.ParamSet;
@@ -27,7 +25,7 @@ import java.util.logging.Logger;
 import java.io.Serializable;
 
 /**
- * Collection of ICTD data relevant to the QPT.
+ * Collection of ICTD data relevant to the QPT and QVis.
  */
 public final class Ictd implements Serializable, PioSerializable {
     private static final Logger LOGGER = Logger.getLogger(Ictd.class.getName());

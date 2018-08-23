@@ -23,6 +23,8 @@ osgiSettings
 
 ocsBundleSettings
 
+OsgiKeys.bundleActivator := Some("edu.gemini.ictd.service.osgi.Activator")
+
 OsgiKeys.bundleSymbolicName := name.value
 
 OsgiKeys.dynamicImportPackage := Seq("*")

@@ -1,6 +1,6 @@
 package edu.gemini.qpt.core;
 
-import edu.gemini.ictd.CustomMaskKey;
+import edu.gemini.spModel.ictd.CustomMaskKey;
 import edu.gemini.qpt.core.listeners.Listeners;
 import edu.gemini.qpt.core.util.*;
 import edu.gemini.qpt.core.util.Variants.EditException;
@@ -15,7 +15,6 @@ import edu.gemini.skycalc.TwilightBoundedNight;
 import static edu.gemini.skycalc.TwilightBoundType.CIVIL;
 import static edu.gemini.skycalc.TwilightBoundType.NAUTICAL;
 import edu.gemini.shared.util.immutable.DefaultImList;
-import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.Site;
@@ -36,7 +35,6 @@ import edu.gemini.spModel.gemini.trecs.TReCSParams;
 import edu.gemini.spModel.pio.Param;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
-import edu.gemini.spModel.pio.PioPath;
 import edu.gemini.spModel.pio.PioFactory;
 import jsky.coords.WorldCoordinates;
 import jsky.util.DateUtil;
