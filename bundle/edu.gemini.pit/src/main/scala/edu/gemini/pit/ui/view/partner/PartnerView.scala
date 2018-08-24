@@ -903,8 +903,9 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       case _: ClassicalProposalClass => true
     }
 
-    // Request type selector. This one is kind of complicated
-    object partnerType extends ComboBox(PartnerType.values.toSeq) with Bound[Proposal, ProposalClass] {
+    // Request type selector. This one is kind of complicated, especially after REL-3943, which requires filtering
+    // out CHF for classical observations.
+    object partnerType extends ComboBox[PartnerType.Value](PartnerType.values.toSeq) with Bound[Proposal, ProposalClass] {
 
       val lens = Proposal.proposalClass
 
@@ -914,9 +915,30 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       var localSubaru = ExchangeSubmission(SubmissionRequest.empty, None, ExchangePartner.SUBARU, InvestigatorRef.empty)
       var localCFH    = ExchangeSubmission(SubmissionRequest.empty, None, ExchangePartner.CFH, InvestigatorRef.empty)
 
-      override def refresh(m:Option[ProposalClass]) {
+      override def refresh(m:Option[ProposalClass]): Unit = {
+
         // Enabled?
         enabled = canEdit
+
+        // Update items.
+        deafTo(selection)
+          def updateComboBoxModel(includeCFH: Boolean): Unit = {
+            val newModel = new DefaultComboBoxModel[PartnerType.Value]()
+            newModel.addElement(PartnerType.GeminiPartner)
+            if (includeCFH)
+              newModel.addElement(PartnerType.ExchangeCFH)
+            newModel.addElement(PartnerType.ExchangeKeck)
+            newModel.addElement(PartnerType.ExchangeSubaru)
+            peer.setModel(newModel)
+          }
+          m.foreach { p =>
+            val item = peer.getSelectedItem
+            val wasCFH = peer.getSelectedItem == PartnerType.ExchangeCFH
+            updateComboBoxModel(header.proposalClass.peer.getSelectedItem != ProposalClassSelection.Classical)
+            if (proposalClass.peer.getSelectedItem == ProposalClassSelection.Classical && wasCFH)
+              peer.setSelectedIndex(0)
+            else peer.setSelectedItem(item)
+        }
 
         // Update visibility
         visible = ~m.map {
@@ -934,7 +956,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           case ClassicalProposalClass(_, _, _, Left(ngos), _)                                      => localGemini = ngos
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.KECK   => localKeck = e
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.SUBARU => localSubaru = e
-          case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.CFH    => localCFH= e
+          case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.CFH    => localGemini = Nil
           case e: ExchangeProposalClass                                                            => localGemini = e.subs
           case _                                                                                   => // ignore
         }
@@ -948,7 +970,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           case ClassicalProposalClass(_, _, _, Left(_), _)                                         => GeminiPartner
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.KECK   => ExchangeKeck
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.SUBARU => ExchangeSubaru
-          case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.CFH    => ExchangeCFH
+          case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.CFH    => GeminiPartner
           case _: ExchangeProposalClass                                                            => GeminiPartner
           case _: SpecialProposalClass                                                             => GeminiPartner
           case _: LargeProgramClass                                                                => GeminiPartner
@@ -956,11 +978,13 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           case _: FastTurnaroundProgramClass                                                       => GeminiPartner
         }.getOrElse(PartnerType.GeminiPartner)
 
+        listenTo(selection)
       }
 
       // When the user changes the selection...
       selection.reactions += {
         case SelectionChanged(_) =>
+          if (selection.item != null)
           model = model.map {
             case q:QueueProposalClass     =>
               selection.item match {
@@ -974,7 +998,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
                 case GeminiPartner  => c.copy(subs = Left(localGemini))
                 case ExchangeKeck   => c.copy(subs = Right(localKeck))
                 case ExchangeSubaru => c.copy(subs = Right(localSubaru))
-                case ExchangeCFH    => c.copy(subs = Right(localCFH))
+                case _              => c.copy(subs = Left(localGemini))
               }
             case e:ExchangeProposalClass  =>
               selection.item match {
@@ -1140,6 +1164,10 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       case _: FastTurnaroundSubmission          => header.specialTime.edit.doClick()
       case ps: PartnerSubmission[_,_]           => list.edit(ps)
     }
+  }
+
+  def editProposalClass(): Unit = {
+    header.proposalClass.requestFocusInWindow()
   }
 
   def editBand3Time() {

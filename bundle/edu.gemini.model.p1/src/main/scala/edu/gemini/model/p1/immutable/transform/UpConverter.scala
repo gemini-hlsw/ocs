@@ -157,7 +157,20 @@ case object SemesterConverter2018BTo2019A extends SemesterConverter {
       StepResult("Flamingos2 Multi-Object Spectroscopy is not offered", f).successNel
   }
 
-  override val transformers = List(altairLgsNotAvailable, f2MOSNotAvailable)
+  // REL-3494: CFH now only offered in queue proposal class.
+  val cfhClassicalToQueue: TransformFunction = {
+    case p @ <proposalClass>{ns @ _*}</proposalClass> if (p \ "classical").nonEmpty && (p \\ "partner").map(_.text).exists(_.equals(ExchangePartner.CFH.value)) =>
+      object ClassicalToQueueTransformer extends BasicTransformer {
+        override def transform(n : xml.Node): xml.NodeSeq = n match {
+          case <classical>{ex @ _*}</classical> => <queue tooOption="None">{ex}</queue>
+          case elem: xml.Elem                   => elem.copy(child = elem.child.flatMap(transform))
+          case _                                => n
+        }
+      }
+      StepResult("All CFH exchange time will now be done in queue.", <proposalClass>{ClassicalToQueueTransformer.transform(ns)}</proposalClass>).successNel
+  }
+
+  override val transformers = List(altairLgsNotAvailable, f2MOSNotAvailable, cfhClassicalToQueue)
 }
 
 /**
