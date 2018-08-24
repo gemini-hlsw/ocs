@@ -105,7 +105,8 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         }
 
         public Option<Instant> getEnd() {
-            return this.repeat == -1 ? None.instance() : new Some<>(Instant.ofEpochMilli(this.start + this.repeat * this.period + this.duration));
+            return repeat == REPEAT_FOREVER || duration == WINDOW_REMAINS_OPEN_FOREVER ?
+                None.instance() : new Some<>(Instant.ofEpochMilli(start + repeat * period + duration));
         }
 
         ParamSet getParamSet(final PioFactory factory) {
