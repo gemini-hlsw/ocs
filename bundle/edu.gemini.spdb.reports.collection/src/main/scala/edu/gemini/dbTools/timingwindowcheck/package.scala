@@ -34,6 +34,4 @@ package object timingwindowcheck {
 
   }
 
-  type TimingWindows = Map[SPProgramID, List[(SPObservationID, Instant)]]
-
 }
