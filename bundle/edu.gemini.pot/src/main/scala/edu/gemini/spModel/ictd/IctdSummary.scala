@@ -22,6 +22,13 @@ final case class IctdSummary(
 
 object IctdSummary {
 
+  def fromJava(
+    f: java.util.Map[java.lang.Enum[_], Availability],
+    m: java.util.Map[CustomMaskKey, Availability]
+  ): IctdSummary =
+
+    IctdSummary(f.asScala.toMap, TreeMap(m.asScala.toList: _*))
+
   /*
   val Feature: String = "feature"
   val Mask:    String = "mask"

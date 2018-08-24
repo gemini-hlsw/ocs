@@ -15,11 +15,10 @@ import java.util.logging.Logger;
 import javax.swing.*;
 
 import edu.gemini.ags.api.AgsMagnitude;
-import edu.gemini.ictd.IctdDatabase;
 import edu.gemini.qpt.core.Block;
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.core.ScheduleIO;
-import edu.gemini.qpt.shared.sp.Ictd;
+import edu.gemini.qpt.shared.util.Ictd;
 import edu.gemini.qpt.shared.sp.MiniModel;
 import edu.gemini.qpt.core.util.LttsServicesClient;
 import edu.gemini.qpt.ui.util.AbstractAsyncAction;
@@ -35,6 +34,7 @@ import edu.gemini.skycalc.TwilightBoundType;
 import edu.gemini.skycalc.TwilightBoundedNight;
 import edu.gemini.spModel.core.Peer;
 import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.ictd.IctdSummary;
 import edu.gemini.ui.workspace.IShell;
 import edu.gemini.util.security.auth.keychain.KeyChain;
 
@@ -50,14 +50,12 @@ public class NewAction extends AbstractAsyncAction {
 
     private final IShell shell;
     private final KeyChain authClient;
-    private final Ictd.SiteConfig ictdConfig;
     private final AgsMagnitude.MagnitudeTable magTable;
 
-    public NewAction(IShell shell, final KeyChain authClient, Ictd.SiteConfig ictdConfig, AgsMagnitude.MagnitudeTable magTable) {
+    public NewAction(IShell shell, final KeyChain authClient, AgsMagnitude.MagnitudeTable magTable) {
         super("New Plan...", authClient);
         this.shell      = shell;
         this.authClient = authClient;
-        this.ictdConfig = ictdConfig;
         this.magTable   = magTable;
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, Platform.MENU_ACTION_MASK));
         authClient.asJava().addListener(() -> setEnabled(!authClient.asJava().isLocked()));
@@ -135,7 +133,7 @@ public class NewAction extends AbstractAsyncAction {
                     } else {
                         pm.setMessage("Querying ICTD ...");
 
-                        final Option<Ictd> ictd = Ictd.query(ictdConfig, nd.getSite()).toOption();
+                        final Option<IctdSummary> ictd = Ictd.query(authClient, nd.getAuthPeer(), nd.getSite()).toOption();
 
                         sched = new Schedule(miniModel, ictd);
 

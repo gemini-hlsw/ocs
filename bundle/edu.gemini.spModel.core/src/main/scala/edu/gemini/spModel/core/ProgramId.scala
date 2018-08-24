@@ -2,6 +2,7 @@ package edu.gemini.spModel.core
 
 import java.util.{GregorianCalendar, Calendar}
 import scala.util.Try
+import scalaz.Order
 
 sealed trait ProgramId extends java.io.Serializable {
   def site: Option[Site]
@@ -65,6 +66,12 @@ object ProgramId {
     override def toString: String =
       format
   }
+
+  implicit val OrderingScience: Ordering[Science] =
+    scala.math.Ordering.by(k => (k.siteVal, k.semesterVal, k.ptypeVal, k.index))
+
+  implicit val OrderScience: Order[Science] =
+    Order.fromScalaOrdering[Science]
 
   case class Daily(siteVal: Site, ptypeVal: ProgramType, year: Int, month: Int, day: Int) extends StandardProgramId {
     def site: Option[Site]         = Some(siteVal)

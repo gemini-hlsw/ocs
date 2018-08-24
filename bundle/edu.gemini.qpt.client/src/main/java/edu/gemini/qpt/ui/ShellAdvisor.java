@@ -1,6 +1,5 @@
 package edu.gemini.qpt.ui;
 
-import edu.gemini.qpt.shared.sp.Ictd;
 import static edu.gemini.qpt.ui.util.BooleanToolPreference.TOOL_MAINTAIN_SPACING;
 import static edu.gemini.qpt.ui.util.BooleanToolPreference.TOOL_SNAP;
 import static edu.gemini.qpt.ui.util.BooleanViewPreference.*;
@@ -134,17 +133,15 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
     }
 
     private final PublishAction.Destination internal, pachon;
-    private final Ictd.SiteConfig ictdConfig;
     private final AgsMagnitude.MagnitudeTable magTable;
 
-    public ShellAdvisor(String name, String version, String rootURL, KeyChain authClient, PublishAction.Destination internal, PublishAction.Destination pachon, Ictd.SiteConfig ictdConfig, AgsMagnitude.MagnitudeTable magTable) {
+    public ShellAdvisor(String name, String version, String rootURL, KeyChain authClient, PublishAction.Destination internal, PublishAction.Destination pachon, AgsMagnitude.MagnitudeTable magTable) {
         this.title      = name + " " + version;
         this.rootURL    = rootURL;
         this.version    = version;
         this.authClient = authClient;
         this.internal   = internal;
         this.pachon     = pachon;
-        this.ictdConfig = ictdConfig;
         this.magTable   = magTable;
     }
 
@@ -171,7 +168,7 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
 
                 Menu.File,
 
-                new NewAction(shell, authClient, ictdConfig, magTable),
+                new NewAction(shell, authClient, magTable),
                 new OpenAction(shell, authClient, magTable),
                 new OpenFromWebAction(shell, authClient, magTable),
                 null,
@@ -210,7 +207,7 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
                 new RefreshAction(shell, authClient, magTable),
                 new MergeAction(shell, authClient, magTable),
                 null,
-                new IctdAction(shell, authClient, ictdConfig)
+                new IctdAction(shell, authClient)
 
         );
 

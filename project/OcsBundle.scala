@@ -195,7 +195,6 @@ trait OcsBundle {
 
   lazy val bundle_edu_gemini_qpt_client =
     project.in(file("bundle/edu.gemini.qpt.client")).dependsOn(
-      bundle_edu_gemini_ictd,
       bundle_edu_gemini_shared_skyobject,
       bundle_edu_gemini_pot,
       bundle_edu_gemini_qpt_shared,
@@ -213,7 +212,6 @@ trait OcsBundle {
   lazy val bundle_edu_gemini_qpt_shared =
     project.in(file("bundle/edu.gemini.qpt.shared")).dependsOn(
       bundle_edu_gemini_ags,
-      bundle_edu_gemini_ictd,
       bundle_edu_gemini_shared_skyobject,
       bundle_edu_gemini_pot,
       bundle_edu_gemini_shared_util,

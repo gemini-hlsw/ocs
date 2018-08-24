@@ -52,6 +52,6 @@ object IctdServiceImpl {
         }
 
       override def summary(site: Site): IctdSummary =
-        action(site).unsafePerformIO
+        action(site).unsafePerformIO()
     }
 }

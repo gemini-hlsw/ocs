@@ -1,14 +1,15 @@
 package edu.gemini.qpt.core;
 
 import edu.gemini.spModel.ictd.CustomMaskKey;
+import edu.gemini.spModel.ictd.IctdSummary;
 import edu.gemini.qpt.core.listeners.Listeners;
 import edu.gemini.qpt.core.util.*;
 import edu.gemini.qpt.core.util.Variants.EditException;
 import edu.gemini.qpt.shared.sp.Conds;
-import edu.gemini.qpt.shared.sp.Ictd;
 import edu.gemini.qpt.shared.sp.Inst;
 import edu.gemini.qpt.shared.sp.MiniModel;
 import edu.gemini.qpt.shared.util.EnumPio;
+import edu.gemini.qpt.shared.util.Ictd;
 import edu.gemini.qpt.shared.util.PioSerializable;
 import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.skycalc.TwilightBoundedNight;
@@ -81,13 +82,13 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
     private File file;
     private Map<WorldCoordinates, Union<Interval>> intervalCache = new HashMap<>();
     private MiniModel miniModel;
-    private Option<Ictd> ictd;
+    private Option<IctdSummary> ictd;
 
     /**
      * Constructs an empty Schedule.
      * @param model
      */
-    public Schedule(MiniModel model, Option<Ictd> ictd) {
+    public Schedule(MiniModel model, Option<IctdSummary> ictd) {
         assert model != null;
         assert ictd != null;
         this.miniModel = model;
@@ -95,7 +96,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
         this.blocks = new BlockUnion();
         this.variants = new VariantList();
         this.extraSemesters = new StringSet();
-        init(true, ictd.map(i -> i.featureAvailability));
+        init(true, ictd.map(i -> i.featureAvailabilityJava()));
     }
 
     /**
@@ -216,7 +217,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
         }
 
         // ok, now the data should be up to date and ready to be processed
-        this.ictd = ImOption.apply(params.getParamSet(PROP_ICTD)).map(p -> new Ictd(p));
+        this.ictd = ImOption.apply(params.getParamSet(PROP_ICTD)).map(Ictd::decode);
         this.blocks = getBlockUnion(params);
         this.variants = new VariantList(this, params.getParamSet(PROP_VARIANTS));
         this.extraSemesters = getExtraSemesters(params);
@@ -233,7 +234,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
             Listeners.attach(v);
         addHiddenFacilities();
         setDirty(false);
-        oam.foreach(am -> matchFacilitiesToIctd(am));
+        oam.foreach(this::matchFacilitiesToIctd);
     }
 
     @Override
@@ -266,18 +267,18 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
 
     }
 
-    public Option<Ictd> getIctd() {
+    public Option<IctdSummary> getIctd() {
         return ictd;
     }
 
     @SuppressWarnings("unchecked")
-    public void setIctd(Option<Ictd> ictd) {
-        final Option<Ictd> prev = this.ictd;
+    public void setIctd(Option<IctdSummary> ictd) {
+        final Option<IctdSummary> prev = this.ictd;
 
         invalidateAllCaches();
 
         this.ictd = ictd;
-        doPublicFacilitiesUpdate(() -> ictd.foreach(i -> matchFacilitiesToIctd(i.featureAvailability)));
+        doPublicFacilitiesUpdate(() -> ictd.foreach(i -> matchFacilitiesToIctd(i.featureAvailabilityJava())));
 
         firePropertyChange(PROP_ICTD, prev, ictd);
     }
@@ -287,7 +288,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
      * is no ICTD data, we assume that the mask is available.
      */
     public Availability maskAvailability(CustomMaskKey key) {
-        return getIctd().map(i -> i.maskAvailability.getOrDefault(key, Availability.Missing))
+        return getIctd().map(i -> i.maskAvailabilityJava().getOrDefault(key, Availability.Missing))
                         .getOrElse(Availability.Installed); // no ICTD => assume installed
     }
 
@@ -321,7 +322,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
         params.addParamSet(blocks.getParamSet(factory, PROP_BLOCKS));
         params.addParamSet(variants.getParamSet(factory, PROP_VARIANTS));
         params.addParamSet(extraSemesters.getParamSet(factory, PROP_EXTRA_SEMESTERS));
-        ictd.foreach(i -> params.addParamSet(i.getParamSet(factory, PROP_ICTD)));
+        ictd.foreach(i -> params.addParamSet(Ictd.encode(factory, PROP_ICTD, i)));
         Pio.addParam(factory, params, PROP_COMMENT, comment);
         return params;
     }

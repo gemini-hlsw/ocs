@@ -1,11 +1,12 @@
 package edu.gemini.qpt.ui.action;
 
 import edu.gemini.qpt.core.Schedule;
-import edu.gemini.qpt.shared.sp.Ictd;
+import edu.gemini.qpt.shared.util.Ictd;
 import edu.gemini.qpt.ui.util.AbstractAsyncAction;
 import edu.gemini.qpt.ui.util.ProgressDialog;
 import edu.gemini.qpt.ui.util.ProgressModel;
 import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.spModel.core.Peer;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.ui.gface.GSelection;
 import edu.gemini.ui.workspace.IShell;
@@ -30,14 +31,12 @@ public final class IctdAction extends AbstractAsyncAction implements PropertyCha
 
     private final IShell shell;
     private final KeyChain authClient;
-    private final Ictd.SiteConfig ictdConfig;
 
-    public IctdAction(IShell shell, final KeyChain authClient, Ictd.SiteConfig ictdConfig) {
+    public IctdAction(IShell shell, final KeyChain authClient) {
         super("Update from ICTD", authClient);
 
         this.shell      = shell;
         this.authClient = authClient;
-        this.ictdConfig = ictdConfig;
 
         shell.addPropertyChangeListener(this);
         setEnabled(false);
@@ -57,24 +56,35 @@ public final class IctdAction extends AbstractAsyncAction implements PropertyCha
 
             final Schedule sched = (Schedule) shell.getModel();
             final Site      site = sched.getSite();
+            final Peer      peer = authClient.asJava().peer(site);
+            if (peer == null) {
+                JOptionPane.showMessageDialog(
+                    shell.getPeer(),
+                    "Cannot figure out which ODB to query, sorry..",
+                    "ICTD Error",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
             pm.setMessage("Querying ICTD database ...");
-            Ictd.query(ictdConfig, site).biForEach(
-                msg -> {
-                    pd.setVisible(false);
-                    JOptionPane.showMessageDialog(
-                        shell.getPeer(),
-                        "There was a problem communicating with the ICTD, sorry..",
-                        "ICTD Error",
-                        JOptionPane.ERROR_MESSAGE);
-                },
-                ictd -> {
-                    pm.setMessage("Updating model...");
-                    sched.setIctd(ImOption.apply(ictd));
 
-                    GSelection<?> sel = shell.getSelection();
-                    shell.setModel(null);
-                    shell.setModel(sched);
+
+            Ictd.query(authClient, peer, site).biForEach(
+                    msg -> {
+                        pd.setVisible(false);
+                        JOptionPane.showMessageDialog(
+                                shell.getPeer(),
+                                "There was a problem communicating with the ICTD, sorry..",
+                                "ICTD Error",
+                                JOptionPane.ERROR_MESSAGE);
+                    },
+                    ictd -> {
+                        pm.setMessage("Updating model...");
+                        sched.setIctd(ImOption.apply(ictd));
+
+                        GSelection<?> sel = shell.getSelection();
+                        shell.setModel(null);
+                        shell.setModel(sched);
                 }
             );
 

@@ -4,6 +4,7 @@ import edu.gemini.spModel.ictd.CustomMaskKey;
 import edu.gemini.spModel.ictd.Availability;
 import edu.gemini.shared.util.immutable.ImOption;
 
+import edu.gemini.spModel.ictd.IctdSummary;
 import edu.gemini.ui.gface.GTableController;
 import edu.gemini.ui.gface.GViewer;
 
@@ -63,16 +64,11 @@ public final class MaskController implements GTableController<Schedule, Map.Entr
         final Map<CustomMaskKey, Availability> masks;
         masks = ImOption.apply(schedule)
                         .flatMap(s -> schedule.getIctd())
-                        .map(i -> i.maskAvailability)
-                        .getOrElse(() -> Collections.emptyMap());
+                        .map(IctdSummary::maskAvailabilityJava)
+                        .getOrElse(Collections::emptyMap);
 
         this.entries = masks.entrySet().toArray(new Map.Entry[masks.size()]);
 
-        Arrays.sort(entries, new Comparator<Map.Entry<CustomMaskKey, Availability>>() {
-            @Override
-            public int compare(Map.Entry<CustomMaskKey, Availability> e1, Map.Entry<CustomMaskKey, Availability> e2) {
-                return CustomMaskKey.OrderingCustomMaskKey().compare(e1.getKey(), e2.getKey());
-            }
-        });
+        Arrays.sort(entries, (e1, e2) -> CustomMaskKey.OrderingCustomMaskKey().compare(e1.getKey(), e2.getKey()));
     }
 }

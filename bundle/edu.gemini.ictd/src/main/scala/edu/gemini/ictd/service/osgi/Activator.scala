@@ -63,6 +63,8 @@ class Activator extends BundleActivator {
 
         Some(t)
     }
+
+    tracker.foreach(_.open())
   }
 
   override def stop(ctx: BundleContext): Unit = {
