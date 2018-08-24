@@ -26,12 +26,12 @@ object TimingWindowCheckCron {
     now: Instant,
     odb: IDBDatabaseService,
     twcm: TimingWindowCheckMailer,
-    ps:  List[(SPProgramID, List[(SPObservationID, Instant)])]
+    ps:  List[(SPProgramID, List[SPObservationID])]
   ): Action[Unit] =
 
     ps.traverseU {
       case (pid, l) =>
-        l.toNel.fold(Action.unit) { tws =>
+        l.toNel.fold(Action.unit) { os =>
           EitherT(ProgramAddresses.fromProgramId(odb, pid).catchLeft).flatMap {
             case None =>
               log.log(Level.INFO, s"Could not get email addresses for $pid because it was not found in ODB")
@@ -40,7 +40,7 @@ object TimingWindowCheckCron {
               log.log(Level.INFO, s"Could not send mask check nag email because some addresses are not valid for $pid: $msg")
 
             case Some(Success(pa)) =>
-              twcm.notifyPendingCheck(pid, pa, tws)
+              twcm.notifyPendingCheck(pid, pa, os)
           }
         }
     }.void
@@ -63,11 +63,9 @@ object TimingWindowCheckCron {
       union = getCheckUnion(now, env.site)
       all <- TimingWindowFunctor.query(env.odb, user)
       ps = all.flatMap {
-        case (pid, otw) => {
-          val ftws = otw.filter {
-            case (_, tw) => union.contains(tw)
-          }
-          if (ftws.nonEmpty) List((pid, ftws)) else Nil
+        case (pid, otws) => {
+          val ftws = otws.filter { case (oid, tw) => union.contains(tw) }
+          if (ftws.nonEmpty) List((pid, ftws.map(_._1))) else Nil
         }
       }
       _  <- sendEmails(ActionLogger(logger), now, env.odb, env.mailer, ps)

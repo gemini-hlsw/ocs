@@ -14,7 +14,7 @@ sealed abstract class TimingWindowCheckMailer(mailer: Mailer) {
   def notifyPendingCheck(
     pid: SPProgramID,
     to:  ProgramAddresses,
-    tws: NonEmptyList[(SPObservationID, Instant)]
+    tws: NonEmptyList[SPObservationID]
   ): Action[Unit] = {
 
     val subject   =
