@@ -10,8 +10,9 @@ import edu.gemini.skycalc.{Interval, TwilightBoundType, TwilightBoundedNight, Un
 import scalaz._
 import Scalaz._
 import edu.gemini.dbTools.mailer.ProgramAddresses
+import edu.gemini.pot.sp.SPObservationID
 import edu.gemini.pot.spdb.IDBDatabaseService
-import edu.gemini.spModel.core.Site
+import edu.gemini.spModel.core.{SPProgramID, Site}
 
 object TimingWindowCheckCron {
 
@@ -25,10 +26,10 @@ object TimingWindowCheckCron {
     now: Instant,
     odb: IDBDatabaseService,
     twcm: TimingWindowCheckMailer,
-    ps:  TimingWindows
+    ps:  List[(SPProgramID, List[(SPObservationID, Instant)])]
   ): Action[Unit] =
 
-    ps.toList.traverseU {
+    ps.traverseU {
       case (pid, l) =>
         l.toNel.fold(Action.unit) { tws =>
           EitherT(ProgramAddresses.fromProgramId(odb, pid).catchLeft).flatMap {
@@ -61,14 +62,14 @@ object TimingWindowCheckCron {
       now <- Action.delay(Instant.now)
       union = getCheckUnion(now, env.site)
       all <- TimingWindowFunctor.query(env.odb, user)
-      ps = all.toList.flatMap {
+      ps = all.flatMap {
         case (pid, otw) => {
           val ftws = otw.filter {
             case (_, tw) => union.contains(tw)
           }
           if (ftws.nonEmpty) List((pid, ftws)) else Nil
         }
-      }.toMap
+      }
       _  <- sendEmails(ActionLogger(logger), now, env.odb, env.mailer, ps)
     } yield ()
 
