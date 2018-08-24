@@ -55,6 +55,7 @@ object TimingWindowCheckCron {
       var u = new Union[Interval]
       u.add(new Interval(night.getStartInstant, night.next.getStartInstant))
       if (now.isAfter(night.getEndInstant)) u else { u.remove(new Interval(now, night.getEndInstant)); u }
+
     }
 
     val action = for {
@@ -64,8 +65,10 @@ object TimingWindowCheckCron {
       all <- TimingWindowFunctor.query(env.odb, user)
       ps = all.flatMap {
         case (pid, otws) => {
-          val ftws = otws.filter { case (oid, tw) => union.contains(tw) }
-          if (ftws.nonEmpty) List((pid, ftws.map(_._1))) else Nil
+          val oids = otws.flatMap {
+            case (oid, tw) => if (union.contains(tw)) List(oid) else Nil
+          }
+          if (oids.nonEmpty) List((pid, oids)) else Nil
         }
       }
       _  <- sendEmails(ActionLogger(logger), now, env.odb, env.mailer, ps)
