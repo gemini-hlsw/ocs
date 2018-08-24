@@ -78,6 +78,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           keywordCheck, attachmentCheck, attachmentValidityCheck, attachmentSizeCheck, missingObsDetailsCheck,
           duplicateInvestigatorCheck, ftReviewerOrMentor, ftAffiliationMismatch, band3Obs).flatten ++
           TimeProblems(p, s).all ++
+          TimeProblems.noCFHClassical(p, s) ++
           TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
           Semester2018BProblems(p, s).all ++
@@ -693,6 +694,13 @@ object TimeProblems {
       }
 
   val SCHEDULING_SECTION = "Time Requests"
+
+  // REL-3493: All CFH exchange time will now be done in queue.
+  def noCFHClassical(p: Proposal, s: ShellAdvisor): Option[ProblemRobot.Problem] = p.proposalClass match {
+    case ClassicalProposalClass(_, _, _, Right(ExchangeSubmission(_, _, ExchangePartner.CFH, _)), _) =>
+      Some(new Problem(Severity.Error, "All CFH exchange time will now be done in queue.", SCHEDULING_SECTION, s.inPartnersView(_.editProposalClass())))
+    case _ => None
+  }
 
   // REL-2032 Check that none of the requested times per partner are zero
   def partnerZeroTimeRequest(p: Proposal, s:ShellAdvisor): List[ProblemRobot.Problem] = p.proposalClass match {
