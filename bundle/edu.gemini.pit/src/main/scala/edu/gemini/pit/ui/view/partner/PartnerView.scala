@@ -999,7 +999,6 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
                 case ExchangeKeck   => c.copy(subs = Right(localKeck))
                 case ExchangeSubaru => c.copy(subs = Right(localSubaru))
                 case _              => c.copy(subs = Left(localGemini))
-                //case ExchangeCFH    => c.copy(subs = Right(localCFH))
               }
             case e:ExchangeProposalClass  =>
               selection.item match {
