@@ -29,17 +29,18 @@ object TimingWindowCheckCron {
   ): Action[Unit] =
 
     ps.toList.traverseU {
-      case (_, Nil) => Action.unit
-      case (pid, tws) =>
-        EitherT(ProgramAddresses.fromProgramId(odb, pid).catchLeft).flatMap {
-          case None               =>
-            log.log(Level.INFO, s"Could not get email addresses for $pid because it was not found in ODB")
+      case (pid, l) =>
+        l.toNel.fold(Action.unit) { tws =>
+          EitherT(ProgramAddresses.fromProgramId(odb, pid).catchLeft).flatMap {
+            case None =>
+              log.log(Level.INFO, s"Could not get email addresses for $pid because it was not found in ODB")
 
-          case Some(Failure(msg)) =>
-            log.log(Level.INFO, s"Could not send mask check nag email because some addresses are not valid for $pid: $msg")
+            case Some(Failure(msg)) =>
+              log.log(Level.INFO, s"Could not send mask check nag email because some addresses are not valid for $pid: $msg")
 
-          case Some(Success(pa))  =>
-            twcm.notifyPendingCheck(pid, pa, tws)
+            case Some(Success(pa)) =>
+              twcm.notifyPendingCheck(pid, pa, tws)
+          }
         }
     }.void
 
