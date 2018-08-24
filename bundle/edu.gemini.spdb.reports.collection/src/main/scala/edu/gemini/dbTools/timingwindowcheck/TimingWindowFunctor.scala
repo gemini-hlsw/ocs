@@ -53,15 +53,16 @@ private class TimingWindowFunctor extends DBAbstractQueryFunctor {
 
   override def execute(db: IDBDatabaseService, node: ISPNode, principals: JSet[Principal]): Unit = {
 
-    def getTimingWindows(o: ISPObservation): Option[(SPObservationID, Instant)] = {
-      // TODO: Will the null case of getDataObject make it an empty list?
-      val tws: List[TimingWindow] = SPTreeUtil.findObsCondNode(o).getDataObject.asInstanceOf[SPSiteQuality].getTimingWindows.asScala.toList
+    def getLastTimingWindow(o: ISPObservation): Option[(SPObservationID, Instant)] = {
+      val tws: List[TimingWindow] = Option(SPTreeUtil.findObsCondNode(o)).flatMap(
+        x => Option(x.getDataObject.asInstanceOf[SPSiteQuality])
+      ).fold(Nil: List[TimingWindow])(_.getTimingWindows.asScala.toList)
       tws.flatMap(_.getEnd.asScala).maximumBy(_.toEpochMilli).map(tw => (o.getObservationID, tw))
     }
 
     node match {
       case p: ISPProgram => if (isActive(p) && isScience(p)) results += (
-        (p.getProgramID, p.getAllObservations.asScala.toList.flatMap(o => getTimingWindows(o).toList))
+        (p.getProgramID, p.getAllObservations.asScala.toList.flatMap(o => getLastTimingWindow(o).toList))
         )
       case _             => // do nothing
     }
