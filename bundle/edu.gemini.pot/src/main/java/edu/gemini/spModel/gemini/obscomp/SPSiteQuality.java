@@ -304,8 +304,7 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
             @Override public boolean isObsolete() { return true; }
         },
         ANY(       "Any",       100, -3.0),
-        ;
-
+        EXACT(     "Exact",       0,  0.0);
 
         /** The default CloudCover value **/
         public static CloudCover DEFAULT = ANY;
@@ -366,7 +365,8 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         PERCENT_20("20%/Best",  20,  0.5),
         PERCENT_70("70%/Good",  70,  0.0),
         PERCENT_85("85%/Poor",  85, -0.5),
-        ANY(       "Any",      100, -1.0);
+        ANY(       "Any",      100, -1.0),
+        EXACT(     "Exact",      0,  0.0);
 
         /** The default ImageQuality value **/
         public static ImageQuality DEFAULT = ANY;
@@ -385,7 +385,6 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         public byte getPercentage() {
             return _percentage;
         }
-
 
         public String displayValue() {
             return _displayValue;
@@ -417,7 +416,6 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         public static Option<ImageQuality> read(String s) {
             return SPSiteQuality.read(s, values());
         }
-
 
         @Override
         public double getAdjustment(final BandsList bl) {
