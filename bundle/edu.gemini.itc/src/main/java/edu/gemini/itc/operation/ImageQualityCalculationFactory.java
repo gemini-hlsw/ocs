@@ -4,6 +4,7 @@ import edu.gemini.itc.base.Instrument;
 import edu.gemini.itc.shared.ObservingConditions;
 import edu.gemini.itc.shared.SourceDefinition;
 import edu.gemini.itc.shared.TelescopeDetails;
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.core.GaussianSource;
 
@@ -18,8 +19,14 @@ public final class ImageQualityCalculationFactory {
             TelescopeDetails telescope,
             Instrument instrument) {
 
-        if (sourceDefinition.profile() instanceof GaussianSource) {
-            // Case A The Image quality is defined by the user
+        if (observingConditions.iq() == SPSiteQuality.ImageQuality.EXACT) {
+            // Case C: The exact delivered FHWM at the science wavelength is specified.
+            final double fwhm = observingConditions.exactiq();
+            if (fwhm <= 0.0) throw new IllegalArgumentException("Exact Image Quality must be > zero arcseconds.");
+            return new GaussianImageQualityCalculation(fwhm);
+
+        } else if (sourceDefinition.profile() instanceof GaussianSource) {
+            // Case A: The Image quality is defined by the user
             // who has selected a Gaussian Extended source
             // Creates a GaussianImageQualityCalculation
             final double fwhm = ((GaussianSource) sourceDefinition.profile()).fwhm();
@@ -30,8 +37,8 @@ public final class ImageQualityCalculationFactory {
             final GuideProbe.Type wfs =
                     telescope.getWFS() == GuideProbe.Type.AOWFS ? GuideProbe.Type.OIWFS : telescope.getWFS();
 
-            // Case B The Image Quality is defined by either of the
-            // Probes in conjuction with the Atmosphric Seeing.
+            // Case B: The Image Quality is defined by either of the
+            // Probes in conjunction with the Atmospheric Seeing.
             // This case creates an ImageQuality Calculation
             return new ImageQualityCalculation(
                     wfs,
@@ -39,7 +46,5 @@ public final class ImageQualityCalculationFactory {
                     observingConditions.airmass(),
                     instrument.getEffectiveWavelength());
         }
-
     }
 }
-

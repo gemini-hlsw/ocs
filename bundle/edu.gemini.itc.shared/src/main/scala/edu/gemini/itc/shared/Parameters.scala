@@ -10,7 +10,9 @@ final case class ObservingConditions(
                       cc: CloudCover,
                       wv: WaterVapor,
                       sb: SkyBackground,
-                      airmass: Double)
+                      airmass: Double,
+                      exactiq: Double,
+                      exactcc: Double)
 
 // ==== Source definition
 final case class SourceDefinition(

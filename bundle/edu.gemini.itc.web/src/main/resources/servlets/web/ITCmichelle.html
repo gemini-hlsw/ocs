@@ -325,61 +325,59 @@
 	<p>
 	&nbsp;
 	</p>
+
 	<!-- Observing conditions definition-->
 	<p>
 	<span style="color: #ff0000"><b>Observing condition constraints</b></span>
-
 	</p>
 	<table background="https://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0" width="100%">
 		<tbody>
 			<tr>
-				<td colspan="6">Note: you should read the <a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10272','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">explanatory
+				<td colspan="6">Please read the <a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10272','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">explanatory
 				notes</a> for the meaning of the percentiles and to ensure that your selected conditions
 				are appropriate for the observing wavelength. Further details are
 				available on the <a href="#" onclick="window.open('http://www.gemini.edu/sciops/ObsProcess/obsConstraints/obsConstraintsIndex.html','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">observing
 				condition constraints</a> pages. </td>
-
 			</tr>
-
             <tr>
-                <td><b>Image quality:</b></td>
+                <td><b>Image Quality:</b></td>
                 <td><input name="ImageQuality" value="PERCENT_20" type="radio" /> 20%/Best</td>
                 <td><input name="ImageQuality" value="PERCENT_70" type="radio" checked /> 70%/Good</td>
                 <td><input name="ImageQuality" value="PERCENT_85" type="radio" /> 85%/Poor</td>
-                <td><input name="ImageQuality" value="ANY" type="radio" /> Any</td>
+                <td><input name="ImageQuality" value="ANY"        type="radio" /> Any</td>
+				<td><input name="ImageQuality" value="EXACT"      type="radio" /> <input name="ExactIQ" type="text" value="0.8" size="4"> arcsec​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​</td>
             </tr>
             <tr>
-                <td><b>Sky transparency (cloud cover):</b></td>
+                <td><b>Cloud Cover:</b></td>
                 <td><input name="CloudCover" value="PERCENT_50" type="radio" checked /> 50%/Clear</td>
                 <td><input name="CloudCover" value="PERCENT_70" type="radio" /> 70%/Cirrus</td>
-                <!--td><input name="CloudCover" value="PERCENT_80" type="radio" /> 80%/Cloudy</td-->
-                <!--td><input name="CloudCover" value="ANY" type="radio" /> Any</td-->
+                <td><input name="CloudCover" value="PERCENT_80" type="radio" disabled /> 80%/Cloudy</td>
+                <td><input name="CloudCover" value="ANY"        type="radio" disabled /> Any</td>
+				<td><input name="CloudCover" value="EXACT"      type="radio" > <input name="ExactCC" type="text" value="0.3" size="4"> mag</td>
             </tr>
             <tr>
-                <td><b>Sky transparency (water vapour):</b></td>
+                <td><b>Water Vapor:</b></td>
                 <td><input name="WaterVapor" value="PERCENT_20" type="radio" /> 20%/Low</td>
                 <td><input name="WaterVapor" value="PERCENT_50" type="radio" checked /> 50%/Median</td>
                 <td><input name="WaterVapor" value="PERCENT_80" type="radio" /> 80%/High</td>
-                <td><input name="WaterVapor" value="ANY" type="radio" /> Any</td>
+                <td><input name="WaterVapor" value="ANY"        type="radio" /> Any</td>
             </tr>
             <tr>
-                <td><b>Sky background: Any (see <a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10272','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>explanatory notes</span></a>)</b></td>
-                <!--td><input name="SkyBackground" value="PERCENT_20" type="radio" /> 20%/Darkest</td-->
-                <!--td><input name="SkyBackground" value="PERCENT_50" type="radio" /> 50%/Dark</td-->
-                <!--td><input name="SkyBackground" value="PERCENT_80" type="radio" /> 80%/Grey</td-->
-                <!--td><input name="SkyBackground" value="ANY" type="radio" checked /> Any/Bright</td-->
-                <input name="SkyBackground" value="ANY" type="hidden" />
+                <td><b>Sky Background:</b></td>
+                <td><input name="SkyBackground" value="PERCENT_20" type="radio" disabled /> 20%/Darkest</td>
+                <td><input name="SkyBackground" value="PERCENT_50" type="radio" disabled /> 50%/Dark</td>
+                <td><input name="SkyBackground" value="PERCENT_80" type="radio" disabled /> 80%/Grey</td>
+				<td colspan="2"><input name="SkyBackground" value="ANY" type="radio" checked /> Any/Bright (<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10272','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>explanatory notes</span></a>)</td>
             </tr>
             <tr>
-                <td><b>Typical air mass during observation:</b></td>
+                <td><b>Airmass:</b></td>
                 <td><input name="Airmass" value="1.2" type="radio" checked /> &lt;1.2</td>
                 <td><input name="Airmass" value="1.5" type="radio" /> 1.5</td>
                 <td><input name="Airmass" value="2.0" type="radio" /> 2.0</td>
             </tr>
-
 			<tr>
 				<td colspan="6">
-					<p align="right"> <!--<input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" /> -->
+					<p align="right">
 						<input value="Calculate" type="submit" style="background-color: gold; padding: 3px 8px;">
 					</p>
 				</td>
@@ -387,9 +385,9 @@
 		</tbody>
 	</table>
 	<p>
-
 	&nbsp;
 	</p>
+
 	<!-- Observation method and output control-->
 	<p>
 	<span style="color: #ff0000"><b>Details of observation</b></span>

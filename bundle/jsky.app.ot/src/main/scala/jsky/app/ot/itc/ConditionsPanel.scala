@@ -63,7 +63,8 @@ final class ConditionsPanel(owner: EdIteratorFolder) extends GridBagPanel {
     cc.selection.item,
     wv.selection.item,
     sb.selection.item,
-    am.selection.item)
+    am.selection.item, 0.0, 0.0
+  )
 
   def update() = {
     // Note: site quality node can be missing (i.e. null)
