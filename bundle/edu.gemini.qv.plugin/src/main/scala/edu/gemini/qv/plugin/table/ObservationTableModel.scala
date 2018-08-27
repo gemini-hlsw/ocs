@@ -8,11 +8,16 @@ import edu.gemini.qpt.shared.sp.{Band, Obs}
 import edu.gemini.qv.plugin.util.SolutionProvider
 import edu.gemini.skycalc.TimeUtils
 import edu.gemini.spModel.`type`.{DisplayableSpType, LoggableSpType}
-import edu.gemini.spModel.core.{Affiliate, Angle, Coordinates}
+import edu.gemini.spModel.core.{Affiliate, Angle}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{ElevationConstraintType, TimingWindow}
+import edu.gemini.spModel.ictd.CustomMaskKey
+import edu.gemini.spModel.ictd.Availability.Installed
 import jsky.coords.DMS
 
 import scala.collection.JavaConverters._
+
+import scalaz._
+import Scalaz._
 
 object ObservationTableModel {
 
@@ -288,8 +293,36 @@ object ObservationTableModel {
       "GPI Observing Mode",
       { o => val v = o.getGpiObservingMode; if (v.isEmpty) "" else asString(v.getValue) },
       visibleAtStart = false
+    ),
+    Column[String](
+      "Installed Config",
+      "Instrument configuration installed", { o =>
+        isInstalled(ctx, o).fold("?") { installed => if (installed) "yes" else "no" }
+      }
     )
+
   )
+
+  /**
+   * Determines whether all the features and custom mask (if any) of the given
+   * observation is available according to the ICTD.
+   *
+   * @return an Option[Boolean] that is defined if the ICTD data is available,
+   *         and Some(true) if all instrument features and the custom mask (if
+   *         any) are installed
+   */
+  def isInstalled(c: QvContext, o : Obs): Option[Boolean] =
+    c.dataSource.ictd.map { i =>
+
+      val features = o.getOptions.asScala.forall { e =>
+                       i.featureAvailability.get(e).forall(_ === Installed)
+                     }
+      val mask     = Option(o.getCustomMask).forall { m =>
+                       CustomMaskKey.parse(m).exists(i.maskAvailability.get(_).contains(Installed))
+                     }
+
+      features && mask
+    }
 
   private def semesterHrsFraction(ctx: QvContext, o: Obs, thisSem: Boolean, nextSem: Boolean): Double = {
     val hrs = SolutionProvider(ctx).remainingTime(ctx, o, thisSem, nextSem)
@@ -445,5 +478,16 @@ class ObservationTableModel(ctx: QvContext) extends AbstractTableModel {
         null
     })
   }
+
+  /**
+   * Determines whether all the features and custom mask (if any) of the
+   * observation at the given row is available according to the ICTD.
+   *
+   * @return an Option[Boolean] that is defined if the ICTD data is available,
+   *         and Some(true) if all instrument features and the custom mask (if
+   *         any) are installed
+   */
+  def isInstalled(c: QvContext, row: Int): Option[Boolean] =
+    observations.lift(row).flatMap(ObservationTableModel.isInstalled(c, _))
 
 }

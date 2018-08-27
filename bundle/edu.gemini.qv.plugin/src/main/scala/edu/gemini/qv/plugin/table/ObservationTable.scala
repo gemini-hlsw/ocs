@@ -1,9 +1,10 @@
 package edu.gemini.qv.plugin.table
 
+import java.awt.Color
 import java.awt.event.{AdjustmentEvent, AdjustmentListener}
 import java.util.regex.PatternSyntaxException
 import javax.swing.table.{DefaultTableCellRenderer, TableColumn, TableRowSorter}
-import javax.swing.{BorderFactory, RowFilter, SwingConstants}
+import javax.swing.{JTable, BorderFactory, RowFilter, SwingConstants}
 
 import edu.gemini.pot.sp.SPObservationID
 import edu.gemini.qv.plugin.data._
@@ -159,6 +160,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
 
     private val popup = createPopup()
 
+    peer.setDefaultRenderer(classOf[java.lang.String], NormalRenderer)
     peer.setDefaultRenderer(classOf[java.lang.Double], DoubleValueRenderer)
     peer.setDefaultRenderer(classOf[RaValue], RaValueRenderer)
     peer.setDefaultRenderer(classOf[DecValue], DecValueRenderer)
@@ -287,9 +289,29 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
       }).reduceOption(_ max _).getOrElse(0)                       // get maximum preferred size of all rows (on potentially empty collection)
 
 
+    private abstract class AvailabilityRenderer extends DefaultTableCellRenderer {
+      override def getTableCellRendererComponent(t: JTable, v: Object, selected: Boolean, focus: Boolean, r: Int, c: Int): java.awt.Component = {
+        val comp = super.getTableCellRendererComponent(t, v, selected, focus, r, c)
+
+        val color = dataModel.isInstalled(ctx, r) match {
+          case None        => Color.white
+          case Some(true)  => new java.awt.Color(238, 255, 204)
+          case Some(false) => new java.awt.Color(253, 177, 177)
+        }
+
+        if (!selected) comp.setBackground(color)
+
+        comp
+      }
+    }
+
+    private object NormalRenderer extends AvailabilityRenderer {
+      // accept the defaults
+    }
+
     // === SPECIAL PURPOSE RENDERERS
     // if column is right aligned add some padding on the right side in order to separate content from next column
-    private object RaValueRenderer extends DefaultTableCellRenderer() {
+    private object RaValueRenderer extends AvailabilityRenderer {
       setHorizontalAlignment(SwingConstants.RIGHT)
       override def setValue(value: Object) = value match {
         case v: RaValue =>
@@ -297,7 +319,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
           setBorder(BorderFactory.createEmptyBorder(0,0,0,6))
       }
     }
-    private object DecValueRenderer extends DefaultTableCellRenderer() {
+    private object DecValueRenderer extends AvailabilityRenderer {
       setHorizontalAlignment(SwingConstants.RIGHT)
       override def setValue(value: Object) = value match {
         case v: DecValue =>
@@ -305,7 +327,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
           setBorder(BorderFactory.createEmptyBorder(0,0,0,6))
       }
     }
-    private object DoubleValueRenderer extends DefaultTableCellRenderer() {
+    private object DoubleValueRenderer extends AvailabilityRenderer {
       setHorizontalAlignment(SwingConstants.RIGHT)
       override def setValue(value: Object) = value match {
         case v: java.lang.Double =>
@@ -313,7 +335,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
           setBorder(BorderFactory.createEmptyBorder(0,0,0,5))
       }
     }
-    private object TimeValueRenderer extends DefaultTableCellRenderer {
+    private object TimeValueRenderer extends AvailabilityRenderer {
       setHorizontalAlignment(SwingConstants.RIGHT)
       override def setValue(value: Object) = value match {
         case v: TimeValue =>

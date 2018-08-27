@@ -29,26 +29,4 @@ object IctdSummary {
 
     IctdSummary(f.asScala.toMap, TreeMap(m.asScala.toList: _*))
 
-  /*
-  val Feature: String = "feature"
-  val Mask:    String = "mask"
-  val Entry:   String = "entry"
-  val Avail:   String = "avail"
-  val Name:    String = "name"
-  val Class:   String = "class"
-
-  def apply(params: ParamSet): IctdSummary = {
-
-  }
-
-  private def enumParamSet(factory: PioFactory, name: String, e: Enum[_]): ParamSet = {
-    val params = factory.createParamSet(name)
-    Pio.addParam(factory, params, Class, e.getClass.getName)
-    Pio.addParam(factory, params, Name,  e.name)
-    params
-  }
-
-  private
-  */
-
 }
