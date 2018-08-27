@@ -4,6 +4,7 @@ import java.util.Date
 
 import edu.gemini.qpt.shared.sp.Obs
 import edu.gemini.spModel.core.{ProgramType, Semester, Site}
+import edu.gemini.spModel.ictd.IctdSummary
 import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.obsclass.ObsClass
 
@@ -13,7 +14,7 @@ import scala.swing.event.Event
 /** Notify listeners that we are loading data from this data source. */
 case object DataSourceRefreshStart extends Event
 /** Notify listeners that we are finished loading. */
-case class DataSourceRefreshEnd(observations: Set[Obs]) extends Event
+case class DataSourceRefreshEnd(observations: (Set[Obs], Option[IctdSummary])) extends Event
 
 /**
  * Base class for data sources that provide observations to the QV tool.
@@ -50,7 +51,7 @@ trait DataSource extends ObservationProvider {
    * Refresh the data in this observation provider (e.g. by re-reading observations from the ODB).
    * Implementations should initiate a series of events which listeners can use to react appropriately.
    */
-  def refresh: Future[Set[Obs]]
+  def refresh: Future[(Set[Obs], Option[IctdSummary])]
 
 }
 
@@ -59,7 +60,7 @@ object DataSource {
   /** An empty data source. */
   def empty(s: Site): DataSource =
     new DataSource {
-      def refresh() = Future.successful(Set.empty)
+      def refresh = Future.successful((Set.empty[Obs], None))
       def site = s
     }
 

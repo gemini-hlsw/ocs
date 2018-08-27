@@ -72,8 +72,8 @@ object QvToolMenu {
       SolutionProvider(ctx).clear()
 
       for {
-        os <- ctx.dataSource.refresh                 // wait for new observations loaded
-        _  <- SolutionProvider(ctx).update(ctx, os)  // wait for all constraints updated
+        tup <- ctx.dataSource.refresh                     // wait for new observations loaded
+        _   <- SolutionProvider(ctx).update(ctx, tup._1)  // wait for all constraints updated
       } yield ()
 
     }
