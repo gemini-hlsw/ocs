@@ -4,7 +4,7 @@ import edu.gemini.ictd._
 import edu.gemini.pot.sp.Instrument
 import edu.gemini.pot.sp.Instrument._
 import edu.gemini.spModel.core.{ProgramId, Site}
-import edu.gemini.spModel.ictd.Availability
+import edu.gemini.spModel.ictd.{CustomMaskKey, Availability}
 
 import doobie.imports._
 

@@ -1,6 +1,6 @@
 package edu.gemini.qpt.core;
 
-import edu.gemini.ictd.CustomMaskKey;
+import edu.gemini.spModel.ictd.CustomMaskKey;
 import edu.gemini.qpt.core.Marker.Severity;
 import edu.gemini.qpt.core.util.*;
 import edu.gemini.qpt.core.util.Interval.Overlap;

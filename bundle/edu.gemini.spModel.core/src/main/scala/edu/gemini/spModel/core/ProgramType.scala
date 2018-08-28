@@ -1,6 +1,7 @@
 package edu.gemini.spModel.core
 
 import scala.collection.JavaConverters._
+import scalaz.Order
 
 sealed trait ProgramType extends Ordered[ProgramType] {
   def name: String
@@ -104,4 +105,7 @@ object ProgramType {
 
   // Java convenience ...
   def readOrNull(id: SPProgramID): ProgramType = ProgramId.parse(id.toString).ptype.orNull
+
+  implicit val OrderProgramType: Order[ProgramType] =
+    Order.fromScalaOrdering[ProgramType]
 }

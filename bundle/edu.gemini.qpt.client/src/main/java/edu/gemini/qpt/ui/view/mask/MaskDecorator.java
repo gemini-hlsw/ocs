@@ -1,6 +1,6 @@
 package edu.gemini.qpt.ui.view.mask;
 
-import edu.gemini.ictd.CustomMaskKey;
+import edu.gemini.spModel.ictd.CustomMaskKey;
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.spModel.ictd.Availability;
 import edu.gemini.ui.gface.GSubElementDecorator;

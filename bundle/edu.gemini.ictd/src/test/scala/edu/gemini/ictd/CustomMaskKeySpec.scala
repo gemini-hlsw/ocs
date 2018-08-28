@@ -1,6 +1,7 @@
 package edu.gemini.ictd
 
 import edu.gemini.spModel.core.{ProgramType, Site, ProgramId, ProgramIdGen}
+import edu.gemini.spModel.ictd.CustomMaskKey
 
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Arbitrary._

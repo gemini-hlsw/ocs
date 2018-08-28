@@ -1,7 +1,7 @@
 package edu.gemini.ictd
 
 import edu.gemini.spModel.core.Site
-import edu.gemini.spModel.ictd.Availability
+import edu.gemini.spModel.ictd.{ Availability, CustomMaskKey }
 
 import doobie.imports._
 

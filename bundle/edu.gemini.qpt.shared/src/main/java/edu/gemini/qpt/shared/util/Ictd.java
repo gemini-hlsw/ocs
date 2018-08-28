@@ -1,80 +1,61 @@
-package edu.gemini.qpt.shared.sp;
+package edu.gemini.qpt.shared.util;
 
-import edu.gemini.ictd.CustomMaskKey;
-import edu.gemini.ictd.IctdDatabase;
+import edu.gemini.spModel.ictd.CustomMaskKey;
+import edu.gemini.spModel.ictd.IctdService;
+import edu.gemini.spModel.ictd.IctdSummary;
 import edu.gemini.shared.util.immutable.ImEither;
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Left;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Right;
-import edu.gemini.spModel.core.ProgramId;
-import edu.gemini.spModel.core.ProgramId$;
+import edu.gemini.spModel.core.Peer;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.ictd.Availability;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
+import edu.gemini.util.security.auth.keychain.KeyChain;
+import edu.gemini.util.trpc.client.TrpcClient$;
 
-import edu.gemini.qpt.shared.util.EnumPio;
-import edu.gemini.qpt.shared.util.PioSerializable;
-
-import java.util.Collections;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import java.io.Serializable;
 
 /**
- * Collection of ICTD data relevant to the QPT.
+ * Utility for querying the ICTD and for converting to/from ParamSet.
  */
-public final class Ictd implements Serializable, PioSerializable {
+public final class Ictd {
     private static final Logger LOGGER = Logger.getLogger(Ictd.class.getName());
 
-    /** ICTD Database configuration for the two sites. */
-    public static final class SiteConfig {
-        public final IctdDatabase.Configuration gn;
-        public final IctdDatabase.Configuration gs;
-
-        public SiteConfig(IctdDatabase.Configuration gn, IctdDatabase.Configuration gs) {
-            assert gn != null;
-            assert gs != null;
-            this.gn = gn;
-            this.gs = gs;
-        }
-
-        public IctdDatabase.Configuration configFor(final Site s) {
-            final IctdDatabase.Configuration c;
-            switch (s) {
-                case GN: c = gn; break;
-                case GS: c = gs; break;
-                default: throw new RuntimeException("Unexpected site: " + s);
-            }
-            return c;
-        }
-
-        public static final SiteConfig forTesting =
-                new SiteConfig(
-                        IctdDatabase.asJava().testConfiguration(),
-                        IctdDatabase.asJava().testConfiguration());
+    private Ictd() {
+        // defeat instantiation
     }
 
     /**
      * Constructs an ICTD instance from query results, if possible. Returns a
      * Right<String, Ictd> if so, and a Left<String, Ictd> if not.
      */
-    public static ImEither<String, Ictd> query(SiteConfig dbs, Site s) {
-        final IctdDatabase.Configuration c = dbs.configFor(s);
+    public static ImEither<String, IctdSummary> query(KeyChain kc, Peer peer, Site s) {
+
+        final ClassLoader cl = Thread.currentThread().getContextClassLoader();
 
         try {
-            return new Right<>(new Ictd(
-                IctdDatabase.asJava().unsafeSelectFeatureAvailability(c, s),
-                IctdDatabase.asJava().unsafeSelectMaskAvailability(c, s)
-            ));
-        } catch (Exception ex) {
-            LOGGER.log(Level.WARNING, "Could not query ICTD", ex);
+
+            final ClassLoader classLoader = Ictd.class.getClassLoader();
+            Thread.currentThread().setContextClassLoader(classLoader);
+
+            final IctdService service = TrpcClient$.MODULE$.apply(peer.host, peer.port).withKeyChain(kc).proxy(IctdService.class);
+            return new Right<>(service.summary(peer.site));
+
+        } catch (UndeclaredThrowableException ute) {
+            LOGGER.log(Level.WARNING, "Could not query ICTD", ute);
             return new Left<>("Error querying the ICTD, sorry.");
+
+        } finally {
+            Thread.currentThread().setContextClassLoader(cl);
         }
 
     }
@@ -85,19 +66,7 @@ public final class Ictd implements Serializable, PioSerializable {
     public static final String AVAIL   = "avail";
     public static final String NAME    = "name";
 
-
-    public final Map<Enum<?>,       Availability> featureAvailability;
-    public final Map<CustomMaskKey, Availability> maskAvailability;
-
-    public Ictd(
-        Map<Enum<?>,       Availability> featureAvailability,
-        Map<CustomMaskKey, Availability> maskAvailability
-    ) {
-        this.featureAvailability = Collections.unmodifiableMap(new HashMap<>(featureAvailability));
-        this.maskAvailability    = Collections.unmodifiableMap(new HashMap<>(maskAvailability));
-    }
-
-    public Ictd(ParamSet params) {
+    public static IctdSummary decode(ParamSet params) {
         final ParamSet feature = params.getParamSet(FEATURE);
         final Map<Enum<?>, Availability> f = new HashMap<>();
         for (ParamSet entry : feature.getParamSets(ENTRY)) {
@@ -126,15 +95,14 @@ public final class Ictd implements Serializable, PioSerializable {
             ok.foreach(k -> m.put(k, a));
         }
 
-        this.featureAvailability = Collections.unmodifiableMap(f);
-        this.maskAvailability    = Collections.unmodifiableMap(m);
+        return IctdSummary.fromJava(f, m);
     }
 
-    public ParamSet getParamSet(PioFactory factory, String name) {
+    public static ParamSet encode(PioFactory factory, String name, IctdSummary summary) {
         final ParamSet params  = factory.createParamSet(name);
 
         final ParamSet feature = factory.createParamSet(FEATURE);
-        for (Map.Entry<Enum<?>, Availability> me: featureAvailability.entrySet()) {
+        for (Map.Entry<Enum<?>, Availability> me : summary.featureAvailabilityJava().entrySet()) {
             final ParamSet e = EnumPio.getEnumParamSet(factory, ENTRY, me.getKey());
             Pio.addEnumParam(factory, e, AVAIL, me.getValue());
             feature.addParamSet(e);
@@ -142,7 +110,7 @@ public final class Ictd implements Serializable, PioSerializable {
         params.addParamSet(feature);
 
         final ParamSet mask = factory.createParamSet(MASK);
-        for (Map.Entry<CustomMaskKey, Availability> me: maskAvailability.entrySet()) {
+        for (Map.Entry<CustomMaskKey, Availability> me: summary.maskAvailabilityJava().entrySet()) {
             final ParamSet e = factory.createParamSet(ENTRY);
             Pio.addParam    (factory, e, NAME,  me.getKey().format());
             Pio.addEnumParam(factory, e, AVAIL, me.getValue());

@@ -9,6 +9,7 @@ import edu.gemini.qv.plugin.QvTool
 import edu.gemini.qv.plugin.data.OdbDataSource._
 import edu.gemini.qv.plugin.ui.QvGui
 import edu.gemini.spModel.core.{Peer, ProgramType, Semester}
+import edu.gemini.spModel.ictd.{IctdSummary, IctdService}
 import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.obsclass.ObsClass
 import edu.gemini.util.trpc.client.TrpcClient
@@ -16,6 +17,7 @@ import edu.gemini.util.trpc.client.TrpcClient
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.swing.Swing._
+import scala.util.{Failure, Success}
 
 /** Logging. */
 object OdbDataSource {
@@ -34,7 +36,7 @@ class OdbDataSource(val peer: Peer, mt: MagnitudeTable) extends DataSource {
    *
    * @return
    */
-  def refresh: Future[Set[Obs]] = {
+  def refresh: Future[(Set[Obs], Option[IctdSummary])] = {
 
     publish(DataSourceRefreshStart)
 
@@ -53,29 +55,46 @@ class OdbDataSource(val peer: Peer, mt: MagnitudeTable) extends DataSource {
     val functor = new ObsQueryFunctor(peer.site, javaSemesters, javaTypes, javaClasses, javaStatuses, !includeCompletedPrograms, !includeInactivePrograms, mt)
 
     // create and initiate db read operation
-    val c = {
-      val b = TrpcClient(peer)
-      QvTool.authClient.map(b.withKeyChain).getOrElse(b.withoutKeys)
+    val client = {
+      val trpc = TrpcClient(peer)
+      QvTool.authClient.map(trpc.withKeyChain).getOrElse(trpc.withoutKeys)
     }
-    val f = c future { r =>
+
+    val ictd = client.future[Option[IctdSummary]] { r =>
+      Some(r[IctdService].summary(peer.site))
+    }.recover {
+      case t: Throwable =>
+        QvGui.showError("Could not query ICTD", s"An error happened when trying to load ICTD data from ${peer.displayName}.", t)
+        None
+    }
+
+    val obsSet = client.future[Set[Obs]] { r =>
+
       val result = r[IDBQueryRunner].queryPrograms(functor)
-      val model = MiniModel.newInstanceFromExecuted(peer, result)
-      val obs = model.getAllObservations
-      // transform from mutable java to immutable scala set
-      val sObs = scala.collection.JavaConversions.asScalaSet[Obs](obs).toSet
-      observations = sObs
-      observations
+      val model  = MiniModel.newInstanceFromExecuted(peer, result)
+      val obs    = model.getAllObservations
+      scala.collection.JavaConversions.asScalaSet[Obs](obs).toSet
 
-    } andThen {
-      case _ => onEDT(publish(DataSourceRefreshEnd(observations)))
+    }.recover {
+      case t: Throwable =>
+        QvGui.showError("Could not load observations", s"An error happened when trying to load observations from ${peer.displayName}.", t)
+        Set.empty[Obs]
     }
 
-    f.onFailure {
-      case t: Throwable => QvGui.showError("Could not load observations", s"An error happened when trying to load observations from ${peer.displayName}.", t)
+
+    val result = obsSet.zip(ictd).andThen {
+      case Success(up) => onEDT(publish(DataSourceRefreshEnd(up)))
+      case Failure(_)  => onEDT(publish(DataSourceRefreshEnd(data)))
     }
 
-    f
+    result.onComplete {
+      case Success(tup) =>
+        updateAndPublish(tup)
+      case Failure(t)   =>
+        QvGui.showError("Could not load data", s"An error happened when trying to load data from ${peer.displayName}.", t)
+    }
 
+    result
   }
 
 

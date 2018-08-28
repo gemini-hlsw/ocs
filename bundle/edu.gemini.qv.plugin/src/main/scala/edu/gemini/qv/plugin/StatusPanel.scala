@@ -19,7 +19,7 @@ class StatusPanel(ctx: QvContext) extends GridBagPanel {
 
   var constraintsTotal = 0
   var constraintsDone = 0
-  
+
   val messageLabel = new Label()
 
   val observationsProgress = new ProgressBar {
@@ -99,9 +99,9 @@ class StatusPanel(ctx: QvContext) extends GridBagPanel {
       observationsLabel.text = "Loading..."
       revalidate()
 
-    case DataSourceRefreshEnd(result) =>
+    case DataSourceRefreshEnd((os, _)) =>
       observationsProgress.visible = false
-      observationsLabel.text = s"Total ${result.size} loaded."
+      observationsLabel.text = s"Total ${os.size} loaded."
       revalidate()
 
     // === events from caches (SolutionProvider)
@@ -144,7 +144,7 @@ class StatusPanel(ctx: QvContext) extends GridBagPanel {
       scheduleLabel.text = "Not Available."
 
   }
-  
+
   def showMessage(message: String) = messageLabel.text = message
 
 

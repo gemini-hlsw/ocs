@@ -1,10 +1,10 @@
 package edu.gemini.qpt.ui.view.mask;
 
-import edu.gemini.ictd.CustomMaskKey;
+import edu.gemini.spModel.ictd.CustomMaskKey;
 import edu.gemini.spModel.ictd.Availability;
 import edu.gemini.shared.util.immutable.ImOption;
-import edu.gemini.shared.util.immutable.Option;
 
+import edu.gemini.spModel.ictd.IctdSummary;
 import edu.gemini.ui.gface.GTableController;
 import edu.gemini.ui.gface.GViewer;
 
@@ -15,7 +15,6 @@ import java.beans.PropertyChangeListener;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Map;
 
 
@@ -63,17 +62,12 @@ public final class MaskController implements GTableController<Schedule, Map.Entr
     private synchronized void fetchMasks() {
         final Map<CustomMaskKey, Availability> masks;
         masks = ImOption.apply(schedule)
-                        .flatMap(s -> schedule.getIctd())
-                        .map(i -> i.maskAvailability)
-                        .getOrElse(() -> Collections.emptyMap());
+                        .flatMap(s -> schedule.getIctdSummary())
+                        .map(IctdSummary::maskAvailabilityJava)
+                        .getOrElse(Collections::emptyMap);
 
         this.entries = masks.entrySet().toArray(new Map.Entry[masks.size()]);
 
-        Arrays.sort(entries, new Comparator<Map.Entry<CustomMaskKey, Availability>>() {
-            @Override
-            public int compare(Map.Entry<CustomMaskKey, Availability> e1, Map.Entry<CustomMaskKey, Availability> e2) {
-                return CustomMaskKey.OrderingCustomMaskKey().compare(e1.getKey(), e2.getKey());
-            }
-        });
+        Arrays.sort(entries, (e1, e2) -> CustomMaskKey.OrderingCustomMaskKey().compare(e1.getKey(), e2.getKey()));
     }
 }

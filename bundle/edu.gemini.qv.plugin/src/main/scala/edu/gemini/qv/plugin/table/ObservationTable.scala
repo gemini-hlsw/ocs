@@ -1,9 +1,10 @@
 package edu.gemini.qv.plugin.table
 
+import java.awt.Color
 import java.awt.event.{AdjustmentEvent, AdjustmentListener}
 import java.util.regex.PatternSyntaxException
-import javax.swing.table.{DefaultTableCellRenderer, TableColumn, TableRowSorter}
-import javax.swing.{BorderFactory, RowFilter, SwingConstants}
+import javax.swing.table.{TableCellRenderer, DefaultTableCellRenderer, TableColumn, TableRowSorter}
+import javax.swing.{JTable, BorderFactory, RowFilter, SwingConstants}
 
 import edu.gemini.pot.sp.SPObservationID
 import edu.gemini.qv.plugin.data._
@@ -24,8 +25,27 @@ import scala.swing.ScrollPane.BarPolicy._
 import scala.swing._
 import scala.swing.event._
 
+object ObservationTable {
 
-class ObservationTable(ctx: QvContext) extends GridBagPanel {
+  /**
+   * Background color of table rows that correspond to observations with all
+   * required instrument configuration and custom mask (if any) installed.
+   */
+  val AvailableColor: Color   = new java.awt.Color(238, 255, 204) // HONEY_DEW
+
+
+  /**
+   * Background color of table rows that correspond to observations with at
+   * least one missing instrument configuration or custom mask.
+   */
+  val UnavailableColor: Color = new java.awt.Color(253, 177, 177) // LIGHT_SALMON
+
+}
+
+
+class ObservationTable(ctx: QvContext) extends GridBagPanel { ui =>
+
+  import ObservationTable._
 
   private val dataModel = new ObservationTableModel(ctx)
   private val headGrid = new HeaderTableGrid
@@ -47,7 +67,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
     Exporter.printLandscape(dataGrid.peer, Some(dataGrid.headerColumns)),
     Exporter.exportXls(dataGrid.peer, Some(dataGrid.headerColumns)),
     Exporter.exportHtml(dataGrid.peer, Some(dataGrid.headerColumns)))
-  private val theSideBar = new SideBar(columnSidePanel, exportSidePanel)
+  private val theSideBar = new SideBar(OptionsSidePanel, columnSidePanel, exportSidePanel)
 
   private val dataDetails = new ObservationTableDetails(ctx, dataGrid)
 
@@ -123,14 +143,14 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
     headerColumns.foreach { c => c.setPreferredWidth(150) }
 
     // in the data table we want to hide all columns which are not meant to be normally visible at startup
-    dataModel.columns.foreach { c =>
+    dataModel.columns.all.foreach { c =>
       if (!c.visibleAtStart) {
         val ix = peer.getColumnModel.getColumnIndex(c.name)
         peer.removeColumn(peer.getColumnModel.getColumn(ix))
       }
     }
   }
-  
+
   class HeaderTableGrid extends ObservationTableGrid {
 
     // store a copy of the all columns of the table's column model, do this before we make any changes to it by
@@ -159,10 +179,18 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
 
     private val popup = createPopup()
 
+    peer.setDefaultRenderer(classOf[java.lang.String], NormalRenderer)
     peer.setDefaultRenderer(classOf[java.lang.Double], DoubleValueRenderer)
     peer.setDefaultRenderer(classOf[RaValue], RaValueRenderer)
     peer.setDefaultRenderer(classOf[DecValue], DecValueRenderer)
     peer.setDefaultRenderer(classOf[TimeValue], TimeValueRenderer)
+
+    // idk why this doesn't work ...
+    //    peer.setDefaultRenderer(classOf[InstallationState], InstallationStateRenderer)
+    peer.setDefaultRenderer(InstallationState.AllInstalled.getClass,     InstallationStateRenderer)
+    peer.setDefaultRenderer(InstallationState.SomeNotInstalled.getClass, InstallationStateRenderer)
+    peer.setDefaultRenderer(InstallationState.Unknown.getClass,          InstallationStateRenderer)
+
     peer.setComponentPopupMenu(popup.peer)
     peer.getTableHeader.setComponentPopupMenu(popup.peer)
 
@@ -287,9 +315,36 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
       }).reduceOption(_ max _).getOrElse(0)                       // get maximum preferred size of all rows (on potentially empty collection)
 
 
+    // A renderer that colors the background of a row with green or red to
+    // indicate whether all required features and custom mask (if any) are
+    // installed.
+    private abstract class AvailabilityRenderer extends DefaultTableCellRenderer {
+      override def getTableCellRendererComponent(t: JTable, v: Object, selected: Boolean, focus: Boolean, r: Int, c: Int): java.awt.Component = {
+        val comp = super.getTableCellRendererComponent(t, v, selected, focus, r, c)
+
+        if (!selected) {
+          import Color.white
+          import OptionsSidePanel.{highlightAvailable, highlightUnavailable}
+          import InstallationState._
+
+          comp.setBackground(dataModel.installationState(r) match {
+            case AllInstalled     => if (highlightAvailable  ) AvailableColor   else white
+            case SomeNotInstalled => if (highlightUnavailable) UnavailableColor else white
+            case Unknown          => white
+          })
+        }
+
+        comp
+      }
+    }
+
+    private object NormalRenderer extends AvailabilityRenderer {
+      // accept the defaults
+    }
+
     // === SPECIAL PURPOSE RENDERERS
     // if column is right aligned add some padding on the right side in order to separate content from next column
-    private object RaValueRenderer extends DefaultTableCellRenderer() {
+    private object RaValueRenderer extends AvailabilityRenderer {
       setHorizontalAlignment(SwingConstants.RIGHT)
       override def setValue(value: Object) = value match {
         case v: RaValue =>
@@ -297,7 +352,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
           setBorder(BorderFactory.createEmptyBorder(0,0,0,6))
       }
     }
-    private object DecValueRenderer extends DefaultTableCellRenderer() {
+    private object DecValueRenderer extends AvailabilityRenderer {
       setHorizontalAlignment(SwingConstants.RIGHT)
       override def setValue(value: Object) = value match {
         case v: DecValue =>
@@ -305,7 +360,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
           setBorder(BorderFactory.createEmptyBorder(0,0,0,6))
       }
     }
-    private object DoubleValueRenderer extends DefaultTableCellRenderer() {
+    private object DoubleValueRenderer extends AvailabilityRenderer {
       setHorizontalAlignment(SwingConstants.RIGHT)
       override def setValue(value: Object) = value match {
         case v: java.lang.Double =>
@@ -313,7 +368,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
           setBorder(BorderFactory.createEmptyBorder(0,0,0,5))
       }
     }
-    private object TimeValueRenderer extends DefaultTableCellRenderer {
+    private object TimeValueRenderer extends AvailabilityRenderer {
       setHorizontalAlignment(SwingConstants.RIGHT)
       override def setValue(value: Object) = value match {
         case v: TimeValue =>
@@ -321,7 +376,15 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
           setBorder(BorderFactory.createEmptyBorder(0,0,0,5))
       }
     }
-
+    private object InstallationStateRenderer extends AvailabilityRenderer {
+      override def setValue(value: Object): Unit = {
+        setText(value match {
+          case InstallationState.AllInstalled     => "yes"
+          case InstallationState.SomeNotInstalled => "no"
+          case InstallationState.Unknown          => "?"
+        })
+      }
+    }
   }
 
   class ObservationTableDetails(ctx: QvContext, dataGrid: ObservationTableGrid) extends GridBagPanel {
@@ -353,6 +416,48 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
       s"${ctx.filtered.size} Observations, Selected: ${ctx.selected.size}"
   }
 
+  object OptionsSidePanel extends SideBarPanel("Options") {
+
+    var highlightAvailable: Boolean   = false
+    var highlightUnavailable: Boolean = false
+
+    layoutCheckBox(0, checkBox(
+      "Highlight available configs",
+      "Show observations with available configs",
+      sel => highlightAvailable = sel
+    ))
+
+    layoutCheckBox(1, checkBox(
+      "Highlight unavailable configs",
+      "Show observations with unavailable configs",
+      sel => highlightUnavailable = sel
+    ))
+
+    layout(Swing.VGlue) = new Constraints {
+      gridy   = 3
+      weighty = 1.0
+      fill    = Vertical
+    }
+
+    private def checkBox(lab: String, tool: String, f: Boolean => Unit): CheckBox =
+      new CheckBox {
+        action = new Action(lab) {
+          toolTip = tool
+          def apply(): Unit = {
+            f(selected)
+            ui.repaint()
+          }
+        }
+      }
+
+    private def layoutCheckBox(y: Int, cb: CheckBox): Unit =
+      layout(cb) = new Constraints {
+        gridy   = y
+        fill    = Horizontal
+        weightx = 1.0
+      }
+  }
+
   class ColumnSidePanel extends SideBarPanel("Columns") {
 
 
@@ -370,7 +475,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
       fill = Horizontal
     }
 
-    dataModel.dataColumns.zipWithIndex.foreach({ case (c, y) =>
+    dataModel.columns.data.zipWithIndex.foreach({ case (c, y) =>
       layout(checkbox(dataGrid.dataColumns(y), c, y)) = new Constraints {
         gridx = 0
         gridy = y + 1
@@ -380,7 +485,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
     })
     layout(Swing.VGlue) = new Constraints {
       gridx = 0
-      gridy = dataModel.dataColumns.size + 1
+      gridy = dataModel.columns.data.size + 1
       weighty = 1
       fill = Vertical
     }

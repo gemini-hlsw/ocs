@@ -6,6 +6,7 @@ import edu.gemini.qv.plugin.filter.core.Filter
 import edu.gemini.qv.plugin.{QvContext, ReferenceDateChanged}
 import edu.gemini.qv.plugin.util.ConstraintsCache.ConstraintCalculationEnd
 import edu.gemini.qv.plugin.util.{SolutionProvider}
+import edu.gemini.spModel.ictd.IctdSummary
 
 import scala.collection.JavaConversions._
 import scala.swing.event.Event
@@ -181,18 +182,25 @@ case class PositionProvider(ctx: QvContext, base: ObservationProvider) extends O
 trait ObservationProvider extends Publisher {
 
   /** Gets the current filter. */
-  private var _observations: Set[Obs] = Set()
+  private var _observations: Set[Obs]    = Set()
+  private var _ictd: Option[IctdSummary] = None
 
   /**
-   * Sets a new set of observations.
-   * @param newObservations
+   * Updates the observations and ICTD information.
    */
-  def observations_= (newObservations: Set[Obs]): Unit = synchronized {
-    _observations = newObservations
+  def updateAndPublish(newData: (Set[Obs], Option[IctdSummary])): Unit = synchronized {
+    _observations = newData._1
+    _ictd         = newData._2
     // data updates can happen asynchronously, make sure GUI update is synchronized with Swing EDT
     Swing.onEDT(publish(DataChanged))
   }
-  def observations = _observations
+
+  def data: (Set[Obs], Option[IctdSummary]) = synchronized {
+    (_observations, _ictd)
+  }
+
+  def observations: Set[Obs]    = _observations
+  def ictd: Option[IctdSummary] = _ictd
 
   /**
    * Gets the values of a given type that are present in the current data.

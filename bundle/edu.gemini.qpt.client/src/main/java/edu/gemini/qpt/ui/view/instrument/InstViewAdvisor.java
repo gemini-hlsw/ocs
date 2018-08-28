@@ -19,11 +19,11 @@ import javax.swing.tree.DefaultTreeModel;
 
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.shared.sp.Inst;
-import edu.gemini.qpt.shared.sp.Ictd;
 import edu.gemini.qpt.ui.view.instrument.OutlineNode.TriState;
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.ictd.Availability;
+import edu.gemini.spModel.ictd.IctdSummary;
 import edu.gemini.ui.workspace.IShell;
 import edu.gemini.ui.workspace.IViewAdvisor;
 import edu.gemini.ui.workspace.IViewContext;
@@ -162,8 +162,8 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
         public void propertyChange(PropertyChangeEvent evt) {
             if (Schedule.PROP_ICTD.equals(evt.getPropertyName())) {
                 // Update from the feature availability map.
-                ((Option<Ictd>) evt.getNewValue()).foreach(ictd ->
-                    updateFromAvailability(ictd.featureAvailability)
+                ((Option<IctdSummary>) evt.getNewValue()).foreach(ictd ->
+                    updateFromAvailability(ictd.featureAvailabilityJava())
                 );
             }
         }

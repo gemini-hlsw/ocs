@@ -1,9 +1,6 @@
-package edu.gemini.ictd
+package edu.gemini.spModel.ictd
 
-import edu.gemini.spModel.core.{ ProgramId, Site }
-import edu.gemini.spModel.ictd.Availability
-
-import scala.collection.immutable.TreeMap
+import edu.gemini.spModel.core.ProgramId
 
 import scalaz._
 import Scalaz._
@@ -49,7 +46,7 @@ object CustomMaskKey {
     parse(s).getOrElse(sys.error(s"Could not parse $s as a CustomMaskKey"))
 
   implicit val OrderingCustomMaskKey: scala.math.Ordering[CustomMaskKey] =
-    scala.math.Ordering.by(k => (k.id.siteVal, k.id.semesterVal, k.id.ptypeVal, k.id.index, k.index))
+    scala.math.Ordering.by(k => (k.id, k.index))
 
   implicit val OrderCustomMaskKey: Order[CustomMaskKey] =
     Order.fromScalaOrdering
