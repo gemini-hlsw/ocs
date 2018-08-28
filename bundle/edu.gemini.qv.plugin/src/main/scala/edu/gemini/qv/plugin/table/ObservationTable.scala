@@ -3,7 +3,7 @@ package edu.gemini.qv.plugin.table
 import java.awt.Color
 import java.awt.event.{AdjustmentEvent, AdjustmentListener}
 import java.util.regex.PatternSyntaxException
-import javax.swing.table.{DefaultTableCellRenderer, TableColumn, TableRowSorter}
+import javax.swing.table.{TableCellRenderer, DefaultTableCellRenderer, TableColumn, TableRowSorter}
 import javax.swing.{JTable, BorderFactory, RowFilter, SwingConstants}
 
 import edu.gemini.pot.sp.SPObservationID
@@ -143,7 +143,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel { ui =>
     headerColumns.foreach { c => c.setPreferredWidth(150) }
 
     // in the data table we want to hide all columns which are not meant to be normally visible at startup
-    dataModel.columns.foreach { c =>
+    dataModel.columns.all.foreach { c =>
       if (!c.visibleAtStart) {
         val ix = peer.getColumnModel.getColumnIndex(c.name)
         peer.removeColumn(peer.getColumnModel.getColumn(ix))
@@ -184,6 +184,13 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel { ui =>
     peer.setDefaultRenderer(classOf[RaValue], RaValueRenderer)
     peer.setDefaultRenderer(classOf[DecValue], DecValueRenderer)
     peer.setDefaultRenderer(classOf[TimeValue], TimeValueRenderer)
+
+    // idk why this doesn't work ...
+    //    peer.setDefaultRenderer(classOf[InstallationState], InstallationStateRenderer)
+    peer.setDefaultRenderer(InstallationState.AllInstalled.getClass,     InstallationStateRenderer)
+    peer.setDefaultRenderer(InstallationState.SomeNotInstalled.getClass, InstallationStateRenderer)
+    peer.setDefaultRenderer(InstallationState.Unknown.getClass,          InstallationStateRenderer)
+
     peer.setComponentPopupMenu(popup.peer)
     peer.getTableHeader.setComponentPopupMenu(popup.peer)
 
@@ -320,7 +327,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel { ui =>
           import OptionsSidePanel.{highlightAvailable, highlightUnavailable}
           import InstallationState._
 
-          comp.setBackground(dataModel.installationState(ctx, r) match {
+          comp.setBackground(dataModel.installationState(r) match {
             case AllInstalled     => if (highlightAvailable  ) AvailableColor   else white
             case SomeNotInstalled => if (highlightUnavailable) UnavailableColor else white
             case Unknown          => white
@@ -369,7 +376,15 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel { ui =>
           setBorder(BorderFactory.createEmptyBorder(0,0,0,5))
       }
     }
-
+    private object InstallationStateRenderer extends AvailabilityRenderer {
+      override def setValue(value: Object): Unit = {
+        setText(value match {
+          case InstallationState.AllInstalled     => "yes"
+          case InstallationState.SomeNotInstalled => "no"
+          case InstallationState.Unknown          => "?"
+        })
+      }
+    }
   }
 
   class ObservationTableDetails(ctx: QvContext, dataGrid: ObservationTableGrid) extends GridBagPanel {
@@ -460,7 +475,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel { ui =>
       fill = Horizontal
     }
 
-    dataModel.dataColumns.zipWithIndex.foreach({ case (c, y) =>
+    dataModel.columns.data.zipWithIndex.foreach({ case (c, y) =>
       layout(checkbox(dataGrid.dataColumns(y), c, y)) = new Constraints {
         gridx = 0
         gridy = y + 1
@@ -470,7 +485,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel { ui =>
     })
     layout(Swing.VGlue) = new Constraints {
       gridx = 0
-      gridy = dataModel.dataColumns.size + 1
+      gridy = dataModel.columns.data.size + 1
       weighty = 1
       fill = Vertical
     }

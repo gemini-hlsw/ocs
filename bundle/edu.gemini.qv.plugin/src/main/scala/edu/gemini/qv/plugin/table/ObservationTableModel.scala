@@ -5,6 +5,7 @@ import java.util.{Comparator, TimeZone}
 import javax.swing.table.{AbstractTableModel, TableRowSorter}
 
 import edu.gemini.qpt.shared.sp.{Band, Obs}
+import edu.gemini.qv.plugin.table.ObservationTableModel.Columns
 import edu.gemini.qv.plugin.util.SolutionProvider
 import edu.gemini.skycalc.TimeUtils
 import edu.gemini.spModel.`type`.{DisplayableSpType, LoggableSpType}
@@ -25,287 +26,291 @@ object ObservationTableModel {
     def myClass: Class[T] = manifest[T].runtimeClass.asInstanceOf[Class[T]]
   }
 
-  def columns(ctx: QvContext) = Seq[Column[_]] (
-    // HEADER COLUMN
-    Column[String](
-      "Observation ID",
-      "",
-      _.getObsId, Some(ObsIdComparator), visibleAtStart = false
-    ),
+  final class Columns(ctx: QvContext) {
 
-    // ANYTHING ELSE
-    Column[String](
-      "Partner",
-      "Partner country",
-      o => asString(o.getProg.getPartner),
-      visibleAtStart = false
-    ),
-    Column[String](
-      "Band",
-      "Priority Band; empty for classical",
-      o => asString(o.getProg.getBandEnum)
-    ),
-    Column[RaValue](
-      "RA",
-      "Right ascension of science target",
-      o => RaValue(o.raDeg(ctx))
-    ),
-    Column[DecValue](
-      "Dec",
-      "Declination of science target",
-      o => DecValue(o.decDeg(ctx))
-    ),
-    Column[String](
-      "Instrument",
-      "The instrument",
-      _.getInstrumentString
-    ),
-    Column[String](
-      "AO",
-      "Instrument configuration includes AO?",
-      o => asString(o.getAO)
-    ),
-    Column[String](
-      "LGS",
-      "Instrument configuration includes laser?",
-      o => asString(o.getLGS)
-    ),
-    Column[String](
-      "Priority",
-      "User priority",
-      _.getPriority.displayValue
-    ),
-    Column[String](
-      "Status",
-      "Observation status", _.getObsStatus.displayValue()
-    ),
-    Column[String](
-      "Class",
-      "Observation class",
-      _.getObsClass.displayValue(),
-      visibleAtStart = false
-    ),
-    Column[String](
-      "TOO", "" +
-        "Target of opportunity type",
-      _.getTooPriority.getDisplayValue
-    ),
-    Column[String](
-      "NonSid",
-      "Has Non sidereal target?",
-      o => asString(o.hasNonSidereal),
-      visibleAtStart = false
-    ),
+    val installationStateColumn: Column[InstallationState] =
+      Column(
+        "Installed",
+        "Instrument configuration installed",
+        installationState(ctx, _)
+      )
 
-    // conditions
-    Column[String](
-      "IQ",
-      "Image quality", o => asString(o.getImageQuality),
-      visibleAtStart = false
-    ),
-    Column[String](
-      "CC",
-      "Cloud coverage",
-      o => asString(o.getCloudCover),
-      visibleAtStart = false
-    ),
-    Column[String](
-      "WV",
-      "Water vapor",
-      o => asString(o.getWaterVapor),
-      visibleAtStart = false
-    ),
-    Column[String](
-      "SB",
-      "Sky brightness",
-      o => asString(o.getSkyBackground),
-      visibleAtStart = false
-    ),
-
-    // general instrument stuff
-    Column[String](
-      "Filter",
-      "Configured filters",
-      _.getFilters.asScala.map(asString).mkString(", ")
-    ),
-    Column[String](
-      "Disperser",
-      "Configured disperses ",
-      _.getDispersers.asScala.map(asString).mkString(", ")
-    ),
-    Column[String](
-      "FPU",
-      "Configured FPUs",
-      _.getFocalPlanUnits.asScala.map(asString).mkString(", ")
-    ),
-    Column[String](
-      "Camera",
-      "Configured cameras",
-      _.getCamera.asScala.map(asString).mkString(", "),
-      visibleAtStart = false
-    ),
-
-    // ==== time information
-    Column[TimeValue](
-      "Prog Planned Time",
-      "Planned time for program",
-      o => TimeValue(o.getProg.getPlannedTime),
-      visibleAtStart = false
-    ),
-    Column[TimeValue](
-      "Prog Used Time",
-      "Used time for program",
-      o => TimeValue(o.getProg.getUsedTime),
-      visibleAtStart = false
-    ),
-    Column[TimeValue](
-      "Prog Remaining Time",
-      "Remaining time for program",
-      o => TimeValue(o.getProg.getRemainingProgramTime),
-      visibleAtStart = false
-    ),
-    Column[String](
-      "Prog PI",
-      "Program PI",
-      _.getProg.getPiLastName,
-      visibleAtStart = false
-    ),
-    Column[String](
-      "Prog NGO Contacts",
-      "Program NGO contacts",
-      _.getProg.getNgoEmail,
-      visibleAtStart = false
-    ),
-    Column[String](
-      "Prog Gemini Contacts",
-      "Program Gemini contacts",
-      _.getProg.getContactEmail,
-      visibleAtStart = false
-    ),
-    Column[TimeValue](
-      "Obs Pi Planned Time", "Planned time for observation",
-      o => TimeValue(o.getPiPlannedTime),
-      visibleAtStart = false
-    ),
-    Column[TimeValue](
-      "Obs Exec Planned Time",
-      "Planned execution time for observation",
-      o => TimeValue(o.getExecPlannedTime),
-      visibleAtStart = false
-    ),
-    Column[TimeValue](
-      "Obs Elapsed Time",
-      "Elapsed time for observation",
-      o => TimeValue(o.getElapsedTime),
-      visibleAtStart = false
-    ),
-    Column[TimeValue](
-      "Obs Remaining Time",
-      "Remaining time for observation",
-      o => TimeValue(o.getRemainingTime),
-      visibleAtStart = false
-    ),
-
-    // ==== Remaining time
-    Column[java.lang.Integer](
-      "Sem. Nts",
-      "Remaining nights from today until the end of current semester.",
-      o => SolutionProvider(ctx).remainingNights(ctx, o, thisSemester = true, nextSemester = false),
-      visibleAtStart = false
-    ),
-    Column[TimeValue](
-      "Sem. Hrs",
-      "Remaining hours from today until the end of current semester.",
-      o => TimeValue(SolutionProvider(ctx).remainingTime(ctx, o, thisSemester = true, nextSemester = false)),
-      visibleAtStart = false
-    ),
-    Column[java.lang.Double](
-      "Sem. Frac",
-      "Fraction of remaining observable hours divided by observation remaining hours until the end of current semester.",
-      o => semesterHrsFraction(ctx, o, thisSem = true, nextSem = false),
-      visibleAtStart = false
-    ),
-    Column[java.lang.Integer](
-      "+Sem. Nts",
-      "Remaining nights from today until the end of next semester.",
-      o => SolutionProvider(ctx).remainingNights(ctx, o, thisSemester = true, nextSemester = true),
-      visibleAtStart = false
-    ),
-    Column[TimeValue](
-      "+Sem. Hrs",
-      "Remaining hours from today until the end of next semester.",
-      o => TimeValue(SolutionProvider(ctx).remainingTime(ctx, o, thisSemester = true, nextSemester = true)),
-      visibleAtStart = false
-    ),
-    Column[java.lang.Double](
-      "+Sem. Frac",
-      "Fraction of remaining observable hours divided by observation remaining hours until the end of next semester.",
-      o => semesterHrsFraction(ctx, o, thisSem = true, nextSem = true),
-      visibleAtStart = false
-    ),
-
-    // ==== Constraints
-    Column[String](
-      "Timing Windows (UTC)",
-      "Timing window restrictions",
-      timingWindowsAsString,
-      visibleAtStart = false
-    ),
-    Column[String](
-      "Elevation Constraints",
-      "Elevation restrictions",
-      elevationConstraintsAsString,
-      visibleAtStart = false
-    ),
-
-    // ==== instrument specific columns, they will be empty except for the instrument the field is specific to
-    // GMOS N/S - Nod & Shuffle
-    Column[String](
-      "GMOS N&S",
-      "GMOS nod and shuffle",
-      o => asString(o.getGmosNodShuffle.getOrElse(false)),
-      visibleAtStart = false
-    ),
-    // GMOS N/S - CCD Manufacturer
-    Column[String](
-      "GMOS CCD",
-      "GMOS CCD manufacturer",
-      { o => val v = o.getGmosCcdManufacturer; if (v.isEmpty) "" else asString(v.getValue) },
-      visibleAtStart = false
-    ),
-    // F2 and GMOS - Pre Imaging
-    Column[String](
-      "PreImg",
-      "",
-      o => asString(o.getPreImaging.getOrElse(false)),
-      visibleAtStart = false
-    ),
-    // GNIRS - Cross Dispersed
-    Column[String](
-      "GNIRS Cross Dispersed",
-      "GNIRS cross dispersed mode",
-      { o => val v = o.getGnirsCrossDispersed; if (v.isEmpty) "" else asString(v.getValue) },
-      visibleAtStart = false
-    ),
-    // GPI - Observing Mode
-    Column[String](
-      "GPI Observing Mode",
-      "GPI Observing Mode",
-      { o => val v = o.getGpiObservingMode; if (v.isEmpty) "" else asString(v.getValue) },
-      visibleAtStart = false
-    ),
-    Column[String](
-      "Installed",
-      "Instrument configuration installed", { o =>
-        installationState(ctx, o) match {
-          case InstallationState.AllInstalled     => "yes"
-          case InstallationState.SomeNotInstalled => "no"
-          case InstallationState.Unknown          => "?"
-        }
-      }
+    val header: Vector[Column[_]] = Vector(
+      Column[String](
+        "Observation ID",
+        "",
+        _.getObsId, Some(ObsIdComparator), visibleAtStart = false
+      )
     )
 
-  )
+    val data: Vector[Column[_]] = Vector(
+      Column[String](
+        "Partner",
+        "Partner country",
+        o => asString(o.getProg.getPartner),
+        visibleAtStart = false
+      ),
+      Column[String](
+        "Band",
+        "Priority Band; empty for classical",
+        o => asString(o.getProg.getBandEnum)
+      ),
+      Column[RaValue](
+        "RA",
+        "Right ascension of science target",
+        o => RaValue(o.raDeg(ctx))
+      ),
+      Column[DecValue](
+        "Dec",
+        "Declination of science target",
+        o => DecValue(o.decDeg(ctx))
+      ),
+      Column[String](
+        "Instrument",
+        "The instrument",
+        _.getInstrumentString
+      ),
+      Column[String](
+        "AO",
+        "Instrument configuration includes AO?",
+        o => asString(o.getAO)
+      ),
+      Column[String](
+        "LGS",
+        "Instrument configuration includes laser?",
+        o => asString(o.getLGS)
+      ),
+      Column[String](
+        "Priority",
+        "User priority",
+        _.getPriority.displayValue
+      ),
+      Column[String](
+        "Status",
+        "Observation status", _.getObsStatus.displayValue()
+      ),
+      Column[String](
+        "Class",
+        "Observation class",
+        _.getObsClass.displayValue(),
+        visibleAtStart = false
+      ),
+      Column[String](
+        "TOO",
+        "Target of opportunity type",
+        _.getTooPriority.getDisplayValue
+      ),
+      Column[String](
+        "NonSid",
+        "Has Non sidereal target?",
+        o => asString(o.hasNonSidereal),
+        visibleAtStart = false
+      ),
+
+      // conditions
+      Column[String](
+        "IQ",
+        "Image quality", o => asString(o.getImageQuality),
+        visibleAtStart = false
+      ),
+      Column[String](
+        "CC",
+        "Cloud coverage",
+        o => asString(o.getCloudCover),
+        visibleAtStart = false
+      ),
+      Column[String](
+        "WV",
+        "Water vapor",
+        o => asString(o.getWaterVapor),
+        visibleAtStart = false
+      ),
+      Column[String](
+        "SB",
+        "Sky brightness",
+        o => asString(o.getSkyBackground),
+        visibleAtStart = false
+      ),
+
+      // general instrument stuff
+      Column[String](
+        "Filter",
+        "Configured filters",
+        _.getFilters.asScala.map(asString).mkString(", ")
+      ),
+      Column[String](
+        "Disperser",
+        "Configured disperses ",
+        _.getDispersers.asScala.map(asString).mkString(", ")
+      ),
+      Column[String](
+        "FPU",
+        "Configured FPUs",
+        _.getFocalPlanUnits.asScala.map(asString).mkString(", ")
+      ),
+      Column[String](
+        "Camera",
+        "Configured cameras",
+        _.getCamera.asScala.map(asString).mkString(", "),
+        visibleAtStart = false
+      ),
+
+      // ==== time information
+      Column[TimeValue](
+        "Prog Planned Time",
+        "Planned time for program",
+        o => TimeValue(o.getProg.getPlannedTime),
+        visibleAtStart = false
+      ),
+      Column[TimeValue](
+        "Prog Used Time",
+        "Used time for program",
+        o => TimeValue(o.getProg.getUsedTime),
+        visibleAtStart = false
+      ),
+      Column[TimeValue](
+        "Prog Remaining Time",
+        "Remaining time for program",
+        o => TimeValue(o.getProg.getRemainingProgramTime),
+        visibleAtStart = false
+      ),
+      Column[String](
+        "Prog PI",
+        "Program PI",
+        _.getProg.getPiLastName,
+        visibleAtStart = false
+      ),
+      Column[String](
+        "Prog NGO Contacts",
+        "Program NGO contacts",
+        _.getProg.getNgoEmail,
+        visibleAtStart = false
+      ),
+      Column[String](
+        "Prog Gemini Contacts",
+        "Program Gemini contacts",
+        _.getProg.getContactEmail,
+        visibleAtStart = false
+      ),
+      Column[TimeValue](
+        "Obs Pi Planned Time", "Planned time for observation",
+        o => TimeValue(o.getPiPlannedTime),
+        visibleAtStart = false
+      ),
+      Column[TimeValue](
+        "Obs Exec Planned Time",
+        "Planned execution time for observation",
+        o => TimeValue(o.getExecPlannedTime),
+        visibleAtStart = false
+      ),
+      Column[TimeValue](
+        "Obs Elapsed Time",
+        "Elapsed time for observation",
+        o => TimeValue(o.getElapsedTime),
+        visibleAtStart = false
+      ),
+      Column[TimeValue](
+        "Obs Remaining Time",
+        "Remaining time for observation",
+        o => TimeValue(o.getRemainingTime),
+        visibleAtStart = false
+      ),
+
+      // ==== Remaining time
+      Column[java.lang.Integer](
+        "Sem. Nts",
+        "Remaining nights from today until the end of current semester.",
+        o => SolutionProvider(ctx).remainingNights(ctx, o, thisSemester = true, nextSemester = false),
+        visibleAtStart = false
+      ),
+      Column[TimeValue](
+        "Sem. Hrs",
+        "Remaining hours from today until the end of current semester.",
+        o => TimeValue(SolutionProvider(ctx).remainingTime(ctx, o, thisSemester = true, nextSemester = false)),
+        visibleAtStart = false
+      ),
+      Column[java.lang.Double](
+        "Sem. Frac",
+        "Fraction of remaining observable hours divided by observation remaining hours until the end of current semester.",
+        o => semesterHrsFraction(ctx, o, thisSem = true, nextSem = false),
+        visibleAtStart = false
+      ),
+      Column[java.lang.Integer](
+        "+Sem. Nts",
+        "Remaining nights from today until the end of next semester.",
+        o => SolutionProvider(ctx).remainingNights(ctx, o, thisSemester = true, nextSemester = true),
+        visibleAtStart = false
+      ),
+      Column[TimeValue](
+        "+Sem. Hrs",
+        "Remaining hours from today until the end of next semester.",
+        o => TimeValue(SolutionProvider(ctx).remainingTime(ctx, o, thisSemester = true, nextSemester = true)),
+        visibleAtStart = false
+      ),
+      Column[java.lang.Double](
+        "+Sem. Frac",
+        "Fraction of remaining observable hours divided by observation remaining hours until the end of next semester.",
+        o => semesterHrsFraction(ctx, o, thisSem = true, nextSem = true),
+        visibleAtStart = false
+      ),
+
+      // ==== Constraints
+      Column[String](
+        "Timing Windows (UTC)",
+        "Timing window restrictions",
+        timingWindowsAsString,
+        visibleAtStart = false
+      ),
+      Column[String](
+        "Elevation Constraints",
+        "Elevation restrictions",
+        elevationConstraintsAsString,
+        visibleAtStart = false
+      ),
+
+      // ==== instrument specific columns, they will be empty except for the instrument the field is specific to
+      // GMOS N/S - Nod & Shuffle
+      Column[String](
+        "GMOS N&S",
+        "GMOS nod and shuffle",
+        o => asString(o.getGmosNodShuffle.getOrElse(false)),
+        visibleAtStart = false
+      ),
+      // GMOS N/S - CCD Manufacturer
+      Column[String](
+        "GMOS CCD",
+        "GMOS CCD manufacturer",
+        { o => val v = o.getGmosCcdManufacturer; if (v.isEmpty) "" else asString(v.getValue) },
+        visibleAtStart = false
+      ),
+      // F2 and GMOS - Pre Imaging
+      Column[String](
+        "PreImg",
+        "",
+        o => asString(o.getPreImaging.getOrElse(false)),
+        visibleAtStart = false
+      ),
+      // GNIRS - Cross Dispersed
+      Column[String](
+        "GNIRS Cross Dispersed",
+        "GNIRS cross dispersed mode",
+        { o => val v = o.getGnirsCrossDispersed; if (v.isEmpty) "" else asString(v.getValue) },
+        visibleAtStart = false
+      ),
+      // GPI - Observing Mode
+      Column[String](
+        "GPI Observing Mode",
+        "GPI Observing Mode",
+        { o => val v = o.getGpiObservingMode; if (v.isEmpty) "" else asString(v.getValue) },
+        visibleAtStart = false
+      ),
+      installationStateColumn
+    )
+
+    val all = header ++ data
+
+  }
+
 
   /**
    * Determines whether all the components and custom mask (if any) of the given
@@ -319,11 +324,12 @@ object ObservationTableModel {
     c.dataSource.ictd.map { i =>
 
       val features = o.getOptions.asScala.forall { e =>
-                       i.featureAvailability.get(e).forall(_ === Installed)
-                     }
+        i.featureAvailability.get(e).forall(_ === Installed)
+      }
+
       val mask     = Option(o.getCustomMask).forall { m =>
-                       CustomMaskKey.parse(m).exists(i.maskAvailability.get(_).contains(Installed))
-                     }
+        CustomMaskKey.parse(m).exists(i.maskAvailability.get(_).contains(Installed))
+      }
 
       if (features && mask) InstallationState.AllInstalled
       else InstallationState.SomeNotInstalled
@@ -440,10 +446,13 @@ class ObservationTableModel(ctx: QvContext) extends AbstractTableModel {
   // need a sequence for indexed access in getValueAt()
   private var _observations: Seq[Obs] = Seq()
 
-  val HeaderColumnCnt = 1
-  val columns = ObservationTableModel.columns(ctx)
-  val headerColumns = columns.take(HeaderColumnCnt)
-  val dataColumns = columns.drop(HeaderColumnCnt)
+  val columns: Columns = new Columns(ctx)
+
+  // Find the installation state column index by name.
+  val installationStateColumnIndex: Int =
+    columns.all.zipWithIndex.findRight { case (c, i)  =>
+      c == columns.installationStateColumn
+    }.map(_._2).getOrElse(sys.error(s"missing installationStateColumn"))
 
   def observations_=(obs: Set[Obs]): Unit = {
     cachedValues.clear()
@@ -455,7 +464,7 @@ class ObservationTableModel(ctx: QvContext) extends AbstractTableModel {
 
   val rowSorter: TableRowSorter[ObservationTableModel] = {
     val sorter = new TableRowSorter(this)
-    columns.zipWithIndex.foreach({ case (c, ix) =>
+    columns.all.zipWithIndex.foreach({ case (c, ix) =>
       c.comparator.foreach(sorter.setComparator(ix, _))
     })
     sorter
@@ -468,28 +477,34 @@ class ObservationTableModel(ctx: QvContext) extends AbstractTableModel {
 
   def getRowCount: Int = observations.size
 
-  def getColumnCount: Int = columns.size
+  def getColumnCount: Int = columns.all.size
 
-  override def getColumnName(col: Int): String = columns(col).name
+  override def getColumnName(col: Int): String = columns.all(col).name
 
-  override def getColumnClass(col: Int): Class[_] = columns(col).myClass
+  override def getColumnClass(col: Int): Class[_] = columns.all(col).myClass
 
   override def isCellEditable(row: Int, col: Int): Boolean = false
 
-  def getValueAt(row: Int, col: Int): AnyRef = {
-    cachedValues.getOrElseUpdate((row, col), {
-      if (observations.nonEmpty)
-        columns(col).value(observations(row)).asInstanceOf[AnyRef]
-      else
-        null
-    })
-  }
+  def getValueAt(row: Int, col: Int): AnyRef =
+    cachedValues.getOrElseUpdate((row, col),
+      (for {
+        c <- columns.all.lift(col)
+        o <- observations.lift(row)
+      } yield c.value(o).asInstanceOf[AnyRef]).getOrElse(sys.error(s"no value at $row, $col"))
+    )
 
   /**
    * Determines whether all the components and custom mask (if any) of the
    * observation at the given row are available according to the ICTD.
    */
-  def installationState(c: QvContext, row: Int): InstallationState =
-    observations.lift(row).map(ObservationTableModel.installationState(c, _)).getOrElse(InstallationState.Unknown)
+  def installationState(row: Int): InstallationState =
+    // Use the cached value?  This is a bit gross but avoids recalculating the
+    // value repeatedly as the original version would require:
+    //   observations.lift(row).map(ObservationTableModel.installationState(c, _)).getOrElse(InstallationState.Unknown)
+    getValueAt(row, installationStateColumnIndex) match {
+      case is: InstallationState => is
+      case x                     => sys.error(s"expected an InstallationState not $x")
+    }
+
 
 }
