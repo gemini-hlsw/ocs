@@ -25,8 +25,27 @@ import scala.swing.ScrollPane.BarPolicy._
 import scala.swing._
 import scala.swing.event._
 
+object ObservationTable {
 
-class ObservationTable(ctx: QvContext) extends GridBagPanel {
+  /**
+   * Background color of table rows that correspond to observations with all
+   * required instrument configuration and custom mask (if any) installed.
+   */
+  val AvailableColor: Color   = new java.awt.Color(238, 255, 204) // HONEY_DEW
+
+
+  /**
+   * Background color of table rows that correspond to observations with at
+   * least one missing instrument configuration or custom mask.
+   */
+  val UnavailableColor: Color = new java.awt.Color(253, 177, 177) // LIGHT_SALMON
+
+}
+
+
+class ObservationTable(ctx: QvContext) extends GridBagPanel { ui =>
+
+  import ObservationTable._
 
   private val dataModel = new ObservationTableModel(ctx)
   private val headGrid = new HeaderTableGrid
@@ -48,7 +67,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
     Exporter.printLandscape(dataGrid.peer, Some(dataGrid.headerColumns)),
     Exporter.exportXls(dataGrid.peer, Some(dataGrid.headerColumns)),
     Exporter.exportHtml(dataGrid.peer, Some(dataGrid.headerColumns)))
-  private val theSideBar = new SideBar(columnSidePanel, exportSidePanel)
+  private val theSideBar = new SideBar(OptionsSidePanel, columnSidePanel, exportSidePanel)
 
   private val dataDetails = new ObservationTableDetails(ctx, dataGrid)
 
@@ -289,17 +308,24 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
       }).reduceOption(_ max _).getOrElse(0)                       // get maximum preferred size of all rows (on potentially empty collection)
 
 
+    // A renderer that colors the background of a row with green or red to
+    // indicate whether all required features and custom mask (if any) are
+    // installed.
     private abstract class AvailabilityRenderer extends DefaultTableCellRenderer {
       override def getTableCellRendererComponent(t: JTable, v: Object, selected: Boolean, focus: Boolean, r: Int, c: Int): java.awt.Component = {
         val comp = super.getTableCellRendererComponent(t, v, selected, focus, r, c)
 
-        val color = dataModel.isInstalled(ctx, r) match {
-          case None        => Color.white
-          case Some(true)  => new java.awt.Color(238, 255, 204)
-          case Some(false) => new java.awt.Color(253, 177, 177)
-        }
+        if (!selected) {
+          import Color.white
+          import OptionsSidePanel.{highlightAvailable, highlightUnavailable}
+          import InstallationState._
 
-        if (!selected) comp.setBackground(color)
+          comp.setBackground(dataModel.installationState(ctx, r) match {
+            case AllInstalled     => if (highlightAvailable  ) AvailableColor   else white
+            case SomeNotInstalled => if (highlightUnavailable) UnavailableColor else white
+            case Unknown          => white
+          })
+        }
 
         comp
       }
@@ -373,6 +399,48 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
 
     private def statusText =
       s"${ctx.filtered.size} Observations, Selected: ${ctx.selected.size}"
+  }
+
+  object OptionsSidePanel extends SideBarPanel("Options") {
+
+    var highlightAvailable: Boolean   = false
+    var highlightUnavailable: Boolean = false
+
+    layoutCheckBox(0, checkBox(
+      "Highlight available configs",
+      "Show observations with available configs",
+      sel => highlightAvailable = sel
+    ))
+
+    layoutCheckBox(1, checkBox(
+      "Highlight unavailable configs",
+      "Show observations with unavailable configs",
+      sel => highlightUnavailable = sel
+    ))
+
+    layout(Swing.VGlue) = new Constraints {
+      gridy   = 3
+      weighty = 1.0
+      fill    = Vertical
+    }
+
+    private def checkBox(lab: String, tool: String, f: Boolean => Unit): CheckBox =
+      new CheckBox {
+        action = new Action(lab) {
+          toolTip = tool
+          def apply(): Unit = {
+            f(selected)
+            ui.repaint()
+          }
+        }
+      }
+
+    private def layoutCheckBox(y: Int, cb: CheckBox): Unit =
+      layout(cb) = new Constraints {
+        gridy   = y
+        fill    = Horizontal
+        weightx = 1.0
+      }
   }
 
   class ColumnSidePanel extends SideBarPanel("Columns") {

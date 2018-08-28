@@ -295,23 +295,27 @@ object ObservationTableModel {
       visibleAtStart = false
     ),
     Column[String](
-      "Installed Config",
+      "Installed",
       "Instrument configuration installed", { o =>
-        isInstalled(ctx, o).fold("?") { installed => if (installed) "yes" else "no" }
+        installationState(ctx, o) match {
+          case InstallationState.AllInstalled     => "yes"
+          case InstallationState.SomeNotInstalled => "no"
+          case InstallationState.Unknown          => "?"
+        }
       }
     )
 
   )
 
   /**
-   * Determines whether all the features and custom mask (if any) of the given
-   * observation is available according to the ICTD.
+   * Determines whether all the components and custom mask (if any) of the given
+   * observation are available according to the ICTD.
    *
    * @return an Option[Boolean] that is defined if the ICTD data is available,
-   *         and Some(true) if all instrument features and the custom mask (if
+   *         and Some(true) if all instrument components and the custom mask (if
    *         any) are installed
    */
-  def isInstalled(c: QvContext, o : Obs): Option[Boolean] =
+  def installationState(c: QvContext, o : Obs): InstallationState =
     c.dataSource.ictd.map { i =>
 
       val features = o.getOptions.asScala.forall { e =>
@@ -321,8 +325,10 @@ object ObservationTableModel {
                        CustomMaskKey.parse(m).exists(i.maskAvailability.get(_).contains(Installed))
                      }
 
-      features && mask
-    }
+      if (features && mask) InstallationState.AllInstalled
+      else InstallationState.SomeNotInstalled
+
+    }.getOrElse(InstallationState.Unknown)
 
   private def semesterHrsFraction(ctx: QvContext, o: Obs, thisSem: Boolean, nextSem: Boolean): Double = {
     val hrs = SolutionProvider(ctx).remainingTime(ctx, o, thisSem, nextSem)
@@ -480,14 +486,10 @@ class ObservationTableModel(ctx: QvContext) extends AbstractTableModel {
   }
 
   /**
-   * Determines whether all the features and custom mask (if any) of the
-   * observation at the given row is available according to the ICTD.
-   *
-   * @return an Option[Boolean] that is defined if the ICTD data is available,
-   *         and Some(true) if all instrument features and the custom mask (if
-   *         any) are installed
+   * Determines whether all the components and custom mask (if any) of the
+   * observation at the given row are available according to the ICTD.
    */
-  def isInstalled(c: QvContext, row: Int): Option[Boolean] =
-    observations.lift(row).flatMap(ObservationTableModel.isInstalled(c, _))
+  def installationState(c: QvContext, row: Int): InstallationState =
+    observations.lift(row).map(ObservationTableModel.installationState(c, _)).getOrElse(InstallationState.Unknown)
 
 }
