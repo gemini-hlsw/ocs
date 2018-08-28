@@ -322,7 +322,7 @@ object ObservationTableModel {
     c.dataSource.ictd.map { i =>
 
       def mask: Boolean =
-        Option(o.getCustomMask).forall { m =>
+        Option(o.getCustomMask).map(_.trim).filterNot(_.isEmpty).forall { m =>
           CustomMaskKey.parse(m).exists(i.maskAvailability.get(_).contains(Installed))
         }
 
