@@ -3,8 +3,6 @@ package edu.gemini.qpt
 import java.io.File
 
 import edu.gemini.ags.conf.ProbeLimitsTable
-import edu.gemini.ictd.IctdDatabase
-;
 import edu.gemini.qpt.ui.ShellAdvisor
 import edu.gemini.qpt.ui.action.PublishAction
 import edu.gemini.spModel.core.{Peer, Site, Version}

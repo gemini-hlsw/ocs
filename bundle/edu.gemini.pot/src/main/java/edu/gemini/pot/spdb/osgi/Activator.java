@@ -34,17 +34,6 @@ public class Activator implements BundleActivator {
      */
     public static final String BUNDLE_PROP_DIR = "edu.gemini.spdb.dir";
 
-    /**
-     * Bundle property specifying the ICTD database user.
-     */
-    public static final String ICTD_USER_PROP = "edu.gemini.ictd.user";
-
-    /**
-     * Bundle property specifying the ICTD database password.
-     */
-    public static final String ICTD_PASS_PROP = "edu.gemini.ictd.password";
-
-
     // Mutable state
     private DatabaseLoader loader;
 

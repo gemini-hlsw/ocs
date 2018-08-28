@@ -16,7 +16,6 @@ import edu.gemini.util.security.auth.keychain.KeyChain;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 
@@ -27,7 +26,6 @@ import javax.swing.JOptionPane;
 public final class IctdAction extends AbstractAsyncAction implements PropertyChangeListener {
 
     private static final long serialVersionUID = 1L;
-    private static final Logger LOGGER = Logger.getLogger(IctdAction.class.getName());
 
     private final IShell shell;
     private final KeyChain authClient;
@@ -68,23 +66,21 @@ public final class IctdAction extends AbstractAsyncAction implements PropertyCha
 
             pm.setMessage("Querying ICTD database ...");
 
-
             Ictd.query(authClient, peer, site).biForEach(
-                    msg -> {
-                        pd.setVisible(false);
-                        JOptionPane.showMessageDialog(
-                                shell.getPeer(),
-                                "There was a problem communicating with the ICTD, sorry..",
-                                "ICTD Error",
-                                JOptionPane.ERROR_MESSAGE);
-                    },
-                    ictd -> {
-                        pm.setMessage("Updating model...");
-                        sched.setIctd(ImOption.apply(ictd));
+                msg -> {
+                    pd.setVisible(false);
+                    JOptionPane.showMessageDialog(
+                        shell.getPeer(),
+                        "There was a problem communicating with the ICTD, sorry..",
+                        "ICTD Error",
+                        JOptionPane.ERROR_MESSAGE);
+                },
+                ictd -> {
+                    pm.setMessage("Updating model...");
+                    sched.setIctdSummary(ImOption.apply(ictd));
 
-                        GSelection<?> sel = shell.getSelection();
-                        shell.setModel(null);
-                        shell.setModel(sched);
+                    shell.setModel(null);
+                    shell.setModel(sched);
                 }
             );
 

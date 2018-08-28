@@ -4,7 +4,7 @@ import scala.collection.JavaConverters._
 import scala.collection.immutable.TreeMap
 
 /**
- * All feature and mask availability data extracted from the ICTD in format
+ * All feature and mask availability data extracted from the ICTD in a format
  * suitable for use by the QPT and QVis.
  */
 final case class IctdSummary(

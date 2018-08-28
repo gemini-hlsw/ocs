@@ -15,7 +15,6 @@ import java.beans.PropertyChangeListener;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Map;
 
 
@@ -63,7 +62,7 @@ public final class MaskController implements GTableController<Schedule, Map.Entr
     private synchronized void fetchMasks() {
         final Map<CustomMaskKey, Availability> masks;
         masks = ImOption.apply(schedule)
-                        .flatMap(s -> schedule.getIctd())
+                        .flatMap(s -> schedule.getIctdSummary())
                         .map(IctdSummary::maskAvailabilityJava)
                         .getOrElse(Collections::emptyMap);
 

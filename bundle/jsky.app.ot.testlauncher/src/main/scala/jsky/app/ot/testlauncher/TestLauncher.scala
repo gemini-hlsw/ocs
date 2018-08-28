@@ -1,7 +1,7 @@
 package jsky.app.ot.testlauncher
 
 import edu.gemini.ags.conf.ProbeLimitsTable
-import edu.gemini.qv.plugin.{QvTool, ShowQvToolAction}
+import edu.gemini.qv.plugin.ShowQvToolAction
 import edu.gemini.sp.vcs2.{Vcs, VcsServer}
 import jsky.app.ot.gemini.obscat.OTBrowserPresetsPersistence
 import jsky.app.ot.vcs.VcsOtClient
@@ -14,8 +14,6 @@ import edu.gemini.util.trpc.auth.TrpcKeyChain
 import edu.gemini.util.security.auth.keychain.Action._
 import edu.gemini.util.security.ext.auth.ui.{AuthDialog, PasswordDialog}
 import java.io.File
-import java.security.{Provider, Security}
-import java.util.logging.{Level, Logger}
 
 import edu.gemini.catalog.image.ImageCacheWatcher
 import edu.gemini.sp.vcs.reg.impl.VcsRegistrarImpl

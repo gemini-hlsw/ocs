@@ -18,7 +18,7 @@ public final class EmptyIctdListener extends MarkerModelListener<Schedule> {
 
         mm.clearMarkers(this, s);
 
-        if (s.getIctd().isEmpty()) {
+        if (s.getIctdSummary().isEmpty()) {
             mm.addMarker(true, this, Severity.Warning, "ICTD information unavailable.", s);
         }
     }

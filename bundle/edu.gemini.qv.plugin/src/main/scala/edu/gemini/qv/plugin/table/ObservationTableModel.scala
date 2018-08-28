@@ -87,12 +87,12 @@ object ObservationTableModel {
       ),
       Column[String](
         "Status",
-        "Observation status", _.getObsStatus.displayValue()
+        "Observation status", _.getObsStatus.displayValue
       ),
       Column[String](
         "Class",
         "Observation class",
-        _.getObsClass.displayValue(),
+        _.getObsClass.displayValue,
         visibleAtStart = false
       ),
       Column[String](
@@ -315,26 +315,26 @@ object ObservationTableModel {
   /**
    * Determines whether all the components and custom mask (if any) of the given
    * observation are available according to the ICTD.
-   *
-   * @return an Option[Boolean] that is defined if the ICTD data is available,
-   *         and Some(true) if all instrument components and the custom mask (if
-   *         any) are installed
    */
-  def installationState(c: QvContext, o : Obs): InstallationState =
+  def installationState(c: QvContext, o : Obs): InstallationState = {
+    import InstallationState._
+
     c.dataSource.ictd.map { i =>
 
-      val features = o.getOptions.asScala.forall { e =>
-        i.featureAvailability.get(e).forall(_ === Installed)
-      }
+      def mask: Boolean =
+        Option(o.getCustomMask).forall { m =>
+          CustomMaskKey.parse(m).exists(i.maskAvailability.get(_).contains(Installed))
+        }
 
-      val mask     = Option(o.getCustomMask).forall { m =>
-        CustomMaskKey.parse(m).exists(i.maskAvailability.get(_).contains(Installed))
-      }
+      def features: Boolean =
+        o.getOptions.asScala.forall { e =>
+          i.featureAvailability.get(e).forall(_ === Installed)
+        }
 
-      if (features && mask) InstallationState.AllInstalled
-      else InstallationState.SomeNotInstalled
+      if (mask && features) AllInstalled else SomeNotInstalled
 
-    }.getOrElse(InstallationState.Unknown)
+    }.getOrElse(Unknown)
+  }
 
   private def semesterHrsFraction(ctx: QvContext, o: Obs, thisSem: Boolean, nextSem: Boolean): Double = {
     val hrs = SolutionProvider(ctx).remainingTime(ctx, o, thisSem, nextSem)
@@ -448,7 +448,7 @@ class ObservationTableModel(ctx: QvContext) extends AbstractTableModel {
 
   val columns: Columns = new Columns(ctx)
 
-  // Find the installation state column index by name.
+  // Find the installation state column index.
   val installationStateColumnIndex: Int =
     columns.all.zipWithIndex.findRight { case (c, i)  =>
       c == columns.installationStateColumn

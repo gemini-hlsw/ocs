@@ -17,18 +17,15 @@ import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.util.security.auth.keychain.KeyChain;
 import edu.gemini.util.trpc.client.TrpcClient$;
 
-import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import java.io.Serializable;
 
 /**
- * Collection of ICTD data relevant to the QPT and QVis.
+ * Utility for querying the ICTD and for converting to/from ParamSet.
  */
 public final class Ictd {
     private static final Logger LOGGER = Logger.getLogger(Ictd.class.getName());

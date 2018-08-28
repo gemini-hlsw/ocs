@@ -82,21 +82,21 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
     private File file;
     private Map<WorldCoordinates, Union<Interval>> intervalCache = new HashMap<>();
     private MiniModel miniModel;
-    private Option<IctdSummary> ictd;
+    private Option<IctdSummary> ictdSummary;
 
     /**
      * Constructs an empty Schedule.
      * @param model
      */
-    public Schedule(MiniModel model, Option<IctdSummary> ictd) {
+    public Schedule(MiniModel model, Option<IctdSummary> ictdSummary) {
         assert model != null;
-        assert ictd != null;
+        assert ictdSummary != null;
         this.miniModel = model;
-        this.ictd      = ictd;
+        this.ictdSummary = ictdSummary;
         this.blocks = new BlockUnion();
         this.variants = new VariantList();
         this.extraSemesters = new StringSet();
-        init(true, ictd.map(i -> i.featureAvailabilityJava()));
+        init(true, ictdSummary.map(i -> i.featureAvailabilityJava()));
     }
 
     /**
@@ -217,7 +217,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
         }
 
         // ok, now the data should be up to date and ready to be processed
-        this.ictd = ImOption.apply(params.getParamSet(PROP_ICTD)).map(Ictd::decode);
+        this.ictdSummary = ImOption.apply(params.getParamSet(PROP_ICTD)).map(Ictd::decode);
         this.blocks = getBlockUnion(params);
         this.variants = new VariantList(this, params.getParamSet(PROP_VARIANTS));
         this.extraSemesters = getExtraSemesters(params);
@@ -267,17 +267,17 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
 
     }
 
-    public Option<IctdSummary> getIctd() {
-        return ictd;
+    public Option<IctdSummary> getIctdSummary() {
+        return ictdSummary;
     }
 
     @SuppressWarnings("unchecked")
-    public void setIctd(Option<IctdSummary> ictd) {
-        final Option<IctdSummary> prev = this.ictd;
+    public void setIctdSummary(Option<IctdSummary> ictd) {
+        final Option<IctdSummary> prev = this.ictdSummary;
 
         invalidateAllCaches();
 
-        this.ictd = ictd;
+        this.ictdSummary = ictd;
         doPublicFacilitiesUpdate(() -> ictd.foreach(i -> matchFacilitiesToIctd(i.featureAvailabilityJava())));
 
         firePropertyChange(PROP_ICTD, prev, ictd);
@@ -288,7 +288,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
      * is no ICTD data, we assume that the mask is available.
      */
     public Availability maskAvailability(CustomMaskKey key) {
-        return getIctd().map(i -> i.maskAvailabilityJava().getOrDefault(key, Availability.Missing))
+        return getIctdSummary().map(i -> i.maskAvailabilityJava().getOrDefault(key, Availability.Missing))
                         .getOrElse(Availability.Installed); // no ICTD => assume installed
     }
 
@@ -322,7 +322,7 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
         params.addParamSet(blocks.getParamSet(factory, PROP_BLOCKS));
         params.addParamSet(variants.getParamSet(factory, PROP_VARIANTS));
         params.addParamSet(extraSemesters.getParamSet(factory, PROP_EXTRA_SEMESTERS));
-        ictd.foreach(i -> params.addParamSet(Ictd.encode(factory, PROP_ICTD, i)));
+        ictdSummary.foreach(i -> params.addParamSet(Ictd.encode(factory, PROP_ICTD, i)));
         Pio.addParam(factory, params, PROP_COMMENT, comment);
         return params;
     }
