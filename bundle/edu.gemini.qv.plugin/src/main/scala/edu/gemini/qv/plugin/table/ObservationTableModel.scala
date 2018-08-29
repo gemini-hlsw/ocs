@@ -321,17 +321,26 @@ object ObservationTableModel {
 
     c.dataSource.ictd.map { i =>
 
-      def mask: Boolean =
-        Option(o.getCustomMask).map(_.trim).filterNot(_.isEmpty).forall { m =>
-          CustomMaskKey.parse(m).exists(i.maskAvailability.get(_).contains(Installed))
+      // Name of the custom mask, if it is defined but *not* installed.
+      val missingMask: Option[String] =
+        Option(o.getCustomMask).map(_.trim).filterNot(_.isEmpty).filter { m =>
+          CustomMaskKey.parse(m).forall(!i.maskAvailability.get(_).contains(Installed))
         }
 
-      def features: Boolean =
-        o.getOptions.asScala.forall { e =>
-          i.featureAvailability.get(e).forall(_ === Installed)
+      // Display values of all the missing features, if any.
+      val missingFeatures: List[String] =
+        o.getOptions.asScala.toList.filter { e =>
+          i.featureAvailability.get(e).exists(_ =/= Installed)
+        }.map {
+          case d: DisplayableSpType => d.displayValue
+          case l: LoggableSpType    => l.logValue
+          case e                    => e.name
         }
 
-      if (mask && features) AllInstalled else SomeNotInstalled
+      missingMask.toList ++ missingFeatures match {
+        case Nil     => AllInstalled
+        case h :: t  => SomeNotInstalled(NonEmptyList(h, t: _*))
+      }
 
     }.getOrElse(Unknown)
   }

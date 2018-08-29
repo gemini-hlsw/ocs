@@ -3,8 +3,8 @@ package edu.gemini.qv.plugin.table
 import java.awt.Color
 import java.awt.event.{AdjustmentEvent, AdjustmentListener}
 import java.util.regex.PatternSyntaxException
-import javax.swing.table.{TableCellRenderer, DefaultTableCellRenderer, TableColumn, TableRowSorter}
-import javax.swing.{JTable, BorderFactory, RowFilter, SwingConstants}
+import javax.swing.table.{DefaultTableCellRenderer, TableColumn, TableRowSorter}
+import javax.swing._
 
 import edu.gemini.pot.sp.SPObservationID
 import edu.gemini.qv.plugin.data._
@@ -20,6 +20,7 @@ import scala.None
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.swing.Action
 import scala.swing.GridBagPanel.Fill._
 import scala.swing.ScrollPane.BarPolicy._
 import scala.swing._
@@ -185,10 +186,8 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel { ui =>
     peer.setDefaultRenderer(classOf[DecValue], DecValueRenderer)
     peer.setDefaultRenderer(classOf[TimeValue], TimeValueRenderer)
 
-    // idk why this doesn't work ...
-    //    peer.setDefaultRenderer(classOf[InstallationState], InstallationStateRenderer)
     peer.setDefaultRenderer(InstallationState.AllInstalled.getClass,     InstallationStateRenderer)
-    peer.setDefaultRenderer(InstallationState.SomeNotInstalled.getClass, InstallationStateRenderer)
+    peer.setDefaultRenderer(classOf[InstallationState.SomeNotInstalled], InstallationStateRenderer)
     peer.setDefaultRenderer(InstallationState.Unknown.getClass,          InstallationStateRenderer)
 
     peer.setComponentPopupMenu(popup.peer)
@@ -322,17 +321,36 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel { ui =>
       override def getTableCellRendererComponent(t: JTable, v: Object, selected: Boolean, focus: Boolean, r: Int, c: Int): java.awt.Component = {
         val comp = super.getTableCellRendererComponent(t, v, selected, focus, r, c)
 
+        import InstallationState._
+
+        // Lookup the installation state.
+        val is = dataModel.installationState(r)
+
+        // Set the appropriate highlight/background color if not selected.
         if (!selected) {
           import Color.white
           import OptionsSidePanel.{highlightAvailable, highlightUnavailable}
-          import InstallationState._
 
-          comp.setBackground(dataModel.installationState(r) match {
-            case AllInstalled     => if (highlightAvailable  ) AvailableColor   else white
-            case SomeNotInstalled => if (highlightUnavailable) UnavailableColor else white
-            case Unknown          => white
+          comp.setBackground(is match {
+            case AllInstalled        => if (highlightAvailable  ) AvailableColor   else white
+            case SomeNotInstalled(_) => if (highlightUnavailable) UnavailableColor else white
+            case Unknown             => white
           })
         }
+
+        // Set an informative tooltip message for observations with missing config..
+        comp.asInstanceOf[JComponent].setToolTipText(is match {
+          case SomeNotInstalled(ms) =>
+            s"""<html>
+              |<b>Missing configuration:</b>
+              |
+              |${ms.list.toList.mkString("<ul><li>", "</li><li>", "</li></ul>")}
+              |
+              |</html>
+            """.stripMargin
+          case _                    =>
+            ""
+        })
 
         comp
       }
@@ -379,9 +397,9 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel { ui =>
     private object InstallationStateRenderer extends AvailabilityRenderer {
       override def setValue(value: Object): Unit = {
         setText(value match {
-          case InstallationState.AllInstalled     => "yes"
-          case InstallationState.SomeNotInstalled => "no"
-          case InstallationState.Unknown          => "?"
+          case InstallationState.AllInstalled        => "yes"
+          case InstallationState.SomeNotInstalled(_) => "no"
+          case InstallationState.Unknown             => "?"
         })
       }
     }
