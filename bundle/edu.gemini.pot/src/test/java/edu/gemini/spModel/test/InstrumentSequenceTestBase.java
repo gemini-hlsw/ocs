@@ -104,7 +104,7 @@ public abstract class InstrumentSequenceTestBase<I extends SPInstObsComp, S exte
      */
     protected void verify(double expectedTime) throws Exception {
         PlannedTimeSummary time = PlannedTimeSummaryService.getTotalTime(getObs());
-        assertEquals(expectedTime, time.getExecTime()/1000.0);
+        assertEquals(expectedTime, time.getExecTime()/1000.0, 0.001);
     }
 
     /**

@@ -38,7 +38,14 @@ sealed trait Spectroscopy
 
 sealed trait CalculationMethod {
   def exposureTime: Double
+  def coadds: Option[Int]
+  /*
+     It seems that using .getOrElse is not straightforward to use from Java,
+     so we can use this "coaddsOrElse" to simplify it.
+   */
+  def coaddsOrElse(d: Int): Int = coadds.getOrElse(d)
   def sourceFraction: Double
+  def offset: Double
 }
 
 sealed trait S2NMethod extends CalculationMethod {
@@ -51,19 +58,24 @@ sealed trait IntMethod extends CalculationMethod {
 
 final case class ImagingS2N(
                     exposures: Int,
+                    coadds: Option[Int],
                     exposureTime: Double,
-                    sourceFraction:
-                    Double) extends Imaging with S2NMethod
+                    sourceFraction: Double,
+                    offset: Double) extends Imaging with S2NMethod
 
 final case class ImagingInt(
                     sigma: Double,
                     exposureTime: Double,
-                    sourceFraction: Double) extends Imaging with IntMethod
+                    coadds: Option[Int],
+                    sourceFraction: Double,
+                    offset: Double) extends Imaging with IntMethod
 
 final case class SpectroscopyS2N(
                     exposures: Int,
+                    coadds: Option[Int],
                     exposureTime: Double,
-                    sourceFraction: Double) extends Spectroscopy with S2NMethod
+                    sourceFraction: Double,
+                    offset: Double) extends Spectroscopy with S2NMethod
 
 
 // ==== Analysis method
@@ -89,6 +101,8 @@ final case class IfuSum(skyFibres: Int, num: Double, isIfu2: Boolean) extends If
 
 final case class ObservationDetails(calculationMethod: CalculationMethod, analysisMethod: AnalysisMethod) {
   def exposureTime: Double    = calculationMethod.exposureTime
+  def coadds: Option[Int] = calculationMethod.coadds
   def sourceFraction: Double  = calculationMethod.sourceFraction
+  def offset: Double = calculationMethod.offset
   def isAutoAperture: Boolean = analysisMethod.isInstanceOf[AutoAperture]
 }

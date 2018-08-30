@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 /** Maps GMOS instrument parameters to readout times */
-class GmosReadoutTime {
+public class GmosReadoutTime {
 
     //Maps the GmosReadoutKey to the overhead. Allows faster searchs.
     private static final Map<GmosReadoutKey, Double> map = new HashMap<GmosReadoutKey, Double>(500);
@@ -987,7 +987,7 @@ class GmosReadoutTime {
      * @param config the current configuration
      * @param customRoiList non-empty if custom ROIS are defined for the instrument
      */
-    static double getReadoutOverhead(Config config, GmosCommonType.CustomROIList customRoiList) {
+    public static double getReadoutOverhead(Config config, GmosCommonType.CustomROIList customRoiList) {
         final AmpCount             ampCount    = (AmpCount) config.getItemValue(AmpCount.KEY);
         final AmpGain              ampGain     = (AmpGain) config.getItemValue(AmpGain.KEY);
         final AmpReadMode          ampReadMode = (AmpReadMode) config.getItemValue(AmpReadMode.KEY);

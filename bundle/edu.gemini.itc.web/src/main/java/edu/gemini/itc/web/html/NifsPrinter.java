@@ -1,11 +1,18 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.altair.Altair;
+import edu.gemini.itc.base.ImagingResult;
+import edu.gemini.itc.base.Result;
 import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.nifs.IFUComponent;
 import edu.gemini.itc.nifs.Nifs;
 import edu.gemini.itc.nifs.NifsRecipe;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.config2.Config;
+import edu.gemini.spModel.gemini.nifs.InstNIFS;
+import edu.gemini.spModel.gemini.nifs.NIFSParams;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime;
+import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -13,15 +20,19 @@ import java.util.UUID;
 /**
  * Helper class for printing NIFS calculation results to an output stream.
  */
-public final class NifsPrinter extends PrinterBase {
+public final class NifsPrinter extends PrinterBase implements OverheadTablePrinter.PrinterWithOverhead {
 
     private final NifsRecipe recipe;
     private final PlottingDetails pdp;
+    private final NifsParameters instr;
+    private final ItcParameters p;
 
     public NifsPrinter(final ItcParameters p, final NifsParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
         this.recipe = new NifsRecipe(p, instr);
         this.pdp    = pdp;
+        this.instr  = instr;
+        this.p      = p;
     }
 
     public void writeOutput() {
@@ -49,6 +60,8 @@ public final class NifsPrinter extends PrinterBase {
 
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
+
+        _print(OverheadTablePrinter.print(this, p, getReadoutTimePerCoadd(), result, s));
 
         _print("<HR align=left SIZE=3>");
 
@@ -106,6 +119,20 @@ public final class NifsPrinter extends PrinterBase {
         s += "\n";
 
         return s;
+    }
+
+
+    public ConfigCreator.ConfigCreatorResult createInstConfig(int numberExposures) {
+        ConfigCreator cc = new ConfigCreator(p);
+        return cc.createNifsConfig(instr, numberExposures);
+    }
+
+    public PlannedTime.ItcOverheadProvider getInst() {
+            return new InstNIFS();
+
+    }
+    public double getReadoutTimePerCoadd() {
+        return instr.readMode().getMinExp() + InstNIFS.COADD_CONSTANT;
     }
 
 }

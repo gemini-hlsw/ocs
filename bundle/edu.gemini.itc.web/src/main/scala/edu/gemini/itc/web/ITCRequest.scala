@@ -11,7 +11,7 @@ import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.GmosCommonType
-import edu.gemini.spModel.gemini.gmos.GmosCommonType.{AmpGain, AmpReadMode, DetectorManufacturer}
+import edu.gemini.spModel.gemini.gmos.GmosCommonType.{BuiltinROI, AmpGain, AmpReadMode, DetectorManufacturer}
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FPUnitNorth, FilterNorth}
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FPUnitSouth, FilterSouth}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
@@ -158,7 +158,8 @@ object ITCRequest {
     val fpMask: GmosCommonType.FPUnit     = if (site.equals(Site.GN)) r.enumParameter(classOf[FPUnitNorth],    "instrumentFPMask")   else r.enumParameter(classOf[FPUnitSouth],      "instrumentFPMask")
     val ampGain                           = r.enumParameter(classOf[AmpGain])
     val ampReadMode                       = r.enumParameter(classOf[AmpReadMode])
-    GmosParameters(filter, grating, centralWl, fpMask, ampGain, ampReadMode, None, spatBinning, specBinning, ccdType, site)
+    val builtinROI                        = r.enumParameter(classOf[GmosCommonType.BuiltinROI])
+    GmosParameters(filter, grating, centralWl, fpMask, ampGain, ampReadMode, None, spatBinning, specBinning, ccdType, builtinROI, site)
   }
 
   /**
@@ -188,7 +189,8 @@ object ITCRequest {
     val filter      = r.enumParameter(classOf[Gsaoi.Filter])
     val readMode    = r.enumParameter(classOf[Gsaoi.ReadMode])
     val iq          = obsConditionParameters(r).iq
-    ConfigExtractor.createGsaoiParameters(filter, readMode, iq) match {
+    val largeSkyOffset = r.intParameter("largeSkyOffset")
+    ConfigExtractor.createGsaoiParameters(filter, readMode, iq, largeSkyOffset) match {
       case \/-(p) => p
       case -\/(t) => throw new IllegalArgumentException(t)
     }
@@ -210,8 +212,9 @@ object ITCRequest {
     val readNoise   = r.enumParameter(classOf[Niri.ReadMode])
     val wellDepth   = r.enumParameter(classOf[Niri.WellDepth])
     val fpMask      = r.enumParameter(classOf[Niri.Mask])
+    val builtinROI  = r.enumParameter(classOf[Niri.BuiltinROI])
     val altair      = altairParameters(r)
-    NiriParameters(filter, grism, camera, readNoise, wellDepth, fpMask, altair)
+    NiriParameters(filter, grism, camera, readNoise, wellDepth, fpMask, builtinROI, altair)
   }
 
   def nifsParameters(r: ITCRequest): NifsParameters = {
@@ -255,6 +258,29 @@ object ITCRequest {
     }
   }
 
+  def gemsParameters(r: ITCRequest): GemsParameters = {
+    val avgStrehl  = r.doubleParameter("avgStrehl") / 100.0
+    val strehlBand = r.parameter("strehlBand")
+    GemsParameters(avgStrehl, strehlBand)
+  }
+
+  sealed trait CoaddsType
+  case object CoaddsA extends CoaddsType
+  case object CoaddsC extends CoaddsType
+
+  def coadds(r: ITCRequest, t: CoaddsType): Option[Int] = {
+    try {
+      val ret = t match {
+        case CoaddsA => r.intParameter("numCoaddsA")
+        case CoaddsC => r.intParameter("numCoaddsC")
+      }
+      Some(ret)
+    } catch {
+      // We get this exception thrown if no coadds parameter was passed with the request
+      case ex: IllegalArgumentException => None
+    }
+  }
+
   def observationParameters(r: ITCRequest, i: InstrumentDetails): ObservationDetails = {
     val calcMethod = r.parameter("calcMethod")
     val calculationMethod = calcMethod match {
@@ -262,19 +288,25 @@ object ITCRequest {
         ImagingInt(
           r.doubleParameter("sigmaC"),
           r.doubleParameter("expTimeC"),
-          r.doubleParameter("fracOnSourceC")
+          coadds(r, CoaddsC),
+          r.doubleParameter("fracOnSourceC"),
+          r.doubleParameter("offset")
         )
       case "s2n"      if InstrumentDetails.isImaging(i)     =>
         ImagingS2N(
           r.intParameter("numExpA"),
+          coadds(r, CoaddsA),
           r.doubleParameter("expTimeA"),
-          r.doubleParameter("fracOnSourceA")
+          r.doubleParameter("fracOnSourceA"),
+          r.doubleParameter("offset")
         )
       case "s2n"      if InstrumentDetails.isSpectroscopy(i) =>
         SpectroscopyS2N(
           r.intParameter("numExpA"),
+          coadds(r, CoaddsA),
           r.doubleParameter("expTimeA"),
-          r.doubleParameter("fracOnSourceA")
+          r.doubleParameter("fracOnSourceA"),
+          r.doubleParameter("offset")
         )
       case _ => throw new IllegalArgumentException("Total integration time to achieve a specific \nS/N ratio is not supported in spectroscopy mode.  \nPlease select the Total S/N method.")
     }

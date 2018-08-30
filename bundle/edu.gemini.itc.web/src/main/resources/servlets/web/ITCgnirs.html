@@ -312,9 +312,7 @@
 	</p>
 	<!-- Instrument definition-->
 	<p>
-    <!-- REL-472: Commenting out Altair option for now -->
-    <!-- <span style="color: #ff0000"><b>Instrument (GNIRS), telescope, and Altair configuration</b></span> -->
-    <span style="color: #ff0000"><b>Instrument (GNIRS) and telescope configuration</b></span>
+    <span style="color: #ff0000"><b>Instrument (GNIRS), telescope, and Altair configuration</b></span>
 	</p>
 
 	<table background="https://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0"  width="100%">
@@ -566,14 +564,22 @@
 
 			<td><input value="s2n" name="calcMethod" checked="checked" type="radio" /></td>
 			<td>Total S/N ratio resulting from <input name="numExpA" size="5" value="30" type="text" />
-				exposures each having an exposure time of <input name="expTimeA" size="5" value="120" type="text" /> secs and with a fraction <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
+				exposures each having <input name="numCoaddsA" size="5" value="1" type="text" /> coadds with exposure time of <input name="expTimeA" size="5" value="120" type="text" /> secs, and with a fraction <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
 
 			</tr>
 			<tr>
 				<td><input value="intTime" name="calcMethod" type="radio" /></td>
-				<td>Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" /> using an exposure time for each exposure of <input name="expTimeC" size="5" value="120" type="text" /> secs and with a fraction <input name="fracOnSourceC" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
+				<td>Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" /> using an exposure time for each exposure of <input name="expTimeC" size="5" value="120" type="text" /> secs and <input name="numCoaddsC" size="5" value="1" type="text" /> coadds, and with a fraction <input name="fracOnSourceC" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
 
 			</tr>
+
+			<tr>
+				<td colspan="2" height="40" valign="bottom"><b>Telescope offset:</b><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/sciops/instruments/gnirs/spectroscopy/observing-strategies#offsetting','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
+			</tr>
+			<tr>
+				<td colspan="2">Dither offset size: <input name="offset" size="5" value="5.0" type="text" />  arcsec</td>
+			</tr>
+
 			<!-- calc method C--><!-- analysis methods-->
 			<input value="1" name="autoSkyAper" type="hidden" />
 			<input value="1" name="userSkyAper" type="hidden" />

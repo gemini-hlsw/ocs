@@ -71,6 +71,33 @@ public enum PlannedTimeCalculator {
         return PlannedTime.apply(setup, steps, cs);
     }
 
+    // for use in ITC
+    public PlannedTime calc(Config[] conf, ItcOverheadProvider instr)  {
+        ChargeClass obsChargeClass = ChargeClass.PROGRAM;
+
+        // add the setup time for the instrument
+        double setupTime = 15 * 60; // default setup time
+        double reacqTime = 0;       // default reacquisition time
+        if (instr != null) {
+            setupTime = instr.getSetupTime(conf[0]);
+            reacqTime = instr.getReacquisitionTime();
+        }
+        Setup setup = Setup.fromSeconds(setupTime, reacqTime, obsChargeClass);
+
+        // Calculate the overhead time
+        Option<Config> prev = None.instance();
+        List<PlannedTime.Step> steps = new ArrayList<PlannedTime.Step>();
+        ConfigSequence cs = new ConfigSequence(conf);
+        for (Config c : cs.getAllSteps()) {
+            CategorizedTimeGroup gtc    = instr.calc(c, prev);
+            prev = new Some<Config>(c);
+
+            steps.add(Step.apply(gtc));
+        }
+
+        return PlannedTime.apply(setup, steps, cs);
+    }
+
     private StepCalculator calculator(ISPObsComponent inst)  {
         if (inst == null) return DefaultStepCalculator.instance;
         SPInstObsComp dobj = (SPInstObsComp) inst.getDataObject();

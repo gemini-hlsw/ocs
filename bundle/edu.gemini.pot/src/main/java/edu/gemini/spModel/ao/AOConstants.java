@@ -8,6 +8,7 @@
 package edu.gemini.spModel.ao;
 
 import edu.gemini.pot.sp.SPComponentBroadType;
+import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.type.DisplayableSpType;
 import edu.gemini.spModel.type.LoggableSpType;
 import edu.gemini.spModel.type.SequenceableSpType;
@@ -27,6 +28,10 @@ public final class AOConstants {
      * The configuration system name for an adaptive optics system.
      */
     public static final String AO_CONFIG_NAME = "adaptive optics";
+    public static final String AO_GUIDE_STAR_TYPE = "guideStarType";
+
+    public static final ItemKey AO_SYSTEM_KEY = new ItemKey(new ItemKey(AO_CONFIG_NAME), AO_SYSTEM_PROP);
+    public static final ItemKey AO_GUIDE_STAR_TYPE_KEY = new ItemKey(new ItemKey(AO_CONFIG_NAME),AO_GUIDE_STAR_TYPE);
 
 
     /**
