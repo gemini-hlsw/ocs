@@ -170,7 +170,7 @@ public class OverheadTablePrinter {
 
     private String printOverheadTable() {
         StringBuilder buf = new StringBuilder("<html><body>");
-        buf.append("<table><tr><th>Observation Overheads</th></tr>");
+        buf.append("<hr><br><table><tr><th>Observation Overheads</th></tr>");
 
         if (ccResult.hasWarnings()) {
             buf.append("</table>");
