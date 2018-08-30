@@ -22,6 +22,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     private Disperser disperser;
     private final double sourceFraction;
     private final double exposureTime;
+    private final int coadds;
     private final double darkCurrent;
     private final double readNoise;
     private final int numberExposures;
@@ -78,6 +79,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         // Currently SpectroscopySN is the only supported calculation method for spectroscopy.
         final CalculationMethod calcMethod = odp.calculationMethod();
         if (!(calcMethod instanceof SpectroscopyS2N)) throw new Error("Unsupported calculation method");
+        this.coadds = calcMethod.coaddsOrElse(1);
         this.numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
         this.sourceFraction  = calcMethod.sourceFraction();
         this.exposureTime    = calcMethod.exposureTime();
@@ -176,7 +178,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
     }
 
-    /** Calculates signal and background. */
+    /** Calculates signal and background per coadd. */
     private void calculateSignal() {
         Log.fine("Calculating signal and background...");
 
@@ -194,7 +196,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
     }
 
-    /** Calculates total source flux (signal) in the aperture. */
+    /** Calculates total source flux (signal) in the aperture per coadd. */
     private VisitableSampledSpectrum signal(final double throughput) {
 
         final VisitableSampledSpectrum signal = (VisitableSampledSpectrum) sourceFlux.clone();
@@ -227,7 +229,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     }
 
 
-    /** Calculates the background in the aperture. */
+    /** Calculates the background in the aperture per coadd. */
     private VisitableSampledSpectrum background(final Slit slit) {
 
         final VisitableSampledSpectrum background = (VisitableSampledSpectrum) backgroundFlux.clone();
@@ -247,19 +249,19 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         return background;
     }
 
-    /** Calculates the signal to noise ratio for a single exposure. */
+    /** Calculates the signal to noise ratio for a single exposure (per frame). */
     private VisitableSampledSpectrum singleS2N(final VisitableSampledSpectrum signal, final VisitableSampledSpectrum background, final double darkNoise, final double readNoise) {
 
         // total noise in the aperture
         final VisitableSampledSpectrum noise = (VisitableSampledSpectrum) sourceFlux.clone();
         for (int i = firstCcdPixel; i <= lastCcdPixel(noise.getLength()); ++i) {
-            noise.setY(i, Math.sqrt(signal.getY(i) + background.getY(i) + darkNoise + readNoise));
+            noise.setY(i, Math.sqrt(signal.getY(i)+ background.getY(i) + darkNoise + readNoise));
         }
 
         // calculate signal to noise
         final VisitableSampledSpectrum singleS2N = (VisitableSampledSpectrum) sourceFlux.clone();
         for (int i = firstCcdPixel; i <= lastCcdPixel(singleS2N.getLength()); ++i) {
-            singleS2N.setY(i, signal.getY(i) / noise.getY(i));
+            singleS2N.setY(i, Math.sqrt(coadds) * signal.getY(i) / noise.getY(i));
         }
 
         return singleS2N;
@@ -283,7 +285,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         final double noiseFactor = 1 + (1 / skyAper);
 
         // the number of exposures measuring the source flux is
-        final double spec_number_source_exposures = numberExposures * sourceFraction;
+        final double spec_number_source_exposures = numberExposures * coadds * sourceFraction;
 
         // noise in aperture
         final VisitableSampledSpectrum spec_sourceless_noise = (VisitableSampledSpectrum) sourceFlux.clone();

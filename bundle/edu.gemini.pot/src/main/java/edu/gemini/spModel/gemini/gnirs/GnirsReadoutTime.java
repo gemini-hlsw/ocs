@@ -11,23 +11,36 @@ import java.util.Map;
  *
  * @author Nicolas A. Barriga
  *         Date: Oct 21, 2010
+ *
+ *  2017-12-15: Modified according to the latest read time measurements.
  */
 public final class GnirsReadoutTime {
-    //Maps from the read mode to an array containing the overhead per frame and the overhead per coadd per frame
-    private static final Map<GNIRSParams.ReadMode, double[]> map;
+    private static final double DHS_WRITE_TIME = 8.5;
+
+    //Maps from the read mode to overhead per coadd
+    private static final Map<GNIRSParams.ReadMode, Double> map;
 
     static{
-        Map<ReadMode, double[]> tmp = new HashMap<ReadMode, double[]>();
-        tmp.put(ReadMode.VERY_BRIGHT, new double[]{0.8, 0.14});
-        tmp.put(ReadMode.BRIGHT, new double[]{0.5, 0.7});
-        tmp.put(ReadMode.FAINT, new double[]{2.8, 11.0});
-        tmp.put(ReadMode.VERY_FAINT, new double[]{5.0, 21.9});
+        Map<ReadMode, Double> tmp = new HashMap<>();
+        tmp.put(ReadMode.VERY_BRIGHT, 0.19);
+        tmp.put(ReadMode.BRIGHT, 0.69);
+        tmp.put(ReadMode.FAINT, 11.14);
+        tmp.put(ReadMode.VERY_FAINT, 22.31);
         map = Collections.unmodifiableMap(tmp);
     }
 
-
-    static double getReadoutOverhead(ReadMode readMode, int coadds) {
-        double[] overheads= map.get(readMode);
-        return overheads[0] + overheads[1] * coadds;
+    public static double getDhsWriteTime () {
+        return DHS_WRITE_TIME;
     }
+
+    public static double getReadoutOverhead(ReadMode readMode, int coadds) {
+        Double overheads= map.get(readMode);
+        return overheads * coadds;
+    }
+
+    public static double getReadoutOverheadPerCoadd(ReadMode readMode) {
+        Double overheads= map.get(readMode);
+        return overheads;
+    }
+
 }

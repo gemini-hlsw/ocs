@@ -435,6 +435,10 @@
 			<tr>
 				<td colspan="4">Dark current: &nbsp; 0.25 e-/s </td>
 			</tr>
+			<tr>
+				<td colspan="4">Array / Subarray size: <input value="FULL_FRAME" name="BuiltinROI" checked="checked" type="radio" /> Full frame <input value="CENTRAL_768" name="BuiltinROI" type="radio" /> Central 768x768 <input value="CENTRAL_512" name="BuiltinROI" type="radio" /> Central 512x512 <input value="CENTRAL_256" name="BuiltinROI" type="radio" /> Central 256x256 </td>
+			</tr>
+
 			<!-- Telescope definition-->
 			<tr>
 				<td colspan="4" height="50" valign="bottom"><b>Telescope configuration:</b> <i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10271','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
@@ -560,14 +564,21 @@
 			<tr>
 				<td><input value="s2n" name="calcMethod" checked="checked" type="radio" /></td>
 				<td>Total S/N ratio resulting from <input name="numExpA" size="5" value="30" type="text" />
-				exposures each having an exposure time of <input name="expTimeA" size="5" value="120" type="text" /> secs and with a fraction <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
+				exposures each having <input name="numCoaddsA" size="5" value="1" type="text" /> coadds with exposure time of <input name="expTimeA" size="5" value="120" type="text" /> secs and with a fraction <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
 
 			</tr>
 			<tr>
 				<td><input value="intTime" name="calcMethod" type="radio" /></td>
-				<td>Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" /> using an exposure time for each exposure of <input name="expTimeC" size="5" value="120" type="text" /> secs and with a fraction <input name="fracOnSourceC" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
+				<td>Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" /> using an exposure time for each exposure of <input name="expTimeC" size="5" value="120" type="text" /> secs and <input name="numCoaddsC" size="5" value="1" type="text" /> coadds, and with a fraction <input name="fracOnSourceC" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
 
 			</tr>
+			<tr>
+				<td colspan="2" height="40" valign="bottom"><b>Telescope offset:</b><i><span>(<a href="#" onclick="window.open('https://www.gemini.edu/sciops/instruments/niri/imaging/observing-strategies','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
+			</tr>
+			<tr>
+				<td colspan="2">Dither offset size: <input name="offset" size="5" value="10.0" type="text" />  arcsec</td>
+			</tr>
+
 			<!-- analysis methods-->
 			<input value="1" name="autoSkyAper" type="hidden" />
 			<input value="1" name="userSkyAper" type="hidden" />

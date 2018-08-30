@@ -8,6 +8,7 @@ public final class ImagingS2NMethodACalculation extends ImagingS2NCalculation {
 
     private final int number_exposures;
     private final double frac_with_source;
+    private final int coadds;
 
     public ImagingS2NMethodACalculation(final ObservationDetails obs,
                                         final Instrument instrument,
@@ -23,6 +24,7 @@ public final class ImagingS2NMethodACalculation extends ImagingS2NCalculation {
         this.number_exposures   = ((ImagingS2N) obs.calculationMethod()).exposures();
         this.frac_with_source   = obs.calculationMethod().sourceFraction();
         this.exposure_time      = obs.calculationMethod().exposureTime();
+        this.coadds             = obs.calculationMethod().coaddsOrElse(1);
     }
 
     public void calculate() {
@@ -41,7 +43,7 @@ public final class ImagingS2NMethodACalculation extends ImagingS2NCalculation {
     }
 
     @Override public double numberSourceExposures() {
-        return number_exposures * frac_with_source;
+        return number_exposures * frac_with_source * coadds;
     }
 
 }
