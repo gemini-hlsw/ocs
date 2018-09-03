@@ -102,7 +102,7 @@ public class ConfigCreator {
         final CalculationMethod calcMethod = obsDetailParams.calculationMethod();
         ConfigCreatorResult result = new ConfigCreatorResult(new DefaultConfig[numberExposures]);
         if (numberExposures < 1) {
-            result.addWarning("Warning: Observation overheads cannot be calculated for the number of exposures = 0.");
+            result.addWarning("Warning: The number of exposures must be > 0.");
         }
         int numberCoadds = calcMethod.coaddsOrElse(1);
         Double offset = calcMethod.offset();
@@ -113,7 +113,7 @@ public class ConfigCreator {
         List<Double> offsetList = new ArrayList<>();
 
         for (int i = 0; i < (1 + numberExposures / 4); i++) {
-            if (calcMethod instanceof Imaging) {
+            if (calcMethod instanceof Imaging || obsDetailParams.analysisMethod() instanceof IfuMethod) {
                 offsetList.addAll(imagingOffsets);
                 result.setOffsetMessage("ABAB dithering pattern");
             } else if (calcMethod instanceof Spectroscopy) {
@@ -131,7 +131,6 @@ public class ConfigCreator {
             step.putItem(CoaddsKey, numberCoadds);
             step.putItem(TelescopePKey, 0.0);
             step.putItem(TelescopeQKey, offsetList.get(i));
-
 
             if (itcParams.telescope().getWFS().equals(GuideProbe.Type.PWFS)) {
                 step.putItem(GuideWithPWFS2Key, StandardGuideOptions.Value.guide);
