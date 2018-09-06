@@ -16,7 +16,7 @@ import jsky.util.I18N;
  * @version $Revision: 5923 $
  * @author Allan Brighton
  */
-public class ImageDisplayControl extends JPanel {
+public abstract class ImageDisplayControl extends JPanel {
 
     // Used to access internationalized strings (see i18n/gui*.properties)
     private static final I18N _I18N = I18N.getInstance(ImageDisplayControl.class);
@@ -84,9 +84,7 @@ public class ImageDisplayControl extends JPanel {
     }
 
     /** Make and return the image display window */
-    protected TpeImageWidget makeImageDisplay() {
-        return (TpeImageWidget)new DivaMainImageDisplay(parent);
-    }
+    protected abstract TpeImageWidget makeImageDisplay();
 
     /**
      * Make and return the pan window.

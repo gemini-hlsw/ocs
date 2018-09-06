@@ -160,7 +160,7 @@ object ImageCatalogClient {
     */
   def downloadImageToFile(cacheDir: Path, url: URL, query: ImageSearchQuery): Task[ImageInFile] = {
 
-    case class ConnectionDescriptor(contentType: Option[String], contentEncoding: Option[String]) {
+    case class ConnectionDescriptor(contentType: Option[String], contentEncoding: Option[String], stream: InputStream) {
       def extension: String = (contentEncoding, contentType) match {
           case (Some("x-gzip"), _)                                                              => "fits.gz"
           // REL-2776 At some places on the sky DSS returns an error, the HTTP error code is ok but the body contains no image
@@ -179,29 +179,14 @@ object ImageCatalogClient {
     def openConnection: Task[ConnectionDescriptor] = Task.delay {
       Log.info(s"Downloading image at $url")
       val connection = url.openConnection()
-      ConnectionDescriptor(Option(connection.getContentType), Option(connection.getContentEncoding))
+      ConnectionDescriptor(Option(connection.getContentType), Option(connection.getContentEncoding), connection.getInputStream)
     }
 
     /**
       * Downloads the url and writes it to a file
       */
-    def writeToTempFile(file: File): Task[Unit] = Task.delay {
-      // Simple old fashioned download
-      val out = new FileOutputStream(file)
-      try {
-        val in = url.openStream()
-        val buffer = new Array[Byte](8 * 1024)
-        try {
-          Iterator
-            .continually(in.read(buffer))
-            .takeWhile(-1 != _)
-            .foreach(read => out.write(buffer, 0, read))
-        } finally {
-          in.close()
-        }
-      } finally {
-        out.close()
-      }
+    def writeToTempFile(stream: InputStream, file: File): Task[Unit] = Task.delay {
+      Files.copy(stream, file.toPath, StandardCopyOption.REPLACE_EXISTING)
     }
 
     /**
@@ -246,7 +231,7 @@ object ImageCatalogClient {
       _           <- ImageCacheOnDisk.mkCacheDir(cacheDir)
       tempFile    <- createTmpFile
       desc        <- openConnection
-      _           <- writeToTempFile(tempFile).onFinish(deleteIfInError(tempFile))
+      _           <- writeToTempFile(desc.stream, tempFile).onFinish(deleteIfInError(tempFile))
       queryHeader <- parseHeader(desc, tempFile).onFinish(deleteIfInError(tempFile))
       file        <- moveToFinalFile(desc.extension, tempFile, queryHeader).onFinish(deleteIfInError(tempFile))
     } yield file

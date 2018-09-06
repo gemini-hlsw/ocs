@@ -18,7 +18,7 @@ import jsky.util.Preferences;
  * @version $Revision: 5923 $
  * @author Allan Brighton
  */
-public class ImageDisplayControlFrame extends JFrame {
+public abstract class ImageDisplayControlFrame extends JFrame {
 
     // Used to access internationalized strings (see i18n/gui*.properties)
     private static final I18N _I18N = I18N.getInstance(ImageDisplayControlFrame.class);
@@ -119,22 +119,6 @@ public class ImageDisplayControlFrame extends JFrame {
      *
      * @param size the size (width, height) to use for the pan and zoom windows.
      */
-    protected ImageDisplayControl makeImageDisplayControl(int size) {
-        return new ImageDisplayControl(this, size);
-    }
+    protected abstract ImageDisplayControl makeImageDisplayControl(int size);
 
-    /**
-     * usage: java ImageDisplayControlFrame [fileOrUrl]
-     */
-    public static void main(String[] args) {
-        String fileOrUrl = null;
-        int size = ImagePanner.DEFAULT_SIZE;
-
-        if (args.length >= 1)
-            fileOrUrl = args[0];
-
-        ImageDisplayControlFrame frame = new ImageDisplayControlFrame(size, fileOrUrl);
-
-        frame.setVisible(true);
-    }
 }
