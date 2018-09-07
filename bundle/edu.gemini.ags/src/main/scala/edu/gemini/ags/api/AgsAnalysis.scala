@@ -156,7 +156,11 @@ object AgsAnalysis {
     else magnitudeAnalysis(ctx, mt, guideProbe, guideStar)
   }
 
-  private def magnitudeAnalysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] = {
+  /**
+   * Analysis of the suitability of the magnitude of the given guide star
+   * regardless of its reachability.
+   */
+  def magnitudeAnalysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] = {
     import AgsGuideQuality._
     import GuideSpeed._
 

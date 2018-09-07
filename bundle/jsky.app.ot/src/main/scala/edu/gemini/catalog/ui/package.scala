@@ -214,7 +214,7 @@ object GuidingQualityColumn {
       s   <- o.strategy
       gp  <- o.guideProbe
       ctx <- o.toContext
-      a   <- s.strategy.analyze(ctx, o.mt, gp, t)
+      a   <- s.strategy.analyzeMagnitude(ctx, o.mt, gp, t)
     } yield a
 
   // Calculate if the target is inside the probe FOV

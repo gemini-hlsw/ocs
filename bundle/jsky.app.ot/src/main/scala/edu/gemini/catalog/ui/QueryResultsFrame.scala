@@ -103,6 +103,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         selection.rows += modelToViewRow(e.getRow)
       }
     }))
+    Option(TpeManager.get()).foreach(_.getImageWidget.setPosAngle())
 
     override def rendererComponent(isSelected: Boolean, focused: Boolean, row: Int, column: Int): Component =
       // Note that we need to use the same conversions as indicated on SortableTable to get the value
