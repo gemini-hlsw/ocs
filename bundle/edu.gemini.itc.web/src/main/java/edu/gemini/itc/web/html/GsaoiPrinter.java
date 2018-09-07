@@ -55,7 +55,7 @@ public final class GsaoiPrinter extends PrinterBase
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
-        _print(OverheadTablePrinter.print(this, p, getReadoutTimePerCoadd(), result));
+        //_print(OverheadTablePrinter.print(this, p, getReadoutTimePerCoadd(), result)); // on-hold until some issues resolved
 
         _print("<HR align=left SIZE=3>");
 
