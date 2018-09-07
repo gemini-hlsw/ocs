@@ -205,27 +205,17 @@ case class IdColumn(title: String) extends CatalogNavigatorColumn[String] {
 
 object GuidingQualityColumn {
   implicit val analysisOrder:Order[AgsAnalysis] = Order.orderBy(_.quality)
-  val paFlip: Angle = Angle.fromDegrees(180)
 
-  // Calculate the guiding quality of the target, allowing for PA flipping
-  def target2Analysis(info: Option[ObservationInfo], t: Target): Option[AgsAnalysis] =
-    if (info.exists(_.allowPAFlip)) {
-      // Note we use min, as AgsGuideQuality is better when the position on the index is lower
-      target2Analysis(info, t, Angle.zero) min target2Analysis(info, t, paFlip)
-    } else {
-      target2Analysis(info, t, Angle.zero)
-    }
-
-  // Calculate the guiding quality of the target at a given PA
-  private def target2Analysis(info: Option[ObservationInfo], t: Target, shift: Angle): Option[AgsAnalysis] = {
-    (for {
-      o                                           <- info
-      s                                           <- o.strategy
-      gp                                          <- o.guideProbe
-      st @ SiderealTarget(_, _, _, _, _, _, _, _) = t
-      ctx                                         <- o.toContext
-    } yield s.strategy.analyze(ctx.withPositionAngle(ctx.getPositionAngle + shift), o.mt, gp, st)).flatten
-  }
+  // Calculate the guiding quality of the target considering only its magnitude
+  // while ignoring reachability.
+  def target2Analysis(info: Option[ObservationInfo], t: SiderealTarget): Option[AgsAnalysis] =
+    for {
+      o   <- info
+      s   <- o.strategy
+      gp  <- o.guideProbe
+      ctx <- o.toContext
+      a   <- s.strategy.analyze(ctx, o.mt, gp, t)
+    } yield a
 
   // Calculate if the target is inside the probe FOV
   def target2FOV(info: Option[ObservationInfo], t: Target): Option[GuideInFOV] = {
