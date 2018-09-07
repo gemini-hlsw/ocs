@@ -11,6 +11,7 @@ import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api._
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
+import edu.gemini.catalog.ui.adapters.TableQueryResultAdapter
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.SPComponentType
@@ -28,7 +29,7 @@ import edu.gemini.ui.miglayout.MigPanel
 import edu.gemini.ui.miglayout.constraints._
 import jsky.app.ot.gemini.editor.targetComponent.GuidingIcon
 import jsky.app.ot.gemini.editor.targetComponent.TargetGuidingFeedback.ProbeLimits
-import jsky.app.ot.tpe.{TpeContext, TpeManager}
+import jsky.app.ot.tpe._
 import jsky.app.ot.util.OtColor
 import jsky.catalog.gui.{SymbolSelectionEvent, SymbolSelectionListener}
 import jsky.util.gui.{DialogUtil, Resources}
@@ -103,7 +104,47 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         selection.rows += modelToViewRow(e.getRow)
       }
     }))
-    Option(TpeManager.get()).foreach(_.getImageWidget.setPosAngle())
+
+    // Watch the image widget for image info updates in order to refresh the
+    // "FOV" column that shows whether the guide star is in reach of the probe.
+    Option(TpeManager.get()).foreach { tpe =>
+      tpe.getImageWidget.addInfoObserver(new TpeImageInfoObserver {
+        override def imageInfoUpdate(iw: TpeImageWidget, tii: TpeImageInfo): Unit =
+          for {
+            c <- iw.getObsContext.asScalaOpt
+            s <- AgsRegistrar.currentStrategy(c)
+          } {
+
+            val mt = ProbeLimitsTable.loadOrThrow()
+            s.catalogQueries(c, mt).headOption.foreach {
+              case q: ConeSearchCatalogQuery =>
+
+                val curModel = model.asInstanceOf[TargetsModel]
+
+                val updated  = curModel.info.exists { i =>
+                  (i.positionAngle =/= c.getPositionAngle) ||
+                    (i.baseCoordinates =/= c.getBaseCoordinates.asScalaOpt.map(_.toNewModel))
+                }
+
+                if (updated) {
+                  val info = ObservationInfo(c, mt)
+                  val tm   = TargetsModel(info.some, q.base, q.radiusConstraint, curModel.targets)
+                  updateResultsModel(tm)
+
+                  // Update the plotter's table list so that the selection link
+                  // between the table rows and the plot continues to work.
+                  iw.plotter.unplotAll()
+                  iw.plotter.plot(TableQueryResultAdapter(tm))
+                }
+
+              case _ =>
+              // Ignore named queries
+            }
+          }
+
+
+      })
+    }
 
     override def rendererComponent(isSelected: Boolean, focused: Boolean, row: Int, column: Int): Component =
       // Note that we need to use the same conversions as indicated on SortableTable to get the value
