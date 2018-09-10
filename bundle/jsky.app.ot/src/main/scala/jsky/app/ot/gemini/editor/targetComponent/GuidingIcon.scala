@@ -3,7 +3,7 @@ package jsky.app.ot.gemini.editor.targetComponent
 import edu.gemini.ags.api.AgsGuideQuality._
 import java.awt.geom.{Arc2D, Rectangle2D}
 
-import edu.gemini.ags.api.{AgsGuideQuality, GuideInFOV, InsideFOV, OutsideFOV}
+import edu.gemini.ags.api.AgsGuideQuality
 import jsky.app.ot.util.Rendering
 import java.awt.{BasicStroke, Color}
 import java.awt.image.BufferedImage

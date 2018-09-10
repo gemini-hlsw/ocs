@@ -5,7 +5,7 @@ import java.net.URL
 
 import javax.swing.event.TableModelListener
 import edu.gemini.ags.api.AgsGuideQuality._
-import edu.gemini.ags.api.{AgsGuideQuality, GuideInFOV, InsideFOV, OutsideFOV}
+import edu.gemini.ags.api.{AgsGuideQuality, GuideInFOV}
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.{MagnitudeBand, SiderealTarget}
@@ -93,72 +93,74 @@ object adapters {
     }
   }
 
+  import GuideInFOV.{Inside, Outside}
+
   case object DeliversRequestedIqSymbolInFOV extends GuideQualitySymbol {
     val quality: Option[AgsGuideQuality] = DeliversRequestedIq.some
-    val inFOV: Option[GuideInFOV] = InsideFOV.some
+    val inFOV: Option[GuideInFOV] = Inside.some
     setFg(Color.green)
     setShape(TablePlotSymbol.CIRCLE)
   }
 
   case object DeliversRequestedIqSymbolOutFOV extends GuideQualitySymbol {
     val quality: Option[AgsGuideQuality] = DeliversRequestedIq.some
-    val inFOV: Option[GuideInFOV] = OutsideFOV.some
+    val inFOV: Option[GuideInFOV] = Outside.some
     setFg(Color.green)
     setShape(TablePlotSymbol.CIRCLE)
   }
 
   case object PossibleIqDegradationSymbolInFOV extends GuideQualitySymbol {
     val quality: Option[AgsGuideQuality] = PossibleIqDegradation.some
-    val inFOV: Option[GuideInFOV] = InsideFOV.some
+    val inFOV: Option[GuideInFOV] = Inside.some
     setFg(Color.green)
     setShape(TablePlotSymbol.CIRCLE)
   }
 
   case object PossibleIqDegradationSymbolOutFOV extends GuideQualitySymbol {
     val quality: Option[AgsGuideQuality] = PossibleIqDegradation.some
-    val inFOV: Option[GuideInFOV] = OutsideFOV.some
+    val inFOV: Option[GuideInFOV] = Outside.some
     setFg(Color.green)
     setShape(TablePlotSymbol.CIRCLE)
   }
 
   case object IqDegradationSymbolInFOV extends GuideQualitySymbol {
     val quality: Option[AgsGuideQuality] = IqDegradation.some
-    val inFOV: Option[GuideInFOV] = InsideFOV.some
+    val inFOV: Option[GuideInFOV] = Inside.some
     setFg(Color.orange)
     setShape(TablePlotSymbol.CIRCLE)
   }
 
   case object IqDegradationSymbolOutFOV extends GuideQualitySymbol {
     val quality: Option[AgsGuideQuality] = IqDegradation.some
-    val inFOV: Option[GuideInFOV] = OutsideFOV.some
+    val inFOV: Option[GuideInFOV] = Outside.some
     setFg(Color.orange)
     setShape(TablePlotSymbol.CIRCLE)
   }
 
   case object PossiblyUnusableSymbolInFOV extends GuideQualitySymbol {
     val quality: Option[AgsGuideQuality] = PossiblyUnusable.some
-    val inFOV: Option[GuideInFOV] = InsideFOV.some
+    val inFOV: Option[GuideInFOV] = Inside.some
     setFg(Color.red)
     setShape(TablePlotSymbol.CIRCLE)
   }
 
   case object PossiblyUnusableSymbolOutFOV extends GuideQualitySymbol {
     val quality: Option[AgsGuideQuality] = PossiblyUnusable.some
-    val inFOV: Option[GuideInFOV] = OutsideFOV.some
+    val inFOV: Option[GuideInFOV] = Outside.some
     setFg(Color.red)
     setShape(TablePlotSymbol.CIRCLE)
   }
 
   case object UnusableSymbolInFOV extends GuideQualitySymbol {
     val quality: Option[AgsGuideQuality] = Unusable.some
-    val inFOV: Option[GuideInFOV] = InsideFOV.some
+    val inFOV: Option[GuideInFOV] = Inside.some
     setFg(Color.red)
     setShape(TablePlotSymbol.CROSS)
   }
 
   case object UnusableSymbolOutFOV extends GuideQualitySymbol {
     val quality: Option[AgsGuideQuality] = Unusable.some
-    val inFOV: Option[GuideInFOV] = OutsideFOV.some
+    val inFOV: Option[GuideInFOV] = Outside.some
     setFg(Color.red)
     setShape(TablePlotSymbol.CROSS)
   }

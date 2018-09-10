@@ -8,6 +8,7 @@ import javax.swing.BorderFactory._
 import javax.swing.border.Border
 import javax.swing._
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
+import edu.gemini.ags.api.GuideInFOV.{Outside, Inside}
 import edu.gemini.ags.api._
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
@@ -75,7 +76,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   private object InFOVRenderer {
     val inFovIcon: ImageIcon = Resources.getIcon("bullet/bullet_green.png")
     val outFovIcon: ImageIcon = Resources.getIcon("bullet/bullet_red.png")
-    val icons: Map[GuideInFOV, ImageIcon] = Map(InsideFOV -> inFovIcon, OutsideFOV -> outFovIcon)
+    val icons: Map[GuideInFOV, ImageIcon] = Map(Inside -> inFovIcon, Outside -> outFovIcon)
     val dimensions = new Dimension(GuidingIcon.sideLength + 2, GuidingIcon.sideLength + 2)
   }
 

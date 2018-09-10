@@ -5,7 +5,7 @@ import java.awt.Color._
 
 import javax.swing.{BorderFactory, Icon}
 import edu.gemini.ags.api.AgsAnalysis.{NoGuideStarForGroup, NoGuideStarForProbe}
-import edu.gemini.ags.api.{AgsAnalysis, AgsRegistrar, InsideFOV}
+import edu.gemini.ags.api.{AgsAnalysis, AgsRegistrar}
 import edu.gemini.ags.api.AgsGuideQuality.{DeliversRequestedIq, IqDegradation, PossibleIqDegradation, PossiblyUnusable, Unusable}
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.pot.ModelConverters._

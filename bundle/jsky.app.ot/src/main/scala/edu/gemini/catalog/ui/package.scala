@@ -3,6 +3,7 @@ package edu.gemini.catalog.ui
 import javax.swing.JTable
 import javax.swing.table._
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
+import edu.gemini.ags.api.GuideInFOV.{Outside, Inside}
 import edu.gemini.ags.api._
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
@@ -225,7 +226,7 @@ object GuidingQualityColumn {
       ctx <- o.toContext
       c   <- t.coords(None)
       st = new SPTarget(SiderealTarget.empty.copy(coordinates = c))
-    } yield (gp.validate(st, ctx) === GuideStarValidation.VALID).fold(InsideFOV, OutsideFOV)
+    } yield (gp.validate(st, ctx) === GuideStarValidation.VALID).fold(Inside, Outside)
   }
 }
 
