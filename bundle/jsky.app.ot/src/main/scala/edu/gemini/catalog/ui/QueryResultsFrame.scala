@@ -76,13 +76,17 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   private object InFOVRenderer {
     val inFovIcon: ImageIcon = Resources.getIcon("bullet/bullet_green.png")
     val outFovIcon: ImageIcon = Resources.getIcon("bullet/bullet_red.png")
-    val icons: Map[GuideInFOV, ImageIcon] = Map(Inside -> inFovIcon, Outside -> outFovIcon)
+    def icon(gif: GuideInFOV): ImageIcon =
+      gif match {
+        case GuideInFOV.Inside  => inFovIcon
+        case GuideInFOV.Outside => outFovIcon
+      }
     val dimensions = new Dimension(GuidingIcon.sideLength + 2, GuidingIcon.sideLength + 2)
   }
 
   private class InFOVRenderer extends Table.AbstractRenderer[GuideInFOV, Label](new Label) {
     override def configure(t: Table, sel: Boolean, foc: Boolean, value: GuideInFOV, row: Int, col: Int): Unit = {
-      component.icon = InFOVRenderer.icons.get(value).orNull
+      component.icon = InFOVRenderer.icon(value)
       component.text = ""
       component.preferredSize = InFOVRenderer.dimensions
       component.maximumSize = InFOVRenderer.dimensions
