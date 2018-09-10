@@ -296,6 +296,7 @@ public class BasicTablePlotter
     private void plotRow(final int row, final Vector<Object> rowVec, final double x, final double y,
                            final int cooSys, final TablePlotSymbol symbol) {
         // eval expr to get condition
+
         final boolean cond = symbol.getCond(rowVec);
         if (!cond)
             return;
@@ -338,15 +339,7 @@ public class BasicTablePlotter
 
         // convert to screen coordinates
         final Point2D.Double pos = new Point2D.Double(x, y);
-        _coordinateConverter.convertCoords(pos, cooSys, CoordinateConverter.USER, false);
-
-        // clip to image bounds
-        final double w = _coordinateConverter.getWidth();
-        final double h = _coordinateConverter.getHeight();
-        if (pos.x < 0. || pos.y < 0. || pos.x >= w || pos.y >= h) {
-            return;
-        }
-        _coordinateConverter.convertCoords(pos, CoordinateConverter.USER, CoordinateConverter.SCREEN, false);
+        _coordinateConverter.convertCoords(pos, cooSys, CoordinateConverter.SCREEN, false);
 
         final Point2D.Double size = new Point2D.Double(radius, radius);
         final int sizeType = getCoordType(symbol.getUnits());

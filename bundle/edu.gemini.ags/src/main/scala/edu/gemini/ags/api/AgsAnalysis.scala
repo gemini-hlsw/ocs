@@ -61,41 +61,41 @@ sealed trait AgsAnalysis {
 }
 
 object AgsAnalysis {
-  case class NoGuideStarForProbe(guideProbe: GuideProbe) extends AgsAnalysis {
+  final case class NoGuideStarForProbe(guideProbe: GuideProbe) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"${guideProbe.getKey} " else ""
       s"No ${p}guide star selected."
     }
   }
 
-  case class NoGuideStarForGroup(guideGroup: GuideProbeGroup) extends AgsAnalysis {
+  final case class NoGuideStarForGroup(guideGroup: GuideProbeGroup) extends AgsAnalysis {
     override def message(withProbe: Boolean): String =
       s"No ${guideGroup.getKey} guide star selected."
   }
 
-  case class MagnitudeTooFaint(guideProbe: GuideProbe, target: SiderealTarget) extends AgsAnalysis {
+  final case class MagnitudeTooFaint(guideProbe: GuideProbe, target: SiderealTarget) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"use ${guideProbe.getKey}" else "guide"
       s"Cannot $p with the star in these conditions, even using the slowest guide speed."
     }
   }
 
-  case class MagnitudeTooBright(guideProbe: GuideProbe, target: SiderealTarget) extends AgsAnalysis {
+  final case class MagnitudeTooBright(guideProbe: GuideProbe, target: SiderealTarget) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"${guideProbe.getKey} g" else "G"
       s"${p}uide star is too bright to guide."
     }
   }
 
-  case class NotReachable(guideProbe: GuideProbe, target: SiderealTarget) extends AgsAnalysis {
+  final case class NotReachable(guideProbe: GuideProbe, target: SiderealTarget) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"with ${guideProbe.getKey} " else ""
       s"The star is not reachable ${p}at all positions."
     }
   }
 
-  case class NoMagnitudeForBand(guideProbe: GuideProbe, target: SiderealTarget) extends AgsAnalysis {
-    val probeBands = guideProbe.getBands
+  final case class NoMagnitudeForBand(guideProbe: GuideProbe, target: SiderealTarget) extends AgsAnalysis {
+    private val probeBands = guideProbe.getBands
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"${guideProbe.getKey} g" else "G"
       if (probeBands.bands.length == 1) {
@@ -104,10 +104,10 @@ object AgsAnalysis {
         s"${p}uide star ${probeBands.bands.map(_.name).mkString(", ")}-band magnitudes are missing. Cannot determine guiding performance."
       }
     }
-    override val quality = AgsGuideQuality.PossiblyUnusable
+    override val quality: AgsGuideQuality = AgsGuideQuality.PossiblyUnusable
   }
 
-  case class Usable(guideProbe: GuideProbe, target: SiderealTarget, guideSpeed: GuideSpeed, override val quality: AgsGuideQuality) extends AgsAnalysis {
+  final case class Usable(guideProbe: GuideProbe, target: SiderealTarget, guideSpeed: GuideSpeed, override val quality: AgsGuideQuality) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val qualityMessage = quality match {
         case AgsGuideQuality.DeliversRequestedIq => ""
@@ -156,7 +156,11 @@ object AgsAnalysis {
     else magnitudeAnalysis(ctx, mt, guideProbe, guideStar)
   }
 
-  private def magnitudeAnalysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] = {
+  /**
+   * Analysis of the suitability of the magnitude of the given guide star
+   * regardless of its reachability.
+   */
+  def magnitudeAnalysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] = {
     import AgsGuideQuality._
     import GuideSpeed._
 
@@ -210,4 +214,21 @@ object AgsAnalysis {
       analysisOpt.getOrElse(NoMagnitudeForBand(guideProbe, guideStar))
     }
   }
+}
+
+sealed trait GuideInFOV
+
+object GuideInFOV {
+  case object Inside  extends GuideInFOV
+  case object Outside extends GuideInFOV
+
+  implicit val order: Order[GuideInFOV] = Order.order {
+    case (Inside, Outside) => Ordering.GT
+    case (Outside, Inside) => Ordering.LT
+    case _                 => Ordering.EQ
+  }
+
+  implicit val ordering: scala.Ordering[GuideInFOV] = order.toScalaOrdering
+
+  val All: List[GuideInFOV] = List(Inside, Outside)
 }

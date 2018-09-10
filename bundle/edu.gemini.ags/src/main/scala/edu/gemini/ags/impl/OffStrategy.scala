@@ -26,6 +26,8 @@ case object OffStrategy extends AgsStrategy {
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] = None
 
+  override def analyzeMagnitude(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] = None
+
   override def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] = Nil
 
   override def candidates(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[(GuideProbe, List[SiderealTarget])]] = Nil.pure[Future]

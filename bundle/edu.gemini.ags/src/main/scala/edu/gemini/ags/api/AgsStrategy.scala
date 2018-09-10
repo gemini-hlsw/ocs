@@ -31,6 +31,8 @@ trait AgsStrategy {
     else analyze(ctx, mt, guideProbe, guideStar).asGeminiOpt
   }
 
+  def analyzeMagnitude(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis]
+
   def candidates(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[(GuideProbe, List[SiderealTarget])]]
 
   /**

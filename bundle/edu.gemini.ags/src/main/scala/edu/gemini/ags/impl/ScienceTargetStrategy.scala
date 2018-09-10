@@ -24,6 +24,9 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGui
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
     AgsAnalysis.analysis(ctx, mt, guideProbe).toList
 
+  override def analyzeMagnitude(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
+    analyze(ctx, mt, guideProbe, guideStar)
+
   private def toSiderealTargets(ctx: ObsContext): List[SiderealTarget] = {
     val when = ctx.getSchedulingBlockStart
     val ts   = ctx.getTargets.getAsterism.allSpTargets.map(_.toSiderealTarget(when))

@@ -50,6 +50,9 @@ trait GemsStrategy extends AgsStrategy {
   override def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
     AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar)
 
+  def analyzeMagnitude(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
+    AgsAnalysis.magnitudeAnalysis(ctx, mt, guideProbe, guideStar)
+
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] = {
     import AgsAnalysis._
 

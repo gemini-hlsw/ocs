@@ -3,14 +3,16 @@ package edu.gemini.catalog.ui
 import java.awt.Color
 import java.io._
 import java.nio.charset.Charset
+
 import javax.swing.BorderFactory._
 import javax.swing.border.Border
-import javax.swing.{BorderFactory, DefaultComboBoxModel, JOptionPane, UIManager}
-
+import javax.swing._
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
-import edu.gemini.ags.api.{AgsGuideQuality, AgsRegistrar}
+import edu.gemini.ags.api.GuideInFOV.{Outside, Inside}
+import edu.gemini.ags.api._
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
+import edu.gemini.catalog.ui.adapters.TableQueryResultAdapter
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.SPComponentType
@@ -28,7 +30,7 @@ import edu.gemini.ui.miglayout.MigPanel
 import edu.gemini.ui.miglayout.constraints._
 import jsky.app.ot.gemini.editor.targetComponent.GuidingIcon
 import jsky.app.ot.gemini.editor.targetComponent.TargetGuidingFeedback.ProbeLimits
-import jsky.app.ot.tpe.{TpeContext, TpeManager}
+import jsky.app.ot.tpe._
 import jsky.app.ot.util.OtColor
 import jsky.catalog.gui.{SymbolSelectionEvent, SymbolSelectionListener}
 import jsky.util.gui.{DialogUtil, Resources}
@@ -40,6 +42,8 @@ import scala.collection.JavaConverters._
 import scala.swing.event._
 import scalaz._
 import Scalaz._
+
+import scala.collection.mutable.ListBuffer
 
 /**
  * Frame to display the Query controls and results
@@ -56,7 +60,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   }
 
   private object GuidingFeedbackRenderer {
-    val icons = AgsGuideQuality.All.fproduct(GuidingIcon(_, enabled = true)).toMap
+    val icons: Map[AgsGuideQuality, ImageIcon] = AgsGuideQuality.All.fproduct(GuidingIcon(_, enabled = true)).toMap
     val dimensions = new Dimension(GuidingIcon.sideLength + 2, GuidingIcon.sideLength + 2)
   }
 
@@ -69,12 +73,31 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     }
   }
 
+  private object InFOVRenderer {
+    val inFovIcon: ImageIcon = Resources.getIcon("bullet/bullet_green.png")
+    val outFovIcon: ImageIcon = Resources.getIcon("bullet/bullet_red.png")
+    def icon(gif: GuideInFOV): ImageIcon =
+      gif match {
+        case GuideInFOV.Inside  => inFovIcon
+        case GuideInFOV.Outside => outFovIcon
+      }
+    val dimensions = new Dimension(GuidingIcon.sideLength + 2, GuidingIcon.sideLength + 2)
+  }
+
+  private class InFOVRenderer extends Table.AbstractRenderer[GuideInFOV, Label](new Label) {
+    override def configure(t: Table, sel: Boolean, foc: Boolean, value: GuideInFOV, row: Int, col: Int): Unit = {
+      component.icon = InFOVRenderer.icon(value)
+      component.text = ""
+      component.preferredSize = InFOVRenderer.dimensions
+      component.maximumSize = InFOVRenderer.dimensions
+    }
+  }
   private lazy val resultsTable = new Table() with SortableTable with TableColumnsAdjuster {
     selection.elementMode = Table.ElementMode.Row
     listenTo(selection)
 
     reactions += {
-      case TableRowsSelected(source, range, false) =>
+      case TableRowsSelected(source, _, false) =>
         selectResults(source.selection.rows.toSet.map(viewToModelRow))
     }
     Option(TpeManager.get()).foreach(_.getImageWidget.plotter.addSymbolSelectionListener(new SymbolSelectionListener {
@@ -87,11 +110,54 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       }
     }))
 
-    override def rendererComponent(isSelected: Boolean, focused: Boolean, row: Int, column: Int) =
+    // Watch the image widget for image info updates in order to refresh the
+    // "FOV" column that shows whether the guide star is in reach of the probe.
+    Option(TpeManager.get()).foreach { tpe =>
+      tpe.getImageWidget.addInfoObserver(new TpeImageInfoObserver {
+        override def imageInfoUpdate(iw: TpeImageWidget, tii: TpeImageInfo): Unit =
+          for {
+            c <- iw.getObsContext.asScalaOpt
+            s <- AgsRegistrar.currentStrategy(c)
+          } {
+
+            val mt = ProbeLimitsTable.loadOrThrow()
+            s.catalogQueries(c, mt).headOption.foreach {
+              case q: ConeSearchCatalogQuery =>
+
+                val curModel = model.asInstanceOf[TargetsModel]
+
+                val updated  = curModel.info.exists { i =>
+                  (i.positionAngle =/= c.getPositionAngle) ||
+                    (i.baseCoordinates =/= c.getBaseCoordinates.asScalaOpt.map(_.toNewModel))
+                }
+
+                if (updated) {
+                  val info = ObservationInfo(c, mt)
+                  val tm   = TargetsModel(info.some, q.base, q.radiusConstraint, curModel.targets)
+                  updateResultsModel(tm)
+
+                  // Update the plotter's table list so that the selection link
+                  // between the table rows and the plot continues to work.
+                  iw.plotter.unplotAll()
+                  iw.plotter.plot(TableQueryResultAdapter(tm))
+                }
+
+              case _ =>
+              // Ignore named queries
+            }
+          }
+
+
+      })
+    }
+
+    override def rendererComponent(isSelected: Boolean, focused: Boolean, row: Int, column: Int): Component =
       // Note that we need to use the same conversions as indicated on SortableTable to get the value
       (model, model.getValueAt(viewToModelRow(row), viewToModelColumn(column))) match {
-        case (m: TargetsModel, q:AgsGuideQuality) =>
+        case (_, q: AgsGuideQuality) =>
           new GuidingFeedbackRenderer().componentFor(this, isSelected, focused, q, row, column)
+        case (_, q: GuideInFOV) =>
+          new InFOVRenderer().componentFor(this, isSelected, focused, q, row, column)
         case (m: TargetsModel, value) =>
           // Delegate rendering to the model
           m.rendererComponent(value, isSelected, focused, row, column, this.peer).getOrElse(super.rendererComponent(isSelected, focused, row, column))
@@ -161,7 +227,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   }
 
   title = "Catalog Query Tool"
-  val tableBorder = new BorderPanel() {
+  val tableBorder: BorderPanel = new BorderPanel() {
     border = titleBorder("Results")
     add(scrollPane, BorderPanel.Position.Center)
   }
@@ -230,6 +296,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       }
     }
   }
+
   private def plotResults(): Unit = {
     resultsTable.model match {
       case t: TargetsModel =>
@@ -309,14 +376,14 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
     border = titleBorder("Query Parameters")
 
-    lazy val queryButton = new Button("Query") {
+    lazy val queryButton: Button = new Button("Query") {
       reactions += {
         case ButtonClicked(_) =>
           // Hit the catalog with a new query
           buildQuery.foreach(Function.tupled(reloadSearchData))
       }
     }
-    lazy val fromImageButton = new Button("Reset") {
+    lazy val fromImageButton: Button = new Button("Reset") {
       reactions += {
         case ButtonClicked(_) =>
           // Reload target info from the OT
@@ -335,8 +402,10 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         }
     }
 
-    lazy val objectName = new TextField("") with SelectOnFocus {
-      val foregroundColor = UIManager.getColor("TextField.foreground")
+    lazy val objectName: TextField with SelectOnFocus {
+      def resetName(n: String): Unit
+    } = new TextField("") with SelectOnFocus {
+      val foregroundColor: Color = UIManager.getColor("TextField.foreground")
       listenTo(keys)
       reactions += {
         case KeyPressed(_, Key.Enter, _, _) if text.nonEmpty =>
@@ -351,7 +420,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         foreground = foregroundColor
       }
     }
-    lazy val searchByName = new Button("") {
+    lazy val searchByName: Button = new Button("") {
       icon = Resources.getIcon("eclipse/search.gif")
       ButtonFlattener.flatten(peer)
       reactions += {
@@ -359,8 +428,10 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           doNameSearch(objectName.text)
       }
     }
-    lazy val instrumentBox = new ComboBox[SPComponentType](ObservationInfo.InstList.map(_._2)) with TextRenderer[SPComponentType] {
-      override def text(a: SPComponentType) = ~Option(a).flatMap(t => ObservationInfo.InstMap.get(t))
+    lazy val instrumentBox: ComboBox[SPComponentType] with TextRenderer[SPComponentType] {
+      def text(a: SPComponentType): String
+    } = new ComboBox[SPComponentType](ObservationInfo.InstList.map(_._2)) with TextRenderer[SPComponentType] {
+      override def text(a: SPComponentType): String = ~Option(a).flatMap(t => ObservationInfo.InstMap.get(t))
       selection.item = ObservationInfo.DefaultInstrument
       listenTo(selection)
       reactions += {
@@ -382,8 +453,13 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           }
       }
     }
-    lazy val catalogBox = new ComboBox(List[CatalogName](UCAC4, PPMXL)) with TextRenderer[CatalogName] {
-      override def text(a: CatalogName) = ~Option(a).map(_.displayName)
+
+    lazy val catalogBox: ComboBox[CatalogName] with TextRenderer[CatalogName] {
+      def text(a: CatalogName): String
+    } = new ComboBox(List[CatalogName](UCAC4, PPMXL)) with TextRenderer[CatalogName] {
+
+      override def text(a: CatalogName): String =
+        Option(a).foldMap(_.displayName)
 
       listenTo(selection)
       reactions += {
@@ -396,8 +472,11 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           revalidateFrame()
       }
     }
-    lazy val guider = new ComboBox(List.empty[SupportedStrategy]) with TextRenderer[SupportedStrategy] {
-      override def text(a: SupportedStrategy) = ~Option(a).map(s => {
+
+    lazy val guider: ComboBox[SupportedStrategy] with TextRenderer[SupportedStrategy] {
+      def text(a: SupportedStrategy): String
+    } = new ComboBox(List.empty[SupportedStrategy]) with TextRenderer[SupportedStrategy] {
+      override def text(a: SupportedStrategy): String = ~Option(a).map(s => {
         if (s.altairMode == AltairParams.Mode.LGS_P1.some) {
           AltairParams.Mode.LGS_P1.displayValue
         } else {
@@ -421,12 +500,14 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     }
 
     // PA and offsets must be mutable, the rest of the model lives on the UI
-    var pa = Angle.zero
+    var pa: Angle = Angle.zero
     var allowPAFlip = false
     var offsets = Set.empty[Offset]
-    var originalConditions = ObservationInfo.zero.conditions
+    var originalConditions: Option[Conditions] = ObservationInfo.zero.conditions
 
-    def conditionsRenderer[A <: Comparable[A]](get: Option[Conditions] => Option[A], text: TextRenderer[A]) = new ListView.AbstractRenderer[A, Label](new Label()) {
+    def conditionsRenderer[A <: Comparable[A]](get: Option[Conditions] => Option[A], text: TextRenderer[A]): ListView.AbstractRenderer[A, Label] {
+      def configure(list: ListView[_], isSelected: Boolean, focused: Boolean, a: A, index: Int): Unit
+    } = new ListView.AbstractRenderer[A, Label](new Label()) {
       override def configure(list: ListView[_], isSelected: Boolean, focused: Boolean, a: A, index: Int): Unit = {
         component.text = text.text(a)
         component.horizontalAlignment = Alignment.Left
@@ -439,7 +520,9 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       }
     }
 
-    lazy val sbBox = new ComboBox(List(SPSiteQuality.SkyBackground.values(): _*)) with TextRenderer[SPSiteQuality.SkyBackground] {
+    lazy val sbBox: ComboBox[SPSiteQuality.SkyBackground] with TextRenderer[SPSiteQuality.SkyBackground] {
+      def text(a: SPSiteQuality.SkyBackground): String
+    } = new ComboBox(List(SPSiteQuality.SkyBackground.values(): _*)) with TextRenderer[SPSiteQuality.SkyBackground] {
       renderer = conditionsRenderer(_.map(_.sb), this)
 
       listenTo(selection)
@@ -457,10 +540,12 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           }
       }
 
-      override def text(a: SPSiteQuality.SkyBackground) = a.displayValue()
+      override def text(a: SPSiteQuality.SkyBackground): String = a.displayValue()
     }
 
-    lazy val ccBox = new ComboBox(List(SPSiteQuality.CloudCover.values().filter(!_.isObsolete): _*)) with TextRenderer[SPSiteQuality.CloudCover] {
+    lazy val ccBox: ComboBox[SPSiteQuality.CloudCover] with TextRenderer[SPSiteQuality.CloudCover] {
+      def text(a: SPSiteQuality.CloudCover): String
+    } = new ComboBox(List(SPSiteQuality.CloudCover.values().filterNot(_.isObsolete): _*)) with TextRenderer[SPSiteQuality.CloudCover] {
       renderer = conditionsRenderer(_.map(_.cc), this)
 
       listenTo(selection)
@@ -478,10 +563,12 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           }
       }
 
-      override def text(a: SPSiteQuality.CloudCover) = a.displayValue()
+      override def text(a: SPSiteQuality.CloudCover): String = a.displayValue()
     }
 
-    lazy val iqBox = new ComboBox(List(SPSiteQuality.ImageQuality.values(): _*)) with TextRenderer[SPSiteQuality.ImageQuality] {
+    lazy val iqBox: ComboBox[SPSiteQuality.ImageQuality] with TextRenderer[SPSiteQuality.ImageQuality] {
+      def text(a: SPSiteQuality.ImageQuality): String
+    } = new ComboBox(List(SPSiteQuality.ImageQuality.values(): _*)) with TextRenderer[SPSiteQuality.ImageQuality] {
       renderer = conditionsRenderer(_.map(_.iq), this)
 
       listenTo(selection)
@@ -499,14 +586,16 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           }
       }
 
-      override def text(a: SPSiteQuality.ImageQuality) = a.displayValue()
+      override def text(a: SPSiteQuality.ImageQuality): String = a.displayValue()
     }
 
-    lazy val limitsLabel = new Label() {
+    lazy val limitsLabel: Label = new Label() {
       font = font.deriveFont(font.getSize2D * 0.8f)
     }
 
-    lazy val ra = new RATextField(RightAscension.zero) {
+    lazy val ra: RATextField {
+      def updateRa(ra: RA): Unit
+    } = new RATextField(RightAscension.zero) {
       reactions += queryButtonEnabling
 
       def updateRa(ra: RightAscension): Unit = {
@@ -514,7 +603,9 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       }
     }
 
-    lazy val dec = new DecTextField(Declination.zero) {
+    lazy val dec: DecTextField {
+      def updateDec(dec: Dec): Unit
+    } = new DecTextField(Declination.zero) {
       reactions += queryButtonEnabling
 
       def updateDec(dec: Declination): Unit = {
@@ -533,7 +624,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     }
 
     // Contains the list of controls on the UI to make magnitude filters
-    val magnitudeControls = mutable.ListBuffer.empty[MagnitudeFilterControls]
+    val magnitudeControls: ListBuffer[MagnitudeFilterControls] = mutable.ListBuffer.empty[MagnitudeFilterControls]
 
     /**
      * Reconstructs the layout depending on the magnitude constraints
@@ -701,7 +792,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       def bandComboBox(band: MagnitudeBand) = new ComboBox(catalog.supportedBands) with TextRenderer[MagnitudeBand] {
         selection.item = band
 
-        override def text(a: MagnitudeBand) = a.name.padTo(2, " ").mkString("")
+        override def text(a: MagnitudeBand): String = a.name.padTo(2, " ").mkString("")
       }
 
       val rRepresentative = catalog.rBand
@@ -835,7 +926,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   }
 
   // Public interface
-  val instance = this
+  val instance: QueryResultsFrame.type = this
 
   def showOn(i: CatalogImageDisplay, n: TpeContext) {
     Option(n).flatMap(_.obsContext).foreach(showOn)

@@ -2,13 +2,13 @@ package edu.gemini.catalog.ui
 
 import java.awt.Color
 import java.net.URL
-import javax.swing.event.TableModelListener
 
+import javax.swing.event.TableModelListener
 import edu.gemini.ags.api.AgsGuideQuality._
-import edu.gemini.ags.api.AgsGuideQuality
+import edu.gemini.ags.api.{AgsGuideQuality, GuideInFOV}
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.spModel.core.{SiderealTarget, MagnitudeBand}
+import edu.gemini.spModel.core.{MagnitudeBand, SiderealTarget}
 import edu.gemini.shared.util.immutable.{Option => JOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import jsky.catalog._
@@ -82,44 +82,87 @@ object adapters {
     }
   }
 
-
-
   // This is a hack to change the symbol dynamically depending on the guiding quality
   sealed trait GuideQualitySymbol extends TablePlotSymbol {
-    val quality: Option[AgsGuideQuality]
+    def quality: Option[AgsGuideQuality]
+    def inFOV: Option[GuideInFOV]
 
-    override def getCond(rowVec: java.util.Vector[AnyRef]): Boolean =
-      rowVec.asScala.contains(quality)
+    override def getCond(rowVec: java.util.Vector[AnyRef]): Boolean = {
+      val vec = rowVec.asScala
+      vec.contains(quality) && vec.contains(inFOV)
+    }
   }
 
-  case object DeliversRequestedIqSymbol extends GuideQualitySymbol {
-    val quality = DeliversRequestedIq.some
+  import GuideInFOV.{Inside, Outside}
+
+  case object DeliversRequestedIqSymbolInFOV extends GuideQualitySymbol {
+    val quality: Option[AgsGuideQuality] = DeliversRequestedIq.some
+    val inFOV: Option[GuideInFOV] = Inside.some
     setFg(Color.green)
     setShape(TablePlotSymbol.CIRCLE)
   }
 
-  case object PossibleIqDegradationSymbol extends GuideQualitySymbol {
-    val quality = PossibleIqDegradation.some
+  case object DeliversRequestedIqSymbolOutFOV extends GuideQualitySymbol {
+    val quality: Option[AgsGuideQuality] = DeliversRequestedIq.some
+    val inFOV: Option[GuideInFOV] = Outside.some
     setFg(Color.green)
-    setShape(TablePlotSymbol.ELLIPSE)
-  }
-
-  case object IqDegradationSymbol extends GuideQualitySymbol {
-    val quality = IqDegradation.some
-    setFg(Color.yellow)
     setShape(TablePlotSymbol.CIRCLE)
   }
 
-  case object PossiblyUnusableSymbol extends GuideQualitySymbol {
-    val quality = PossiblyUnusable.some
+  case object PossibleIqDegradationSymbolInFOV extends GuideQualitySymbol {
+    val quality: Option[AgsGuideQuality] = PossibleIqDegradation.some
+    val inFOV: Option[GuideInFOV] = Inside.some
+    setFg(Color.green)
+    setShape(TablePlotSymbol.CIRCLE)
+  }
+
+  case object PossibleIqDegradationSymbolOutFOV extends GuideQualitySymbol {
+    val quality: Option[AgsGuideQuality] = PossibleIqDegradation.some
+    val inFOV: Option[GuideInFOV] = Outside.some
+    setFg(Color.green)
+    setShape(TablePlotSymbol.CIRCLE)
+  }
+
+  case object IqDegradationSymbolInFOV extends GuideQualitySymbol {
+    val quality: Option[AgsGuideQuality] = IqDegradation.some
+    val inFOV: Option[GuideInFOV] = Inside.some
     setFg(Color.orange)
     setShape(TablePlotSymbol.CIRCLE)
   }
 
-  case object UnusableSymbol extends GuideQualitySymbol {
-    val quality = Unusable.some
+  case object IqDegradationSymbolOutFOV extends GuideQualitySymbol {
+    val quality: Option[AgsGuideQuality] = IqDegradation.some
+    val inFOV: Option[GuideInFOV] = Outside.some
+    setFg(Color.orange)
+    setShape(TablePlotSymbol.CIRCLE)
+  }
+
+  case object PossiblyUnusableSymbolInFOV extends GuideQualitySymbol {
+    val quality: Option[AgsGuideQuality] = PossiblyUnusable.some
+    val inFOV: Option[GuideInFOV] = Inside.some
     setFg(Color.red)
     setShape(TablePlotSymbol.CIRCLE)
+  }
+
+  case object PossiblyUnusableSymbolOutFOV extends GuideQualitySymbol {
+    val quality: Option[AgsGuideQuality] = PossiblyUnusable.some
+    val inFOV: Option[GuideInFOV] = Outside.some
+    setFg(Color.red)
+    setShape(TablePlotSymbol.CIRCLE)
+  }
+
+  case object UnusableSymbolInFOV extends GuideQualitySymbol {
+    val quality: Option[AgsGuideQuality] = Unusable.some
+    val inFOV: Option[GuideInFOV] = Inside.some
+    setFg(Color.red)
+    setShape(TablePlotSymbol.CROSS)
+  }
+
+  case object UnusableSymbolOutFOV extends GuideQualitySymbol {
+    val quality: Option[AgsGuideQuality] = Unusable.some
+    val inFOV: Option[GuideInFOV] = Outside.some
+    setFg(Color.red)
+    setShape(TablePlotSymbol.CROSS)
   }
 
   /**
@@ -137,7 +180,17 @@ object adapters {
 
     override def getSymbolDesc(i: Int): TablePlotSymbol = ???
 
-    override def getSymbols: Array[TablePlotSymbol] = Array(DeliversRequestedIqSymbol, PossibleIqDegradationSymbol, IqDegradationSymbol, PossiblyUnusableSymbol, UnusableSymbol)
+    override def getSymbols: Array[TablePlotSymbol] = Array(
+      DeliversRequestedIqSymbolInFOV,
+      DeliversRequestedIqSymbolOutFOV,
+      PossibleIqDegradationSymbolInFOV,
+      PossibleIqDegradationSymbolOutFOV,
+      IqDegradationSymbolInFOV,
+      IqDegradationSymbolOutFOV,
+      PossiblyUnusableSymbolInFOV,
+      PossiblyUnusableSymbolOutFOV,
+      UnusableSymbolInFOV,
+      UnusableSymbolOutFOV)
 
     override def getType: String = ???
 
@@ -179,7 +232,7 @@ object adapters {
 
   /** Table Query Result Adapter to let the BasicTablePlotter work */
   case class TableQueryResultAdapter(model: TargetsModel) extends TableQueryResult {
-    val catalog = new CatalogAdapter(model)
+    val catalog = CatalogAdapter(model)
 
     // Table QueryResult methods
     override def getCatalog: Catalog = catalog
@@ -189,7 +242,7 @@ object adapters {
         case Some(v) => Double.box(v.value)
         case None => null // This is required for the Java side of plotting
       }
-      new java.util.Vector[AnyRef]((List(t.name, t.coordinates.ra.toAngle.formatHMS, t.coordinates.dec.formatDMS, GuidingQuality.target2Analysis(model.info, t).map(_.quality)) ::: mags).asJavaCollection)
+      new java.util.Vector[AnyRef]((List(t.name, t.coordinates.ra.toAngle.formatHMS, t.coordinates.dec.formatDMS, GuidingQualityColumn.target2Analysis(model.info, t).map(_.quality), GuidingQualityColumn.target2FOV(model.info, t)) ::: mags).asJavaCollection)
     }.asJavaCollection)
 
     override def getColumnDesc(i: Int): FieldDesc = ???
@@ -198,7 +251,7 @@ object adapters {
 
     override def getColumnIdentifiers: java.util.List[String] = {
       val mags = MagnitudeBand.all.map(_.name + "mag")
-      (List("Id", "RAJ2000", "DECJ2000", "GQ") ::: mags).asJava
+      (List("Id", "RAJ2000", "DECJ2000", "GQ", "FOV") ::: mags).asJava
     }
 
     override def hasCoordinates: Boolean = ???
@@ -297,7 +350,7 @@ case class TpePlotter(display: CatalogImageDisplay) {
   }
 
   /**
-   * Plot the given table data.
+   * Select items on the image
    */
   def select(model: TargetsModel, selected: Set[Int]): Unit = {
     val qr = TableQueryResultAdapter(model)
