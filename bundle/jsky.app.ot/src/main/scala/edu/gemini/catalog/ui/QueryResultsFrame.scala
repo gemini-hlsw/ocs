@@ -453,10 +453,13 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           }
       }
     }
+
     lazy val catalogBox: ComboBox[CatalogName] with TextRenderer[CatalogName] {
       def text(a: CatalogName): String
     } = new ComboBox(List[CatalogName](UCAC4, PPMXL)) with TextRenderer[CatalogName] {
-      override def text(a: CatalogName): String = ~Option(a).map(_.displayName)
+
+      override def text(a: CatalogName): String =
+        Option(a).foldMap(_.displayName)
 
       listenTo(selection)
       reactions += {
@@ -469,6 +472,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           revalidateFrame()
       }
     }
+
     lazy val guider: ComboBox[SupportedStrategy] with TextRenderer[SupportedStrategy] {
       def text(a: SupportedStrategy): String
     } = new ComboBox(List.empty[SupportedStrategy]) with TextRenderer[SupportedStrategy] {
@@ -541,7 +545,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
     lazy val ccBox: ComboBox[SPSiteQuality.CloudCover] with TextRenderer[SPSiteQuality.CloudCover] {
       def text(a: SPSiteQuality.CloudCover): String
-    } = new ComboBox(List(SPSiteQuality.CloudCover.values().filter(!_.isObsolete): _*)) with TextRenderer[SPSiteQuality.CloudCover] {
+    } = new ComboBox(List(SPSiteQuality.CloudCover.values().filterNot(_.isObsolete): _*)) with TextRenderer[SPSiteQuality.CloudCover] {
       renderer = conditionsRenderer(_.map(_.cc), this)
 
       listenTo(selection)
