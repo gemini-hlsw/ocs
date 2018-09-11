@@ -6,6 +6,7 @@ import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.Angle;
+import edu.gemini.spModel.ao.AOConstants;
 import edu.gemini.spModel.config.ConfigPostProcessor;
 import edu.gemini.spModel.config.injector.ConfigInjector;
 import edu.gemini.spModel.config.injector.obswavelength.ObsWavelengthCalc3;
@@ -18,6 +19,8 @@ import edu.gemini.spModel.data.config.DefaultSysConfig;
 import edu.gemini.spModel.data.config.ISysConfig;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
+import edu.gemini.spModel.gemini.altair.AltairParams;
+import edu.gemini.spModel.gemini.altair.AltairParams.GuideStarType;
 import edu.gemini.spModel.gemini.calunit.calibration.CalConfigBuilderUtil;
 import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKey;
 import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKeyProvider;
@@ -34,6 +37,7 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTimeGroup;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.Category;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.StepCalculator;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime.ItcOverheadProvider;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.pio.ParamSet;
@@ -48,7 +52,7 @@ import java.util.*;
 /**
  * The NIFS instrument.
  */
-public final class InstNIFS extends SPInstObsComp implements PropertyProvider, GuideProbeProvider, StepCalculator, CalibrationKeyProvider, ConfigPostProcessor {
+public final class InstNIFS extends SPInstObsComp implements PropertyProvider, GuideProbeProvider, StepCalculator, CalibrationKeyProvider, ConfigPostProcessor, ItcOverheadProvider {
 
     // for serialization
     private static final long serialVersionUID = 3L;
@@ -176,7 +180,7 @@ public final class InstNIFS extends SPInstObsComp implements PropertyProvider, G
         final CategorizedTime expTime = CategorizedTime.fromSeconds(Category.EXPOSURE, coadds*exp);
         final double readoutTime      = (readMode.getMinExp() + COADD_CONSTANT) * coadds;
         final CategorizedTime readOut = CategorizedTime.fromSeconds(Category.READOUT, readoutTime);
-        final CategorizedTime dhs     = CategorizedTime.fromSeconds(Category.DHS_WRITE, 8.0); // REL-1678
+        final CategorizedTime dhs     = CategorizedTime.fromSeconds(Category.DHS_WRITE, 9.8); // Updated according to the latest measurements. -OS
 
         return CommonStepCalculator.instance.calc(cur, prev).addAll(expTime, readOut, dhs);
     }
@@ -188,10 +192,24 @@ public final class InstNIFS extends SPInstObsComp implements PropertyProvider, G
         return NifsSetupTimeService.getSetupTimeSec(obs);
     }
 
+    public double getSetupTime(Config conf) {
+        final GuideStarType guideStarType = (GuideStarType) conf.getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
+        if (conf.containsItem(AOConstants.AO_SYSTEM_KEY) &&
+                guideStarType.equals(AltairParams.GuideStarType.LGS)) {
+                return NifsSetupTimeService.BASE_LGS_SETUP_TIME_SEC;
+        } else {
+            return NifsSetupTimeService.BASE_SETUP_TIME_SEC;
+        }
+    }
+
+    public double getReacquisitionTime () {
+        return 6 * 60;
+    }
+
     /**
-     * Return the dimensions of the science area.
-     * @return an array giving the size of the detector in arcsec
-     */
+         * Return the dimensions of the science area.
+         * @return an array giving the size of the detector in arcsec
+         */
     public double[] getScienceArea() {
         return new double[] {Mask.SIZE, Mask.SIZE};
     }

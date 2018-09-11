@@ -397,6 +397,18 @@ public class GmosCommonType {
             return SpTypeUtil.oldValueOf(Binning.class, name, nvalue);
         }
 
+        public static Binning getBinningByValue(int value) {
+            for(Binning constant : Binning.class.getEnumConstants()) {
+                if (constant.getValue() == value)
+                    return constant;
+            }
+            /*
+            LOG.warning("Could not return the enum with value " + value + " in class: " +
+                    Binning.class.getName() + ", returning: " + DEFAULT);
+                    */
+            return DEFAULT;
+        }
+
         /** Return a Binning value by index **/
         public static Binning getBinningByIndex(int index) {
             return SpTypeUtil.valueOf(Binning.class, index, DEFAULT);
