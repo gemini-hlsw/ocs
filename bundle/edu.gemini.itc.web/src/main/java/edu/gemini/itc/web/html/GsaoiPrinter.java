@@ -6,7 +6,6 @@ import edu.gemini.itc.gsaoi.Camera;
 import edu.gemini.itc.gsaoi.Gsaoi;
 import edu.gemini.itc.gsaoi.GsaoiRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 
 import java.io.PrintWriter;

@@ -1,5 +1,6 @@
 package edu.gemini.itc.web
 
+import java.util.logging.Logger
 import javax.servlet.http.HttpServletRequest
 
 import edu.gemini.itc.shared._
@@ -11,7 +12,7 @@ import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.GmosCommonType
-import edu.gemini.spModel.gemini.gmos.GmosCommonType.{BuiltinROI, AmpGain, AmpReadMode, DetectorManufacturer}
+import edu.gemini.spModel.gemini.gmos.GmosCommonType.{AmpGain, AmpReadMode, DetectorManufacturer}
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FPUnitNorth, FilterNorth}
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FPUnitSouth, FilterSouth}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
@@ -88,6 +89,7 @@ sealed abstract class ITCRequest {
  * Utility object that allows to translate different objects into ITC requests.
  */
 object ITCRequest {
+  private val Log = Logger.getLogger(classOf[ITCRequest].getName)
 
   def from(request: HttpServletRequest): ITCRequest = new ITCRequest {
     override def parameter(name: String): String = request.getParameter(name)
@@ -277,7 +279,9 @@ object ITCRequest {
       Some(ret)
     } catch {
       // We get this exception thrown if no coadds parameter was passed with the request
-      case ex: IllegalArgumentException => None
+      case _: IllegalArgumentException =>
+        Log.warning("No coadds parameter was passed with the request; using None.")
+        None
     }
   }
 
