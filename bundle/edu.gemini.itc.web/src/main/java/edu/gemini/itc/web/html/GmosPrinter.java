@@ -6,8 +6,9 @@ import edu.gemini.itc.gmos.Gmos;
 import edu.gemini.itc.gmos.GmosRecipe;
 import edu.gemini.itc.gmos.GmosSaturLimitRule;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.gemini.gmos.GmosNorthType;
-import edu.gemini.spModel.gemini.gmos.GmosSouthType;
+import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.gemini.gmos.*;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 
 import java.io.PrintWriter;
 import java.util.*;
@@ -15,17 +16,21 @@ import java.util.*;
 /**
  * Helper class for printing GMOS calculation results to an output stream.
  */
-public final class GmosPrinter extends PrinterBase {
+public final class GmosPrinter extends PrinterBase implements OverheadTablePrinter.PrinterWithOverhead {
 
     private final GmosRecipe recipe;
     private final PlottingDetails pdp;
     private final boolean isImaging;
+    private final ItcParameters p;
+    private final GmosParameters instr;
 
     public GmosPrinter(final ItcParameters p, final GmosParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
         this.recipe         = new GmosRecipe(p, instr);
         this.pdp            = pdp;
         this.isImaging      = p.observation().calculationMethod() instanceof Imaging;
+        this.p              = p;
+        this.instr          = instr;
     }
 
     /**
@@ -82,8 +87,9 @@ public final class GmosPrinter extends PrinterBase {
             if (instrumentWithMaxPeak.isPresent()) {
                 _printPeakPixelInfo(ccdWithMaxPeak, instrumentWithMaxPeak.get().getGmosSaturLimitWarning());
             }
-            _printWarnings(ccdWithMaxPeak.get().warnings());
         }
+
+        _print(OverheadTablePrinter.print(this, p, results[0], s));
 
         _print("<HR align=left SIZE=3>");
 
@@ -164,6 +170,9 @@ public final class GmosPrinter extends PrinterBase {
             }
         }
 
+        _print(OverheadTablePrinter.print(this, p, results[0]));
+
+
         printConfiguration(results[0].parameters(), instrument);
     }
 
@@ -234,5 +243,24 @@ public final class GmosPrinter extends PrinterBase {
                     String.format("The peak pixel signal + background is %.0f e- (%d ADU). This is %.0f%% of the saturation limit of %.0f e-.",
                             ccd.get().peakPixelFlux(), ccd.get().adu(), gmosLimit.percentOfLimit(ccd.get().peakPixelFlux()), gmosLimit.limit()));
         }
+    }
+
+    public ConfigCreator.ConfigCreatorResult createInstConfig(int numberExposures) {
+        ConfigCreator cc = new ConfigCreator(p);
+        return cc.createGmosConfig(instr, numberExposures);
+    }
+
+    public PlannedTime.ItcOverheadProvider getInst() {
+        if (instr.site().equals(Site.GN)) {
+            return new InstGmosNorth();
+        } else if (instr.site().equals(Site.GS)) {
+            return new InstGmosSouth();
+        } else {
+            throw new Error("invalid site");
+        }
+    }
+
+    public double getReadoutTimePerCoadd() {
+        return 0;
     }
 }

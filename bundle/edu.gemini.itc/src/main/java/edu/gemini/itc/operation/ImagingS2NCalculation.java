@@ -29,11 +29,12 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
     protected double read_noise;
     protected double pixel_size;
     protected double exposure_time;
+    protected int    coadds;
 
     protected double secondary_integral = 0;
     protected double secondary_source_fraction = 0;
 
-    public ImagingS2NCalculation( final ObservationDetails obs, final Instrument instrument,final SourceFraction sourceFrac, final double sed_integral, final double sky_integral) {
+    public ImagingS2NCalculation( final ObservationDetails obs, final Instrument instrument, final SourceFraction sourceFrac, final double sed_integral, final double sky_integral) {
         this.sed_integral    = sed_integral;
         this.sky_integral    = sky_integral;
         this.source_fraction = sourceFrac.getSourceFraction();
@@ -46,6 +47,7 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
         this.skyAper         = (instrument instanceof Niri || instrument instanceof Gsaoi) ? 1 : ((ApertureMethod) obs.analysisMethod()).skyAperture();
         // TODO: marker interface like for binning?
         this.elfinParam      = (instrument instanceof TRecs) ? ((TRecs) instrument).getExtraLowFreqNoise() : 1; // default 1 will have no effect
+        coadds = obs.calculationMethod().coaddsOrElse(1);
     }
 
     public void calculate() {
@@ -55,17 +57,15 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
 
         //Multiply source by Extra-Low Frequency Noise
         var_source = var_source * elfinParam;
-        var_background = sky_integral * exposure_time * pixel_size *
-                pixel_size * Npix;
+        var_background = sky_integral * exposure_time * pixel_size * pixel_size * Npix;
+
         //Multiply background by Extra-Low Frequency Noise
         var_background = var_background * elfinParam;
         var_dark = dark_current * Npix * exposure_time;
         var_readout = read_noise * read_noise * Npix;
 
-        noise = Math.sqrt(var_source + var_background + var_dark +
-                var_readout);
-        sourceless_noise = Math.sqrt(var_background + var_dark +
-                var_readout);
+        noise = Math.sqrt(var_source + var_background + var_dark + var_readout);
+        sourceless_noise = Math.sqrt(var_background + var_dark + var_readout);
         signal = sed_integral * source_fraction * exposure_time +
                 secondary_integral * secondary_source_fraction * exposure_time;
     }
@@ -90,8 +90,7 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
     }
 
     public double singleSNRatio() {
-        return signal / noise;
+        return Math.sqrt(coadds) * signal / noise;
     }
-
 
 }

@@ -6,6 +6,7 @@ import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
+import edu.gemini.spModel.ao.AOConstants;
 import edu.gemini.spModel.config.ConfigPostProcessor;
 import edu.gemini.spModel.config.injector.ConfigInjector;
 import edu.gemini.spModel.config.injector.obswavelength.ObsWavelengthCalc2;
@@ -21,6 +22,7 @@ import edu.gemini.spModel.data.config.StringParameter;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
 import edu.gemini.spModel.gemini.altair.AltairParams;
+import edu.gemini.spModel.gemini.altair.AltairParams.GuideStarType;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.calunit.calibration.CalConfigBuilderUtil;
 import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKey;
@@ -38,6 +40,7 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTimeGroup;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.Category;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime.ItcOverheadProvider;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.StepCalculator;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
@@ -55,7 +58,7 @@ import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
 /**
  * The NIRI instrument.
  */
-public final class InstNIRI extends SPInstObsComp implements PropertyProvider, GuideProbeProvider, StepCalculator, CalibrationKeyProvider, ConfigPostProcessor {
+public final class InstNIRI extends SPInstObsComp implements PropertyProvider, GuideProbeProvider, StepCalculator, CalibrationKeyProvider, ConfigPostProcessor, ItcOverheadProvider {
 
     // for serialization
     private static final long serialVersionUID = 2L;
@@ -88,6 +91,7 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
     public static final PropertyDescriptor FOCUS_PROP;
     public static final PropertyDescriptor MASK_PROP;
     public static final PropertyDescriptor POS_ANGLE_PROP;
+    public static final ItemKey DISPERSER_KEY = new ItemKey(INSTRUMENT_KEY, "disperser");
     public static final PropertyDescriptor READ_MODE_PROP;
     public static final PropertyDescriptor BUILTIN_ROI_PROP;
     public static final PropertyDescriptor WELL_DEPTH_PROP;
@@ -173,10 +177,28 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
         private static Mode getMode(InstNIRI niri) {
             return niri._disperser == Disperser.NONE ? imaging : spectroscopy;
         }
+
+        /**
+         * For ITC.
+         * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
+         */
+        @Deprecated
+        private static Mode getMode(Config conf) {
+            return conf.getItemValue(DISPERSER_KEY) == Disperser.NONE ? imaging : spectroscopy;
+        }
     }
 
     public Mode getMode() {
         return Mode.getMode(this);
+    }
+
+    /**
+     * For ITC.
+     * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
+     */
+    @Deprecated
+    public Mode getMode(Config conf) {
+        return Mode.getMode(conf);
     }
 
     private static class SetupTimeKey {
@@ -214,6 +236,10 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
     public static double getFilterChangeOverheadSec() {
         return 30.0;
     }
+
+    public double getReacquisitionTime () {
+        return 0.0;
+    } // considering it zero, as currently NIRI is imaging-only
 
     private static final Map<SetupTimeKey, Double> SETUP_TIME = new HashMap<>();
 
@@ -263,13 +289,39 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
         return (altair == null) ? getSetupTime(mode) : getSetupTime(mode, altair.getMode());
     }
 
+    /**
+     * For ITC.
+     * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
+     */
+    @Deprecated @Override
+    public double getSetupTime(Config conf) {
+        final GuideStarType guideStarType = (GuideStarType) conf.getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
+        final Mode mode = getMode(conf);
+        final AltairParams.Mode altairMode;
+
+        if (conf.containsItem(AOConstants.AO_SYSTEM_KEY))  {
+            if (guideStarType.equals(AltairParams.GuideStarType.LGS)) {
+                altairMode = AltairParams.Mode.LGS;
+            } else if (guideStarType.equals(AltairParams.GuideStarType.NGS)) {
+                altairMode = AltairParams.Mode.NGS;
+            } else {
+                throw new Error("Invalid guide star type");
+            }
+            return getSetupTime(mode, altairMode);
+        } else {
+            return getSetupTime(mode);
+        }
+    }
+
     @Override
     public CategorizedTimeGroup calc(final Config cur, final Option<Config> prev) {
         final Collection<CategorizedTime> times = new ArrayList<>();
 
-        // Add filter change overhead if necessary.
-        if (PlannedTime.isUpdated(cur, prev, Filter.KEY)) {
-            times.add(CategorizedTime.fromSeconds(Category.CONFIG_CHANGE, getFilterChangeOverheadSec(), "Filter"));
+        // Add filter change overhead if necessary
+        if (cur.containsItem(Filter.KEY)) {
+            if (PlannedTime.isUpdated(cur, prev, Filter.KEY)) {
+                times.add(CategorizedTime.fromSeconds(Category.CONFIG_CHANGE, getFilterChangeOverheadSec(), "Filter"));
+            }
         }
 
         // Add readout time.
@@ -279,14 +331,20 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
 
         final Option<NiriReadoutTime> nrt = NiriReadoutTime.lookup(roi, readMode);
         nrt.foreach(niriReadoutTime -> {
-            times.add(CategorizedTime.fromSeconds(Category.DHS_WRITE, niriReadoutTime.dhsWrite));
+            times.add(CategorizedTime.fromSeconds(Category.DHS_WRITE, niriReadoutTime.getDhsWriteTime()));
             times.add(CategorizedTime.fromSeconds(Category.READOUT, niriReadoutTime.getReadout(coadds)));
         });
 
         // Add exposure time
         final double exp = ExposureCalculator.instance.exposureTimeSec(cur);
-        final int fast = (Integer) cur.getItemValue(FAST_MODE_KEY);
-        final double secs = fast * exp * coadds;
+        final double secs;
+
+        if (cur.containsItem(FAST_MODE_KEY)) {
+            final int fast = (Integer) cur.getItemValue(FAST_MODE_KEY);
+            secs = fast * exp * coadds;
+        } else {
+            secs = exp * coadds;
+        }
         times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, secs));
 
         return CommonStepCalculator.instance.calc(cur, prev).addAll(times);

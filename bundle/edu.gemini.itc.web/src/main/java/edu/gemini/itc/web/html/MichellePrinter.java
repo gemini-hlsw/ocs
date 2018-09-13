@@ -112,19 +112,22 @@ public final class MichellePrinter extends PrinterBase {
         } else {
             _println("Polarimetry mode enabled.\n");
             final String result2 = CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation());
-            final String delims = "[ ]+";
+            final String delims = "[ ,]+";
             final String[] tokens = result2.split(delims);
             for (int i = 0; i < tokens.length; i++) {
                 if (tokens[i].contains("Derived")) {
-                    tokens[i + 5] = String.format("%.2f", new Double(tokens[i + 5]) * 4);
-                    tokens[i + 9] = String.format("%.2f", new Double(tokens[i + 9]) * 4);
+                    tokens[i + 5] = String.format("%.2f", Double.valueOf(tokens[i + 5]) * 4);
+                    if (tokens[i + 6].contains("each"))
+                        tokens[i + 12] = String.format("%.2f", Double.valueOf(tokens[i + 12]) * 4);
+                    else
+                        tokens[i + 8] = String.format("%.2f", Double.valueOf(tokens[i + 8]) * 4);
                 }
                 if (tokens[i].contains("Taking")) {
-                    tokens[i + 1] = String.format("%.2f", new Double(tokens[i + 1]) * 4);
+                    tokens[i + 1] = String.format("%.2f", Double.valueOf(tokens[i + 1]) * 4);
                 }
                 if (tokens[i].contains("Requested") || tokens[i].contains("Required")) {
-                    tokens[i + 5] = String.format("%.2f", new Double(tokens[i + 5]) * 4);
-                    tokens[i + 9] = String.format("%.2f", new Double(tokens[i + 9]) * 4);
+                    tokens[i + 5] = String.format("%.2f", Double.valueOf(tokens[i + 5]) * 4);
+                    tokens[i + 9] = String.format("%.2f", Double.valueOf(tokens[i + 9]) * 4);
                 }
                 _print(tokens[i] + " ");
             }

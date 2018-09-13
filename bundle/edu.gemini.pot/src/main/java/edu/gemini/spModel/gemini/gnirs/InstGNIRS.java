@@ -7,6 +7,7 @@ import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.Angle;
+import edu.gemini.spModel.ao.AOConstants;
 import edu.gemini.spModel.config.ConfigPostProcessor;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
@@ -17,6 +18,7 @@ import edu.gemini.spModel.data.config.*;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
 import edu.gemini.spModel.gemini.altair.AltairParams;
+import edu.gemini.spModel.gemini.altair.AltairParams.GuideStarType;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.calunit.calibration.CalConfigBuilderUtil;
 import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKey;
@@ -35,6 +37,7 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTimeGroup;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.Category;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.StepCalculator;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime.ItcOverheadProvider;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.pio.ParamSet;
@@ -55,7 +58,7 @@ import java.util.*;
  * The GNIRS instrument.
  */
 public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyProvider, GuideProbeProvider,
-        IssPortProvider, ConfigPostProcessor, StepCalculator, CalibrationKeyProvider, PosAngleConstraintAware {
+        IssPortProvider, ConfigPostProcessor, StepCalculator, CalibrationKeyProvider, PosAngleConstraintAware, ItcOverheadProvider {
 
     // for serialization
     private static final long serialVersionUID = 3L;
@@ -172,6 +175,11 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         _nf.setMaximumFractionDigits(3);
     }
 
+    private static final double SETUP_TIME_LGS = 25 * 60;
+    private static final double SETUP_TIME_IFU = 20 * 60;
+    private static final double SETUP_TIME = 15 * 60;
+    private static final double REACQUISITION_TIME = 6 * 60; // 6 minutes as defined in REL-1346
+
     /**
      * Constructor
      */
@@ -210,6 +218,19 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         return "gemGNIRS";
     }
 
+
+    public static double getSetupTimeLgs () {
+        return SETUP_TIME_LGS;
+    }
+
+    public static double getSetupTimeIfu () {
+        return SETUP_TIME_IFU;
+    }
+
+    public static double getSetupTime () {
+        return SETUP_TIME;
+    }
+
     /**
      * Return the setup time in seconds before observing can begin
      * (nominally 30 minutes, may be longer for IFU, and thermal (WL>2.5um))
@@ -222,10 +243,32 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         // REL-437: When GNIRS is used with Altair in LGS mode then the acq overhead must be 25 minutes.
         // The only change is to GNIRS with Altair LGS, for other modes the overhead should remain 15 minutes.
         if (altair != null && altair.getMode().guideStarType() == AltairParams.GuideStarType.LGS) {
-            return 25 * 60;
+            return getSetupTimeLgs();
         }
 
-        return (_slitWidth == SlitWidth.IFU) ? (20 * 60) : (15 * 60);
+        return (_slitWidth == SlitWidth.IFU) ? (getSetupTimeIfu()) : (getSetupTime());
+    }
+
+    /**
+     * For ITC.
+     * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
+     */
+    @Deprecated @Override
+    public double getSetupTime(Config conf) {
+        if (conf.containsItem(AOConstants.AO_SYSTEM_KEY)) {
+            final GuideStarType guideStarType = (GuideStarType) conf.getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
+            if (guideStarType.equals(AltairParams.GuideStarType.LGS)) {
+                return getSetupTimeLgs();
+            }
+        }
+
+        SlitWidth slitWidth = (SlitWidth) conf.getItemValue(GNIRSConstants.SLIT_WIDTH_KEY);
+
+        if (slitWidth.equals(GNIRSParams.SlitWidth.IFU)) {
+            return getSetupTimeIfu();
+        } else  {
+            return getSetupTime();
+        }
     }
 
     /**
@@ -235,7 +278,11 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
      * @return time in seconds
      */
     public double getReacquisitionTime(ISPObservation obs) {
-        return 6 * 60; // 6 minutes as defined in REL-1346
+        return getReacquisitionTime();
+    }
+
+    public double getReacquisitionTime () {
+        return REACQUISITION_TIME;
     }
 
     /**
@@ -715,7 +762,6 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         Pio.addParam(factory, paramSet, GNIRSConstants.READ_MODE_PROP, getReadMode().name());
         Pio.addParam(factory, paramSet, WELL_DEPTH_PROP, getWellDepth().name());
         Pio.addParam(factory, paramSet, GNIRSConstants.CENTRAL_WAVELENGTH_PROP, getCentralWavelength().getStringValue());
-
         Pio.addParam(factory, paramSet, ACQUISITION_MIRROR_PROP, getAcquisitionMirror().name());
         Pio.addParam(factory, paramSet, CAMERA_PROP, getCamera().name());
         Pio.addParam(factory, paramSet, DECKER_PROP, getDecker().name());
@@ -893,7 +939,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         final int coadds = ExposureCalculator.instance.coadds(cur);
         final double secs = GnirsReadoutTime.getReadoutOverhead(readMode, coadds);
         final CategorizedTime readout = CategorizedTime.fromSeconds(Category.READOUT, secs);
-        final CategorizedTime dhs = CategorizedTime.fromSeconds(Category.DHS_WRITE, 2.8); // REL-1678
+        final CategorizedTime dhs = CategorizedTime.fromSeconds(Category.DHS_WRITE, GnirsReadoutTime.getDhsWriteTime()); // REL-1678
         return DefaultStepCalculator.instance.calc(cur, prev).addAll(readout, dhs);
     }
 

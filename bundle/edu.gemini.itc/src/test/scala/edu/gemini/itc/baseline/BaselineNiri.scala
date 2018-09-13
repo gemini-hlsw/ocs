@@ -19,6 +19,7 @@ object BaselineNiri {
       ReadMode.IMAG_SPEC_3TO5,
       WellDepth.DEEP,
       Mask.MASK_IMAGING,
+      BuiltinROI.FULL_FRAME,
       Fixture.AltairNgsFL),
 
     new NiriParameters(
@@ -28,6 +29,7 @@ object BaselineNiri {
       ReadMode.IMAG_SPEC_3TO5,
       WellDepth.DEEP,
       Mask.MASK_IMAGING,
+      BuiltinROI.FULL_FRAME,
       Fixture.AltairNgs),
 
     new NiriParameters(
@@ -37,6 +39,7 @@ object BaselineNiri {
       ReadMode.IMAG_SPEC_3TO5,
       WellDepth.DEEP,
       Mask.MASK_IMAGING,
+      BuiltinROI.CENTRAL_256,
       Fixture.AltairLgs),
 
 
@@ -48,6 +51,7 @@ object BaselineNiri {
       ReadMode.IMAG_SPEC_3TO5,
       WellDepth.DEEP,
       Mask.MASK_IMAGING,
+      BuiltinROI.CENTRAL_512,
       Fixture.AltairNgsFL),
 
     new NiriParameters(
@@ -57,6 +61,7 @@ object BaselineNiri {
       ReadMode.IMAG_SPEC_3TO5,
       WellDepth.DEEP,
       Mask.MASK_IMAGING,
+      BuiltinROI.CENTRAL_768,
       Fixture.AltairNgs),
 
     new NiriParameters(
@@ -66,6 +71,7 @@ object BaselineNiri {
       ReadMode.IMAG_SPEC_3TO5,
       WellDepth.DEEP,
       Mask.MASK_IMAGING,
+      BuiltinROI.FULL_FRAME,
       Fixture.AltairLgs)
 
   ))
@@ -78,6 +84,7 @@ object BaselineNiri {
       ReadMode.IMAG_SPEC_NB,
       WellDepth.SHALLOW,
       Mask.MASK_1,
+      BuiltinROI.FULL_FRAME,
       Fixture.NoAltair)
   ))
 

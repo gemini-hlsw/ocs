@@ -55,17 +55,22 @@ public final class HtmlPrinter {
         final StringBuilder sb = new StringBuilder();
 
         sb.append("Calculation and analysis methods:\n");
-        sb.append("<LI>mode: ");
+        sb.append("<LI>Mode: ");
         sb.append((odp.calculationMethod() instanceof Imaging ? "imaging" : "spectroscopy"));
         sb.append("\n");
         sb.append("<LI>Calculation of ");
         if (odp.calculationMethod() instanceof S2NMethod) {
-            sb.append(String.format("S/N ratio with " + ((S2NMethod) odp.calculationMethod()).exposures() + " exposures of %.2f secs,", odp.exposureTime()));
-            sb.append(String.format(" and %.2f %% of them were on source.\n", odp.sourceFraction() * 100));
+            sb.append(String.format("S/N ratio with %d", ((S2NMethod) odp.calculationMethod()).exposures()));
         } else {
-            sb.append(String.format("integration time from a S/N ratio of %.2f for exposures of", ((ImagingInt) odp.calculationMethod()).sigma()));
-            sb.append(String.format(" %.2f with %.2f %% of them were on source.\n", odp.exposureTime(), odp.sourceFraction() * 100));
+            sb.append(String.format("integration time from a S/N ratio of %.2f for", ((ImagingInt) odp.calculationMethod()).sigma()));
         }
+        sb.append(String.format(" exposures of %.2f secs", odp.exposureTime()));
+        if (odp.calculationMethod().coaddsOrElse(1) > 1) {
+            sb.append(String.format(" and %d coadds", odp.calculationMethod().coaddsOrElse(1)));
+        }
+        sb.append(String.format(", and %.2f%% of them on source.\n", odp.sourceFraction() * 100));
+
+
         sb.append("<LI>Analysis performed for aperture ");
         if (odp.analysisMethod() instanceof AutoAperture) {
             sb.append("that gives 'optimum' S/N ");

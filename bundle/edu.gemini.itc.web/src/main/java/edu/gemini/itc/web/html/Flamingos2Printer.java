@@ -1,12 +1,16 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.base.ImagingResult;
+import edu.gemini.itc.base.Result;
 import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.flamingos2.Flamingos2;
 import edu.gemini.itc.flamingos2.Flamingos2Recipe;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime;
+import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -14,17 +18,22 @@ import java.util.UUID;
 /**
  * Helper class for printing F2 calculation results to an output stream.
  */
-public final class Flamingos2Printer extends PrinterBase {
+public final class Flamingos2Printer extends PrinterBase implements OverheadTablePrinter.PrinterWithOverhead {
 
     private final PlottingDetails pdp;
     private final Flamingos2Recipe recipe;
     private final boolean isImaging;
+    private final ItcParameters p;
+    private final Flamingos2Parameters instr;
+
 
     public Flamingos2Printer(final ItcParameters p, final Flamingos2Parameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
         this.pdp       = pdp;
         this.recipe    = new Flamingos2Recipe(p, instr);
         this.isImaging = p.observation().calculationMethod() instanceof Imaging;
+        this.p          = p;
+        this.instr          = instr;
     }
 
     /**
@@ -64,6 +73,8 @@ public final class Flamingos2Printer extends PrinterBase {
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
+        _print(OverheadTablePrinter.print(this, p, result));
+
         _print("<HR align=left SIZE=3>");
 
         _println("<p style=\"page-break-inside: never\">");
@@ -101,6 +112,8 @@ public final class Flamingos2Printer extends PrinterBase {
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
+        _print(OverheadTablePrinter.print(this, p, result));
+
         printConfiguration((Flamingos2) result.instrument(), result.parameters());
     }
 
@@ -132,4 +145,16 @@ public final class Flamingos2Printer extends PrinterBase {
     }
 
 
+    public ConfigCreator.ConfigCreatorResult createInstConfig(int numberExposures) {
+        ConfigCreator cc = new ConfigCreator(p);
+        return cc.createF2Config(instr, numberExposures);
+    }
+
+    public PlannedTime.ItcOverheadProvider getInst() {
+        return new edu.gemini.spModel.gemini.flamingos2.Flamingos2();
+    }
+
+    public double getReadoutTimePerCoadd() {
+        return 0;
+    }
 }

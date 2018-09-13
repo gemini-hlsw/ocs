@@ -30,6 +30,7 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTimeGroup;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.Category;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime.ItcOverheadProvider;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.StepCalculator;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.obscomp.InstConstants;
@@ -54,6 +55,8 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.lang.String;
+import java.util.Optional;
 
 /**
  * The GMOS instrument.
@@ -64,7 +67,7 @@ public abstract class InstGmosCommon<
         P extends Enum<P> & GmosCommonType.FPUnit,
         SM extends Enum<SM> & GmosCommonType.StageMode>
         extends ParallacticAngleSupportInst implements IOffsetPosListProvider<OffsetPos>, GuideProbeProvider,
-            IssPortProvider, PosAngleConstraintAware, StepCalculator, VignettableScienceAreaInstrument {
+            IssPortProvider, PosAngleConstraintAware, StepCalculator, VignettableScienceAreaInstrument, ItcOverheadProvider {
 
     private static final Logger LOG = Logger.getLogger(InstGmosCommon.class.getName());
 
@@ -82,6 +85,8 @@ public abstract class InstGmosCommon<
     public static final String FPU_PROP_NAME = "fpu";
     public static final String AMP_COUNT_PROP_NAME = GmosCommonType.AmpCount.KEY.getName();
     public static final String DETECTOR_MANUFACTURER_PROP_NAME = GmosCommonType.DetectorManufacturer.KEY.getName();
+    public static final ItemKey DISPERSER_KEY = new ItemKey(SeqConfigNames.INSTRUMENT_KEY, DISPERSER_PROP_NAME);
+    public static final ItemKey FPU_KEY = new ItemKey(SeqConfigNames.INSTRUMENT_KEY, FPU_PROP_NAME);
 
     // Nod & Shuffle values
     public static final boolean DEFAULT_USE_NS = false;
@@ -413,6 +418,10 @@ public abstract class InstGmosCommon<
         }
     }
 
+    private static final double SETUP_TIME_LS_SPECTROSCOPY = 16 * 60;
+    private static final double SETUP_TIME_IMAGING = 6 * 60;
+    private static final double SETUP_TIME_IFU_MOS = 18 * 60.;
+
     /**
      * Return the setup time in seconds before observing can begin
      * GMOS returns 15 minutes if imaging mode and 30 minutes if spectroscopy.
@@ -423,9 +432,22 @@ public abstract class InstGmosCommon<
      * (Update5: SCI-0107)
      */
     public double getSetupTime(ISPObservation obs) {
-        if (_disperser.isMirror()) return 6 * 60;
-        if (_fpu.isSpectroscopic() || _fpu.isNSslit()) return 16 * 60;
-        return 18 * 60.;
+        if (_disperser.isMirror()) return SETUP_TIME_IMAGING;
+        if (_fpu.isSpectroscopic() || _fpu.isNSslit()) return SETUP_TIME_LS_SPECTROSCOPY;
+        return SETUP_TIME_IFU_MOS;
+    }
+
+    /**
+     * For ITC.
+     * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
+     */
+    @Deprecated @Override
+    public double getSetupTime(Config conf) {
+        return Optional.ofNullable(conf.getItemValue(FPU_KEY))
+                .map(c -> (GmosCommonType.FPUnit) c)
+                .filter(f -> !f.isImaging())
+                .map(f -> f.isIFU() ? SETUP_TIME_IFU_MOS : SETUP_TIME_LS_SPECTROSCOPY)
+                .orElse(SETUP_TIME_IMAGING);
     }
 
     /**
@@ -1831,6 +1853,11 @@ public abstract class InstGmosCommon<
     public double getReacquisitionTime(ISPObservation obs) {
         return REACQUISITION_TIME;
     }
+
+    public double getReacquisitionTime() {
+        return REACQUISITION_TIME;
+    }
+
 
     abstract protected GuideProbe getGuideProbe();
 

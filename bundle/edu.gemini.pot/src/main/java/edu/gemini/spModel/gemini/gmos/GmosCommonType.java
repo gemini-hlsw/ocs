@@ -218,58 +218,6 @@ public class GmosCommonType {
         }
     }
 
-    /*
-    public static enum AmpGainReadCombo implements DisplayableSpType, SequenceableSpType {
-        SLOW_HIGH("Slow Read/High Gain", GmosCommonType.AmpReadMode.SLOW, GmosCommonType.AmpGain.HIGH),
-        SLOW_LOW("Slow Read/Low Gain", GmosCommonType.AmpReadMode.SLOW, GmosCommonType.AmpGain.LOW),
-        FAST_LOW("Fast Read/Low Gain", GmosCommonType.AmpReadMode.FAST, GmosCommonType.AmpGain.LOW),
-        FAST_HIGH("Fast Read/High Gain", GmosCommonType.AmpReadMode.FAST, GmosCommonType.AmpGain.HIGH);
-
-        private String _displayValue;
-        private GmosCommonType.AmpReadMode _ampReadMode;
-        private GmosCommonType.AmpGain _ampGain;
-
-        private AmpGainReadCombo(String displayValue,
-              GmosCommonType.AmpReadMode ampReadMode, GmosCommonType.AmpGain ampGain) {
-            this._displayValue = displayValue;
-            this._ampGain = ampGain;
-            this._ampReadMode = ampReadMode;
-        }
-
-        public String displayValue() {
-            return _displayValue;
-        }
-
-        public String sequenceValue() {
-            return _displayValue;
-        }
-
-        public GmosCommonType.AmpReadMode getAmpReadMode() {
-            return _ampReadMode;
-        }
-
-        public GmosCommonType.AmpGain getAmpGain() {
-            return _ampGain;
-        }
-
-        public static AmpGainReadCombo getAmpGainReadCombo(String name) {
-            return SpTypeUtil.oldValueOf(AmpGainReadCombo.class, name, SLOW_LOW);
-        }
-
-        public static AmpGainReadCombo lookup(AmpGain gain, AmpReadMode mode) {
-            for (AmpGainReadCombo combo : values()) {
-                if ((mode == combo.getAmpReadMode()) &&
-                    (gain == combo.getAmpGain())) {
-                    return combo;
-                }
-            }
-            // all combinations have to be accounted for ...
-            throw new RuntimeException("Could not find combo for gain '" + gain +
-                        "' and mode '" + mode + "'");
-        }
-    }
-    */
-
     /**
      * CCD Gain indicates which gain mode to use
      */
@@ -395,6 +343,14 @@ public class GmosCommonType {
         /** Return a Binning by name giving a value to return upon error **/
         public static Binning getBinning(String name, Binning nvalue) {
             return SpTypeUtil.oldValueOf(Binning.class, name, nvalue);
+        }
+
+        public static Binning getBinningByValue(int value) {
+            for(Binning constant : Binning.class.getEnumConstants()) {
+                if (constant.getValue() == value)
+                    return constant;
+            }
+            return DEFAULT;
         }
 
         /** Return a Binning value by index **/

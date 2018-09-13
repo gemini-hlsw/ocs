@@ -21,6 +21,7 @@ public final class GNIRSConstants extends InstConstants {
     public static final String PIXEL_SCALE_PROP = "pixelScale";
     public static final ItemKey PIXEL_SCALE_KEY = key(PIXEL_SCALE_PROP);
     public static final String SLIT_WIDTH_PROP = "slitWidth";
+    public static final ItemKey SLIT_WIDTH_KEY = key(SLIT_WIDTH_PROP);
     public static final String DECKER_PROP = "decker";
     public static final String CAMERA_PROP = "camera";
     public static final ItemKey CAMERA_KEY = key(CAMERA_PROP);
