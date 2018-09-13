@@ -47,6 +47,11 @@ public final class PlannedTime implements Serializable {
         CategorizedTimeGroup calc(Config stepConfig, Option<Config> prevStepConfig);
     }
 
+    /**
+     * For ITC.
+     * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
+     */
+    @Deprecated
     public interface ItcOverheadProvider {
         double getSetupTime(Config conf);
         double getReacquisitionTime();

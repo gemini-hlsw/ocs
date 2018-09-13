@@ -249,10 +249,14 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         return (_slitWidth == SlitWidth.IFU) ? (getSetupTimeIfu()) : (getSetupTime());
     }
 
+    /**
+     * For ITC.
+     * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
+     */
+    @Deprecated @Override
     public double getSetupTime(Config conf) {
-
         if (conf.containsItem(AOConstants.AO_SYSTEM_KEY)) {
-            GuideStarType guideStarType = (GuideStarType) conf.getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
+            final GuideStarType guideStarType = (GuideStarType) conf.getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
             if (guideStarType.equals(AltairParams.GuideStarType.LGS)) {
                 return getSetupTimeLgs();
             }

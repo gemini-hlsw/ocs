@@ -192,6 +192,11 @@ public final class InstNIFS extends SPInstObsComp implements PropertyProvider, G
         return NifsSetupTimeService.getSetupTimeSec(obs);
     }
 
+    /**
+     * For ITC.
+     * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
+     */
+    @Deprecated @Override
     public double getSetupTime(Config conf) {
         final GuideStarType guideStarType = (GuideStarType) conf.getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
         if (conf.containsItem(AOConstants.AO_SYSTEM_KEY) &&
@@ -207,9 +212,9 @@ public final class InstNIFS extends SPInstObsComp implements PropertyProvider, G
     }
 
     /**
-         * Return the dimensions of the science area.
-         * @return an array giving the size of the detector in arcsec
-         */
+     * Return the dimensions of the science area.
+     * @return an array giving the size of the detector in arcsec
+     */
     public double[] getScienceArea() {
         return new double[] {Mask.SIZE, Mask.SIZE};
     }

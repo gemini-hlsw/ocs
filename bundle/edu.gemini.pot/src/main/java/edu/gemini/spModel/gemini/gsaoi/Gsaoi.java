@@ -665,6 +665,11 @@ public final class Gsaoi extends SPInstObsComp
         return MCAO_SETUP_TIME * 60;//MCAO setup time: 30m
     }
 
+    /**
+     * For ITC.
+     * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
+     */
+    @Deprecated @Override
     public double getSetupTime(Config conf) {
         return MCAO_SETUP_TIME * 60;//MCAO setup time: 30m
     }
@@ -745,8 +750,13 @@ public final class Gsaoi extends SPInstObsComp
         return curGuided || isGuided(prev);
 
     }
-    // This is for use in the ITC overheads calculations only.
-    // LGS reacquisition is required when coming back from sky offset >5'
+
+    /**
+     * This is for use in the ITC overheads calculations only.
+     * LGS reacquisition is required when coming back from sky offset >5'
+     * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
+     */
+    @Deprecated
     private static boolean lgsReacquisitionRequired(Config cur, Option<Config> prev) {
         if (!isOffset(cur, prev)) {
             return false;

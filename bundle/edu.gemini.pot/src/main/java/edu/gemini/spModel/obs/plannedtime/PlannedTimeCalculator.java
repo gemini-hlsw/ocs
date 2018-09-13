@@ -71,7 +71,11 @@ public enum PlannedTimeCalculator {
         return PlannedTime.apply(setup, steps, cs);
     }
 
-    // for use in ITC
+    /**
+     * For ITC.
+     * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
+     */
+    @Deprecated
     public PlannedTime calc(Config[] conf, ItcOverheadProvider instr)  {
         ChargeClass obsChargeClass = ChargeClass.PROGRAM;
 
@@ -86,11 +90,11 @@ public enum PlannedTimeCalculator {
 
         // Calculate the overhead time
         Option<Config> prev = None.instance();
-        List<PlannedTime.Step> steps = new ArrayList<PlannedTime.Step>();
+        List<PlannedTime.Step> steps = new ArrayList<>();
         ConfigSequence cs = new ConfigSequence(conf);
         for (Config c : cs.getAllSteps()) {
             CategorizedTimeGroup gtc    = instr.calc(c, prev);
-            prev = new Some<Config>(c);
+            prev = new Some<>(c);
 
             steps.add(Step.apply(gtc));
         }

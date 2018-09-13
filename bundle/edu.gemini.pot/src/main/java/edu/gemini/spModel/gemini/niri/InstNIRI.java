@@ -178,6 +178,11 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
             return niri._disperser == Disperser.NONE ? imaging : spectroscopy;
         }
 
+        /**
+         * For ITC.
+         * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
+         */
+        @Deprecated
         private static Mode getMode(Config conf) {
             return conf.getItemValue(DISPERSER_KEY) == Disperser.NONE ? imaging : spectroscopy;
         }
@@ -187,6 +192,11 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
         return Mode.getMode(this);
     }
 
+    /**
+     * For ITC.
+     * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
+     */
+    @Deprecated
     public Mode getMode(Config conf) {
         return Mode.getMode(conf);
     }
@@ -278,36 +288,12 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
         final InstAltair altair = InstAltair.lookupAltair(obs);
         return (altair == null) ? getSetupTime(mode) : getSetupTime(mode, altair.getMode());
     }
-/*
-    public double getSetupTime(Config conf) {
-        String aoSystem = (String) conf.getItemValue(AOConstants.AO_SYSTEM_KEY);
-        String guideStarType = (String) conf.getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
-        String disperser = (String) conf.getItemValue(DISPERSER_KEY);
 
-        Mode mode;
-        AltairParams.Mode altairMode = null;
-        if (disperser.equals("none"))  {
-            mode = Mode.imaging;
-        } else {
-            mode = Mode.spectroscopy;
-        }
-
-        if (conf.containsItem(AOConstants.AO_SYSTEM_KEY) && aoSystem.equals("Altair")) {
-            if (guideStarType.equals("LGS")) {
-                altairMode = AltairParams.Mode.LGS;
-            } else if (guideStarType.equals("NGS")) {
-                altairMode = AltairParams.Mode.NGS;
-            }
-        }
-
-        if (!conf.containsItem(AOConstants.AO_SYSTEM_KEY))  {
-            return getSetupTime(mode);
-        } else {
-            return getSetupTime(mode, altairMode);
-        }
-    }
-    */
-
+    /**
+     * For ITC.
+     * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
+     */
+    @Deprecated @Override
     public double getSetupTime(Config conf) {
         final GuideStarType guideStarType = (GuideStarType) conf.getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
         final Mode mode = getMode(conf);

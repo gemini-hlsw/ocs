@@ -867,7 +867,10 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         return usesF2Oiwfs(obs) ? IMAGING_SETUP_TIME_OIWFS : IMAGING_SETUP_TIME_PWFS2;
     }
 
-
+    /**
+     * For ITC.
+     * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
+     */
     public static double getImagingSetupSec(Config conf) {
             return ImOption.apply(conf.getItemValue(GUIDE_WITH_OIWFS_KEY))
                     .exists(g -> ((GuideOption) g).isActive()) ? IMAGING_SETUP_TIME_OIWFS : IMAGING_SETUP_TIME_PWFS2;
@@ -911,7 +914,11 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         return getSpectroscopySetupSec();
     }
 
-    // for ITC overheads
+    /**
+     * for ITC overheads
+     * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
+     */
+    @Deprecated @Override
     public double getSetupTime(Config conf) {
         if (isImagingConfig(conf)) return getImagingSetupSec(conf);
         return getSpectroscopySetupSec();
@@ -924,6 +931,11 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         return (fpu == FPUnit.FPU_NONE) && (disperser == Disperser.NONE);
     }
 
+    /**
+     * For ITC.
+     * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
+     */
+    @Deprecated
     private static boolean isImagingConfig(Config conf) {
         return isImagingConfig(
                 (FPUnit) conf.getItemValue(FPUnit.KEY),

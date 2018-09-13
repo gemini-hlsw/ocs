@@ -437,7 +437,11 @@ public abstract class InstGmosCommon<
         return SETUP_TIME_IFU_MOS;
     }
 
-
+    /**
+     * For ITC.
+     * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
+     */
+    @Deprecated @Override
     public double getSetupTime(Config conf) {
         return Optional.ofNullable(conf.getItemValue(FPU_KEY))
                 .map(c -> (GmosCommonType.FPUnit) c)
