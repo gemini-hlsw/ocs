@@ -100,7 +100,7 @@ public final class ConfigCreator {
         final CalculationMethod calcMethod = obsDetailParams.calculationMethod();
         final ConfigCreatorResult result = new ConfigCreatorResult(new DefaultConfig[numberExposures]);
         if (numberExposures < 1) {
-            result.addWarning("Warning: Observation overheads cannot be calculated for the number of exposures = 0.");
+            result.addWarning("Warning: The number of exposures must be > 0.");
         }
         final int numberCoadds = calcMethod.coaddsOrElse(1);
         final double offset = calcMethod.offset();
@@ -111,7 +111,7 @@ public final class ConfigCreator {
         final List<Double> offsetList = new ArrayList<>();
 
         for (int i = 0; i < (1 + numberExposures / 4); i++) {
-            if (calcMethod instanceof Imaging) {
+            if (calcMethod instanceof Imaging || obsDetailParams.analysisMethod() instanceof IfuMethod) {
                 offsetList.addAll(imagingOffsets);
                 result.setOffsetMessage("ABAB dithering pattern");
             } else if (calcMethod instanceof Spectroscopy) {
