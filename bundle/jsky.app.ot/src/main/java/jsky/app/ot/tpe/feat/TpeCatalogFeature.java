@@ -1,10 +1,9 @@
 package jsky.app.ot.tpe.feat;
 
+import edu.gemini.shared.util.immutable.ImOption;
 import jsky.app.ot.tpe.TpeImageFeature;
 import jsky.app.ot.tpe.TpeImageInfo;
-import jsky.app.ot.tpe.TpeImageWidget;
 import jsky.app.ot.tpe.TpeImageFeatureCategory;
-import jsky.catalog.gui.TablePlotter;
 
 import java.awt.*;
 
@@ -23,28 +22,23 @@ public class TpeCatalogFeature extends TpeImageFeature {
      */
     @Override
     public void unloaded() {
-        if (_iw != null) {
-            TablePlotter p = _iw.plotter();
-            if (p != null) {
-                p.setVisible(false);
-            }
-        }
+        setVisible(false);
         super.unloaded();
     }
 
-    /**
-     * Reinitialize.  Override if additional initialization is required.
-     */
     @Override
-    public void reinit(TpeImageWidget iw, TpeImageInfo tii) {
-        super.reinit(iw, tii);
-        TablePlotter p = _iw.plotter();
-        if (p != null) {
-            p.setVisible(true);
-        }
+    public void draw(Graphics g, TpeImageInfo tii) {
+        // Drawing is handled by the plotter that the image widget maintains,
+        // so we just need to make sure it is visible whenever we are asked to
+        // draw.
+        setVisible(true);
     }
 
-    public void draw(Graphics g, TpeImageInfo tii) { }
+    private void setVisible(final boolean isVisible) {
+        ImOption.apply(_iw)
+                .flatMap(iw -> ImOption.apply(iw.plotter()))
+                .foreach(p -> p.setVisible(isVisible));
+    }
 
     @Override
     public boolean isEnabledByDefault() {

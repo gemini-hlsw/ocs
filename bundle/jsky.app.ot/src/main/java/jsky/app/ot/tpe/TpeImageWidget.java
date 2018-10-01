@@ -34,8 +34,7 @@ import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.event.MouseInputListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
@@ -112,6 +111,28 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
 
         addMouseListener(this);
         addMouseMotionListener(this);
+
+        QueryResultsFrame.instance().peer().addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                System.out.println("Component shown");
+                QueryResultsFrame.instance().plotResults();
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+                System.out.println("Component hidden");
+                QueryResultsFrame.instance().unplotCurrent();
+            }
+        });
+
+        if (QueryResultsFrame.instance().visible()) {
+            System.out.println("Window is open");
+            QueryResultsFrame.instance().plotResults();
+        } else {
+            System.out.println("Window is closed");
+            QueryResultsFrame.instance().unplotCurrent();
+        }
     }
 
 

@@ -297,7 +297,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     }
   }
 
-  private def plotResults(): Unit = {
+  def plotResults(): Unit = {
     resultsTable.model match {
       case t: TargetsModel =>
         Option(TpeManager.open()).foreach(p => TpePlotter(p.getImageWidget).plot(t))
@@ -314,7 +314,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     }
   }
 
-  private def unplotCurrent(): Unit = {
+  def unplotCurrent(): Unit = {
     resultsTable.model match {
       case t: TargetsModel =>
         val tpe = TpeManager.get()
