@@ -296,7 +296,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     }
   }
 
-  def unplotCurrent(): Unit = {
+  private def unplotCurrent(): Unit = {
     resultsTable.model match {
       case t: TargetsModel =>
         val tpe = TpeManager.get()
@@ -329,6 +329,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     }
   }
 
+  /** Obtains the targets model behind the results table. */
   def targetsModel: Option[TargetsModel] =
     resultsTable.model match {
       case tm: TargetsModel => Some(tm)

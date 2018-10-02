@@ -111,6 +111,9 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         addMouseListener(this);
         addMouseMotionListener(this);
 
+        // Watch the manual catalog query tool so that we can toggle the view
+        // of the plotted guide stars between AGS candidates and manual search
+        // results.  See TpeCatalogFeature.
         QueryResultsFrame.instance().peer().addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(ComponentEvent e) {

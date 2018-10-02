@@ -16,6 +16,12 @@ import java.awt._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing.Swing
 
+/**
+ * The TpeCatalogFeature is used to show guide star candidates.  When enabled,
+ * it has two modes.  Normally AGS candidates are displayed but when the manual
+ * catalog search tool is visible then it plots the results from there.  The
+ * actual drawing of the plot symbols is delegated to the catalog code.
+ */
 final class TpeCatalogFeature extends TpeImageFeature("Catalog", "Show or hide catalog symbols.") {
   import TpeCatalogFeature._
 
@@ -54,18 +60,21 @@ final class TpeCatalogFeature extends TpeImageFeature("Catalog", "Show or hide c
       p.unplotAll()
       if (state.exists(_.visible)) {
         if (state.exists(_.manual)) QueryResultsFrame.plotResults()
-        else w.getObsContext.asScalaOpt.foreach(showAgsCandidates(w, p, _, newState))
+        else showAgsCandidates(w, p, newState)
       }
     }
   }
 
+  // Displays the candidates considered by AGS.  This requires performing an
+  // asynchronous query and packaging up the results so that they appear to be
+  // from the catalog ui.
   private def showAgsCandidates(
     w: TpeImageWidget,
     p: TablePlotter,
-    c: ObsContext,
     state: Option[PlotState]
   ): Unit =
     for {
+      c <- w.getObsContext.asScalaOpt
       s <- AgsRegistrar.currentStrategy(c)
       m  = ProbeLimitsTable.loadOrThrow()
       q <- s.catalogQueries(c, m).headOption
@@ -98,7 +107,7 @@ object TpeCatalogFeature {
 
   private def agsHash(c: ObsContext): Int = {
     // Need a reasonable stable value for when to compute coordinates for an
-    // observation, but which precise time (and hence the site) don't matter
+    // observation, but which precise time (and hence the site) doesn't matter
     val when = c.getSchedulingBlockStart.asScalaOpt.map(_.toLong).getOrElse {
       new ObservingNight(c.getSite.getOrElse(Site.GN)).getStartTime
     }
