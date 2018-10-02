@@ -136,10 +136,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
                   val tm   = TargetsModel(info.some, q.base, q.radiusConstraint, curModel.targets)
                   updateResultsModel(tm)
 
-                  // Update the plotter's table list so that the selection link
-                  // between the table rows and the plot continues to work.
-                  iw.plotter.unplotAll()
-                  iw.plotter.plot(TableQueryResultAdapter(tm))
+                  iw.repaint()
                 }
 
               case _ =>
@@ -167,20 +164,6 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   private lazy val closeButton = new Button("Close") {
     reactions += {
       case ButtonClicked(_) => QueryResultsFrame.visible = false
-    }
-  }
-
-  private lazy val unplotButton = new Button(PlottedState.flipAction) {
-    reactions += {
-      case ButtonClicked(_) =>
-        text match {
-          case PlottedState.flipAction =>
-            unplotCurrent()
-            text = UnplottedState.flipAction
-          case UnplottedState.flipAction =>
-            plotResults()
-            text = PlottedState.flipAction
-        }
     }
   }
 
@@ -239,7 +222,6 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     add(tableBorder, CC().grow().spanX(4).pushY().pushX())
     // Labels and command buttons at the bottom
     add(errorLabel, CC().alignX(LeftAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px).newline().skip(1).grow())
-    add(unplotButton, CC().alignX(RightAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
     add(exportButton, CC().alignX(RightAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
     add(closeButton, CC().alignX(RightAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
   }
@@ -342,13 +324,16 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         QueryForm.updateQuery(info, q)
 
         // Plot the results when they arrive
-        plotResults()
-
-        // Reset the state of the plot button
-        unplotButton.text = PlottedState.flipAction
+        Option(TpeManager.get()).foreach(t => t.getImageWidget.repaint())
       case _ =>
     }
   }
+
+  def targetsModel: Option[TargetsModel] =
+    resultsTable.model match {
+      case tm: TargetsModel => Some(tm)
+      case _                => None
+    }
 
   private def updateResultsModel(model: TargetsModel): Unit = {
     resultsTable.model = model
@@ -532,10 +517,9 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           resultsTable.model match {
             case t: TargetsModel =>
               Swing.onEDT {
-                unplotCurrent()
                 updateResultsModel(t.copy(info = t.info.map(i => i.copy(ctx = None, conditions = i.conditions.map(_.sb(selection.item))))))
-                plotResults()
                 updateGuideSpeedText()
+                Option(TpeManager.open()).foreach(p => p.getImageWidget.repaint())
               }
           }
       }
@@ -555,10 +539,9 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           resultsTable.model match {
             case t: TargetsModel =>
               Swing.onEDT {
-                unplotCurrent()
                 updateResultsModel(t.copy(info = t.info.map(i => i.copy(ctx = None, conditions = i.conditions.map(_.cc(selection.item))))))
-                plotResults()
                 updateGuideSpeedText()
+                Option(TpeManager.open()).foreach(p => p.getImageWidget.repaint())
               }
           }
       }
@@ -578,10 +561,9 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           resultsTable.model match {
             case t: TargetsModel =>
               Swing.onEDT {
-                unplotCurrent()
                 updateResultsModel(t.copy(info = t.info.map(i => i.copy(ctx = None, conditions = i.conditions.map(_.iq(selection.item))))))
-                plotResults()
                 updateGuideSpeedText()
+                Option(TpeManager.open()).foreach(p => p.getImageWidget.repaint())
               }
           }
       }

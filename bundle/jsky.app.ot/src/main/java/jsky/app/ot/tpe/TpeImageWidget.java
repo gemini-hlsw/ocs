@@ -10,7 +10,6 @@ import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.*;
 import edu.gemini.spModel.target.env.Asterism;
-import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.env.UserTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
@@ -115,24 +114,14 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         QueryResultsFrame.instance().peer().addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(ComponentEvent e) {
-                System.out.println("Component shown");
-                QueryResultsFrame.instance().plotResults();
+                repaint();
             }
 
             @Override
             public void componentHidden(ComponentEvent e) {
-                System.out.println("Component hidden");
-                QueryResultsFrame.instance().unplotCurrent();
+                repaint();
             }
         });
-
-        if (QueryResultsFrame.instance().visible()) {
-            System.out.println("Window is open");
-            QueryResultsFrame.instance().plotResults();
-        } else {
-            System.out.println("Window is closed");
-            QueryResultsFrame.instance().unplotCurrent();
-        }
     }
 
 
