@@ -10,7 +10,6 @@ import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.*;
 import edu.gemini.spModel.target.env.Asterism;
-import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.env.UserTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
@@ -34,8 +33,7 @@ import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.event.MouseInputListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
@@ -112,6 +110,21 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
 
         addMouseListener(this);
         addMouseMotionListener(this);
+
+        // Watch the manual catalog query tool so that we can toggle the view
+        // of the plotted guide stars between AGS candidates and manual search
+        // results.  See TpeCatalogFeature.
+        QueryResultsFrame.instance().peer().addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                repaint();
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+                repaint();
+            }
+        });
     }
 
 
