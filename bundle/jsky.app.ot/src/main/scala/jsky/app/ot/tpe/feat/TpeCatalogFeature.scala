@@ -10,6 +10,7 @@ import edu.gemini.skycalc.ObservingNight
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.obs.context.ObsContext
 import jsky.app.ot.tpe._
+import jsky.app.ot.tpe.feat.TpeCatalogFeature.PlotState.{AgsPlot, ManualPlot, NoPlot}
 import jsky.catalog.gui.TablePlotter
 import java.awt._
 
@@ -50,7 +51,7 @@ final class TpeCatalogFeature extends TpeImageFeature("Catalog", "Show or hide c
   // triggers repaint which calls draw, something has to break the loop.  That's
   // where PlotState comes in.  It can be computed and compared to determine
   // whether what would be drawn differs from the previous instance.
-  private var state: Option[PlotState] = None
+  private var state: PlotState = NoPlot
 
   private def draw(w: TpeImageWidget, p: TablePlotter): Unit = {
     val newState = plotState(w)
@@ -58,9 +59,11 @@ final class TpeCatalogFeature extends TpeImageFeature("Catalog", "Show or hide c
       state = newState
 
       p.unplotAll()
-      if (state.exists(_.visible)) {
-        if (state.exists(_.manual)) QueryResultsFrame.plotResults()
-        else showAgsCandidates(w, p, newState)
+
+      newState match {
+        case NoPlot        => // do nothing
+        case ManualPlot(_) => QueryResultsFrame.plotResults()
+        case AgsPlot(_)    => showAgsCandidates(w, p, newState)
       }
     }
   }
@@ -71,7 +74,7 @@ final class TpeCatalogFeature extends TpeImageFeature("Catalog", "Show or hide c
   private def showAgsCandidates(
     w: TpeImageWidget,
     p: TablePlotter,
-    state: Option[PlotState]
+    state: PlotState
   ): Unit =
     for {
       c <- w.getObsContext.asScalaOpt
@@ -90,10 +93,10 @@ final class TpeCatalogFeature extends TpeImageFeature("Catalog", "Show or hide c
       }
     }
 
-  private def plotState(iw: TpeImageWidget): Option[PlotState] =
-    iw.getObsContext.asScalaOpt.map { c =>
-      PlotState(isVisible, agsHash(c), QueryResultsFrame.visible, QueryResultsFrame.targetsModel)
-    }
+  private def plotState(iw: TpeImageWidget): PlotState =
+    if (!isVisible) NoPlot
+    else if (QueryResultsFrame.visible) ManualPlot(QueryResultsFrame.targetsModel)
+    else iw.getObsContext.asScalaOpt.fold(NoPlot: PlotState)(c => AgsPlot(agsHash(c)))
 }
 
 object TpeCatalogFeature {
@@ -108,11 +111,11 @@ object TpeCatalogFeature {
   }
 
   /** PlotState contains all relevant information for the catalog plot. */
-  private final case class PlotState(
-    visible: Boolean,
-    agsHash: Int,
-    manual:  Boolean,
-    targets: Option[TargetsModel]
-  )
+  sealed trait PlotState extends Product with Serializable
 
+  object PlotState {
+    case object NoPlot extends PlotState
+    final case class AgsPlot(hash: Int) extends PlotState
+    final case class ManualPlot(targets: Option[TargetsModel]) extends PlotState
+  }
 }
