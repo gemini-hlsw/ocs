@@ -77,25 +77,18 @@ final class TpeCatalogFeature extends TpeImageFeature("Catalog", "Show or hide c
       c <- w.getObsContext.asScalaOpt
       s <- AgsRegistrar.currentStrategy(c)
       m  = ProbeLimitsTable.loadOrThrow()
-      q <- s.catalogQueries(c, m).headOption
-    } q match {
-      case cs: ConeSearchCatalogQuery =>
-        s.candidates(c, m)(global).map(_.flatMap(_._2)).onSuccess {
-          case ts =>
-            Swing.onEDT {
-              // assuming the state of the world is the same after the candidate
-              // search, plot the candidates
-              if (state == plotState(w)) {
-                val in = ObservationInfo(c, m)
-                val tm = TargetsModel(Some(in), cs.base, cs.radiusConstraint, ts)
-                p.plot(TableQueryResultAdapter(tm))
-              }
-            }
+      q <- s.catalogQueries(c, m).headOption.collect { case cs: ConeSearchCatalogQuery => cs }
+    } s.candidates(c, m)(global).map(_.flatMap(_._2)).onSuccess { case ts =>
+      Swing.onEDT {
+        // assuming the state of the world is the same after the candidate
+        // search, plot the candidates
+        if (state == plotState(w)) {
+          val in = ObservationInfo(c, m)
+          val tm = TargetsModel(Some(in), q.base, q.radiusConstraint, ts)
+          p.plot(TableQueryResultAdapter(tm))
         }
-      case _ =>
-        // ignore
+      }
     }
-
 
   private def plotState(iw: TpeImageWidget): Option[PlotState] =
     iw.getObsContext.asScalaOpt.map { c =>
