@@ -2,16 +2,16 @@ package edu.gemini.dbTools.timingwindowcheck
 
 import edu.gemini.pot.sp._
 import edu.gemini.pot.spdb.{DBAbstractQueryFunctor, IDBDatabaseService}
-import edu.gemini.spModel.core.{ProgramId, ProgramType, SPProgramID}
-import edu.gemini.spModel.gemini.obscomp.{SPProgram, SPSiteQuality}
+import edu.gemini.spModel.core.SPProgramID
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
+import edu.gemini.spModel.rich.pot.sp._
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import java.security.Principal
 import java.time.Instant
 import java.util.{Set => JSet}
 
-import scala.collection.mutable.Buffer
 import scalaz._
 import Scalaz._
-import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.TimingWindow
 import edu.gemini.spModel.util.SPTreeUtil
 
 import scala.collection.JavaConverters._
@@ -21,50 +21,61 @@ import scala.collection.JavaConverters._
  */
 object TimingWindowFunctor {
 
-  private def isScience(p: ISPProgram): Boolean = {
-    val programType: Option[ProgramType] =
-      for {
-        i <- Option(p.getProgramID).map(pid => ProgramId.parse(pid.stringValue))
-        t <- i.ptype
-      } yield t
+  private implicit class ObservationOps(o: ISPObservation) {
 
-    programType.exists(_.isScience)
-  }
+    /** Gets the site quality component (data obj) of this observation if any. */
+    def siteQuality: Option[SPSiteQuality] =
+      Option(SPTreeUtil.findObsCondNode(o))
+        .flatMap { n => Option(n.getDataObject) }
+        .collect { case s: SPSiteQuality => s }
 
-  private def isActive(p: ISPProgram): Boolean = {
-    Option(p.getDataObject) match {
-      case Some(obj: SPProgram) => obj.isActive && !obj.isCompleted
-      case _                    => false
-    }
+    /** Gets the time that the last timing window expires, if any. */
+    def timingWindowExpiration: Option[Instant] =
+      o.siteQuality.flatMap { s =>
+        s.getTimingWindows.asScala.toList
+         .flatMap(_.getEnd.asScalaOpt.toList)
+         .maximumBy(_.toEpochMilli)
+      }
+
   }
 
   def unsafeQuery(db: IDBDatabaseService, user: JSet[Principal]): List[(SPProgramID, List[(SPObservationID, Instant)])] =
     new TimingWindowFunctor |>
-            (f => db.getQueryRunner(user).queryPrograms(f).results.toList)
+            (f => db.getQueryRunner(user).queryPrograms(f).results)
 
   def query(db: IDBDatabaseService, user: JSet[Principal]): Action[List[(SPProgramID, List[(SPObservationID, Instant)])]] =
     Action.catchLeft(unsafeQuery(db, user))
 }
 
 private class TimingWindowFunctor extends DBAbstractQueryFunctor {
-  import TimingWindowFunctor.{ isActive, isScience }
+  import TimingWindowFunctor._
 
-  val results: Buffer[(SPProgramID, List[(SPObservationID, Instant)])] = Buffer.empty
+  /**
+   * All observations in active programs with an expiring timing window,
+   * regardless of when the timing window expires.
+   */
+  var results: List[(SPProgramID, List[(SPObservationID, Instant)])] = Nil
 
   override def execute(db: IDBDatabaseService, node: ISPNode, principals: JSet[Principal]): Unit = {
 
-    def getLastTimingWindow(o: ISPObservation): Option[(SPObservationID, Instant)] = {
-      val tws: List[TimingWindow] = Option(SPTreeUtil.findObsCondNode(o)).flatMap(
-        x => Option(x.getDataObject.asInstanceOf[SPSiteQuality])
-      ).fold(Nil: List[TimingWindow])(_.getTimingWindows.asScala.toList)
-      tws.flatMap(_.getEnd.asScala).maximumBy(_.toEpochMilli).map(tw => (o.getObservationID, tw))
-    }
+    def expiringObs(p: ISPProgram): List[(SPObservationID, Instant)] =
+      p.allObservations.flatMap { o =>
+        o.timingWindowExpiration.strengthL(o.getObservationID).toList
+      }
 
     node match {
-      case p: ISPProgram => if (isActive(p) && isScience(p)) results += (
-        (p.getProgramID, p.getAllObservations.asScala.toList.flatMap(o => getLastTimingWindow(o).toList))
-        )
-      case _             => // do nothing
+      case p: ISPProgram if p.isOngoing =>
+        p.pidOption.strengthR(expiringObs(p)) match {
+          case Some((pid, o :: os))  =>
+            results = (pid, o :: os) :: results
+
+          case _                     =>
+            // no pid or no observations with an expiring window so do nothing
+        }
+
+      case _ =>
+        // do nothing
     }
+    
   }
 }

@@ -1,6 +1,7 @@
 package edu.gemini.spModel.rich.pot.sp
 
 import edu.gemini.pot.sp.{SPNodeKey, ISPContainerNode, ISPNode}
+import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.data.ISPDataObject
 
 import scala.annotation.tailrec
@@ -12,6 +13,9 @@ import Scalaz._
 final class RichNode(val node: ISPNode) extends AnyVal {
   /** An alias for `getNodeKey`. */
   def key: SPNodeKey = node.getNodeKey
+
+  def pidOption: Option[SPProgramID] =
+    Option(node.getProgramID)
 
   def dataObject: Option[ISPDataObject] = Option(node.getDataObject)
 
