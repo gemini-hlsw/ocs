@@ -2,8 +2,9 @@ package edu.gemini.dbTools.timingwindowcheck
 
 import edu.gemini.pot.sp._
 import edu.gemini.pot.spdb.{DBAbstractQueryFunctor, IDBDatabaseService}
-import edu.gemini.spModel.core.SPProgramID
+import edu.gemini.skycalc.Interval
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
+import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import java.security.Principal
@@ -37,45 +38,42 @@ object TimingWindowFunctor {
          .maximumBy(_.toEpochMilli)
       }
 
+    def isActive: Boolean = {
+      import ObservationStatus.{ON_HOLD, ONGOING, READY}
+
+      ObservationStatus.computeFor(o) match {
+        case ON_HOLD | ONGOING | READY => true
+        case _                         => false
+      }
+    }
   }
 
-  def unsafeQuery(db: IDBDatabaseService, user: JSet[Principal]): List[(SPProgramID, List[(SPObservationID, Instant)])] =
-    new TimingWindowFunctor |>
+  def unsafeQuery(interval: Interval, db: IDBDatabaseService, user: JSet[Principal]): Vector[SPObservationID] =
+    new TimingWindowFunctor(interval) |>
             (f => db.getQueryRunner(user).queryPrograms(f).results)
 
-  def query(db: IDBDatabaseService, user: JSet[Principal]): Action[List[(SPProgramID, List[(SPObservationID, Instant)])]] =
-    Action.catchLeft(unsafeQuery(db, user))
+  def query(interval: Interval, db: IDBDatabaseService, user: JSet[Principal]): Action[Vector[SPObservationID]] =
+    Action.catchLeft(unsafeQuery(interval, db, user))
 }
 
-private class TimingWindowFunctor extends DBAbstractQueryFunctor {
+private class TimingWindowFunctor(interval: Interval) extends DBAbstractQueryFunctor {
   import TimingWindowFunctor._
 
   /**
-   * All observations in active programs with an expiring timing window,
-   * regardless of when the timing window expires.
+   * All active observations in active programs with a timing window that
+   * expired or expires in the given Interval.
    */
-  var results: List[(SPProgramID, List[(SPObservationID, Instant)])] = Nil
+  var results: Vector[SPObservationID] = Vector.empty
 
-  override def execute(db: IDBDatabaseService, node: ISPNode, principals: JSet[Principal]): Unit = {
-
-    def expiringObs(p: ISPProgram): List[(SPObservationID, Instant)] =
-      p.allObservations.flatMap { o =>
-        o.timingWindowExpiration.strengthL(o.getObservationID).toList
-      }
-
+  override def execute(db: IDBDatabaseService, node: ISPNode, principals: JSet[Principal]): Unit =
     node match {
-      case p: ISPProgram if p.isOngoing =>
-        p.pidOption.strengthR(expiringObs(p)) match {
-          case Some((pid, o :: os))  =>
-            results = (pid, o :: os) :: results
-
-          case _                     =>
-            // no pid or no observations with an expiring window so do nothing
-        }
-
-      case _ =>
-        // do nothing
+      case p: ISPProgram if p.isScience && p.isOngoing =>
+        results = results ++
+          p.allObservations
+            .filter(o => o.timingWindowExpiration.exists(interval.contains) && o.isActive)
+            .map(_.getObservationID)
+      case _                            =>
+        // Not an ongoing program so do nothing
     }
-    
-  }
+
 }

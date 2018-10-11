@@ -1,11 +1,7 @@
 package edu.gemini.dbTools
 
-import java.time.Instant
-
 import scalaz._
 import Scalaz._
-import edu.gemini.pot.sp.SPObservationID
-import edu.gemini.spModel.core.SPProgramID
 import scalaz.effect.IO
 
 package object timingwindowcheck {

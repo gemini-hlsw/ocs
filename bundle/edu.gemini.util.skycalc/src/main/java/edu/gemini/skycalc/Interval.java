@@ -77,6 +77,18 @@ public class Interval implements Comparable<Interval>, Serializable /*, PioSeria
 	}
 
 	/**
+	 * Returns <code>true</code> if the specified instant falls within the
+	 * interval.  In other words, at or after the start time but strictly before
+	 * the end time.
+	 *
+	 * @return <code>true</code> if <code>instant</code> falls within the
+	 * interval
+	 */
+	public final boolean contains(Instant instant) {
+		return contains(instant.toEpochMilli());
+	}
+
+	/**
 	 * Returns true if this interval overlaps the passed <code>interval</code> in the
 	 * specified manner. Note that this operation is not necessarily commutative;
 	 * <code>(10 .. 20]</code> overlaps <code>(13 .. 15]</code> completely, but the inverse

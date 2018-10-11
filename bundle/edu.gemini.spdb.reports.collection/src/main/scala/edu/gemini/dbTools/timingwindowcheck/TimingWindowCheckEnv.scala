@@ -3,14 +3,9 @@ package edu.gemini.dbTools.timingwindowcheck
 import edu.gemini.dbTools.mailer.MailerType
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.spModel.core.Site
-import edu.gemini.spModel.core.osgi.SiteProperty;
+import edu.gemini.spModel.core.osgi.SiteProperty
 
 import org.osgi.framework.BundleContext
-
-import java.time.Duration
-
-import scalaz._
-import Scalaz._
 
 
 final case class TimingWindowCheckEnv(odb: IDBDatabaseService, mailer: TimingWindowCheckMailer, site: Site)

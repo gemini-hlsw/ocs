@@ -1,13 +1,9 @@
 package edu.gemini.dbTools.timingwindowcheck
 
-import java.time.Instant
-
 import edu.gemini.dbTools.mailer.{Mailer, MailerType, ProgramAddresses}
+import edu.gemini.pot.sp.SPObservationID
 import edu.gemini.spModel.core.{SPProgramID, Site}
 import scalaz._
-import Scalaz._
-import edu.gemini.pot.sp.SPObservationID
-import scalaz.effect.IO
 
 sealed abstract class TimingWindowCheckMailer(mailer: Mailer) {
 
