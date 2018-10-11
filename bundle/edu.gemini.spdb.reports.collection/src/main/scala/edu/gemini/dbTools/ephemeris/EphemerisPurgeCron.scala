@@ -1,9 +1,9 @@
 package edu.gemini.dbTools.ephemeris
 
 import edu.gemini.pot.spdb.IDBDatabaseService
+import edu.gemini.spdb.cron.Storage.{Perm, Temp}
 import org.osgi.framework.BundleContext
 
-import java.io.File
 import java.security.Principal
 import java.util.logging.{Level, Logger}
 
@@ -13,7 +13,7 @@ object EphemerisPurgeCron {
 
 
   /** Cron job entry point.  See edu.gemini.spdb.cron.osgi.Activator. */
-  def run(ctx: BundleContext)(tmpDir: File, logger: Logger, env: java.util.Map[String, String], user: java.util.Set[Principal]): Unit = {
+  def run(ctx: BundleContext)(temp: Temp, perm: Perm, logger: Logger, env: java.util.Map[String, String], user: java.util.Set[Principal]): Unit = {
     val odbRef = ctx.getServiceReference(classOf[IDBDatabaseService])
     val odb    = ctx.getService(odbRef)
 

@@ -1,5 +1,6 @@
 package edu.gemini.dbTools.timingwindowcheck
 
+import edu.gemini.spdb.cron.Storage.{Temp, Perm}
 import org.osgi.framework.BundleContext
 import java.io.File
 import java.security.Principal
@@ -47,7 +48,7 @@ object TimingWindowCheckCron {
     }.void
 
   /** Cron job entry point.  See edu.gemini.spdb.cron.osgi.Activator. */
-  def run(ctx: BundleContext)(tmpDir: File, logger: Logger, env: java.util.Map[String, String], user: java.util.Set[Principal]): Unit = {
+  def run(ctx: BundleContext)(temp: Temp, perm: Perm, logger: Logger, env: java.util.Map[String, String], user: java.util.Set[Principal]): Unit = {
 
     def checkInterval(now: Instant): Interval =
       new Interval(now.minus(Duration.ofHours(24)), now)

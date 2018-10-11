@@ -10,6 +10,7 @@ import edu.gemini.shared.mail.MailSender;
 import edu.gemini.shared.mail.MailUtil;
 import edu.gemini.shared.util.FileUtil;
 import edu.gemini.spModel.core.SPProgramID;
+import edu.gemini.spdb.cron.Storage;
 
 import javax.mail.Message;
 import java.io.File;
@@ -80,7 +81,7 @@ public final class OdbMailAgent {
     }
 
     private static Map<SPProgramID, ProgramState> _hashState(final ProgramState[] state) {
-        final Map<SPProgramID, ProgramState> m = new HashMap<SPProgramID, ProgramState>();
+        final Map<SPProgramID, ProgramState> m = new HashMap<>();
         for (final ProgramState ps : state) {
             m.put(ps.getProgramId(), ps);
         }
@@ -196,7 +197,7 @@ public final class OdbMailAgent {
         _updateState();
     }
 
-    public static void run(final File tempDir, final Logger log, final Map<String, String> env, Set<Principal> user) throws IOException {
-        new OdbMailAgent(new OdbMailConfig(tempDir, env), new OdbStateConfig(tempDir)).executeOnce(log);
+    public static void run(final Storage.Temp temp, final Storage.Perm perm, final Logger log, final Map<String, String> env, Set<Principal> user) throws IOException {
+        new OdbMailAgent(new OdbMailConfig(temp.dir(), env), new OdbStateConfig(temp.dir())).executeOnce(log);
     }
 }

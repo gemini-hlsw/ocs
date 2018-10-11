@@ -8,6 +8,7 @@ import edu.gemini.skycalc.TwilightBoundType.OFFICIAL
 import edu.gemini.skycalc.{Night, TwilightBoundedNight}
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.osgi.SiteProperty
+import edu.gemini.spdb.cron.Storage.{Perm, Temp}
 import org.osgi.framework.BundleContext
 
 import java.io.File
@@ -136,11 +137,11 @@ object TcsEphemerisCron {
   }
 
   /** Cron job entry point.  See edu.gemini.spdb.cron.osgi.Activator. */
-  def run(ctx: BundleContext)(tmpDir: File, logger: Logger, env: java.util.Map[String, String], user: java.util.Set[Principal]): Unit = {
+  def run(ctx: BundleContext)(temp: Temp, perm: Perm, logger: Logger, env: java.util.Map[String, String], user: java.util.Set[Principal]): Unit = {
     val site   = Option(SiteProperty.get(ctx)) | sys.error(s"Property `${SiteProperty.NAME}` not specified.")
     val mailer = reportMailer(ctx, site, logger)
 
-    val exportDir = Option(ctx.getProperty(DirectoryProp)).fold(tmpDir) { pathString =>
+    val exportDir = Option(ctx.getProperty(DirectoryProp)).fold(temp.dir) { pathString =>
       new File(pathString)
     }
 

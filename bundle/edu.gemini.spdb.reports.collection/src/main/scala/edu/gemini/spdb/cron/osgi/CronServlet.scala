@@ -3,12 +3,14 @@ package edu.gemini.spdb.cron.osgi
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest, HttpServlet}
 import java.util.logging._
 
+import edu.gemini.spdb.cron.{Storage, CronJob}
+import Storage.{Temp, Perm}
+
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.JavaConverters._
 
 import java.util.concurrent.atomic.AtomicInteger
-import java.io.File
 import org.osgi.framework.BundleContext
 import edu.gemini.spdb.cron.CronJob
 import scala.util.Success
@@ -19,7 +21,7 @@ import java.security.Principal
  * A servlet that maps requests to batch jobs, allowing them to be scheduled by an external
  * entity like `cron`.
  */
-class CronServlet(ctx: BundleContext, services: Map[String, Job], tempDir: File, user: java.util.Set[Principal]) extends HttpServlet {
+class CronServlet(ctx: BundleContext, services: Map[String, Job], tempDir: Temp, permDir: Perm, user: java.util.Set[Principal]) extends HttpServlet {
 
   // This is all kinds of bad, sorry.
   val newLogger: String => (Logger, Int) = {
@@ -42,7 +44,7 @@ class CronServlet(ctx: BundleContext, services: Map[String, Job], tempDir: File,
       .asScala
       .find(_.getProperty(CronJob.ALIAS) == alias)
       .map(ctx.getService[CronJob])
-      .map(s => (f: File, l: Logger, e: java.util.Map[String, String], user: java.util.Set[Principal]) => s.run(f, l, e, user))
+      .map(s => (t: Temp, p: Perm, l: Logger, e: java.util.Map[String, String], user: java.util.Set[Principal]) => s.run(t, p, l, e, user))
 
   override def doGet(req: HttpServletRequest, resp: HttpServletResponse): Unit = {
 
@@ -79,7 +81,7 @@ class CronServlet(ctx: BundleContext, services: Map[String, Job], tempDir: File,
       Future {
         log.info(f"starting...")
         val start = System.currentTimeMillis
-        j(tempDir, log, env, user)
+        j(tempDir, permDir, log, env, user)
         System.currentTimeMillis - start
       } onComplete {
         case Success(n) => log.info(f"completed in $n%d ms.")
