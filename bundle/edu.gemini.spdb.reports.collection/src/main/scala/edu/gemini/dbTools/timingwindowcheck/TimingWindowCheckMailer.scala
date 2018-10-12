@@ -14,11 +14,17 @@ sealed abstract class TimingWindowCheckMailer(mailer: Mailer) {
     tws: NonEmptyList[SPObservationID]
   ): IO[Unit] = {
 
+    val s: String =
+      if (tws.tail.isEmpty) "" else "s"
+
     val subject   =
-      s"${pid.stringValue} Timing Window Still Pending"
+      s"${pid.stringValue} Timing Window$s Expired"
 
     val text      =
       s"""
+       |Timing window$s recently expired in ${pid.stringValue} observation$s:
+       |
+       |${tws.list.toList.sortBy(_.getObservationNumber).mkString("\t", "\n\t", "\n")}
        """.stripMargin
 
     mailer.sendText(to.ngo ++ to.cs, subject, text)
