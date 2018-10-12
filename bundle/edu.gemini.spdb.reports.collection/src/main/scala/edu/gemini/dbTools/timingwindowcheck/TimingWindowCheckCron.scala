@@ -2,7 +2,6 @@ package edu.gemini.dbTools.timingwindowcheck
 
 import edu.gemini.spdb.cron.Storage.{Temp, Perm}
 import org.osgi.framework.BundleContext
-import java.io.File
 import java.security.Principal
 import java.time.{Duration, Instant}
 import java.util.logging.{Level, Logger}
@@ -47,17 +46,22 @@ object TimingWindowCheckCron {
 
     }.void
 
+  private def lastRun(perm: Perm, now: Instant): Action[Instant] =
+    EitherT(TimingWindowProps.load(perm).catchLeft).map(_.fold(now)(_.when))
+
   /** Cron job entry point.  See edu.gemini.spdb.cron.osgi.Activator. */
   def run(ctx: BundleContext)(temp: Temp, perm: Perm, logger: Logger, env: java.util.Map[String, String], user: java.util.Set[Principal]): Unit = {
 
-    def checkInterval(now: Instant): Interval =
+    def checkInterval(lst: Instant, now: Instant): Interval =
       new Interval(now.minus(Duration.ofHours(24)), now)
 
     val action = for {
       env <- TimingWindowCheckEnv.fromBundleContext(ctx)
       now <- Action.delay(Instant.now)
-      obs <- TimingWindowFunctor.query(checkInterval(now), env.odb, user)
+      lst <- lastRun(perm, now)
+      obs <- TimingWindowFunctor.query(new Interval(lst, now), env.odb, user)
       _   <- sendEmails(ActionLogger(logger), env.odb, env.mailer, obs)
+      _   <- EitherT(TimingWindowProps(now).store(perm).catchLeft)
     } yield ()
 
     action.run.unsafePerformIO() match {
