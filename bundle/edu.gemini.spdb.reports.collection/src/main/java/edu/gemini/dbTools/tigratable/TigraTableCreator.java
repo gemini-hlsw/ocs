@@ -8,7 +8,7 @@ import edu.gemini.dbTools.html.FtpUtil$;
 import edu.gemini.pot.client.SPDB;
 import edu.gemini.sp.vcs.log.VcsLog;
 import edu.gemini.spModel.core.Site;
-import edu.gemini.spdb.cron.Storage;
+import edu.gemini.spdb.cron.CronStorage;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
@@ -62,7 +62,7 @@ public class TigraTableCreator {
     }
 
     // curl -i -G -d edu.gemini.dbTools.html.ftpAccount=software -d edu.gemini.dbTools.html.ftpPassword=lemon -d edu.gemini.dbTools.html.ftpHost=foobar -d edu.gemini.dbTools.html.ftpDestDir=crap  http://localhost:8442/cron/tigraTable
-    public void run(final Storage.Temp temp, final Storage.Perm perm, final Logger log, final Map<String, String> env, Set<Principal> user) throws Exception {
+    public void run(final CronStorage store, final Logger log, final Map<String, String> env, Set<Principal> user) throws Exception {
         final Site site = Site.currentSiteOrNull;
         if (site != null) {
 
@@ -72,10 +72,10 @@ public class TigraTableCreator {
             final File out;
             switch (site) {
                 case GN:
-                    out = temp.newFile("TigraTableNorth.js");
+                    out = store.newTempFile("TigraTableNorth.js");
                     break;
                 case GS:
-                    out = temp.newFile("TigraTableSouth.js");
+                    out = store.newTempFile("TigraTableSouth.js");
                     break;
                 default:
                     throw new RuntimeException("Unknown site: " + site);

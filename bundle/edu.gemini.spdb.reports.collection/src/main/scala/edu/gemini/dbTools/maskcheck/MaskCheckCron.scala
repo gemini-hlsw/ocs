@@ -7,7 +7,7 @@ import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.shared.util.immutable.ImOption
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spdb.cron.Storage._
+import edu.gemini.spdb.cron.CronStorage
 import org.osgi.framework.BundleContext
 
 import java.security.Principal
@@ -102,7 +102,7 @@ object MaskCheckCron {
     }.void
 
   /** Cron job entry point.  See edu.gemini.spdb.cron.osgi.Activator. */
-  def run(ctx: BundleContext)(temp: Temp, perm: Perm, logger: Logger, env: java.util.Map[String, String], user: java.util.Set[Principal]): Unit = {
+  def run(ctx: BundleContext)(store: CronStorage, logger: Logger, env: java.util.Map[String, String], user: java.util.Set[Principal]): Unit = {
 
     val action = for {
       env  <- MaskCheckEnv.fromBundleContext(ctx)

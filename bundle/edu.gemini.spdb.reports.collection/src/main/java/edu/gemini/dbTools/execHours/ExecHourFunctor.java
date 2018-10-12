@@ -14,7 +14,7 @@ import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.time.ObsTimeCharge;
 import edu.gemini.spModel.time.ObsTimeCharges;
 import edu.gemini.spModel.time.ObsTimes;
-import edu.gemini.spdb.cron.Storage;
+import edu.gemini.spdb.cron.CronStorage;
 
 import java.io.*;
 import java.security.Principal;
@@ -79,7 +79,7 @@ public class ExecHourFunctor extends DBAbstractQueryFunctor {
 
     /** Entry point. */
     // curl -i -G -d edu.gemini.dbTools.html.ftpAccount=software -d edu.gemini.dbTools.html.ftpPassword=lemon -d edu.gemini.dbTools.html.ftpHost=foobar -d edu.gemini.dbTools.html.ftpDestDir=crap  http://localhost:8442/cron/execHours
-    public static void run(final Storage.Temp temp, Storage.Perm perm, final Logger log, final Map<String, String> env, Set<Principal> user) throws Exception {
+    public static void run(final CronStorage store, final Logger log, final Map<String, String> env, Set<Principal> user) throws Exception {
         final Site site = Site.currentSiteOrNull;
         if (site != null) {
 
@@ -89,10 +89,10 @@ public class ExecHourFunctor extends DBAbstractQueryFunctor {
             final File out;
             switch (site) {
                 case GN:
-                    out = temp.newFile("ExecHoursNorth.txt");
+                    out = store.newTempFile("ExecHoursNorth.txt");
                     break;
                 case GS:
-                    out = temp.newFile("ExecHoursSouth.txt");
+                    out = store.newTempFile("ExecHoursSouth.txt");
                     break;
                 default:
                     throw new RuntimeException("Unknown site: " + site);

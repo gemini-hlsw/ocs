@@ -1,15 +1,17 @@
 package edu.gemini.dbTools.timingwindowcheck
 
-import edu.gemini.spdb.cron.Storage.{Temp, Perm}
-import org.osgi.framework.BundleContext
-import java.security.Principal
-import java.time.{Duration, Instant}
-import java.util.logging.{Level, Logger}
+import edu.gemini.spdb.cron.CronStorage
 
 import edu.gemini.dbTools.mailer.ProgramAddresses
 import edu.gemini.pot.sp.SPObservationID
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.skycalc.Interval
+
+import org.osgi.framework.BundleContext
+import java.io.File
+import java.security.Principal
+import java.time.{Duration, Instant}
+import java.util.logging.{Level, Logger}
 
 import scalaz._
 import Scalaz._
@@ -52,11 +54,11 @@ object TimingWindowCheckCron {
   // Last time the cron job ran (or `now` if it hasn't run before).  Using the
   // current time if not executed before prevents sending a flood of emails the
   // first time that we execute the cron job.
-  private def lastRun(perm: Perm, now: Instant): IO[Instant] =
-    TimingWindowProps.load(perm).map(_.fold(now)(_.when))
+  private def lastRun(dir: File, now: Instant): IO[Instant] =
+    TimingWindowProps.load(dir).map(_.fold(now)(_.when))
 
   /** Cron job entry point.  See edu.gemini.spdb.cron.osgi.Activator. */
-  def run(ctx: BundleContext)(temp: Temp, perm: Perm, logger: Logger, env: java.util.Map[String, String], user: java.util.Set[Principal]): Unit = {
+  def run(ctx: BundleContext)(store: CronStorage, logger: Logger, env: java.util.Map[String, String], user: java.util.Set[Principal]): Unit = {
 
     def checkInterval(lst: Instant, now: Instant): Interval =
       new Interval(now.minus(Duration.ofHours(24)), now)
@@ -65,11 +67,11 @@ object TimingWindowCheckCron {
       for {
         env <- TimingWindowCheckEnv.fromBundleContext(ctx)
         now <- IO(Instant.now)
-        lst <- lastRun(perm, now)
+        lst <- lastRun(store.permDir, now)
         obs <- TimingWindowFunctor.query(new Interval(lst, now), env.odb, user)
         _   <- logger.ioLog(Level.INFO, obs.mkString("Found expired timing windows in these active obs: {", ",", "}"))
         _   <- sendEmails(logger, env.odb, env.mailer, obs)
-        _   <- TimingWindowProps(now).store(perm)
+        _   <- TimingWindowProps(now).store(store.permDir)
       } yield ()
 
     action.attempt.unsafePerformIO() match {

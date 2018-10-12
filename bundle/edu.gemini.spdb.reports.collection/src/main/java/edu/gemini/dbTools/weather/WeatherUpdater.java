@@ -10,7 +10,7 @@ import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.gemini.plan.NightlyRecord;
 import edu.gemini.spModel.gemini.plan.WeatherInfo;
 import edu.gemini.spModel.util.NightlyProgIdGenerator;
-import edu.gemini.spdb.cron.Storage;
+import edu.gemini.spdb.cron.CronStorage;
 import edu.gemini.weather.IWeatherBean;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -80,7 +80,7 @@ public final class WeatherUpdater {
         return record;
     }
 
-    public void run(final Storage.Temp temp, final Storage.Perm perm, final Logger log, final Map<String, String> env, Set<Principal> user) throws DBIDClashException {
+    public void run(final CronStorage store, final Logger log, final Map<String, String> env, Set<Principal> user) throws DBIDClashException {
         final ServiceReference<IWeatherBean> ref = context.getServiceReference(IWeatherBean.class);
         if (ref != null) {
             final IWeatherBean wb = context.getService(ref);

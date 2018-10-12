@@ -7,7 +7,7 @@ import edu.gemini.pot.client.SPDB;
 import edu.gemini.pot.spdb.DBStatus;
 import edu.gemini.pot.spdb.IDBAdmin;
 import edu.gemini.pot.spdb.IDBDatabaseService;
-import edu.gemini.spdb.cron.Storage;
+import edu.gemini.spdb.cron.CronStorage;
 
 import java.security.Principal;
 import java.util.Iterator;
@@ -22,7 +22,7 @@ public class OdbMonitor {
 
     // curl -i -G http://localhost:8442/cron/monitor
     @SuppressWarnings("UnusedParameters")
-    public static void monitor(final Storage.Temp temp, final Storage.Perm perm, final Logger log, final Map<String, String> env, Set<Principal> user) {
+    public static void monitor(final CronStorage store, final Logger log, final Map<String, String> env, Set<Principal> user) {
         final IDBDatabaseService db = SPDB.get();
         final IDBAdmin admin = db.getDBAdmin();
         final DBStatus status = admin.getStatus();

@@ -1,7 +1,5 @@
 package edu.gemini.dbTools.timingwindowcheck
 
-import edu.gemini.spdb.cron.Storage.Perm
-
 import java.io.{FileOutputStream, FileInputStream, File}
 import java.time.Instant
 import java.util.Properties
@@ -24,8 +22,8 @@ final case class TimingWindowProps(when: Instant) {
     p
   }
 
-  def store(perm: Perm): IO[Unit] =
-    IO(new FileOutputStream(file(perm)))
+  def store(dir: File): IO[Unit] =
+    IO(new FileOutputStream(file(dir)))
       .bracket(fos => IO(fos.close())) { fos =>
         IO(toProperties.store(fos, "TimingWindowCheck cron properties"))
       }
@@ -38,10 +36,10 @@ object TimingWindowProps {
   def fromProperties(p: Properties): Option[TimingWindowProps] =
     Option(p.getProperty(Key)).map(s => TimingWindowProps(Instant.parse(s)))
 
-  def file(perm: Perm): File =
-    perm.newFile("timingWindow.properties")
+  def file(dir: File): File =
+    new File(dir, "timingWindow.properties")
 
-  def load(perm: Perm): IO[Option[TimingWindowProps]] = {
+  def load(dir: File): IO[Option[TimingWindowProps]] = {
 
     def open(f: File): IO[Option[FileInputStream]] =
       IO((f.exists && f.canRead) option new FileInputStream(f))
@@ -53,7 +51,7 @@ object TimingWindowProps {
         fromProperties(p)
       }
 
-    open(file(perm))
+    open(file(dir))
       .bracket(fis => IO(fis.foreach(_.close()))) {
         _.fold(IO(Option.empty[TimingWindowProps]))(load)
       }

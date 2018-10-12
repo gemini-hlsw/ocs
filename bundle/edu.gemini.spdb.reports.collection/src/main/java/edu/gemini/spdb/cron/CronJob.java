@@ -9,6 +9,6 @@ public interface CronJob {
 
     String ALIAS = "edu.gemini.spdb.cron.alias";
 
-    void run(Storage.Temp temp, Storage.Perm perm, Logger log, Map<String, String> env, Set<Principal> user);
+    void run(CronStorage store, Logger log, Map<String, String> env, Set<Principal> user);
 
 }

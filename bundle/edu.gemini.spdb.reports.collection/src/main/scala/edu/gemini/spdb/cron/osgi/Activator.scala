@@ -4,8 +4,7 @@ import edu.gemini.dbTools.ephemeris.{EphemerisPurgeCron, TcsEphemerisCron}
 import edu.gemini.dbTools.maskcheck.MaskCheckCron
 import edu.gemini.dbTools.timingwindowcheck.TimingWindowCheckCron
 import edu.gemini.spModel.core.Version
-import edu.gemini.spdb.cron.Storage
-import Storage.{Perm, Temp}
+import edu.gemini.spdb.cron.CronStorage
 import org.osgi.framework.{BundleContext, BundleActivator}
 import org.osgi.util.tracker.ServiceTracker
 import edu.gemini.util.osgi.Tracker._
@@ -36,7 +35,7 @@ class Activator extends BundleActivator {
 
   // See each service's entry point for an example invocation via curl
   def services(c: BundleContext): Map[String, Job] =
-     Map("maskcheck"         -> MaskCheckCron.run(c),
+     Map("maskCheck"         -> MaskCheckCron.run(c),
          "monitor"           -> OdbMonitor.monitor,
          "execHours"         -> ExecHourFunctor.run,
          "tigraTable"        -> new TigraTableCreator(c).run,
@@ -66,7 +65,8 @@ class Activator extends BundleActivator {
     tracker = track[HttpService, HttpService](ctx) { http =>
       val temp = ExternalStorage.getExternalDataFile(ctx, "cron") <| (_.mkdirs)
       val perm = ExternalStorage.getPermanentDataFile(ctx, Version.current.isTest, "cron", Nil) <| (_.mkdirs)
-      val servlet = new CronServlet(ctx, services(ctx), Temp(temp), Perm(perm), user)
+      val stor = CronStorage(temp, perm)
+      val servlet = new CronServlet(ctx, services(ctx), stor, user)
       http <| (_.registerServlet(alias, servlet, null, null))
     }(_.unregister(alias))
     tracker.open()

@@ -6,7 +6,7 @@ package edu.gemini.dbTools.odbState;
 import edu.gemini.pot.client.SPDB;
 import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.spModel.core.SPProgramID;
-import edu.gemini.spdb.cron.Storage;
+import edu.gemini.spdb.cron.CronStorage;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -47,8 +47,8 @@ public final class OdbStateAgent {
     }
 
     @SuppressWarnings("UnusedParameters")
-    public static void run(final Storage.Temp temp, final Storage.Perm perm, final Logger log, final Map<String, String> env, Set<Principal> user) throws IOException {
-        new OdbStateAgent(log, new OdbStateConfig(temp.dir()), SPDB.get()).updateState(log, user);
+    public static void run(final CronStorage store, final Logger log, final Map<String, String> env, Set<Principal> user) throws IOException {
+        new OdbStateAgent(log, new OdbStateConfig(store.tempDir()), SPDB.get()).updateState(log, user);
     }
 
 }

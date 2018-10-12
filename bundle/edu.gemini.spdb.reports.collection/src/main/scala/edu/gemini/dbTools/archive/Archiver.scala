@@ -1,7 +1,7 @@
 package edu.gemini.dbTools.archive
 
 
-import edu.gemini.spdb.cron.Storage.{Perm, Temp}
+import edu.gemini.spdb.cron.CronStorage
 import org.osgi.framework.BundleContext
 import edu.gemini.dbTools.html.{FtpProps, FtpUtil}
 import edu.gemini.pot.client.SPDB
@@ -25,8 +25,8 @@ object Archiver {
 
   val ARCHIVE_DIRECTORY_PROP = "edu.gemini.dbTools.archive.directory"
 
-  def run(ctx: BundleContext)(temp: Temp, perm: Perm, log: Logger, env: java.util.Map[String, String], user: java.util.Set[Principal]): Unit = {
-    val archiveDir = Option(ctx.getProperty(ARCHIVE_DIRECTORY_PROP)).fold(temp.dir) { dirName =>
+  def run(ctx: BundleContext)(store: CronStorage, log: Logger, env: java.util.Map[String, String], user: java.util.Set[Principal]): Unit = {
+    val archiveDir = Option(ctx.getProperty(ARCHIVE_DIRECTORY_PROP)).fold(store.tempDir) { dirName =>
       new File(dirName)
     }
 

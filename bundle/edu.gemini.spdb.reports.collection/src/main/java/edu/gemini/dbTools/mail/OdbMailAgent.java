@@ -10,7 +10,7 @@ import edu.gemini.shared.mail.MailSender;
 import edu.gemini.shared.mail.MailUtil;
 import edu.gemini.shared.util.FileUtil;
 import edu.gemini.spModel.core.SPProgramID;
-import edu.gemini.spdb.cron.Storage;
+import edu.gemini.spdb.cron.CronStorage;
 
 import javax.mail.Message;
 import java.io.File;
@@ -197,7 +197,7 @@ public final class OdbMailAgent {
         _updateState();
     }
 
-    public static void run(final Storage.Temp temp, final Storage.Perm perm, final Logger log, final Map<String, String> env, Set<Principal> user) throws IOException {
-        new OdbMailAgent(new OdbMailConfig(temp.dir(), env), new OdbStateConfig(temp.dir())).executeOnce(log);
+    public static void run(final CronStorage store, final Logger log, final Map<String, String> env, Set<Principal> user) throws IOException {
+        new OdbMailAgent(new OdbMailConfig(store.tempDir(), env), new OdbStateConfig(store.tempDir())).executeOnce(log);
     }
 }

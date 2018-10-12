@@ -3,8 +3,7 @@ package edu.gemini.spdb.cron.osgi
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest, HttpServlet}
 import java.util.logging._
 
-import edu.gemini.spdb.cron.{Storage, CronJob}
-import Storage.{Temp, Perm}
+import edu.gemini.spdb.cron.CronStorage
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -21,7 +20,7 @@ import java.security.Principal
  * A servlet that maps requests to batch jobs, allowing them to be scheduled by an external
  * entity like `cron`.
  */
-class CronServlet(ctx: BundleContext, services: Map[String, Job], tempDir: Temp, permDir: Perm, user: java.util.Set[Principal]) extends HttpServlet {
+class CronServlet(ctx: BundleContext, services: Map[String, Job], store: CronStorage, user: java.util.Set[Principal]) extends HttpServlet {
 
   // This is all kinds of bad, sorry.
   val newLogger: String => (Logger, Int) = {
@@ -44,7 +43,7 @@ class CronServlet(ctx: BundleContext, services: Map[String, Job], tempDir: Temp,
       .asScala
       .find(_.getProperty(CronJob.ALIAS) == alias)
       .map(ctx.getService[CronJob])
-      .map(s => (t: Temp, p: Perm, l: Logger, e: java.util.Map[String, String], user: java.util.Set[Principal]) => s.run(t, p, l, e, user))
+      .map(s => (cs: CronStorage, l: Logger, e: java.util.Map[String, String], user: java.util.Set[Principal]) => s.run(cs, l, e, user))
 
   override def doGet(req: HttpServletRequest, resp: HttpServletResponse): Unit = {
 
@@ -81,7 +80,7 @@ class CronServlet(ctx: BundleContext, services: Map[String, Job], tempDir: Temp,
       Future {
         log.info(f"starting...")
         val start = System.currentTimeMillis
-        j(tempDir, permDir, log, env, user)
+        j(store, log, env, user)
         System.currentTimeMillis - start
       } onComplete {
         case Success(n) => log.info(f"completed in $n%d ms.")
