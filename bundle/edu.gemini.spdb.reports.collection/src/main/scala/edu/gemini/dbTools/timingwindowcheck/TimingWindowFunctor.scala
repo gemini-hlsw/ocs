@@ -2,23 +2,26 @@ package edu.gemini.dbTools.timingwindowcheck
 
 import edu.gemini.pot.sp._
 import edu.gemini.pot.spdb.{DBAbstractQueryFunctor, IDBDatabaseService}
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.skycalc.Interval
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.rich.pot.sp._
-import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.spModel.util.SPTreeUtil
+
 import java.security.Principal
 import java.time.Instant
 import java.util.{Set => JSet}
 
-import scalaz._
-import Scalaz._
-import edu.gemini.spModel.util.SPTreeUtil
-
 import scala.collection.JavaConverters._
 
+import scalaz._
+import Scalaz._
+
+
 /**
- * An ODB query functor that finds all active science programs.
+ * An ODB query functor that finds all active observations whose last timing
+ * window expired during a given time `Interval`.
  */
 object TimingWindowFunctor {
 
@@ -52,6 +55,10 @@ object TimingWindowFunctor {
     new TimingWindowFunctor(interval) |>
             (f => db.getQueryRunner(user).queryPrograms(f).results)
 
+  /**
+   * Obtains all active observations whose last timing window (if any) expired
+   * during the given `interval`.
+   */
   def query(interval: Interval, db: IDBDatabaseService, user: JSet[Principal]): Action[Vector[SPObservationID]] =
     Action.catchLeft(unsafeQuery(interval, db, user))
 }
