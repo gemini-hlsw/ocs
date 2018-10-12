@@ -4,6 +4,7 @@ import edu.gemini.dbTools.mailer.{Mailer, MailerType, ProgramAddresses}
 import edu.gemini.pot.sp.SPObservationID
 import edu.gemini.spModel.core.{SPProgramID, Site}
 import scalaz._
+import scalaz.effect.IO
 
 sealed abstract class TimingWindowCheckMailer(mailer: Mailer) {
 
@@ -11,7 +12,7 @@ sealed abstract class TimingWindowCheckMailer(mailer: Mailer) {
     pid: SPProgramID,
     to:  ProgramAddresses,
     tws: NonEmptyList[SPObservationID]
-  ): Action[Unit] = {
+  ): IO[Unit] = {
 
     val subject   =
       s"${pid.stringValue} Timing Window Still Pending"
@@ -20,7 +21,7 @@ sealed abstract class TimingWindowCheckMailer(mailer: Mailer) {
       s"""
        """.stripMargin
 
-    EitherT(mailer.sendText(to.ngo ++ to.cs, subject, text).catchLeft)
+    mailer.sendText(to.ngo ++ to.cs, subject, text)
 
   }
 

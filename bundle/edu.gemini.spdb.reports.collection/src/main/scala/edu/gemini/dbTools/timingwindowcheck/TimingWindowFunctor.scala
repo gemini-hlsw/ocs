@@ -18,6 +18,8 @@ import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
 
+import scalaz.effect.IO
+
 
 /**
  * An ODB query functor that finds all active observations whose last timing
@@ -59,8 +61,8 @@ object TimingWindowFunctor {
    * Obtains all active observations whose last timing window (if any) expired
    * during the given `interval`.
    */
-  def query(interval: Interval, db: IDBDatabaseService, user: JSet[Principal]): Action[Vector[SPObservationID]] =
-    Action.catchLeft(unsafeQuery(interval, db, user))
+  def query(interval: Interval, db: IDBDatabaseService, user: JSet[Principal]): IO[Vector[SPObservationID]] =
+    IO(unsafeQuery(interval, db, user))
 }
 
 private class TimingWindowFunctor(interval: Interval) extends DBAbstractQueryFunctor {
