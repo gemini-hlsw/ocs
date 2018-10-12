@@ -15,7 +15,12 @@ import scalaz._
 import Scalaz._
 import scalaz.effect.IO
 
-
+/**
+ * The TimingWindowCheckCron finds all active observations that have a timing
+ * window which expired since the last time the cron job ran and sends a
+ * notification email to the PI, NGO, CS and appropriate QA exploder.
+ * Multiple observations from the same program are grouped into a single email.
+ */
 object TimingWindowCheckCron {
 
   private implicit class LoggerOps(logger: Logger) {
@@ -40,10 +45,13 @@ object TimingWindowCheckCron {
             log.ioLog(Level.INFO, s"Could not send timing window nag email because some addresses are not valid for $pid: $msg")
 
           case Some(Success(pa)) =>
-            ov.toNel.fold(IO.ioUnit)(on => twcm.notifyPendingCheck(pid, pa, on))
+            ov.toNel.fold(IO.ioUnit)(on => twcm.notifyExpiredWindows(pid, pa, on))
         }
     }.void
 
+  // Last time the cron job ran (or `now` if it hasn't run before).  Using the
+  // current time if not executed before prevents sending a flood of emails the
+  // first time that we execute the cron job.
   private def lastRun(perm: Perm, now: Instant): IO[Instant] =
     TimingWindowProps.load(perm).map(_.fold(now)(_.when))
 
@@ -59,6 +67,7 @@ object TimingWindowCheckCron {
         now <- IO(Instant.now)
         lst <- lastRun(perm, now)
         obs <- TimingWindowFunctor.query(new Interval(lst, now), env.odb, user)
+        _   <- logger.ioLog(Level.INFO, obs.mkString("Found expired timing windows in these active obs: {", ",", "}"))
         _   <- sendEmails(logger, env.odb, env.mailer, obs)
         _   <- TimingWindowProps(now).store(perm)
       } yield ()
