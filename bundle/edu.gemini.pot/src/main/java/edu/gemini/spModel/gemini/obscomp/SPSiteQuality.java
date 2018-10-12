@@ -104,6 +104,10 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
             return start;
         }
 
+        /**
+         * Returns the time at which the timing window ends, if any.  Windows
+         * that repeat forever or that remain open forever have no end.
+         */
         public Option<Instant> getEnd() {
             return repeat == REPEAT_FOREVER || duration == WINDOW_REMAINS_OPEN_FOREVER ?
                 None.instance() : new Some<>(Instant.ofEpochMilli(start + repeat * period + duration));

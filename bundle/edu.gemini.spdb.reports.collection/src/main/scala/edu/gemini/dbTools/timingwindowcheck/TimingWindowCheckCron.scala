@@ -60,9 +60,6 @@ object TimingWindowCheckCron {
   /** Cron job entry point.  See edu.gemini.spdb.cron.osgi.Activator. */
   def run(ctx: BundleContext)(store: CronStorage, logger: Logger, env: java.util.Map[String, String], user: java.util.Set[Principal]): Unit = {
 
-    def checkInterval(lst: Instant, now: Instant): Interval =
-      new Interval(now.minus(Duration.ofHours(24)), now)
-
     val action: IO[Unit] =
       for {
         env <- TimingWindowCheckEnv.fromBundleContext(ctx)

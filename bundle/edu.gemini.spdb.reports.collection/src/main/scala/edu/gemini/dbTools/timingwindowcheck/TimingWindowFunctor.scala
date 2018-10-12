@@ -81,7 +81,7 @@ private class TimingWindowFunctor(interval: Interval) extends DBAbstractQueryFun
           p.allObservations
             .filter(o => o.timingWindowExpiration.exists(interval.contains) && o.isActive)
             .map(_.getObservationID)
-      case _                            =>
+      case _                                           =>
         // Not an ongoing program so do nothing
     }
 
