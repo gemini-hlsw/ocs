@@ -39,16 +39,16 @@ object TimingWindowFunctor {
     def timingWindowExpiration: Option[Instant] =
       o.siteQuality.flatMap { s =>
         s.getTimingWindows.asScala.toList
-         .flatMap(_.getEnd.asScalaOpt.toList)
-         .maximumBy(_.toEpochMilli)
+         .traverseU(_.getEnd.asScalaOpt)
+         .flatMap(_.maximumBy(_.toEpochMilli))
       }
 
     def isActive: Boolean = {
       import ObservationStatus.{ON_HOLD, ONGOING, READY}
 
       ObservationStatus.computeFor(o) match {
-        case ON_HOLD | ONGOING | READY => true
-        case _                         => false
+        case ONGOING | READY => true
+        case _               => false
       }
     }
   }
