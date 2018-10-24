@@ -72,10 +72,10 @@ public class TigraTableCreator {
             final File out;
             switch (site) {
                 case GN:
-                    out = store.newTempFile("TigraTableNorth.js");
+                    out = store.getTempFile("TigraTableNorth.js");
                     break;
                 case GS:
-                    out = store.newTempFile("TigraTableSouth.js");
+                    out = store.getTempFile("TigraTableSouth.js");
                     break;
                 default:
                     throw new RuntimeException("Unknown site: " + site);

@@ -8,10 +8,10 @@ import java.io.File
  */
 final case class CronStorage(tempDir: File, permDir: File) {
 
-  def newTempFile(name: String): File =
+  def getTempFile(name: String): File =
     new File(tempDir, name)
 
-  def newPermFile(name: String): File =
+  def getPermFile(name: String): File =
     new File(permDir, name)
 
 }

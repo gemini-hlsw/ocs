@@ -89,10 +89,10 @@ public class ExecHourFunctor extends DBAbstractQueryFunctor {
             final File out;
             switch (site) {
                 case GN:
-                    out = store.newTempFile("ExecHoursNorth.txt");
+                    out = store.getTempFile("ExecHoursNorth.txt");
                     break;
                 case GS:
-                    out = store.newTempFile("ExecHoursSouth.txt");
+                    out = store.getTempFile("ExecHoursSouth.txt");
                     break;
                 default:
                     throw new RuntimeException("Unknown site: " + site);

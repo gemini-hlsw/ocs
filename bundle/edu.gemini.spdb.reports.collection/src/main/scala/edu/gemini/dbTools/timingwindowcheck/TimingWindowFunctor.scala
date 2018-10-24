@@ -44,7 +44,7 @@ object TimingWindowFunctor {
       }
 
     def isActive: Boolean = {
-      import ObservationStatus.{ON_HOLD, ONGOING, READY}
+      import ObservationStatus.{ONGOING, READY}
 
       ObservationStatus.computeFor(o) match {
         case ONGOING | READY => true
