@@ -4,6 +4,7 @@ import edu.gemini.util.ssh.*;
 import edu.gemini.pot.client.SPDB;
 import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.spdb.cron.CronJob;
+import edu.gemini.spdb.cron.CronStorage;
 import edu.gemini.spdb.reports.IQuery;
 import edu.gemini.spdb.reports.IReport;
 import edu.gemini.spdb.reports.IRow;
@@ -32,7 +33,7 @@ public class BatchReportsTask implements CronJob {
         this.rootDir = rootDir;
     }
 
-    public void run(final File tempdir, final Logger log, final Map<String, String> env, Set<Principal> user) {
+    public void run(final CronStorage store, final Logger log, final Map<String, String> env, Set<Principal> user) {
 
         // Get our config
         final Props props = new Props(env);

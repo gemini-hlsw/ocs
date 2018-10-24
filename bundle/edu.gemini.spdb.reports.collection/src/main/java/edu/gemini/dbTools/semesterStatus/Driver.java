@@ -10,6 +10,7 @@ import edu.gemini.dbTools.odbState.OdbStateIO;
 import edu.gemini.dbTools.odbState.ProgramState;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.core.Site;
+import edu.gemini.spdb.cron.CronStorage;
 
 import javax.imageio.ImageIO;
 import java.awt.image.RenderedImage;
@@ -57,7 +58,7 @@ public final class Driver {
         return chartFile;
     }
 
-    public static void run(final File tempDir, final Logger log, final Map<String, String> env, Set<Principal> user) throws IOException {
+    public static void run(final CronStorage store, final Logger log, final Map<String, String> env, Set<Principal> user) throws IOException {
 
         final FtpProps props = new FtpProps(env);
         final Site loc = Site.currentSiteOrNull;
@@ -65,12 +66,12 @@ public final class Driver {
         if (loc != null) {
 
             // Read all the program state information and sort them into groups to be charted.
-            final OdbStateConfig config  = new OdbStateConfig(tempDir);
+            final OdbStateConfig config  = new OdbStateConfig(store.tempDir());
             final ProgramState[] pstateA = new OdbStateIO(log, config.stateFile).readState();
             final Map<ProgramGroupId, List<ProgramState>> progStateMap = _groupPrograms(pstateA);
 
             // Create semester chart files for each program group.
-            final List<File> chartFiles = new ArrayList<File>();
+            final List<File> chartFiles = new ArrayList<>();
             for (final Map.Entry<ProgramGroupId, List<ProgramState>> me : progStateMap.entrySet()) {
 
                 // Get the program group and the programs that belong to it.
@@ -87,7 +88,7 @@ public final class Driver {
 
                 // Write the image to a file.
                 try {
-                    final File outfile = _writeImage(image, pg, tempDir, log);
+                    final File outfile = _writeImage(image, pg, store.tempDir(), log);
                     chartFiles.add(outfile);
                 } catch (IOException ioe) {
                     log.log(Level.SEVERE, "Trouble writing image for " + pg, ioe);

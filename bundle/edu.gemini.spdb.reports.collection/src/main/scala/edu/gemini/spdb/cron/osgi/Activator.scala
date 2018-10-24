@@ -2,6 +2,9 @@ package edu.gemini.spdb.cron.osgi
 
 import edu.gemini.dbTools.ephemeris.{EphemerisPurgeCron, TcsEphemerisCron}
 import edu.gemini.dbTools.maskcheck.MaskCheckCron
+import edu.gemini.dbTools.timingwindowcheck.TimingWindowCheckCron
+import edu.gemini.spModel.core.Version
+import edu.gemini.spdb.cron.CronStorage
 import org.osgi.framework.{BundleContext, BundleActivator}
 import org.osgi.util.tracker.ServiceTracker
 import edu.gemini.util.osgi.Tracker._
@@ -32,17 +35,18 @@ class Activator extends BundleActivator {
 
   // See each service's entry point for an example invocation via curl
   def services(c: BundleContext): Map[String, Job] =
-     Map("maskcheck"      -> MaskCheckCron.run(c),
-         "monitor"        -> OdbMonitor.monitor,
-         "execHours"      -> ExecHourFunctor.run,
-         "tigraTable"     -> new TigraTableCreator(c).run,
-         "semesterStatus" -> semesterStatus.Driver.run,
-         "odbState"       -> OdbStateAgent.run,
-         "odbMail"        -> OdbMailAgent.run,
-         "weather"        -> new WeatherUpdater(c).run,
-         "archive"        -> Archiver.run(c),
-         "ephemeris"      -> TcsEphemerisCron.run(c),
-         "ephemerisPurge" -> EphemerisPurgeCron.run(c))
+     Map("maskCheck"         -> MaskCheckCron.run(c),
+         "monitor"           -> OdbMonitor.monitor,
+         "execHours"         -> ExecHourFunctor.run,
+         "tigraTable"        -> new TigraTableCreator(c).run,
+         "semesterStatus"    -> semesterStatus.Driver.run,
+         "odbState"          -> OdbStateAgent.run,
+         "odbMail"           -> OdbMailAgent.run,
+         "weather"           -> new WeatherUpdater(c).run,
+         "archive"           -> Archiver.run(c),
+         "ephemeris"         -> TcsEphemerisCron.run(c),
+         "ephemerisPurge"    -> EphemerisPurgeCron.run(c),
+         "timingWindowCheck" -> TimingWindowCheckCron.run(c))
 
   var tracker: ServiceTracker[HttpService, HttpService] = null
 
@@ -59,8 +63,10 @@ class Activator extends BundleActivator {
 
     // Cron
     tracker = track[HttpService, HttpService](ctx) { http =>
-      val file = ExternalStorage.getExternalDataFile(ctx, "cron") <| (_.mkdirs)
-      val servlet = new CronServlet(ctx, services(ctx), file, user)
+      val temp = ExternalStorage.getExternalDataFile(ctx, "cron") <| (_.mkdirs)
+      val perm = ExternalStorage.getPermanentDataFile(ctx, Version.current.isTest, "cron", Nil) <| (_.mkdirs)
+      val stor = CronStorage(temp, perm)
+      val servlet = new CronServlet(ctx, services(ctx), stor, user)
       http <| (_.registerServlet(alias, servlet, null, null))
     }(_.unregister(alias))
     tracker.open()

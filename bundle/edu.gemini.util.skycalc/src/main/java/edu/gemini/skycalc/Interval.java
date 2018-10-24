@@ -1,6 +1,7 @@
 package edu.gemini.skycalc;
 
 import java.io.Serializable;
+import java.time.Instant;
 
 /**
  * Pair of longs representing the interval <code>(start .. end]</code>.
@@ -61,6 +62,10 @@ public class Interval implements Comparable<Interval>, Serializable /*, PioSeria
 		this.end = end;
 	}
 
+	public Interval(Instant start, Instant end) {
+		this(start.toEpochMilli(), end.toEpochMilli());
+	}
+
 	/**
 	 * Returns <code>true</code> if the specified value falls within the interval. Note that
 	 * the <code>end</code> value does <i>not</i> fall within the interval.
@@ -69,6 +74,18 @@ public class Interval implements Comparable<Interval>, Serializable /*, PioSeria
 	 */
 	public final boolean contains(long value) {
 		return value >= start && value < end;
+	}
+
+	/**
+	 * Returns <code>true</code> if the specified instant falls within the
+	 * interval.  In other words, at or after the start time but strictly before
+	 * the end time.
+	 *
+	 * @return <code>true</code> if <code>instant</code> falls within the
+	 * interval
+	 */
+	public final boolean contains(Instant instant) {
+		return contains(instant.toEpochMilli());
 	}
 
 	/**
@@ -177,11 +194,19 @@ public class Interval implements Comparable<Interval>, Serializable /*, PioSeria
 		return end;
 	}
 
+	public Instant getEndInstant() {
+		return Instant.ofEpochMilli(end);
+	}
+
 	/**
 	 * Returns the start point for this Interval.
 	 */
 	public long getStart() {
 		return start;
+	}
+
+	public Instant getStartInstant() {
+		return Instant.ofEpochMilli(start);
 	}
 
 	/**
