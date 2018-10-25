@@ -78,6 +78,10 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
         _w.notifyPiCheckBox.addItemListener(e ->
                 getDataObject().setNotifyPi(_w.notifyPiCheckBox.isSelected() ? YesNoType.YES : YesNoType.NO));
 
+        _w.timingWindowNotificationCheckBox.addItemListener(e ->
+            getDataObject().setTimingWindowNotification(_w.timingWindowNotificationCheckBox.isSelected())
+        );
+
         // override green theme for value labels
         _w.totalPlannedPiTime.setForeground(Color.black);
         _w.totalPlannedExecTime.setForeground(Color.black);
@@ -136,6 +140,7 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
         _showActiveState();
         _showCompletedState();
         _showNotifyPiState();
+        _showTimingWindowNotificationState();
         _updateEnabledStates();
 
         // The total planed time is updated whenever the sequence or instrument
@@ -191,6 +196,10 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
 
     private void _showNotifyPiState() {
         _w.notifyPiCheckBox.setSelected(getDataObject().isNotifyPi());
+    }
+
+    private void _showTimingWindowNotificationState() {
+        _w.timingWindowNotificationCheckBox.setSelected(getDataObject().getTimingWindowNotification());
     }
 
     private void _showPiInfo() {

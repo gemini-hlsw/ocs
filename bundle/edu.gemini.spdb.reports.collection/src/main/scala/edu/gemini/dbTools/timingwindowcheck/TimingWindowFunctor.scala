@@ -76,7 +76,7 @@ private class TimingWindowFunctor(interval: Interval) extends DBAbstractQueryFun
 
   override def execute(db: IDBDatabaseService, node: ISPNode, principals: JSet[Principal]): Unit =
     node match {
-      case p: ISPProgram if p.isScience && p.isOngoing =>
+      case p: ISPProgram if p.isScience && p.isOngoing && p.spProgram.exists(_.getTimingWindowNotification) =>
         results = results ++
           p.allObservations
             .filter(o => o.timingWindowExpiration.exists(interval.contains) && o.isActive)
