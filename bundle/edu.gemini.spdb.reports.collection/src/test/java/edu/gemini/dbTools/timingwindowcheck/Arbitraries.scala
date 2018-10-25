@@ -47,8 +47,9 @@ trait Arbitraries {
         i <- arbitrary[SPProgramID]
         a <- arbitrary[Active]
         c <- arbitrary[Boolean]
+        n <- arbitrary[Boolean]
         o <- arbitrary[List[Obs]]
-      } yield Prog(i, a, c, o)
+      } yield Prog(i, a, c, n, o)
     }
 
 }

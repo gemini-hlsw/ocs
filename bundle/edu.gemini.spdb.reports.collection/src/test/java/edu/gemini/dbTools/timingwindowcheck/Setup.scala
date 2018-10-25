@@ -33,16 +33,18 @@ object Setup {
   }
 
   final case class Prog(
-    pid:       SPProgramID,
-    active:    Active,
-    completed: Boolean,
-    obs:       List[Obs]
+    pid:          SPProgramID,
+    active:       Active,
+    completed:    Boolean,
+    shouldNotify: Boolean,
+    obs:          List[Obs]
   ) {
 
     def valid: Boolean =
       ProgramId.parse(pid.toString).ptype.exists(_.isScience) &&
         active == Active.YES                                  &&
-        !completed
+        !completed                                            &&
+        shouldNotify
 
     /** Creates an ISPProgram matching the specification. */
     def create(f: ISPFactory, tw: List[TimingWindow]): ISPProgram = {
@@ -51,6 +53,7 @@ object Setup {
       val pd = new SPProgram
       pd.setActive(active)
       pd.setCompleted(completed)
+      pd.setTimingWindowNotification(shouldNotify)
       pn.setDataObject(pd)
 
       val ons = obs.map { o =>
