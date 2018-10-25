@@ -110,6 +110,9 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
     /** This attribute indicates if the PI should be notified when the obs is done */
     public static final String NOTIFY_PI_PROP = "notifyPi";
 
+    /** Attribute used to determine whether to send timing window notifications. */
+    public static final String TIMING_WINDOW_NOTIFICATION_PROP = "timingWindowNotification";
+
     /** This attribute indicates the rollover status of this program */
     public static final String ROLLOVER_FLAG_PROP = "rolloverFlag";
 
@@ -433,6 +436,8 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
     // Indicates if the PI should be notified when the observation is done
     private YesNoType _notifyPi = YesNoType.YES; // REL-1150
 
+    private boolean _timingWindowNotification = true;  // REL-361
+
     // indicates the final date that the program is active in the database.
     // This will be extended by the ITAC rearranging software when a program from the
     // previous semester is to be "rolled over".
@@ -728,10 +733,6 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
         return _notifyPi;
     }
 
-    public int getNotifyPiIndex() {
-        return _notifyPi.ordinal();
-    }
-
     public boolean isNotifyPi() {
         return _notifyPi == YesNoType.YES;
     }
@@ -752,7 +753,16 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
         setNotifyPi(YesNoType.getYesNoType(name, oldValue));
     }
 
+    public boolean getTimingWindowNotification() {
+        return _timingWindowNotification;
+    }
 
+    public void setTimingWindowNotification(boolean timingWindowNotification) {
+        if (_timingWindowNotification != timingWindowNotification) {
+            _timingWindowNotification = timingWindowNotification;
+            firePropertyChange(TIMING_WINDOW_NOTIFICATION_PROP, !timingWindowNotification, timingWindowNotification);
+        }
+    }
 
     /**
      * Returns the contact scientist for this proposal.
@@ -990,6 +1000,7 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
 
         Pio.addParam(factory, paramSet, COMPLETED_PROP, Boolean.toString(isCompleted()));
         Pio.addParam(factory, paramSet, NOTIFY_PI_PROP, getNotifyPi().name());
+        Pio.addBooleanParam(factory, paramSet, TIMING_WINDOW_NOTIFICATION_PROP, getTimingWindowNotification());
 
         // SCT 201
         if (_gsa != null) {
@@ -1085,6 +1096,9 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
         if (v != null) _setCompleted(v);
         v = Pio.getValue(paramSet, NOTIFY_PI_PROP);
         if (v != null) _setNotifyPi(v);
+
+        v = Pio.getValue(paramSet, TIMING_WINDOW_NOTIFICATION_PROP);
+        setTimingWindowNotification((v == null) || Boolean.parseBoolean(v));
 
         v = Pio.getValue(paramSet, ROLLOVER_FLAG_PROP);
         if (v != null) setRolloverStatus(Boolean.parseBoolean(v));
