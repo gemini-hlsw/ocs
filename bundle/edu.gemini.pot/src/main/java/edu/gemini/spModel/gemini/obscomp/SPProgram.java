@@ -1097,8 +1097,7 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
         v = Pio.getValue(paramSet, NOTIFY_PI_PROP);
         if (v != null) _setNotifyPi(v);
 
-        v = Pio.getValue(paramSet, TIMING_WINDOW_NOTIFICATION_PROP);
-        setTimingWindowNotification((v == null) || Boolean.parseBoolean(v));
+        setTimingWindowNotification(Pio.getBooleanValue(paramSet, TIMING_WINDOW_NOTIFICATION_PROP, true));
 
         v = Pio.getValue(paramSet, ROLLOVER_FLAG_PROP);
         if (v != null) setRolloverStatus(Boolean.parseBoolean(v));
