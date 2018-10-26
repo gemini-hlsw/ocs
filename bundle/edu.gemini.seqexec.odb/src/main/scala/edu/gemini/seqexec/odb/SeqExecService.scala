@@ -3,11 +3,9 @@ package edu.gemini.seqexec.odb
 import edu.gemini.pot.sp.{ISPObservation, SPObservationID}
 import edu.gemini.pot.spdb.DBLocalDatabase
 import edu.gemini.seqexec.odb.SeqFailure.{MissingObservation, SeqException}
-import edu.gemini.spModel.config.ConfigBridge
-import edu.gemini.spModel.config.map.ConfigValMapInstances.IDENTITY_MAP
-import edu.gemini.spModel.config2.ConfigSequence
 import edu.gemini.spModel.core.Peer
 import edu.gemini.spModel.io.SpImportService
+import edu.gemini.spModel.obs.plannedtime.{ PlannedTime, PlannedTimeCalculator }
 import java.io.{BufferedReader, InputStreamReader, StringReader}
 import java.net.{HttpURLConnection, URL}
 import java.net.HttpURLConnection.{HTTP_NOT_FOUND, HTTP_OK}
@@ -21,7 +19,7 @@ import scala.collection.JavaConverters._
 import scala.collection.breakOut
 
 case class ExecutedDataset(timestamp: Instant, filename: String)
-case class SeqexecSequence(title: String, datasets: Map[Int, ExecutedDataset], config: ConfigSequence)
+case class SeqexecSequence(title: String, datasets: Map[Int, ExecutedDataset], plannedTime: PlannedTime)
 
 /**
  * Sequence Executor Service API.
@@ -90,9 +88,9 @@ object SeqExecService {
     Right(obs.getDataObject.getTitle)
   }
 
-  private def extractSequence(obs: ISPObservation): TrySeq[ConfigSequence] =
+  private def extractPlannedTime(obs: ISPObservation): TrySeq[PlannedTime] =
     catchingAll {
-      ConfigBridge.extractSequence(obs, null, IDENTITY_MAP, true)
+      PlannedTimeCalculator.instance.calc(obs)
     }
 
   private def extractExecutedDatsets(obs: ISPObservation): TrySeq[Map[Int, ExecutedDataset]] =
@@ -118,9 +116,9 @@ object SeqExecService {
           c <- open(u).right
           x <- read(c, oid).right
           o <- parse(x).right
-          s <- extractSequence(o).right
+          t <- extractPlannedTime(o).right
           n <- extractName(o).right
           e <- extractExecutedDatsets(o).right
-        } yield SeqexecSequence(n, e, s)
+        } yield SeqexecSequence(n, e, t)
     }
 }
