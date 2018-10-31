@@ -60,8 +60,8 @@ public final class ITCChart {
     }
 
     // some specific colors, used for blue/green/red detectors (GMOS)
-    public static Color LightBlue  = Colors.get(0);
-    public static Color DarkBlue   = Colors.get(1);
+    public static Color DarkBlue   = Colors.get(0);
+    public static Color LightBlue  = Colors.get(1);
     public static Color LightGreen = Colors.get(2);
     public static Color DarkGreen  = Colors.get(3);
     public static Color LightRed   = Colors.get(4);
