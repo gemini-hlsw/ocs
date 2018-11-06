@@ -43,6 +43,11 @@ public class LimitsListener extends MarkerModelListener<Variant> {
     public void propertyChange(PropertyChangeEvent evt) {
         final Variant  v               = (Variant) evt.getSource();
         final Schedule schedule        = v.getSchedule();
+
+        if (!schedule.isEmpty()) updateLimits(v, schedule);
+    }
+
+    private void updateLimits(final Variant v, final Schedule schedule) {
         final MarkerManager mm         = schedule.getMarkerManager();
         mm.clearMarkers(this, v);
 
