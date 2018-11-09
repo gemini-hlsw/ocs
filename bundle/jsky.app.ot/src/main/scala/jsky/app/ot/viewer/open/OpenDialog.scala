@@ -115,7 +115,7 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
   var selection: List[ISPProgram] = Nil
   val filter = new DBProgramChooserFilter(DBProgramChooserFilter.Mode.localAndRemote)
 
-  val MaxM = 50
+  val MaxM = 100
   val MaxK = MaxM * 1000
 
   def usedBytes: Long =
