@@ -179,6 +179,7 @@ public class GmosNorthType {
         z_G0304("z_G0304", "z", "0.925",             Track_z),
         Z_G0322("Z_G0322", "Z", "0.876",             Ictd.track("Z")), // missing ?
         Y_G0323("Y_G0323", "Y", "1.01",              Ictd.track("Y")), // missing ?
+        ri_G0349("ri_G0349", "ri", "0.700",          Ictd.track("ri")),
         GG455_G0305("GG455_G0305", "GG455", "0.680", Track_GG455),
         OG515_G0306("OG515_G0306", "OG515", "0.710", Track_OG515),
         RG610_G0307("RG610_G0307", "RG610", "0.750", Track_RG610),
@@ -186,7 +187,6 @@ public class GmosNorthType {
         Ha_G0310("Ha_G0310", "Ha", "0.655",          Ictd.track("Ha")),
         HaC_G0311("HaC_G0311", "HaC", "0.662",       Ictd.track("HaC")),
         DS920_G0312("DS920_G0312", "DS920", "0.920", Ictd.track("DS920")),
-        RI_G0349("ri_G0349", "ri", "0.700",          Ictd.track("ri")),
         SII_G0317("SII_G0317", "SII", "0.672",       Ictd.track("SII")),
         OIII_G0318("OIII_G0318", "OIII", "0.499",    Ictd.track("OIII")),
         OIIIC_G0319("OIIIC_G0319", "OIIIC", "0.514", Ictd.track("OIIIC")),
