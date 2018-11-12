@@ -25,6 +25,7 @@ jres.sbt
 app/**/idea
 *.iml
 *.ipr
+*.iws
 
 # Eclipse specific
 .project
