@@ -9,12 +9,25 @@ trait VisitorBase extends GroupInitializer[SpVisitorBlueprint] with TemplateDsl 
   val program = "VISITOR INSTRUMENT PHASE I/II MAPPING BPS"
   val seqConfigCompType = VisitorInstrument.SP_TYPE
 
+  val AlopekeWavelength: Double = 0.674
+  val DssiWavelength: Double    = 0.700
+
+  private val WavelengthMapping: List[(String, Double)] =
+    List(
+      "alopeke" -> AlopekeWavelength,
+      "dssi"    -> DssiWavelength
+    )
+
+
   implicit def pimpInst(obs: ISPObservation) = new {
 
     val ed = StaticObservationEditor[edu.gemini.spModel.gemini.visitor.VisitorInstrument](obs, instrumentType)
 
     def setName(n: String): Either[String, Unit] =
       ed.updateInstrument(_.setName(n))
+
+    def setWavelength(microns: Double): Either[String, Unit] =
+      ed.updateInstrument(_.setWavelength(microns))
   }
 
   // HACK: override superclass initialize to hang onto db reference
@@ -36,4 +49,12 @@ trait VisitorBase extends GroupInitializer[SpVisitorBlueprint] with TemplateDsl 
 
   // DSL Setters
   def setName = Setter[String](blueprint.name)(_.setName(_))
+
+  private def wavelength: Double = {
+    val inst = blueprint.name.toLowerCase
+    WavelengthMapping.collectFirst { case (n, w) if inst.contains(n) => w }
+                     .getOrElse(0.0)
+  }
+
+  def setWavelength = Setter[Double](wavelength)(_.setWavelength(_))
 }
