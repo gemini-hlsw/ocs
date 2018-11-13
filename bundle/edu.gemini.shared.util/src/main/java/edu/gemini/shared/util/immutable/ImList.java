@@ -445,4 +445,12 @@ public interface ImList<T> extends Iterable<T> {
      *         }}}
      */
     <K> HashMap<K, ImList<T>> groupBy(Function1<? super T, K> f);
+
+    /**
+     * Selects the first n elements.
+     * @param n the number of elements to take from the list
+     * @return a list consisting only of the first n elements of this list, or
+     * else the whole list if it has less than n elements
+     */
+    ImList<T> take(int n);
 }
