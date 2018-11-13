@@ -3,30 +3,42 @@ package edu.gemini.qpt.ui.view.candidate;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import java.util.logging.Logger;
+
 import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.shared.sp.MiniModel;
 import edu.gemini.qpt.shared.sp.Obs;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.ui.gface.GTableController;
 import edu.gemini.ui.gface.GViewer;
 
-public class CandidateObsController implements GTableController<Schedule, Obs, CandidateObsAttribute>, PropertyChangeListener {
+public final class CandidateObsController implements GTableController<Schedule, Obs, CandidateObsAttribute>, PropertyChangeListener {
+
+    private static final Logger LOG = Logger.getLogger(CandidateObsController.class.getName());
 
     private GViewer<Schedule, Obs> viewer;
     private Obs[] obs = {};
-    
+
     public synchronized Object getSubElement(Obs obs, CandidateObsAttribute subElement) {
         switch (subElement) {
         case Dur: return obs.getRemainingTime();
         case Inst: return obs.getInstrumentString();
         case Observation: return obs;
         case P: return obs.getPriority();
-        case RA: return obs.getRa(viewer.getModel().getMiddlePoint());
+        case RA:
+            final Double ra  = ImOption.apply(viewer.getModel())
+                                       .map(s -> obs.getRa(s.getMiddlePoint()))
+                                       .getOrNull();
+            if (ra == null) {
+                LOG.warning("Prevented attempt to get middle point for a null schedule.  Returning null RA.");
+            }
+            return ra;
         case SB: return obs.getProg().getBand();
         case Target: return obs.getTargetName();
 
         // The decorator will take care of this one,
         // otherwise we have to track the variant.
-        case Score: return null; 
+        case Score: return null;
 
         }
         return null;
@@ -46,7 +58,7 @@ public class CandidateObsController implements GTableController<Schedule, Obs, C
         this.viewer = viewer;
 
         // Unhook previous variant and model, if any
-        if (oldModel != null) {            
+        if (oldModel != null) {
             oldModel.removePropertyChangeListener(Schedule.PROP_MINI_MODEL, this);
         }
 
@@ -54,10 +66,10 @@ public class CandidateObsController implements GTableController<Schedule, Obs, C
         if (newModel != null) {
             newModel.addPropertyChangeListener(Schedule.PROP_MINI_MODEL, this);
         }
-              
+
         // Get the obs
         fetchObs(newModel != null ? newModel.getMiniModel() : null);
-        
+
     }
 
     public void propertyChange(PropertyChangeEvent evt) {
@@ -70,5 +82,5 @@ public class CandidateObsController implements GTableController<Schedule, Obs, C
     private synchronized void fetchObs(MiniModel model) {
         obs = model == null ? new Obs[0] : model.getAllObservations().toArray(new Obs[0]);
     }
-    
+
 }

@@ -21,6 +21,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.io.IOException;
+import java.util.SortedSet;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,6 +35,7 @@ import edu.gemini.qpt.ui.util.BooleanToolPreference;
 import edu.gemini.qpt.ui.util.DragImage;
 import edu.gemini.qpt.ui.util.Platform;
 import edu.gemini.qpt.ui.util.TimePreference;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.ui.gface.GSelection;
 import edu.gemini.ui.gface.GViewer;
 import edu.gemini.ui.gface.GViewerPlugin;
@@ -137,7 +140,10 @@ public class PlotViewer extends GViewer<Variant, Alloc> {
                         b = temp;
                     }
                     GSelection<Alloc> accum = GSelection.<Alloc>emptySelection();
-                    for (Alloc x: getModel().getAllocs()) {
+                    final SortedSet<Alloc> allocs = ImOption.apply(getModel())
+                                                            .map(v -> v.getAllocs())
+                                                            .getOrElse(Collections.<Alloc>emptySortedSet());
+                    for (Alloc x : allocs) {
                         if (x.compareTo(b) > 0) {
                             break;
                         } else if (x.compareTo(a) >= 0) {
@@ -200,8 +206,10 @@ public class PlotViewer extends GViewer<Variant, Alloc> {
             if ((dge.getTriggerEvent().getModifiersEx() & InputEvent.SHIFT_DOWN_MASK) == InputEvent.SHIFT_DOWN_MASK)
                 return;
 
+            final Variant variant = getModel();
+
             GSelection<Alloc> selection = getControl().getSelection();
-            if (!selection.isEmpty()) {
+            if (variant != null && !selection.isEmpty()) {
 
                 // Calculate the offset from the start of the first alloc in the selection.
                 selection.sort(); // be sure it's sorted
@@ -211,7 +219,7 @@ public class PlotViewer extends GViewer<Variant, Alloc> {
                 // Set the offset as a decoration on the selection
                 selection.putProperty("offset", (long) (clickTime - selection.first().getStart()));
 
-                Image dragImage = DragImage.forSelection(getModel(), selection);
+                Image dragImage = DragImage.forSelection(variant, selection);
 
                 dge.startDrag(
                         DragSource.DefaultCopyNoDrop,
@@ -267,23 +275,25 @@ public class PlotViewer extends GViewer<Variant, Alloc> {
             // We're creating a new list of allocs by offsetting the stuff in the dragObject
 
             // TODO: make this actually work
-            Alloc[] allocs = obj.toArray(Alloc.class);
-            for (int i = 0; i < allocs.length; i++) {
-                Alloc a = allocs[i];
-                try {
-                    allocs[i] = getModel().addAlloc(a.getObs(), a.getStart() + delta, a.getFirstStep(), a.getLastStep(), a.getSetupType(), a.getComment());
-                } catch (EditException e) {
-                    LOGGER.log(Level.SEVERE, "Problem dropping " + a + " with delta " + delta, e);
-                    JOptionPane.showMessageDialog(getControl(), "The drop action for " + a + " failed due to a " + e.getClass().getSimpleName() + ".\n" +
-                            "This should never happen. Sorry.", "Drop Exception", JOptionPane.ERROR_MESSAGE, null);
-                    return;
+            ImOption.apply(getModel()).foreach(variant -> {
+                Alloc[] allocs = obj.toArray(Alloc.class);
+                for (int i = 0; i < allocs.length; i++) {
+                    Alloc a = allocs[i];
+                    try {
+                        allocs[i] = variant.addAlloc(a.getObs(), a.getStart() + delta, a.getFirstStep(), a.getLastStep(), a.getSetupType(), a.getComment());
+                    } catch (EditException e) {
+                        LOGGER.log(Level.SEVERE, "Problem dropping " + a + " with delta " + delta, e);
+                        JOptionPane.showMessageDialog(getControl(), "The drop action for " + a + " failed due to a " + e.getClass().getSimpleName() + ".\n" +
+                                "This should never happen. Sorry.", "Drop Exception", JOptionPane.ERROR_MESSAGE, null);
+                        return;
+                    }
                 }
-            }
 
-            GSelection<Alloc> newSelection = new GSelection<Alloc>(allocs);
-            getControl().setSelection(newSelection);
-            setPulledSelection(newSelection);
-            getControl().requestFocus();
+                GSelection<Alloc> newSelection = new GSelection<Alloc>(allocs);
+                getControl().setSelection(newSelection);
+                setPulledSelection(newSelection);
+                getControl().requestFocus();
+            });
 
         }
 
@@ -293,25 +303,28 @@ public class PlotViewer extends GViewer<Variant, Alloc> {
             // out again on dragEnter. How annoying.
             GSelection<Alloc> drag = getControl().getDragObject();
             drag.sort();
-            for (Alloc a: drag) {
-                boolean dragContainsSuccessor = false;
-                for (Alloc s: drag) {
-                    if (a.isSuccessor(s)) {
-                        dragContainsSuccessor = true;
-                        break;
+
+            ImOption.apply(getModel()).foreach(variant -> {
+                for (Alloc a : drag) {
+                    boolean dragContainsSuccessor = false;
+                    for (Alloc s : drag) {
+                        if (a.isSuccessor(s)) {
+                            dragContainsSuccessor = true;
+                            break;
+                        }
+                    }
+                    if (dragContainsSuccessor || a.getSuccessor() != null) {
+                        try {
+                            variant.addAlloc(a);
+                        } catch (EditException e) {
+                            LOGGER.log(Level.SEVERE, "Problem putting back split slice " + a, e);
+                            JOptionPane.showMessageDialog(getControl(), "The drop action for " + a + " failed due to a " + e.getClass().getSimpleName() + ".\n" +
+                                    "This should never happen. Sorry.", "Drop Exception", JOptionPane.ERROR_MESSAGE, null);
+                            return;
+                        }
                     }
                 }
-                if (dragContainsSuccessor || a.getSuccessor() != null) {
-                    try {
-                        getModel().addAlloc(a);
-                    } catch (EditException e) {
-                        LOGGER.log(Level.SEVERE, "Problem putting back split slice " + a, e);
-                        JOptionPane.showMessageDialog(getControl(), "The drop action for " + a + " failed due to a " + e.getClass().getSimpleName() + ".\n" +
-                                "This should never happen. Sorry.", "Drop Exception", JOptionPane.ERROR_MESSAGE, null);
-                        return;
-                    }
-                }
-            }
+            });
 
 
             getControl().clearDrag();
@@ -339,7 +352,11 @@ public class PlotViewer extends GViewer<Variant, Alloc> {
             // in the drag.
             final Option<GSelection<Alloc>> obj = getDraggedObject(dtde.getTransferable());
             if (obj.isDefined()) {
-                for (Alloc a: getModel().getAllocs()) {
+                final SortedSet<Alloc> allocs = ImOption.apply(getModel())
+                                                        .map(v -> v.getAllocs())
+                                                        .getOrElse(Collections.<Alloc>emptySortedSet());
+
+                for (Alloc a: allocs) {
                     if (obj.get().contains(a)) {
                         a.forceRemove();
                     }
