@@ -229,6 +229,11 @@ public class ImCollections {
             return Collections.emptyList().iterator();
         }
 
+        @Override
+        public ImList<Object> take(int n) {
+            return this;
+        }
+
         private Object readResolve() {
             return EMPTY_LIST;
         }
