@@ -325,7 +325,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel { ui =>
         import InstallationState._
 
         // Lookup the installation state.
-        val is = dataModel.installationState(r)
+        val is = dataModel.installationState(viewToModelRow(r))
 
         // Set the appropriate highlight/background color if not selected.
         if (!selected) {
