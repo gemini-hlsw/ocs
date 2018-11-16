@@ -668,8 +668,8 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 colorFin = ITCChart.LightRed;
             }
 
-            series.add(SpcSeriesData.withVisibility(!disableLegend, SingleS2NData.instance(), s2nTitle, s2n, new Some<>(colorFin)));
-            series.add(SpcSeriesData.withVisibility(!disableLegend, FinalS2NData.instance(), finTitle, fin, new Some<>(colorS2N)));
+            series.add(SpcSeriesData.withVisibility(!disableLegend, SingleS2NData.instance(), s2nTitle, s2n, new Some<>(colorS2N)));
+            series.add(SpcSeriesData.withVisibility(!disableLegend, FinalS2NData.instance(), finTitle, fin, new Some<>(colorFin)));
         }
         return series;
     }
