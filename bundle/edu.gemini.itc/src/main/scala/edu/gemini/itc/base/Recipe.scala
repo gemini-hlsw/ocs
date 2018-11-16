@@ -47,8 +47,8 @@ object Recipe {
 
   def createSignalChart(result: SpectroscopyResult, title: String, index: Int): SpcChartData = {
     val data: java.util.List[SpcSeriesData] = new java.util.ArrayList[SpcSeriesData]()
-    data.add(SpcSeriesData(SignalData,     "Signal",           result.specS2N(index).getSignalSpectrum.getData))
-    data.add(SpcSeriesData(BackgroundData, "SQRT(Background)", result.specS2N(index).getBackgroundSpectrum.getData))
+    data.add(SpcSeriesData(SignalData,     "Signal",           result.specS2N(index).getSignalSpectrum.getData, Some(ITCChart.DarkBlue)))
+    data.add(SpcSeriesData(BackgroundData, "SQRT(Background)", result.specS2N(index).getBackgroundSpectrum.getData, Some(ITCChart.LightBlue)))
     new SpcChartData(SignalChart, title, ChartAxis("Wavelength (nm)"), ChartAxis("e- per exposure per spectral pixel"), data.toList)
   }
 
