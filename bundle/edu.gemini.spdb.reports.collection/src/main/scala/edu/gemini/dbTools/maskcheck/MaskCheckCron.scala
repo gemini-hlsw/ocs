@@ -54,10 +54,10 @@ object MaskCheckCron {
       val nagAt     = lastMod.plus(nag)
       val lastEmail = f.getLastEmailed.asScalaOpt.getOrElse(Instant.MIN)
 
-      f.getName.endsWith(".odf") &&   // Only ODF Files
-      !f.isChecked               &&   // that haven't been checked
-      lastMod.isAfter(lastEmail) &&   // that have been modified more recently than the last nagging email (if any)
-      now.isAfter(nagAt)              // that haven't been checked in at least a week
+      f.getName.toLowerCase.endsWith("_odf.fits") &&   // Only ODF Files
+      !f.isChecked                                &&   // that haven't been checked
+      lastMod.isAfter(lastEmail)                  &&   // that have been modified more recently than the last nagging email (if any)
+      now.isAfter(nagAt)                               // that haven't been checked in at least a week
     })
 
   private def allPending(
