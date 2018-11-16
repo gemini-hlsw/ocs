@@ -364,6 +364,11 @@ public final class DefaultImList<T> implements ImList<T>, Serializable {
         return StreamSupport.stream(spliterator(), false);
     }
 
+    @Override
+    public ImList<T> take(int n) {
+        final int to = Math.min(n, backingList.size());
+        return (to < 0) ? ImCollections.<T>emptyList() : new DefaultImList<>(backingList.subList(0, to));
+    }
 
     /**
      * Calls {@link #mkString(String, String, String)} with the arguments

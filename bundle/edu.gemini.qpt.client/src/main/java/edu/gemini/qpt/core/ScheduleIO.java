@@ -69,14 +69,32 @@ public class ScheduleIO {
         return read(file.toURL(), timeout, authClient, magTable);
     }
 
+    private static IOException wrapWithIoException(Exception ex) {
+        final IOException ioe = new IOException(ex.getMessage());
+        ioe.initCause(ex);
+        return ioe;
+    }
+
+    // Reads the URL into a ParamSet containing the schedule data.
+    private static ParamSet loadParamSet(URL url) throws IOException {
+        final Reader reader = new InputStreamReader(url.openStream());
+
+        try {
+            return (ParamSet) PioXmlUtil.read(reader);
+
+        } catch (Exception ex) {
+            throw wrapWithIoException(ex);
+
+        } finally {
+            reader.close();
+        }
+    }
+
+
     public static Schedule read(URL url, long timeout, KeyChain authClient, AgsMagnitude.MagnitudeTable magTable) throws IOException, TimeoutException {
 
         try {
-
-            InputStream is = url.openStream();
-            Reader reader = new InputStreamReader(is);
-
-            ParamSet node = (ParamSet) PioXmlUtil.read(reader);
+            final ParamSet node = loadParamSet(url);
             int version = Pio.getIntValue(node, PROP_VERSION, Integer.MAX_VALUE);
             if (version > VERSION_CURRENT) throw new IOException("This file was written by a newer version of this software.");
 
@@ -93,6 +111,9 @@ public class ScheduleIO {
             Schedule.BlockUnion blocks = Schedule.getBlockUnion(core);
             SortedSet<Block> intervals = blocks.getIntervals();
             if (intervals.size() == 0) throw new IOException("Schedule has no blocks.");
+
+            // Check that all allocs are in range.
+            Schedule.validateAllocs(core, blocks);
 
             if (LttsServicesClient.getInstance() == null) {
                 LttsServicesClient.newInstance(intervals.first().getStart(), peer);
@@ -112,11 +133,8 @@ public class ScheduleIO {
         } catch (IOException ioe) {
             throw ioe;
         } catch (Exception pxe) {
-            IOException ioe = new IOException(pxe.getMessage());
-            ioe.initCause(pxe);
-            throw ioe;
+            throw wrapWithIoException(pxe);
         }
-
 
     }
 

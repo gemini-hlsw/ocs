@@ -140,14 +140,14 @@ object adapters {
   case object PossiblyUnusableSymbolInFOV extends GuideQualitySymbol {
     val quality: Option[AgsGuideQuality] = PossiblyUnusable.some
     val inFOV: Option[GuideInFOV] = Inside.some
-    setFg(Color.red)
+    setFg(Color.orange)
     setShape(TablePlotSymbol.CIRCLE)
   }
 
   case object PossiblyUnusableSymbolOutFOV extends GuideQualitySymbol {
     val quality: Option[AgsGuideQuality] = PossiblyUnusable.some
     val inFOV: Option[GuideInFOV] = Outside.some
-    setFg(Color.red)
+    setFg(Color.orange)
     setShape(TablePlotSymbol.CIRCLE)
   }
 
@@ -155,14 +155,14 @@ object adapters {
     val quality: Option[AgsGuideQuality] = Unusable.some
     val inFOV: Option[GuideInFOV] = Inside.some
     setFg(Color.red)
-    setShape(TablePlotSymbol.CROSS)
+    setShape(TablePlotSymbol.CIRCLE)
   }
 
   case object UnusableSymbolOutFOV extends GuideQualitySymbol {
     val quality: Option[AgsGuideQuality] = Unusable.some
     val inFOV: Option[GuideInFOV] = Outside.some
     setFg(Color.red)
-    setShape(TablePlotSymbol.CROSS)
+    setShape(TablePlotSymbol.CIRCLE)
   }
 
   /**

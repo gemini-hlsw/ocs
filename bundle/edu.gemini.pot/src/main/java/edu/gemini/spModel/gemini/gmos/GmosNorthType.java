@@ -179,6 +179,7 @@ public class GmosNorthType {
         z_G0304("z_G0304", "z", "0.925",             Track_z),
         Z_G0322("Z_G0322", "Z", "0.876",             Ictd.track("Z")), // missing ?
         Y_G0323("Y_G0323", "Y", "1.01",              Ictd.track("Y")), // missing ?
+        ri_G0349("ri_G0349", "ri", "0.700",          Ictd.track("ri")),
         GG455_G0305("GG455_G0305", "GG455", "0.680", Track_GG455),
         OG515_G0306("OG515_G0306", "OG515", "0.710", Track_OG515),
         RG610_G0307("RG610_G0307", "RG610", "0.750", Track_RG610),

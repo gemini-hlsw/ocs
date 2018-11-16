@@ -431,6 +431,25 @@ public class ImListTest extends TestCase {
         assertSame(lst, lst.sort(c));
     }
 
+    public void testTake() {
+        assertSame(empty,          empty.take(1));
+        assertSame(emptySingleton, emptySingleton.take(1));
+
+        assertEquals(empty,                  emptySingleton.take(1));
+        assertEquals(emptySingleton.take(1), emptySingleton);
+
+        final ImList<Integer> lst = create(1, 2, 3);
+        assertEquals(empty, lst.take(-1));
+        assertEquals(empty, lst.take(0));
+        assertEquals(lst,   lst.take(3));
+
+        assertEquals(create(1),    lst.take(1));
+        assertEquals(create(1, 2), lst.take(2));
+        assertEquals(lst,          lst.take(3));
+        assertEquals(lst,          lst.take(4));
+        assertEquals(lst,          lst.take(Integer.MAX_VALUE));
+    }
+
     public void testReverse() {
         ImList<Integer> lst = create(1, 2, 3, 4);
         lst = lst.reverse();

@@ -20,7 +20,9 @@ import Scalaz._
 object GuidingIcon {
   val sideLength = 16
 
-  private val darkGreen = new Color(0, 153, 0)
+  private val darkGreen  = new Color(  0, 153, 0)
+  private val darkOrange = new Color(255, 147, 0)
+  private val darkRed    = new Color(221,  38, 0)
 
   private val icons: Map[(AgsGuideQuality, Boolean), ImageIcon] = (for {
     q <- AgsGuideQuality.All
@@ -41,28 +43,40 @@ object GuidingIcon {
         // The bounding rectangle for the arcs.
         val r2  = new Rectangle2D.Double(2, 2, img.getWidth - 4, img.getHeight - 4)
 
-        // Paint the inner component indicating quality.
-        val quarters = q match {
+        // How many pieces of the pie chart to paint.
+        val quarters: Int = q match {
           case DeliversRequestedIq   => 4
           case PossibleIqDegradation => 3
           case IqDegradation         => 2
           case PossiblyUnusable      => 1
           case Unusable              => 0
         }
-        if (q =/= Unusable) {
-          g2.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND))
-          g2.setPaint(if (enabled) darkGreen else Color.gray)
-          g2.fill(new Arc2D.Double(r2, 90, -90 * quarters, Arc2D.PIE))
+
+        // Color of the pie chart pieces.
+        val fillColor: Color = q match {
+          case DeliversRequestedIq   => darkGreen
+          case PossibleIqDegradation => darkGreen
+          case IqDegradation         => darkOrange
+          case PossiblyUnusable      => darkOrange
+          case Unusable              => darkRed
         }
+
+        // Color of the outline of the pie chart.
+        val borderColor: Color = if (q === Unusable) darkRed else Color.black
+
+        // Paint a white interior.
+        g2.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND))
+        g2.setPaint(Color.white)
+        g2.fill(new Arc2D.Double(r2, 0, 360, Arc2D.PIE))
+
+        // Paint the color-coded pie chart pieces.
+        g2.setPaint(if (enabled) fillColor else Color.gray)
+        g2.fill(new Arc2D.Double(r2, 90, -90 * quarters, Arc2D.PIE))
+
         // Paint the outer border.
         g2.setStroke(new BasicStroke(1.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND))
-        val color = if (enabled) {
-          if (q === Unusable) Color.red else Color.black
-        } else Color.gray
-
-        g2.setPaint(color)
+        g2.setPaint(if (enabled) borderColor else Color.gray)
         g2.draw(new Arc2D.Double(r2, 0, 360, Arc2D.OPEN))
-
       }
 
       img

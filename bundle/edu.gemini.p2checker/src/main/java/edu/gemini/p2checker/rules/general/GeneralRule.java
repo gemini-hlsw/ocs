@@ -548,7 +548,7 @@ public class GeneralRule implements IRule {
             if (templateFolderNode != null) {
 
                 final Asterism a = getObsAsterism(elements);
-                if (a.asterismType() == AsterismType.Single) {
+                if (a != null && a.asterismType() == AsterismType.Single) {
                     // There should be only one target here, namely the science target.
                     a.allSpTargetsJava().foreach(obsTarget -> {
                         // We're going to drive this off the target, so we first want to narrow it

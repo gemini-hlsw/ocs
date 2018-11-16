@@ -13,4 +13,5 @@ case class Visitor(blueprint: SpVisitorBlueprint) extends VisitorBase {
 
   // SET Name from Phase-I
   forObs(sci: _*)(setName fromPI)
+  forObs(sci: _*)(setWavelength fromPI)
 }

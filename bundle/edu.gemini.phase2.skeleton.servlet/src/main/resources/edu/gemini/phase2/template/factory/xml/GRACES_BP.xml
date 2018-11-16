@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2017B-1" subtype="basic" key="e9123279-cbbd-49d2-a609-188cc0c208d0" name="GRACES-BP">
+  <container kind="program" type="Program" version="2018A-1" subtype="basic" key="e9123279-cbbd-49d2-a609-188cc0c208d0" name="GRACES-BP">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="GRACES PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -49,10 +49,20 @@ Other:
 
 DO NOT EDIT ANYTHING ELSE
 
+
+Because this is a hack, you can expect to find some warnings in your program.  You can safely ignore the following warnings:
+
+* A slit, mask, or IFU is defined, but no grating is selected
+* In IFU one slit mode it is recommended to use the red slit
+* Slow readout and high gain is not recommended
+* Exposure time exceeds recommended maximum for the GMOS instrument due to excessive contamination of the image due to cosmic rays 
+(Note: Try to keep exposures times under 2400s for GRACES. The warning will show up for exposures greater than 1200s which is the GMOS limit.)
+
+
 More information can be found at 
 http://www.gemini.edu/sciops/instruments/graces/observation-preparation/graces-ot-details-0
 
-KC - 16 Oct 2017.</value>
+KC - 22 Aug 2018.</value>
         </param>
       </paramset>
     </container>
@@ -191,7 +201,7 @@ Central wavelength: XXXXA / XXXnm
                 <paramset name="GMOS-N Sequence" kind="dataObj">
                   <param name="title" value="GMOS-N: Set-up (DO NOT EDIT)"/>
                   <param name="disperser" value="B600_G5307"/>
-                  <param name="exposureTime" value="60.0"/>
+                  <param name="exposureTime" value="61.0"/>
                   <param name="fpu" value="IFU_2"/>
                 </paramset>
                 <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="c5653c8a-e23a-440e-92fd-480dbc4c254c" name="Observe">
@@ -325,7 +335,7 @@ Central wavelength: XXXXA / XXXnm
                 <paramset name="GMOS-N Sequence" kind="dataObj">
                   <param name="title" value="GMOS-N: Set-up (DO NOT EDIT)"/>
                   <param name="disperser" value="B600_G5307"/>
-                  <param name="exposureTime" value="60.0"/>
+                  <param name="exposureTime" value="61.0"/>
                   <param name="fpu" value="IFU_2"/>
                 </paramset>
                 <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="1fb0693e-6e68-49ea-95e9-91f3ee92601a" name="Observe">
@@ -480,7 +490,7 @@ Central wavelength: XXXXA / XXXnm
                 <paramset name="GMOS-N Sequence" kind="dataObj">
                   <param name="title" value="GMOS-N: Set-up (DO NOT EDIT)"/>
                   <param name="disperser" value="B600_G5307"/>
-                  <param name="exposureTime" value="60.0"/>
+                  <param name="exposureTime" value="61.0"/>
                   <param name="fpu" value="IFU_2"/>
                 </paramset>
                 <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="ebce48b5-8ab7-490f-a4d9-f631f92e06cf" name="Observe">
@@ -614,7 +624,7 @@ Central wavelength: XXXXA / XXXnm
                 <paramset name="GMOS-N Sequence" kind="dataObj">
                   <param name="title" value="GMOS-N: Set-up (DO NOT EDIT)"/>
                   <param name="disperser" value="B600_G5307"/>
-                  <param name="exposureTime" value="60.0"/>
+                  <param name="exposureTime" value="61.0"/>
                   <param name="fpu" value="IFU_2"/>
                 </paramset>
                 <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="afec4099-5bd3-46b5-9ecc-9ef7cc2414b1" name="Observe">
@@ -769,7 +779,7 @@ Central wavelength: XXXXA / XXXnm
                 <paramset name="GMOS-N Sequence" kind="dataObj">
                   <param name="title" value="GMOS-N: Set-up (DO NOT EDIT)"/>
                   <param name="disperser" value="B600_G5307"/>
-                  <param name="exposureTime" value="60.0"/>
+                  <param name="exposureTime" value="61.0"/>
                   <param name="fpu" value="IFU_2"/>
                 </paramset>
                 <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="50452e53-0fbb-4cc0-9fbd-c076a1dcff98" name="Observe">
@@ -903,7 +913,7 @@ Central wavelength: XXXXA / XXXnm
                 <paramset name="GMOS-N Sequence" kind="dataObj">
                   <param name="title" value="GMOS-N: Set-up (DO NOT EDIT)"/>
                   <param name="disperser" value="B600_G5307"/>
-                  <param name="exposureTime" value="60.0"/>
+                  <param name="exposureTime" value="61.0"/>
                   <param name="fpu" value="IFU_2"/>
                 </paramset>
                 <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="530b3d9d-166b-4bf2-a3eb-f8c5b597f7ba" name="Observe">
@@ -1058,7 +1068,7 @@ Central wavelength: XXXXA / XXXnm
                 <paramset name="GMOS-N Sequence" kind="dataObj">
                   <param name="title" value="GMOS-N: Set-up (DO NOT EDIT)"/>
                   <param name="disperser" value="B600_G5307"/>
-                  <param name="exposureTime" value="60.0"/>
+                  <param name="exposureTime" value="61.0"/>
                   <param name="fpu" value="IFU_2"/>
                 </paramset>
                 <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="549190c9-bc81-498c-84a1-eb3c4b14eece" name="Observe">
@@ -1192,7 +1202,7 @@ Central wavelength: XXXXA / XXXnm
                 <paramset name="GMOS-N Sequence" kind="dataObj">
                   <param name="title" value="GMOS-N: Set-up (DO NOT EDIT)"/>
                   <param name="disperser" value="B600_G5307"/>
-                  <param name="exposureTime" value="60.0"/>
+                  <param name="exposureTime" value="61.0"/>
                   <param name="fpu" value="IFU_2"/>
                 </paramset>
                 <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="2993d765-b2ac-4786-9b9d-fdf9344dd765" name="Observe">
@@ -1377,6 +1387,7 @@ Central wavelength: XXXXA / XXXnm
       <param name="key" value="4676ec7c-467c-4af9-b982-b4c88e6b273f"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
       <param name="086d4258-16d9-4dce-bd33-3d794ccf9a25" value="2"/>
+      <param name="bd7450c1-98a1-4b02-a76e-0e07bb93175e" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="851d22af-026b-4e96-8c85-47fbbc4941a7"/>
@@ -1419,6 +1430,7 @@ Central wavelength: XXXXA / XXXnm
       <param name="key" value="57e7a620-e491-4134-8185-091e87e92a32"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
       <param name="086d4258-16d9-4dce-bd33-3d794ccf9a25" value="2"/>
+      <param name="bd7450c1-98a1-4b02-a76e-0e07bb93175e" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="036bccf4-8f7b-4375-a3a5-306b757eb515"/>
@@ -1428,6 +1440,7 @@ Central wavelength: XXXXA / XXXnm
       <param name="key" value="964629d2-1678-41fa-88a4-ad9869e5dff7"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
       <param name="086d4258-16d9-4dce-bd33-3d794ccf9a25" value="3"/>
+      <param name="bd7450c1-98a1-4b02-a76e-0e07bb93175e" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="4cfc26b3-8529-4879-9ced-2c3ef2cdce15"/>
@@ -1520,11 +1533,13 @@ Central wavelength: XXXXA / XXXnm
       <param name="key" value="17b519ea-35b6-4c1e-bc63-ab150eefb599"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
       <param name="086d4258-16d9-4dce-bd33-3d794ccf9a25" value="2"/>
+      <param name="bd7450c1-98a1-4b02-a76e-0e07bb93175e" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a9bcd6ad-9dd3-4ca2-a462-9ddd82b12c7e"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
       <param name="086d4258-16d9-4dce-bd33-3d794ccf9a25" value="2"/>
+      <param name="bd7450c1-98a1-4b02-a76e-0e07bb93175e" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d29f7c49-ab99-4c27-ba73-9dc58de71890"/>
@@ -1620,6 +1635,7 @@ Central wavelength: XXXXA / XXXnm
       <param name="key" value="2693c900-09b3-4915-8f33-7802a8746aa8"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
       <param name="086d4258-16d9-4dce-bd33-3d794ccf9a25" value="2"/>
+      <param name="bd7450c1-98a1-4b02-a76e-0e07bb93175e" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="530b3d9d-166b-4bf2-a3eb-f8c5b597f7ba"/>
@@ -1680,6 +1696,7 @@ Central wavelength: XXXXA / XXXnm
       <param name="key" value="4931a77a-95b8-497b-8091-78cd1956a5d0"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
       <param name="086d4258-16d9-4dce-bd33-3d794ccf9a25" value="2"/>
+      <param name="bd7450c1-98a1-4b02-a76e-0e07bb93175e" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="40f55750-c050-4f86-a246-311cd285f602"/>
@@ -1718,6 +1735,8 @@ Central wavelength: XXXXA / XXXnm
       <param name="key" value="160566f7-eb0d-4e8a-b6dc-6fc2a53115e7"/>
       <param name="ee939b46-90bf-4ff5-bf1f-f58d3f8b1faa" value="1"/>
       <param name="5b2cdd1b-8a4b-4a40-8c39-212123e16e65" value="272"/>
+      <param name="bd7450c1-98a1-4b02-a76e-0e07bb93175e" value="15"/>
+      <param name="c59f0116-0c69-4bbd-bf96-00ff257ccfcd" value="18"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5c0ccef2-c88a-4cee-b57e-35df213bb00c"/>
@@ -1739,6 +1758,7 @@ Central wavelength: XXXXA / XXXnm
       <param name="key" value="a67b3ea7-81a1-4bff-a146-ef0484daa17b"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
       <param name="086d4258-16d9-4dce-bd33-3d794ccf9a25" value="2"/>
+      <param name="bd7450c1-98a1-4b02-a76e-0e07bb93175e" value="2"/>
     </paramset>
   </container>
 </document>

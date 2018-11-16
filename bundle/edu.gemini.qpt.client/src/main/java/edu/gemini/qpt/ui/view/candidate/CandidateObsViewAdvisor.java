@@ -28,6 +28,7 @@ import edu.gemini.qpt.ui.action.DragLimit;
 import edu.gemini.qpt.ui.util.DragImage;
 import edu.gemini.qpt.ui.util.ScrollPanes;
 import edu.gemini.qpt.ui.util.SimpleToolbar;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.ui.gface.GSelection;
 import edu.gemini.ui.gface.GTableViewer;
 import edu.gemini.ui.workspace.IShell;
@@ -40,20 +41,20 @@ import static edu.gemini.qpt.ui.view.candidate.CandidateObsAttribute.*;
 public class CandidateObsViewAdvisor implements IViewAdvisor, PropertyChangeListener {
 
     // The viewer. Central doodad for this view.
-    private final GTableViewer<Schedule, Obs, CandidateObsAttribute> viewer = 
+    private final GTableViewer<Schedule, Obs, CandidateObsAttribute> viewer =
         new GTableViewer<Schedule, Obs, CandidateObsAttribute>(new CandidateObsController());
-    
+
     // Save the context
     private IViewContext context;
-    
+
     // More UI stuff.
     private final JScrollPane scroll = Factory.createStrippedScrollPane(viewer.getTable());
     private final JPanel toolbar = new SimpleToolbar();
-    private final JLabel text = new SimpleToolbar.StaticText("Double-click an observation to view it in context.");    
+    private final JLabel text = new SimpleToolbar.StaticText("Double-click an observation to view it in context.");
     private final JPanel content = new JPanel(new BorderLayout());
-    
+
     public CandidateObsViewAdvisor() {
-    
+
         // Set up the viewer
         viewer.setColumns(SB, P, Score, Observation, Target, RA, Inst, Dur);
         viewer.setColumnSize(Observation, 125);
@@ -70,36 +71,36 @@ public class CandidateObsViewAdvisor implements IViewAdvisor, PropertyChangeList
         viewer.setComparator(new CandidateObsComparator());
         viewer.getTable().addMouseListener(doubleClickListener);
         viewer.setTranslator(new CandidateObsTranslator());
-        
+
         // Set viewport size
         ScrollPanes.setViewportWidth(scroll);
-        
+
         // Set up the toolbar
         toolbar.add(text);
-        
+
         // Put it all together.
         content.add(scroll, BorderLayout.CENTER);
         content.add(toolbar, BorderLayout.SOUTH);
-        
+
         // Outgoing drag.
         DragSource.getDefaultDragSource().createDefaultDragGestureRecognizer(
             viewer.getTable(), DnDConstants.ACTION_COPY, dragGestureListener);
-        
+
     }
-    
+
     public void close(IViewContext context) {
         // nop
     }
 
     public void open(IViewContext context) {
-        
+
         this.context = context;
-        
+
         context.setTitle("Candidate Observations");
         context.setContent(content);
         context.setSelectionBroker(viewer);
         context.getShell().addPropertyChangeListener(IShell.PROP_MODEL, this);
-        
+
     }
 
     public void setFocus() {
@@ -108,26 +109,26 @@ public class CandidateObsViewAdvisor implements IViewAdvisor, PropertyChangeList
 
     public void propertyChange(PropertyChangeEvent evt) {
         if (IShell.PROP_MODEL.equals(evt.getPropertyName())) {
-            viewer.setModel((Schedule) evt.getNewValue());            
+            viewer.setModel((Schedule) evt.getNewValue());
         }
     }
 
-    private final DragGestureListener dragGestureListener = new DragGestureListener() {            
-        public void dragGestureRecognized(DragGestureEvent dge) {            
-            Obs obs = viewer.getElementAt(dge.getDragOrigin());            
-            if (obs != null) {
-                Variant variant = viewer.getModel().getCurrentVariant();
-                Set<Flag> flags = variant.getFlags(obs);
-                if (!flags.contains(Flag.SCHEDULED)) {                    
-                    GSelection<Alloc> selection = new GSelection<Alloc>(Alloc.forDragging(obs, DragLimit.value()));
-                    Image dragImage = DragImage.forSelection(variant, selection);
-                    dge.startDrag(DragSource.DefaultMoveNoDrop,    dragImage,
-                        DragImage.getCenterOffset(dragImage), selection, null);
-                }
-            }            
+    private final DragGestureListener dragGestureListener = new DragGestureListener() {
+        public void dragGestureRecognized(DragGestureEvent dge) {
+            ImOption.apply(viewer.getModel()).flatMap(s -> ImOption.apply(s.getCurrentVariant())).foreach(variant -> {
+                ImOption.apply(viewer.getElementAt(dge.getDragOrigin())).foreach(obs -> {
+                    final Set<Flag> flags = variant.getFlags(obs);
+                    if (!flags.contains(Flag.SCHEDULED)) {
+                        GSelection<Alloc> selection = new GSelection<>(Alloc.forDragging(obs, DragLimit.value()));
+                        Image dragImage = DragImage.forSelection(variant, selection);
+                        dge.startDrag(DragSource.DefaultMoveNoDrop, dragImage,
+                                DragImage.getCenterOffset(dragImage), selection, null);
+                    }
+                });
+            });
         }
     };
-    
+
     private final MouseListener doubleClickListener = new MouseAdapter() {
         @Override
         public void mouseClicked(MouseEvent e) {
@@ -136,6 +137,6 @@ public class CandidateObsViewAdvisor implements IViewAdvisor, PropertyChangeList
             }
         }
     };
-    
+
 
 }
