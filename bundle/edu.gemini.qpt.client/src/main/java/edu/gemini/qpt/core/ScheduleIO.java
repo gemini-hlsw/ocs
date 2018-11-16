@@ -113,7 +113,7 @@ public class ScheduleIO {
             if (intervals.size() == 0) throw new IOException("Schedule has no blocks.");
 
             // Check that all allocs are in range.
-            Schedule.validateAllocs(core, blocks);
+            Schedule.validateAllocs(siteDesc, core, blocks);
 
             if (LttsServicesClient.getInstance() == null) {
                 LttsServicesClient.newInstance(intervals.first().getStart(), peer);

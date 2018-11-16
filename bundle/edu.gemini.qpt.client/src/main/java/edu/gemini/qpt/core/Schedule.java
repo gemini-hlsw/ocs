@@ -231,21 +231,37 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
     // and ends after the start of the block.
     private static boolean inRange(
         final ParamSet alloc,
-        final long     start,
-        final long     end
+        final Interval range
     ) {
         final long aStart = Pio.getLongValue(alloc, "start", Long.MAX_VALUE);
         final long aEnd   = Pio.getLongValue(alloc, "end",   Long.MIN_VALUE);
-        return (aStart <= aEnd) && (aStart <= end) && (aEnd >= start);
+        return (aStart <= aEnd) && (aStart <= range.getEnd()) && (aEnd >= range.getStart());
     }
 
-    // An alloc is out of range if it is not inRange.
-    private static boolean outOfRange(
-        final ParamSet alloc,
-        final long     start,
-        final long     end
+    // Calculates an interval that includes the given blocks with padding for
+    // the day time before and after.
+    private static Interval calculateValidTimeRange(
+        final Site site,
+        final BlockUnion blocks
     ) {
-        return !inRange(alloc, start, end);
+
+        // The start and end time of the actual schedule block(s).
+        final long blockStart = blocks.getIntervals().first().getStart();
+        final long blockEnd   = blocks.getIntervals().last().getEnd();
+
+        // We'll pad it with day time on either side.
+        final TwilightBoundedNight prevNight = Twilight.forTime(blockStart, site).previous();
+
+        // Usually blockEnd will be the ms after the twilight time and so
+        // nextNight will be correct.  If for any reason the block ends during
+        // the night we'll need n.next().
+        final TwilightBoundedNight n         = Twilight.forTime(blockEnd,   site);
+        final TwilightBoundedNight nextNight = n.includes(blockEnd) ? n.next() : n;
+
+        return new Interval(
+            prevNight.getEndTime(),
+            nextNight.getStartTime()
+        );
     }
 
     /**
@@ -261,12 +277,12 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
      * range of the time blocks
      */
     public static void validateAllocs(
+        final Site site,
         final ParamSet core,
         final BlockUnion blocks
     ) throws IOException {
-        final SortedSet<Block> intervals = blocks.getIntervals();
-        final long start = intervals.first().getStart();
-        final long end   = intervals.last().getEnd();
+
+        final Interval range = calculateValidTimeRange(site, blocks);
 
         // A listing of the observation ids that fall out of range, if any.
         final ImList<String> outOfRangeObsList =
@@ -275,8 +291,8 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
                 .flatMap(vs -> DefaultImList.create(vs.getParamSets(VariantList.PROP_MEMBER)))
                 .flatMap(v  -> DefaultImList.create(v.getParamSets(Variant.PROP_ALLOCS)))
                 .flatMap(as -> DefaultImList.create(as.getParamSets(AllocSet.PROP_MEMBER)))
-                .filter(a -> outOfRange(a, start, end))
-                .map(a -> Pio.getValue(a, "obs"));
+                .filter(a   -> !inRange(a, range))
+                .map(a      -> Pio.getValue(a, "obs"));
 
         if (outOfRangeObsList.nonEmpty()) {
             // Trim duplicates.
