@@ -182,6 +182,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel { ui =>
 
     peer.setDefaultRenderer(classOf[java.lang.String], NormalRenderer)
     peer.setDefaultRenderer(classOf[java.lang.Double], DoubleValueRenderer)
+    peer.setDefaultRenderer(classOf[java.lang.Integer], IntegerValueRenderer)
     peer.setDefaultRenderer(classOf[RaValue], RaValueRenderer)
     peer.setDefaultRenderer(classOf[DecValue], DecValueRenderer)
     peer.setDefaultRenderer(classOf[TimeValue], TimeValueRenderer)
@@ -324,7 +325,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel { ui =>
         import InstallationState._
 
         // Lookup the installation state.
-        val is = dataModel.installationState(r)
+        val is = dataModel.installationState(viewToModelRow(r))
 
         // Set the appropriate highlight/background color if not selected.
         if (!selected) {
@@ -383,6 +384,14 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel { ui =>
       override def setValue(value: Object) = value match {
         case v: java.lang.Double =>
           setText(f"$v%.2f")
+          setBorder(BorderFactory.createEmptyBorder(0,0,0,5))
+      }
+    }
+    private object IntegerValueRenderer extends AvailabilityRenderer {
+      setHorizontalAlignment(SwingConstants.RIGHT)
+      override def setValue(value: Object) = value match {
+        case v: java.lang.Integer =>
+          setText(f"$v%d")
           setBorder(BorderFactory.createEmptyBorder(0,0,0,5))
       }
     }

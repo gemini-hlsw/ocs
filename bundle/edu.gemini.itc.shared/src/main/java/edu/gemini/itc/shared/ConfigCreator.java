@@ -96,12 +96,13 @@ public final class ConfigCreator {
     }
 
     // create part of config common for all instruments
-    private final ConfigCreatorResult createCommonConfig(final int numberExposures) {
+    private ConfigCreatorResult createCommonConfig(final int numberExposures) {
+        if (numberExposures <= 0) {
+            throw new IllegalArgumentException("The number of exposures must be at least 1.");
+        }
+        
         final CalculationMethod calcMethod = obsDetailParams.calculationMethod();
         final ConfigCreatorResult result = new ConfigCreatorResult(new DefaultConfig[numberExposures]);
-        if (numberExposures < 1) {
-            result.addWarning("Warning: Observation overheads cannot be calculated for the number of exposures = 0.");
-        }
         final int numberCoadds = calcMethod.coaddsOrElse(1);
         final double offset = calcMethod.offset();
         // for spectroscopic observations we consider ABBA offset pattern
@@ -111,7 +112,7 @@ public final class ConfigCreator {
         final List<Double> offsetList = new ArrayList<>();
 
         for (int i = 0; i < (1 + numberExposures / 4); i++) {
-            if (calcMethod instanceof Imaging) {
+            if (calcMethod instanceof Imaging || obsDetailParams.analysisMethod() instanceof IfuMethod) {
                 offsetList.addAll(imagingOffsets);
                 result.setOffsetMessage("ABAB dithering pattern");
             } else if (calcMethod instanceof Spectroscopy) {

@@ -278,11 +278,11 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
           show = d => f"$d%.3f",
           get  = tp => tp.getTarget.getSiderealTarget.fold(0.0)(lens.get),
           set  = (tp, pm) => {
-            val newTarget = tp.getTarget
+            val newTarget = tp.getTarget            // Get an SPTarget clone of the template param target
             newTarget.getSiderealTarget.foreach { t =>
-              tp.getTarget.setTarget(lens.set(t, pm))
+              newTarget.setTarget(lens.set(t, pm))  // Set the cloned SPTarget's immutable Target after updating
             }
-            tp.copy(newTarget)
+            tp.copy(newTarget)                      // Update the template parameter with the new SPTarget
           }
         )
 

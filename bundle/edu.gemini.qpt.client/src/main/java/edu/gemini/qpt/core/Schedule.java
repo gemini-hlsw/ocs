@@ -16,6 +16,7 @@ import edu.gemini.skycalc.TwilightBoundedNight;
 import static edu.gemini.skycalc.TwilightBoundType.CIVIL;
 import static edu.gemini.skycalc.TwilightBoundType.NAUTICAL;
 import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.Site;
@@ -41,6 +42,7 @@ import jsky.coords.WorldCoordinates;
 import jsky.util.DateUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Level;
@@ -224,6 +226,90 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
         this.comment = Pio.getValue(params, PROP_COMMENT);
         init(false, ImOption.empty());
     }
+
+    // An alloc is considered in range if it starts before the end of the block
+    // and ends after the start of the block.
+    private static boolean inRange(
+        final ParamSet alloc,
+        final Interval range
+    ) {
+        final long aStart = Pio.getLongValue(alloc, "start", Long.MAX_VALUE);
+        final long aEnd   = Pio.getLongValue(alloc, "end",   Long.MIN_VALUE);
+        return (aStart <= aEnd) && (aStart <= range.getEnd()) && (aEnd >= range.getStart());
+    }
+
+    // Calculates an interval that includes the given blocks with padding for
+    // the day time before and after.
+    private static Interval calculateValidTimeRange(
+        final Site site,
+        final BlockUnion blocks
+    ) {
+
+        // The start and end time of the actual schedule block(s).
+        final long blockStart = blocks.getIntervals().first().getStart();
+        final long blockEnd   = blocks.getIntervals().last().getEnd();
+
+        // We'll pad it with day time on either side.
+        final TwilightBoundedNight prevNight = Twilight.forTime(blockStart, site).previous();
+
+        // Usually blockEnd will be the ms after the twilight time and so
+        // nextNight will be correct.  If for any reason the block ends during
+        // the night we'll need n.next().
+        final TwilightBoundedNight n         = Twilight.forTime(blockEnd,   site);
+        final TwilightBoundedNight nextNight = n.includes(blockEnd) ? n.next() : n;
+
+        return new Interval(
+            prevNight.getEndTime(),
+            nextNight.getStartTime()
+        );
+    }
+
+    /**
+     * Determines whether all allocs at least start or end within the block
+     * time range.  If any fall outside of the block time range, an IOException
+     * is thrown listing the offending allocs.
+     *
+     * @param core param set describing the schedule, its variants and the
+     *             allocs they contain
+     * @param blocks the schedule time block(s)
+     *
+     * @throws IOException if any allocation falls completely outside of the
+     * range of the time blocks
+     */
+    public static void validateAllocs(
+        final Site site,
+        final ParamSet core,
+        final BlockUnion blocks
+    ) throws IOException {
+
+        final Interval range = calculateValidTimeRange(site, blocks);
+
+        // A listing of the observation ids that fall out of range, if any.
+        final ImList<String> outOfRangeObsList =
+            ImOption.apply(core.getParamSet(PROP_VARIANTS))
+                .toImList()
+                .flatMap(vs -> DefaultImList.create(vs.getParamSets(VariantList.PROP_MEMBER)))
+                .flatMap(v  -> DefaultImList.create(v.getParamSets(Variant.PROP_ALLOCS)))
+                .flatMap(as -> DefaultImList.create(as.getParamSets(AllocSet.PROP_MEMBER)))
+                .filter(a   -> !inRange(a, range))
+                .map(a      -> Pio.getValue(a, "obs"));
+
+        if (outOfRangeObsList.nonEmpty()) {
+            // Trim duplicates.
+            final ImList<String> os = DefaultImList.create(new TreeSet<>(outOfRangeObsList.toList()));
+
+            // Show the problem in the exception message, which ends up being
+            // displayed to the user from the open dialogs.
+            throw new IOException(
+                os.take(10).mkString(
+                    "Some observations are out of the schedule's time range:\n",
+                    ",\n",
+                    os.size() > 10 ? "..." : ""
+                )
+            );
+        }
+    }
+
 
     private void init(boolean isNew, Option<Map<Enum<?>, Availability>> oam) {
         if (isNew) initFacilities();

@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import edu.gemini.qpt.core.Alloc;
 import edu.gemini.qpt.core.Marker;
+import edu.gemini.qpt.core.Schedule;
 import edu.gemini.qpt.core.Variant;
 import edu.gemini.qpt.core.Alloc.Circumstance;
 import edu.gemini.qpt.core.Marker.Severity;
@@ -40,9 +41,19 @@ public class LimitsListener extends MarkerModelListener<Variant> {
     public static final int MIN_ELEVATION_WARN_LIMIT = 42;
 
     public void propertyChange(PropertyChangeEvent evt) {
-        Variant v = (Variant) evt.getSource();
-        MarkerManager mm = v.getSchedule().getMarkerManager();
+        final Variant  v               = (Variant) evt.getSource();
+        final Schedule schedule        = v.getSchedule();
+
+        if (!schedule.isEmpty()) updateLimits(v, schedule);
+    }
+
+    private void updateLimits(final Variant v, final Schedule schedule) {
+        final MarkerManager mm         = schedule.getMarkerManager();
         mm.clearMarkers(this, v);
+
+        final TwilightBoundedNight tbn = Twilight.forTime(schedule.getStart(), schedule.getSite());
+        final Interval nightInterval   = new Interval(tbn.getStartTime(), tbn.getEndTime());
+        final Supplier<Union<Interval>> wholeNight = () -> new Union<>(nightInterval);
 
         for (Alloc a: v.getAllocs()) {
 
@@ -96,14 +107,11 @@ public class LimitsListener extends MarkerModelListener<Variant> {
                 mm.addMarker(false, this, Severity.Warning, msg, v, a);
             }
 
-            final TwilightBoundedNight tbn = Twilight.forTime(a.getStart(), v.getSchedule().getSite());
-            final Interval nightInterval   = new Interval(tbn.getStartTime(), tbn.getEndTime());
-            final Supplier<Union<Interval>> wholeNight = () -> new Union<>(nightInterval);
 
             final BiFunction<Function<Interval, Long>, String, Predicate<Long>> matchWith =
                 (f, cacheName) ->
                     ts -> {
-                        final Map<Obs, Union<Interval>> c = v.getSchedule().getCache(cacheName);
+                        final Map<Obs, Union<Interval>> c = schedule.getCache(cacheName);
                         final Union<Interval> u = c.getOrDefault(a.getObs(), new Union<>());
 
                         return u.getIntervals().stream().anyMatch(i -> f.apply(i).equals(ts));
@@ -139,7 +147,7 @@ public class LimitsListener extends MarkerModelListener<Variant> {
             // Function to create markers that report solver intervals.
             final Supplier<Option<Marker>> createSolverMarker =
                 () -> {
-                    final Map<Obs, Union<Interval>> c = v.getSchedule().getCache(Variant.CONSTRAINED_UNION_CACHE);
+                    final Map<Obs, Union<Interval>> c = schedule.getCache(Variant.CONSTRAINED_UNION_CACHE);
                     final Union<Interval>       valid = c.getOrDefault(a.getObs(), new Union<>());
                     final Union<Interval>     invalid = wholeNight.get();
                     invalid.remove(valid);

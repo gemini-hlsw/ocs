@@ -9,6 +9,7 @@ import javax.swing.AbstractAction;
 
 import edu.gemini.qpt.core.Alloc;
 import edu.gemini.qpt.core.Variant;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.ui.gface.GSelection;
 import edu.gemini.ui.gface.GViewer;
 
@@ -24,8 +25,10 @@ public class SelectAllAction extends AbstractAction implements PropertyChangeLis
     }
 
     public void actionPerformed(ActionEvent e) {
-        Collection<Alloc> all = viewer.getModel().getAllocs();
-        viewer.setSelection(new GSelection<>(all.toArray(new Alloc[all.size()])));
+        ImOption.apply(viewer.getModel()).foreach(variant -> {
+            Collection<Alloc> all = variant.getAllocs();
+            viewer.setSelection(new GSelection<>(all.toArray(new Alloc[all.size()])));
+        });
     }
 
     public void propertyChange(PropertyChangeEvent evt) {
