@@ -10,6 +10,7 @@ import edu.gemini.catalog.api._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.{None => JNone}
 import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.spModel.ags.AgsStrategyKey.{ Pwfs1NorthKey, Pwfs2NorthKey, Pwfs1SouthKey, Pwfs2SouthKey }
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.altair.{AltairParams, InstAltair}
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
@@ -102,8 +103,14 @@ case class ObservationInfo(ctx: Option[ObsContext],
       case SPComponentType.INSTRUMENT_VISITOR    => new VisitorInstrument()
     }
     val site = instrument.collect {
-      case SPComponentType.INSTRUMENT_VISITOR    => None // Setting the site as None will make the CatalogQueryTool select the site from the selected probe
-      case _                                     => inst.flatMap(_.getSite.asScala.headOption)
+      case SPComponentType.INSTRUMENT_VISITOR    =>
+        // Try to pick the site based on the guide probe we're searching for.
+        strategy.map(_.strategy.key).collect {
+          case Pwfs1NorthKey | Pwfs2NorthKey => Site.GN
+          case Pwfs1SouthKey | Pwfs2SouthKey => Site.GS
+        }
+      case _                                     =>
+        inst.flatMap(_.getSite.asScala.headOption)
     }
     (baseCoordinates |@| inst |@| conditions){ (c, i, cond) =>
       val target = new SPTarget(c.ra.toAngle.toDegrees, c.dec.toDegrees) <| {_.setName(~objectName)}
