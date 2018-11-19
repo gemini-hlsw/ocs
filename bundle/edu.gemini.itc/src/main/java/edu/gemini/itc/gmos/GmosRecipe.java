@@ -658,14 +658,14 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             // =====
 
             if (result.getNumberOfSlits() == 1) {
-                colorS2N = ccdDarkColor(ccdIndex);
-                colorFin = ccdLightColor(ccdIndex);
+                colorS2N = ccdLightColor(ccdIndex);
+                colorFin = ccdDarkColor(ccdIndex);
             } else if (i == 0) {
-                colorS2N = ITCChart.DarkBlue;
-                colorFin = ITCChart.LightBlue;
+                colorS2N = ITCChart.LightBlue;
+                colorFin = ITCChart.DarkBlue;
             } else {
-                colorS2N = ITCChart.DarkRed;
-                colorFin = ITCChart.LightRed;
+                colorS2N = ITCChart.LightRed;
+                colorFin = ITCChart.DarkRed;
             }
 
             series.add(SpcSeriesData.withVisibility(!disableLegend, SingleS2NData.instance(), s2nTitle, s2n, new Some<>(colorS2N)));
