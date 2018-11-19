@@ -115,6 +115,13 @@ case class ObservationInfo(ctx: Option[ObsContext],
       ObsContext.create(env, i, site.flatten.asGeminiOpt, cond, offsets.map(_.toOldModel).asJava, altair.orNull, JNone.instance()).withPositionAngle(positionAngle)
     }
   }
+
+  def withConditions(f: Conditions => Conditions): ObservationInfo =
+    copy(
+      ctx        = ctx.map(c => c.withConditions(f(c.getConditions))),
+      conditions = conditions.map(f)
+    )
+
 }
 
 object ObservationInfo {
@@ -390,4 +397,7 @@ case class TargetsModel(info: Option[ObservationInfo], base: Coordinates, radius
         case (column, i)        => sorter.setComparator(i, column.ordering)
       }
     } <| { _.sort() }
+
+  def withConditions(f: Conditions => Conditions): TargetsModel  =
+    copy(info = info.map(_.withConditions(f)))
 }

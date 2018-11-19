@@ -558,7 +558,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           resultsTable.model match {
             case t: TargetsModel =>
               Swing.onEDT {
-                updateResultsModel(t.copy(info = t.info.map(i => i.copy(ctx = None, conditions = i.conditions.map(_.sb(selection.item))))))
+                updateResultsModel(t.withConditions(_.sb(selection.item)))
                 updateGuideSpeedText()
                 Option(TpeManager.open()).foreach(p => p.getImageWidget.repaint())
               }
@@ -580,7 +580,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           resultsTable.model match {
             case t: TargetsModel =>
               Swing.onEDT {
-                updateResultsModel(t.copy(info = t.info.map(i => i.copy(ctx = None, conditions = i.conditions.map(_.cc(selection.item))))))
+                updateResultsModel(t.withConditions(_.cc(selection.item)))
                 updateGuideSpeedText()
                 Option(TpeManager.open()).foreach(p => p.getImageWidget.repaint())
               }
@@ -602,7 +602,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           resultsTable.model match {
             case t: TargetsModel =>
               Swing.onEDT {
-                updateResultsModel(t.copy(info = t.info.map(i => i.copy(ctx = None, conditions = i.conditions.map(_.iq(selection.item))))))
+                updateResultsModel(t.withConditions(_.iq(selection.item)))
                 updateGuideSpeedText()
                 Option(TpeManager.open()).foreach(p => p.getImageWidget.repaint())
               }
