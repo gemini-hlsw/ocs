@@ -117,11 +117,13 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         QueryResultsFrame.instance().peer().addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(ComponentEvent e) {
+                QueryResultsFrame.instance().linkTpe(TpeImageWidget.this);
                 repaint();
             }
 
             @Override
             public void componentHidden(ComponentEvent e) {
+                QueryResultsFrame.instance().unlinkTpe(TpeImageWidget.this);
                 repaint();
             }
         });

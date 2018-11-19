@@ -1,6 +1,7 @@
 package edu.gemini.catalog.ui
 
 import java.awt.Color
+import java.awt.event.MouseEvent
 import java.io._
 import java.nio.charset.Charset
 
@@ -100,52 +101,75 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       case TableRowsSelected(source, _, false) =>
         selectResults(source.selection.rows.toSet.map(viewToModelRow))
     }
-    Option(TpeManager.get()).foreach(_.getImageWidget.plotter.addSymbolSelectionListener(new SymbolSelectionListener {
-      override def symbolDeselected(e: SymbolSelectionEvent): Unit = {
-        selection.rows -= modelToViewRow(e.getRow)
-      }
 
-      override def symbolSelected(e: SymbolSelectionEvent): Unit = {
-        selection.rows += modelToViewRow(e.getRow)
+    // Watch symbol selection events in the image widget to select the
+    // corresponding row in the image widget.
+    private val symbolSelectionListener: SymbolSelectionListener =
+      new SymbolSelectionListener {
+        private def rowOption(e: SymbolSelectionEvent): Option[Int] = {
+          val r = e.getRow
+          Option(model).collect {
+            case tm: TargetsModel if r >= 0 && r < tm.getRowCount => modelToViewRow(r)
+          }
+        }
+
+        override def symbolDeselected(e: SymbolSelectionEvent): Unit = {
+          rowOption(e).foreach { r =>
+            selection.rows -= r
+          }
+        }
+
+        override def symbolSelected(e: SymbolSelectionEvent): Unit = {
+          rowOption(e).foreach { r =>
+            selection.rows += r
+            peer.scrollRectToVisible(peer.getCellRect(r, 0, true))
+          }
+        }
       }
-    }))
 
     // Watch the image widget for image info updates in order to refresh the
     // "FOV" column that shows whether the guide star is in reach of the probe.
-    Option(TpeManager.get()).foreach { tpe =>
-      tpe.getImageWidget.addInfoObserver(new TpeImageInfoObserver {
+    private val imageInfoObserver: TpeImageInfoObserver =
+      new TpeImageInfoObserver {
+
         override def imageInfoUpdate(iw: TpeImageWidget, tii: TpeImageInfo): Unit =
           for {
             c <- iw.getObsContext.asScalaOpt
             s <- AgsRegistrar.currentStrategy(c)
+            m <- Option(model).collect { case tm: TargetsModel => tm }
           } {
 
             val mt = ProbeLimitsTable.loadOrThrow()
             s.catalogQueries(c, mt).headOption.foreach {
               case q: ConeSearchCatalogQuery =>
 
-                val curModel = model.asInstanceOf[TargetsModel]
-
-                val updated  = curModel.info.exists { i =>
+                val updated = m.info.exists { i =>
                   (i.positionAngle =/= c.getPositionAngle) ||
                     (i.baseCoordinates =/= c.getBaseCoordinates.asScalaOpt.map(_.toNewModel))
                 }
 
                 if (updated) {
                   val info = ObservationInfo(c, mt)
-                  val tm   = TargetsModel(info.some, q.base, q.radiusConstraint, curModel.targets)
+                  val tm   = TargetsModel(info.some, q.base, q.radiusConstraint, m.targets)
                   updateResultsModel(tm)
 
                   iw.repaint()
                 }
 
               case _ =>
-              // Ignore named queries
+                // Ignore named queries
             }
           }
+      }
 
+    def linkTpe(iw: TpeImageWidget): Unit = {
+      iw.addInfoObserver(imageInfoObserver)
+      iw.plotter.addSymbolSelectionListener(symbolSelectionListener)
+    }
 
-      })
+    def unlinkTpe(iw: TpeImageWidget): Unit = {
+      iw.deleteInfoObserver(imageInfoObserver)
+      iw.plotter.removeSymbolSelectionListener(symbolSelectionListener)
     }
 
     override def rendererComponent(isSelected: Boolean, focused: Boolean, row: Int, column: Int): Component =
@@ -159,6 +183,22 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           // Delegate rendering to the model
           m.rendererComponent(value, isSelected, focused, row, column, this.peer).getOrElse(super.rendererComponent(isSelected, focused, row, column))
       }
+  }
+
+  /**
+   * Links the QueryResultsFrame with the TPE image widget such that changes
+   * to the base position result in revaluating FOV data and selecting in the
+   * image widget selects the corresponding row in the table
+   */
+  def linkTpe(iw: TpeImageWidget): Unit = {
+    resultsTable.linkTpe(iw)
+  }
+
+  /**
+   * Unlinks the QueryResultsFrame from the TPE image widget.
+   */
+  def unlinkTpe(iw: TpeImageWidget): Unit = {
+    resultsTable.unlinkTpe(iw)
   }
 
   private lazy val closeButton = new Button("Close") {
