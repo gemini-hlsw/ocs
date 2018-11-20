@@ -61,14 +61,14 @@ object Mailer {
     }
   }
 
-  private def write(m: MimeMessage): IO[Unit] = {
+  private def write(prefix: String, m: MimeMessage): IO[Unit] = {
     def log(m: String): IO[Unit] =
-      putStrLn(s"TestMailer: $m")
+      putStrLn(s"$prefix: $m")
 
     for {
       _ <- putStrLn("")
-      _ <- log(s"From: ${m.getFrom.mkString(", ")}")
-      _ <- log(s"To: ${m.getRecipients(TO).mkString(", ")}")
+      _ <- log(s"From...: ${m.getFrom.mkString(", ")}")
+      _ <- log(s"To.....: ${m.getRecipients(TO).mkString(", ")}")
       _ <- log(s"Subject: ${m.getSubject}")
       _ <- log("")
       _ <- m.getContent.toString.lines.toList.traverseU(log)
@@ -78,7 +78,7 @@ object Mailer {
   def apply(site: Site, smtpHost: String): Mailer =
     new Mailer(site, smtpHost) {
       def send(m: MimeMessage): IO[Unit] =
-        IO(sendAsync(m))
+        write("Production Mailer", m) *> IO(sendAsync(m))
     }
 
   def forTesting(site: Site, smtpHost: String): Mailer =
@@ -90,7 +90,7 @@ object Mailer {
         }
 
       def send(m: MimeMessage): IO[Unit] = {
-        write(m) *> {
+        write("Test Mailer", m) *> {
 
           val allRecipients = m.getRecipients(TO)
 
@@ -118,7 +118,7 @@ object Mailer {
   def forDevelopment(site: Site): Mailer =
     new Mailer(site, "bogus.mail.host") {
       def send(m: MimeMessage): IO[Unit] =
-        write(m)
+        write("Development Mailer", m)
     }
 
   def ofType(t: MailerType, site: Site, smtpHost: String): Mailer =
