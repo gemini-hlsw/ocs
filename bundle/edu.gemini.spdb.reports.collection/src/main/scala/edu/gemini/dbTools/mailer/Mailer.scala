@@ -19,9 +19,22 @@ import Scalaz._
 import scalaz.effect.IO
 import scalaz.effect.IO._
 
-
+/**
+ * Mailer is used to send emails from cron jobs.  There are three flavors,
+ * development, test, and production obtained from `Mailer.forDevelopment`,
+ * `Mailer.forTesting`, and `Mailer.apply` respectively.  The development
+ * version simply logs the message that would have been emailed.  The test
+ * version alters the content with a "test only" disclaimer and strips the
+ * message of non-gemini emails.  It is meant to be used during the pre-release
+ * test month.  The production version sends the mail as requested.
+ */
 sealed abstract class Mailer(val site: Site, val smtpHost: String) {
 
+  /**
+   * Creates a program that will send the given message with the given subject
+   * to the given recipients, logging along the way.  Once the client has a
+   * Mailer instance via one of the constructors, this method is the entire API.
+   */
   def sendText(
     to:      List[InternetAddress],
     subject: String,
@@ -32,53 +45,52 @@ sealed abstract class Mailer(val site: Site, val smtpHost: String) {
       (_.setAddress("noreply@gemini.edu")) <|
       (_.setPersonal(s"Gemini ODB (${site.abbreviation})"))
 
-    val props = new java.util.Properties         <|
-      (_.put("mail.transport.protocol", "smtp")) <|
-      (_.put("mail.smtp.host", smtpHost))
-
-    new MimeMessage(Session.getInstance(props, null)) <|
-      (_.setFrom(sender))                             <|
-      (m => to.foreach(m.addRecipient(TO, _)))        <|
-      (_.setSubject(subject))                         <|
-      (_.setContent(message, "text/plain"))
+    SafeMimeMessage(sender, to, subject, message)
 
   } >>= send
 
-  def send(m: MimeMessage): IO[Unit]
+  // Left abstract so that the various types of mailer (production, test, dev)
+  // can take the appropriate action.
+  protected def send(m: SafeMimeMessage): IO[Unit]
 
+  protected final def sendAsync(m: SafeMimeMessage): IO[Unit] = IO {
+    import Mailer.Log
+
+    // OCSADV-85: use a future here; it can block for a long time if the mail server is down
+    if (m.to.isEmpty) {
+      Log.info(s"""Cannot send mail "${m.subject}" because there are no recipients.""")
+    } else {
+      val to = m.to.mkString(", ")
+      Future(Transport.send(m.toMimeMessage(smtpHost))).onComplete {
+        case Success(_) => Log.info(s"""Successfully sent mail "${m.subject}" to $to.""")
+        case Failure(e) => Log.log(Level.WARNING, s"""Failed to send mail "${m.subject}" to $to.""", e)
+      }
+    }
+  }
 }
 
 object Mailer {
 
   val Log = Logger.getLogger(getClass.getName)
 
-  private def sendAsync(m: MimeMessage): Unit = {
-    // OCSADV-85: use a future here; it can block for a long time if the mail server is down
-    val to = m.getRecipients(TO).mkString(", ")
-    Future(Transport.send(m)).onComplete {
-      case Success(_) => Log.info(s"Successfully sent mail to $to.")
-      case Failure(e) => Log.log(Level.WARNING, s"Failed to send mail to $to", e)
-    }
-  }
-
-  private def write(m: MimeMessage): IO[Unit] = {
-    def log(m: String): IO[Unit] =
-      putStrLn(s"TestMailer: $m")
-
-    for {
-      _ <- putStrLn("")
-      _ <- log(s"From: ${m.getFrom.mkString(", ")}")
-      _ <- log(s"To: ${m.getRecipients(TO).mkString(", ")}")
-      _ <- log(s"Subject: ${m.getSubject}")
-      _ <- log("")
-      _ <- m.getContent.toString.lines.toList.traverseU(log)
-    } yield ()
+  // Logs the message.
+  private def write(prefix: String, m: SafeMimeMessage): IO[Unit] = IO {
+    Log.info(
+       s"""$prefix
+         |
+         |From...: ${m.from}
+         |To.....: ${m.to.mkString(", ")}
+         |Subject: ${m.subject}
+         |
+         |${m.content}
+       """.stripMargin
+    )
   }
 
   def apply(site: Site, smtpHost: String): Mailer =
     new Mailer(site, smtpHost) {
-      def send(m: MimeMessage): IO[Unit] =
-        IO(sendAsync(m))
+      override def send(m: SafeMimeMessage): IO[Unit] =
+        write("", m) *> sendAsync(m)
     }
 
   def forTesting(site: Site, smtpHost: String): Mailer =
@@ -89,36 +101,37 @@ object Mailer {
           case _                   => false
         }
 
-      def send(m: MimeMessage): IO[Unit] = {
-        write(m) *> {
+      override def send(m: SafeMimeMessage): IO[Unit] = {
+        write("Test Mailer: ", m) *> {
 
-          val allRecipients = m.getRecipients(TO)
+          import SafeMimeMessage.{ Content, Subject, To }
 
-          val content       =
-            s"""
-              |This is a test message that, were it running in production, would have been sent to these recipients:
-              |
-              |  ${allRecipients.mkString(", ")}
-              |
-              |Message Body:
-              |
-              |${m.getContent.toString}
-              |
-            """.stripMargin
+          sendAsync(
+            (for {
+              _ <- To      := m.to.filter(isGeminiAddress)
+              _ <- Subject := s"Test: ${m.subject}"
+              _ <- Content :=
+                s"""
+                  |This is a test message that, were it running in production, would have been sent to these recipients:
+                  |
+                  |  ${m.to.mkString(", ")}
+                  |
+                  |Message Body:
+                  |
+                  |${m.content.toString}
+                  |
+                """.stripMargin
 
-          m.setRecipients(TO, allRecipients.filter(isGeminiAddress))
-          m.setSubject("Test: " + m.getSubject)
-          m.setContent(content, "text/plain")
-
-          IO(sendAsync(m))
+            } yield ()).exec(m)
+          )
         }
       }
     }
 
   def forDevelopment(site: Site): Mailer =
     new Mailer(site, "bogus.mail.host") {
-      def send(m: MimeMessage): IO[Unit] =
-        write(m)
+      override def send(m: SafeMimeMessage): IO[Unit] =
+        write("Development Mailer: ", m)
     }
 
   def ofType(t: MailerType, site: Site, smtpHost: String): Mailer =
