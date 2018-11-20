@@ -44,7 +44,7 @@ sealed abstract class Mailer(val site: Site, val smtpHost: String) {
 
   } >>= send
 
-  def send(m: MimeMessage): IO[Unit]
+  protected def send(m: MimeMessage): IO[Unit]
 
 }
 
@@ -77,7 +77,7 @@ object Mailer {
 
   def apply(site: Site, smtpHost: String): Mailer =
     new Mailer(site, smtpHost) {
-      def send(m: MimeMessage): IO[Unit] =
+      override def send(m: MimeMessage): IO[Unit] =
         write("Production Mailer", m) *> IO(sendAsync(m))
     }
 
@@ -89,7 +89,7 @@ object Mailer {
           case _                   => false
         }
 
-      def send(m: MimeMessage): IO[Unit] = {
+      override def send(m: MimeMessage): IO[Unit] = {
         write("Test Mailer", m) *> {
 
           val allRecipients = m.getRecipients(TO)
@@ -117,7 +117,7 @@ object Mailer {
 
   def forDevelopment(site: Site): Mailer =
     new Mailer(site, "bogus.mail.host") {
-      def send(m: MimeMessage): IO[Unit] =
+      override def send(m: MimeMessage): IO[Unit] =
         write("Development Mailer", m)
     }
 
