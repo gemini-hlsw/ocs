@@ -268,7 +268,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final String yAxis = "Signal / Noise per frame per spectral pixel";
         final List<SpcSeriesData> data = new ArrayList<>();
         for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
-           data.add(new SpcSeriesData(FinalS2NData.instance(),   "Final S/N Order "        + (i + 3), result.specS2N()[i].getFinalS2NSpectrum().getData(),     new Some<>(ITCChart.colorByIndex(2*i))));
+           data.add(new SpcSeriesData(FinalS2NData.instance(),   "Final S/N Order "        + (i + 3), result.specS2N()[i].getFinalS2NSpectrum().getData(),     new Some<>(ITCChart.colorByIndex(2*i + 1))));
         }
         return SpcChartData.apply(S2NChart.instance(), title, xAxis, yAxis, JavaConversions.asScalaBuffer(data).toList());
     }
