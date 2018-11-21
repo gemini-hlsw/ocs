@@ -36,7 +36,10 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
     private static final SpidMatcher CLASSICAL = new SpidMatcher.TypeMatcher(ProgramType.Classical$.MODULE$);
     private static final SpidMatcher LP        = new SpidMatcher.TypeMatcher(ProgramType.LargeProgram$.MODULE$);
     private static final SpidMatcher FT        = new SpidMatcher.TypeMatcher(ProgramType.FastTurnaround$.MODULE$);
-    private static final SpidMatcher QUEUE     = new SpidMatcher.TypeMatcher(ProgramType.Queue$.MODULE$);
+    private static final SpidMatcher QUEUE     = new SpidMatcher.Or(
+                                                    new SpidMatcher.TypeMatcher(ProgramType.Queue$.MODULE$),
+                                                    new SpidMatcher.TypeMatcher(ProgramType.SystemVerification$.MODULE$),
+                                                    new SpidMatcher.TypeMatcher(ProgramType.DirectorsTime$.MODULE$));
     private static final SpidMatcher CAL       = new SpidMatcher.TypeMatcher(ProgramType.Calibration$.MODULE$);
     private static final SpidMatcher LIB       = new SpidMatcher.Or(
                                                    new SpidMatcher.Pattern("^G[NS]-LIB.*"),
@@ -55,15 +58,15 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
         }};
     }
 
-    private final JCheckBox remote      = mkCheckBox("Remote",    "Include programs from the remote site");
-    private final JCheckBox classical   = mkCheckBox("Classical", "Include classical mode programs");
-    private final JCheckBox lp          = mkCheckBox("LP",        "Include large programs");
-    private final JCheckBox fastTurn    = mkCheckBox("FT",        "Include fast turnaround programs");
-    private final JCheckBox queue       = mkCheckBox("Queue",     "Include queue mode programs");
-    private final JCheckBox cal         = mkCheckBox("Cal",       "Include calibration programs");
-    private final JCheckBox engineering = mkCheckBox("Eng",       "Include engineering programs");
-    private final JCheckBox other       = mkCheckBox("Other",     "Include programs in minor observing modes.");
-    private final JCheckBox libs        = mkCheckBox("Libs",      "Include library programs");
+    private final JCheckBox remote      = mkCheckBox("Remote",  "Include programs from the remote site");
+    private final JCheckBox classical   = mkCheckBox("C",       "Include classical mode programs");
+    private final JCheckBox lp          = mkCheckBox("LP",      "Include large programs");
+    private final JCheckBox fastTurn    = mkCheckBox("FT",      "Include fast turnaround programs");
+    private final JCheckBox queue       = mkCheckBox("Q/DD/SV", "Include queue, director's time, and special verification programs");
+    private final JCheckBox cal         = mkCheckBox("Cal",     "Include calibration programs");
+    private final JCheckBox engineering = mkCheckBox("Eng",     "Include engineering programs");
+    private final JCheckBox other       = mkCheckBox("Other",   "Include programs in minor observing modes.");
+    private final JCheckBox libs        = mkCheckBox("Libs",    "Include library programs");
 
     private final JComboBox semestersCombo = new JComboBox() {{
         setToolTipText("Show only programs for the selected semester");
