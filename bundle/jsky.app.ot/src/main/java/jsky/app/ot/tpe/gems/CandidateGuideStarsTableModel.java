@@ -12,6 +12,7 @@ import jsky.catalog.skycat.SkycatTable;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * OT-111: Model for {@link CandidateGuideStarsTable}
@@ -167,18 +168,37 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
         };
     }
 
-    /**
-     * Returns a list of SiderealTargets corresponding to the checked rows in the table
-     */
-    List<SiderealTarget> getCandidates() {
+    private List<SiderealTarget> getFilteredCandidates(Predicate<Integer> f) {
         final List<SiderealTarget> result = new ArrayList<>();
         final int numRows = getRowCount();
-        final int col = Cols.CHECK.ordinal();
+
         for(int row = 0; row < numRows; row++) {
-            if (!((Boolean) getValueAt(row, col))) {
-                result.add(_siderealTargets.get(row));
-            }
+            if (f.test(row)) result.add(_siderealTargets.get(row));
         }
         return result;
+    }
+
+    private final Predicate<Integer> checked =
+            r -> (Boolean) getValueAt(r, Cols.CHECK.ordinal());
+
+    /**
+     * Returns the subset of all candidate targets that are checked in the UI.
+     */
+    List<SiderealTarget> getCheckedCandidates() {
+        return getFilteredCandidates(checked);
+    }
+
+    /**
+     * Returns the subset of all candidate targets that are not checked in the UI.
+     */
+    List<SiderealTarget> getUncheckedCandidates() {
+        return getFilteredCandidates(checked.negate());
+    }
+
+    /**
+     * Returns all candidate targets.
+     */
+    List<SiderealTarget> getAllCandidates() {
+        return getFilteredCandidates(r -> true);
     }
 }

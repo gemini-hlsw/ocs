@@ -3,6 +3,7 @@ package jsky.app.ot.tpe.gems;
 import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
 import edu.gemini.ags.gems.GemsGuideStars;
 import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.shared.util.immutable.Function1;
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SiderealTarget;
@@ -15,7 +16,6 @@ import edu.gemini.spModel.telescope.PosAngleConstraint;
 import jsky.app.ot.tpe.GemsGuideStarWorker;
 import jsky.app.ot.tpe.InstrumentContext;
 import jsky.app.ot.tpe.TpeImageWidget;
-import jsky.catalog.gui.TablePlotter;
 import jsky.util.Preferences;
 import jsky.util.gui.SwingWorker;
 import jsky.util.gui.DialogUtil;
@@ -27,6 +27,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CancellationException;
@@ -166,10 +167,9 @@ public class GemsGuideStarSearchDialog extends JFrame {
         super("GeMS Guide Star Search");
         _tpe = tpe;
 
-        TablePlotter _plotter = tpe.plotter();
         this.ec = ec;
 
-        _candidateGuideStarsTable = new CandidateGuideStarsTable(_plotter);
+        _candidateGuideStarsTable = new CandidateGuideStarsTable(tpe.plotter());
 
         Option<SPInstObsComp> gems = ImOption.fromScalaOpt(tpe.getContext().instrument().ifIs(SPComponentType.INSTRUMENT_GSAOI));
 
@@ -196,6 +196,14 @@ public class GemsGuideStarSearchDialog extends JFrame {
         Preferences.manageLocation(this);
         pack();
         setVisible(true);
+    }
+
+    public void plot() {
+        _candidateGuideStarsTable.plot();
+    }
+
+    public void unplot() {
+        _candidateGuideStarsTable.unplot();
     }
 
     /**
@@ -514,6 +522,10 @@ public class GemsGuideStarSearchDialog extends JFrame {
                 && posAngleConstraint == PosAngleConstraint.UNBOUNDED;
     }
 
+    public int getModelVersion() {
+        return _candidateGuideStarsTable.getModelVersion();
+    }
+
     public void query() throws Exception {
         setState(State.QUERY);
         CatalogChoice catalogChoice = (CatalogChoice) _catalogComboBox.getSelectedItem();
@@ -559,6 +571,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         CandidateGuideStarsTableModel tableModel = new CandidateGuideStarsTableModel(_model);
         try {
             _candidateGuideStarsTable.setTableModel(tableModel);
+            _tpe.repaint();
         } catch (Exception e) {
             DialogUtil.error(e);
         }
@@ -577,6 +590,11 @@ public class GemsGuideStarSearchDialog extends JFrame {
         }
     }
 
+    private List<SiderealTarget> getCandidates(Function1<CandidateGuideStarsTableModel, List<SiderealTarget>> m) {
+        return ImOption.apply(_candidateGuideStarsTable.getTableModel())
+                       .map(m)
+                       .getOrElse(Collections.emptyList());
+    }
 
     private void analyze() {
         setState(State.ANALYZE);
@@ -584,7 +602,8 @@ public class GemsGuideStarSearchDialog extends JFrame {
         _model.setAnalyseChoice((AnalyseChoice) _analyseComboBox.getSelectedItem());
         _model.setAllowPosAngleAdjustments(_allowPosAngleChangesCheckBox.isSelected());
 
-        final List<SiderealTarget> excludeCandidates = _candidateGuideStarsTable.getTableModel().getCandidates();
+        final List<SiderealTarget> excludeCandidates =
+                getCandidates(CandidateGuideStarsTableModel::getUncheckedCandidates);
 
         new SwingWorker() {
 
@@ -653,26 +672,26 @@ public class GemsGuideStarSearchDialog extends JFrame {
             DialogUtil.error(this, "Please press the Stop button first or wait for the current search to complete.");
             return;
         }
-        _candidateGuideStarsTable.unplot();
         setVisible(false);
 
         TargetObsComp targetObsComp = _tpe.getContext().targets().orNull();
         if (targetObsComp != null) {
             targetObsComp.setTargetEnvironment(_savedTargetEnv);
         }
+        _tpe.repaint();
     }
 
 
     // Adds the selected asterism groups to the target env
     private void add() {
         _candidateAsterismsTreeTable.addCheckedAsterisms();
-        _candidateGuideStarsTable.unplot();
         setVisible(false);
+        _tpe.repaint();
     }
 
     public void reset() {
         setState(State.PRE_QUERY);
-        _candidateGuideStarsTable.unplot();
         _savedTargetEnv = getEnvironment(_tpe);
+        _tpe.repaint();
     }
 }
