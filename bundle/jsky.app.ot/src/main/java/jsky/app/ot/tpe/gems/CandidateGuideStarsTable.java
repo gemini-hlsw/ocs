@@ -1,5 +1,6 @@
 package jsky.app.ot.tpe.gems;
 
+import edu.gemini.shared.util.immutable.ImOption;
 import jsky.catalog.gui.SymbolSelectionEvent;
 import jsky.catalog.gui.SymbolSelectionListener;
 import jsky.catalog.gui.TableDisplay;
@@ -14,7 +15,14 @@ import javax.swing.table.DefaultTableModel;
 /**
  * OT-111: Displays the results of the catalog search.
  */
-class CandidateGuideStarsTable extends TableDisplay {
+final class CandidateGuideStarsTable extends TableDisplay {
+
+    // Updating the table model changes the state in some inscrutable way in
+    // the TPE plotting code that *requires* a replot even if the actual list of
+    // candidates has not changed. To keep up with whether a replot is needed,
+    // we simply keep a running count of model updates.  Obviously, this is a
+    // hack.
+    private int _modelVersion = 0;
 
     private boolean _ignoreSelection;
     private final TablePlotter _plotter;
@@ -78,10 +86,25 @@ class CandidateGuideStarsTable extends TableDisplay {
     }
 
     public void setTableModel(final CandidateGuideStarsTableModel tableModel) {
-        unplot();
+        unlink();
         _tableModel = tableModel;
         setModel(_tableModel.getTableQueryResult());
-        plot();
+
+        _modelVersion++;
+
+        // Set up 2-way correspondence between table and TPE plot.  Selections
+        // in one update the selection the other.
+        getTable().clearSelection(); // do this or add code to keep selections in sync
+        _plotter.addSymbolSelectionListener(symbolListener);
+        getTable().getSelectionModel().addListSelectionListener(selectionListener);
+    }
+
+    /**
+     * Obtains the count of times that a call to `setTableModel` has been made,
+     * which provides an indication of whether a plot is needed.
+     */
+    public int getModelVersion() {
+        return _modelVersion;
     }
 
     public CandidateGuideStarsTableModel getTableModel() {
@@ -92,31 +115,30 @@ class CandidateGuideStarsTable extends TableDisplay {
      * Plot the contents of the table.
      */
     public void plot() {
-        if (_plotter != null) {
-            getTable().clearSelection(); // do this or add code to keep selections in sync
-            _plotter.addSymbolSelectionListener(symbolListener);
-            getTable().getSelectionModel().addListSelectionListener(selectionListener);
-            try {
-                _plotter.plot(getTableQueryResult());
-            } catch (Exception e) {
-                DialogUtil.error(this, e);
-            }
+        try {
+            ImOption.apply(getTableQueryResult()).foreach(_plotter::plot);
+        } catch (Exception e) {
+            DialogUtil.error(this, e);
         }
+    }
+
+    /**
+     * Remove 2-way correspondence between candidates table and TPE plot symbols.
+     */
+    private void unlink() {
+        _plotter.removeSymbolSelectionListener(symbolListener);
+        getTable().getSelectionModel().removeListSelectionListener(selectionListener);
     }
 
     /**
      * Remove any plot symbols for this table.
      */
     public void unplot() {
-        if (_plotter != null && getTableQueryResult() != null) {
-            _plotter.removeSymbolSelectionListener(symbolListener);
-            getTable().getSelectionModel().removeListSelectionListener(selectionListener);
-            _plotter.unplot(getTableQueryResult());
-        }
+        ImOption.apply(getTableQueryResult()).foreach(_plotter::unplot);
     }
 
     public void clear() {
-        unplot();
+        unlink();
         getTable().setModel(new DefaultTableModel());
     }
 }

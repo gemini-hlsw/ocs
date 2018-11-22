@@ -10,9 +10,9 @@ import edu.gemini.skycalc.ObservingNight
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.obs.context.ObsContext
 import jsky.app.ot.tpe._
-import jsky.app.ot.tpe.feat.TpeCatalogFeature.PlotState.{AgsPlot, ManualPlot, NoPlot}
+import jsky.app.ot.tpe.feat.TpeCatalogFeature.PlotState._
 import jsky.catalog.gui.TablePlotter
-import java.awt._
+import java.awt.Graphics
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing.Swing
@@ -63,6 +63,7 @@ final class TpeCatalogFeature extends TpeImageFeature("Catalog", "Show or hide c
       newState match {
         case NoPlot        => // do nothing
         case ManualPlot(_) => QueryResultsFrame.plotResults()
+        case GemsPlot(_)   => w.getGemsGuideStarSearchDialog.asScalaOpt.foreach(_.plot());
         case AgsPlot(_)    => showAgsCandidates(w, p, newState)
       }
     }
@@ -96,7 +97,10 @@ final class TpeCatalogFeature extends TpeImageFeature("Catalog", "Show or hide c
   private def plotState(iw: TpeImageWidget): PlotState =
     if (!isVisible) NoPlot
     else if (QueryResultsFrame.visible) ManualPlot(QueryResultsFrame.targetsModel)
-    else iw.getObsContext.asScalaOpt.fold(NoPlot: PlotState)(c => AgsPlot(agsHash(c)))
+    else iw.getGemsGuideStarSearchDialog.asScalaOpt.filter(_.isVisible) match {
+      case None    => iw.getObsContext.asScalaOpt.fold(NoPlot: PlotState)(c => AgsPlot(agsHash(c)))
+      case Some(d) => GemsPlot(d.getModelVersion)
+    }
 }
 
 object TpeCatalogFeature {
@@ -116,6 +120,7 @@ object TpeCatalogFeature {
   object PlotState {
     case object NoPlot extends PlotState
     final case class AgsPlot(hash: Int) extends PlotState
+    final case class GemsPlot(cnt: Int) extends PlotState
     final case class ManualPlot(targets: Option[TargetsModel]) extends PlotState
   }
 }

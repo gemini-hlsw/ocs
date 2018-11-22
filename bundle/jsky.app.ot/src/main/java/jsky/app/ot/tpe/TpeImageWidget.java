@@ -80,7 +80,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     private boolean _baseOutOfView = false;
 
     // Dialog for GeMS manual guide star selection
-    private GemsGuideStarSearchDialog _gemsGuideStarSearchDialog;
+    private Option<GemsGuideStarSearchDialog> _gemsGuideStarSearchDialog = ImOption.empty();
 
     // Action to use to show the guide star search window
     private final AbstractAction _manualGuideStarAction = new AbstractAction(
@@ -639,9 +639,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         if (_ctx.instrument().isDefined()) {
             // This is bad but it is the only way to link changes from the instrument
             // to the dialog box, talk about side-effects
-            if (_gemsGuideStarSearchDialog != null) {
-                _gemsGuideStarSearchDialog.updatedInstrument(ctx.instrument());
-            }
+            _gemsGuideStarSearchDialog.foreach(d -> d.updatedInstrument(ctx.instrument()));
             _ctx.instrument().get().addPropertyChangeListener(this);
             setPosAngle(_ctx.instrument().get().getPosAngleDegrees());
         }
@@ -1034,17 +1032,25 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     }
 
     private void showGemsGuideStarSearchDialog() {
-        if (_gemsGuideStarSearchDialog == null) {
-            _gemsGuideStarSearchDialog = new GemsGuideStarSearchDialog(this, scala.concurrent.ExecutionContext$.MODULE$.global());
+        if (_gemsGuideStarSearchDialog.isEmpty()) {
+            _gemsGuideStarSearchDialog = ImOption.apply(new GemsGuideStarSearchDialog(this, scala.concurrent.ExecutionContext$.MODULE$.global()));
         } else {
-            _gemsGuideStarSearchDialog.reset();
-            _gemsGuideStarSearchDialog.setVisible(true);
+            _gemsGuideStarSearchDialog.foreach(d -> {
+               d.reset();
+               d.setVisible(true);
+            });
         }
-        try {
-            _gemsGuideStarSearchDialog.query();
-        } catch (Exception e) {
-            DialogUtil.error(e);
-        }
+        _gemsGuideStarSearchDialog.foreach(d -> {
+            try {
+                d.query();
+            } catch (Exception e) {
+                DialogUtil.error(e);
+            }
+        });
+    }
+
+    public Option<GemsGuideStarSearchDialog> getGemsGuideStarSearchDialog() {
+        return _gemsGuideStarSearchDialog;
     }
 
     /**
