@@ -62,7 +62,7 @@ public final class DBProgramChooserFilter implements IDBProgramChooserFilter {
     private final JCheckBox classical   = mkCheckBox("C",       "Include classical mode programs");
     private final JCheckBox lp          = mkCheckBox("LP",      "Include large programs");
     private final JCheckBox fastTurn    = mkCheckBox("FT",      "Include fast turnaround programs");
-    private final JCheckBox queue       = mkCheckBox("Q/DD/SV", "Include queue, director's time, and special verification programs");
+    private final JCheckBox queue       = mkCheckBox("Q/DD/SV", "Include queue, director's time, and system verification programs");
     private final JCheckBox cal         = mkCheckBox("Cal",     "Include calibration programs");
     private final JCheckBox engineering = mkCheckBox("Eng",     "Include engineering programs");
     private final JCheckBox other       = mkCheckBox("Other",   "Include programs in minor observing modes.");
