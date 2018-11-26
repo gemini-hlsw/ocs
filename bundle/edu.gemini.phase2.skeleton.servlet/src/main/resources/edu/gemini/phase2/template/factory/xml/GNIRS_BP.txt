@@ -5,6 +5,7 @@ Version : 2013 October 10, AStephens, set well depth and offsets for >2.5 micron
 Version : 2014 December 11, BMiller, specific setting conditions from PI (change to add science conditions to tellurics)
 Version : 2017-Oct-10, astephens, change long-slit science offsets from +/-3 to -1/+5 and add re-acquisition observation
 Version : 2018-Feb-15, astephens, tweak long-slit offsets to avoid bad-pixel patch
+Version : 2018-Nov-26, astephens, revise the long-camera long-wavelength long-slit offsets
 
 Observations identified by LibraryIDs indicated with {}.
 
@@ -56,20 +57,21 @@ INCLUDE {5}, {6}, {12}-{14} in a target-specific Scheduling Group
                 IF CROSS-DISPERSED == SXD OR CROSS-DISPERSED == LXD SET Central Wavelength (FILTER) == Cross-dispersed
             SET DISPERSER FROM PI 
 
-# Expand offsets for non-cross-dispersed spectroscopic observations
-# Short Camera bad-pixel patch at +5.25 < Q < +11.25 -> Use -2,+4 and -4,+2
-# Long Camera bad-pixel patch at  +1.75 < Q <  +3.75 -> Use -1,+5 for both sci and std
+# Cross-dispersed offsets are -1/+2 for the science and +1/-2 for the standard (short and long cameras).
+
+# Expand offsets for non-cross-dispersed spectroscopic observations to avoid the bad-pixel patch
+# For wavelengths > 2.5um use the same offsets for both science and Telluric
 IF CROSS-DISPERSED == No:
-  IF pixel scale = 0.15" AND wavelength < 2.5um:
-    SET Q-OFFSET to +2, -4, -4, +2 IN ITERATOR CALLED 'ABBA offset pattern' FOR {12} # Science
-    SET Q-OFFSET to -2, +4, +4, -2 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{14} # Telluric
-  ELIF pixel scale = 0.15" AND wavelength >= 2.5um:
-    SET Q-OFFSET to +2, -4, -4, +2 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{12},{14} # Sci & Tell
-  ELIF pixel scale = 0.05" AND wavelength < 2.5um:
-    SET Q-OFFSET to -1, +5, +5, -1 IN ITERATOR CALLED 'ABBA offset pattern' FOR {12} # Science
-    SET Q-OFFSET to +1, -5, -5, +1 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{14} # Telluric
-  ELIF pixel scale = 0.05" AND wavelength >= 2.5um:
-    SET Q-OFFSET to -1, +5, +5, -1 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{12},{14} # Sci & Tell
+   IF   PIXSCALE==0.15"/pix AND wavelength < 2.5um:
+      SET Q-OFFSET to +2, -4, -4, +2 IN ITERATOR CALLED 'ABBA offset pattern' FOR {12}          # Science
+      SET Q-OFFSET to -2, +4, +4, -2 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{14}      # Telluric
+   ELIF PIXSCALE==0.15"/pix AND wavelength > 2.5um:
+      SET Q-OFFSET to +2, -4, -4, +2 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{12},{14} # Sci & Tel
+   ELIF PIXSCALE==0.05"/pix AND wavelength < 2.5um:
+      SET Q-OFFSET to -1, +5, +5, -1 IN ITERATOR CALLED 'ABBA offset pattern' FOR {12}          # Science
+      SET Q-OFFSET to +1, -5, -5, +1 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{14}      # Telluric
+   ELIF PIXSCALE==0.05"/pix AND wavelength > 2.5um:
+      SET Q-OFFSET to -3, +3, +3, -3 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{12},{14} # Sci & Tel
 
 IF PI Central Wavelength > 2.5um
     SET Well depth == Deep for {5}-{14},{22}
@@ -105,7 +107,7 @@ ELSE INCLUDE {7} - {11}, {22}, {23}                      # no H-magnitude provid
 
 # AO Mode
 # In NGS mode target and standards use the same Altair guide mode.
-# In LGS mode the target uses the mode from PI, standards and daycals use NGS+FieldsLens
+# In LGS mode the target uses the mode from PI, standards and daycals use NGS+FieldLens
 # An Altair component must not be added to templates derived from {15} (Daytime pinhole below)
 IF AO mode != None AND NOT {15}
     ADD Altair Adaptive Optics component AND SET Guide Star Type based on:
