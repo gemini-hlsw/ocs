@@ -95,7 +95,7 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
       forObs(6, 14)(mutateOffsets.withTitle("ABBA offset sequence")(setQ(1, -5, -5, 1)))
     }
     else if (pixelScale == PixelScale.PS_005 && wavelengthGe2_5) {
-      forObs(6, 12, 14)(mutateOffsets.withTitle("ABBA offset sequence")(setQ(-1, 5, 5, -1)))
+      forObs(6, 12, 14)(mutateOffsets.withTitle("ABBA offset sequence")(setQ(-3, 3, 3, -3)))
     }
   }
 

@@ -49,7 +49,7 @@ class REL_3376_Test extends TemplateSpec("GNIRS_BP.xml") with SpecificationLike 
     //   ELIF pixel scale = 0.05" AND wavelength > 2.5um:
     //     SET Q-OFFSET to -1, +5, +5, -1 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{12},{14} # Sci & Tell
 
-    "For Central Wavelength < 2.5um, Pixel Scala 0.15\"" ! forAll(nonXD(LT_25, GnirsPixelScale.PS_015)) { bp =>
+    "For Central Wavelength < 2.5um, Pixel Scale 0.15\"" ! forAll(nonXD(LT_25, GnirsPixelScale.PS_015)) { bp =>
       expand(proposal(bp, List(6.5, 10, 21, 25), MagnitudeBand.H)) { (p, sp) =>
         groups(sp).map(libsMap).forall { m =>
           qOffset(m(12)) must_== List(2, -4, -4, 2)
@@ -59,7 +59,7 @@ class REL_3376_Test extends TemplateSpec("GNIRS_BP.xml") with SpecificationLike 
       }
     }
 
-    "For Central Wavelength ≥ 2.5um, Pixel Scala 0.15\"" ! forAll(nonXD(GTE_25, GnirsPixelScale.PS_015)) { bp =>
+    "For Central Wavelength ≥ 2.5um, Pixel Scale 0.15\"" ! forAll(nonXD(GTE_25, GnirsPixelScale.PS_015)) { bp =>
       expand(proposal(bp, List(6.5, 10, 21, 25), MagnitudeBand.H)) { (p, sp) =>
         groups(sp).map(libsMap).forall { m =>
           qOffset(m(6))  must_== List(2, -4, -4, 2)
@@ -69,7 +69,7 @@ class REL_3376_Test extends TemplateSpec("GNIRS_BP.xml") with SpecificationLike 
       }
     }
 
-    "For Central Wavelength < 2.5um, Pixel Scala 0.05\"" ! forAll(nonXD(LT_25, GnirsPixelScale.PS_005)) { bp =>
+    "For Central Wavelength < 2.5um, Pixel Scale 0.05\"" ! forAll(nonXD(LT_25, GnirsPixelScale.PS_005)) { bp =>
       expand(proposal(bp, List(6.5, 10, 21, 25), MagnitudeBand.H)) { (p, sp) =>
         groups(sp).map(libsMap).forall { m =>
           qOffset(m(12)) must_== List(-1, 5, 5, -1)
@@ -79,12 +79,12 @@ class REL_3376_Test extends TemplateSpec("GNIRS_BP.xml") with SpecificationLike 
       }
     }
 
-    "For Central Wavelength ≥ 2.5um, Pixel Scala 0.05\"" ! forAll(nonXD(GTE_25, GnirsPixelScale.PS_005)) { bp =>
+    "For Central Wavelength ≥ 2.5um, Pixel Scale 0.05\"" ! forAll(nonXD(GTE_25, GnirsPixelScale.PS_005)) { bp =>
       expand(proposal(bp, List(6.5, 10, 21, 25), MagnitudeBand.H)) { (p, sp) =>
         groups(sp).map(libsMap).forall { m =>
-          qOffset(m(6))  must_== List(-1, 5, 5, -1)
-          qOffset(m(12)) must_== List(-1, 5, 5, -1)
-          qOffset(m(14)) must_== List(-1, 5, 5, -1)
+          qOffset(m(6))  must_== List(-3, 3, 3, -3)
+          qOffset(m(12)) must_== List(-3, 3, 3, -3)
+          qOffset(m(14)) must_== List(-3, 3, 3, -3)
         }
       }
     }
