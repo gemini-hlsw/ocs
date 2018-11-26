@@ -87,7 +87,7 @@ object Mascot {
                        filter: Star => Boolean = defaultFilter)
   : (List[Star], List[Strehl]) = {
     // sort by selected mag and select
-    val sortedStarList = starList.sortWith((s1,s2) => s1.r < s2.r)
+    val sortedStarList = starList.distinct.sortWith((s1,s2) => s1.r < s2.r)
     val filteredStarList = selectStarsOnMag(sortedStarList).filter(filter)
 
     val ns = filteredStarList.length

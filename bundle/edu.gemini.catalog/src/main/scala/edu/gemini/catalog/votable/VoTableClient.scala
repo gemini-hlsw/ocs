@@ -20,7 +20,7 @@ import scalaz._
 import Scalaz._
 
 trait VoTableBackend {
-  val catalogUrls: NonEmptyList[URL]
+  def catalogUrls: NonEmptyList[URL]
   protected [votable] def doQuery(query: CatalogQuery, url: URL)(ec: ExecutionContext): Future[QueryResult]
 }
 

@@ -46,8 +46,8 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
 
   private val LOGGER = Logger.getLogger(classOf[GemsResultsAnalyzerSpec].getName)
 
-  class TestGemsVoTableCatalog(file: String) extends GemsVoTableCatalog {
-    override val backend = TestVoTableBackend(file)
+  class TestGemsVoTableCatalog(file: String, c: Conditions) extends GemsVoTableCatalog {
+    override val backend = TestVoTableBackend(file, GemsTestVoTableMod.forCwfsMagnitudeLimitChange(c))
   }
 
   val NoTime = JNone.instance[java.lang.Long]
@@ -59,7 +59,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val tipTiltMode = GemsTipTiltMode.canopus
 
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY).wv(SPSiteQuality.WaterVapor.ANY)
-      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, tipTiltMode, conditions, new TestGemsVoTableCatalog("/gems_TYC_8345_1155_1.xml"))
+      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, tipTiltMode, conditions, new TestGemsVoTableCatalog("/gems_TYC_8345_1155_1.xml", conditions))
 
       val expectedResults = if (tipTiltMode == GemsTipTiltMode.both) 4 else 2
       results should have size expectedResults
@@ -119,8 +119,9 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val base = new WorldCoords("05:35:28.020", "-69:16:11.07")
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val tipTiltMode = GemsTipTiltMode.canopus
+      val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
 
-      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, tipTiltMode, SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY), new TestGemsVoTableCatalog("/gems_sn1987A.xml"))
+      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, tipTiltMode, conditions, new TestGemsVoTableCatalog("/gems_sn1987A.xml", conditions))
 
       val expectedResults = if (tipTiltMode == GemsTipTiltMode.both) 4 else 2
       results should have size expectedResults
@@ -180,8 +181,9 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val base = new WorldCoords("17:40:20.000", "-32:15:12.00")
       val inst = new Gsaoi
       val tipTiltMode = GemsTipTiltMode.canopus
+      val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
 
-      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, tipTiltMode, SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY), new TestGemsVoTableCatalog("/gems_m6.xml"))
+      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, tipTiltMode, conditions, new TestGemsVoTableCatalog("/gems_m6.xml", conditions))
 
       val expectedResults = if (tipTiltMode == GemsTipTiltMode.both) 4 else 2
       results should have size expectedResults
@@ -213,12 +215,12 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue
       val cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue
       val odgw2 = group.get(GsaoiOdgw.odgw2)  .getValue.getPrimary.getValue
-      cwfs1.getName must beEqualTo("289-128909")
+      cwfs1.getName must beEqualTo("289-128891")
       cwfs2.getName must beEqualTo("289-128878")
       cwfs3.getName must beEqualTo("289-128908")
       odgw2.getName must beEqualTo("289-128891")
 
-      val cwfs1x = Coordinates.create("17:40:21.743", "-32:14:54.04")
+      val cwfs1x = Coordinates.create("17:40:19.295", "-32:14:58.34")
       val cwfs2x = Coordinates.create("17:40:16.855", "-32:15:55.83")
       val cwfs3x = Coordinates.create("17:40:21.594", "-32:15:50.38")
       val odgw2x = Coordinates.create("17:40:19.295", "-32:14:58.34")
@@ -241,8 +243,9 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val base = new WorldCoords("12:38:49.820", "-49:48:00.20")
       val inst = new Gsaoi
       val tipTiltMode = GemsTipTiltMode.canopus
+      val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
 
-      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, tipTiltMode, SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY), new TestGemsVoTableCatalog("/gems_bpm_37093.xml"))
+      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, tipTiltMode, conditions, new TestGemsVoTableCatalog("/gems_bpm_37093.xml", conditions))
 
       val expectedResults = if (tipTiltMode == GemsTipTiltMode.both) 4 else 2
       results should have size expectedResults

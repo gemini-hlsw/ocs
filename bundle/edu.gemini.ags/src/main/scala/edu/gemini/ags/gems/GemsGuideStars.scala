@@ -133,7 +133,7 @@ case class GemsGuideStars(pa: Angle, tiptiltGroup: GemsGuideProbeGroup, strehl: 
 
     val guiders = guideGroup.getReferencedGuiders.asScala.map { gp =>
       val target = guideGroup.get(gp).getValue.getPrimary.getValue
-      s"$gp[${target.getRaString(NoTime)},${target.getRaString(NoTime)}]"
+      s"$gp[${target.getName},${target.getRaString(NoTime).asScalaOpt},${target.getDecString(NoTime).asScalaOpt}]"
     }
     s"GemsGuideStars{pa=$pa, tiptilt=${tiptiltGroup.getKey}, avg Strehl=${strehl.avg * 100}, guiders=${guiders.mkString(" ")}}"
   }

@@ -111,14 +111,12 @@ case class GemsVoTableCatalog(backend: VoTableBackend = ConeSearchBackend, catal
    */
   private def assignToCriterion(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], targets: List[SiderealTarget]): List[GemsCatalogSearchResults] = {
 
-    def matchCriteria(basePosition: Coordinates, criter: GemsCatalogSearchCriterion, targets: List[SiderealTarget]): List[SiderealTarget] = {
+    def matchCriteria(basePosition: Coordinates, criter: GemsCatalogSearchCriterion): List[SiderealTarget] = {
       val matcher = criter.criterion.matcher(basePosition)
       targets.filter(matcher.matches).distinct
     }
 
-    for {
-      c <- criterions
-    } yield GemsCatalogSearchResults(c, matchCriteria(basePosition, c, targets))
+    criterions.map(c => GemsCatalogSearchResults(c, matchCriteria(basePosition, c)))
   }
 
   // Returns a list of radius limits used in the criteria.
