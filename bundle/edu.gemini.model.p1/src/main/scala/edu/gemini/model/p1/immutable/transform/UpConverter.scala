@@ -145,12 +145,6 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter will upgrade to 2019A.
  */
 case object SemesterConverter2018BTo2019A extends SemesterConverter {
-  // REL-3453: Altair LGS not available for 2019A.
-  val altairLgsNotAvailable: TransformFunction = {
-    case a @ <altair>{ns@_*}</altair> if (a \\ "lgs").nonEmpty =>
-      StepResult(s"Altair Laser Guidestar is currently not offered", a).successNel
-  }
-
   // REL-3485: F2 MOS not available for 2019A.
   val f2MOSNotAvailable: TransformFunction = {
     case f @ <flamingos2>{ns @ _*}</flamingos2> if (f \ "mos").nonEmpty =>
@@ -170,7 +164,7 @@ case object SemesterConverter2018BTo2019A extends SemesterConverter {
       StepResult("All CFH exchange time will now be done in queue.", <proposalClass>{ClassicalToQueueTransformer.transform(ns)}</proposalClass>).successNel
   }
 
-  override val transformers = List(altairLgsNotAvailable, f2MOSNotAvailable, cfhClassicalToQueue)
+  override val transformers = List(f2MOSNotAvailable, cfhClassicalToQueue)
 }
 
 /**
