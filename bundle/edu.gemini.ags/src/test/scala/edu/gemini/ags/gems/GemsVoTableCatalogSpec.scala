@@ -45,11 +45,12 @@ class GemsVoTableCatalogSpec extends Specification {
       val posAngles = new java.util.HashSet[Angle]()
       val options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles)
 
-      val results = Await.result(GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml")).search(ctx, base, options, scala.None)(implicitly), 30.seconds)
+      val mod = GemsTestVoTableMod.forCwfsMagnitudeLimitChange(conditions)
+      val results = Await.result(GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml", mod)).search(ctx, base, options, scala.None)(implicitly), 30.seconds)
       results should be size 2
 
       results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))), Some(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
-      results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(16.8), Some(SaturationConstraint(9.3))), Some(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
+      results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(15.5), Some(SaturationConstraint(8.0))), Some(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
       results.head.results should be size 5
       results(1).results should be size 5
     }
@@ -61,14 +62,16 @@ class GemsVoTableCatalogSpec extends Specification {
       val inst = new Gsaoi
       inst.setPosAngle(0.0)
       inst.setIssPort(IssPort.SIDE_LOOKING)
-      val ctx = ObsContext.create(env, inst, JNone.instance[Site], SPSiteQuality.Conditions.BEST, null, null, JNone.instance())
+      val conditions = SPSiteQuality.Conditions.BEST
+      val ctx = ObsContext.create(env, inst, JNone.instance[Site], conditions, null, null, JNone.instance())
       val instrument = GemsInstrument.gsaoi
       val tipTiltMode = GemsTipTiltMode.instrument
 
       val posAngles = new java.util.HashSet[Angle]()
       val options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles)
 
-      val results = GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml")).getRadiusConstraints(instrument, options.searchCriteria(ctx, scala.None).asScala.toList)
+      val mod = GemsTestVoTableMod.forCwfsMagnitudeLimitChange(conditions)
+      val results = GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml", mod)).getRadiusConstraints(instrument, options.searchCriteria(ctx, scala.None).asScala.toList)
       results should be size 1
       results.head should beEqualTo(RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01878572819686042)))
     }
@@ -80,17 +83,19 @@ class GemsVoTableCatalogSpec extends Specification {
       val inst = new Gsaoi
       inst.setPosAngle(0.0)
       inst.setIssPort(IssPort.SIDE_LOOKING)
-      val ctx = ObsContext.create(env, inst, JNone.instance[Site], SPSiteQuality.Conditions.BEST, null, null, JNone.instance())
+      val conditions = SPSiteQuality.Conditions.BEST
+      val ctx = ObsContext.create(env, inst, JNone.instance[Site], conditions, null, null, JNone.instance())
       val instrument = GemsInstrument.gsaoi
       val tipTiltMode = GemsTipTiltMode.instrument
 
       val posAngles = new java.util.HashSet[Angle]()
       val options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles)
 
-      val results = GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml")).optimizeMagnitudeConstraints(options.searchCriteria(ctx, scala.None).asScala.toList)
+      val mod = GemsTestVoTableMod.forCwfsMagnitudeLimitChange(conditions)
+      val results = GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml", mod)).optimizeMagnitudeConstraints(options.searchCriteria(ctx, scala.None).asScala.toList)
       results should be size 2
       results.head should beEqualTo(MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))))
-      results(1) should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(16.8), Some(SaturationConstraint(9.3))))
+      results(1) should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(15.5), Some(SaturationConstraint(8.0))))
     }
     "preserve the radius constraint for a single item without offsets" in {
       val catalog = GemsVoTableCatalog(TestVoTableBackend(""))

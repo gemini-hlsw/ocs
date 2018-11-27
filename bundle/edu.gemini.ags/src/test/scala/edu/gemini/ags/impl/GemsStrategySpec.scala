@@ -3,7 +3,7 @@ package edu.gemini.ags.impl
 import edu.gemini.ags.api.{AgsAnalysis, AgsGuideQuality, AgsStrategy}
 import edu.gemini.ags.api.AgsStrategy.Estimate
 import edu.gemini.ags.conf.ProbeLimitsTable
-import edu.gemini.ags.gems.{CatalogSearchCriterion, GemsCatalogSearchCriterion, GemsCatalogSearchKey}
+import edu.gemini.ags.gems.{CatalogSearchCriterion, GemsCatalogSearchCriterion, GemsCatalogSearchKey, GemsTestVoTableMod}
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable.TestVoTableBackend
 import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
@@ -23,7 +23,7 @@ import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
 import edu.gemini.spModel.telescope.IssPort
 import org.specs2.mutable.Specification
 import AlmostEqual.AlmostEqualOps
-import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, ImageQuality, SkyBackground, WaterVapor}
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{Conditions, CloudCover, ImageQuality, SkyBackground, WaterVapor}
 
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -31,8 +31,8 @@ import scala.concurrent.duration._
 import scalaz._
 import Scalaz._
 
-case class TestGemsStrategy(file: String) extends GemsStrategy {
-  override val backend = TestVoTableBackend(file)
+case class TestGemsStrategy(file: String, c: Conditions) extends GemsStrategy {
+  override val backend = TestVoTableBackend(file, GemsTestVoTableMod.forCwfsMagnitudeLimitChange(c))
 }
 
 class GemsStrategySpec extends Specification {
@@ -48,9 +48,10 @@ class GemsStrategySpec extends Specification {
       val canopus = Canopus.Wfs.values().toList
       val pwfs1 = List(PwfsGuideProbe.pwfs1)
 
-      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), SPSiteQuality.Conditions.BEST, null, new Gems, JNone.instance())
+      val conditions = SPSiteQuality.Conditions.BEST
+      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
 
-      val estimate = TestGemsStrategy("/gemsstrategyquery.xml").estimate(ctx, ProbeLimitsTable.loadOrThrow())(implicitly)
+      val estimate = TestGemsStrategy("/gemsstrategyquery.xml", conditions).estimate(ctx, ProbeLimitsTable.loadOrThrow())(implicitly)
       Await.result(estimate, 1.minute) should beEqualTo(Estimate.GuaranteedSuccess)
     }
     "support search" in {
@@ -65,11 +66,11 @@ class GemsStrategySpec extends Specification {
 
       val posAngles = Set.empty[Angle]
 
-      val results = Await.result(TestGemsStrategy("/gemsstrategyquery.xml").search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 1.minute)
+      val results = Await.result(TestGemsStrategy("/gemsstrategyquery.xml", conditions).search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 1.minute)
       results should be size 2
 
       results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(14.5), scala.Option(SaturationConstraint(7.3))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
-      results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(15.8), scala.Option(SaturationConstraint(8.3))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
+      results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(15.0), scala.Option(SaturationConstraint(7.5))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
       results.head.results should be size 5
       results(1).results should be size 4
     }
@@ -87,7 +88,7 @@ class GemsStrategySpec extends Specification {
 
       testSearchOnNominal("/gems_pal1.xml", ctx, tipTiltMode, posAngles, 2, 2)
 
-      val gemsStrategy = TestGemsStrategy("/gems_pal1.xml")
+      val gemsStrategy = TestGemsStrategy("/gems_pal1.xml", conditions)
       val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
       selection.map(_.posAngle) should beSome(Angle.zero)
       val assignments = ~selection.map(_.assignments)
@@ -145,7 +146,7 @@ class GemsStrategySpec extends Specification {
 
       val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
-      val gemsStrategy = TestGemsStrategy("/gems_rel2941.xml")
+      val gemsStrategy = TestGemsStrategy("/gems_rel2941.xml", conditions)
       val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
       selection.map(_.posAngle) should beSome(Angle.fromDegrees(90))
       val assignments = ~selection.map(_.assignments)
@@ -179,18 +180,20 @@ class GemsStrategySpec extends Specification {
       val result = Await.result(estimate, 1.minute).probability
       math.abs(result - 1.0 / 3.0) should beLessThan(1e-4)
     }
+
     "find an asterism of size 3" in {
       val ra = Angle.fromHMS(0, 0, 7.808).getOrElse(Angle.zero)
       val dec = Angle.zero - Angle.fromDMS(0, 3, 16.13).getOrElse(Angle.zero)
       val target = new SPTarget(ra.toDegrees, dec.toDegrees)
       val env = TargetEnvironment.create(target)
       val inst = new Gsaoi <| {_.setPosAngle(90.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
-      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), SPSiteQuality.Conditions.BEST, null, new Gems, JNone.instance())
+      val conditions = SPSiteQuality.Conditions.BEST
+      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
       val tipTiltMode = GemsTipTiltMode.canopus
 
       val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
-      val gemsStrategy = TestGemsStrategy("/gems_rel2941_2.xml")
+      val gemsStrategy = TestGemsStrategy("/gems_rel2941_2.xml", conditions)
       val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
       selection.map(_.posAngle) should beSome(Angle.fromDegrees(90))
       val assignments = ~selection.map(_.assignments)
@@ -263,7 +266,7 @@ class GemsStrategySpec extends Specification {
 
       testSearchOnStandardConditions("/gems_sn1987A.xml", ctx, tipTiltMode, posAngles, 9, 9)
 
-      val gemsStrategy = TestGemsStrategy("/gems_sn1987A.xml")
+      val gemsStrategy = TestGemsStrategy("/gems_sn1987A.xml", conditions)
       val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
       selection.map(_.posAngle) should beSome(Angle.zero)
       val assignments = ~selection.map(_.assignments)
@@ -332,7 +335,7 @@ class GemsStrategySpec extends Specification {
 
       testSearchOnBestConditions("/gems_sn1987A.xml", ctx, tipTiltMode, posAngles, 12, 9)
 
-      val gemsStrategy = TestGemsStrategy("/gems_sn1987A.xml")
+      val gemsStrategy = TestGemsStrategy("/gems_sn1987A.xml", conditions)
       val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
       selection.map(_.posAngle) should beSome(Angle.zero)
       val assignments = ~selection.map(_.assignments)
@@ -389,7 +392,7 @@ class GemsStrategySpec extends Specification {
 
       testSearchOnStandardConditions("/gems_TYC_8345_1155_1.xml", ctx, tipTiltMode, posAngles, 25, 28)
 
-      val gemsStrategy = TestGemsStrategy("/gems_TYC_8345_1155_1.xml")
+      val gemsStrategy = TestGemsStrategy("/gems_TYC_8345_1155_1.xml", conditions)
       val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
       selection.map(_.posAngle) should beSome(Angle.zero)
       val assignments = ~selection.map(_.assignments)
@@ -455,7 +458,7 @@ class GemsStrategySpec extends Specification {
 
       testSearchOnStandardConditions("/gems_m6.xml", ctx, tipTiltMode, posAngles, 5, 7)
 
-      val gemsStrategy = TestGemsStrategy("/gems_m6.xml")
+      val gemsStrategy = TestGemsStrategy("/gems_m6.xml", conditions)
       val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
       selection.map(_.posAngle) should beSome(Angle.fromDegrees(90))
       val assignments = ~selection.map(_.assignments)
@@ -467,11 +470,11 @@ class GemsStrategySpec extends Specification {
       val cwfs2 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs2).map(_.guideStar)
       assignments.exists(_.guideProbe == Canopus.Wfs.cwfs3) should beTrue
       val cwfs3 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs3).map(_.guideStar)
-      cwfs1.map(_.name) should beSome("289-128909")
+      cwfs1.map(_.name) should beSome("289-128891")
       cwfs2.map(_.name) should beSome("289-128878")
       cwfs3.map(_.name) should beSome("289-128908")
 
-      val cwfs1x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(17, 40, 21.743).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(32, 14, 54.04).getOrElse(Angle.zero)).getOrElse(Declination.zero))
+      val cwfs1x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(17, 40, 19.295).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(32, 14, 58.34).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       cwfs1.map(_.coordinates ~= cwfs1x) should beSome(true)
       val cwfs2x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(17, 40, 16.855).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(32, 15, 55.83).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       cwfs2.map(_.coordinates ~= cwfs2x) should beSome(true)
@@ -490,7 +493,7 @@ class GemsStrategySpec extends Specification {
       analysis.collect {
         case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs1 => Canopus.Wfs.cwfs1
         case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs2 => Canopus.Wfs.cwfs2
-        case AgsAnalysis.NotReachable(Canopus.Wfs.cwfs3, st) if st.some == cwfs3                                                 => Canopus.Wfs.cwfs3
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq) if st.some == cwfs3 => Canopus.Wfs.cwfs3
       } should beEqualTo(List(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3))
 
       // Analyze per probe
@@ -501,7 +504,7 @@ class GemsStrategySpec extends Specification {
         gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs2, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
       cwfs3.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs3, s).contains(AgsAnalysis.NotReachable(Canopus.Wfs.cwfs3, s))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs3, s).contains(AgsAnalysis.Usable(Canopus.Wfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq))
       } should beSome(true)
 
       // Test estimate
@@ -522,7 +525,7 @@ class GemsStrategySpec extends Specification {
 
       testSearchOnStandardConditions("/gems_bpm_37093.xml", ctx, tipTiltMode, posAngles, 4, 5)
 
-      val gemsStrategy = TestGemsStrategy("/gems_bpm_37093.xml")
+      val gemsStrategy = TestGemsStrategy("/gems_bpm_37093.xml", conditions)
       val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
       selection.map(_.posAngle) should beSome(Angle.zero)
       val assignments = ~selection.map(_.assignments)
@@ -578,7 +581,7 @@ class GemsStrategySpec extends Specification {
 
       testSearchOnBestConditions("/gems_bpm_37093.xml", ctx, tipTiltMode, posAngles, 5, 5)
 
-      val gemsStrategy = TestGemsStrategy("/gems_bpm_37093.xml")
+      val gemsStrategy = TestGemsStrategy("/gems_bpm_37093.xml", conditions)
       val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
       selection.map(_.posAngle) should beSome(Angle.zero)
       val assignments = ~selection.map(_.assignments)
@@ -623,11 +626,11 @@ class GemsStrategySpec extends Specification {
   }
 
   def testSearchOnStandardConditions(file: String, ctx: ObsContext, tipTiltMode: GemsTipTiltMode, posAngles: Set[Angle], expectedTipTiltResultsCount: Int, expectedFlexureResultsCount: Int): Unit = {
-    val results = Await.result(TestGemsStrategy(file).search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 1.minute)
+    val results = Await.result(TestGemsStrategy(file, ctx.getConditions).search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 1.minute)
     results should be size 2
 
     results.head.criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance))
-    results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(15.8), scala.Option(SaturationConstraint(8.3))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
+    results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(15.0), scala.Option(SaturationConstraint(7.5))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
     results(1).criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance))
     results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(17.0), scala.Option(SaturationConstraint(8.0))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
     results.head.results should be size expectedTipTiltResultsCount
@@ -635,11 +638,11 @@ class GemsStrategySpec extends Specification {
   }
 
   def testSearchOnNominal(file: String, ctx: ObsContext, tipTiltMode: GemsTipTiltMode, posAngles: Set[Angle], expectedTipTiltResultsCount: Int, expectedFlexureResultsCount: Int): Unit = {
-    val results = Await.result(TestGemsStrategy(file).search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 1.minute)
+    val results = Await.result(TestGemsStrategy(file, ctx.getConditions).search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 1.minute)
     results should be size 2
 
     results.head.criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance))
-    results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(16.3), scala.Option(SaturationConstraint(8.8))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
+    results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(15.0), scala.Option(SaturationConstraint(7.5))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
     results(1).criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance))
     results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(17.0), scala.Option(SaturationConstraint(8.0))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
     results.head.results should be size expectedTipTiltResultsCount
@@ -647,11 +650,11 @@ class GemsStrategySpec extends Specification {
   }
 
   def testSearchOnBestConditions(file: String, ctx: ObsContext, tipTiltMode: GemsTipTiltMode, posAngles: Set[Angle], expectedTipTiltResultsCount: Int, expectedFlexureResultsCount: Int): Unit = {
-    val results = Await.result(TestGemsStrategy(file).search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 1.minute)
+    val results = Await.result(TestGemsStrategy(file, ctx.getConditions).search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 1.minute)
     results should be size 2
 
     results.head.criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance))
-    results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(16.8), scala.Option(SaturationConstraint(9.3))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
+    results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(15.5), scala.Option(SaturationConstraint(8.0))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
     results(1).criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance))
     results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(17.0), scala.Option(SaturationConstraint(8.0))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
     results.head.results should be size expectedTipTiltResultsCount
