@@ -115,7 +115,7 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
 
   }
 
-  val Semester2019A = new Semester(2018, Semester.Half.B)
+  val Semester2019A = new Semester(2019, Semester.Half.A)
   val GS19AStart    = Instant.ofEpochMilli(Semester2019A.getStartDate(GS).getTime)
   val GS19AEnd      = Instant.ofEpochMilli(Semester2019A.getEndDate(GS).getTime)
   val DayInMs       = Duration.ofDays(1l).toMillis

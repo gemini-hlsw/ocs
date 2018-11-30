@@ -87,7 +87,7 @@ private[obsrecord] object VisitCalculator {
    * </ul>
    */
   case object Update2019A extends VisitCalculator {
-    val semester = new Semester(2018, Semester.Half.B)
+    val semester = new Semester(2019, Semester.Half.A)
 
     override def validAt(s: Site): Instant =
       Instant.ofEpochMilli(semester.getStartDate(s).getTime)
