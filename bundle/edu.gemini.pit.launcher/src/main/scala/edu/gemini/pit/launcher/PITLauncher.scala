@@ -20,7 +20,7 @@ object PITLauncher extends App {
   // We normally want to be in test mode in development
   System.setProperty("edu.gemini.pit.test", "true")
   // Need to set this manually, as we are not inside OSGi
-  val version = s"${Semester.current.year}.1.1"
+  val version = s"${Semester.current.year}.1.2"
   System.setProperty("edu.gemini.model.p1.schemaVersion", version)
   System.setProperty(classOf[Workspace].getName + ".fonts.shrunk", "true")
 
