@@ -31,7 +31,7 @@ public class AOConfig extends ParamSet {
 
     // Default values
     private static final String DEFAULT_NGS_GSMAG = "11.0";
-    private static final String DEFAULT_LGS_GSMAG = "12.0";
+    private static final String DEFAULT_LGS_GSMAG = "11.0";
     private static final String DEFAULT_SEEING = "0.23";
     private static final String DEFAULT_WINDSPEED = "20";
 
