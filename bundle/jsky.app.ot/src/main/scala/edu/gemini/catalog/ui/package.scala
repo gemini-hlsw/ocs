@@ -10,10 +10,11 @@ import edu.gemini.catalog.api._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.{None => JNone}
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.ags.AgsStrategyKey.{ Pwfs1NorthKey, Pwfs2NorthKey, Pwfs1SouthKey, Pwfs2SouthKey }
+import edu.gemini.spModel.ags.AgsStrategyKey.{ Pwfs1NorthKey, Pwfs2NorthKey, Pwfs1SouthKey, Pwfs2SouthKey, GemsKey }
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.altair.{AltairParams, InstAltair}
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
+import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.gemini.gmos.{InstGmosNorth, InstGmosSouth}
 import edu.gemini.spModel.gemini.gnirs.{GNIRSConstants, InstGNIRS}
 import edu.gemini.spModel.gemini.gpi.Gpi
@@ -76,9 +77,14 @@ case class ObservationInfo(ctx: Option[ObsContext],
    * Attempts to find the guide probe for the selected strategy
    */
   def guideProbe: Option[ValidatableGuideProbe] =
-    strategy.flatMap(_.strategy.guideProbes.headOption.collect {
-      case v: ValidatableGuideProbe => v
-    })
+    strategy.map(_.strategy).flatMap { s =>
+      s.key match {
+        case GemsKey => Some(Canopus.Wfs.cwfs3)
+        case _       => s.guideProbes.headOption.collect {
+          case v: ValidatableGuideProbe => v
+        }
+      }
+    }
 
   /**
    * An obscontext is required for guide quality calculation. The method below will attempt to create a context out of the information on the query form
