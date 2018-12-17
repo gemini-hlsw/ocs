@@ -1390,7 +1390,7 @@ enum BasePositionType implements PositionType {
         final GuideEnvironment   genv = env.getGuideEnvironment();
         final ImList<UserTarget> user = env.getUserTargets().append(new UserTarget(UserTarget.Type.other, baseTarget));
 
-        final TargetEnvironment newEnv = TargetEnvironment.create(baseTarget, genv, user);
+        final TargetEnvironment newEnv = TargetEnvironment.create(target, genv, user);
         obsComp.setTargetEnvironment(newEnv);
     }
 
