@@ -25,6 +25,8 @@ import edu.gemini.spModel.data.config.StringParameter;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
 import edu.gemini.spModel.gemini.gems.CanopusWfs;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
+import edu.gemini.spModel.gemini.init.ObservationNI;
 import edu.gemini.spModel.guide.GuideOption;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
@@ -437,7 +439,7 @@ public final class Gsaoi extends SPInstObsComp
             SPComponentType.INSTRUMENT_GSAOI;
 
     public static final ISPNodeInitializer<ISPObsComponent, Gsaoi> NI =
-        new ComponentNodeInitializer<>(SP_TYPE, () -> new Gsaoi(), c -> new GsaoiCB(c));
+        new ComponentNodeInitializer<>(SP_TYPE, Gsaoi::new, GsaoiCB::new);
 
     public static final ISPNodeInitializer<ISPObservation, SPObservation> OBSERVATION_NI =
         new ObservationNI(Instrument.Gsaoi.some()) {
