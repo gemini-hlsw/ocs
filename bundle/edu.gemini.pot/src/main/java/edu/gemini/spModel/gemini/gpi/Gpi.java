@@ -1120,6 +1120,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     public static final boolean DEFAULT_ASTROMETRIC_FIELD = false;
     public static final double DEFAULT_EXPOSURE_TIME = 1.49; // OT-54
     public static final int MAX_EXPOSURE_TIME = 60; // OT-78
+    public static final double DEFAULT_HALF_WAVE_PLATE_ANGLE = 0;
 
     public static final long READOUT_PER_EXPOSURE_MS = 3000; // REL-1717
     public static final double READOUT_OVERHEAD_SEC    = 10.0; // REL-1717
@@ -1352,7 +1353,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     private Disperser _disperser = Disperser.DEFAULT; // OT-50
 
     // value if _disperser is WOLLASTON
-    private double      _halfWavePlateAngleValue = 0;
+    private double      _halfWavePlateAngleValue = DEFAULT_HALF_WAVE_PLATE_ANGLE;
 
     // OT-52: predefined values
     private DetectorReadoutArea _detectorReadoutArea = DetectorReadoutArea.DEFAULT;
@@ -2031,6 +2032,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         }
 
         Pio.addParam(factory, paramSet, DISPERSER_PROP, getDisperser().name());
+        Pio.addParam(factory, paramSet, HALF_WAVE_PLATE_ANGLE_VALUE_PROP, String.valueOf(getHalfWavePlateAngle()));
 
         Pio.addParam(factory, paramSet, DETECTOR_STARTX_PROP, String.valueOf(getDetectorStartX()));
         Pio.addParam(factory, paramSet, DETECTOR_STARTY_PROP, String.valueOf(getDetectorStartY()));
@@ -2084,6 +2086,9 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
         v = Pio.getValue(paramSet, DISPERSER_PROP);
         if (v != null) setDisperser(Disperser.valueOf(v));
+
+        setHalfWavePlateAngle(Pio.getDoubleValue(paramSet,
+          HALF_WAVE_PLATE_ANGLE_VALUE_PROP.getName(), DEFAULT_HALF_WAVE_PLATE_ANGLE));
 
         ReadoutArea a = DetectorReadoutArea.DEFAULT.getReadoutArea();
         int startX = Pio.getIntValue(paramSet, DETECTOR_STARTX_PROP.getName(), a.getDetectorStartX());
