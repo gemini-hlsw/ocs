@@ -143,12 +143,19 @@ object LibraryNonStar {
   case object Txpsc             extends LibraryNonStar("txpsc (N-type Visible Carbon Star)",      "txpsc")
   case object Wr104             extends LibraryNonStar("WR 104 (Wolf-Rayet Star + dust)",         "wr104")
   case object Wr34              extends LibraryNonStar("WR 34 (Wolf-Rayet Star)",                 "wr34")
+  case object Mars              extends LibraryNonStar("Mars",                                    "Mars")
+  case object Jupiter           extends LibraryNonStar("Jupiter",                                 "Jupiter")
+  case object Saturn            extends LibraryNonStar("Saturn",                                  "Saturn")
+  case object Uranus            extends LibraryNonStar("Uranus",                                  "Uranus")
+  case object Neptune           extends LibraryNonStar("Neptune",                                 "Neptune")
+
 
   /** All available non-star spectras. */
   val values = List(
     EllipticalGalaxy, SpiralGalaxy, QS0, QS02, OrionNebula, PlanetaryNebula, PlanetaryNebula2, PlanetaryNebula3,
     StarburstGalaxy, PmsStar, GalacticCenter, Afgl230, Afgl3068, AlphaBoo, AlphaCar, BetaAnd, BetaGru, GammaCas,
-    GammaDra, L1511Irs, NGC1068, NGC2023, NGC2440, OCet, OrionBar, Rscl, Txpsc, Wr104, Wr34
+    GammaDra, L1511Irs, NGC1068, NGC2023, NGC2440, OCet, OrionBar, Rscl, Txpsc, Wr104, Wr34,
+    Mars, Jupiter, Saturn, Uranus, Neptune
   )
 }
 

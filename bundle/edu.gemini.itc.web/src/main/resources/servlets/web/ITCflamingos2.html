@@ -81,28 +81,27 @@
                 <td colspan="3"><img src="/spacer.gif" height="40" width="1" style="opacity:0.0"/>
                     with the above <b>brightness normalisation</b> applied in filter
                     <select name="WavebandDefinition" size="1">
-
-                        <option value="U">U (0.36µm)</option>
-                        <option value="B">B (0.44µm)</option>
-                        <option value="g">g' (0.48µm) </option>
-                        <option value="V">V (0.55µm)</option>
-                        <option value="r">r' (0.62µm) </option>
-                        <option value="R">R (0.67µm)</option>
-                        <option value="i">i' (0.77µm) </option>
-                        <option value="I">I (0.87µm)</option>
-                        <option value="z">z' (0.92µm) </option>
-                        <option value="Y">Y (1.02µm)</option>
-                        <option value="J">J (1.25µm)</option>
-                        <option value="H">H (1.65µm)</option>
-                        <option value="K" selected>K (2.2µm)</option>
-                        <option value="L">L' (3.76µm)</option>
-                        <option value="M">M' (4.77µm)</option>
-                        <option value="N">N (10.5µm)</option>
-                        <option value="Q">Q (20.1µm)</option>
-
-                    </select> band</td>
-
+                        <option value="U">U (0.36 µm)</option>
+                        <option value="B">B (0.44 µm)</option>
+                        <option value="g">g' (0.48 µm) </option>
+                        <option value="V">V (0.55 µm)</option>
+                        <option value="r">r' (0.62 µm) </option>
+                        <option value="R">R (0.67 µm)</option>
+                        <option value="i">i' (0.77 µm) </option>
+                        <option value="I">I (0.87 µm)</option>
+                        <option value="z">z' (0.92 µm) </option>
+                        <option value="Y">Y (1.02 µm)</option>
+                        <option value="J">J (1.25 µm)</option>
+                        <option value="H">H (1.65 µm)</option>
+                        <option value="K" selected>K (2.2 µm)</option>
+                        <option value="L">L' (3.76 µm)</option>
+                        <option value="M">M' (4.77 µm)</option>
+                        <option value="N">N (10.5 µm)</option>
+                        <option value="Q">Q (20.1 µm)</option>
+                    </select> band
+                </td>
             </tr>
+
             <tr>
                 <td colspan="3">
                     <p align="right"> <!--<input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" /> -->
@@ -121,81 +120,86 @@
                 <td colspan="3"><b>Spectral distribution:</b> <i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10257#spectral','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false">more info</a>)</span></i><br />
                     <i>Choose one SED, the redshift and extinction</i></td>
             </tr>
+
             <tr>
-
                 <td><input value="LIBRARY_NON_STAR" name="Distribution" type="radio" /></td>
-                <td colspan="2">Library spectrum of a non-stellar object <select name="nsSpectrumType" size="1">
-                    <option value="elliptical-galaxy">
-                        elliptical galaxy</option>
-                    <option value="spiral-galaxy" selected="selected">
-                        spiral galaxy (Sc)</option>
-                    <!--<option value="QSO">QSO</option>-->
-                    <option value="QSO">QSO (80-855nm)</option>
-                    <option value="QSO2">QSO (276-3520nm)</option>
-
-                    <option value="Orion-nebula">
-                        HII region (Orion)</option>
-                    <option value="Planetary-nebula">Planetary nebula (NGC7009: 100-1100nm)</option>
-                    <option value="Planetary-nebula2">Planetary nebula (IC5117: 480-2500nm)</option>
-
-                </select></td>
+                <td colspan="2">Library spectrum of a non-stellar object
+                    <select name="nsSpectrumType" size="1">
+                        <option value="Mars">Mars (540 nm - 5.0 µm)</option>
+                        <option value="Jupiter">Jupiter (530 nm - 5.9 µm)</option>
+                        <option value="Saturn">Saturn (530 nm - 5.9 µm)</option>
+                        <option value="Uranus">Uranus (540 nm - 5.0 µm)</option>
+                        <option value="Neptune">Neptune (540 nm - 5.0 µm)</option>
+                        <option value="none" disabled></option>
+                        <option value="Orion-nebula">HII region (Orion, 100 nm - 1.1 µm)</option>
+                        <option value="Planetary-nebula">Planetary nebula (NGC 7009, 100 nm - 1.1 µm)</option>
+                        <option value="Planetary-nebula2">Planetary nebula (IC 5117, 480 nm - 2.5 µm)</option>
+                        <option value="none" disabled></option>
+                        <option value="elliptical-galaxy">Elliptical galaxy (22 nm - 9.7 µm)</option>
+                        <option value="spiral-galaxy" selected>Spiral galaxy (Sc, 22 nm - 9.7 µm)</option>
+                        <option value="none" disabled></option>
+                        <option value="QSO">QSO (80 nm - 0.855 µm)</option>
+                        <option value="QSO2">QSO (276 nm - 3.52 µm)</option>
+                    </select>
+                </td>
             </tr>
 
             <tr>
                 <td><input value="LIBRARY_STAR" name="Distribution" checked="checked" type="radio" /></td>
-                <td colspan="2">Library spectrum of a star with spectral type <select name="stSpectrumType" size="1">
-                    <option value="O5V">O5V</option>
-                    <option value="O8III">O8III</option>
-                    <option value="O8III">O8III</option>
-                    <option value="B0V">B0V</option>
-                    <option value="B5-7V">B5-7V</option>
-                    <option value="B5III">B5III</option>
-                    <option value="B5I">B5I</option>
-                    <option value="A0V" selected="selected">A0V</option>
-                    <option value="A0III">A0III</option>
-                    <option value="A0I"> A0I</option>
-                    <option value="A5V">A5V</option>
-                    <option value="A5III">A5III</option>
-                    <option value="F0V">F0V</option>
-                    <option value="F0III">F0III</option>
-                    <option value="F0I">F0I</option>
-                    <option value="F5V">F5V</option>
-                    <option value="F5V-w">F5V-w</option>
-                    <option value="F6V-r">F6V-r</option>
-                    <option value="F5III">F5III</option>
-                    <option value="F5I">F5I</option>
-                    <option value="G0V">G0V</option>
-                    <option value="G0V-w">G0V-w</option>
-                    <option value="G0V-r">G0V-r</option>
-                    <option value="G0III">G0III</option>
-                    <option value="G0I">G0I</option>
-                    <option value="G2V">G2V</option>
-                    <option value="G5V">G5V</option>
-                    <option value="G5V-w">G5V-w</option>
-                    <option value="G5V-r">G5V-r</option>
-                    <option value="G5III">G5III</option>
-                    <option value="G5III-w">G5III-w</option>
-                    <option value="G5III-r">G5III-r</option>
-                    <option value="G5I">G5I</option>
-                    <option value="K0V">K0V</option>
-                    <option value="K0V-r">K0V-r</option>
-                    <option value="K0III">K0III</option>
-                    <option value="K0III-w">K0III-w</option>
-                    <option value="K0III-r">K0III-r</option>
-                    <option value="K0-1II">K0-1II</option>
-                    <option value="K4V">K4V</option>
-                    <option value="K4III">K4III</option>
-                    <option value="K4III-w">K4III-w</option>
-                    <option value="K4III-r">K4III-r</option>
-                    <option value="K4I">K4I</option>
-                    <option value="M0V">M0V</option>
-                    <option value="M0III">M0III</option>
-                    <option value="M3V">M3V</option>
-                    <option value="M3III">M3III</option>
-                    <option value="M6V">M6V</option>
-                    <option value="M6III">M6III</option>
-                    <option value="M9III">M9III</option>
-                </select></td>
+                <td colspan="2">Library spectrum of a star with spectral type
+                    <select name="stSpectrumType" size="1">
+                        <option value="O5V">O5V</option>
+                        <option value="O8III">O8III</option>
+                        <option value="B0V">B0V</option>
+                        <option value="B5-7V">B5-7V</option>
+                        <option value="B5III">B5III</option>
+                        <option value="B5I">B5I</option>
+                        <option value="A0V" selected>A0V</option>
+                        <option value="A0III">A0III</option>
+                        <option value="A0I"> A0I</option>
+                        <option value="A5V">A5V</option>
+                        <option value="A5III">A5III</option>
+                        <option value="F0V">F0V</option>
+                        <option value="F0III">F0III</option>
+                        <option value="F0I">F0I</option>
+                        <option value="F5V">F5V</option>
+                        <option value="F5V-w">F5V-w</option>
+                        <option value="F6V-r">F6V-r</option>
+                        <option value="F5III">F5III</option>
+                        <option value="F5I">F5I</option>
+                        <option value="G0V">G0V</option>
+                        <option value="G0V-w">G0V-w</option>
+                        <option value="G0V-r">G0V-r</option>
+                        <option value="G0III">G0III</option>
+                        <option value="G0I">G0I</option>
+                        <option value="G2V">G2V</option>
+                        <option value="G5V">G5V</option>
+                        <option value="G5V-w">G5V-w</option>
+                        <option value="G5V-r">G5V-r</option>
+                        <option value="G5III">G5III</option>
+                        <option value="G5III-w">G5III-w</option>
+                        <option value="G5III-r">G5III-r</option>
+                        <option value="G5I">G5I</option>
+                        <option value="K0V">K0V</option>
+                        <option value="K0V-r">K0V-r</option>
+                        <option value="K0III">K0III</option>
+                        <option value="K0III-w">K0III-w</option>
+                        <option value="K0III-r">K0III-r</option>
+                        <option value="K0-1II">K0-1II</option>
+                        <option value="K4V">K4V</option>
+                        <option value="K4III">K4III</option>
+                        <option value="K4III-w">K4III-w</option>
+                        <option value="K4III-r">K4III-r</option>
+                        <option value="K4I">K4I</option>
+                        <option value="M0V">M0V</option>
+                        <option value="M0III">M0III</option>
+                        <option value="M3V">M3V</option>
+                        <option value="M3III">M3III</option>
+                        <option value="M6V">M6V</option>
+                        <option value="M6III">M6III</option>
+                        <option value="M9III">M9III</option>
+                    </select> (300 nm - 6 µm)
+                </td>
             </tr>
 
             <tr>
@@ -209,6 +213,7 @@
                         <option value="ergs_fd_wavelength">erg/s/cm²/Å</option>
                     </select></td>
             </tr>
+
             <tr>
                 <td><input value="BBODY" name="Distribution" type="radio" /></td>
                 <td colspan="2">Model black body spectrum with temperature <input name="BBTemp" size="6" value="10000" type="text" /> K </td>
@@ -371,7 +376,7 @@
             </tbody>
         </table>
         <p>
-            &nbsp;
+        &nbsp;
         </p>
 
         <!-- Observing conditions definition-->
@@ -381,52 +386,49 @@
         <table background="https://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0" width="100%">
             <tbody>
             <tr>
-                <td colspan="6">Note: you should read the <a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10272','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false">explanatory
-                    notes</a> for the meaning of the percentiles and to ensure that your selected conditions
-                    are appropriate for the observing wavelength. Further details are
-                    available on the <a href="#" onclick="window.open('http://www.gemini.edu/sciops/ObsProcess/obsConstraints/obsConstraintsIndex.html','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false">observing
-                        condition constraints</a> pages. </td>
-
+                <td colspan="6">Please read the <a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10272','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false">explanatory
+                notes</a> for the meaning of the percentiles and to ensure that your selected conditions
+                are appropriate for the observing wavelength. Further details are
+                available on the <a href="#" onclick="window.open('http://www.gemini.edu/sciops/ObsProcess/obsConstraints/obsConstraintsIndex.html','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false">observing
+                condition constraints</a> pages. </td>
             </tr>
-
             <tr>
-                <td><b>Image quality:</b></td>
+                <td><b>Image Quality:</b></td>
                 <td><input name="ImageQuality" value="PERCENT_20" type="radio" /> 20%/Best</td>
                 <td><input name="ImageQuality" value="PERCENT_70" type="radio" /> 70%/Good</td>
                 <td><input name="ImageQuality" value="PERCENT_85" type="radio" checked /> 85%/Poor</td>
-                <td><input name="ImageQuality" value="ANY" type="radio" /> Any</td>
+                <td><input name="ImageQuality" value="ANY"        type="radio" /> Any</td>
             </tr>
             <tr>
-                <td><b>Sky transparency (cloud cover):</b></td>
+                <td><b>Cloud Cover:</b></td>
                 <td><input name="CloudCover" value="PERCENT_50" type="radio" /> 50%/Clear</td>
                 <td><input name="CloudCover" value="PERCENT_70" type="radio" checked /> 70%/Cirrus</td>
                 <td><input name="CloudCover" value="PERCENT_80" type="radio" /> 80%/Cloudy</td>
-                <td><input name="CloudCover" value="ANY" type="radio" /> Any</td>
+                <td><input name="CloudCover" value="ANY"        type="radio" /> Any</td>
             </tr>
             <tr>
-                <td><b>Sky transparency (water vapour):</b></td>
+                <td><b>Water Vapor:</b></td>
                 <td><input name="WaterVapor" value="PERCENT_20" type="radio" /> 20%/Low</td>
                 <td><input name="WaterVapor" value="PERCENT_50" type="radio" /> 50%/Median</td>
                 <td><input name="WaterVapor" value="PERCENT_80" type="radio" /> 80%/High</td>
-                <td><input name="WaterVapor" value="ANY" type="radio" checked /> Any</td>
+                <td><input name="WaterVapor" value="ANY"        type="radio" checked /> Any</td>
             </tr>
             <tr>
-                <td><b>Sky background:</b></td>
+                <td><b>Sky Background:</b></td>
                 <td><input name="SkyBackground" value="PERCENT_20" type="radio" /> 20%/Darkest</td>
                 <td><input name="SkyBackground" value="PERCENT_50" type="radio" /> 50%/Dark</td>
                 <td><input name="SkyBackground" value="PERCENT_80" type="radio" /> 80%/Grey</td>
-                <td><input name="SkyBackground" value="ANY" type="radio" checked /> Any/Bright</td>
+                <td><input name="SkyBackground" value="ANY"        type="radio" checked /> Any/Bright</td>
             </tr>
             <tr>
-                <td><b>Typical air mass during observation:</b></td>
+                <td><b>Airmass:</b></td>
                 <td><input name="Airmass" value="1.2" type="radio" /> &lt;1.2</td>
                 <td><input name="Airmass" value="1.5" type="radio" checked /> 1.5</td>
                 <td><input name="Airmass" value="2.0" type="radio" /> 2.0</td>
             </tr>
-
             <tr>
                 <td colspan="6">
-                    <p align="right"> <!--<input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" /> -->
+                    <p align="right">
                         <input value="Calculate" type="submit" style="background-color: gold; padding: 3px 8px;">
                     </p>
                 </td>
@@ -434,9 +436,9 @@
             </tbody>
         </table>
         <p>
-
-            &nbsp;
+        &nbsp;
         </p>
+
         <!-- Observation method and output control-->
         <p>
             <span style="color: #ff0000"><b>Details of observation</b></span>
