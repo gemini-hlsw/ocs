@@ -6,7 +6,7 @@ import java.util.{Calendar, TimeZone}
 object Semester {
 
   lazy val year = 2019
-  lazy val semesterOption = SemesterOption.A
+  lazy val semesterOption = SemesterOption.B
 
   lazy val current = Semester(year, semesterOption)
 
