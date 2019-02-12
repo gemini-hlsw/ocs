@@ -108,7 +108,7 @@ object HS2Spec extends Specification with ScalaCheck {
     }
 
     "handle empty results with small-body fallthrough (many)" in {
-      runSearch(Search.MajorBody("hu")) must_== \/-(Nil)
+      runSearch(Search.MajorBody("hh")) must_== \/-(Nil)
     }
 
     "handle empty results with small-body fallthrough (single)" in {
