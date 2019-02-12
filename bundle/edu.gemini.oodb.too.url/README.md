@@ -13,6 +13,7 @@ This bundle originated from `edu.gemini.oodb.too.url` in the OCS 1.5 build.
 | Parameter  | Format/Example          | Reqd?  | Notes
 |------------|-------------------------|:------:|-------
 | `posangle` | 123.45                  |✓       | position angle in degrees
+| `exptime`  | 60                      |        | exposure time in seconds (1 <= secs <= 300)
 | `note`     | `hurry!`                |✓       | text of the note to add to the cloned template observation
 | `group`    | `too-group`             |        | optional name of destination group for cloned observation
 | `ready`    | `true` or `false`       |✓       | whether to mark the cloned template observation as ready

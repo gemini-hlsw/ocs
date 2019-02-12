@@ -6,6 +6,7 @@ package edu.gemini.spdb.rapidtoo;
 
 import edu.gemini.shared.util.immutable.Option;
 import java.io.Serializable;
+import java.time.Duration;
 
 /**
  * A description of the rapid TOO update that should be applied.
@@ -34,6 +35,11 @@ public interface TooUpdate extends Serializable {
      * @return position angle in degrees or <code>null</code> if not specified
      */
     Double getPositionAngle();
+
+    /**
+     * Gets the (optional) exposure time to apply.
+     */
+    Option<Duration> getExposureTime();
 
     /**
      * Gets the text of the note that will be added to the observation.  For

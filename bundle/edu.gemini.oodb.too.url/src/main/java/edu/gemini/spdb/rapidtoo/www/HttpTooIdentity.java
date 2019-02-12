@@ -64,7 +64,7 @@ public final class HttpTooIdentity implements TooIdentity {
         // Set the password.
         _password = req.getParameter(PASSWORD_PARAM);
         if (_password == null) {
-            throw new BadRequestException("missing \"" + OBS_NAME_PARAM + "\"");
+            throw new BadRequestException("missing \"" + PASSWORD_PARAM + "\"");
         }
 
         // Set the template observation name and/or number

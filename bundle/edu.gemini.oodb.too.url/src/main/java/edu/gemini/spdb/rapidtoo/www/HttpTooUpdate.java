@@ -5,8 +5,10 @@
 package edu.gemini.spdb.rapidtoo.www;
 
 import edu.gemini.spdb.rapidtoo.*;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 
+import java.time.Duration;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -22,15 +24,20 @@ import javax.servlet.http.HttpServletRequest;
  * </ul>
  */
 public final class HttpTooUpdate implements TooUpdate {
+    public static final String EXPOSURE_TIME_PARAM  = "exptime";
     public static final String POSITION_ANGLE_PARAM = "posangle";
     public static final String NOTE_PARAM           = "note";
     public static final String GROUP_PARAM          = "group";
     public static final String READY_PARAM          = "ready";
 
+    public static final Duration MIN_EXPOSURE_TIME  = Duration.ofSeconds(1L);
+    public static final Duration MAX_EXPOSURE_TIME  = Duration.ofSeconds(300L);
+
     private final TooIdentity _id;
     private final TooTarget _target;
     private final Option<TooGuideTarget> _guide;
     private final Double _posAngle;
+    private final Option<Duration> _exposureTime;
     private final String _note;
     private final TooElevationConstraint _elevation;
     private final TooTimingWindow _timingWindow;
@@ -59,6 +66,28 @@ public final class HttpTooUpdate implements TooUpdate {
             }
         }
         _posAngle = posAngle;
+
+
+        Duration expTime = null;
+        final String expTimeString = req.getParameter(EXPOSURE_TIME_PARAM);
+        if (expTimeString != null) {
+
+            try {
+                expTime = Duration.ofSeconds(Integer.parseInt(expTimeString));
+            } catch (NumberFormatException ex) {
+                throw new BadRequestException("cannot parse " + EXPOSURE_TIME_PARAM + " value `" + expTimeString + "`");
+            }
+
+            if (expTime.compareTo(MIN_EXPOSURE_TIME) < 0) {
+                throw new BadRequestException("minimum " + EXPOSURE_TIME_PARAM + " is " + MIN_EXPOSURE_TIME.getSeconds() + " sec");
+            }
+
+            if (expTime.compareTo(MAX_EXPOSURE_TIME) > 0) {
+                throw new BadRequestException("maximum " + EXPOSURE_TIME_PARAM + " is " + MAX_EXPOSURE_TIME.getSeconds() + " sec");
+            }
+
+        }
+        _exposureTime = ImOption.apply(expTime);
 
         _note  = req.getParameter(NOTE_PARAM);
         _elevation    = HttpTooElevationConstraint.parse(req);
@@ -93,6 +122,10 @@ public final class HttpTooUpdate implements TooUpdate {
 
     public Double getPositionAngle() {
         return _posAngle;
+    }
+
+    public Option<Duration> getExposureTime() {
+        return _exposureTime;
     }
 
     public String getNote() {
