@@ -25,6 +25,7 @@
     <xsd:include schemaLocation="ProposalClass.xsd"/>
     <xsd:include schemaLocation="Observation.xsd"/>
     <xsd:include schemaLocation="Alopeke.xsd"/>
+    <xsd:include schemaLocation="Zorro.xsd"/>
 
     <xsd:element name="proposal">
         <xsd:complexType>
@@ -135,6 +136,7 @@
             <xsd:element name="trecs"      type="TrecsBlueprintChoice"/>
             <xsd:element name="visitor"    type="VisitorBlueprintChoice"/>
             <xsd:element name="alopeke"    type="AlopekeBlueprintChoice"/>
+            <xsd:element name="zorro"      type="ZorroBlueprintChoice"/>
         </xsd:choice>
     </xsd:complexType>
 

@@ -533,6 +533,11 @@ package object immutable {
     val WIDE_FIELD = M.AlopekeMode.WIDE_FIELD_0_0725_PIX_60_FO_V
   }
 
+  type ZorroMode = M.ZorroMode
+  object ZorroMode extends EnumObject[M.ZorroMode] {
+    val SPECKLE    = M.ZorroMode.SPECKLE_0_0096_PIX_6_7_FO_V
+    val WIDE_FIELD = M.ZorroMode.WIDE_FIELD_0_0725_PIX_60_FO_V
+  }
 }
 
 

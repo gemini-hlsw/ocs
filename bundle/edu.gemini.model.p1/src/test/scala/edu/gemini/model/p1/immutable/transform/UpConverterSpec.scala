@@ -478,6 +478,19 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           result must \\("Alopeke") \\ "name" \> AlopekeBlueprint(AlopekeMode.SPECKLE).name
       }
     }
+    "proposal with dssi blueprints at Gemini South must migrate to Zorro, REL-3454" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_dssi_gs.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 5
+          changes must contain(SemesterConverter2019ATo2019B.dssiGSToZorroMessage)
+          result must \\("Zorro", "id")
+          result must \\("Zorro") \\ "mode" \> ZorroMode.SPECKLE.value
+          result must \\("Zorro") \\ "name" \> ZorroBlueprint(ZorroMode.SPECKLE).name
+      }
+    }
     "proposal with phoenix blueprints must have them removed, REL-3233" in {
       skipped {
         val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_phoenix_no_site.xml")))

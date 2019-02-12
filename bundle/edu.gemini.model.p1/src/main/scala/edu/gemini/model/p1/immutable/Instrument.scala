@@ -26,6 +26,7 @@ object Instrument {
   case object Phoenix    extends Instrument(GS, "Phoenix", "Phoenix", "PHOENIX")
   case object Trecs      extends Instrument(GS, "TReCS", "T-ReCS", "TReCS")
   case object Visitor    extends Instrument(GS, "Visitor")
+  case object Zorro      extends Instrument(GS, "Zorro")
 
 //  case object Keck extends Instrument(Site.Keck, "Keck")
 //  case object Subaru extends Instrument(Site.Subaru, "Subaru")

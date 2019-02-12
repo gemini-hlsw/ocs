@@ -145,7 +145,21 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
 
 
 case object SemesterConverter2019ATo2019B extends SemesterConverter {
-  override val transformers = Nil
+  lazy val dssiGSToZorroMessage: String = "DSSI Gemini South proposal has been migrated to Zorro instead."
+  val dssiGSToZorro: TransformFunction = {
+    case p @ <dssi>{ns @ _*}</dssi> if (p \\ "Dssi" \\ "site").map(_.text).exists(_.equals(Site.GS.name)) =>
+      object DssiGSZorroTransformer extends BasicTransformer {
+        override def transform(n: xml.Node): xml.NodeSeq = n match {
+          case p @ <Dssi>{q @ _*}</Dssi> => <Zorro id={p.attribute("id")}>{q.map(transform) +: <mode>{ZorroMode.SPECKLE.value}</mode>}</Zorro>
+          case <name>{_}</name>          => <name>{ZorroBlueprint(ZorroMode.SPECKLE).name}</name>
+          case elem: xml.Elem            => elem.copy(child = elem.child.flatMap(transform))
+          case _                         => n
+        }
+      }
+      StepResult(dssiGSToZorroMessage, <zorro>{DssiGSZorroTransformer.transform(ns)}</zorro>).successNel
+  }
+
+  override val transformers = List(dssiGSToZorro)
 }
 
 /**
@@ -325,19 +339,6 @@ case object SemesterConverter2016ATo2016B extends SemesterConverter {
         StepResult("The Flamingos2 filter K-long (2.00 um) has been converted to K-long (2.20 um).", <flamingos2>{KLongFilterTransformer.transform(ns)}</flamingos2>).successNel
     }
 
-  val dssiSite: TransformFunction = {
-    case p @ <dssi>{ns @ _*}</dssi> if (p \\ "Dssi" \\ "site").isEmpty =>
-      object DssiSiteTransformer extends BasicTransformer {
-        override def transform(n: xml.Node): xml.NodeSeq = n match {
-          case p @ <Dssi>{q @ _*}</Dssi> => <Dssi id={p.attribute("id")}>{q.map(transform) +: <site>{Site.GS.name}</site>}</Dssi>
-          case <name>{name}</name>       => <name>DSSI {Site.GS.name}</name>
-          case elem: xml.Elem            => elem.copy(child = elem.child.flatMap(transform))
-          case _                         => n
-        }
-      }
-      StepResult("DSSI proposal has been assigned to Gemini South.", <dssi>{DssiSiteTransformer.transform(ns)}</dssi>).successNel
-  }
-
   val removedModes = List(GpiObservingMode.HLiwa, GpiObservingMode.HStar).map(_.value())
 
   val gpiModes: TransformFunction = {
@@ -352,7 +353,7 @@ case object SemesterConverter2016ATo2016B extends SemesterConverter {
       }
       StepResult(s"GPI proposal with observing mode ${(p \\ "observingMode").text} has been assigned to the ${GpiObservingMode.HDirect.value} mode.", <gpi>{GpiObsModeTransformer.transform(ns)}</gpi>).successNel
   }
-  override val transformers = List(replaceKLongFilter, dssiSite, gpiModes)
+  override val transformers = List(replaceKLongFilter, gpiModes)
 }
 
 /**

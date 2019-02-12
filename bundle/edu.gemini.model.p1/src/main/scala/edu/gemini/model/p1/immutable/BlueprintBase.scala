@@ -68,6 +68,9 @@ object BlueprintBase {
     case b: M.TrecsBlueprintImaging         => TrecsBlueprintImaging(b)
     case b: M.TrecsBlueprintSpectroscopy    => TrecsBlueprintSpectroscopy(b)
 
+    // Zorro
+    case b: M.ZorroBlueprint                => ZorroBlueprint(b)
+
     // Exchange
     case b: M.SubaruBlueprint               => SubaruBlueprint(b)
     case b: M.KeckBlueprint                 => KeckBlueprint(b)
