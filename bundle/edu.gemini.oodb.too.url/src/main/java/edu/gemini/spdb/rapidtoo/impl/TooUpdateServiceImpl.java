@@ -278,7 +278,7 @@ final class TooUpdateServiceImpl implements TooUpdateService {
         targetComp.setDataObject(targetObsComp);
     }
 
-    private void _setPosAngle(final ISPObservation obs, final TooUpdate update)  {
+    private void _updateInstrument(final ISPObservation obs, final TooUpdate update)  {
 
         final Double posAngle = update.getPositionAngle();
         if (posAngle == null) return;
@@ -292,6 +292,7 @@ final class TooUpdateServiceImpl implements TooUpdateService {
 
         final SPInstObsComp dobj = (SPInstObsComp) inst.getDataObject();
         dobj.setPosAngleDegrees(update.getPositionAngle());
+        update.getExposureTime().foreach(e -> dobj.setExposureTime(e.getSeconds()));
         inst.setDataObject(dobj);
     }
 
@@ -336,7 +337,7 @@ final class TooUpdateServiceImpl implements TooUpdateService {
         _addElevationConstraint(obs, factory, update);
         _addTimingWindow(obs, factory, update);
         _setTarget(obs, update);
-        _setPosAngle(obs, update);
+        _updateInstrument(obs, update);
         _updateObsDataObj(obs, update);
     }
 
