@@ -31,7 +31,7 @@ public final class HttpTooUpdate implements TooUpdate {
     public static final String READY_PARAM          = "ready";
 
     public static final Duration MIN_EXPOSURE_TIME  = Duration.ofSeconds(1L);
-    public static final Duration MAX_EXPOSURE_TIME  = Duration.ofSeconds(300L);
+    public static final Duration MAX_EXPOSURE_TIME  = Duration.ofSeconds(1200L);
 
     private final TooIdentity _id;
     private final TooTarget _target;
@@ -75,7 +75,7 @@ public final class HttpTooUpdate implements TooUpdate {
             try {
                 expTime = Duration.ofSeconds(Integer.parseInt(expTimeString));
             } catch (NumberFormatException ex) {
-                throw new BadRequestException("cannot parse " + EXPOSURE_TIME_PARAM + " value `" + expTimeString + "`");
+                throw new BadRequestException("cannot parse " + EXPOSURE_TIME_PARAM + " value `" + expTimeString + "` as an integral number of seconds");
             }
 
             if (expTime.compareTo(MIN_EXPOSURE_TIME) < 0) {
