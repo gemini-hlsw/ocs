@@ -1,5 +1,13 @@
 Gemini Phase I Schema Changes
 
+# Version 2019.2.1 - 2019B
+##########################
+
+* Added new instrument, Zorro, with two modes, namely Speckle (0.0096"/pix, 6.7" FoV) and Wide Field (0.0725"/pix, 60" FoV). (REL-3454)
+
+# Version 2019.1.1 - 2019A
+##########################
+
 # Version 2018.2.2 - 2018B
 ##########################
 

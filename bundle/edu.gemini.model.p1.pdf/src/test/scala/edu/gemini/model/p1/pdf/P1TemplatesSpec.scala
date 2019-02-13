@@ -133,14 +133,13 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
       // Check that we use the proper public name of Texes
       XML.loadString(result) must (\\("table-cell") \ "block" \> "Texes - Gemini North")
     }
-    "present the correct name when using Dssi, REL-1061" in {
-      val result = transformProposal("proposal_with_dssi.xml")
-      // Check that we use the proper public name of DSSI
-      XML.loadString(result) must (\\("table-cell") \ "block" \> "DSSI - Gemini North")
-    }
     "present the correct name when using 'Alopeke, REL-3351" in {
       val result = transformProposal("proposal_with_alopeke.xml")
       XML.loadString(result) must (\\("table-cell") \ "block" \> "'Alopeke")
+    }
+    "present the correct name when using Zorro, REL-3454" in {
+      val result = transformProposal("proposal_with_zorro.xml")
+      XML.loadString(result) must (\\("table-cell") \ "block" \> "Zorro")
     }
     "present the correct name when using Visitor GN, REL-1090" in {
       val result = transformProposal("proposal_with_visitor_gn.xml")
@@ -306,11 +305,6 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
     "show that Texes is in Gemini North, REL-1062" in {
       val result = transformProposal("proposal_with_texes.xml", P1PDF.NOAONoInvestigatorsList)
       // Check that Texes is shown in Gemini North
-      XML.loadString(result) must (\\("table-cell") \ "block" \> "Gemini North")
-    }
-    "show that Dssi is in Gemini North, REL-1061" in {
-      val result = transformProposal("proposal_with_dssi.xml", P1PDF.NOAONoInvestigatorsList)
-      // Check that Speckle is shown in Gemini North
       XML.loadString(result) must (\\("table-cell") \ "block" \> "Gemini North")
     }
     "show that a GN visitor is in Gemini North, REL-1090" in {

@@ -56,6 +56,7 @@ object QueryArgs {
     case g: GracesBlueprint     => Right(Instrument.GmosNorth.id) // REL-3288: GRACES uses GMOS-N OI.
     case g: TexesBlueprint      => Right(Instrument.Nifs.id)      // REL-1062
     case g: VisitorBlueprint    => Right(Instrument.Niri.id)      // REL-1090
+    case g: ZorroBlueprint      => Right(Instrument.Nifs.id)      // REL-3454: treat Zorro like Alopeke and DSSI.
     case g: GeminiBlueprintBase => Right(g.instrument.id)
     case _ => Left("Not a Gemini Instrument")
   }

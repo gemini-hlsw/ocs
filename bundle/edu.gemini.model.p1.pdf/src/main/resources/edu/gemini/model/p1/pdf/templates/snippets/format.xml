@@ -233,6 +233,7 @@
             <xsl:when test="$inst = 'dssi'">DSSI - <xsl:value-of select="$site"/></xsl:when>
             <xsl:when test="$inst = 'texes'">Texes - <xsl:value-of select="$site"/></xsl:when>
             <xsl:when test="$inst = 'trecs'">TReCS</xsl:when>
+            <xsl:when test="$inst = 'zorro'">Zorro</xsl:when>
             <xsl:otherwise>?<xsl:value-of select="$inst"/>?</xsl:otherwise>
         </xsl:choose>
 
@@ -265,6 +266,7 @@
             <xsl:when test="$inst = 'dssi'"><xsl:value-of select="$site"/></xsl:when>
             <xsl:when test="$inst = 'texes'"><xsl:value-of select="$site"/></xsl:when>
             <xsl:when test="$inst = 'trecs'">Gemini South</xsl:when>
+            <xsl:when test="$inst = 'zorro'">Gemini South</xsl:when>
             <xsl:when test="$inst = 'subaru'">Subaru</xsl:when>
             <xsl:when test="$inst = 'keck'">Keck</xsl:when>
             <xsl:otherwise>?<xsl:value-of select="$inst"/>?</xsl:otherwise>

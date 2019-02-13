@@ -82,6 +82,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
           Semester2018BProblems(p, s).all ++
+          Semester2019BProblems(p, s).all ++
           List(incompleteInvestigator, missingObsElementCheck, emptyTargetCheck,
             emptyEphemerisCheck, singlePointEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
             badGuiding, cwfsCorrectionsIssue, badVisibility, iffyVisibility, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsIQ70Check, lgsGemsIQ85Check,
@@ -710,6 +711,23 @@ object TimeProblems {
   }
 }
 
+case class Semester2019BProblems(p: Proposal, s: ShellAdvisor) {
+  // *** 2019B specific issues ***
+  private val semester2019B = Semester(2019, SemesterOption.B)
+
+  private val dssiObsolete = for {
+    o <- p.nonEmptyObservations
+    b <- o.blueprint
+    if b.isInstanceOf[DssiBlueprint]
+    if p.semester == semester2019B
+  } yield {
+    val sol = if (b.site == Site.GN) "Use 'Alopeke instead for GN." else "Use Zorro instead for GS."
+    new Problem(Severity.Error, s"DSSI is not offered at Gemini for 2019B. $sol", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
+  }
+
+  def all: List[Problem] = List(dssiObsolete).flatten
+}
+
 case class Semester2018BProblems(p: Proposal, s: ShellAdvisor) {
   // *** 2018B specific issues ***
   private val semester2018B = Semester(2018, SemesterOption.B)
@@ -729,14 +747,6 @@ case class Semester2018BProblems(p: Proposal, s: ShellAdvisor) {
     if b.asInstanceOf[GmosNBlueprintBase].altair != AltairNone
   } yield new Problem(Severity.Error, "GMOS-N does not offer Altair in 2018B.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
 
-  private val dssiOnlyGS = for {
-    o <- p.nonEmptyObservations
-    b <- o.blueprint
-    if b.isInstanceOf[DssiBlueprint]
-    if b.site == Site.GN
-    if p.semester == semester2018B
-  } yield new Problem(Severity.Error, "DSSI is not offered at Gemini North for 2018B.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
-
   private val phoenixOnlyGS = for {
     o <- p.nonEmptyObservations
     b <- o.blueprint
@@ -744,7 +754,7 @@ case class Semester2018BProblems(p: Proposal, s: ShellAdvisor) {
     if b.site == Site.GN
   } yield new Problem(Severity.Error, "Phoenix is only available at Gemini South for 2018B.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
 
-  def all: List[Problem] = List(texesNotOfferedCheck, gmosnAltairNotOfferedCheck, dssiOnlyGS, phoenixOnlyGS).flatten
+  def all: List[Problem] = List(texesNotOfferedCheck, gmosnAltairNotOfferedCheck, phoenixOnlyGS).flatten
 }
 
 case class TimeProblems(p: Proposal, s: ShellAdvisor) {

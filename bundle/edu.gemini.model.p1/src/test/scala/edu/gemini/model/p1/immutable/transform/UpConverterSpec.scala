@@ -451,20 +451,6 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
         }
       }
     }
-    "proposal with dssi blueprints must have a site, REL-2463" in {
-      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_dssi_no_site.xml")))
-
-      val converted = UpConverter.convert(xml)
-      converted must beSuccessful.like {
-        case StepResult(changes, result) =>
-          changes must have length 5
-          changes must contain("DSSI proposal has been assigned to Gemini South.")
-          // The dssi blueprint must remain and include a site
-          result must \\("Dssi", "id")
-          result must \\("Dssi") \\ "site" \> "Gemini South"
-          result must \\("Dssi") \\ "name" \> "DSSI Gemini South"
-      }
-    }
     "proposal with dssi blueprints at Gemini North must migrate to 'Alopeke, REL-3349" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_dssi_gn.xml")))
 
@@ -476,6 +462,19 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           result must \\("Alopeke", "id")
           result must \\("Alopeke") \\ "mode" \> AlopekeMode.SPECKLE.value
           result must \\("Alopeke") \\ "name" \> AlopekeBlueprint(AlopekeMode.SPECKLE).name
+      }
+    }
+    "proposal with dssi blueprints at Gemini South must migrate to Zorro, REL-3454" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_dssi_gs.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 5
+          changes must contain(SemesterConverter2019ATo2019B.dssiGSToZorroMessage)
+          result must \\("Zorro", "id")
+          result must \\("Zorro") \\ "mode" \> ZorroMode.SPECKLE.value
+          result must \\("Zorro") \\ "name" \> ZorroBlueprint(ZorroMode.SPECKLE).name
       }
     }
     "proposal with phoenix blueprints must have them removed, REL-3233" in {
@@ -698,29 +697,6 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           changes must have length 5
           // Check that fpu and name are replaced
           result must \\("name") \> "GMOS-N IFU None B600 i + CaT (815 nm) IFU 1 slit"
-      }
-    }
-    "remove submissions for ngo gs, REL-1918" in {
-      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_gs_time_request.xml")))
-      val converted = UpConverter.convert(xml)
-      converted must beSuccessful.like {
-        case StepResult(changes, result) =>
-          changes must have length 7
-          changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
-          changes must contain(s"Updated semester to ${Semester.current.display}")
-          changes must contain("Please use the PIT from semester 2014B to view the unmodified proposal")
-          changes must contain("Gemini Staff is no longer a valid partner and this time request has been removed")
-          changes must contain("Former observation time parameter mapped to program time")
-
-          // Sanity check
-          ProposalIo.read(result.toString())
-
-          // ngo is gone
-          result \\ "queue" must not \\ "ngo"
-          // but itac is there
-          result \\ "queue" must \\("itac")
-          // Check that queue attributes are preserved
-          result must \\("queue", "key" -> "604c87d8-9bf8-96a8-0642-f70604c87d89", "tooOption" -> "None")
       }
     }
     "proposal with Graces blueprints must be preserved, REL-2200" in {
