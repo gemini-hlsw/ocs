@@ -244,9 +244,7 @@ case object SemesterConverter2018ATo2018B extends SemesterConverter {
       StepResult(phoenixSiteMessage, <phoenix>{PhoenixSiteTransformer.transform(ns)}</phoenix>).successNel
   }
 
-  val (texesRemover, texesRemoverMessage) = removeBlueprint("texes", "Texes")
-
-  override val transformers = List(dssiGNToAlopeke, phoenixSite, texesRemover)
+  override val transformers = List(dssiGNToAlopeke, phoenixSite)
 }
 
 /**
