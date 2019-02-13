@@ -11,9 +11,9 @@ class RootSpec extends Specification {
       val root = new Root(Semester(2016, A))
       root.choices must contain(Instrument.Gsaoi)
     }
-    "Texes has been removed in 2018B" in {
-      val root = new Root(Semester(2018, B))
-      root.choices must not contain Instrument.Texes
+    "includes Texes" in {
+      val root = new Root(Semester(2019, B))
+      root.choices must contain(Instrument.Texes)
     }
     "DSSI has been removed in 2019B" in {
       val root = new Root(Semester(2019, B))
