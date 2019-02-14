@@ -5,7 +5,7 @@ import edu.gemini.itc.shared._
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.telescope.IssPort;
 
-trait ItcRequestCodec {
+trait ItcParametersCodec {
   import keyed._
   import instrumentdetails._
   import observingconditions._
@@ -29,4 +29,4 @@ trait ItcRequestCodec {
 
 }
 
-object itcrequest extends ItcRequestCodec
+object itcrequest extends ItcParametersCodec
