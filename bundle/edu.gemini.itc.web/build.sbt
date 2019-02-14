@@ -12,7 +12,8 @@ unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/org.osgi.enterprise-5.0.0.jar"),
   new File(baseDirectory.value, "../../lib/bundle/javax-servlet_2.10-2.5.0.jar"),
   new File(baseDirectory.value, "../../lib/bundle/pax-web-jetty-bundle-1.1.13.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/pax-web-jsp-1.1.13.jar")
+  new File(baseDirectory.value, "../../lib/bundle/pax-web-jsp-1.1.13.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/argonaut_2.11-6.2.jar")
 )
 
 libraryDependencies ++= Seq(
