@@ -2,12 +2,11 @@ package edu.gemini.itc.web.json
 
 import argonaut._, Argonaut._
 import edu.gemini.spModel.core._
-import squants.motion.Velocity
-import squants.radio.{ Irradiance, SpectralIrradiance }
 
 trait SpectralDistributionCodec {
   import coproduct._
   import keyed._
+  import squants._
   import wavelength._
 
   private implicit val BlackBodyCodec: CodecJson[BlackBody] =
@@ -20,17 +19,13 @@ trait SpectralDistributionCodec {
       "index"
     )
 
-  private implicit val EmissionLineCodec: CodecJson[EmissionLine] = {
-    implicit val VelocityCodec:           CodecJson[Velocity]           = ???
-    implicit val IrradianceCodec:         CodecJson[Irradiance]         = ???
-    implicit val SpectralIrradianceCodec: CodecJson[SpectralIrradiance] = ???
+  private implicit val EmissionLineCodec: CodecJson[EmissionLine] =
     casecodec4(EmissionLine.apply, EmissionLine.unapply)(
       "wavelength",
       "width",
       "flux",
       "continuum"
     )
-  }
 
   private implicit val UserDefinedSpectrumCodec: CodecJson[UserDefinedSpectrum] =
     casecodec2(UserDefinedSpectrum.apply, UserDefinedSpectrum.unapply)(

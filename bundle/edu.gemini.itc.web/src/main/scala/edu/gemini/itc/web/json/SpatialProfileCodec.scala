@@ -6,9 +6,16 @@ import edu.gemini.spModel.core.{ SpatialProfile, PointSource, UniformSource, Gau
 trait SpatialProfileCodec {
   import coproduct._
 
-  private val PointSourceCodec    = constCodec(PointSource)
-  private val UniformSourceCodec  = constCodec(UniformSource)
-  private val GaussianSourceCodec = casecodec1(GaussianSource.apply, GaussianSource.unapply)("fwhm")
+  private val PointSourceCodec: CodecJson[PointSource.type] =
+    constCodec(PointSource)
+
+  private val UniformSourceCodec: CodecJson[UniformSource.type] =
+    constCodec(UniformSource)
+
+  private val GaussianSourceCodec: CodecJson[GaussianSource] =
+    casecodec1(GaussianSource.apply, GaussianSource.unapply)(
+      "fwhm"
+    )
 
   implicit val SpatialProfileCodec: CodecJson[SpatialProfile] = {
     CoproductCodec[SpatialProfile]
