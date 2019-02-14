@@ -18,7 +18,7 @@ unmanagedJars in Compile ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scala-lang" % "scala-actors" % "2.11.7",
+  "org.scala-lang" % "scala-actors" % scalaVersion.value,
   "org.scalaz" %% "scalaz-core" % ScalaZVersion,
   "org.scalaz" %% "scalaz-effect" % ScalaZVersion)
 
