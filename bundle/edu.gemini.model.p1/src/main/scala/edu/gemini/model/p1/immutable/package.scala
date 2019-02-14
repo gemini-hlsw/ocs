@@ -124,6 +124,7 @@ package object immutable {
       z_G0304,
       Z_G0322,
       Y_G0323,
+      ri_G0349,
       HeII_G0320,
       HeIIC_G0321,
       OIII_G0318,
