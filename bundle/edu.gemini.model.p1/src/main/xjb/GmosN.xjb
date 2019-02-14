@@ -74,6 +74,9 @@
             <jxb:bindings node="./xsd:enumeration[@value='Y (1010 nm)']">
                 <jxb:typesafeEnumMember name="Y_G0323"/>
             </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='ri (700 nm)']">
+                <jxb:typesafeEnumMember name="ri_G0349"/>
+            </jxb:bindings>
             <jxb:bindings node="./xsd:enumeration[@value='HeII (468 nm)']">
                 <jxb:typesafeEnumMember name="HeII_G0320"/>
             </jxb:bindings>

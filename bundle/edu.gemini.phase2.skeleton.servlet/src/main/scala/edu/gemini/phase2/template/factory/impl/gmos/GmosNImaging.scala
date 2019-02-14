@@ -47,6 +47,7 @@ case class GmosNImaging(blueprint:SpGmosNBlueprintImaging) extends GmosNBase[SpG
       z_G0304 -> 30.0,
       Z_G0322 -> 30.0,
       Y_G0323 -> 30.0,
+      ri_G0349 -> 30.0,
       HeII_G0320 -> 300.0,
       HeIIC_G0321 -> 300.0,
       OIII_G0318 -> 300.0,

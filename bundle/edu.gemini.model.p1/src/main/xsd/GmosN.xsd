@@ -159,6 +159,7 @@
             <xsd:enumeration value="z (925 nm)"/>
             <xsd:enumeration value="Z (876 nm)"/>
             <xsd:enumeration value="Y (1010 nm)"/>
+            <xsd:enumeration value="ri (700 nm)"/>
             <xsd:enumeration value="HeII (468 nm)"/>
             <xsd:enumeration value="HeIIC (478 nm)"/>
             <xsd:enumeration value="OIII (499 nm)"/>
