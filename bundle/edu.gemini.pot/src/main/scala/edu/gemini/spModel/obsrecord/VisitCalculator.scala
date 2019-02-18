@@ -76,50 +76,38 @@ private[obsrecord] object VisitCalculator {
   }
 
   /**
-   * The 2019A+ calculator.  The main change from the previous time accounting
-   * result is that visits without a passing dataset are not charged at all.  It
-   * also simplifies and fixes a number of bugs with the original algorithm:
-   *
-   * <ul>
-   *   <li>Charges for the portion of a dataset after start and before overlap</li>
-   *   <li>Handles start/end dataset pairs with intervening events correctly</li>
-   *   <li>Doesn't drop time if the first event is start dataset</li>
-   * </ul>
+   * Base trait for 2019A time accounting rules.
    */
-  case object Update2019A extends VisitCalculator {
-    val semester = new Semester(2019, Semester.Half.A)
+  sealed trait Base2019A extends VisitCalculator {
 
-    override def validAt(s: Site): Instant =
-      Instant.ofEpochMilli(semester.getStartDate(s).getTime)
-
-    override def calc(
+    /**
+     * Time accounting calculation for "normal" visits with facility instruments.
+     * A normal visit is one in which at least one chargable dataset is
+     * generated.
+     */
+    def normalCharges(
+      total:  Union[Interval],
+      dsets:  Vector[DatasetInterval],
       events: VisitEvents,
       qa:     DatasetLabel => DatasetQaState,
       oc:     DatasetLabel => ObsClass
     ): VisitTimes = {
 
-      val total = events.total
-      val dsets = events.datasetIntervals
+      val chargeable = events.chargeable
 
-      def normalCharges: VisitTimes = {
-        val chargeable = events.chargeable
+      val charge: ChargeClass => Union[Interval] =
+        dsets.groupBy { case (label, interval) =>
+          if (qa(label).isChargeable) oc(label).getDefaultChargeClass else NONCHARGED
+        }.mapValues(v => new Union(v.map(_._2).asJava) ∩ chargeable)
+         .withDefaultValue(new Union())
 
-        val charge: ChargeClass => Union[Interval] =
-          dsets.groupBy { case (label, interval) =>
-            if (qa(label).isChargeable) oc(label).getDefaultChargeClass else NONCHARGED
-          }.mapValues(v => new Union(v.map(_._2).asJava) ∩ chargeable)
-           .withDefaultValue(new Union())
+      visitTimes(
+        total,
+        program    = charge(PROGRAM),
+        partner    = charge(PARTNER),
+        noncharged = charge(NONCHARGED) + (total - chargeable)
+      )
 
-        visitTimes(
-          total,
-          program    = charge(PROGRAM),
-          partner    = charge(PARTNER),
-          noncharged = charge(NONCHARGED) + (total - chargeable)
-        )
-      }
-
-      if (dsets.exists { case (lab, _) => qa(lab).isChargeable }) normalCharges
-      else VisitTimes.noncharged(total.sum)
     }
 
     // Converts a collection of categorized Union[Interval] into VisitTimes.
@@ -139,6 +127,41 @@ private[obsrecord] object VisitCalculator {
       vt.addUnclassifiedTime((total - program - partner - noncharged).sum)
       vt
     }
+
+  }
+
+  /**
+   * The 2019A+ calculator.  The main change from the previous time accounting
+   * result is that visits without a passing dataset are not charged at all.  It
+   * also simplifies and fixes a number of bugs with the original algorithm:
+   *
+   * <ul>
+   *   <li>Charges for the portion of a dataset after start and before overlap</li>
+   *   <li>Handles start/end dataset pairs with intervening events correctly</li>
+   *   <li>Doesn't drop time if the first event is start dataset</li>
+   * </ul>
+   */
+  case object Update2019A extends Base2019A {
+    val semester = new Semester(2019, Semester.Half.A)
+
+    override def validAt(s: Site): Instant =
+      Instant.ofEpochMilli(semester.getStartDate(s).getTime)
+
+    override def calc(
+      events: VisitEvents,
+      qa:     DatasetLabel => DatasetQaState,
+      oc:     DatasetLabel => ObsClass
+    ): VisitTimes = {
+
+      val total = events.total
+      val dsets = events.datasetIntervals
+
+      if (dsets.exists { case (lab, _) => qa(lab).isChargeable })
+        normalCharges(total, dsets, events, qa, oc)
+      else
+        VisitTimes.noncharged(total.sum)
+    }
+
   }
 
   // reverse order by valid time (newest first)
