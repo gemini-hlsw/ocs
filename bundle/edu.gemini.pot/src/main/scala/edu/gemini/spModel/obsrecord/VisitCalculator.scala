@@ -79,37 +79,60 @@ private[obsrecord] object VisitCalculator {
   }
 
   /**
-   * Base trait for 2019A time accounting rules.
+   * The 2019A+ calculator.  The main change from the previous time accounting
+   * result is that visits without a passing dataset are not charged at all,
+   * except for visitor instrument observations which are charged regardless.
+   * It also simplifies and fixes a number of bugs with the original algorithm:
+   *
+   * <ul>
+   *   <li>Charges for the portion of a dataset after start and before overlap</li>
+   *   <li>Handles start/end dataset pairs with intervening events correctly</li>
+   *   <li>Doesn't drop time if the first event is start dataset</li>
+   * </ul>
    */
-  sealed trait Base2019A extends VisitCalculator {
+  case object Update2019A extends VisitCalculator {
+    val semester = new Semester(2019, Semester.Half.A)
 
-    /**
-     * Time accounting calculation for "normal" visits with facility instruments.
-     * A normal visit is one in which at least one chargable dataset is
-     * generated.
-     */
-    def normalCharges(
-      total:  Union[Interval],
-      dsets:  Vector[DatasetInterval],
-      events: VisitEvents,
-      qa:     DatasetLabel => DatasetQaState,
-      oc:     DatasetLabel => ObsClass
+    override def validAt(s: Site): Instant =
+      Instant.ofEpochMilli(semester.getStartDate(s).getTime)
+
+    override def calc(
+      instrument: Option[Instrument],
+      events:     VisitEvents,
+      qa:         DatasetLabel => DatasetQaState,
+      oc:         DatasetLabel => ObsClass
     ): VisitTimes = {
 
-      val chargeable = events.chargeable
+      val total = events.total
+      val dsets = events.datasetIntervals
 
-      val charge: ChargeClass => Union[Interval] =
-        dsets.groupBy { case (label, interval) =>
-          if (qa(label).isChargeable) oc(label).getDefaultChargeClass else NONCHARGED
-        }.mapValues(v => new Union(v.map(_._2).asJava) ∩ chargeable)
-         .withDefaultValue(new Union())
+      def normalCharges: VisitTimes = {
 
-      visitTimes(
-        total,
-        program    = charge(PROGRAM),
-        partner    = charge(PARTNER),
-        noncharged = charge(NONCHARGED) + (total - chargeable)
-      )
+        val chargeable = events.chargeable
+
+        val charge: ChargeClass => Union[Interval] =
+          dsets.groupBy { case (label, interval) =>
+            if (qa(label).isChargeable) oc(label).getDefaultChargeClass else NONCHARGED
+          }.mapValues(v => new Union(v.map(_._2).asJava) ∩ chargeable)
+           .withDefaultValue(new Union())
+
+        visitTimes(
+          total,
+          program    = charge(PROGRAM),
+          partner    = charge(PARTNER),
+          noncharged = charge(NONCHARGED) + (total - chargeable)
+        )
+
+      }
+
+      def isVisitor: Boolean =
+        instrument.exists(_ == Instrument.Visitor)
+
+      def hasChargeableDataset: Boolean =
+        dsets.exists { case (lab, _) => qa(lab).isChargeable }
+
+      if (isVisitor || hasChargeableDataset) normalCharges
+      else VisitTimes.noncharged(total.sum)
 
     }
 
@@ -133,69 +156,8 @@ private[obsrecord] object VisitCalculator {
 
   }
 
-  /**
-   * The 2019A+ calculator.  The main change from the previous time accounting
-   * result is that visits without a passing dataset are not charged at all.  It
-   * also simplifies and fixes a number of bugs with the original algorithm:
-   *
-   * <ul>
-   *   <li>Charges for the portion of a dataset after start and before overlap</li>
-   *   <li>Handles start/end dataset pairs with intervening events correctly</li>
-   *   <li>Doesn't drop time if the first event is start dataset</li>
-   * </ul>
-   */
-  case object Update2019A0 extends Base2019A {
-    val semester = new Semester(2019, Semester.Half.A)
-
-    override def validAt(s: Site): Instant =
-      Instant.ofEpochMilli(semester.getStartDate(s).getTime)
-
-    override def calc(
-      instrument: Option[Instrument],
-      events:     VisitEvents,
-      qa:         DatasetLabel => DatasetQaState,
-      oc:         DatasetLabel => ObsClass
-    ): VisitTimes = {
-
-      val total = events.total
-      val dsets = events.datasetIntervals
-
-      if (dsets.exists { case (lab, _) => qa(lab).isChargeable })
-        normalCharges(total, dsets, events, qa, oc)
-      else
-        VisitTimes.noncharged(total.sum)
-    }
-
-  }
-
-  /**
-   * Updates the 2019A0 calculator for visitor instruments.  (REL-3625) Since
-   * visitor instruments don't have associated datasets they were not being
-   * charged at all.  This change will charge as before for visitor instruments.
-   */
-  case object Update2019A1 extends Base2019A {
-
-    // 2PM local time
-    val startDate = LocalDateTime.of(2019, Month.FEBRUARY, 19, 14, 0)
-
-    override def validAt(s: Site): Instant =
-      startDate.atZone(s.timezone.toZoneId).toInstant
-
-    override def calc(
-      instrument: Option[Instrument],
-      events:     VisitEvents,
-      qa:         DatasetLabel => DatasetQaState,
-      oc:         DatasetLabel => ObsClass
-    ): VisitTimes =
-
-      instrument.filterNot(_ == Instrument.Visitor).fold(
-        normalCharges(events.total, events.datasetIntervals, events, qa, oc)
-      )(_ => Update2019A0.calc(instrument, events, qa,oc))
-
-  }
-
   // reverse order by valid time (newest first)
   def all: List[VisitCalculator] =
-    List(Update2019A1, Update2019A0, Primordial)
+    List(Update2019A, Primordial)
 
 }

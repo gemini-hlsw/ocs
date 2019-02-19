@@ -121,7 +121,6 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
   val GmosSouth     = Some(Instrument.GmosSouth)
   val Semester2019A = new Semester(2019, Semester.Half.A)
   val GS19AStart    = Instant.ofEpochMilli(Semester2019A.getStartDate(GS).getTime)
-  val GS19AUpdate1  = VisitCalculator.Update2019A1.validAt(GS)
   val GS19AEnd      = Instant.ofEpochMilli(Semester2019A.getEndDate(GS).getTime)
   val DayInMs       = Duration.ofDays(1l).toMillis
 
@@ -162,41 +161,30 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
         // Union of the dataset intervals.
         val u = new Union(t.events.datasetIntervals.unzip._2.asJava)
 
-        // All events.
-        val es: Vector[ObsExecEvent] = t.events.sorted
-
         // Use a calc assuming all datasets are PASS (because if they are all
         // FAIL or USABLE nothing is charged in some cases).
-        val v = TimeAccounting.calc(t.instrument, es, const(PASS), t.oc)
+        val v = TimeAccounting.calc(t.instrument, t.events.sorted, const(PASS), t.oc)
 
-        val pre2019A1 = es.headOption.exists(e => Instant.ofEpochMilli(e.getTimestamp).isBefore(GS19AUpdate1))
-        val isVisitor = t.instrument.forall(_ == Instrument.Visitor)
+        val isVisitor = t.instrument.exists(_ == Instrument.Visitor)
 
         // If there were no datasets, then we don't charge at all.
-        if ((u.sum === 0) && (pre2019A1 || !isVisitor))
+        if ((u.sum === 0) && !isVisitor)
           v.getTotalTime shouldEqual v.getClassifiedTime(NONCHARGED)
         else
           v.getUnclassifiedTime shouldEqual (t.events.chargeable - u).sum
       }
     }
 
-    "not charge, even for visitor instruments, if there are no passing datasets until 19A update 1" in {
-      forAll(genTest(GS19AStart, GS19AUpdate1)) { (t: Test) =>
+    "not charge (except for visitor instruments), if there are no passing datasets" in {
+      forAll(genTest(GS19AStart, GS19AEnd)) { (t: Test) =>
         t.qa.values.exists(_.isChargeable) ||
+          t.instrument.exists(_ == Instrument.Visitor) ||
           (t.visitTimes === VisitTimes.noncharged(t.events.total.sum))
       }
     }
 
-    "not charge for non-visitor instruments if there are no passing datasets after 19A update 1" in {
-      forAll(genTest(GS19AUpdate1, GS19AEnd)) { (t: Test) =>
-        val tʹ = t.copy(instrument = GmosSouth)
-        tʹ.qa.values.exists(_.isChargeable) ||
-          (tʹ.visitTimes === VisitTimes.noncharged(tʹ.events.total.sum))
-      }
-    }
-
-    "charge even if there are no passing datasets for visitor instruments after 19A update 1" in {
-      forAll(genTest(GS19AUpdate1, GS19AEnd)) { (t: Test) =>
+    "charge even if there are no passing datasets for visitor instruments" in {
+      forAll(genTest(GS19AStart, GS19AEnd)) { (t: Test) =>
 
         // Modify the test to use a visitor instrument and make all the
         // datasets be failed.  This should still be charged according to the
@@ -254,9 +242,8 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
         // Of the remaining datasets, we need at least one to be PASS (or
         // undefined or check) because the new algorithm explicitly doesn't
         // charge if they are all failing.
-        val charge = events.datasetIntervals.exists { case (lab, _) =>
-          t.qa(lab).isChargeable
-        }
+        val charge = t.instrument.exists(_ == Instrument.Visitor) ||
+          events.datasetIntervals.exists { case (lab, _) => t.qa(lab).isChargeable }
 
         // If the new algorithm won't charge at all we can't really compare so
         // just assign noncharged to vtOld.
@@ -264,7 +251,7 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
                     else VisitTimes.noncharged(events.total.sum)
 
         // Now the two methods should produce the same results.
-        val vtNew = VisitCalculator.Update2019A0.calc(t.instrument, events, t.qa, t.oc)
+        val vtNew = VisitCalculator.Update2019A.calc(t.instrument, events, t.qa, t.oc)
 
         vtNew shouldEqual vtOld
       }
