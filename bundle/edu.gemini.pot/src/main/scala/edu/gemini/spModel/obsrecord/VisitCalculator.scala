@@ -1,6 +1,6 @@
 package edu.gemini.spModel.obsrecord
 
-import java.time.Instant
+import java.time.{ Instant, LocalDateTime, Month }
 
 import edu.gemini.pot.sp.Instrument
 import edu.gemini.skycalc.TwilightBoundType.NAUTICAL
@@ -144,7 +144,7 @@ private[obsrecord] object VisitCalculator {
    *   <li>Doesn't drop time if the first event is start dataset</li>
    * </ul>
    */
-  case object Update2019A extends Base2019A {
+  case object Update2019A0 extends Base2019A {
     val semester = new Semester(2019, Semester.Half.A)
 
     override def validAt(s: Site): Instant =
@@ -168,8 +168,34 @@ private[obsrecord] object VisitCalculator {
 
   }
 
+  /**
+   * Updates the 2019A0 calculator for visitor instruments.  (REL-3625) Since
+   * visitor instruments don't have associated datasets they were not being
+   * charged at all.  This change will charge as before for visitor instruments.
+   */
+  case object Update2019A1 extends Base2019A {
+
+    // 2PM local time
+    val startDate = LocalDateTime.of(2019, Month.FEBRUARY, 19, 14, 0)
+
+    override def validAt(s: Site): Instant =
+      startDate.atZone(s.timezone.toZoneId).toInstant
+
+    override def calc(
+      instrument: Option[Instrument],
+      events:     VisitEvents,
+      qa:         DatasetLabel => DatasetQaState,
+      oc:         DatasetLabel => ObsClass
+    ): VisitTimes =
+
+      instrument.filterNot(_ == Instrument.Visitor).fold(
+        normalCharges(events.total, events.datasetIntervals, events, qa, oc)
+      )(_ => Update2019A0.calc(instrument, events, qa,oc))
+
+  }
+
   // reverse order by valid time (newest first)
   def all: List[VisitCalculator] =
-    List(Update2019A, Primordial)
+    List(Update2019A1, Update2019A0, Primordial)
 
 }
