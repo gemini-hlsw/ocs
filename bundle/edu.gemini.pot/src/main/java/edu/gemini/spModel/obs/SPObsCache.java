@@ -185,7 +185,7 @@ public final class SPObsCache implements ISPEventMonitor, ISPCloneable, Serializ
     private Option<TargetCalculator> _targetCalculator;
 
     // The observation's instrument, if any.
-    private Option<Instrument> _instrument;
+    private Option<Instrument> _instrument = ImOption.empty();
 
     // The observation class (The value is determined by examining the sequence
     // and is cached here)
@@ -334,6 +334,7 @@ public final class SPObsCache implements ISPEventMonitor, ISPCloneable, Serializ
 //        _configSequence     = null;
         _stepCount          = null;
         _targetCalculator   = null;
+        _instrument         = ImOption.empty();
     }
 
     public void structureChanged(SPStructureChange change) {
