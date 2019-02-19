@@ -2,6 +2,7 @@ package edu.gemini.spModel.obsrecord
 
 import java.time.Instant
 
+import edu.gemini.pot.sp.Instrument
 import edu.gemini.skycalc.TwilightBoundType.NAUTICAL
 import edu.gemini.skycalc.{Interval, ObservingNight, Union}
 import edu.gemini.spModel.core.{Semester, Site}
@@ -37,9 +38,10 @@ private[obsrecord] sealed trait VisitCalculator {
    * individual dataset.
    */
   def calc(
-    events: VisitEvents,
-    qa:     DatasetLabel => DatasetQaState,
-    oc:     DatasetLabel => ObsClass
+    instrument: Option[Instrument],
+    events:     VisitEvents,
+    qa:         DatasetLabel => DatasetQaState,
+    oc:         DatasetLabel => ObsClass
   ): VisitTimes
 
 }
@@ -67,9 +69,10 @@ private[obsrecord] object VisitCalculator {
       Instant.MIN
 
     override def calc(
-      events: VisitEvents,
-      qa:     DatasetLabel => DatasetQaState,
-      oc:     DatasetLabel => ObsClass
+      instrument: Option[Instrument], // ignored here
+      events:     VisitEvents,
+      qa:         DatasetLabel => DatasetQaState,
+      oc:         DatasetLabel => ObsClass
     ): VisitTimes =
       PrimordialVisitCalculator.instance.calc(events.sorted.toList.asJava, qa.asJava, oc.asJava)
 
@@ -148,9 +151,10 @@ private[obsrecord] object VisitCalculator {
       Instant.ofEpochMilli(semester.getStartDate(s).getTime)
 
     override def calc(
-      events: VisitEvents,
-      qa:     DatasetLabel => DatasetQaState,
-      oc:     DatasetLabel => ObsClass
+      instrument: Option[Instrument],
+      events:     VisitEvents,
+      qa:         DatasetLabel => DatasetQaState,
+      oc:         DatasetLabel => ObsClass
     ): VisitTimes = {
 
       val total = events.total

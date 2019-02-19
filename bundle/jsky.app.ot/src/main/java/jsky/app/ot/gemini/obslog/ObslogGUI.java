@@ -1,7 +1,10 @@
 package jsky.app.ot.gemini.obslog;
 
+import edu.gemini.pot.sp.Instrument;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.dataset.*;
 import edu.gemini.spModel.event.ObsExecEvent;
+import edu.gemini.spModel.obs.InstrumentService;
 import edu.gemini.spModel.obslog.ObsLog;
 import edu.gemini.spModel.obsrecord.ObsVisit;
 import edu.gemini.spModel.obsrecord.UniqueConfig;
@@ -95,10 +98,10 @@ class ObslogGUI extends JPanel {
     /**
      * Sets the data object, replacing or updating the content as appropriate.
      */
-    void setup(ObsLog obsLog) {
+    void setup(Option<Instrument> inst, ObsLog obsLog) {
         // And tell the tabs that the world has changed.
         tabDataAnalysis.setObsLog(obsLog);
-        tabVisits.setObsLog(obsLog);
+        tabVisits.setObsLog(inst, obsLog);
         tabComments.setObsLog(obsLog);
     }
 
@@ -706,14 +709,14 @@ class ObslogGUI extends JPanel {
             setName(name);
         }
 
-        void setObsLog(final ObsLog obsLog) {
+        void setObsLog(final Option<Instrument> inst, final ObsLog obsLog) {
             clientArea.removeAll();
-            addVisits(clientArea, obsLog);
+            addVisits(inst, clientArea, obsLog);
             revalidate();
         }
 
-        private void addVisits(Container parent, ObsLog obsLog) {
-            final ObsVisit[] visits = obsLog.getVisits();
+        private void addVisits(Option<Instrument> inst, Container parent, ObsLog obsLog) {
+            final ObsVisit[] visits = obsLog.getVisits(inst);
             for (final ObsVisit visit : visits) {
                 final String title;
                 final DatasetLabel[] labels = visit.getAllDatasetLabels();

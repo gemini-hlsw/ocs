@@ -4,6 +4,8 @@
 
 package edu.gemini.spModel.obsrecord;
 
+import edu.gemini.pot.sp.Instrument;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.event.ExecEvent;
 import edu.gemini.spModel.event.ObsExecEvent;
@@ -108,26 +110,30 @@ final class PrivateVisitList implements Serializable {
         return 0;
     }
 
-    ObsTimeCharges getTimeCharges(ChargeClass mainChargeClass,
-                                  ObsQaRecord qa, ConfigStore store) {
+    ObsTimeCharges getTimeCharges(
+        Option<Instrument> instrument,
+        ChargeClass        mainChargeClass,
+        ObsQaRecord        qa,
+        ConfigStore        store
+    ) {
 
         VisitTimes vt = new VisitTimes();
         for (PrivateVisit pv : _visits) {
-            vt.addVisitTimes(pv.getTimeCharges(qa, store));
+            vt.addVisitTimes(pv.getTimeCharges(instrument, qa, store));
         }
 
         return vt.getTimeCharges(mainChargeClass);
     }
 
-    ObsVisit[] getObsVisits(ObsQaRecord qa, ConfigStore store) {
+    ObsVisit[] getObsVisits(Option<Instrument> instrument, ObsQaRecord qa, ConfigStore store) {
         List<ObsVisit> obsVisitList = new ArrayList<ObsVisit>();
         for (PrivateVisit pv : _visits) {
-            obsVisitList.add(pv.toObsVisit(qa, store));
+            obsVisitList.add(pv.toObsVisit(instrument, qa, store));
         }
         return obsVisitList.toArray(ObsVisit.EMPTY_ARRAY);
     }
 
-    ObsVisit[] getObsVisits(ObsQaRecord qa, ConfigStore store, long startTime, long endTime) {
+    ObsVisit[] getObsVisits(Option<Instrument> instrument, ObsQaRecord qa, ConfigStore store, long startTime, long endTime) {
         List<ObsVisit> obsVisitList = null;
         for (PrivateVisit pv : _visits) {
             ObsExecEvent evt = pv.getFirstEvent();
@@ -136,7 +142,7 @@ final class PrivateVisitList implements Serializable {
             long visitStart = evt.getTimestamp();
             if ((startTime <= visitStart) && (visitStart < endTime)) {
                 if (obsVisitList == null) obsVisitList = new ArrayList<ObsVisit>();
-                obsVisitList.add(pv.toObsVisit(qa, store));
+                obsVisitList.add(pv.toObsVisit(instrument, qa, store));
             }
         }
         if (obsVisitList == null) return ObsVisit.EMPTY_ARRAY;
