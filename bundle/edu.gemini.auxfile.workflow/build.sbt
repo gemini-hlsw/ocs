@@ -29,3 +29,5 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.auxfile.client",
   "edu.gemini.auxfile.server",
   "edu.gemini.auxfile.copier")
+
+parallelExecution in Test := false

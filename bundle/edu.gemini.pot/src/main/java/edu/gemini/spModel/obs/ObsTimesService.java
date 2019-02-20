@@ -3,8 +3,10 @@ package edu.gemini.spModel.obs;
 import edu.gemini.pot.sp.ISPProgram;
 import edu.gemini.shared.util.TimeValue;
 import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.obsclass.ObsClass;
+import edu.gemini.pot.sp.Instrument;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.ISPObservationContainer;
 import edu.gemini.spModel.obslog.ObsLog;
@@ -39,8 +41,10 @@ public final class ObsTimesService {
         // Ask the ObsRecord for the raw observation times.
         final ObsLog nodes = ObsLog.getIfExists(obs);
         if (nodes != null) {
+            final Option<Instrument> inst = InstrumentService.lookupInstrument(obs);
+
             final ObsClass obsClass = ObsClassService.lookupObsClass(obs);
-            res = nodes.getExecRecord().getTimes(nodes.getQaRecord(), obsClass.getDefaultChargeClass());
+            res = nodes.getExecRecord().getTimes(inst, nodes.getQaRecord(), obsClass.getDefaultChargeClass());
         }
 
         // Cache and return the results.

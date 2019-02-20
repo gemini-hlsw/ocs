@@ -1,14 +1,17 @@
 package edu.gemini.spdb.reports.collection.table;
 
 
+import edu.gemini.pot.sp.Instrument;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.ISPProgram;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.TimeValue;
 import edu.gemini.skycalc.ObservingNight;
 import edu.gemini.spModel.core.ProgramType;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
+import edu.gemini.spModel.obs.InstrumentService;
 import edu.gemini.spModel.obslog.ObsLog;
 import edu.gemini.spModel.obsrecord.ObsVisit;
 import edu.gemini.spModel.timeacct.TimeAcctAllocation;
@@ -152,9 +155,10 @@ public final class QueueProgramStatusExternalTable extends AbstractTable {
 		final SortedSet<String> set = new TreeSet<>();
 		final Site site = ReportUtils.getSiteDesc(progShell.getProgramID());
 		for (ISPObservation obs: progShell.getAllObservations()) {
+            final Option<Instrument> inst = InstrumentService.lookupInstrument(obs);
             final ObsLog log = ObsLog.getIfExists(obs);
 			if (log != null) {
-				for (ObsVisit visit: log.getVisits()) {
+				for (ObsVisit visit: log.getVisits(inst)) {
 					final String utc = new ObservingNight(site, visit.getStartTime()).getNightString();
 					set.add(utc);
 				}

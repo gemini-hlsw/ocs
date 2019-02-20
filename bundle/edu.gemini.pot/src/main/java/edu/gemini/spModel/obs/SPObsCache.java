@@ -6,6 +6,7 @@ package edu.gemini.spModel.obs;
 
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.util.GeminiRuntimeException;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.dataset.DataflowStatus;
@@ -47,6 +48,16 @@ public final class SPObsCache implements ISPEventMonitor, ISPCloneable, Serializ
         if (cache == null) cache = new SPObsCache();
         cache.setTargetCalculator(targetCalculator);
         setObsCache(obs, cache);
+    }
+
+    public static Option<Instrument> getInstrument(ISPObservation obs) {
+        return ImOption.apply(getObsCache(obs)).flatMap(c -> c.getInstrument());
+    }
+
+    public static void setInstrument(ISPObservation obs, Option<Instrument> instrument) {
+        final SPObsCache c = ImOption.apply(getObsCache(obs)).getOrElse(() -> new SPObsCache());
+        c.setInstrument(instrument);
+        setObsCache(obs, c);
     }
 
     public static ObsClass getObsClass(ISPObservation obs) {
@@ -173,6 +184,9 @@ public final class SPObsCache implements ISPEventMonitor, ISPCloneable, Serializ
     // The target calculator.
     private Option<TargetCalculator> _targetCalculator;
 
+    // The observation's instrument, if any.
+    private Option<Instrument> _instrument = ImOption.empty();
+
     // The observation class (The value is determined by examining the sequence
     // and is cached here)
     private ObsClass _obsClass;
@@ -235,6 +249,14 @@ public final class SPObsCache implements ISPEventMonitor, ISPCloneable, Serializ
 
     public void setTargetCalculator(Option<TargetCalculator> targetCalculator) {
         _targetCalculator = targetCalculator;
+    }
+
+    public Option<Instrument> getInstrument() {
+        return _instrument;
+    }
+
+    public void setInstrument(Option<Instrument> instrument) {
+        _instrument = instrument;
     }
 
     public ObsTimes getCorrectedObsTimes() {
@@ -312,6 +334,7 @@ public final class SPObsCache implements ISPEventMonitor, ISPCloneable, Serializ
 //        _configSequence     = null;
         _stepCount          = null;
         _targetCalculator   = null;
+        _instrument         = ImOption.empty();
     }
 
     public void structureChanged(SPStructureChange change) {

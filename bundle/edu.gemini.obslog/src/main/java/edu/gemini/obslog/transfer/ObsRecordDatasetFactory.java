@@ -1,6 +1,7 @@
 package edu.gemini.obslog.transfer;
 
 
+import edu.gemini.pot.sp.Instrument;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
@@ -81,7 +82,7 @@ public final class ObsRecordDatasetFactory implements Serializable {
 
         List<EObslogVisit> eObslogVisits = new ArrayList<EObslogVisit>();
 
-        for (ObsVisit visit : obsLog.getVisits()) {
+        for (ObsVisit visit : obsLog.getVisits(Instrument.fromComponentType(type))) {
             if (visit.getAllDatasetLabels().length == 0) {
                 LOG.fine("Skipping  empty visit");
                 continue;

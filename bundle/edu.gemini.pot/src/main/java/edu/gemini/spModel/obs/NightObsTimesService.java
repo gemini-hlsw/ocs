@@ -6,7 +6,9 @@ package edu.gemini.spModel.obs;
 
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.obsclass.ObsClass;
+import edu.gemini.pot.sp.Instrument;
 import edu.gemini.pot.sp.ISPObservation;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.obslog.ObsLog;
 import edu.gemini.spModel.obsrecord.ObsVisit;
 import edu.gemini.spModel.time.ChargeClass;
@@ -46,8 +48,11 @@ public class NightObsTimesService {
         ObsClass obsClass = ObsClassService.lookupObsClass(obs);
         ChargeClass chargeClass = obsClass.getDefaultChargeClass();
 
+        // Figure out the instrument in use, if any.
+        final Option<Instrument> inst = InstrumentService.lookupInstrument(obs);
+
         // Get the visits for the obs, if any.
-        ObsVisit[] visits = nodes.getExecRecord().getVisits(nodes.getQaRecord());
+        ObsVisit[] visits = nodes.getExecRecord().getVisits(inst, nodes.getQaRecord());
         if ((visits == null) || (visits.length == 0)) return res;
 
         // Start with the first visit, and figure out the ObservingNight and
