@@ -21,6 +21,8 @@ import java.util.*;
  * ordering, etc.
  */
 final class PrivateVisitList implements Serializable {
+    private static final long serialVersionUID = -2686488059242714341L;
+    
     private List<PrivateVisit> _visits;
 
     PrivateVisitList() {
