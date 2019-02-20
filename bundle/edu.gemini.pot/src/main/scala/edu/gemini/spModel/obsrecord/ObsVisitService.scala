@@ -3,6 +3,7 @@ package edu.gemini.spModel.obsrecord
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.gemini.plan.NightlyRecord
+import edu.gemini.spModel.obs.InstrumentService
 import edu.gemini.spModel.obslog.ObsLog
 
 import scala.collection.JavaConverters._
@@ -20,7 +21,8 @@ object ObsVisitService {
       (for {
         obs <- Option(db.lookupObservationByID(oid))
         log <- Option(ObsLog.getIfExists(obs))
-      } yield log.getVisits(night.getStartTime, night.getEndTime).toList).getOrElse(Nil)
+        inst = InstrumentService.lookupInstrument(obs)
+      } yield log.getVisits(inst, night.getStartTime, night.getEndTime).toList).getOrElse(Nil)
     }.sorted(comparatorToOrdering(ObsVisit.START_TIME_COMPARATOR))
   }
 }

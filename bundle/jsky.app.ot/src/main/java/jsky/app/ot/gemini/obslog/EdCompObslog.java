@@ -1,7 +1,10 @@
 package jsky.app.ot.gemini.obslog;
 
 import edu.gemini.pot.sp.*;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.dataset.DatasetLabel;
+import edu.gemini.spModel.obs.InstrumentService;
 import edu.gemini.spModel.obslog.ObsExecLog;
 import edu.gemini.spModel.obslog.ObsLog;
 import edu.gemini.spModel.obslog.ObsQaLog;
@@ -31,7 +34,9 @@ public class EdCompObslog extends OtItemEditor<ISPObsQaLog, ObsQaLog> {
         if (SPUtil.getDataObjectPropertyName().equals(evt.getPropertyName())) {
             SwingUtilities.invokeLater(() -> {
                 final ISPObsExecLog execLogShell = (ISPObsExecLog) evt.getSource();
-                gui.setup(new ObsLog(getNode(), getDataObject(), execLogShell, (ObsExecLog) evt.getNewValue()));
+                final Option<Instrument> inst    = ImOption.apply(execLogShell.getContextObservation())
+                                                           .flatMap(o -> InstrumentService.lookupInstrument(o));
+                gui.setup(inst, new ObsLog(getNode(), getDataObject(), execLogShell, (ObsExecLog) evt.getNewValue()));
             });
         }
     };
@@ -104,7 +109,9 @@ public class EdCompObslog extends OtItemEditor<ISPObsQaLog, ObsQaLog> {
             currentLog       = incomingLog;
             currentLog.addDatasetQaRecordListener(listener);
             originalComments = incomingBaseline;
-            gui.setup(new ObsLog(getNode(), incomingLog, oel, execLog));
+
+            final Option<Instrument> inst = InstrumentService.lookupInstrument(obs);
+            gui.setup(inst, new ObsLog(getNode(), incomingLog, oel, execLog));
         }
     }
 
