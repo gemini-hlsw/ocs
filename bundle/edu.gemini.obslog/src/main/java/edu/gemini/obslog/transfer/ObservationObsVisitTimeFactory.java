@@ -2,9 +2,11 @@ package edu.gemini.obslog.transfer;
 
 
 import edu.gemini.obslog.obslog.OlLogOptions;
+import edu.gemini.pot.sp.Instrument;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.ObservingNight;
 import edu.gemini.spModel.dataset.DatasetLabel;
 import edu.gemini.spModel.dataset.DatasetRecord;
@@ -86,12 +88,13 @@ public final class ObservationObsVisitTimeFactory implements Serializable {
         List<EChargeObslogVisit> obslogVisits = new ArrayList<EChargeObslogVisit>();
         OlLogOptions options = _obsLogOptions;
 
+        final Option<Instrument> inst = Instrument.fromComponentType(type);
         ObsVisit[] visits;
         if (options.getLimitConfigDatesByNight() == null) {
-            visits = obsLog.getVisits();
+            visits = obsLog.getVisits(inst);
         } else {
             ObservingNight night = options.getLimitConfigDatesByNight();
-            visits = obsLog.getVisits(night.getStartTime(), night.getEndTime());
+            visits = obsLog.getVisits(inst, night.getStartTime(), night.getEndTime());
         }
 
         for (ObsVisit visit : visits) {

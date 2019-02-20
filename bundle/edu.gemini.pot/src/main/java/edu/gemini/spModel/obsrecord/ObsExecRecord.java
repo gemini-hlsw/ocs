@@ -1,5 +1,7 @@
 package edu.gemini.spModel.obsrecord;
 
+import edu.gemini.pot.sp.Instrument;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.GeminiRuntimeException;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.DefaultConfig;
@@ -348,8 +350,8 @@ public final class ObsExecRecord implements Serializable {
      * @return array of ObsVisit corresponding to the visits that this
      * observation has seen
      */
-    public synchronized ObsVisit[] getVisits(ObsQaRecord qa) {
-        return _visits.getObsVisits(qa, _configStore);
+    public synchronized ObsVisit[] getVisits(Option<Instrument> instrument, ObsQaRecord qa) {
+        return _visits.getObsVisits(instrument, qa, _configStore);
     }
 
     /**
@@ -362,8 +364,8 @@ public final class ObsExecRecord implements Serializable {
      * @return {@link ObsVisit}s whose start time falls between
      * <code>startTime</code> (inclusive) and <code>endTime</code> exclusive
      */
-    public synchronized ObsVisit[] getVisits(ObsQaRecord qa, long startTime, long endTime) {
-        return _visits.getObsVisits(qa, _configStore, startTime, endTime);
+    public synchronized ObsVisit[] getVisits(Option<Instrument> instrument, ObsQaRecord qa, long startTime, long endTime) {
+        return _visits.getObsVisits(instrument, qa, _configStore, startTime, endTime);
     }
 
     /**
@@ -398,8 +400,12 @@ public final class ObsExecRecord implements Serializable {
      * @return total times which should be charged to the various categories
      * (see {@link ChargeClass})
      */
-    public ObsTimeCharges getTimeCharges(ObsQaRecord qa, ChargeClass mainChargeClass) {
-        return _visits.getTimeCharges(mainChargeClass, qa, _configStore);
+    public ObsTimeCharges getTimeCharges(
+        Option<Instrument> instrument,
+        ObsQaRecord        qa,
+        ChargeClass        mainChargeClass
+    ) {
+        return _visits.getTimeCharges(instrument, mainChargeClass, qa, _configStore);
     }
 
     /**
@@ -412,8 +418,12 @@ public final class ObsExecRecord implements Serializable {
      *
      * @return calculated (uncorrected) observing times for this observation
      */
-    public ObsTimes getTimes(ObsQaRecord qa, ChargeClass mainChargeClass) {
-        return new ObsTimes(getTotalTime(), getTimeCharges(qa, mainChargeClass));
+    public ObsTimes getTimes(
+        Option<Instrument> instrument,
+        ObsQaRecord        qa,
+        ChargeClass        mainChargeClass
+    ) {
+        return new ObsTimes(getTotalTime(), getTimeCharges(instrument, qa, mainChargeClass));
     }
 
     /**

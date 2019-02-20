@@ -1,5 +1,8 @@
 package edu.gemini.spModel.obsrecord
 
+import edu.gemini.pot.sp.Instrument
+import edu.gemini.shared.util.immutable.{Option => GOption}
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.dataset.{ DatasetLabel, DatasetQaState }
 import edu.gemini.spModel.event.ObsExecEvent
 import edu.gemini.spModel.obsclass.ObsClass
@@ -16,9 +19,10 @@ object TimeAccounting {
    * Calculate VisitTimes for the events in this visit.
    */
   def calc(
-    events: Vector[ObsExecEvent],
-    qa:     DatasetLabel => DatasetQaState,
-    oc:     DatasetLabel => ObsClass
+    instrument: Option[Instrument],
+    events:     Vector[ObsExecEvent],
+    qa:         DatasetLabel => DatasetQaState,
+    oc:         DatasetLabel => ObsClass
   ): VisitTimes = {
 
     val ve = VisitEvents(events)
@@ -33,7 +37,7 @@ object TimeAccounting {
       c <- VisitCalculator.all.find(_.validAt(s).isBefore(h.instant))
     } yield c
 
-    calculator.fold(new VisitTimes()) { _.calc(ve, qa, oc) }
+    calculator.fold(new VisitTimes()) { _.calc(instrument, ve, qa, oc) }
   }
 
   /**
@@ -41,10 +45,11 @@ object TimeAccounting {
    * to facilitate execution from the Java based PrivateVisit class.
    */
   def calcAsJava(
-    events: java.util.List[ObsExecEvent],
-    qa:     ObsQaRecord,
-    store:  ConfigStore
+    instrument: GOption[Instrument],
+    events:     java.util.List[ObsExecEvent],
+    qa:         ObsQaRecord,
+    store:      ConfigStore
   ): VisitTimes =
-    calc(events.asScala.toVector, qa.qaState, store.getObsClass)
+    calc(instrument.asScalaOpt, events.asScala.toVector, qa.qaState, store.getObsClass)
 
 }

@@ -1,7 +1,8 @@
 package edu.gemini.spModel.obsrecord
 
-import java.time.Instant
+import java.time.{ Instant, LocalDateTime, Month }
 
+import edu.gemini.pot.sp.Instrument
 import edu.gemini.skycalc.TwilightBoundType.NAUTICAL
 import edu.gemini.skycalc.{Interval, ObservingNight, Union}
 import edu.gemini.spModel.core.{Semester, Site}
@@ -37,9 +38,10 @@ private[obsrecord] sealed trait VisitCalculator {
    * individual dataset.
    */
   def calc(
-    events: VisitEvents,
-    qa:     DatasetLabel => DatasetQaState,
-    oc:     DatasetLabel => ObsClass
+    instrument: Option[Instrument],
+    events:     VisitEvents,
+    qa:         DatasetLabel => DatasetQaState,
+    oc:         DatasetLabel => ObsClass
   ): VisitTimes
 
 }
@@ -67,9 +69,10 @@ private[obsrecord] object VisitCalculator {
       Instant.MIN
 
     override def calc(
-      events: VisitEvents,
-      qa:     DatasetLabel => DatasetQaState,
-      oc:     DatasetLabel => ObsClass
+      instrument: Option[Instrument], // ignored here
+      events:     VisitEvents,
+      qa:         DatasetLabel => DatasetQaState,
+      oc:         DatasetLabel => ObsClass
     ): VisitTimes =
       PrimordialVisitCalculator.instance.calc(events.sorted.toList.asJava, qa.asJava, oc.asJava)
 
@@ -77,8 +80,9 @@ private[obsrecord] object VisitCalculator {
 
   /**
    * The 2019A+ calculator.  The main change from the previous time accounting
-   * result is that visits without a passing dataset are not charged at all.  It
-   * also simplifies and fixes a number of bugs with the original algorithm:
+   * result is that visits without a passing dataset are not charged at all,
+   * except for visitor instrument observations which are charged regardless.
+   * It also simplifies and fixes a number of bugs with the original algorithm:
    *
    * <ul>
    *   <li>Charges for the portion of a dataset after start and before overlap</li>
@@ -93,15 +97,17 @@ private[obsrecord] object VisitCalculator {
       Instant.ofEpochMilli(semester.getStartDate(s).getTime)
 
     override def calc(
-      events: VisitEvents,
-      qa:     DatasetLabel => DatasetQaState,
-      oc:     DatasetLabel => ObsClass
+      instrument: Option[Instrument],
+      events:     VisitEvents,
+      qa:         DatasetLabel => DatasetQaState,
+      oc:         DatasetLabel => ObsClass
     ): VisitTimes = {
 
       val total = events.total
       val dsets = events.datasetIntervals
 
       def normalCharges: VisitTimes = {
+
         val chargeable = events.chargeable
 
         val charge: ChargeClass => Union[Interval] =
@@ -116,10 +122,18 @@ private[obsrecord] object VisitCalculator {
           partner    = charge(PARTNER),
           noncharged = charge(NONCHARGED) + (total - chargeable)
         )
+
       }
 
-      if (dsets.exists { case (lab, _) => qa(lab).isChargeable }) normalCharges
+      def isVisitor: Boolean =
+        instrument.exists(_ == Instrument.Visitor)
+
+      def hasChargeableDataset: Boolean =
+        dsets.exists { case (lab, _) => qa(lab).isChargeable }
+
+      if (isVisitor || hasChargeableDataset) normalCharges
       else VisitTimes.noncharged(total.sum)
+
     }
 
     // Converts a collection of categorized Union[Interval] into VisitTimes.
@@ -139,6 +153,7 @@ private[obsrecord] object VisitCalculator {
       vt.addUnclassifiedTime((total - program - partner - noncharged).sum)
       vt
     }
+
   }
 
   // reverse order by valid time (newest first)

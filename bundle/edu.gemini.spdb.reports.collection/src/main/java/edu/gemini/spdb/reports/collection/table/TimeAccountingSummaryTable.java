@@ -5,15 +5,18 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
+import edu.gemini.pot.sp.Instrument;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.ISPProgram;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.skycalc.ObservingNight;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.obsclass.ObsClass;
+import edu.gemini.spModel.obs.InstrumentService;
 import edu.gemini.spModel.obs.ObsClassService;
 import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obslog.ObsLog;
@@ -141,12 +144,11 @@ public class TimeAccountingSummaryTable extends AbstractTable {
             // Find the charge class for this observation.
             final ChargeClass defaultChargeClass = obsClass.getDefaultChargeClass();
 
-            // Find the instrument. If there is none, I'm not sure what this
-            // means. But we will keep going since it doesn't really matter.
-            final ISPObsComponent instrument = SPTreeUtil.findInstrument(obsShell);
+            // Find the instrument, if any.
+            final Option<Instrument> inst = InstrumentService.lookupInstrument(obsShell);
 
             // Collect visits and instruments per night.
-            for (final ObsVisit visit : log.getVisits()) {
+            for (final ObsVisit visit : log.getVisits(inst)) {
 
                 // Determine night and initialize map entries if needed.
                 final ObservingNight night = new ObservingNight(site, visit.getEndTime());
@@ -155,7 +157,7 @@ public class TimeAccountingSummaryTable extends AbstractTable {
 
                 // Collect information for this visit.
                 visits.add(visit);
-                if (instrument != null) instruments.add(instrument.getType());
+                inst.foreach(i -> instruments.add(i.componentType));
 
             }
 

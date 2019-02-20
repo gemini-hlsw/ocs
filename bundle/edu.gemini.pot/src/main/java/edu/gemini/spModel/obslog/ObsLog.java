@@ -2,6 +2,7 @@ package edu.gemini.spModel.obslog;
 
 import edu.gemini.pot.sp.*;
 import edu.gemini.pot.spdb.IDBDatabaseService;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.dataset.*;
 import edu.gemini.spModel.obsrecord.ObsQaRecord;
 import edu.gemini.spModel.obsrecord.ObsExecRecord;
@@ -133,12 +134,12 @@ public final class ObsLog {
         return execLogDataObject.getRecord();
     }
 
-    public ObsVisit[] getVisits() {
-        return getExecRecord().getVisits(getQaRecord());
+    public ObsVisit[] getVisits(Option<Instrument> instrument) {
+        return getExecRecord().getVisits(instrument, getQaRecord());
     }
 
-    public ObsVisit[] getVisits(long startTime, long endTime) {
-        return getExecRecord().getVisits(getQaRecord(), startTime, endTime);
+    public ObsVisit[] getVisits(Option<Instrument> instrument, long startTime, long endTime) {
+        return getExecRecord().getVisits(instrument, getQaRecord(), startTime, endTime);
     }
 
     public scala.Option<DataflowStatus> getMinimumDisposition() {
