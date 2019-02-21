@@ -28,6 +28,8 @@ import java.util.List;
  * a few methods for working with them.
  */
 final class PrivateVisit implements Serializable {
+    private static final long serialVersionUID = -7796307171519915226L;
+
     List<ObsExecEvent> _events = new ArrayList<ObsExecEvent>();
 
     PrivateVisit() {
