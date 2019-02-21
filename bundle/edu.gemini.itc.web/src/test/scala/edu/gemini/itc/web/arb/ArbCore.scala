@@ -8,7 +8,7 @@ trait ArbCore extends Arbitraries {
   val genMagnitudeSystem: Gen[MagnitudeSystem] =
     Gen.oneOf(MagnitudeSystem.all)
 
-  val genSurfaceBrightness: Gen[SurfaceBrightness] = ???
+  val genSurfaceBrightness: Gen[SurfaceBrightness] =
     Gen.oneOf(SurfaceBrightness.all)
 
   val genBrightnessUnit: Gen[BrightnessUnit] =
