@@ -44,7 +44,8 @@ object SpImportService {
         }
       }
 
-      val cp = db.getFactory.copyWithNewKeys(im, POTUtil.getUnusedProgramId(im.getProgramID, db))
+      val pid = Option(im.getProgramID).map(POTUtil.getUnusedProgramId(_, db)).orNull
+      val cp  = db.getFactory.copyWithNewKeys(im, pid)
       cp.setVersions(inc(EmptyVersionMap, cp))
       cp
     }
@@ -54,7 +55,8 @@ object SpImportService {
 
   private val planOps = new ImportOps[ISPNightlyRecord] {
     def copy(db: IDBDatabaseService, im: ISPNightlyRecord): ISPNightlyRecord = {
-      val cp = db.getFactory.createNightlyRecord(null, POTUtil.getUnusedProgramId(im.getProgramID, db))
+      val pid = Option(im.getProgramID).map(POTUtil.getUnusedProgramId(_, db)).orNull
+      val cp  = db.getFactory.createNightlyRecord(null, pid)
       cp.setDataObject(im.getDataObject)
       cp
     }
