@@ -2,8 +2,6 @@ package edu.gemini.itc.web.json
 
 import argonaut._, Argonaut._
 import edu.gemini.itc.shared._
-import edu.gemini.spModel.guide.GuideProbe;
-import edu.gemini.spModel.telescope.IssPort;
 
 trait ItcParametersCodec {
   import instrumentdetails._
