@@ -75,7 +75,7 @@ public final class HttpTooUpdate implements TooUpdate {
             try {
                 expTime = Duration.ofSeconds(Integer.parseInt(expTimeString));
             } catch (NumberFormatException ex) {
-                throw new BadRequestException("cannot parse " + EXPOSURE_TIME_PARAM + " value `" + expTimeString + "` as an integral number of seconds");
+                throw new BadRequestException("cannot parse " + EXPOSURE_TIME_PARAM + " value `" + expTimeString + "` as an integer number of seconds");
             }
 
             if (expTime.compareTo(MIN_EXPOSURE_TIME) < 0) {
