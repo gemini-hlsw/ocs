@@ -26,8 +26,8 @@ object ItcParametersCodecSpec extends Specification with ScalaCheck {
   import arb.itcparameters._
 
   def testInvertibility[A: EncodeJson: DecodeJson: Arbitrary] =
-    prop { (t: InstrumentDetails) =>
-      Parse.decodeOption[InstrumentDetails](t.asJson.spaces2) should_== Some(t)
+    prop { (t: A) =>
+      Parse.decodeOption[A](t.asJson.spaces2) should_== Some(t)
     }
 
   "ItcParametersCodecSpec" >> {
