@@ -30,10 +30,10 @@ object ItcResultCodecSpec extends Specification with ScalaCheck {
     }
 
   "ItcResultCodecSpec" >> {
-    "Color"   ! testInvertibility[Color]
-    "ItcCcd"  ! testInvertibility[ItcCcd]
-    "ItcResult"    ! testInvertibility[ItcResult]
-    // "ItcService.Result"       ! testInvertibility[ItcService.Result]
+    "Color"             ! testInvertibility[Color]
+    "ItcCcd"            ! testInvertibility[ItcCcd]
+    "ItcResult"         ! testInvertibility[ItcResult]
+    "ItcService.Result" ! testInvertibility[ItcService.Result]
   }
 
 }
