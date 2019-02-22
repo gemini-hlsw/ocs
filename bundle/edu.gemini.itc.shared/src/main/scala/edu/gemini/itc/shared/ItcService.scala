@@ -102,6 +102,14 @@ final case class SpcSeriesData(dataType: SpcDataType, title: String, data: Array
     ssdCopy.displayInLegend = visibility
     ssdCopy
   }
+
+  override def equals(other: Any): Boolean =
+    other match {
+      case SpcSeriesData(`dataType`, `title`, arr, `color`) =>
+        (arr corresponds data)(_ sameElements _)
+      case _ => false
+    }
+
 }
 
 /** Companion object for SpcSeriesData, used to instantiate specialized cases */
