@@ -87,7 +87,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         return Recipe$.MODULE$.serviceResult(r);
     }
 
-    public ItcSpectroscopyResult serviceResult(final SpectroscopyResult[] r) {
+    public ItcSpectroscopyResult serviceResult(final SpectroscopyResult[] r, final boolean headless) {
         final List<List<SpcChartData>> groups = new ArrayList<>();
         // The array specS2Narr represents the different IFUs, for each one we produce a separate set of charts.
         // For completeness: The result array holds the results for the different CCDs. For each CCD
@@ -95,15 +95,15 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         // In case of IFU-2 each element of specS2Narr holds the results for both slits.
         for (int i = 0; i < r[0].specS2N().length; i++) {
             final List<SpcChartData> charts = new ArrayList<>();
-            charts.add(createSignalChart(r, i));
+            if (!headless) charts.add(createSignalChart(r, i));
             charts.add(createS2NChart(r, i));
             // IFU-2 case has an additional chart with signal in pixel space
-            if (((Gmos) r[0].instrument()).isIfu2()) {
+            if ((!headless) && ((Gmos) r[0].instrument()).isIfu2()) {
                 charts.add(createSignalPixelChart(r, i));
             }
             groups.add(charts);
         }
-        return Recipe$.MODULE$.serviceGroupedResult(r, groups);
+        return Recipe$.MODULE$.serviceGroupedResult(r, groups, headless);
     }
 
     public SpectroscopyResult[] calculateSpectroscopy() {
@@ -681,7 +681,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
         // For IFU-2 with Hamamatsu we don't show CCDs in different colors, hence need to disable extra legend items
         final boolean visibleLegend = (ccdName.equals("") || ccdName.equals(" BB(B)") || ccdName.equals(" BB"));
-        
+
         // The suffix is a hack to overcome the requirement for titles of series to be unique when depricating
         // extra legend items with IFU-2 with Hamamatsu
         String suffix = ccdName;

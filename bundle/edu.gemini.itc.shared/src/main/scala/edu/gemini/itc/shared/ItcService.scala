@@ -192,7 +192,12 @@ trait ItcService {
 
   import edu.gemini.itc.shared.ItcService._
 
-  def calculate(p: ItcParameters): Result
+  /**
+   * Perform the ITC calculation if possible, and return an answer or a reason for failure.
+   * @param p parameters for the ITC calculation.
+   * @param headless pass `true` for headless applications that do not require chart data.
+   */
+  def calculate(p: ItcParameters, headless: Boolean): Result
 
 }
 
@@ -214,7 +219,7 @@ object ItcService {
   /** Performs an ITC call on the given host. */
   def calculate(peer: Peer, inputs: ItcParameters): Future[Result] =
     TrpcClient(peer).withoutKeys future { r =>
-      r[ItcService].calculate(inputs)
+      r[ItcService].calculate(inputs, false)
     }
 
 }
