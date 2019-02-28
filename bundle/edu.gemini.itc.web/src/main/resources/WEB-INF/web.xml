@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!-- This file configures the "itc" web application servlets.  It
-     maps the names used in the URL's to the internal classnames.  
+     maps the names used in the URL's to the internal classnames.
      Initialization can also be done here.
 -->
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -36,6 +36,21 @@
     <servlet-mapping>
         <servlet-name>files</servlet-name>
         <url-pattern>/servlet/images</url-pattern>
+    </servlet-mapping>
+
+    <!-- This maps itc/servlet/json to the ITC JSON servlet class -->
+    <servlet>
+        <servlet-name>
+            json
+        </servlet-name>
+        <servlet-class>
+            edu.gemini.itc.web.servlets.JsonServlet
+        </servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>json</servlet-name>
+        <url-pattern>/servlet/json</url-pattern>
     </servlet-mapping>
 
 </web-app>
