@@ -25,14 +25,6 @@ object ItcSanitySpec extends Specification with ScalaCheck {
 
   "ItcSanitySpec" should {
 
-    // "provide a response for all input without any nasty crashing" !
-    //   prop { (ps: ItcParameters) =>
-    //     println("----")
-    //     println(ps)
-    //     println(itc.calculate(ps)) // just do this to ensure no throwing
-    //     true
-    //   }
-
     "provide a reasonable response for sensibe input" !
       prop { (
         source:      SourceDefinition,
@@ -73,11 +65,10 @@ object ItcSanitySpec extends Specification with ScalaCheck {
           )
         )
 
-        println("----")
-        println(params)
-        println(itc.calculate(params, true)) // just do this to ensure no throwing
+        // Sometmes will give a good answer, sometimes will fail, but it shouldn't crash
+        itc.calculate(params, true)
 
-        true
+        true // ok
 
     }
 
