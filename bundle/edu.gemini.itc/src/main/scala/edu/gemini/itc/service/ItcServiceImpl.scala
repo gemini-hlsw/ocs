@@ -25,7 +25,7 @@ class ItcServiceImpl extends ItcService {
 
   import ItcService._
 
-  def calculate(p: ItcParameters): Result = try {
+  def calculate(p: ItcParameters, headless: Boolean): Result = try {
 
     // update parameters sent from client with stuff that needs to be done on the server
     val updatedParams: ItcParameters = {
@@ -53,7 +53,7 @@ class ItcServiceImpl extends ItcService {
     // execute ITC service call with updated parameters
     updatedParams.observation.calculationMethod match {
       case _: Imaging       => calculateImaging(updatedParams)
-      case _: Spectroscopy  => calculateSpectroscopy(updatedParams)
+      case _: Spectroscopy  => calculateSpectroscopy(updatedParams, headless)
     }
 
   } catch {
@@ -90,28 +90,28 @@ class ItcServiceImpl extends ItcService {
 
   // === Spectroscopy
 
-  private def calculateSpectroscopy(p: ItcParameters): Result =
+  private def calculateSpectroscopy(p: ItcParameters, headless: Boolean): Result =
     p.instrument match {
       case i: MichelleParameters          => ItcResult.forMessage ("Spectroscopy not implemented.")
       case i: TRecsParameters             => ItcResult.forMessage ("Spectroscopy not implemented.")
-      case i: Flamingos2Parameters        => spectroscopyResult   (new Flamingos2Recipe(p, i))
-      case i: GmosParameters              => spectroscopyResult   (new GmosRecipe(p, i))
-      case i: GnirsParameters             => spectroscopyResult   (new GnirsRecipe(p, i))
-      case i: NifsParameters              => spectroscopyResult   (new NifsRecipe(p, i))
-      case i: NiriParameters              => spectroscopyResult   (new NiriRecipe(p, i))
+      case i: Flamingos2Parameters        => spectroscopyResult   (new Flamingos2Recipe(p, i), headless )
+      case i: GmosParameters              => spectroscopyResult   (new GmosRecipe(p, i),       headless )
+      case i: GnirsParameters             => spectroscopyResult   (new GnirsRecipe(p, i),      headless )
+      case i: NifsParameters              => spectroscopyResult   (new NifsRecipe(p, i),       headless )
+      case i: NiriParameters              => spectroscopyResult   (new NiriRecipe(p, i),       headless )
       case _                              => ItcResult.forMessage ("Spectroscopy with this instrument is not supported by ITC.")
 
     }
 
-  private def spectroscopyResult(recipe: SpectroscopyRecipe): Result = {
+  private def spectroscopyResult(recipe: SpectroscopyRecipe, headless: Boolean): Result = {
     val r = recipe.calculateSpectroscopy()
-    val s = recipe.serviceResult(r)
+    val s = recipe.serviceResult(r, headless)
     ItcResult.forResult(s)
   }
 
-  private def spectroscopyResult(recipe: SpectroscopyArrayRecipe): Result = {
+  private def spectroscopyResult(recipe: SpectroscopyArrayRecipe, headless: Boolean): Result = {
     val r = recipe.calculateSpectroscopy()
-    val s = recipe.serviceResult(r)
+    val s = recipe.serviceResult(r, headless)
     ItcResult.forResult(s)
   }
 

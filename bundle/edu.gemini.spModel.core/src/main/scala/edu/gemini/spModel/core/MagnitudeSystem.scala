@@ -67,4 +67,10 @@ object SurfaceBrightness {
   implicit val SurfaceBrightnessEqual: Equal[SurfaceBrightness] =
     Equal.equalA
 
+  val all: List[SurfaceBrightness] =
+    List(Vega, AB, Jy, Watts, ErgsWavelength, ErgsFrequency)
+
+  def fromString(s: String): Option[SurfaceBrightness] =
+    all.find(_.name == s)
+
 }

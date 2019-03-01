@@ -37,7 +37,7 @@ public final class NifsPrinter extends PrinterBase implements OverheadTablePrint
 
     public void writeOutput() {
         final SpectroscopyResult r = recipe.calculateSpectroscopy();
-        final ItcSpectroscopyResult s = recipe.serviceResult(r);
+        final ItcSpectroscopyResult s = recipe.serviceResult(r, false);
         final UUID id = cache(s);
         writeSpectroscopyOutput(id, r, s);
     }

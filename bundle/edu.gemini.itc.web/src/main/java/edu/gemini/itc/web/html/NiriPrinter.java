@@ -47,7 +47,7 @@ public final class NiriPrinter extends PrinterBase implements OverheadTablePrint
             writeImagingOutput(result, s);
         } else {
             final SpectroscopyResult r = recipe.calculateSpectroscopy();
-            final ItcSpectroscopyResult s = recipe.serviceResult(r);
+            final ItcSpectroscopyResult s = recipe.serviceResult(r, false);
             final UUID id = cache(s);
             writeSpectroscopyOutput(id, r, s);
         }

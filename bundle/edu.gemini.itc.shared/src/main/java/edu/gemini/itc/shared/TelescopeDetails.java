@@ -54,5 +54,23 @@ public final class TelescopeDetails implements Serializable {
         return telescopeDiameter;
     }
 
+    public String toString() {
+        return String.format("TelescopeDetails(%s, %s, %s)", mirrorCoating, instrumentPort, wfs);
+    }
+
+    public int hashCode() {
+        return mirrorCoating.hashCode() ^ instrumentPort.hashCode() ^ wfs.hashCode();
+    }
+
+    public boolean equals(Object o) {
+        if (o instanceof TelescopeDetails) {
+            final TelescopeDetails td = (TelescopeDetails) o;
+            return td.mirrorCoating  == mirrorCoating  &&
+                   td.instrumentPort == instrumentPort &&
+                   td.wfs            == wfs;
+        } else {
+            return false;
+        }
+    }
 
 }

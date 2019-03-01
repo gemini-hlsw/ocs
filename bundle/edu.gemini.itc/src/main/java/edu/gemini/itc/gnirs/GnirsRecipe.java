@@ -61,17 +61,17 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         return Recipe$.MODULE$.serviceResult(r);
     }
 
-    public ItcSpectroscopyResult serviceResult(final SpectroscopyResult r) {
+    public ItcSpectroscopyResult serviceResult(final SpectroscopyResult r, final boolean headless) {
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             if (instrument.XDisp_IsUsed()) {
-                add(createGnirsSignalChart(r));
+                if (!headless) add(createGnirsSignalChart(r));
                 add(createGnirsS2NChart(r));
             } else {
-                add(Recipe$.MODULE$.createSignalChart(r, 0));
+                if (!headless) add(Recipe$.MODULE$.createSignalChart(r, 0));
                 add(Recipe$.MODULE$.createS2NChart(r));
             }
         }};
-        return Recipe$.MODULE$.serviceResult(r, dataSets);
+        return Recipe$.MODULE$.serviceResult(r, dataSets, headless);
     }
 
     public SpectroscopyResult calculateSpectroscopy() {

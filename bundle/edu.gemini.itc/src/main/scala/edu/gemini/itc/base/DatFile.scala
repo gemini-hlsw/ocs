@@ -126,7 +126,7 @@ object DatFile {
   /** Loads a file and parses it using the given scanner unless it is already available in the cache. */
   // Note: this could be changed to use a weak hash map in case we run into memory issues
   private def cache[T](load: Scanner => T): String => T = Memo.immutableHashMapMemo[String, T] { f =>
-    Log.info(s"Caching file $f")
+    Log.fine(s"Caching file $f")
     load(scanFile(f))
   }
 

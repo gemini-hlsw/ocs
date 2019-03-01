@@ -1,6 +1,6 @@
 package edu.gemini.itc.base
 
-import java.util
+import java.util. { ArrayList, List => JList }
 
 import edu.gemini.itc.shared._
 
@@ -24,13 +24,13 @@ trait ImagingArrayRecipe extends Recipe {
 
 trait SpectroscopyRecipe extends Recipe {
   def calculateSpectroscopy(): SpectroscopyResult
-  def serviceResult(r: SpectroscopyResult): ItcSpectroscopyResult
+  def serviceResult(r: SpectroscopyResult, headless: Boolean): ItcSpectroscopyResult
 }
 
 
 trait SpectroscopyArrayRecipe extends Recipe {
   def calculateSpectroscopy(): Array[SpectroscopyResult]
-  def serviceResult(r: Array[SpectroscopyResult]): ItcSpectroscopyResult
+  def serviceResult(r: Array[SpectroscopyResult], headless: Boolean): ItcSpectroscopyResult
 
 }
 
@@ -46,7 +46,7 @@ object Recipe {
   }
 
   def createSignalChart(result: SpectroscopyResult, title: String, index: Int): SpcChartData = {
-    val data: java.util.List[SpcSeriesData] = new java.util.ArrayList[SpcSeriesData]()
+    val data: JList[SpcSeriesData] = new ArrayList[SpcSeriesData]()
     data.add(SpcSeriesData(SignalData,     "Signal",           result.specS2N(index).getSignalSpectrum.getData, Some(ITCChart.DarkBlue)))
     data.add(SpcSeriesData(BackgroundData, "SQRT(Background)", result.specS2N(index).getBackgroundSpectrum.getData, Some(ITCChart.LightBlue)))
     new SpcChartData(SignalChart, title, ChartAxis("Wavelength (nm)"), ChartAxis("e- per exposure per spectral pixel"), data.toList)
@@ -61,7 +61,7 @@ object Recipe {
   }
 
   def createS2NChart(result: SpectroscopyResult, title: String, index: Int): SpcChartData = {
-    val data: java.util.List[SpcSeriesData] = new util.ArrayList[SpcSeriesData]
+    val data: JList[SpcSeriesData] = new ArrayList[SpcSeriesData]
     data.add(SpcSeriesData(SingleS2NData, "Single Exp S/N", result.specS2N(index).getExpS2NSpectrum.getData))
     data.add(SpcSeriesData(FinalS2NData,  "Final S/N  ",    result.specS2N(index).getFinalS2NSpectrum.getData))
     new SpcChartData(S2NChart, title, ChartAxis("Wavelength (nm)"), ChartAxis("Signal / Noise per spectral pixel"), data.toList)
@@ -97,18 +97,27 @@ object Recipe {
   // === Java helpers
 
   // One result (CCD) and a simple set of charts, this covers most cases.
-  def serviceResult(r: SpectroscopyResult, charts: java.util.List[SpcChartData]): ItcSpectroscopyResult =
-    ItcSpectroscopyResult(List(toCcdData(r, charts.toList)), List(SpcChartGroup(charts.toList)))
+  def serviceResult(r: SpectroscopyResult, charts: JList[SpcChartData], headless: Boolean): ItcSpectroscopyResult =
+    ItcSpectroscopyResult(
+      List(toCcdData(r, charts.toList)),
+      if (headless) Nil else List(SpcChartGroup(charts.toList))
+    )
 
   // One result (CCD) and a set of groups of charts, this covers NIFS (1 CCD and separate groups for IFU cases).
-  def serviceGroupedResult(r: SpectroscopyResult, charts: java.util.List[java.util.List[SpcChartData]]): ItcSpectroscopyResult =
-    ItcSpectroscopyResult(List(toCcdData(r, charts.toList.flatten)), charts.toList.map(l => SpcChartGroup(l.toList)))
+  def serviceGroupedResult(r: SpectroscopyResult, charts: JList[JList[SpcChartData]], headless: Boolean): ItcSpectroscopyResult =
+    ItcSpectroscopyResult(
+      List(toCcdData(r, charts.toList.flatten)),
+      if (headless) Nil else charts.toList.map(l => SpcChartGroup(l.toList))
+    )
 
   // A set of results and a set of groups of charts, this covers GMOS (3 CCDs and potentially separate groups
   // for IFU cases, if IFU is activated).
-  def serviceGroupedResult(rs: Array[SpectroscopyResult], charts: java.util.List[java.util.List[SpcChartData]]): ItcSpectroscopyResult = {
-    val ccds = rs.map(r => toCcdData(r, charts.toList.flatten)).toList
-    ItcSpectroscopyResult(ccds, charts.toList.map(l => SpcChartGroup(l.toList)))
+  def serviceGroupedResult(rs: Array[SpectroscopyResult], charts: JList[JList[SpcChartData]], headless: Boolean): ItcSpectroscopyResult = {
+    ItcSpectroscopyResult(
+      rs.map(r => toCcdData(r, charts.toList.flatten)).toList,
+      if (headless) Nil else charts.toList.map(l => SpcChartGroup(l.toList))
+    )
+
   }
 
 }
