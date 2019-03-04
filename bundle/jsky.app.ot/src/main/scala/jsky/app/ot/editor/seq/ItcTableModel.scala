@@ -38,8 +38,8 @@ sealed trait ItcTableModel extends AbstractTableModel {
   val PeakPixelColumn     = Column("Peak\n(e-)",       (_, _, r) => maxPeakPixelFlux(r),          tooltip = ItcTableModel.PeakPixelETooltip)
   val PeakADUColumn       = Column("Peak\n(ADU)",      (_, _, r) => maxImgAdu(r),                 tooltip = ItcTableModel.PeakPixelAduTooltip)
   val PeakFullWellColumn  = Column("Peak\n(%FW)",      (_, _, r) => maxImgPercentWell(r),         tooltip = ItcTableModel.PeakPixelFWTooltip)
-  val SNSingleColumn      = Column("S/N Single Coadd", (_, _, r) => maxSingleSNRatio(r),            tooltip = "Signal / Noise for one exposure with one coadd")
-  val SNTotalColumn       = Column("S/N Total",        (_, _, r) => maxTotalSNRatio(r),            tooltip = "Total Signal / Noise for all exposures and coadds")
+  val SNSingleColumn      = Column("S/N Single",       (_, _, r) => maxSingleSNRatio(r),          tooltip = "Signal / Noise for one exposure")
+  val SNTotalColumn       = Column("S/N Total",        (_, _, r) => maxTotalSNRatio(r),           tooltip = "Total Signal / Noise for all exposures")
 
   // Define different sets of columns as headers
   val PeakColumns       = List(PeakPixelColumn, PeakADUColumn, PeakFullWellColumn)
