@@ -137,7 +137,12 @@ private[obsrecord] object VisitCalculator {
       def hasChargeableDataset: Boolean =
         dsets.exists { case (lab, _) => datasetQa(lab).isChargeable }
 
-      if (isVisitor || hasChargeableDataset) normalCharges
+      // REL-3628: many GPI acquisitions don't produce datasets so charge for
+      //           them regardless
+      def isGpiAcquisition: Boolean =
+        instrument.exists(_ == Instrument.Gpi) && (obsClass == ObsClass.ACQ)
+
+      if (isVisitor || hasChargeableDataset || isGpiAcquisition) normalCharges
       else VisitTimes.noncharged(total.sum)
 
     }
