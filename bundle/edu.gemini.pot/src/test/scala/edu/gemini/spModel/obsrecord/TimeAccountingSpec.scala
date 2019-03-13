@@ -165,7 +165,7 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
         // FAIL or USABLE nothing is charged in some cases).
         val v = TimeAccounting.calc(t.instrument, t.events.sorted, const(PASS), t.oc)
 
-        val isVisitor = t.instrument.exists(_ == Instrument.Visitor)
+        val isVisitor = t.instrument.exists(_.isVisitor)
 
         // If there were no datasets, then we don't charge at all.
         if ((u.sum === 0) && !isVisitor)
@@ -178,7 +178,7 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
     "not charge (except for visitor instruments), if there are no passing datasets" in {
       forAll(genTest(GS19AStart, GS19AEnd)) { (t: Test) =>
         t.qa.values.exists(_.isChargeable) ||
-          t.instrument.exists(_ == Instrument.Visitor) ||
+          t.instrument.exists(_.isVisitor) ||
           (t.visitTimes === VisitTimes.noncharged(t.events.total.sum))
       }
     }
@@ -242,7 +242,7 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
         // Of the remaining datasets, we need at least one to be PASS (or
         // undefined or check) because the new algorithm explicitly doesn't
         // charge if they are all failing.
-        val charge = t.instrument.exists(_ == Instrument.Visitor) ||
+        val charge = t.instrument.exists(_.isVisitor) ||
           events.datasetIntervals.exists { case (lab, _) => t.qa(lab).isChargeable }
 
         // If the new algorithm won't charge at all we can't really compare so
