@@ -95,10 +95,10 @@ public final class ObservationObsVisitsFactory implements Serializable {
 
         ObsVisit[] visits;
         if (options.getLimitConfigDatesByNight() == null) {
-            visits = obsLog.getVisits(inst);
+            visits = obsLog.getVisits(inst, obsClass);
         } else {
             ObservingNight night = options.getLimitConfigDatesByNight();
-            visits = obsLog.getVisits(inst, night.getStartTime(), night.getEndTime());
+            visits = obsLog.getVisits(inst, obsClass, night.getStartTime(), night.getEndTime());
         }
 
         for (ObsVisit visit : visits)  {

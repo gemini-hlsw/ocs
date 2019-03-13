@@ -44,7 +44,7 @@ public final class ObsTimesService {
             final Option<Instrument> inst = InstrumentService.lookupInstrument(obs);
 
             final ObsClass obsClass = ObsClassService.lookupObsClass(obs);
-            res = nodes.getExecRecord().getTimes(inst, nodes.getQaRecord(), obsClass.getDefaultChargeClass());
+            res = nodes.getExecRecord().getTimes(inst, obsClass, nodes.getQaRecord(), obsClass.getDefaultChargeClass());
         }
 
         // Cache and return the results.

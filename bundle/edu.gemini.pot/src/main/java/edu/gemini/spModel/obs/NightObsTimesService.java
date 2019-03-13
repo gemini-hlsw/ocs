@@ -52,7 +52,7 @@ public class NightObsTimesService {
         final Option<Instrument> inst = InstrumentService.lookupInstrument(obs);
 
         // Get the visits for the obs, if any.
-        ObsVisit[] visits = nodes.getExecRecord().getVisits(inst, nodes.getQaRecord());
+        ObsVisit[] visits = nodes.getExecRecord().getVisits(inst, obsClass, nodes.getQaRecord());
         if ((visits == null) || (visits.length == 0)) return res;
 
         // Start with the first visit, and figure out the ObservingNight and
