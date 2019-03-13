@@ -126,7 +126,7 @@ private[obsrecord] object VisitCalculator {
       }
 
       def isVisitor: Boolean =
-        instrument.exists(_ == Instrument.Visitor)
+        instrument.exists(_.isVisitor)
 
       def hasChargeableDataset: Boolean =
         dsets.exists { case (lab, _) => qa(lab).isChargeable }
