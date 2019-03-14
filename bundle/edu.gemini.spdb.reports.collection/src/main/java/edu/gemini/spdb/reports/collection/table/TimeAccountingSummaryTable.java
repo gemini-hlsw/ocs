@@ -148,7 +148,7 @@ public class TimeAccountingSummaryTable extends AbstractTable {
             final Option<Instrument> inst = InstrumentService.lookupInstrument(obsShell);
 
             // Collect visits and instruments per night.
-            for (final ObsVisit visit : log.getVisits(inst)) {
+            for (final ObsVisit visit : log.getVisits(inst, obsClass)) {
 
                 // Determine night and initialize map entries if needed.
                 final ObservingNight night = new ObservingNight(site, visit.getEndTime());
