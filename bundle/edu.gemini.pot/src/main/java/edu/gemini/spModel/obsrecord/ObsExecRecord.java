@@ -350,8 +350,8 @@ public final class ObsExecRecord implements Serializable {
      * @return array of ObsVisit corresponding to the visits that this
      * observation has seen
      */
-    public synchronized ObsVisit[] getVisits(Option<Instrument> instrument, ObsQaRecord qa) {
-        return _visits.getObsVisits(instrument, qa, _configStore);
+    public synchronized ObsVisit[] getVisits(Option<Instrument> instrument, ObsClass oc, ObsQaRecord qa) {
+        return _visits.getObsVisits(instrument, oc, qa, _configStore);
     }
 
     /**
@@ -364,8 +364,8 @@ public final class ObsExecRecord implements Serializable {
      * @return {@link ObsVisit}s whose start time falls between
      * <code>startTime</code> (inclusive) and <code>endTime</code> exclusive
      */
-    public synchronized ObsVisit[] getVisits(Option<Instrument> instrument, ObsQaRecord qa, long startTime, long endTime) {
-        return _visits.getObsVisits(instrument, qa, _configStore, startTime, endTime);
+    public synchronized ObsVisit[] getVisits(Option<Instrument> instrument, ObsClass oc, ObsQaRecord qa, long startTime, long endTime) {
+        return _visits.getObsVisits(instrument, oc, qa, _configStore, startTime, endTime);
     }
 
     /**
@@ -402,10 +402,11 @@ public final class ObsExecRecord implements Serializable {
      */
     public ObsTimeCharges getTimeCharges(
         Option<Instrument> instrument,
+        ObsClass           oc,
         ObsQaRecord        qa,
         ChargeClass        mainChargeClass
     ) {
-        return _visits.getTimeCharges(instrument, mainChargeClass, qa, _configStore);
+        return _visits.getTimeCharges(instrument, oc, mainChargeClass, qa, _configStore);
     }
 
     /**
@@ -420,10 +421,11 @@ public final class ObsExecRecord implements Serializable {
      */
     public ObsTimes getTimes(
         Option<Instrument> instrument,
+        ObsClass           oc,
         ObsQaRecord        qa,
         ChargeClass        mainChargeClass
     ) {
-        return new ObsTimes(getTotalTime(), getTimeCharges(instrument, qa, mainChargeClass));
+        return new ObsTimes(getTotalTime(), getTimeCharges(instrument, oc, qa, mainChargeClass));
     }
 
     /**

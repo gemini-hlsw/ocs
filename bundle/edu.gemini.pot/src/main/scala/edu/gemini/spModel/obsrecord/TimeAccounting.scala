@@ -20,9 +20,10 @@ object TimeAccounting {
    */
   def calc(
     instrument: Option[Instrument],
+    obsClass:   ObsClass,
     events:     Vector[ObsExecEvent],
-    qa:         DatasetLabel => DatasetQaState,
-    oc:         DatasetLabel => ObsClass
+    datasetQa:  DatasetLabel => DatasetQaState,
+    datasetOc:  DatasetLabel => ObsClass
   ): VisitTimes = {
 
     val ve = VisitEvents(events)
@@ -37,7 +38,7 @@ object TimeAccounting {
       c <- VisitCalculator.all.find(_.validAt(s).isBefore(h.instant))
     } yield c
 
-    calculator.fold(new VisitTimes()) { _.calc(instrument, ve, qa, oc) }
+    calculator.fold(new VisitTimes()) { _.calc(instrument, obsClass, ve, datasetQa, datasetOc) }
   }
 
   /**
@@ -46,10 +47,11 @@ object TimeAccounting {
    */
   def calcAsJava(
     instrument: GOption[Instrument],
+    obsClass:   ObsClass,
     events:     java.util.List[ObsExecEvent],
     qa:         ObsQaRecord,
     store:      ConfigStore
   ): VisitTimes =
-    calc(instrument.asScalaOpt, events.asScala.toVector, qa.qaState, store.getObsClass)
+    calc(instrument.asScalaOpt, obsClass, events.asScala.toVector, qa.qaState, store.getObsClass)
 
 }

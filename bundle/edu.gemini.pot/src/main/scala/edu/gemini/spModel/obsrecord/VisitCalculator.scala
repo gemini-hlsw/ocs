@@ -39,9 +39,10 @@ private[obsrecord] sealed trait VisitCalculator {
    */
   def calc(
     instrument: Option[Instrument],
+    obsClass:   ObsClass,
     events:     VisitEvents,
-    qa:         DatasetLabel => DatasetQaState,
-    oc:         DatasetLabel => ObsClass
+    datasetQa:  DatasetLabel => DatasetQaState,
+    datasetOc:  DatasetLabel => ObsClass
   ): VisitTimes
 
 }
@@ -70,11 +71,15 @@ private[obsrecord] object VisitCalculator {
 
     override def calc(
       instrument: Option[Instrument], // ignored here
+      obsClass:   ObsClass,           // ignored here
       events:     VisitEvents,
-      qa:         DatasetLabel => DatasetQaState,
-      oc:         DatasetLabel => ObsClass
+      datasetQa:  DatasetLabel => DatasetQaState,
+      datasetOc:  DatasetLabel => ObsClass
     ): VisitTimes =
-      PrimordialVisitCalculator.instance.calc(events.sorted.toList.asJava, qa.asJava, oc.asJava)
+      PrimordialVisitCalculator.instance.calc(
+        events.sorted.toList.asJava,
+        datasetQa.asJava,
+        datasetOc.asJava)
 
   }
 
@@ -98,9 +103,10 @@ private[obsrecord] object VisitCalculator {
 
     override def calc(
       instrument: Option[Instrument],
+      obsClass:   ObsClass,
       events:     VisitEvents,
-      qa:         DatasetLabel => DatasetQaState,
-      oc:         DatasetLabel => ObsClass
+      datasetQa:  DatasetLabel => DatasetQaState,
+      datasetOc:  DatasetLabel => ObsClass
     ): VisitTimes = {
 
       val total = events.total
@@ -112,7 +118,7 @@ private[obsrecord] object VisitCalculator {
 
         val charge: ChargeClass => Union[Interval] =
           dsets.groupBy { case (label, interval) =>
-            if (qa(label).isChargeable) oc(label).getDefaultChargeClass else NONCHARGED
+            if (datasetQa(label).isChargeable) datasetOc(label).getDefaultChargeClass else NONCHARGED
           }.mapValues(v => new Union(v.map(_._2).asJava) ∩ chargeable)
            .withDefaultValue(new Union())
 
@@ -129,9 +135,14 @@ private[obsrecord] object VisitCalculator {
         instrument.exists(_.isVisitor)
 
       def hasChargeableDataset: Boolean =
-        dsets.exists { case (lab, _) => qa(lab).isChargeable }
+        dsets.exists { case (lab, _) => datasetQa(lab).isChargeable }
 
-      if (isVisitor || hasChargeableDataset) normalCharges
+      // REL-3628: many GPI acquisitions don't produce datasets so charge for
+      //           them regardless
+      def isGpiAcquisition: Boolean =
+        instrument.exists(_ == Instrument.Gpi) && (obsClass == ObsClass.ACQ)
+
+      if (isVisitor || hasChargeableDataset || isGpiAcquisition) normalCharges
       else VisitTimes.noncharged(total.sum)
 
     }

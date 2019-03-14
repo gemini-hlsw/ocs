@@ -5,6 +5,8 @@ import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.dataset.DatasetLabel;
 import edu.gemini.spModel.obs.InstrumentService;
+import edu.gemini.spModel.obs.ObsClassService;
+import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obslog.ObsExecLog;
 import edu.gemini.spModel.obslog.ObsLog;
 import edu.gemini.spModel.obslog.ObsQaLog;
@@ -34,9 +36,10 @@ public class EdCompObslog extends OtItemEditor<ISPObsQaLog, ObsQaLog> {
         if (SPUtil.getDataObjectPropertyName().equals(evt.getPropertyName())) {
             SwingUtilities.invokeLater(() -> {
                 final ISPObsExecLog execLogShell = (ISPObsExecLog) evt.getSource();
-                final Option<Instrument> inst    = ImOption.apply(execLogShell.getContextObservation())
-                                                           .flatMap(o -> InstrumentService.lookupInstrument(o));
-                gui.setup(inst, new ObsLog(getNode(), getDataObject(), execLogShell, (ObsExecLog) evt.getNewValue()));
+                final Option<ISPObservation> obs = ImOption.apply(execLogShell.getContextObservation());
+                final Option<Instrument>    inst = obs.flatMap(o -> InstrumentService.lookupInstrument(o));
+                final ObsClass                oc = obs.map(o -> ObsClassService.lookupObsClass(o)).getOrElse(ObsClass.SCIENCE);
+                gui.setup(inst, oc, new ObsLog(getNode(), getDataObject(), execLogShell, (ObsExecLog) evt.getNewValue()));
             });
         }
     };
@@ -111,7 +114,8 @@ public class EdCompObslog extends OtItemEditor<ISPObsQaLog, ObsQaLog> {
             originalComments = incomingBaseline;
 
             final Option<Instrument> inst = InstrumentService.lookupInstrument(obs);
-            gui.setup(inst, new ObsLog(getNode(), incomingLog, oel, execLog));
+            final ObsClass             oc = ObsClassService.lookupObsClass(obs);
+            gui.setup(inst, oc, new ObsLog(getNode(), incomingLog, oel, execLog));
         }
     }
 

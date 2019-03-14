@@ -92,11 +92,16 @@ final class PrivateVisit implements Serializable {
         return null;
     }
 
-    VisitTimes getTimeCharges(Option<Instrument> instrument, ObsQaRecord qa, ConfigStore store) {
-        return TimeAccounting.calcAsJava(instrument, _events, qa, store);
+    VisitTimes getTimeCharges(
+        Option<Instrument> instrument,
+        ObsClass           oc,
+        ObsQaRecord        qa,
+        ConfigStore        store
+    ) {
+        return TimeAccounting.calcAsJava(instrument, oc, _events, qa, store);
     }
 
-    ObsVisit toObsVisit(Option<Instrument> instrument, ObsQaRecord qa, ConfigStore store) {
+    ObsVisit toObsVisit(Option<Instrument> instrument, ObsClass oc, ObsQaRecord qa, ConfigStore store) {
         List<UniqueConfig> uniqueConfigs = new ArrayList<UniqueConfig>();
 
         Config lastConfig = null;
@@ -156,7 +161,7 @@ final class PrivateVisit implements Serializable {
         UniqueConfig[] uconfigs;
         uconfigs = uniqueConfigs.toArray(UniqueConfig.EMPTY_ARRAY);
 
-        return new ObsVisit(getEvents(), uconfigs, getTimeCharges(instrument, qa, store));
+        return new ObsVisit(getEvents(), uconfigs, getTimeCharges(instrument, oc, qa, store));
     }
 
     // Implement as done in 2013B June release.  StartSequence is the only
