@@ -280,11 +280,11 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
 
         // If the new algorithm won't charge at all we can't really compare so
         // just assign noncharged to vtOld.
-        val vtOld = if (charge) VisitCalculator.Primordial.calc(t.instrument, ObsClass.SCIENCE, events, t.datasetQa, t.datasetOc)
+        val vtOld = if (charge) VisitCalculator.Primordial.calc(t.instrument, t.obsClass, events, t.datasetQa, t.datasetOc)
                     else VisitTimes.noncharged(events.total.sum)
 
         // Now the two methods should produce the same results.
-        val vtNew = VisitCalculator.Update2019A.calc(t.instrument, ObsClass.SCIENCE, events, t.datasetQa, t.datasetOc)
+        val vtNew = VisitCalculator.Update2019A.calc(t.instrument, t.obsClass, events, t.datasetQa, t.datasetOc)
 
         vtNew shouldEqual vtOld
       }
