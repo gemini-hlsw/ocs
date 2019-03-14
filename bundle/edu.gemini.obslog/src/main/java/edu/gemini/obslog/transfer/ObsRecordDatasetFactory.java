@@ -82,7 +82,7 @@ public final class ObsRecordDatasetFactory implements Serializable {
 
         List<EObslogVisit> eObslogVisits = new ArrayList<EObslogVisit>();
 
-        for (ObsVisit visit : obsLog.getVisits(Instrument.fromComponentType(type))) {
+        for (ObsVisit visit : obsLog.getVisits(Instrument.fromComponentType(type), obsClass)) {
             if (visit.getAllDatasetLabels().length == 0) {
                 LOG.fine("Skipping  empty visit");
                 continue;
