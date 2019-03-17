@@ -22,7 +22,7 @@ import scala.swing._
 class RefreshDialog(owner: Window, ctx: QvContext) extends Dialog(owner) {
 
   title = "QV Data Selection and Reload"
-  preferredSize = new Dimension(800, 400)
+  preferredSize = new Dimension(900, 400)
   modal = true
 
 
