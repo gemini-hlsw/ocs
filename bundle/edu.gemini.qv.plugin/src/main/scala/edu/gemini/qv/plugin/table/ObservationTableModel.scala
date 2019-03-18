@@ -48,7 +48,7 @@ object ObservationTableModel {
         "Partner",
         "Partner country",
         o => asString(o.getProg.getPartner),
-        visibleAtStart = false
+        visibleAtStart = true
       ),
       Column[String](
         "Band",
@@ -104,32 +104,32 @@ object ObservationTableModel {
         "NonSid",
         "Has Non sidereal target?",
         o => asString(o.hasNonSidereal),
-        visibleAtStart = false
+        visibleAtStart = true
       ),
 
       // conditions
       Column[String](
         "IQ",
         "Image quality", o => asString(o.getImageQuality),
-        visibleAtStart = false
+        visibleAtStart = true
       ),
       Column[String](
         "CC",
         "Cloud coverage",
         o => asString(o.getCloudCover),
-        visibleAtStart = false
+        visibleAtStart = true
       ),
       Column[String](
         "WV",
         "Water vapor",
         o => asString(o.getWaterVapor),
-        visibleAtStart = false
+        visibleAtStart = true
       ),
       Column[String](
         "SB",
         "Sky brightness",
         o => asString(o.getSkyBackground),
-        visibleAtStart = false
+        visibleAtStart = true
       ),
 
       // general instrument stuff
@@ -172,7 +172,7 @@ object ObservationTableModel {
         "Prog Remaining Time",
         "Remaining time for program",
         o => TimeValue(o.getProg.getRemainingProgramTime),
-        visibleAtStart = false
+        visibleAtStart = true
       ),
       Column[String](
         "Prog PI",
@@ -213,7 +213,7 @@ object ObservationTableModel {
         "Obs Remaining Time",
         "Remaining time for observation",
         o => TimeValue(o.getRemainingTime),
-        visibleAtStart = false
+        visibleAtStart = true
       ),
 
       // ==== Remaining time
@@ -221,19 +221,19 @@ object ObservationTableModel {
         "Sem. Nts",
         "Remaining nights from today until the end of current semester.",
         o => SolutionProvider(ctx).remainingNights(ctx, o, thisSemester = true, nextSemester = false),
-        visibleAtStart = false
+        visibleAtStart = true
       ),
       Column[TimeValue](
         "Sem. Hrs",
         "Remaining hours from today until the end of current semester.",
         o => TimeValue(SolutionProvider(ctx).remainingTime(ctx, o, thisSemester = true, nextSemester = false)),
-        visibleAtStart = false
+        visibleAtStart = true
       ),
       Column[java.lang.Double](
         "Sem. Frac",
         "Fraction of remaining observable hours divided by observation remaining hours until the end of current semester.",
         o => semesterHrsFraction(ctx, o, thisSem = true, nextSem = false),
-        visibleAtStart = false
+        visibleAtStart = true
       ),
       Column[java.lang.Integer](
         "+Sem. Nts",
@@ -259,13 +259,13 @@ object ObservationTableModel {
         "Timing Windows (UTC)",
         "Timing window restrictions",
         timingWindowsAsString,
-        visibleAtStart = false
+        visibleAtStart = true
       ),
       Column[String](
         "Elevation Constraints",
         "Elevation restrictions",
         elevationConstraintsAsString,
-        visibleAtStart = false
+        visibleAtStart = true
       ),
 
       // ==== instrument specific columns, they will be empty except for the instrument the field is specific to
@@ -288,7 +288,7 @@ object ObservationTableModel {
         "PreImg",
         "",
         o => asString(o.getPreImaging.getOrElse(false)),
-        visibleAtStart = false
+        visibleAtStart = true
       ),
       // GNIRS - Cross Dispersed
       Column[String](

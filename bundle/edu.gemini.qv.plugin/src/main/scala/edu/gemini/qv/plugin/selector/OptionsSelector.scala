@@ -98,8 +98,8 @@ object OptionsSelector {
   }
 
   case class Marker(label: String, tip: String, selected: Boolean = false) extends ChartOption
-  object Now extends Marker("Now", """Show a marker for "now" in the plot.""")
-  object Twilights extends Marker("Twilights", "Show markers for sunrise and sunset and nautical twilights.")
+  object Now extends Marker("Now", """Show a marker for "now" in the plot.""", selected = true)
+  object Twilights extends Marker("Twilights", "Show markers for sunrise and sunset and nautical twilights.", selected = true)
   object MoonPhases extends Marker("Moon Phases", "Show moon phases.")
   object IgnoreDaytime extends Marker("Ignore Daytime", "Fold segmented solutions for the same night into a single solution that covers the whole night.")
   object MoonElevation extends Marker("Moon Elevation", "Show the moon elevation.")
@@ -108,7 +108,7 @@ object OptionsSelector {
   object AirmassRuler extends Marker("Airmass", "Indicate airmass instead of elevation in degrees.")
   object InsideMarkers extends Marker("Highlight Observable", "Hightlight areas where the observation (or any observation) is observable in green.")
   object OutsideMarkers extends Marker("Highlight Not Observable", "Highlight areas where the observation (or none of the observations) is not observable in red.")
-  object Schedule extends Marker("Schedule", "Show the schedule constraints.")
+  object Schedule extends Marker("Schedule", "Show the schedule constraints.", selected = true)
   object DarkHours extends Marker("Dark Hours", "Show the dark hours.")
   object AvailableHours extends Marker("Available Hours", "Show available hours.")
   object EmptyCategories extends Marker("Show Empty Categories", "Show or hide categories for which there are no values.")
