@@ -1014,6 +1014,132 @@ public class GNIRSParams {
         }
     }
 
+    /**
+     * Hartmann Masks
+     */
+    public enum HartmannMask implements DisplayableSpType, SequenceableSpType {
+
+        OUT("Out"),
+        LeftMask("Left"),
+        RightMask("Right"),
+        ;
+
+        public static HartmannMask DEFAULT = OUT;
+        private String _displayValue;
+
+        HartmannMask(String displayValue) {
+            _displayValue = displayValue;
+        }
+
+        public String displayValue() {
+            return _displayValue;
+        }
+
+        public String sequenceValue() {
+            return _displayValue;
+        }
+
+        public String toString() {
+            return _displayValue;
+        }
+
+        /**
+         * Return the HartmannMask by name *
+         */
+        static public HartmannMask getHartmannMask(String name) {
+            return getHartmannMask(name, DEFAULT);
+        }
+
+        /**
+         * Return the HartmannMask by index *
+         */
+        static public HartmannMask getHartmannMaskByIndex(int index) {
+            return SpTypeUtil.valueOf(HartmannMask.class, index, DEFAULT);
+        }
+
+        /**
+         * Return the HartmannMask by name giving a value to return upon error *
+         */
+        static public HartmannMask getHartmannMask(String name, HartmannMask nvalue) {
+            return SpTypeUtil.oldValueOf(HartmannMask.class, name, nvalue);
+        }
+    }
+
+    /**
+     * Focus
+     */
+    public enum FocusSuggestion implements DisplayableSpType, SequenceableSpType {
+
+        BEST_FOCUS("best focus"),;
+
+        /**
+         * The default Focus value *
+         */
+        public static final FocusSuggestion DEFAULT = BEST_FOCUS;
+
+        private final String _displayValue;
+
+        FocusSuggestion(String displayValue) {
+            _displayValue = displayValue;
+        }
+
+        public String displayValue() {
+            return _displayValue;
+        }
+
+        public String sequenceValue() {
+            return _displayValue;
+        }
+
+        public String toString() {
+            return _displayValue;
+        }
+
+    }
+
+    public static class Focus extends SuggestibleString {
+        public Focus() {
+            super(FocusSuggestion.class);
+            setStringValue(FocusSuggestion.DEFAULT.displayValue());
+        }
+    }
+
+    public static class FocusEditor extends PropertyEditorSupport {
+        public Object getValue() {
+            Focus f = (Focus) super.getValue();
+            if (f == null) return null;
+
+            Focus res = new Focus();
+            res.setStringValue(f.getStringValue());
+            return res;
+        }
+
+        public void setValue(Object value) {
+            Focus f = (Focus) value;
+            Focus cur = (Focus) super.getValue();
+            if (cur == null) {
+                cur = new Focus();
+                super.setValue(cur);
+            }
+            cur.setStringValue(f.getStringValue());
+        }
+
+        public String getAsText() {
+            Focus val = (Focus) getValue();
+            if (val == null) return null;
+            return val.getStringValue();
+        }
+
+        public void setAsText(String string) throws IllegalArgumentException {
+            Focus val = (Focus) super.getValue();
+            if (val == null) {
+                val = new Focus();
+                super.setValue(val);
+            }
+            val.setStringValue(string);
+        }
+    }
+    
     /**Well Depth Values **/
     public enum WellDepth implements DisplayableSpType, SequenceableSpType {
 

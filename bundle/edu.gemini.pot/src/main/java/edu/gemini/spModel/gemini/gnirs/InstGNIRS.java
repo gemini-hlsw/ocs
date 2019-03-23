@@ -82,6 +82,8 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     public static final PropertyDescriptor FILTER_PROP;
     public static final PropertyDescriptor ACQUISITION_MIRROR_PROP;
     public static final PropertyDescriptor POS_ANGLE_CONSTRAINT_PROP;
+    public static final PropertyDescriptor HARTMANN_MASK_PROP;
+    public static final PropertyDescriptor FOCUS_PROP;
 
     // REL-2646.  This is an unfortunate requirement that falls out of REL-2646.
     // The observing wavelength for acquisition observations should be computed
@@ -139,6 +141,10 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         WELL_DEPTH_PROP = initProp("wellDepth", query_yes, iter_no);
         PORT_PROP = initProp("issPort", query_yes, iter_no);
         POS_ANGLE_CONSTRAINT_PROP = initProp("posAngleConstraint", query_no, iter_no);
+        HARTMANN_MASK_PROP = initProp("hartmannMask", query_yes, iter_yes);
+        HARTMANN_MASK_PROP.setExpert(true);
+        FOCUS_PROP = initProp("focus", query_no, iter_yes);
+        FOCUS_PROP.setExpert(true);
 
         OVERRIDE_ACQ_OBS_WAVELENGTH_PROP = initProp("overrideAcqObsWavelength", query_no, iter_no);
     }
@@ -155,6 +161,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     private Decker _decker = Decker.DEFAULT;
     private Filter _filter = Filter.DEFAULT;
     private WellDepth _wellDepth = WellDepth.DEFAULT;
+    private HartmannMask _hartmannMask = HartmannMask.DEFAULT;
 
     private IssPort port = IssPort.SIDE_LOOKING;
 
@@ -360,6 +367,41 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
 
     public void setOverrideAcqObsWavelength(boolean newValue) {
         _overrideAcqObsWavelength = newValue;
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Get the Hartmann mask value.
+     * NOTE: these are not available in the public interface but must be present for properties and to be iterable.
+     */
+    public HartmannMask getHartmannMask() {
+        return _hartmannMask;
+    }
+
+    /**
+     * Set the Hartmann mask.
+     */
+    public void setHartmannMask(HartmannMask newValue) {
+        HartmannMask oldValue = getHartmannMask();
+        if (oldValue != newValue) {
+            _hartmannMask = newValue;
+            firePropertyChange(HARTMANN_MASK_PROP.getName(), oldValue, newValue);
+        }
+    }
+
+    // ------------------------------------------------------------------------
+
+
+    /**
+     * Return the (read-only, static) value for focus.
+     */
+    public Focus getFocus() {
+        return new Focus();
+    }
+
+    public void setFocus(Focus focus) {
+        // Required for reflection
     }
 
     // ------------------------------------------------------------------------
@@ -876,6 +918,8 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         sc.putParameter(DefaultParameter.getInstance(InstConstants.POS_ANGLE_PROP, getPosAngleDegrees()));
         sc.putParameter(DefaultParameter.getInstance(InstConstants.COADDS_PROP, getCoadds()));
         sc.putParameter(DefaultParameter.getInstance(PORT_PROP, getIssPort()));
+        sc.putParameter(DefaultParameter.getInstance(HARTMANN_MASK_PROP, getHartmannMask()));
+        sc.putParameter(DefaultParameter.getInstance(FOCUS_PROP.getName(), getFocus()));
 
         return sc;
     }

@@ -33,6 +33,10 @@ public final class GNIRSConstants extends InstConstants {
     public static final ItemKey FILTER_KEY = key(FILTER_PROP);
     public static final String ACQUISITION_MIRROR_PROP = "acquisitionMirror";
     public static final ItemKey ACQUISITION_MIRROR_KEY = key(ACQUISITION_MIRROR_PROP);
+    public static final String HARTMANN_MASK_PROP = "hartmannMask";
+    public static final ItemKey HARTMANN_MASK_KEY = key(HARTMANN_MASK_PROP);
+    public static final String FOCUS_PROP = "Focus";
+    public static final ItemKey FOCUS_KEY = key(FOCUS_PROP);
 
     public static final double DEF_EXPOSURE_TIME = 17.0; // sec (by default settings)
     public static final double DEF_CENTRAL_WAVELENGTH = 2.2; // um (band=K)
