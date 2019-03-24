@@ -159,7 +159,8 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
         }
 
         _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
-        _println(CalculatablePrinter.getBackgroundLimitResult(result.is2nCalc()));
+        //_println(CalculatablePrinter.getBackgroundLimitResult(result.is2nCalc()));
+        _println(CalculatablePrinter.WarnIfReadNoiseLimited(result.is2nCalc()));
 
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());

@@ -114,4 +114,11 @@ public final class CalculatablePrinter {
         else return "Observation is background noise limited.";
     }
 
+    public static String WarnIfReadNoiseLimited(final ImagingS2NCalculatable s2n) {
+        if (s2n.getVarReadout() > s2n.getVarSource() + s2n.getVarBackground() + s2n.getVarDark())
+            return "Warning: observation is read noise limited";
+        else
+            return "";
+    }
+
 }
