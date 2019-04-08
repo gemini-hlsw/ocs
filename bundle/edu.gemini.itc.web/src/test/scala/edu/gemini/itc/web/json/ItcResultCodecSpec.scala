@@ -12,7 +12,7 @@ object ItcResultCodecSpec extends Specification with ScalaCheck {
 
   // Codecs
   import color._
-  import disjunction._
+  import edu.gemini.json.disjunction._
   import itcccd._
   import itcerror._
   import itcresult._

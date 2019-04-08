@@ -4,7 +4,7 @@ import argonaut._, Argonaut._
 import edu.gemini.spModel.core.Wavelength
 
 trait WavelengthCodec {
-  import keyed._
+  import edu.gemini.json.keyed._
 
   implicit val wavelengthCodec: CodecJson[Wavelength] =
     keyedCodec(_.toString, (s: String) => Wavelength(s).toOption)

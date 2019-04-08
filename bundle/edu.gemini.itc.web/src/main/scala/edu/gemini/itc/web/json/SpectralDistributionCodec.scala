@@ -4,8 +4,8 @@ import argonaut._, Argonaut._
 import edu.gemini.spModel.core._
 
 trait SpectralDistributionCodec {
-  import coproduct._
-  import keyed._
+  import edu.gemini.json.coproduct._
+  import edu.gemini.json.keyed._
   import squants._
   import wavelength._
 

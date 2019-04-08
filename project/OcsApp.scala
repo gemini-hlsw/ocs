@@ -4,6 +4,10 @@ import Keys._
 
 trait OcsApp { this: OcsBundle =>
 
+  lazy val app_ags = project.in(file("app/ags")).dependsOn(
+    bundle_edu_gemini_ags_servlet
+  )
+
   lazy val app_bundle_server = project.in(file("app/bundle-server"))
 
   lazy val app_epics_acm = project.in(file("app/epics-acm")).dependsOn(
@@ -88,6 +92,7 @@ trait OcsApp { this: OcsBundle =>
     bundle_edu_gemini_catalog,
     bundle_edu_gemini_dataman_app,
     bundle_edu_gemini_horizons_api,
+    bundle_edu_gemini_json,
     bundle_edu_gemini_lchquery_servlet,
     bundle_edu_gemini_obslog,
     bundle_edu_gemini_oodb_auth_servlet,

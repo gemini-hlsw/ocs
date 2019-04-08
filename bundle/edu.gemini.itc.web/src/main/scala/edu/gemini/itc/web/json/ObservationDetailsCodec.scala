@@ -5,8 +5,8 @@ import edu.gemini.itc.shared._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality._
 
 trait ObservationDetailsCodec {
-  import coproduct._
-  import keyed._
+  import edu.gemini.json.coproduct._
+  import edu.gemini.json.keyed._
 
   private val ImagingIntCodec: CodecJson[ImagingInt] =
     casecodec5(ImagingInt.apply, ImagingInt.unapply)(

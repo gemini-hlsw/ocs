@@ -4,9 +4,9 @@ import argonaut._, Argonaut._
 import edu.gemini.itc.shared._
 
 trait ItcSpectroscopyResultCodec {
-  import array._
+  import edu.gemini.json.array._
   import color._
-  import coproduct._
+  import edu.gemini.json.coproduct._
   import itcccd._
 
   private implicit val SpcChartTypeCodec: CodecJson[SpcChartType] =

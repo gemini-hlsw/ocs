@@ -16,8 +16,8 @@ import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.gemini.trecs.TReCSParams
 
 trait InstrumentDetailsCodec {
-  import coproduct._
-  import keyed._
+  import edu.gemini.json.coproduct._
+  import edu.gemini.json.keyed._
   import wavelength._
 
   // All our enum types must be declared explicitly

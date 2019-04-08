@@ -17,6 +17,7 @@ ocsAppManifest := {
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_itc).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_itc).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_itc_shared).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_itc_shared).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_itc_web).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_itc_web).value)),
+    BundleSpec((sbt.Keys.name in bundle_edu_gemini_json).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_json).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_lchquery_servlet).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_lchquery_servlet).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_obslog).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_obslog).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_oodb_auth_servlet).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_oodb_auth_servlet).value)),

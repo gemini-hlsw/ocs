@@ -6,7 +6,7 @@ import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.telescope.IssPort;
 
 trait TelescopeDetailsCodec {
-  import keyed._
+  import edu.gemini.json.keyed._
 
   private implicit val TelescopeDetailsCoatingCodec = enumCodec[TelescopeDetails.Coating]
   private implicit val IssPortCodec                 = enumCodec[IssPort]
