@@ -12,6 +12,7 @@ trait AgsRequestCodec {
 
   import edu.gemini.json.all._
   import coordinates._
+  import agsinstrument._
 
   private implicit val SiteCodec: CodecJson[Site] =
     enumCodec[Site]
@@ -41,11 +42,12 @@ trait AgsRequestCodec {
     }
 
   implicit val AgsRequestCodec: CodecJson[AgsRequest] =
-    casecodec4(AgsRequest.apply, AgsRequest.unapply)(
+    casecodec5(AgsRequest.apply, AgsRequest.unapply)(
       "site",
       "coordinates",
       "targetType",
-      "conditions"
+      "conditions",
+      "instrument"
     )
 
 

@@ -18,7 +18,7 @@ trait ArbCoordinates {
 
   implicit val arbRightAscension: Arbitrary[RightAscension] =
     Arbitrary {
-      Gen.choose(0, 360).map(d => RightAscension.fromDegrees(d.toDouble))
+      Gen.choose(0, 359).map(d => RightAscension.fromDegrees(d.toDouble))
     }
 
   implicit val arbCoordinates: Arbitrary[Coordinates] =

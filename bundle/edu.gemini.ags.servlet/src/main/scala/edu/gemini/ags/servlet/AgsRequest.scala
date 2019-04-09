@@ -12,14 +12,16 @@ import edu.gemini.spModel.target.env.TargetEnvironment
 import TargetType._
 
 
-/**
- * Describes a
- */
+import scalaz._
+import Scalaz._
+
+
 final case class AgsRequest(
   site:        Site,
   coordinates: Coordinates,
   targetType:  TargetType,
-  conditions:  Conditions
+  conditions:  Conditions,
+  instrument:  AgsInstrument
 ) {
 
   def target: Target =
@@ -37,17 +39,16 @@ final case class AgsRequest(
    * order to do an AGS search. This method creates a context that contains
    * the request data and defaults unimportant details.
    */
-  def toContext: ObsContext =
-    ObsContext.create(
-      TargetEnvironment.create(spTarget),
-      site match  {
-        case Site.GN => new InstGmosNorth()
-        case Site.GS => new InstGmosSouth()
-      },
-      conditions,
-      java.util.Collections.emptySet[Offset],
-      null, // :-(
-      edu.gemini.shared.util.immutable.ImOption.empty[SchedulingBlock]
-    )
+  def toContext: \/[String, ObsContext] =
+    instrument.instObsComp.map { inst =>
+      ObsContext.create(
+        TargetEnvironment.create(spTarget),
+        inst,
+        conditions,
+        java.util.Collections.emptySet[Offset],
+        null, // :-(
+        edu.gemini.shared.util.immutable.ImOption.empty[SchedulingBlock]
+      )
+    }
 
 }

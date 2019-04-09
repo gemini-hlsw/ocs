@@ -32,21 +32,21 @@ final class JsonServlet(magTable: MagnitudeTable) extends HttpServlet with AgsRe
     val src  = Source.fromInputStream(req.getInputStream, enc)
     val json = try src.mkString finally src.close
 
-    val task: Either[String, Task[Option[AgsStrategy.Selection]]] =
+    val task: \/[String, Task[Option[AgsStrategy.Selection]]] =
       for {
-        agsReq     <- Parse.decodeEither[AgsRequest](json).right
-        obsContext <- Right(agsReq.toContext).right  // weird: obsContext = produces "value flatMap is not a member of Product with Serializable with scala.util.Either"
-        strategy   <- AgsRegistrar.currentStrategy(obsContext).toRight("Could not determine AGS strategy.").right
+        agsReq     <- \/.fromEither(Parse.decodeEither[AgsRequest](json))
+        obsContext <- agsReq.toContext
+        strategy   <- AgsRegistrar.currentStrategy(obsContext) \/> "Could not determine AGS strategy."
       } yield Task.delay(strategy.select(obsContext, magTable)(global)).flatMap(fut => toTask(fut))
 
     val result = task.leftMap(msg => (SC_BAD_REQUEST, msg))
-                     .flatMap(_.unsafePerformSyncAttempt.toEither.leftMap(e => (SC_INTERNAL_SERVER_ERROR, e.getMessage)))
+                     .flatMap(_.unsafePerformSyncAttempt.leftMap(e => (SC_INTERNAL_SERVER_ERROR, e.getMessage)))
 
     result match {
-      case Left((code, msg)) =>
+      case -\/((code, msg)) =>
         res.sendError(code, msg)
 
-      case Right(sel)        =>
+      case \/-(sel)         =>
         res.setStatus(SC_OK)
         res.setContentType("text/json; charset=UTF-8")
         val writer = res.getWriter

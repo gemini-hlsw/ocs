@@ -1,6 +1,6 @@
 package edu.gemini.ags.servlet.arb
 
-import edu.gemini.ags.servlet.{ AgsRequest, TargetType }
+import edu.gemini.ags.servlet.{ AgsInstrument, AgsRequest, TargetType }
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, Conditions, ImageQuality, SkyBackground, WaterVapor}
 
@@ -11,11 +11,7 @@ import org.scalacheck.Arbitrary._
 trait ArbAgsRequest {
 
   import coordinates._
-
-  implicit val arbSite: Arbitrary[Site] =
-    Arbitrary {
-      Gen.oneOf(Site.GN, Site.GS)
-    }
+  import agsinstrument._
 
   implicit val arbTargetType: Arbitrary[TargetType] =
     Arbitrary {
@@ -38,7 +34,8 @@ trait ArbAgsRequest {
         c <- arbitrary[Coordinates]
         t <- arbitrary[TargetType]
         n <- arbitrary[Conditions]
-      } yield AgsRequest(s, c, t, n)
+        i <- arbitrary[AgsInstrument]
+      } yield AgsRequest(s, c, t, n, i)
     }
 
 }
