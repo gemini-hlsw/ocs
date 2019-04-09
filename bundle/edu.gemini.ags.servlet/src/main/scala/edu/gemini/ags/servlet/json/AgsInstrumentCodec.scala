@@ -8,6 +8,8 @@ import edu.gemini.pot.sp.Instrument
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2.LyotWheel
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.FPUnitNorth
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.FPUnitSouth
+import edu.gemini.spModel.telescope.PosAngleConstraint
+
 
 trait AgsInstrumentCodec {
 
@@ -18,24 +20,35 @@ trait AgsInstrumentCodec {
   private implicit val FPUnitSouthCodec: CodecJson[FPUnitSouth] = enumCodec[FPUnitSouth]
   private implicit val InstrumentCodec: CodecJson[Instrument]   = enumCodec[Instrument]
 
+  private implicit val PosAngleConstraintCodec: CodecJson[PosAngleConstraint] =
+    enumCodec[PosAngleConstraint]
+
   private val Flamingos2Codec: CodecJson[Flamingos2] =
-    casecodec1(Flamingos2.apply, Flamingos2.unapply)("lyout")
+    casecodec2(Flamingos2.apply, Flamingos2.unapply)("lyout", "constraint")
 
   private val GmosNorthCodec: CodecJson[GmosNorth] =
-    casecodec1(GmosNorth.apply, GmosNorth.unapply)("fpu")
+    casecodec2(GmosNorth.apply, GmosNorth.unapply)("fpu", "constraint")
 
   private val GmosSouthCodec: CodecJson[GmosSouth] =
-    casecodec1(GmosSouth.apply, GmosSouth.unapply)("fpu")
+    casecodec2(GmosSouth.apply, GmosSouth.unapply)("fpu", "constraint")
+
+  private val GnirsCodec: CodecJson[Gnirs] =
+    casecodec1(Gnirs.apply, Gnirs.unapply)("constraint")
+
+  private val GsaoiCodec: CodecJson[Gsaoi] =
+    casecodec1(Gsaoi.apply, Gsaoi.unapply)("constraint")
 
   private val OtherCodec: CodecJson[Other] =
     casecodec1(Other.apply, Other.unapply)("id")
 
   implicit val InstrumentRequestCodec: CodecJson[AgsInstrument] =
     CoproductCodec[AgsInstrument]
-      .withCase("flamingos2", Flamingos2Codec) { case f2: Flamingos2 => f2 }
-      .withCase("gmosNorth",  GmosNorthCodec)  { case gn: GmosNorth  => gn }
-      .withCase("gmosSouth",  GmosSouthCodec)  { case gs: GmosSouth  => gs }
-      .withCase("other",      OtherCodec)      { case o:  Other      => o  }
+      .withCase("flamingos2", Flamingos2Codec) { case i: Flamingos2 => i }
+      .withCase("gmosNorth",  GmosNorthCodec)  { case i: GmosNorth  => i }
+      .withCase("gmosSouth",  GmosSouthCodec)  { case i: GmosSouth  => i }
+      .withCase("gnirs",      GnirsCodec)      { case i: Gnirs      => i }
+      .withCase("gsaoi",      GsaoiCodec)      { case i: Gsaoi      => i }
+      .withCase("other",      OtherCodec)      { case i: Other      => i }
       .asCodecJson
 
 }
