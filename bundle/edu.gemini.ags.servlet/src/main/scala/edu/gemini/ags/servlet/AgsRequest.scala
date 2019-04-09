@@ -21,6 +21,7 @@ final case class AgsRequest(
   coordinates: Coordinates,
   targetType:  TargetType,
   conditions:  Conditions,
+  posAngle:    Angle,
   instrument:  AgsInstrument
 ) {
 
@@ -41,6 +42,9 @@ final case class AgsRequest(
    */
   def toContext: \/[String, ObsContext] =
     instrument.instObsComp.map { inst =>
+
+      inst.setPosAngle(posAngle.toDegrees)
+
       ObsContext.create(
         TargetEnvironment.create(spTarget),
         inst,

@@ -10,10 +10,8 @@ import edu.gemini.spModel.guide.{ GuideProbe, GuideProbeMap }
 trait SelectionCodec {
 
   import edu.gemini.json.keyed._
+  import angle._
   import siderealtarget._
-
-  implicit val AngleCodec: CodecJson[Angle] =
-    CodecJson.derived[Double].xmap(Angle.fromDegrees)(_.toDegrees)
 
   implicit val GuideProbeCodec: CodecJson[GuideProbe] =
     keyedCodec(_.getKey, (k: String) => Option(GuideProbeMap.instance.get(k)))

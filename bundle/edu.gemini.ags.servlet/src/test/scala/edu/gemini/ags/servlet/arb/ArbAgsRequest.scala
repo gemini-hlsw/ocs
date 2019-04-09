@@ -34,8 +34,9 @@ trait ArbAgsRequest {
         c <- arbitrary[Coordinates]
         t <- arbitrary[TargetType]
         n <- arbitrary[Conditions]
+        d <- Gen.choose(0, 359)
         i <- arbitrary[AgsInstrument]
-      } yield AgsRequest(s, c, t, n, i)
+      } yield AgsRequest(s, c, t, n, Angle.fromDegrees(d.toDouble), i)
     }
 
 }

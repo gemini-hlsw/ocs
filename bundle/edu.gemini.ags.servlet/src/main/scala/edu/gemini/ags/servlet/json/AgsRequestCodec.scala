@@ -11,8 +11,10 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, Conditions, 
 trait AgsRequestCodec {
 
   import edu.gemini.json.all._
-  import coordinates._
+
   import agsinstrument._
+  import angle._
+  import coordinates._
 
   private implicit val SiteCodec: CodecJson[Site] =
     enumCodec[Site]
@@ -42,11 +44,12 @@ trait AgsRequestCodec {
     }
 
   implicit val AgsRequestCodec: CodecJson[AgsRequest] =
-    casecodec5(AgsRequest.apply, AgsRequest.unapply)(
+    casecodec6(AgsRequest.apply, AgsRequest.unapply)(
       "site",
       "coordinates",
       "targetType",
       "conditions",
+      "posAngle",
       "instrument"
     )
 
