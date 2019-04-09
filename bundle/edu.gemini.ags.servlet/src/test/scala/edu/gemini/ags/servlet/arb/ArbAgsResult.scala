@@ -12,7 +12,10 @@ trait ArbAgsResult {
 
   implicit val arbAgsResult: Arbitrary[AgsResult] =
     Arbitrary {
-      arbitrary[Option[SiderealTarget]].map(AgsResult.apply)
+      for {
+        d <- Gen.choose(0, 359)
+        t <- arbitrary[SiderealTarget]
+      } yield AgsResult(Angle.fromDegrees(d.toDouble), t)
     }
 
 }

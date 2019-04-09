@@ -49,7 +49,9 @@ final class JsonServlet(magTable: MagnitudeTable) extends HttpServlet with AgsRe
       case Right(o)          =>
         res.setStatus(SC_OK)
         res.setContentType("text/json; charset=UTF-8")
-        val agsRes = AgsResult { o.flatMap(_.assignments.headOption.map(_.guideStar)) }
+        val agsRes = o.map { sel =>
+          AgsResult(sel.posAngle, sel.assignments.head.guideStar)
+        }
         val writer = res.getWriter
         println("RESULT: -------------------")
         println(agsRes)
