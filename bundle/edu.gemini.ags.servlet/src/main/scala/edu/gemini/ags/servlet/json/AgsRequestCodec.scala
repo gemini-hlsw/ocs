@@ -40,9 +40,6 @@ trait AgsRequestCodec {
       } yield new Conditions(cc, iq, sb, WaterVapor.ANY)
     }
 
-  private implicit val ConditionsCodec: CodecJson[Conditions] =
-    CodecJson.derived[Conditions](ConditionsEncoder, ConditionsDecoder)
-
   implicit val AgsRequestCodec: CodecJson[AgsRequest] =
     casecodec4(AgsRequest.apply, AgsRequest.unapply)(
       "site",

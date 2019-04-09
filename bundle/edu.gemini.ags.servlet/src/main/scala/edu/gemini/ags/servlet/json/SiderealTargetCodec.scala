@@ -27,9 +27,6 @@ trait SiderealTargetCodec {
       } yield SiderealTarget(name, coords, None, None, None, Nil, None, None)
     }
 
-  implicit val SiderealTargetCodec: CodecJson[SiderealTarget] =
-    CodecJson.derived[SiderealTarget](SiderealTargetEncoder, SiderealTargetDecoder)
-
 }
 
 object siderealtarget extends SiderealTargetCodec
