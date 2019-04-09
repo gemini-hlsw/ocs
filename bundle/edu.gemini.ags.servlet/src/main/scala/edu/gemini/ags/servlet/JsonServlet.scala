@@ -18,7 +18,7 @@ import scalaz._, Scalaz._
 import scalaz.concurrent.Task
 
 
-final class JsonServlet(magTable: MagnitudeTable) extends HttpServlet with AgsRequestCodec with AgsResultCodec {
+final class JsonServlet(magTable: MagnitudeTable) extends HttpServlet with AgsRequestCodec with SelectionCodec {
 
   import JsonServlet._
 
@@ -46,19 +46,16 @@ final class JsonServlet(magTable: MagnitudeTable) extends HttpServlet with AgsRe
       case Left((code, msg)) =>
         res.sendError(code, msg)
 
-      case Right(o)          =>
+      case Right(sel)        =>
         res.setStatus(SC_OK)
         res.setContentType("text/json; charset=UTF-8")
-        val agsRes = o.map { sel =>
-          AgsResult(sel.posAngle, sel.assignments.head.guideStar)
-        }
         val writer = res.getWriter
         println("RESULT: -------------------")
-        println(agsRes)
+        println(sel)
         println("---")
-        println(agsRes.asJson.spaces2)
+        println(sel.asJson.spaces2)
         println("---------------------------")
-        writer.write(agsRes.asJson.spaces2)
+        writer.write(sel.asJson.spaces2)
         writer.close
     }
   }
