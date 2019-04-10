@@ -51,7 +51,7 @@ final case class AgsRequest(
         inst,
         conditions,
         new java.util.HashSet(offsets.asJavaCollection),
-        null, // :-(
+        instrument.ao.map(_.aoObsComp).orNull, // :-(
         edu.gemini.shared.util.immutable.ImOption.empty[SchedulingBlock]
       )
     }

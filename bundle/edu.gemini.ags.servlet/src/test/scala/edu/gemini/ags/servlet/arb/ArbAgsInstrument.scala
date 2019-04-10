@@ -2,6 +2,8 @@ package edu.gemini.ags.servlet.arb
 
 import edu.gemini.ags.servlet.AgsInstrument
 import edu.gemini.ags.servlet.AgsInstrument._
+import edu.gemini.ags.servlet.AgsAo.Altair
+import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.pot.sp.Instrument
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2.LyotWheel
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.FPUnitNorth
@@ -13,6 +15,11 @@ import org.scalacheck.Arbitrary._
 
 
 trait ArbAgsInstrument {
+
+  implicit val arbAltair: Arbitrary[Altair] =
+    Arbitrary {
+      arbitrary[AltairParams.Mode].map(Altair(_))
+    }
 
   implicit val arbFlamingos2: Arbitrary[Flamingos2] =
     Arbitrary {
@@ -27,7 +34,8 @@ trait ArbAgsInstrument {
       for {
         f <- arbitrary[FPUnitNorth]
         c <- arbitrary[PosAngleConstraint]
-      } yield GmosNorth(f, c)
+        a <- arbitrary[Option[Altair]]
+      } yield GmosNorth(f, c, a)
     }
 
   implicit val arbGmosSouth: Arbitrary[GmosSouth] =
@@ -39,10 +47,21 @@ trait ArbAgsInstrument {
     }
 
   implicit val arbGnirs: Arbitrary[Gnirs] =
-    Arbitrary { arbitrary[PosAngleConstraint].map(Gnirs(_)) }
+    Arbitrary {
+      for {
+        c <- arbitrary[PosAngleConstraint]
+        a <- arbitrary[Option[Altair]]
+      } yield Gnirs(c, a)
+    }
 
   implicit val arbGsaoi: Arbitrary[Gsaoi] =
     Arbitrary { arbitrary[PosAngleConstraint].map(Gsaoi(_)) }
+
+  implicit val arbNifs: Arbitrary[Nifs] =
+    Arbitrary { arbitrary[Option[Altair]].map(Nifs(_)) }
+
+  implicit val arbNiri: Arbitrary[Niri] =
+    Arbitrary { arbitrary[Option[Altair]].map(Niri(_)) }
 
   implicit val arbOther: Arbitrary[Other] =
     Arbitrary {
@@ -57,6 +76,8 @@ trait ArbAgsInstrument {
         arbitrary[GmosSouth],
         arbitrary[Gnirs],
         arbitrary[Gsaoi],
+        arbitrary[Nifs],
+        arbitrary[Niri],
         arbitrary[Other]
       )
     }
