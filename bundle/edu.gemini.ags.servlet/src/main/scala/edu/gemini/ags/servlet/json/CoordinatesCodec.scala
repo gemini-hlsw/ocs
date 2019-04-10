@@ -10,7 +10,7 @@ trait CoordinatesCodec {
   import edu.gemini.json.keyed._
 
   implicit val DecCodec: CodecJson[Declination] =
-    keyedCodec(_.toAngle.formatDMS, (s: String) => Angle.parseDMS(s).toOption.flatMap(Declination.fromAngle))
+    keyedCodec(_.formatDMS, (s: String) => Angle.parseDMS(s).toOption.flatMap(Declination.fromAngle))
 
   implicit val RaCodec: CodecJson[RightAscension] =
     keyedCodec(_.toAngle.formatHMS, (s: String) => Angle.parseHMS(s).toOption.map(RightAscension.fromAngle))

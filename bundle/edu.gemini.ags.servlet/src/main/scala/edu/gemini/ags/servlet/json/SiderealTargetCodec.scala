@@ -26,21 +26,41 @@ trait SiderealTargetCodec {
       } yield ProperMotion(r, d, e)
     }
 
+  implicit val MagnitudeBandCodec: CodecJson[MagnitudeBand] =
+    keyedCodec(_.name, MagnitudeBand.fromString)
+
+  implicit val MagnitudeSystemCodec: CodecJson[MagnitudeSystem] =
+    keyedCodec(_.name, MagnitudeSystem.fromString)
+
+  implicit val MagnitudeCodec: CodecJson[Magnitude] =
+    casecodec4(Magnitude.apply, Magnitude.unapply)(
+      "value",
+      "band",
+      "error",
+      "system"
+    )
+
   implicit val SiderealTargetEncoder: EncodeJson[SiderealTarget] =
     EncodeJson((s: SiderealTarget) =>
-      ("properMotion" := s.properMotion) ->:
-      ("coordinates"  := s.coordinates ) ->:
-      ("name"         := s.name        ) ->:
+      ("magnitudes"   := s.magnitudes         ) ->:
+      ("parallax"     := s.parallax.map(_.mas)) ->:
+      ("redshift"     := s.redshift.map(_.z)  ) ->:
+      ("properMotion" := s.properMotion       ) ->:
+      ("coordinates"  := s.coordinates        ) ->:
+      ("name"         := s.name               ) ->:
       jEmptyObject
     )
 
   implicit val SiderealTargetDecoder: DecodeJson[SiderealTarget] =
     DecodeJson { c =>
       for {
-        name   <- (c --\ "name"        ).as[String]
-        coords <- (c --\ "coordinates" ).as[Coordinates]
-        pm     <- (c --\ "properMotion").as[Option[ProperMotion]]
-      } yield SiderealTarget(name, coords, pm, None, None, Nil, None, None)
+        n <- (c --\ "name"        ).as[String]
+        o <- (c --\ "coordinates" ).as[Coordinates]
+        p <- (c --\ "properMotion").as[Option[ProperMotion]]
+        r <- (c --\ "redshift"    ).as[Option[Double]].map(_.map(z => Redshift(z)))
+        x <- (c --\ "parallax"    ).as[Option[Double]].map(_.map(mas => Parallax(mas)))
+        m <- (c --\ "magnitudes"  ).as[List[Magnitude]]
+      } yield SiderealTarget(n, o, p, r, x, m, None, None)
     }
 
 }
