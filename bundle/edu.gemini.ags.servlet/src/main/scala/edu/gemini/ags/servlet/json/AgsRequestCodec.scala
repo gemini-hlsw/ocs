@@ -15,6 +15,7 @@ trait AgsRequestCodec {
   import agsinstrument._
   import angle._
   import coordinates._
+  import offset._
 
   private implicit val SiteCodec: CodecJson[Site] =
     enumCodec[Site]
@@ -44,13 +45,14 @@ trait AgsRequestCodec {
     }
 
   implicit val AgsRequestCodec: CodecJson[AgsRequest] =
-    casecodec6(AgsRequest.apply, AgsRequest.unapply)(
+    casecodec7(AgsRequest.apply, AgsRequest.unapply)(
       "site",
       "coordinates",
       "targetType",
       "conditions",
       "posAngle",
-      "instrument"
+      "instrument",
+      "offsets"
     )
 
 

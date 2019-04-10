@@ -11,7 +11,7 @@ import edu.gemini.spModel.target.env.TargetEnvironment
 
 import TargetType._
 
-
+import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
 
@@ -22,7 +22,8 @@ final case class AgsRequest(
   targetType:  TargetType,
   conditions:  Conditions,
   posAngle:    Angle,
-  instrument:  AgsInstrument
+  instrument:  AgsInstrument,
+  offsets:     List[Offset]
 ) {
 
   def target: Target =
@@ -49,7 +50,7 @@ final case class AgsRequest(
         TargetEnvironment.create(spTarget),
         inst,
         conditions,
-        java.util.Collections.emptySet[Offset],
+        new java.util.HashSet(offsets.asJavaCollection),
         null, // :-(
         edu.gemini.shared.util.immutable.ImOption.empty[SchedulingBlock]
       )
