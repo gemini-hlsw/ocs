@@ -3,6 +3,9 @@ package edu.gemini.ags.servlet
 import edu.gemini.spModel.data.AbstractDataObject
 import edu.gemini.spModel.gemini.altair.AltairParams.Mode
 
+/**
+ * AO component details relevant to AGS.
+ */
 sealed trait AgsAo extends Product with Serializable {
 
   import AgsAo._

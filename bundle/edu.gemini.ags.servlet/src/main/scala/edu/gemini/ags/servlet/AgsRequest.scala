@@ -16,6 +16,10 @@ import scalaz._
 import Scalaz._
 
 
+/**
+ * Describes observation details such that AGS can be used to find an
+ * appropriate guide star.
+ */
 final case class AgsRequest(
   site:        Site,
   coordinates: Coordinates,
@@ -26,6 +30,10 @@ final case class AgsRequest(
   offsets:     List[Offset]
 ) {
 
+  /**
+   * Creates a stand-in target at the precise coordinates that is sufficiently
+   * specified for AGS.
+   */
   def target: Target =
     targetType match {
       case Sidereal    => SiderealTarget("", coordinates, None, None, None, Nil, None, None)

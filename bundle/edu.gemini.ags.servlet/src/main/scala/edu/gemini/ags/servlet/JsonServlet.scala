@@ -18,7 +18,13 @@ import scala.util.{ Failure, Success }
 import scalaz._, Scalaz._
 import scalaz.concurrent.Task
 
-
+/**
+ * Servlet that accepts a JSON-encoded `AgsRequest` as its POST payload (no
+ * other methods are supported) and responds with a JSON-encoded
+ * `Option[AgsStrategy.Selection]` on success or a `SC_BAD_REQUEST` with an
+ * error message on failure.  JSON codecs are defined in package
+ * `edu.gemini.ags.servlet.json`.
+ */
 final class JsonServlet(magTable: MagnitudeTable) extends HttpServlet with AgsRequestCodec with SelectionCodec {
 
   import JsonServlet._
@@ -33,6 +39,7 @@ final class JsonServlet(magTable: MagnitudeTable) extends HttpServlet with AgsRe
     val src  = Source.fromInputStream(req.getInputStream, enc)
     val json = try src.mkString finally src.close
 
+    // The AGS API uses `Future` but we map it to a `Task`.
     val task: \/[String, Task[Option[AgsStrategy.Selection]]] =
       for {
         agsReq     <- \/.fromEither(Parse.decodeEither[AgsRequest](json))
@@ -60,8 +67,14 @@ final class JsonServlet(magTable: MagnitudeTable) extends HttpServlet with AgsRe
 
 object JsonServlet {
 
-  // Worker pool for running the queries.
-  private val pool = Executors.newFixedThreadPool(32, new ThreadFactory() {
+  // Worker pool for running the queries. Puts a limit on how many concurrent
+  // AGS selections can be running.  Queries block on catalog requests and then
+  // do a relatively quick calculation so more threads means we hit the catalog
+  // server with more simultaneous requests and throughput goes up. If we
+  // increase the thread count too much, the catalog server begins failing and
+  // producing HTML 500 and 504 responses.
+
+  private val pool = Executors.newFixedThreadPool(16, new ThreadFactory() {
     override def newThread(r: Runnable): Thread = {
       val t = new Thread(r, "AGS JsonServlet - Query Worker")
       t.setPriority(Thread.NORM_PRIORITY - 1)
