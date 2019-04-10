@@ -1,17 +1,18 @@
 package edu.gemini.ags.servlet
 
+
 import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.servlet.json._
 
 import argonaut._, Argonaut._
 
+import java.util.concurrent.{ Executors, ThreadFactory }
 import javax.servlet.http.{ HttpServlet, HttpServletRequest, HttpServletResponse }
 import javax.servlet.http.HttpServletResponse.{ SC_BAD_REQUEST, SC_INTERNAL_SERVER_ERROR, SC_OK }
 
 import scala.io.Source
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.global
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{ Failure, Success }
 
 import scalaz._, Scalaz._
@@ -37,7 +38,7 @@ final class JsonServlet(magTable: MagnitudeTable) extends HttpServlet with AgsRe
         agsReq     <- \/.fromEither(Parse.decodeEither[AgsRequest](json))
         obsContext <- agsReq.toContext
         strategy   <- AgsRegistrar.currentStrategy(obsContext) \/> "Could not determine AGS strategy."
-      } yield Task.delay(strategy.select(obsContext, magTable)(global)).flatMap(fut => toTask(fut))
+      } yield Task.delay(strategy.select(obsContext, magTable)(executionContext)).flatMap(fut => toTask(fut))
 
     val result = task.leftMap(msg => (SC_BAD_REQUEST, msg))
                      .flatMap(_.unsafePerformSyncAttempt.leftMap(e => (SC_INTERNAL_SERVER_ERROR, e.getMessage)))
@@ -50,11 +51,6 @@ final class JsonServlet(magTable: MagnitudeTable) extends HttpServlet with AgsRe
         res.setStatus(SC_OK)
         res.setContentType("text/json; charset=UTF-8")
         val writer = res.getWriter
-        println("RESULT: -------------------")
-        println(sel)
-        println("---")
-        println(sel.asJson.spaces2)
-        println("---------------------------")
         writer.write(sel.asJson.spaces2)
         writer.close
     }
@@ -63,6 +59,18 @@ final class JsonServlet(magTable: MagnitudeTable) extends HttpServlet with AgsRe
 }
 
 object JsonServlet {
+
+  // Worker pool for running the queries.
+  private val pool = Executors.newFixedThreadPool(32, new ThreadFactory() {
+    override def newThread(r: Runnable): Thread = {
+      val t = new Thread(r, "AGS JsonServlet - Query Worker")
+      t.setPriority(Thread.NORM_PRIORITY - 1)
+      t.setDaemon(true)
+      t
+    }
+  })
+
+  private val executionContext = ExecutionContext.fromExecutor(pool)
 
   // Copied the idea from cats-effect `IOFromFuture`.
   private def toTask[A](f: Future[A]): Task[A] =
@@ -77,7 +85,7 @@ object JsonServlet {
           f.onComplete(r => cb(r match {
             case Success(a) => \/-(a)
             case Failure(e) => -\/(e)
-          }))(global)
+          }))(executionContext)
         }
     }
 
