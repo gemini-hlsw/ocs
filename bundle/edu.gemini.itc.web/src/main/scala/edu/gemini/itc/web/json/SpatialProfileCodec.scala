@@ -4,7 +4,7 @@ import argonaut._, Argonaut._
 import edu.gemini.spModel.core.{ SpatialProfile, PointSource, UniformSource, GaussianSource }
 
 trait SpatialProfileCodec {
-  import coproduct._
+  import edu.gemini.json.coproduct._
 
   private val PointSourceCodec: CodecJson[PointSource.type] =
     constCodec(PointSource)

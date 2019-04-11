@@ -1,18 +1,18 @@
-package edu.gemini.ags.servlet
+package edu.gemini.ags.servlet.estimation
+
+import java.io.{BufferedOutputStream, IOException}
+import java.net.URLDecoder
+import java.util.concurrent.{LinkedBlockingDeque, ThreadFactory, ThreadPoolExecutor, TimeUnit}
+import java.util.logging.{Level, Logger}
+import javax.servlet.http.HttpServletResponse.{SC_BAD_GATEWAY, SC_BAD_REQUEST, SC_INTERNAL_SERVER_ERROR, SC_OK}
+import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api.{AgsRegistrar, AgsStrategy}
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.obs.context.ObsContext
 
-import java.io.{BufferedOutputStream, IOException}
-import java.net.URLDecoder
-import java.util.concurrent.{ThreadFactory, LinkedBlockingDeque, TimeUnit, ThreadPoolExecutor}
-import java.util.logging.{Level, Logger}
-import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
-import javax.servlet.http.HttpServletResponse.{SC_BAD_GATEWAY, SC_BAD_REQUEST, SC_INTERNAL_SERVER_ERROR, SC_OK}
-
-import scala.concurrent.{ExecutionContext, Await}
+import scala.concurrent.{Await, ExecutionContext}
 import scala.util.{Failure, Success, Try}
 
 object AgsServlet {
@@ -74,7 +74,7 @@ object AgsServlet {
   private val executionContext = ExecutionContext.fromExecutor(executor)
 }
 
-import AgsServlet._
+import edu.gemini.ags.servlet.estimation.AgsServlet._
 
 class AgsServlet(magTable: MagnitudeTable) extends HttpServlet {
 

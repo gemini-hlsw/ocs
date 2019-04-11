@@ -4,7 +4,7 @@ import argonaut._, Argonaut._
 import edu.gemini.itc.shared._
 
 trait ItcResultCodec {
-  import coproduct._
+  import edu.gemini.json.coproduct._
   import itcimagingresult._
   import itcspectroscopyresult._
 

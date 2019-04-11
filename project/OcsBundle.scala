@@ -9,6 +9,7 @@ trait OcsBundle {
 
   lazy val bundle_edu_gemini_ags_servlet =
     project.in(file("bundle/edu.gemini.ags.servlet")).dependsOn(
+      bundle_edu_gemini_json,
       bundle_edu_gemini_shared_skyobject,
       bundle_edu_gemini_pot,
       bundle_edu_gemini_shared_util,
@@ -84,12 +85,17 @@ trait OcsBundle {
 
   lazy val bundle_edu_gemini_itc_web =
     project.in(file("bundle/edu.gemini.itc.web")).dependsOn(
+      bundle_edu_gemini_json,
       bundle_edu_gemini_spModel_core % "test->test;compile->compile",
       bundle_edu_gemini_itc % "test->test;compile->compile",
       bundle_edu_gemini_itc_shared,
       bundle_edu_gemini_util_osgi,
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_pot
+    )
+
+  lazy val bundle_edu_gemini_json =
+    project.in(file("bundle/edu.gemini.json")).dependsOn(
     )
 
   lazy val bundle_edu_gemini_lchquery_servlet =

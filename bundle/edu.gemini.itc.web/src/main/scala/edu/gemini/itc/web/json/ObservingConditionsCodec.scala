@@ -5,7 +5,7 @@ import edu.gemini.itc.shared.ObservingConditions
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality._
 
 trait ObservingConditionsCodec {
-  import keyed._
+  import edu.gemini.json.keyed._
 
   private implicit val ImageQualityCodec = enumCodec[ImageQuality]
   private implicit val CloudCoverCodec = enumCodec[CloudCover]

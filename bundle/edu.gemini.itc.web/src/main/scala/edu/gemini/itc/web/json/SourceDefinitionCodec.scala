@@ -6,8 +6,8 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality._
 import edu.gemini.spModel.core._
 
 trait SourceDefinitionCodec {
-  import coproduct._
-  import keyed._
+  import edu.gemini.json.coproduct._
+  import edu.gemini.json.keyed._
   import spatialprofile._
   import spectraldistribution._
 

@@ -1,6 +1,6 @@
-package edu.gemini.ags.servlet
+package edu.gemini.ags.servlet.estimation
 
-import edu.gemini.spModel.core.{Ephemeris, Site, Coordinates, NonSiderealTarget}
+import edu.gemini.spModel.core.{Coordinates, Ephemeris, NonSiderealTarget, Site}
 
 class ToContextHelper {
 

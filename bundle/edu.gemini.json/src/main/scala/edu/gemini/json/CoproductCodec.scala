@@ -1,4 +1,5 @@
-package edu.gemini.itc.web.json
+package edu.gemini.json
+
 
 import argonaut._, Argonaut._
 

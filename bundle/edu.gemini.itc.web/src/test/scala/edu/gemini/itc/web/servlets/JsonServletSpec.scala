@@ -5,8 +5,8 @@ import edu.gemini.itc.shared._
 import edu.gemini.itc.web.json.itcerror._
 import edu.gemini.itc.web.json.itcparameters._
 import edu.gemini.itc.web.json.itcresult._
-import edu.gemini.itc.web.json.disjunction._
 import edu.gemini.itc.web.arb
+import edu.gemini.json.disjunction._
 import javax.servlet.http.HttpServletResponse
 import org.scalacheck.{ Gen, Arbitrary }
 import org.scalacheck.Arbitrary.arbitrary

@@ -5,7 +5,7 @@ import _root_.squants.motion.Velocity
 import _root_.squants.radio.{ Irradiance, SpectralIrradiance }
 
 trait SquantsCodec {
-  import keyed._
+  import edu.gemini.json.keyed._
 
   implicit val VelocityCodec: CodecJson[Velocity] =
     keyedCodec[Velocity, String](_.toString, (s: String) => Velocity(s).toOption)
