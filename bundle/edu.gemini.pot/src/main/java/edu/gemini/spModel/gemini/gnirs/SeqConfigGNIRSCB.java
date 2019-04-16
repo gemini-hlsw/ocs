@@ -4,11 +4,13 @@ import edu.gemini.pot.sp.ISPSeqComponent;
 
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
-
+import edu.gemini.shared.util.immutable.Some;
 import static edu.gemini.spModel.obscomp.InstConstants.INSTRUMENT_NAME_PROP;
 import static edu.gemini.spModel.obscomp.InstConstants.OBSERVING_WAVELENGTH_PROP;
 import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_CONFIG_NAME;
+import edu.gemini.spModel.config.AbstractSeqComponentCB;
 import edu.gemini.spModel.config.HelperSeqCompCB;
+import edu.gemini.spModel.data.config.DefaultParameter;
 import edu.gemini.spModel.data.config.IConfig;
 import edu.gemini.spModel.data.config.IParameter;
 import edu.gemini.spModel.data.config.ISysConfig;
@@ -18,7 +20,9 @@ import static edu.gemini.spModel.gemini.gnirs.GNIRSConstants.CENTRAL_WAVELENGTH_
 import static edu.gemini.spModel.gemini.gnirs.GNIRSConstants.FILTER_PROP;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.AcquisitionMirror;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.Filter;
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams.Wavelength;
 import edu.gemini.spModel.util.SPTreeUtil;
+
 
 import java.util.Map;
 
@@ -48,50 +52,34 @@ public final class SeqConfigGNIRSCB extends HelperSeqCompCB {
                     .flatMap(c -> ImOption.apply(c.getContextObservation()))
                     .flatMap(o -> ImOption.apply(SPTreeUtil.findInstrument(o)))
                     .flatMap(i -> ImOption.apply(i.getDataObject()))
-                    .filter(d -> d instanceof InstGNIRS)
                     .map(d -> ((InstGNIRS) d).isOverrideAcqObsWavelength())
                     .getOrElse(true);
 
         super.thisReset(options);
     }
 
-    private static Option<Object> getInstrumentParameterValue(String n, Option<IConfig> oc) {
-        return oc.flatMap(c -> ImOption.apply(c.getSysConfig(INSTRUMENT_CONFIG_NAME)))
-                 .flatMap(s -> ImOption.apply(s.getParameterValue(n)));
+    private static <T> Option<T> extract(String n, IConfig c, IConfig p) {
+        return AbstractSeqComponentCB.<T>extractInstrumentParameterValue(n, c, p);
     }
 
-    private static Option<Object> getInstrumentParameterValue(String n, Option<IConfig> oc, Option<IConfig> op) {
-        return getInstrumentParameterValue(n, oc)
-                 .orElse(() -> getInstrumentParameterValue(n, op));
-    }
-
-    private static Option<Object> getInstrumentParameterValue(String n, IConfig c, IConfig p) {
-        return getInstrumentParameterValue(n, ImOption.apply(c), ImOption.apply(p));
+    private static <T> T extractOrElse(String n, IConfig c, IConfig p, T defaultValue) {
+        return SeqConfigGNIRSCB.<T>extract(n, c, p).getOrElse(defaultValue);
     }
 
     private static AcquisitionMirror getAcquisitionMirror(IConfig c, IConfig p) {
-        return getInstrumentParameterValue(ACQUISITION_MIRROR_PROP, c, p)
-                 .filter(o -> o instanceof AcquisitionMirror)
-                 .map(o -> (AcquisitionMirror) o)
-                 .getOrElse(AcquisitionMirror.OUT);
+        return extractOrElse(ACQUISITION_MIRROR_PROP, c, p, AcquisitionMirror.OUT);
     }
 
     private static Option<Filter> getFilter(IConfig c, IConfig p) {
-        return getInstrumentParameterValue(FILTER_PROP, c, p)
-                 .filter(o -> o instanceof Filter)
-                 .map(o -> (Filter) o);
+        return extract(FILTER_PROP, c, p);
     }
 
-    private static Option<String> getObservingWavelength(IConfig c, IConfig p) {
-        return getInstrumentParameterValue(OBSERVING_WAVELENGTH_PROP, c, p)
-                 .filter(o -> o instanceof String)
-                 .map(o -> (String) o);
+    private static Option<Wavelength> getObservingWavelength(IConfig c, IConfig p) {
+        return extract(OBSERVING_WAVELENGTH_PROP, c, p);
     }
 
-    private static Option<String> getCentralWavelength(IConfig c, IConfig p) {
-        return getInstrumentParameterValue(CENTRAL_WAVELENGTH_PROP, c, p)
-                 .filter(o -> o instanceof String)
-                 .map(o -> (String) o);
+    private static Option<Wavelength> getCentralWavelength(IConfig c, IConfig p) {
+        return extract(CENTRAL_WAVELENGTH_PROP, c, p);
     }
 
     // Override the observing wavelength for acquisition steps.  It must
@@ -103,18 +91,18 @@ public final class SeqConfigGNIRSCB extends HelperSeqCompCB {
 
         // Get the filter wavelength if there is a filter and if this is an
         // acquisition.
-        final Option<String> fLambda;
+        final Option<Wavelength> fLambda;
         if (overrideAcqObsWavelength && getAcquisitionMirror(c, p) == AcquisitionMirror.IN) {
             fLambda = getFilter(c, p)
                         .flatMap(f -> ImOption.apply(f.wavelength()))
-                        .map(d -> String.format("%.2f", d));
+                        .map(d -> new Wavelength(String.format("%.2f", d)));
         } else {
-            fLambda = ImOption.<String>empty();
+            fLambda = ImOption.<Wavelength>empty();
         }
 
         // The observing wavelength is the filter wavelength if defined at this
         // point, or else the central wavelength.
-        final Option<String> obsLambda = fLambda.orElse(() -> getCentralWavelength(c, p));
+        final Option<Wavelength> obsLambda = fLambda.orElse(() -> getCentralWavelength(c, p));
 
         // If the observing wavelength value is changing in this step, add it to
         // the current configuration.
@@ -123,7 +111,7 @@ public final class SeqConfigGNIRSCB extends HelperSeqCompCB {
                 ImOption.apply(c).foreach(c0 ->
                     c0.putParameter(
                         INSTRUMENT_CONFIG_NAME,
-                        StringParameter.getInstance(OBSERVING_WAVELENGTH_PROP, l)
+                        DefaultParameter.getInstance(OBSERVING_WAVELENGTH_PROP, l)
                     )
                 )
             );
