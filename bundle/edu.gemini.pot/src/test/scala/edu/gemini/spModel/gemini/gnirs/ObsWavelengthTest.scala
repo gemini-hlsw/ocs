@@ -11,8 +11,8 @@ import InstrumentSequenceTestBase._
 import GNIRSParams.AcquisitionMirror.{IN, OUT}
 import GNIRSParams.Filter.{J, K, X_DISPERSED, Y}
 
-import org.junit.Test
 import org.junit.Assert._
+import org.junit.Test
 
 import scala.collection.JavaConverters._
 
@@ -47,12 +47,17 @@ class ObsWavelengthTest extends InstrumentSequenceTestBase[InstGNIRS, SeqConfigG
     setSysConfig(sc)
   }
 
-  private def assertWavelengths(wl: String*): Unit = {
-    val actual = configSeq.getItemValueAtEachStep(InstConstants.OBSERVING_WAVELENGTH_KEY)
-    wl.zipAll(actual, "", "").foreach { case (e,a) =>
+  private def actualObservingWavelengthStrings(seq: ConfigSequence): Array[String] =
+    seq.getItemValueAtEachStep(InstConstants.OBSERVING_WAVELENGTH_KEY)
+       .map {
+         case w: GNIRSParams.Wavelength => w.getStringValue
+         case x                         => throw new AssertionError(s"Not GNIRSParams.Wavelength: ${x.getClass}: $x")
+       }
+
+  private def assertWavelengths(wl: String*): Unit =
+    wl.zipAll(actualObservingWavelengthStrings(configSeq), "", "").foreach { case (e,a) =>
       assertEquals(s"Expected: $e, actual: $a", e, a)
     }
-  }
 
   @Test def testAcqImagingWavelength(): Unit = {
     // In general, new acquisition imaging observations should take observing
@@ -102,7 +107,7 @@ class ObsWavelengthTest extends InstrumentSequenceTestBase[InstGNIRS, SeqConfigG
     // Copying should produce a copy with a true override value
     val obs2 = getFactory.createObservationCopy(getProgram, getObs, false)
     val seq2 = ConfigBridge.extractSequence(obs2, null, ConfigValMapInstances.IDENTITY_MAP)
-    val act2 = seq2.getItemValueAtEachStep(InstConstants.OBSERVING_WAVELENGTH_KEY)
+    val act2 = actualObservingWavelengthStrings(seq2)
     val exp2 = List("1.25", "2.20", "1.03")
 
     exp2.zipAll(act2, "", "").foreach { case (e,a) =>

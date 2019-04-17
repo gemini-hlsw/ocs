@@ -966,17 +966,6 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         final Config[] configs = in.getAllSteps();
 
         for (Config c : configs) {
-            // Override the observing wavelength for acquisition steps.  It must
-            // match the filter wavelength in this case (unless this is an old
-            // executed pre-2017A observation in which case we must continue to
-            // use the old method for calculating the observing wavelength).
-            final AcquisitionMirror am = (AcquisitionMirror) c.getItemValue(GNIRSConstants.ACQUISITION_MIRROR_KEY);
-            if (isOverrideAcqObsWavelength() && (am == AcquisitionMirror.IN)) {
-                final Option<Filter> f  = ImOption.apply((Filter) c.getItemValue(GNIRSConstants.FILTER_KEY));
-                final Option<Double> wl = f.flatMap(f0 -> ImOption.apply(f0.wavelength()));
-                // Sorry, yes observing wavelength stored as a String for GNRIS.
-                wl.foreach(d -> c.putItem(GNIRSConstants.OBSERVING_WAVELENGTH_KEY, String.format("%.2f", d)));
-            }
 
             if (isCalStep(c)) {
                 final Double expTime = calExposureTime(c);

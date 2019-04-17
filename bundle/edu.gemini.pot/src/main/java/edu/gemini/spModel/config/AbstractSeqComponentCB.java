@@ -2,12 +2,16 @@ package edu.gemini.spModel.config;
 
 import edu.gemini.pot.sp.ISPSeqComponent;
 import edu.gemini.pot.sp.SPNodeKey;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.data.config.IConfig;
+import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_CONFIG_NAME;
 
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 
 /**
  * An abstract base class useful for building
@@ -262,6 +266,61 @@ public abstract class AbstractSeqComponentCB implements IConfigBuilder {
      * this class.
      */
     protected abstract void thisApplyNext(IConfig config, IConfig prevFull) ;
+
+    /**
+     * Obtains the associated instrument parameter value in the given config,
+     * if it exists.
+     */
+    public static Option<Object> lookupInstrumentParameterValue(String n, Option<IConfig> oc) {
+        return oc.flatMap(c -> ImOption.apply(c.getSysConfig(INSTRUMENT_CONFIG_NAME)))
+                 .flatMap(s -> ImOption.apply(s.getParameterValue(n)));
+    }
+
+    /**
+     * Obtains the associated instrument parameter value in `oc` but falls back
+     * on `op` if not found. This is meant to be used inside of apply next
+     * implementations where there is a current configuration with the modified
+     * values for the current step and a previous full configuration for past
+     * steps.
+     *
+     * @param n parameter name
+     * @param oc optional current config
+     * @param op optional previous full config
+     */
+    public static Option<Object> lookupInstrumentParameterValue(String n, Option<IConfig> oc, Option<IConfig> op) {
+        return lookupInstrumentParameterValue(n, oc)
+                 .orElse(() -> lookupInstrumentParameterValue(n, op));
+    }
+
+    /**
+     * Obtains the associated instrument parameter value in `c` but falls back
+     * on `p` if not found. This is meant to be used inside of apply next
+     * implementations where there is a current configuration with the modified
+     * values for the current step and a previous full configuration for past
+     * steps.
+     *
+     * @param n parameter name
+     * @param c current config, possibly `null`
+     * @param p previous full config, possibly `null`
+     */
+    public static Option<Object> lookupInstrumentParameterValue(String n, IConfig c, IConfig p) {
+        return lookupInstrumentParameterValue(n, ImOption.apply(c), ImOption.apply(p));
+    }
+
+    /**
+     * Obtains the associated instrument parameter value in `c` but falls back
+     * on `p` if not found, casting to the expected type.  This is meant to be
+     * used inside of apply next implementations where there is a current
+     * configuration with the modified values for the current step and a
+     * previous full configuration for past steps
+     *
+     * @param n parameter name
+     * @param c current config, possibly `null`
+     * @param p previous full config, possibly `null`
+     */
+    public static <T> Option<T> extractInstrumentParameterValue(String n, IConfig c, IConfig p) {
+        return lookupInstrumentParameterValue(n, c, p).map(o -> (T) o);
+    }
 
 }
 
