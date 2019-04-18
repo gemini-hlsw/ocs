@@ -93,6 +93,20 @@ object LibraryStar {
   case object M6V     extends LibraryStar("M6V")
   case object M6III   extends LibraryStar("M6III")
   case object M9III   extends LibraryStar("M9III")
+  case object T2800K extends LibraryStar("T2800K")
+  case object T2600K extends LibraryStar("T2600K")
+  case object T2400K extends LibraryStar("T2400K")
+  case object T2200K extends LibraryStar("T2200K")
+  case object T2000K extends LibraryStar("T2000K")
+  case object T1800K extends LibraryStar("T1800K")
+  case object T1600K extends LibraryStar("T1600K")
+  case object T1400K extends LibraryStar("T1400K")
+  case object T1200K extends LibraryStar("T1200K")
+  case object T1000K extends LibraryStar("T1000K")
+  case object T0900K extends LibraryStar("T0900K")
+  case object T0800K extends LibraryStar("T0800K")
+  case object T0600K extends LibraryStar("T0600K")
+  case object T0400K extends LibraryStar("T0400K")
 
 
   /** All available library stars. */
@@ -102,7 +116,10 @@ object LibraryStar {
     F5I,      G0V,        G0V_w,    G0V_r,      G0III,      G0I,      G2V,      G5V,        G5V_w,
     G5V_r,    G5III,      G5III_w,  G5III_r,    G5I,        K0V,      K0V_r,    K0III,      K0III_w,
     K0III_r,  K0_1II,     K4V,      K4III,      K4III_w,    K4III_r,  K4I,      M0V,        M0III,
-    M3V,      M3III,      M6V,      M6III,      M9III
+    M3V,      M3III,      M6V,      M6III,      M9III,
+    T2800K,   T2600K,     T2400K,   T2200K,     T2000K,
+    T1800K,   T1600K,     T1400K,   T1200K,     T1000K,
+    T0900K,   T0800K,     T0600K,   T0400K
   )
 }
 
