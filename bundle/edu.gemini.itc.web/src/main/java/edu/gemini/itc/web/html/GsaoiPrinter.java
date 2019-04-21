@@ -49,7 +49,8 @@ public final class GsaoiPrinter extends PrinterBase
         _print(CalculatablePrinter.getTextResult(result.sfCalc(), false));
         _println(String.format("derived image halo size (FWHM) for a point source = %.2f arcsec.\n", result.iqCalc().getImageQuality()));
         _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
-        _println(CalculatablePrinter.getBackgroundLimitResult(result.is2nCalc()));
+        //_println(CalculatablePrinter.getBackgroundLimitResult(result.is2nCalc()));
+        _println(CalculatablePrinter.WarnIfReadNoiseLimited(result.is2nCalc()));
 
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
