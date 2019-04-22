@@ -58,7 +58,7 @@ public class PlannedTimeTest extends InstrumentSequenceTestBase<InstNICI, SeqCon
         sc.putParameter(getExpTimeParam(10.0));
         setSysConfig(sc);
 
-        double expected = getInstDataObj().getSetupTime(getObs()) + InstNICI.EXPOSURE_OVERHEAD_CONSTANT;
+        double expected = getInstDataObj().getSetupTime(getObs()).getSeconds() + InstNICI.EXPOSURE_OVERHEAD_CONSTANT;
         expected += 3 * (10.0 + InstNICI.COADD_CONSTANT);
         verify(expected);
     }
@@ -74,7 +74,7 @@ public class PlannedTimeTest extends InstrumentSequenceTestBase<InstNICI, SeqCon
         sro.setStepCount(2);
         getObserveSeqComp().setDataObject(sro);
 
-        double base = getInstDataObj().getSetupTime(getObs());
+        double base = getInstDataObj().getSetupTime(getObs()).getSeconds();
 
         double exp1 = InstNICI.EXPOSURE_OVERHEAD_CONSTANT + 3 * (10.0 + InstNICI.COADD_CONSTANT);
         double exp2 = InstNICI.EXPOSURE_OVERHEAD_CONSTANT + 5 * (12.0 + InstNICI.COADD_CONSTANT);
@@ -136,7 +136,7 @@ public class PlannedTimeTest extends InstrumentSequenceTestBase<InstNICI, SeqCon
         getInstDataObj().setCoadds(1);
         storeStaticUpdates();
 
-        double base = getInstDataObj().getSetupTime(getObs());
+        double base = getInstDataObj().getSetupTime(getObs()).getSeconds();
 
         // Time for two exposures of 10 seconds with 1 coadd
         double expTime = 2 * (InstNICI.EXPOSURE_OVERHEAD_CONSTANT + 10.0 + InstNICI.COADD_CONSTANT);

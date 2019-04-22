@@ -52,6 +52,7 @@ import edu.gemini.spModel.telescope.PosAngleConstraintAware;
 import java.beans.PropertyDescriptor;
 
 import java.text.NumberFormat;
+import java.time.Duration;
 import java.util.*;
 
 /**
@@ -175,10 +176,10 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         _nf.setMaximumFractionDigits(3);
     }
 
-    private static final double SETUP_TIME_LGS = 25 * 60;
-    private static final double SETUP_TIME_IFU = 20 * 60;
-    private static final double SETUP_TIME = 15 * 60;
-    private static final double REACQUISITION_TIME = 6 * 60; // 6 minutes as defined in REL-1346
+    private static final Duration SETUP_TIME_LGS     = Duration.ofMinutes(25);
+    private static final Duration SETUP_TIME_IFU     = Duration.ofMinutes(20);
+    private static final Duration SETUP_TIME         = Duration.ofMinutes(15);
+    private static final Duration REACQUISITION_TIME = Duration.ofMinutes( 6); // 6 minutes as defined in REL-1346
 
     /**
      * Constructor
@@ -219,15 +220,15 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     }
 
 
-    public static double getSetupTimeLgs () {
+    public static Duration getSetupTimeLgs () {
         return SETUP_TIME_LGS;
     }
 
-    public static double getSetupTimeIfu () {
+    public static Duration getSetupTimeIfu () {
         return SETUP_TIME_IFU;
     }
 
-    public static double getSetupTime () {
+    public static Duration getSetupTime () {
         return SETUP_TIME;
     }
 
@@ -237,7 +238,8 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
      * (Update: see OT-243: 10 and 20 min).
      * (Update: SCT-275: 15 minutes longslit, 20 minutes IFU)
      */
-    public double getSetupTime(ISPObservation obs) {
+    @Override
+    public Duration getSetupTime(ISPObservation obs) {
         final InstAltair altair = InstAltair.lookupAltair(obs);
 
         // REL-437: When GNIRS is used with Altair in LGS mode then the acq overhead must be 25 minutes.
@@ -254,7 +256,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
      * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
      */
     @Deprecated @Override
-    public double getSetupTime(Config conf) {
+    public Duration getSetupTime(Config conf) {
         if (conf.containsItem(AOConstants.AO_SYSTEM_KEY)) {
             final GuideStarType guideStarType = (GuideStarType) conf.getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
             if (guideStarType.equals(AltairParams.GuideStarType.LGS)) {
@@ -277,11 +279,13 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
      * @param obs the observation for which the setup time is wanted
      * @return time in seconds
      */
-    public double getReacquisitionTime(ISPObservation obs) {
-        return getReacquisitionTime();
+    @Override
+    public Duration getReacquisitionTime(ISPObservation obs) {
+        return REACQUISITION_TIME;
     }
 
-    public double getReacquisitionTime () {
+    @Override
+    public Duration getReacquisitionTime (Config config) {
         return REACQUISITION_TIME;
     }
 

@@ -62,8 +62,8 @@ val specs2Version = "3.8.9"
 
 // Use managed dependencies for tests; everyone gets JUnit, ScalaCheck, and Specs2
 libraryDependencies in ThisBuild ++= Seq(
-  "junit"           % "junit"                % "4.11"        % "test",
-  "com.novocode"    % "junit-interface"      % "0.9"         % "test",
+  "junit"           % "junit"                % "4.12"        % "test",
+  "com.novocode"    % "junit-interface"      % "0.11"        % "test",
   "org.scalacheck" %% "scalacheck"           % "1.12.6"      % "test",
   "org.specs2"     %% "specs2-core"          % specs2Version % "test",
   "org.specs2"     %% "specs2-scalacheck"    % specs2Version % "test",
@@ -73,6 +73,8 @@ libraryDependencies in ThisBuild ++= Seq(
 
 // Required for specs2
 scalacOptions in Test ++= Seq("-Yrangepos")
+
+testOptions += Tests.Argument(TestFrameworks.JUnit, "-q", "-v")
 
 // Don't build scaladoc (for now)
 publishArtifact in (ThisBuild, packageDoc) := false

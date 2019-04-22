@@ -28,7 +28,7 @@ public class PlannedTimeTest extends InstrumentSequenceTestBase<InstNIFS, SeqCon
         sc.putParameter(getExpTimeParam(100.0));
         setSysConfig(sc);
 
-        final double base = getInstDataObj().getSetupTime(getObs())
+        final double base = getInstDataObj().getSetupTime(getObs()).getSeconds()
                 + 100.0 + InstNIFS.COADD_CONSTANT
                 + PlannedTime.Category.DHS_OVERHEAD.add(2800).time/1000.;
 
@@ -50,7 +50,7 @@ public class PlannedTimeTest extends InstrumentSequenceTestBase<InstNIFS, SeqCon
         sc.putParameter(getReadModeParam(ReadMode.values()));
         setSysConfig(sc);
 
-        final double base = getInstDataObj().getSetupTime(getObs());
+        final double base = getInstDataObj().getSetupTime(getObs()).getSeconds();
         final double coaddConst = InstNIFS.COADD_CONSTANT;
         final double dhs = PlannedTime.Category.DHS_OVERHEAD.add(2800).time/1000.;
 
@@ -72,7 +72,7 @@ public class PlannedTimeTest extends InstrumentSequenceTestBase<InstNIFS, SeqCon
         getObserveSeqComp().setDataObject(sro);
 
 
-        final double base = getInstDataObj().getSetupTime(getObs());
+        final double base = getInstDataObj().getSetupTime(getObs()).getSeconds();
 
         final double minExp = getInstDataObj().getReadMode().getMinExp();
         final double dhs = PlannedTime.Category.DHS_OVERHEAD.add(2800).time/1000.;
@@ -96,7 +96,7 @@ public class PlannedTimeTest extends InstrumentSequenceTestBase<InstNIFS, SeqCon
         sro.setStepCount(2);
         getObserveSeqComp().setDataObject(sro);
 
-        final double base = getInstDataObj().getSetupTime(getObs());
+        final double base = getInstDataObj().getSetupTime(getObs()).getSeconds();
         final double dhs = PlannedTime.Category.DHS_OVERHEAD.add(2800).time/1000.;
         final double common = 100.0 + dhs + InstNIFS.COADD_CONSTANT;
         final double bright = common + ReadMode.BRIGHT_OBJECT_SPEC.getMinExp();

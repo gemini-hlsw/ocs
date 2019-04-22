@@ -25,13 +25,14 @@ import edu.gemini.spModel.pio.PioNodeParent;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 
 import java.beans.PropertyDescriptor;
+import java.time.Duration;
 import java.util.*;
 
 //$Id: InstBHROS.java 33533 2011-04-08 15:47:09Z nbarriga $
 
 public final class InstBHROS extends SPInstObsComp implements PropertyProvider {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     public static final SPComponentType SP_TYPE = SPComponentType.INSTRUMENT_BHROS;
 
@@ -149,9 +150,9 @@ public final class InstBHROS extends SPInstObsComp implements PropertyProvider {
         return "gembHROS"; //matches what GeminiData.xml has for the Phase1Resource
     }
 
-    public double getSetupTime(ISPObservation obs) {
+    public Duration getSetupTime(ISPObservation obs) {
         // OT-427: setup time should be 30 minutes
-        return 60 * 30;
+        return Duration.ofMinutes(30);
     }
 
     public double[] getScienceArea() {

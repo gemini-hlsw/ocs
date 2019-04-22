@@ -41,6 +41,7 @@ import edu.gemini.spModel.seqcomp.SeqConfigNames;
 import edu.gemini.spModel.util.Angle;
 
 import java.beans.PropertyDescriptor;
+import java.time.Duration;
 import java.util.*;
 
 import static edu.gemini.spModel.obscomp.InstConstants.EXPOSURE_TIME_KEY;
@@ -52,7 +53,7 @@ import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
 public final class InstTReCS extends SPInstObsComp implements PropertyProvider, StepCalculator {
 
     // for serialization
-    private static final long serialVersionUID = 5L;
+    private static final long serialVersionUID = 6L;
 
     private static final double MAX_CHOP_THROW = 15.;
 
@@ -207,12 +208,13 @@ public final class InstTReCS extends SPInstObsComp implements PropertyProvider, 
      * (Update: see OT-243: 10 and 20 min).
      * (Update: SCT-275: 6 minutes imaging, 20 minutes otherwise)
      */
-    public double getSetupTime(ISPObservation obs) {
-        Disperser d  = getDisperser();
+    @Override
+    public Duration getSetupTime(ISPObservation obs) {
+        final Disperser d  = getDisperser();
         if (d == Disperser.MIRROR || d == Disperser.HIGH_RES_REF_MIRROR || d == Disperser.LOW_RES_REF_MIRROR) {
-            return 6 * 60.;
+            return Duration.ofMinutes(6);
         }
-        return 20 * 60.;
+        return Duration.ofMinutes(20);
     }
 
     /**

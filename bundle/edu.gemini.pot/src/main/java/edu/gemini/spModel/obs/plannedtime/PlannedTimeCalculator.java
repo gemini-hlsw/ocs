@@ -2,6 +2,7 @@ package edu.gemini.spModel.obs.plannedtime;
 
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPObservation;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
@@ -20,7 +21,7 @@ import edu.gemini.spModel.obsrecord.ObsExecRecord;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.util.SPTreeUtil;
 
-
+import java.time.Duration;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,24 +40,32 @@ public enum PlannedTimeCalculator {
 
     private static final Logger LOG = Logger.getLogger(PlannedTimeCalculator.class.getName());
 
+    private static final SetupTime DEFAULT_SETUP =
+        SetupTime.unsafeFromDuration(Duration.ofMinutes(15), Duration.ZERO, SetupTime.Type.Full);
+
     public PlannedTime calc(ISPObservation obs)  {
         ObsExecRecord obsExecRecord = SPTreeUtil.getObsRecord(obs);
         ChargeClass obsChargeClass = chargeClass(obs);
 
         // add the setup time for the instrument
-        double setupTime = 15 * 60; // default setup time
-        double reacqTime = 0;       // default reacquisition time
-        ISPObsComponent instNode = SPTreeUtil.findInstrument(obs);
-        if (instNode != null) {
-            SPInstObsComp inst = (SPInstObsComp) instNode.getDataObject();
-            if (inst != null) setupTime = inst.getSetupTime(obs);
-            if (inst != null) reacqTime = inst.getReacquisitionTime(obs);
+        final SetupTime setupTime;
+        final ISPObsComponent instNode = SPTreeUtil.findInstrument(obs);
+        if (instNode == null) {
+            setupTime = DEFAULT_SETUP;
+        } else {
+            setupTime = ImOption.apply((SPInstObsComp) instNode.getDataObject())
+                                .flatMap(i -> {
+                                  final Duration s = i.getSetupTime(obs);
+                                  final Duration r = i.getReacquisitionTime(obs);
+                                  return SetupTime.fromDuration(s, r, SetupTime.Type.Full);
+                                })
+                                .getOrElse(DEFAULT_SETUP);
         }
-        Setup setup = Setup.fromSeconds(setupTime, reacqTime, obsChargeClass);
+        final Setup setup = Setup.apply(setupTime, obsChargeClass);
 
         // Calculate the overhead time
         Option<Config> prev = None.instance();
-        List<PlannedTime.Step> steps = new ArrayList<PlannedTime.Step>();
+        List<PlannedTime.Step> steps = new ArrayList<>();
         ConfigSequence cs = ConfigBridge.extractSequence(obs, null, ConfigValMapInstances.IDENTITY_MAP, false);
         for (Config c : cs.getAllSteps()) {
             ChargeClass stepChargeClass = stepChargeClass(obsChargeClass, c);
@@ -76,17 +85,19 @@ public enum PlannedTimeCalculator {
      * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
      */
     @Deprecated
-    public PlannedTime calc(Config[] conf, ItcOverheadProvider instr)  {
+    public PlannedTime calcForItc(Config[] conf, ItcOverheadProvider instr)  {
         ChargeClass obsChargeClass = ChargeClass.PROGRAM;
 
         // add the setup time for the instrument
-        double setupTime = 15 * 60; // default setup time
-        double reacqTime = 0;       // default reacquisition time
-        if (instr != null) {
-            setupTime = instr.getSetupTime(conf[0]);
-            reacqTime = instr.getReacquisitionTime();
+        final SetupTime setupTime;
+        if ((instr == null) || (conf.length == 0)) {
+            setupTime = DEFAULT_SETUP;
+        } else {
+            final Duration s = instr.getSetupTime(conf[0]);
+            final Duration r = instr.getReacquisitionTime(conf[0]);
+            setupTime = SetupTime.fromDuration(s, r, SetupTime.Type.Full).getOrElse(DEFAULT_SETUP);
         }
-        Setup setup = Setup.fromSeconds(setupTime, reacqTime, obsChargeClass);
+        final Setup setup = Setup.apply(setupTime, obsChargeClass);
 
         // Calculate the overhead time
         Option<Config> prev = None.instance();

@@ -58,6 +58,7 @@ import edu.gemini.spModel.type.SequenceableSpType;
 import edu.gemini.spModel.type.SpTypeUtil;
 
 import java.beans.PropertyDescriptor;
+import java.time.Duration;
 import java.util.*;
 
 import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
@@ -456,14 +457,14 @@ public final class Gsaoi extends SPInstObsComp
 
     // REL-2645 offset overhead is 15 secs
     static final double GUIDED_OFFSET_OVERHEAD = 15.0; // sec
-    private static final int MCAO_SETUP_TIME = 30; // min
-    private static final int GSAOI_REACQUISITION_TIME = 10; // sec
+    private static final Duration MCAO_SETUP_TIME          = Duration.ofMinutes(30);
+    private static final Duration GSAOI_REACQUISITION_TIME = Duration.ofMinutes(10);
 
     private static final CategorizedTime GUIDED_OFFSET_OVERHEAD_CATEGORIZED_TIME =
             CategorizedTime.fromSeconds(Category.CONFIG_CHANGE, GUIDED_OFFSET_OVERHEAD, OffsetOverheadCalculator.DETAIL);
 
     public static final CategorizedTime LGS_REACQUISITION_OVERHEAD_CATEGORIZED_TIME =
-            CategorizedTime.fromSeconds(Category.CONFIG_CHANGE, GSAOI_REACQUISITION_TIME * 60, "LGS Reacquisition");
+            CategorizedTime.fromSeconds(Category.CONFIG_CHANGE, GSAOI_REACQUISITION_TIME.getSeconds(), "LGS Reacquisition");
 
     public static final PropertyDescriptor FILTER_PROP;
     public static final PropertyDescriptor READ_MODE_PROP;
@@ -661,8 +662,9 @@ public final class Gsaoi extends SPInstObsComp
      * @param obs the observation for which the setup time is wanted
      * @return time in seconds
      */
-    public double getSetupTime(ISPObservation obs) {
-        return MCAO_SETUP_TIME * 60;//MCAO setup time: 30m
+    @Override
+    public Duration getSetupTime(ISPObservation obs) {
+        return MCAO_SETUP_TIME;
     }
 
     /**
@@ -670,8 +672,8 @@ public final class Gsaoi extends SPInstObsComp
      * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
      */
     @Deprecated @Override
-    public double getSetupTime(Config conf) {
-        return MCAO_SETUP_TIME * 60;//MCAO setup time: 30m
+    public Duration getSetupTime(Config conf) {
+        return MCAO_SETUP_TIME;
     }
 
     /**
@@ -680,12 +682,14 @@ public final class Gsaoi extends SPInstObsComp
      * @param obs the observation for which the setup time is wanted
      * @return time in seconds
      */
-    public double getReacquisitionTime(ISPObservation obs) {
-        return GSAOI_REACQUISITION_TIME * 60; // 10 mins as defined in REL-1346
+    @Override
+    public Duration getReacquisitionTime(ISPObservation obs) {
+        return GSAOI_REACQUISITION_TIME; // 10 mins as defined in REL-1346
     }
 
-    public double getReacquisitionTime() {
-        return GSAOI_REACQUISITION_TIME * 60; // 10 mins as defined in REL-1346
+    @Override
+    public Duration getReacquisitionTime(Config conf) {
+        return GSAOI_REACQUISITION_TIME; // 10 mins as defined in REL-1346
     }
 
     public static CategorizedTime getWheelMoveOverhead() {

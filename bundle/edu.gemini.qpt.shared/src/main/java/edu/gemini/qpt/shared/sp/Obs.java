@@ -470,7 +470,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
         // Note: The remaining time is not necessarily the difference between planned and elapsed time
         // because the elapsed time can be longer than planned time because of unexpected problems etc.
         // The remaining time is the time of all steps that still await execution.
-        long acc = steps.getSetupTime();
+        long acc = steps.getSetupTime().toDuration().toMillis(); // this is now dependent on SetupTime.Type
         for (int i = 0; i < steps.size(); i++)
             if (!steps.isStepExecuted(i)) acc += steps.getStepTime(i);
        this.remainingTime = acc;

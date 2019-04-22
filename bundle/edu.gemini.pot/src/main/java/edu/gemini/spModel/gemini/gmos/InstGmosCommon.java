@@ -52,6 +52,7 @@ import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.text.NumberFormat;
+import java.time.Duration;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -418,9 +419,9 @@ public abstract class InstGmosCommon<
         }
     }
 
-    private static final double SETUP_TIME_LS_SPECTROSCOPY = 16 * 60;
-    private static final double SETUP_TIME_IMAGING = 6 * 60;
-    private static final double SETUP_TIME_IFU_MOS = 18 * 60.;
+    private static final Duration SETUP_TIME_LS_SPECTROSCOPY = Duration.ofMinutes(16);
+    private static final Duration SETUP_TIME_IMAGING         = Duration.ofMinutes(6);
+    private static final Duration SETUP_TIME_IFU_MOS         = Duration.ofMinutes(18);
 
     /**
      * Return the setup time in seconds before observing can begin
@@ -431,7 +432,8 @@ public abstract class InstGmosCommon<
      * (Update4: SCT-275, 6 minutes imaging, 20 minutes spectroscopy)
      * (Update5: SCI-0107)
      */
-    public double getSetupTime(ISPObservation obs) {
+    @Override
+    public Duration getSetupTime(ISPObservation obs) {
         if (_disperser.isMirror()) return SETUP_TIME_IMAGING;
         if (_fpu.isSpectroscopic() || _fpu.isNSslit()) return SETUP_TIME_LS_SPECTROSCOPY;
         return SETUP_TIME_IFU_MOS;
@@ -442,7 +444,7 @@ public abstract class InstGmosCommon<
      * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
      */
     @Deprecated @Override
-    public double getSetupTime(Config conf) {
+    public Duration getSetupTime(Config conf) {
         return Optional.ofNullable(conf.getItemValue(FPU_KEY))
                 .map(c -> (GmosCommonType.FPUnit) c)
                 .filter(f -> !f.isImaging())
@@ -1846,15 +1848,16 @@ public abstract class InstGmosCommon<
         return UseElectronicOffsettingRuling.allow();
     }
 
-    // The reacquisition time, in seconds.
-    private static final double REACQUISITION_TIME = 5.0 * 60;
+    // The reacquisition time.
+    private static final Duration REACQUISITION_TIME = Duration.ofMinutes(5);
 
     @Override
-    public double getReacquisitionTime(ISPObservation obs) {
+    public Duration getReacquisitionTime(ISPObservation obs) {
         return REACQUISITION_TIME;
     }
 
-    public double getReacquisitionTime() {
+    @Override
+    public Duration getReacquisitionTime(Config conf) {
         return REACQUISITION_TIME;
     }
 

@@ -91,7 +91,7 @@ public class OverheadTablePrinter {
             this.p = params;
             this.ccResult = printer.createInstConfig(this.numOfExposures);
             this.readoutTimePerCoadd = readoutTimePerCoadd;
-            this.pta = PlannedTimeCalculator.instance.calc(this.ccResult.getConfig(), printer.getInst());
+            this.pta = PlannedTimeCalculator.instance.calcForItc(this.ccResult.getConfig(), printer.getInst());
             this.instrumentName = (SPComponentType) ccResult.getConfig()[0].getItemValue(ConfigCreator.InstInstrumentKey);
         } else {
             throw new OverheadTablePrinterException("<b>Observation Overheads</b><br> Warning: Observation overheads cannot be calculated for the number of exposures = 0.");
@@ -124,7 +124,7 @@ public class OverheadTablePrinter {
     private int getNumRecenter() {
         int numReacq = 0;
         if (p.observation().calculationMethod() instanceof Spectroscopy) {
-            numReacq = pta.numRecenter(ccResult.getConfig()[0]);
+            numReacq = PlannedTimeMath.numRecenter(pta, ccResult.getConfig()[0]);
             // for IFU spectroscopy recentering is needed only for faint targets (with SNR in individual images < 5)
             if (isIFU()) {
                 if (r.maxSingleSNRatio() > 5) {
@@ -185,11 +185,11 @@ public class OverheadTablePrinter {
 
         // print setup overheads, counting one full setup per every two hours of science
         String setupStr = "";
-        int numAcq = pta.numAcq();
+        int numAcq = PlannedTimeMath.numAcq(pta);
         if (numAcq == 1) {
-            setupStr = String.format("%.1f s", pta.setup.time / 1000.0);
+            setupStr = String.format("%.1f s", pta.setup.time.fullSetupTime.toMillis() / 1000.0);
         } else if (numAcq > 1) {
-            setupStr = String.format("%d acq x %.1f s", numAcq, pta.setup.time / 1000.0);
+            setupStr = String.format("%d acq x %.1f s", numAcq, pta.setup.time.fullSetupTime.toMillis() / 1000.0);
         }
         buf.append("<tr>");
         buf.append("<td>").append("Setup ").append("</td>");
@@ -204,14 +204,14 @@ public class OverheadTablePrinter {
         int numLgsReacq = getGsaoiLgsReacqNum();
         String  reacqStr;
         if (numReacq > 0) {
-            reacqStr = String.format("%d x %.1f s", numReacq, pta.setup.reacquisitionTime / 1000.0);
+            reacqStr = String.format("%d x %.1f s", numReacq, pta.setup.time.reacquisitionOnlyTime.toMillis() / 1000.0);
             buf.append("<tr>");
             buf.append("<td>").append("Re-centering ").append("</td>");
             buf.append("<td align=\"right\"> ").append(reacqStr).append("</td>");
             buf.append("</tr>");
         }
         if (numLgsReacq > 0) {
-            reacqStr = String.format("%d x %.1f s", numLgsReacq, pta.setup.reacquisitionTime / 1000.0);
+            reacqStr = String.format("%d x %.1f s", numLgsReacq, pta.setup.time.reacquisitionOnlyTime.toMillis() / 1000.0);
             buf.append("<tr>");
             buf.append("<td>").append("LGS reacquisition ").append("</td>");
             buf.append("<td align=\"right\"> ").append(reacqStr).append("</td>");
@@ -261,7 +261,7 @@ public class OverheadTablePrinter {
             buf.append("</tr>");
         }
 
-        long totalTime = pta.totalTimeWithReacq(numReacq);
+        long totalTime = PlannedTimeMath.totalTimeWithReacq(pta, numReacq);
         buf.append("<tr><td><b>Total time</b></td><td align=\"right\"><b>").append(String.format("%s", TimeAmountFormatter.getDescriptiveFormat(totalTime))).append("</b></td></tr>");
         buf.append("</table>");
 

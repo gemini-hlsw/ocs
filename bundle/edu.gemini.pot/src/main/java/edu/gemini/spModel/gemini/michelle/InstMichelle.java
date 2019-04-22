@@ -36,6 +36,7 @@ import edu.gemini.spModel.seqcomp.SeqConfigNames;
 import edu.gemini.spModel.util.Angle;
 
 import java.beans.PropertyDescriptor;
+import java.time.Duration;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -48,7 +49,7 @@ public final class InstMichelle extends SPInstObsComp implements PropertyProvide
     private static final Logger LOG = Logger.getLogger(InstMichelle.class.getName());
 
     // for serialization
-    private static final long serialVersionUID = 7L;
+    private static final long serialVersionUID = 8L;
     private static final String VERSION = "2009B-2";
 
     /**
@@ -270,16 +271,17 @@ public final class InstMichelle extends SPInstObsComp implements PropertyProvide
     }
 
     /**
-     * Return the setup time in seconds before observing can begin
+     * Return the setup time before observing can begin
      * Michelle returns 10 minutes if imaging mode and 20 minutes if spectroscopy.
      * (Update: see OT-243: 10 and 20 min).
      * (Update: SCT-275, 6 minutes imaging, 15 minutes "longslit")
      */
-    public double getSetupTime(ISPObservation obs) {
+    @Override
+    public Duration getSetupTime(ISPObservation obs) {
         if (getDisperser() == Disperser.MIRROR) {
-            return 6 * 60.;
+            return Duration.ofMinutes(6);
         }
-        return 15 * 60.;
+        return Duration.ofMinutes(15);
     }
 
     @Override public CategorizedTimeGroup calc(Config cur, Option<Config> prev) {

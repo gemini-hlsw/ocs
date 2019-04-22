@@ -60,6 +60,7 @@ import edu.gemini.spModel.type.*;
 import edu.gemini.spModel.util.SPTreeUtil;
 
 import java.beans.PropertyDescriptor;
+import java.time.Duration;
 import java.util.*;
 
 import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_CONFIG_NAME;
@@ -72,7 +73,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         ItcOverheadProvider {
 
     // for serialization
-    private static final long serialVersionUID = 3L;
+    private static final long serialVersionUID = 4L;
 
     /**
       * Flamingos2 Dispersers.
@@ -857,13 +858,13 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         return CommonStepCalculator.instance.calc(cur, prev).addAll(times);
     }
 
-    private static final double IMAGING_SETUP_TIME_OIWFS = 60 * 15;
+    private static final Duration IMAGING_SETUP_TIME_OIWFS = Duration.ofMinutes(15);
 
-    private static final double IMAGING_SETUP_TIME_PWFS2 = 60 * 6;
+    private static final Duration IMAGING_SETUP_TIME_PWFS2 = Duration.ofMinutes(6);
 
     private static final ItemKey GUIDE_WITH_OIWFS_KEY = new ItemKey(TELESCOPE_KEY, TargetObsCompConstants.GUIDE_WITH_OIWFS_PROP);
 
-    public static double getImagingSetupSec(ISPObservation obs) {
+    public static Duration getImagingSetup(ISPObservation obs) {
         return usesF2Oiwfs(obs) ? IMAGING_SETUP_TIME_OIWFS : IMAGING_SETUP_TIME_PWFS2;
     }
 
@@ -871,7 +872,8 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
      * For ITC.
      * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
      */
-    public static double getImagingSetupSec(Config conf) {
+    @Deprecated
+    public static Duration getImagingSetup(Config conf) {
             return ImOption.apply(conf.getItemValue(GUIDE_WITH_OIWFS_KEY))
                     .exists(g -> ((GuideOption) g).isActive()) ? IMAGING_SETUP_TIME_OIWFS : IMAGING_SETUP_TIME_PWFS2;
         }
@@ -892,26 +894,27 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         return gptOpt.exists(gpt -> gpt.getPrimary().isDefined());
     }
 
-    public static double getSpectroscopySetupSec() {
-        return 20 * 60;
+    public static Duration getSpectroscopySetup() {
+        return Duration.ofMinutes(20);
 	}
 
-	public static double getCustomMaskSetupSec() {
-        return 30 * 60;
+	public static Duration getCustomMaskSetup() {
+        return Duration.ofMinutes(30);
     }
 
-    public double getReacquisitionTime() { return 6 * 60; }
+    private static final Duration REACQUISITION_TIME = Duration.ofMinutes(6);
 
-
-
+    @Override
+    public Duration getReacquisitionTime(ISPObservation obs) { return REACQUISITION_TIME; }
 
     /**
      * Return the setup time in seconds before observing can begin
      */
-    public double getSetupTime(ISPObservation obs) {
-        if (isImaging()) return getImagingSetupSec(obs);
-        else if (getFpu() == FPUnit.CUSTOM_MASK) return getCustomMaskSetupSec();
-        return getSpectroscopySetupSec();
+    @Override
+    public Duration getSetupTime(ISPObservation obs) {
+        if (isImaging()) return getImagingSetup(obs);
+        else if (getFpu() == FPUnit.CUSTOM_MASK) return getCustomMaskSetup();
+        return getSpectroscopySetup();
     }
 
     /**
@@ -919,10 +922,14 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
      * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
      */
     @Deprecated @Override
-    public double getSetupTime(Config conf) {
-        if (isImagingConfig(conf)) return getImagingSetupSec(conf);
-        return getSpectroscopySetupSec();
+    public Duration getSetupTime(Config conf) {
+        if (isImagingConfig(conf)) return getImagingSetup(conf);
+        return getSpectroscopySetup();
     }
+
+    @Override
+    public Duration getReacquisitionTime(Config conf) { return REACQUISITION_TIME; }
+
 
     /**
      * Is the instrument in imaging mode.

@@ -43,7 +43,7 @@ public final class PlannedTimeTest extends SpModelTestBase {
         instDataObject.setCoadds(3);
         instObsComponent.setDataObject(instDataObject);
 
-        double setup   = instDataObject.getSetupTime(getObs());
+        double setup   = instDataObject.getSetupTime(getObs()).getSeconds();
         double expTime = 42.0 * 3 + InstPhoenix.READOUT_OVERHEAD;
 
         verify(setup + expTime);
@@ -57,7 +57,7 @@ public final class PlannedTimeTest extends SpModelTestBase {
         observeDataObject.setStepCount(2);
         observeSeqComponent.setDataObject(observeDataObject);
 
-        double setup   = instDataObject.getSetupTime(getObs());
+        double setup   = instDataObject.getSetupTime(getObs()).getSeconds();
         double expTime = 42.0 * 3 + InstPhoenix.READOUT_OVERHEAD;
 
         verify(setup + expTime * 2);

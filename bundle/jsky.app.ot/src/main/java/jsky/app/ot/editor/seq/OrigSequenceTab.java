@@ -9,6 +9,7 @@ import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
+import edu.gemini.spModel.obs.plannedtime.SetupTime;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.time.TimeAmountFormatter;
 import jsky.app.ot.OTOptions;
@@ -225,7 +226,7 @@ final class OrigSequenceTab {
             DialogUtil.error(e);
         }
 
-        return (pt == null) ? PlannedTime.apply(PlannedTime.Setup.apply(0, ChargeClass.DEFAULT)) : pt;
+        return (pt == null) ? PlannedTime.apply(PlannedTime.Setup.apply(SetupTime.ZERO, ChargeClass.DEFAULT)) : pt;
     }
 
     /**

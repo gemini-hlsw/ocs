@@ -84,7 +84,7 @@ public final class PlannedTimeTest {
     @Test
     public void testEmptySequence() throws Exception {
         // Imaging setup time + a 1 sec exposure
-        verify(Gpi.getImagingSetupSec() +
+        verify(Gpi.getImagingSetup().getSeconds() +
                 Gpi.READOUT_PER_EXPOSURE_MS/1000.0 +
                 Gpi.READOUT_OVERHEAD_SEC +
                 PlannedTime.Category.DHS_OVERHEAD.time/1000.);
@@ -143,7 +143,7 @@ public final class PlannedTimeTest {
         gpiSeqComponent.setDataObject(gpiSeqDataObject);
 
         // Account for setup, exposure time, and readout time for the 2 steps
-        double time = Gpi.getImagingSetupSec();
+        double time = Gpi.getImagingSetup().getSeconds();
         time += (EXP_TIME + Gpi.READOUT_PER_EXPOSURE_MS/1000.0) * 2;
         time += Gpi.READOUT_OVERHEAD_SEC * 2;
         time += PlannedTime.Category.DHS_OVERHEAD.time/1000. * 2;
@@ -184,7 +184,7 @@ public final class PlannedTimeTest {
         gpiSeqComponent.setDataObject(gpiSeqDataObject);
 
         // Account for setup, exposure time, and readout time for the 2 steps.
-        double time = Gpi.getImagingSetupSec();
+        double time = Gpi.getImagingSetup().getSeconds();
 
         time += (Gpi.READOUT_PER_EXPOSURE_MS/1000.0 + EXP_TIME) * 2;
         time += Gpi.READOUT_OVERHEAD_SEC * 2;
@@ -208,7 +208,7 @@ public final class PlannedTimeTest {
         gpiSeqComponent.setDataObject(gpiSeqDataObject);
 
         // Account for setup, exposure time, and readout time for the 3 steps.
-        double time = Gpi.getImagingSetupSec();
+        double time = Gpi.getImagingSetup().getSeconds();
 
         time += (Gpi.READOUT_PER_EXPOSURE_MS/1000.0 + EXP_TIME) * 3;
         time += Gpi.READOUT_OVERHEAD_SEC * 3;
@@ -233,7 +233,7 @@ public final class PlannedTimeTest {
         gpiSeqComponent.setDataObject(gpiSeqDataObject);
 
         // Account for setup, exposure time, and readout time for both steps
-        double time = Gpi.getImagingSetupSec();
+        double time = Gpi.getImagingSetup().getSeconds();
 
         time += (Gpi.READOUT_PER_EXPOSURE_MS/1000.0 + EXP_TIME) * 2;
         time += Gpi.READOUT_OVERHEAD_SEC * 2;
@@ -261,7 +261,7 @@ public final class PlannedTimeTest {
         gpiSeqComponent.setDataObject(gpiSeqDataObject);
 
         // Account for setup, exposure time, and readout time for the 3 steps.
-        double time = Gpi.getImagingSetupSec();
+        double time = Gpi.getImagingSetup().getSeconds();
 
         time += (Gpi.READOUT_PER_EXPOSURE_MS/1000.0 + EXP_TIME) * 3;
         time += Gpi.READOUT_OVERHEAD_SEC * 3;
@@ -295,7 +295,7 @@ public final class PlannedTimeTest {
         gpiSeqComponent.setSeqComponents(children);
 
         // Account for setup, exposure time, and readout time for the 2 steps
-        double time = Gpi.getImagingSetupSec();
+        double time = Gpi.getImagingSetup().getSeconds();
         time += (2.0 + Gpi.READOUT_PER_EXPOSURE_MS/1000.0) * 5;
         time += Gpi.READOUT_OVERHEAD_SEC;
         time += PlannedTime.Category.DHS_OVERHEAD.time/1000.0;

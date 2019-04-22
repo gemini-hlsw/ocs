@@ -50,7 +50,7 @@ import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 
 import java.beans.PropertyDescriptor;
-
+import java.time.Duration;
 import java.util.*;
 
 import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
@@ -61,7 +61,7 @@ import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
 public final class InstNIRI extends SPInstObsComp implements PropertyProvider, GuideProbeProvider, StepCalculator, CalibrationKeyProvider, ConfigPostProcessor, ItcOverheadProvider {
 
     // for serialization
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     /**
      * Updated version for changes in 2008B *
@@ -237,39 +237,41 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
         return 30.0;
     }
 
-    public double getReacquisitionTime () {
-        return 0.0;
+    @Override
+    public Duration getReacquisitionTime(Config conf) {
+        return Duration.ZERO;
     } // considering it zero, as currently NIRI is imaging-only
 
-    private static final Map<SetupTimeKey, Double> SETUP_TIME = new HashMap<>();
+    private static final Map<SetupTimeKey, Duration> SETUP_TIME = new HashMap<>();
 
     static {
-        SETUP_TIME.put(new SetupTimeKey(Mode.imaging), 6 * 60.);
-        SETUP_TIME.put(new SetupTimeKey(Mode.imaging, AltairParams.Mode.NGS), 10 * 60.);
-        SETUP_TIME.put(new SetupTimeKey(Mode.imaging, AltairParams.Mode.NGS_FL), 10 * 60.);
-        SETUP_TIME.put(new SetupTimeKey(Mode.imaging, AltairParams.Mode.LGS), 15 * 60.);
-        SETUP_TIME.put(new SetupTimeKey(Mode.imaging, AltairParams.Mode.LGS_P1), 15 * 60.);
-        SETUP_TIME.put(new SetupTimeKey(Mode.imaging, AltairParams.Mode.LGS_OI), 15 * 60.); // not really supported
-        SETUP_TIME.put(new SetupTimeKey(Mode.spectroscopy), 13 * 60.);
-        SETUP_TIME.put(new SetupTimeKey(Mode.spectroscopy, AltairParams.Mode.NGS), 20 * 60.);
-        SETUP_TIME.put(new SetupTimeKey(Mode.spectroscopy, AltairParams.Mode.NGS_FL), 20 * 60.);
-        SETUP_TIME.put(new SetupTimeKey(Mode.spectroscopy, AltairParams.Mode.LGS), 25 * 60.);
-        SETUP_TIME.put(new SetupTimeKey(Mode.spectroscopy, AltairParams.Mode.LGS_P1), 25 * 60.);
-        SETUP_TIME.put(new SetupTimeKey(Mode.spectroscopy, AltairParams.Mode.LGS_OI), 25 * 60.); // not really supported
+        SETUP_TIME.put(new SetupTimeKey(Mode.imaging), Duration.ofMinutes(6));
+        SETUP_TIME.put(new SetupTimeKey(Mode.imaging, AltairParams.Mode.NGS), Duration.ofMinutes(10));
+        SETUP_TIME.put(new SetupTimeKey(Mode.imaging, AltairParams.Mode.NGS_FL), Duration.ofMinutes(10));
+        SETUP_TIME.put(new SetupTimeKey(Mode.imaging, AltairParams.Mode.LGS), Duration.ofMinutes(15));
+        SETUP_TIME.put(new SetupTimeKey(Mode.imaging, AltairParams.Mode.LGS_P1), Duration.ofMinutes(15));
+        SETUP_TIME.put(new SetupTimeKey(Mode.imaging, AltairParams.Mode.LGS_OI), Duration.ofMinutes(15)); // not really supported
+        SETUP_TIME.put(new SetupTimeKey(Mode.spectroscopy), Duration.ofMinutes(13));
+        SETUP_TIME.put(new SetupTimeKey(Mode.spectroscopy, AltairParams.Mode.NGS), Duration.ofMinutes(20));
+        SETUP_TIME.put(new SetupTimeKey(Mode.spectroscopy, AltairParams.Mode.NGS_FL), Duration.ofMinutes(20));
+        SETUP_TIME.put(new SetupTimeKey(Mode.spectroscopy, AltairParams.Mode.LGS), Duration.ofMinutes(25));
+        SETUP_TIME.put(new SetupTimeKey(Mode.spectroscopy, AltairParams.Mode.LGS_P1), Duration.ofMinutes(25));
+        SETUP_TIME.put(new SetupTimeKey(Mode.spectroscopy, AltairParams.Mode.LGS_OI), Duration.ofMinutes(25)); // not really supported
     }
 
-    public static double getSetupTime(Mode mode) {
+    public static Duration getSetupTime(Mode mode) {
         return SETUP_TIME.get(new SetupTimeKey(mode));
     }
 
-    public static double getSetupTime(Mode mode, AltairParams.Mode altairMode) {
+    public static Duration getSetupTime(Mode mode, AltairParams.Mode altairMode) {
         return SETUP_TIME.get(new SetupTimeKey(mode, altairMode));
     }
 
     /**
      * Return the setup time in seconds before observing can begin.
      */
-    public double getSetupTime(ISPObservation obs) {
+    @Override
+    public Duration getSetupTime(ISPObservation obs) {
         // OT-243: 10 and 20 min
         // OT-470:
         //     NIRI + Altair imaging setup time should be 15 min
@@ -294,7 +296,7 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
      * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
      */
     @Deprecated @Override
-    public double getSetupTime(Config conf) {
+    public Duration getSetupTime(Config conf) {
         final GuideStarType guideStarType = (GuideStarType) conf.getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
         final Mode mode = getMode(conf);
         final AltairParams.Mode altairMode;
@@ -331,7 +333,7 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
 
         final Option<NiriReadoutTime> nrt = NiriReadoutTime.lookup(roi, readMode);
         nrt.foreach(niriReadoutTime -> {
-            times.add(CategorizedTime.fromSeconds(Category.DHS_WRITE, niriReadoutTime.getDhsWriteTime()));
+            times.add(CategorizedTime.fromSeconds(Category.DHS_WRITE, NiriReadoutTime.getDhsWriteTime()));
             times.add(CategorizedTime.fromSeconds(Category.READOUT, niriReadoutTime.getReadout(coadds)));
         });
 
