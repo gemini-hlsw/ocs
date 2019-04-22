@@ -17,7 +17,7 @@ import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.pio.PioParseException;
 import edu.gemini.spModel.seqcomp.IObserveSeqComponent;
 import edu.gemini.spModel.obs.ObsParamSetCodecs;
-import edu.gemini.spModel.target.TargetParamSetCodecs;
+import edu.gemini.spModel.obs.plannedtime.SetupTime;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.time.ObsTimeCharges;
@@ -73,6 +73,8 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
     public static final String ORIGINATING_TEMPLATE_PROP = "originatingTemplate";
 
     public static final String AGS_STRATEGY_PROP = "agsStrategyOverride";
+
+    public static final String SETUP_TIME_TYPE_PROP = "setupTimeType";
 
     /**
      * Observation user priority.
@@ -148,6 +150,8 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
             new Some<>(SchedulingBlock.apply(System.currentTimeMillis()));
 
     private Option<AgsStrategyKey> _agsStrategyOverride = None.instance();
+
+    private SetupTime.Type _setupTimeType = SetupTime.Type.FULL;
 
     /**
      * Default constructor.
@@ -574,6 +578,18 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
         }
     }
 
+    public SetupTime.Type getSetupTimeType() {
+        return _setupTimeType;
+    }
+
+    public void setSetupTimeType(SetupTime.Type t) {
+        ImOption.apply(t).filter(y -> y != getSetupTimeType()).foreach(y -> {
+            final SetupTime.Type old = getSetupTimeType();
+            _setupTimeType = y;
+            firePropertyChange(SETUP_TIME_TYPE_PROP, old, y);
+        });
+    }
+
     /**
      * Return a parameter set describing the current state of this object.
      */
@@ -610,6 +626,8 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
         if (!_agsStrategyOverride.isEmpty()) {
             Pio.addParam(factory, paramSet, AGS_STRATEGY_PROP, _agsStrategyOverride.getValue().id());
         }
+
+        Pio.addParam(factory, paramSet, SETUP_TIME_TYPE_PROP, getSetupTimeType().name());
 
         return paramSet;
     }
@@ -697,6 +715,9 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
         } else {
             _agsStrategyOverride = ImOption.apply(AgsStrategyKey$.MODULE$.fromStringOrNull(v));
         }
+
+        v = ImOption.apply(Pio.getValue(paramSet, SETUP_TIME_TYPE_PROP)).getOrElse(SetupTime.Type.FULL.name());
+        setSetupTimeType(SetupTime.Type.valueOf(v));
     }
 }
 

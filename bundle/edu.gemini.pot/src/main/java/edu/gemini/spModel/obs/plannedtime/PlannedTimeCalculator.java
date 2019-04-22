@@ -13,6 +13,7 @@ import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.dataset.DatasetLabel;
 import edu.gemini.spModel.obs.ObsClassService;
+import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.*;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
@@ -41,7 +42,7 @@ public enum PlannedTimeCalculator {
     private static final Logger LOG = Logger.getLogger(PlannedTimeCalculator.class.getName());
 
     private static final SetupTime DEFAULT_SETUP =
-        SetupTime.unsafeFromDuration(Duration.ofMinutes(15), Duration.ZERO, SetupTime.Type.Full);
+        SetupTime.unsafeFromDuration(Duration.ofMinutes(15), Duration.ZERO, SetupTime.Type.FULL);
 
     public PlannedTime calc(ISPObservation obs)  {
         ObsExecRecord obsExecRecord = SPTreeUtil.getObsRecord(obs);
@@ -57,7 +58,8 @@ public enum PlannedTimeCalculator {
                                 .flatMap(i -> {
                                   final Duration s = i.getSetupTime(obs);
                                   final Duration r = i.getReacquisitionTime(obs);
-                                  return SetupTime.fromDuration(s, r, SetupTime.Type.Full);
+                                  final SetupTime.Type t = ((SPObservation) obs.getDataObject()).getSetupTimeType();
+                                  return SetupTime.fromDuration(s, r, t);
                                 })
                                 .getOrElse(DEFAULT_SETUP);
         }
@@ -95,7 +97,7 @@ public enum PlannedTimeCalculator {
         } else {
             final Duration s = instr.getSetupTime(conf[0]);
             final Duration r = instr.getReacquisitionTime(conf[0]);
-            setupTime = SetupTime.fromDuration(s, r, SetupTime.Type.Full).getOrElse(DEFAULT_SETUP);
+            setupTime = SetupTime.fromDuration(s, r, SetupTime.Type.FULL).getOrElse(DEFAULT_SETUP);
         }
         final Setup setup = Setup.apply(setupTime, obsChargeClass);
 

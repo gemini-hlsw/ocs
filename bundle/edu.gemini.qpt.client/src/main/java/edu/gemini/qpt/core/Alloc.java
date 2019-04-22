@@ -129,9 +129,9 @@ public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializa
 
         final SetupType t;
         switch (setupTime.acquisitionType) {
-            case Full:          t = SetupType.FULL;          break;
-            case Reacquisition: t = SetupType.REACQUISITION; break;
-            case None:          t = SetupType.NONE;          break;
+            case FULL:          t = SetupType.FULL;          break;
+            case REACQUISITION: t = SetupType.REACQUISITION; break;
+            case NONE:          t = SetupType.NONE;          break;
             default: throw new IllegalArgumentException();
         }
 

@@ -11,9 +11,9 @@ import java.util.Objects;
 public final class SetupTime {
 
     public enum Type {
-        Full,
-        Reacquisition,
-        None
+        FULL,
+        REACQUISITION,
+        NONE
         ;
     }
 
@@ -33,9 +33,9 @@ public final class SetupTime {
     public Duration toDuration() {
         final Duration result;
         switch (acquisitionType) {
-            case Full:          result = fullSetupTime;         break;
-            case Reacquisition: result = reacquisitionOnlyTime; break;
-            case None:          result = Duration.ZERO;         break;
+            case FULL:          result = fullSetupTime;         break;
+            case REACQUISITION: result = reacquisitionOnlyTime; break;
+            case NONE:          result = Duration.ZERO;         break;
             default:
                 throw new IllegalArgumentException();
         }
@@ -68,7 +68,7 @@ public final class SetupTime {
     }
 
     public static SetupTime ZERO =
-        SetupTime.unsafeFromDuration(Duration.ZERO, Duration.ZERO, Type.Full);
+        SetupTime.unsafeFromDuration(Duration.ZERO, Duration.ZERO, Type.FULL);
 
     private static Duration duration(double secs) {
         return Duration.ofMillis(Math.round(secs * 1000.0));
