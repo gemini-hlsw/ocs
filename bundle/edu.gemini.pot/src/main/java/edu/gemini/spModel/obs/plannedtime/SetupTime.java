@@ -4,11 +4,12 @@ import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.util.Objects;
 
 
-public final class SetupTime {
+public final class SetupTime implements Serializable {
 
     public enum Type {
         FULL,
