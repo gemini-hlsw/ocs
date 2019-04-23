@@ -211,7 +211,7 @@ object TpeEphemerisFeature {
 
   def remainingTime(ispObservation: ISPObservation): Long = {
     val c = PlannedTimeCalculator.instance.calc(ispObservation)
-    c.setup.time + c.steps.asScala
+    c.setup.time.toDuration.toMillis + c.steps.asScala
       .filterNot(_.executed)
       .map(_.totalTime)
       .sum

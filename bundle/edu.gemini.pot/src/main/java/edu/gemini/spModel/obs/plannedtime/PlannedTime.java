@@ -8,7 +8,10 @@ import edu.gemini.spModel.guide.StandardGuideOptions;
 import edu.gemini.spModel.time.ChargeClass;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -44,17 +47,6 @@ public final class PlannedTime implements Serializable {
     }
 
     public interface StepCalculator {
-        CategorizedTimeGroup calc(Config stepConfig, Option<Config> prevStepConfig);
-    }
-
-    /**
-     * For ITC.
-     * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
-     */
-    @Deprecated
-    public interface ItcOverheadProvider {
-        double getSetupTime(Config conf);
-        double getReacquisitionTime();
         CategorizedTimeGroup calc(Config stepConfig, Option<Config> prevStepConfig);
     }
 
@@ -258,54 +250,32 @@ public final class PlannedTime implements Serializable {
     }
 
     public static final class Setup implements Serializable {
-        /** Time in milliseconds. */
-        public final long time;
-        public final long reacquisitionTime;
+        public final SetupTime time;
         public final ChargeClass chargeClass;
 
-        /**
-         * @param time time in milliseconds.
-         */
-        private Setup(long time, long reacquisitionTime, ChargeClass chargeClass) {
+        private Setup(SetupTime time, ChargeClass chargeClass) {
+            if (time        == null) throw new IllegalArgumentException("time is null");
             if (chargeClass == null) throw new IllegalArgumentException("chargeClass is null");
-            this.time              = time;
-            this.reacquisitionTime = reacquisitionTime;
-            this.chargeClass       = chargeClass;
+            this.time        = time;
+            this.chargeClass = chargeClass;
         }
 
-        @Override public boolean equals(Object o) {
+        public static Setup apply(SetupTime time, ChargeClass chargeClass) {
+            return new Setup(time, chargeClass);
+        }
+
+        @Override
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-
             Setup setup = (Setup) o;
-
-            if (time != setup.time) return false;
-            if (reacquisitionTime != setup.reacquisitionTime) return false;
-            if (chargeClass != setup.chargeClass) return false;
-
-            return true;
+            return Objects.equals(time, setup.time) &&
+                    Objects.equals(chargeClass, setup.chargeClass);
         }
 
-        @Override public int hashCode() {
-            int result = (int) (time ^ (time >>> 32));
-            result = 31 * result + (int) (reacquisitionTime ^ (reacquisitionTime >>> 32));
-            result = 31 * result + chargeClass.hashCode();
-            return result;
-        }
-
-        /**
-         * @param sec compatibility with old code base; converted to ms
-         */
-        public static Setup fromSeconds(double sec, double reacquSec, ChargeClass chargeClass) {
-            return new Setup(toMillsec(sec), toMillsec(reacquSec), chargeClass);
-        }
-
-        public static Setup apply(long time, ChargeClass chargeClass) {
-            return new Setup(time, 0, chargeClass);
-        }
-
-        public static Setup apply(long time, long reacquTime, ChargeClass chargeClass) {
-            return new Setup(time, reacquTime, chargeClass);
+        @Override
+        public int hashCode() {
+            return Objects.hash(time, chargeClass);
         }
     }
 
@@ -384,16 +354,25 @@ public final class PlannedTime implements Serializable {
         this.sequence = sequence;
     }
 
-    public long totalTime() {
-        long res = setup.time;
-        for (Step step : steps) res += step.totalTime();
+    public <T> T foldSteps(T init, BiFunction<T, Step, T> sum) {
+        T res = init;
+        for (Step s : steps) res = sum.apply(res, s);
         return res;
     }
 
+    public <T> T fold(Function<Setup, T> init, BiFunction<T, Step, T> sum) {
+        return foldSteps(init.apply(setup), sum);
+    }
+
+    public long totalTime() {
+        return fold(s -> s.time.toDuration(), (d, s) -> d.plusMillis(s.totalTime())).toMillis();
+    }
+
     public long totalTime(ChargeClass chargeClass) {
-        long res = (setup.chargeClass == chargeClass) ? setup.time : 0;
-        for (Step step : steps) res += step.totalTime(chargeClass);
-        return res;
+        return fold(
+                 s -> (s.chargeClass == chargeClass) ? s.time.toDuration() : Duration.ZERO,
+                 (d, s) -> d.plusMillis(s.totalTime(chargeClass))
+               ).toMillis();
     }
 
     public PlannedTimeSummary toPlannedTimeSummary() {
@@ -414,7 +393,7 @@ public final class PlannedTime implements Serializable {
             ++i;
          }
 
-        return new PlannedStepSummary(setup.time, setup.reacquisitionTime, stepTimes, executed, obsTypes);
+        return new PlannedStepSummary(setup.time, stepTimes, executed, obsTypes);
     }
 
     public static PlannedTime apply(Setup setup) {
@@ -424,68 +403,6 @@ public final class PlannedTime implements Serializable {
     public static PlannedTime apply(Setup setup, List<Step> steps, ConfigSequence sequence) {
         steps = Collections.unmodifiableList(new ArrayList<>(steps));
         return new PlannedTime(setup, steps, sequence);
-    }
-
-    /**
-     * The following methods are for use in the ITC.
-     *
-     */
-
-    public static final double VISIT_TIME = 7200; // visit time, sec
-    public static final double RECENTERING_INTERVAL = 3600; // sec
-
-    // total science time (time without setup and re-centering)
-    public long scienceTime() {
-        long scienceTime = 0;
-        for (Step step : steps) scienceTime += step.totalTime();
-        return scienceTime / 1000;
-    }
-
-    private int numReacq(double obsTime, double reacqInterval) {
-        int numReacq = 0;
-        if ((obsTime > reacqInterval) && (obsTime % reacqInterval == 0)) {
-            numReacq = (int) (obsTime / reacqInterval) - 1;
-        } else if ((obsTime > reacqInterval) && (obsTime % reacqInterval != 0)) {
-            numReacq = (int) (obsTime / reacqInterval);
-        }
-        return numReacq;
-    }
-
-    // number of acquisitions (setups) per observation
-    public int numAcq() {
-        return numReacq(scienceTime(), VISIT_TIME) + 1;
-    }
-
-    // Number of re-centerings on the slit for spectroscopic observations using PWFS2
-    public int numRecenter(Config config) {
-        int numRecenter = 0;
-        ItemKey guideWithPWFS2 = new ItemKey("telescope:guideWithPWFS2");
-
-        if (config.containsItem(guideWithPWFS2) &&
-                config.getItemValue(guideWithPWFS2).equals(StandardGuideOptions.Value.guide)) {
-            long scienceTime = scienceTime();
-            double visitTime = (numAcq() == 1) ? scienceTime : VISIT_TIME;
-            double lastVisitTime = scienceTime % VISIT_TIME;
-            // number of re-centerings per visit
-            int visitRecenteringNum = numReacq(visitTime, RECENTERING_INTERVAL);
-            // number of re-centerings in the last visit
-            int lastVisitRecenteringNum = numReacq(lastVisitTime, RECENTERING_INTERVAL);
-
-            if (VISIT_TIME > RECENTERING_INTERVAL) {
-                numRecenter = (numAcq() - 1) * visitRecenteringNum + lastVisitRecenteringNum;
-            } else {
-                throw new Error("Visit time is smaller than re-centering time");
-            }
-        }
-        return numRecenter;
-    }
-
-    // total time with acquisitions and re-acquisitions.
-    // Uses the parameter because of GSAOI LGS re-acquisitions.
-    public long totalTimeWithReacq(int numReacq) {
-        long totalTimeWithReacq = setup.time * numAcq() + setup.reacquisitionTime * numReacq;
-        for (Step step : steps) totalTimeWithReacq += step.totalTime();
-        return totalTimeWithReacq;
     }
 
 }

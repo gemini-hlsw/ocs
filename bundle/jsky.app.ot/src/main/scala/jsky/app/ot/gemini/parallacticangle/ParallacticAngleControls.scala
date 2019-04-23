@@ -96,10 +96,8 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
           obs  <- Option(e.getContextObservation)
           inst <- Option(e.getContextInstrumentDataObject)
         } yield {
-          // For some ridiculous reason, setup and reacq time is provided as
-          // floating point seconds by the instrument implementations :/
-          val setupTimeMs = math.round(inst.getSetupTime(obs) * 1000)
-          val reacqTimeMs = math.round(inst.getReacquisitionTime(obs) * 1000)
+          val setupTimeMs = inst.getSetupTime(obs).toMillis();
+          val reacqTimeMs = inst.getReacquisitionTime(obs).toMillis();
           def formatMin(ms: Long): String = s"(${math.round(ms/60000.0)} min)"
 
           List(

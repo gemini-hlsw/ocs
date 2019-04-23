@@ -9,6 +9,7 @@ import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.gmos.*;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
+import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 
 import java.io.PrintWriter;
 import java.util.*;
@@ -250,7 +251,7 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
         return cc.createGmosConfig(instr, numberExposures);
     }
 
-    public PlannedTime.ItcOverheadProvider getInst() {
+    public ItcOverheadProvider getInst() {
         if (instr.site().equals(Site.GN)) {
             return new InstGmosNorth();
         } else if (instr.site().equals(Site.GS)) {

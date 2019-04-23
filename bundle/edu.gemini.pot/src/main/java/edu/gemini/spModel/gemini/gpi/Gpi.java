@@ -46,6 +46,7 @@ import edu.gemini.spModel.type.*;
 
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.*;
 import java.util.function.IntFunction;
 
@@ -57,7 +58,7 @@ import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
  */
 public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeConsumer, PlannedTime.StepCalculator, ConfigPostProcessor {
     // for serialization
-    private static final long serialVersionUID = 4L;
+    private static final long serialVersionUID = 5L;
 
     private static final String GUIDING_PATH = TargetObsCompConstants.CONFIG_NAME + ":" + TargetObsCompConstants.GUIDE_WITH_OIWFS_PROP;
 
@@ -1419,14 +1420,14 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         return "gemGPI";
     }
 
-    public static double getImagingSetupSec() {
+    public static Duration getImagingSetup() {
         // OT-94: "Default from GPI goals are 10 minutes but could be changed at commissioning"
-        return 10 * 60;
+        return Duration.ofMinutes(10);
     }
 
     @Override
-    public double getSetupTime(ISPObservation obs) {
-        return getImagingSetupSec();
+    public Duration getSetupTime(ISPObservation obs) {
+        return getImagingSetup();
     }
 
     public boolean isAstrometricField() {

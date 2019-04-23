@@ -14,6 +14,7 @@ import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.util.Angle;
 
 import java.beans.PropertyDescriptor;
+import java.time.Duration;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Set;
@@ -26,7 +27,7 @@ import java.util.Set;
  */
 public abstract class SPInstObsComp extends AbstractDataObject {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     // The exposure time
     protected double _exposureTime = InstConstants.DEF_EXPOSURE_TIME;
@@ -78,8 +79,8 @@ public abstract class SPInstObsComp extends AbstractDataObject {
      * (value may depend on the selected disperser, etc.).
      * Should normally be redefined in a derived class.
      */
-    public double getSetupTime(ISPObservation obs) {
-        return 20;
+    public Duration getSetupTime(ISPObservation obs) {
+        return Duration.ofSeconds(20);
     }
 
     /**
@@ -88,8 +89,8 @@ public abstract class SPInstObsComp extends AbstractDataObject {
      * Should normally be redefined in a derived class.
      */
     // REL-1346
-    public double getReacquisitionTime(ISPObservation obs) {
-        return 0;
+    public Duration getReacquisitionTime(ISPObservation obs) {
+        return Duration.ZERO;
     }
 
     /**

@@ -122,18 +122,18 @@ public final class PlannedTimeTest {
             // test mode + all possible altair modes
             for (AltairParams.Mode altairMode : AltairParams.Mode.values()) {
                 setMode(altairMode);
-                verify(dhs + execTime + InstNIRI.getSetupTime(mode, altairMode));
+                verify(dhs + execTime + InstNIRI.getSetupTime(mode, altairMode).getSeconds());
             }
             // test mode without altair component
             obs.removeObsComponent(altairObsComponent);
-            verify(dhs + execTime + InstNIRI.getSetupTime(mode));
+            verify(dhs + execTime + InstNIRI.getSetupTime(mode).getSeconds());
         }
     }
 
     @Test
     public void testEmptySequence() throws Exception {
         final NiriReadoutTime nrt = NiriReadoutTime.lookup(Niri.BuiltinROI.DEFAULT, Niri.ReadMode.DEFAULT).getValue();
-        cycleSetups(nrt.getDhsWriteTime(), nrt.getReadout(1));
+        cycleSetups(NiriReadoutTime.getDhsWriteTime(), nrt.getReadout(1));
     }
 
     private <T> IParameter getParam(PropertyDescriptor desc, T... vals) {
@@ -157,7 +157,7 @@ public final class PlannedTimeTest {
                 System.out.println(mode.toString() + ", " + roi.toString());
 
                 final NiriReadoutTime nrt = NiriReadoutTime.lookup(roi, mode).getValue();
-                cycleSetups(nrt.getDhsWriteTime(), 60 + nrt.getReadout(1));
+                cycleSetups(NiriReadoutTime.getDhsWriteTime(), 60 + nrt.getReadout(1));
             }
         }
     }
@@ -181,9 +181,9 @@ public final class PlannedTimeTest {
         niriObsComponent.setDataObject(niriDataObject);
 
         final NiriReadoutTime nrt = NiriReadoutTime.lookup(roi, mode).getValue();
-        double setup   = InstNIRI.getSetupTime(Mode.imaging);
+        double setup   = InstNIRI.getSetupTime(Mode.imaging).getSeconds();
         double readout = 2 * (60 + nrt.getReadout(1));
-        double dhs     = 2 * nrt.getDhsWriteTime();
+        double dhs     = 2 * NiriReadoutTime.getDhsWriteTime();
 
         verify(setup + readout + InstNIRI.getFilterChangeOverheadSec() + dhs);
     }

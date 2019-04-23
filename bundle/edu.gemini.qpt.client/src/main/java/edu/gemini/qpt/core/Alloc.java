@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import edu.gemini.qpt.core.util.LttsServicesClient;
 import edu.gemini.spModel.obs.plannedtime.PlannedStepSummary;
+import edu.gemini.spModel.obs.plannedtime.SetupTime;
 import jsky.coords.WorldCoords;
 import edu.gemini.qpt.core.Marker.Severity;
 import edu.gemini.qpt.shared.sp.*;
@@ -109,21 +110,32 @@ public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializa
      */
     public static Alloc forDragging(Obs obs, long maxLengthHint) {
 
+        final PlannedStepSummary summary = obs.getSteps();
+        final SetupTime        setupTime = summary.getSetupTime();
+
         // Minimum is setup plus first unexecuted step
         int first = obs.getFirstUnexecutedStep();
         int last = first;
-        long dur = obs.getSteps().getSetupTime() + obs.getSteps().getStepTime(first);
+        long dur = setupTime.toDuration().toMillis() + summary.getStepTime(first);
 
         // While there are more steps and the next one doesn't go over our limit, add the step and repeat.
-        while (last < obs.getSteps().size() - 1) {
-            long next = obs.getSteps().getStepTime(last + 1);
+        while (last < summary.size() - 1) {
+            long next = summary.getStepTime(last + 1);
             if (dur + next > maxLengthHint)
                 break;
             dur += next;
             last++;
         }
 
-        return new Alloc(null, obs, 0L, first, last, SetupType.FULL, null);
+        final SetupType t;
+        switch (setupTime.acquisitionType) {
+            case FULL:          t = SetupType.FULL;          break;
+            case REACQUISITION: t = SetupType.REACQUISITION; break;
+            case NONE:          t = SetupType.NONE;          break;
+            default: throw new IllegalArgumentException();
+        }
+
+        return new Alloc(null, obs, 0L, first, last, t, null);
     }
 
     ///
@@ -207,7 +219,7 @@ public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializa
             if (getSetupType() != SetupType.NONE) {
 
                 circS = new TreeMap<Circumstance, Double[]>();
-                long setupTime = getSetupTime();
+                final long setupTime = getSetupTime();
 
                 for (Circumstance c: Circumstance.values()) {
 
@@ -495,8 +507,9 @@ public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializa
      * @return
      */
     public Alloc toggleSetupTime() {
-        long fullSetup = obs.getSteps().getSetupTime();
-        long racqSetup = obs.getSteps().getReacquisitionTime();
+        final SetupTime setupTime = obs.getSteps().getSetupTime();
+        long fullSetup = setupTime.fullSetupTime.toMillis();
+        long racqSetup = setupTime.reacquisitionOnlyTime.toMillis();
         long start;
         switch (getSetupType()) {
             case NONE:
@@ -521,10 +534,11 @@ public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializa
     }
 
     public long getSetupTime() {
+        final SetupTime time = getObs().getSteps().getSetupTime();
         switch (getSetupType()) {
-            case NONE: return 0;
-            case FULL: return getObs().getSteps().getSetupTime();
-            case REACQUISITION: return getObs().getSteps().getReacquisitionTime();
+            case NONE:          return 0;
+            case FULL:          return time.fullSetupTime.toMillis();
+            case REACQUISITION: return time.reacquisitionOnlyTime.toMillis();
             default: throw new IllegalArgumentException();
         }
     }
@@ -602,13 +616,14 @@ public final class Alloc implements Comparable<Alloc>, Commentable, PioSerializa
 
     private static long span(Obs obs, int firstStep, int lastStep, SetupType setup) {
         assert lastStep >= firstStep;
-        PlannedStepSummary steps = obs.getSteps();
+        final PlannedStepSummary steps = obs.getSteps();
+        final SetupTime           time = steps.getSetupTime();
         assert lastStep < steps.size();
         long accum;
         switch (setup) {
-            case NONE: accum = 0; break;
-            case FULL: accum = steps.getSetupTime(); break;
-            case REACQUISITION: accum = steps.getReacquisitionTime(); break;
+            case NONE:          accum = 0;                                     break;
+            case FULL:          accum = time.fullSetupTime.toMillis();         break;
+            case REACQUISITION: accum = time.reacquisitionOnlyTime.toMillis(); break;
             default: throw new IllegalArgumentException();
         }
         for (int i = firstStep; i <= lastStep; i++) {

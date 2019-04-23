@@ -11,6 +11,7 @@ import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
+import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -150,7 +151,7 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
         return cc.createF2Config(instr, numberExposures);
     }
 
-    public PlannedTime.ItcOverheadProvider getInst() {
+    public ItcOverheadProvider getInst() {
         return new edu.gemini.spModel.gemini.flamingos2.Flamingos2();
     }
 

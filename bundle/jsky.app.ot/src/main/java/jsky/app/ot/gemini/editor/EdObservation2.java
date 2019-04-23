@@ -7,9 +7,7 @@ import edu.gemini.shared.gui.text.AbstractDocumentListener;
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.skycalc.ObservingNight;
 import edu.gemini.shared.util.TimeValue;
-import edu.gemini.shared.util.immutable.None;
-import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.dataset.DataflowStatus;
 import edu.gemini.spModel.dataset.DatasetQaState;
 import edu.gemini.spModel.dataset.DatasetQaStateSums;
@@ -17,12 +15,15 @@ import edu.gemini.spModel.obs.*;
 import edu.gemini.spModel.obs.ObservationStatus;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummary;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummaryService;
+import edu.gemini.spModel.obs.plannedtime.SetupTime;
 import edu.gemini.spModel.obsclass.ObsClass;
+import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.obsrecord.ObsExecStatus;
 import edu.gemini.spModel.template.OriginatingTemplateFunctor;
 import edu.gemini.spModel.time.*;
 import edu.gemini.spModel.too.Too;
 import edu.gemini.spModel.too.TooType;
+import edu.gemini.spModel.util.SPTreeUtil;
 import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.editor.OtItemEditor;
@@ -32,6 +33,7 @@ import jsky.app.ot.viewer.SPViewer;
 import jsky.util.gui.*;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
@@ -43,9 +45,11 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.function.Function;
 
 /**
  * This is the editor for the Observation item.
@@ -176,6 +180,114 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
     }
 
     private ExecOverrideEditor _execOverrideEditor = new ExecOverrideEditor(_editorPanel.execStatusPanel);
+
+
+    private final class SetupTimeTypeRenderer extends JLabel implements ListCellRenderer<SetupTime.Type> {
+
+        SetupTimeTypeRenderer() {
+            setOpaque(true);
+            setBorder(new EmptyBorder(1, 1, 1, 1));
+        }
+
+        private String formatLen(long len, String name) {
+            final String s;
+            if (len == 0L)      s = "";
+            else if (len == 1L) s = "1 " + name;
+            else                s = String.format("%d %ss", len, name);
+            return s;
+        }
+
+        private String formatDuration(Duration d) {
+            return String.format(
+                    "%s %s",
+                    formatLen(d.toMinutes(),        "min"),
+                    formatLen(d.getSeconds() % 60L, "sec")
+            ).trim();
+        }
+
+        private Duration getTime(Function<SPInstObsComp, Duration> f) {
+            return ImOption.apply(SPTreeUtil.findInstrument(getNode()))
+                           .map(i -> f.apply((SPInstObsComp) i.getDataObject()))
+                           .getOrElse(Duration.ZERO);
+        }
+
+        private String formatSetupTime(String prefix, Duration d) {
+            return d.isZero() ? prefix : String.format("%s (%s)", prefix, formatDuration(d));
+        }
+
+        @Override
+        public Component getListCellRendererComponent(
+                final JList<? extends SetupTime.Type> jList,
+                final SetupTime.Type value,
+                final int index,
+                final boolean isSelected,
+                final boolean hasFocus) {
+
+            final boolean enabled;
+            final String text;
+            switch (value) {
+                case FULL:
+                    enabled             = true;
+                    text                = formatSetupTime("Full Setup", getTime(i -> i.getSetupTime(getNode())));
+                    break;
+
+                case REACQUISITION:
+                    final Duration time = getTime(i -> i.getReacquisitionTime(getNode()));
+                    enabled             = !time.isZero();
+                    text                = formatSetupTime("Reacquisition Only", time);
+                    break;
+
+                case NONE:
+                    enabled             = true;
+                    text                = "No Setup";
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Unexpected SetupTime.Type");
+            }
+            setText(text);
+
+            setEnabled(enabled);
+
+            if (isSelected && enabled) {
+                setBackground(jList.getSelectionBackground());
+                setForeground(jList.getSelectionForeground());
+            } else {
+                setBackground(jList.getBackground());
+                setForeground(jList.getForeground());
+            }
+
+            setFont(jList.getFont());
+
+            return this;
+        }
+    }
+
+    private final class SetupTimeTypeEditor {
+        final JComboBox<SetupTime.Type> combo = _editorPanel.setupTypeBox;
+
+        SetupTimeTypeEditor() {
+            combo.setRenderer(new SetupTimeTypeRenderer());
+            combo.addActionListener(e -> {
+                getDataObject().setSetupTimeType((SetupTime.Type) combo.getSelectedItem());
+                _updateTotalPlannedTime();
+            });
+
+            final Dimension p = combo.getPreferredSize();
+            final Dimension d = new Dimension(190, p.height);
+            combo.setMaximumSize(d);
+            combo.setMinimumSize(d);
+            combo.setPreferredSize(d);
+        }
+
+        void update() {
+            final SPObservation obs = getDataObject();
+            combo.setSelectedItem(obs.getSetupTimeType());
+            combo.repaint();
+        }
+    }
+
+    private SetupTimeTypeEditor _setupTimeTypeEditor = new SetupTimeTypeEditor();
 
     /**
      * The constructor initializes the user interface.
@@ -572,6 +684,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
         try {
             _editorPanel.phase2StatusBox.setSelectedItem(getDataObject().getPhase2Status());
             _execOverrideEditor.update();
+            _setupTimeTypeEditor.update();
             _editorPanel.qaStateBox.setSelectedItem(obsQaState);
             _editorPanel.override.setSelected(override);
         } finally {

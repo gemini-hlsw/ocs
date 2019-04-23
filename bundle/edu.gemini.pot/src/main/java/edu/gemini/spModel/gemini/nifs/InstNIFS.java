@@ -37,16 +37,16 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTimeGroup;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.Category;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.StepCalculator;
-import edu.gemini.spModel.obs.plannedtime.PlannedTime.ItcOverheadProvider;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
+import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 
 import java.beans.PropertyDescriptor;
-
+import java.time.Duration;
 import java.util.*;
 
 /**
@@ -55,7 +55,7 @@ import java.util.*;
 public final class InstNIFS extends SPInstObsComp implements PropertyProvider, GuideProbeProvider, StepCalculator, CalibrationKeyProvider, ConfigPostProcessor, ItcOverheadProvider {
 
     // for serialization
-    private static final long serialVersionUID = 3L;
+    private static final long serialVersionUID = 4L;
 
     public static final double ALTAIR_P_OFFSET =  2.51;
     public static final double ALTAIR_Q_OFFSET = -1.86;
@@ -188,8 +188,16 @@ public final class InstNIFS extends SPInstObsComp implements PropertyProvider, G
     /**
      * Return the setup time in seconds before observing can begin
      */
-    public double getSetupTime(ISPObservation obs) {
-        return NifsSetupTimeService.getSetupTimeSec(obs);
+    @Override
+    public Duration getSetupTime(ISPObservation obs) {
+        return Duration.ofMillis(Math.round(NifsSetupTimeService.getSetupTimeSec(obs) * 1000.0));
+    }
+
+    public static final Duration REACQUISITION_TIME = Duration.ofMinutes(6);
+
+    @Override
+    public Duration getReacquisitionTime(ISPObservation obs) {
+        return REACQUISITION_TIME;
     }
 
     /**
@@ -197,18 +205,21 @@ public final class InstNIFS extends SPInstObsComp implements PropertyProvider, G
      * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
      */
     @Deprecated @Override
-    public double getSetupTime(Config conf) {
+    public Duration getSetupTime(Config conf) {
+        final double secs;
         final GuideStarType guideStarType = (GuideStarType) conf.getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
         if (conf.containsItem(AOConstants.AO_SYSTEM_KEY) &&
                 guideStarType.equals(AltairParams.GuideStarType.LGS)) {
-                return NifsSetupTimeService.BASE_LGS_SETUP_TIME_SEC;
+                secs = NifsSetupTimeService.BASE_LGS_SETUP_TIME_SEC;
         } else {
-            return NifsSetupTimeService.BASE_SETUP_TIME_SEC;
+            secs = NifsSetupTimeService.BASE_SETUP_TIME_SEC;
         }
+        return Duration.ofMillis(Math.round(secs * 1000.0));
     }
 
-    public double getReacquisitionTime () {
-        return 6 * 60;
+    @Override
+    public Duration getReacquisitionTime(Config conf) {
+        return REACQUISITION_TIME;
     }
 
     /**

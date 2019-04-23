@@ -810,7 +810,8 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
                     LOGGER.severe(obs + ": TOTAL STEPS == " + steps.size() + ", FIRST UNEX IS " + obs.getFirstUnexecutedStep());
                     return;
                 }
-                final long setupTime = steps.getSetupTime();
+                // setupTime will depend on the setup type selected in the obs.
+                final long setupTime = steps.getSetupTime().toDuration().toMillis();
                 final long firstUnexStepPlusSetup = firstUnexStep + setupTime;
 
 
@@ -904,10 +905,12 @@ public final class Variant extends BaseMutableBean implements PioSerializable, C
 
                         } else {
 
-                            // At least enough time for step 1 plus setup.
+                            // At least enough time for step 1 plus setup (where
+                            // setup time depends on the setup type selected in
+                            // the observation).
 
                             // Count up all the steps
-                            long totalSteps = steps.getSetupTime();
+                            long totalSteps = steps.getSetupTime().toDuration().toMillis();
                             for (int i = 0; i < steps.size(); i++)
                                 totalSteps += steps.getStepTime(i);
 

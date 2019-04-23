@@ -82,13 +82,13 @@ public class ObserveTimeLineNode extends DefaultTimeLineNode {
     }
 
     public static long getDuration(PlannedTime pt, int step) {
-        return (step < 0) ? pt.setup.time : pt.steps.get(step).totalTime();
+        return (step < 0) ? pt.setup.time.toDuration().toMillis() : pt.steps.get(step).totalTime();
     }
 
     @Override public String getDescription(Point pt) {
         StringBuilder buf = new StringBuilder("<html><body>");
         if (step < 0) {
-            buf.append("<b>Setup ").append(formatSec(plannedTime.setup.time)).append(" sec</b>");
+            buf.append("<b>Setup ").append(formatSec(plannedTime.setup.time.toDuration().toMillis())).append(" sec</b>");
         } else {
             buf.append("<p align=\"center\"><b>").append(SequenceTabUtil.shortDatasetLabel(plannedTime.sequence.getStep(step))).append("</b></p>");
 

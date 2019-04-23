@@ -5,6 +5,7 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
 import edu.gemini.spModel.obs.ObsPhase2Status;
 import edu.gemini.spModel.obs.ObsQaState;
+import edu.gemini.spModel.obs.plannedtime.SetupTime;
 import jsky.util.gui.DropDownListBoxWidget;
 import jsky.util.gui.NumberBoxWidget;
 import jsky.util.gui.SingleSelectComboBox;
@@ -199,11 +200,19 @@ public class ObsForm extends JPanel {
 
         row += 2;
 
-        add(new JLabel(" Class "), cc.xy(1, row));
+        add(new JLabel("Class"), cc.xy(1, row));
 
         obsClass = new JLabel("unknown");
         obsClass.setBorder(null);
-        add(obsClass, cc.xywh(3, row, 9, 1));
+        add(obsClass, cc.xy(3, row));
+
+        final Box setupPanel = new Box(BoxLayout.X_AXIS);
+        setupPanel.add(new JLabel("Setup Type"));
+        setupPanel.add(Box.createHorizontalStrut(5));
+        setupTypeBox = new JComboBox<>(SetupTime.Type.values());
+        setupPanel.add(setupTypeBox);
+        setupPanel.add(Box.createHorizontalGlue());
+        add(setupPanel, cc.xywh(5, row, 7, 1));
 
         row += 2;
 
@@ -397,6 +406,7 @@ public class ObsForm extends JPanel {
     final JLabel qaStateSum;
     final JLabel dataflowStep;
     final JLabel obsClass;
+    final JComboBox<SetupTime.Type> setupTypeBox;
     final JLabel plannedLabel;
     final JLabel execLabel;
     final JLabel execTime;

@@ -88,13 +88,13 @@ public final class PlannedTimeTest {
         final double readout = f2DataObject.getReadMode().readoutTimeSec() + PlannedTime.Category.DHS_OVERHEAD.time/1000.;
 
         // Imaging setup time.
-        verify(Flamingos2.getImagingSetupSec(obs) + readout);
+        verify(Flamingos2.getImagingSetup(obs).getSeconds() + readout);
 
         // Spectroscopy setup time.
         f2DataObject.setFpu(Flamingos2.FPUnit.LONGSLIT_1);
         f2ObsComponent.setDataObject(f2DataObject);
 
-        verify(Flamingos2.getSpectroscopySetupSec() + readout);
+        verify(Flamingos2.getSpectroscopySetup().getSeconds() + readout);
     }
 
     @Test
@@ -103,7 +103,7 @@ public final class PlannedTimeTest {
         final double readout = f2DataObject.getReadMode().readoutTimeSec() + PlannedTime.Category.DHS_OVERHEAD.time/1000.;
 
         // Imaging setup time.
-        verify(Flamingos2.getImagingSetupSec(obs) + readout);
+        verify(Flamingos2.getImagingSetup(obs).getSeconds() + readout);
 
         // With an explicit PWFS2 guider.
         final ISPObsComponent targetComp = odb.getFactory().createObsComponent(prog, SPComponentType.TELESCOPE_TARGETENV, null);
@@ -116,8 +116,8 @@ public final class PlannedTimeTest {
         targetDo.setTargetEnvironment(tenv.putPrimaryGuideProbeTargets(pwfs2));
         targetComp.setDataObject(targetDo);
 
-        assertEquals(360.0, Flamingos2.getImagingSetupSec(obs), 0.000001);
-        verify(Flamingos2.getImagingSetupSec(obs) + readout);
+        assertEquals(360L, Flamingos2.getImagingSetup(obs).getSeconds());
+        verify(Flamingos2.getImagingSetup(obs).getSeconds() + readout);
 
         // With OIWFS
         final SPTarget oiwfsTarget = new SPTarget();
@@ -125,8 +125,8 @@ public final class PlannedTimeTest {
         targetDo.setTargetEnvironment(tenv.putPrimaryGuideProbeTargets(oiwfs));
         targetComp.setDataObject(targetDo);
 
-        assertEquals(900.0, Flamingos2.getImagingSetupSec(obs), 0.000001);
-        verify(Flamingos2.getImagingSetupSec(obs) + readout);
+        assertEquals(900, Flamingos2.getImagingSetup(obs).getSeconds());
+        verify(Flamingos2.getImagingSetup(obs).getSeconds() + readout);
     }
 
     private IParameter getExpTimeParam(final Double... secs) {
@@ -161,7 +161,7 @@ public final class PlannedTimeTest {
         f2SeqDataObject.setSysConfig(sc);
         f2SeqComponent.setDataObject(f2SeqDataObject);
 
-        final double base = Flamingos2.getImagingSetupSec(obs) + 60 + PlannedTime.Category.DHS_OVERHEAD.time/1000.;
+        final double base = Flamingos2.getImagingSetup(obs).getSeconds() + 60 + PlannedTime.Category.DHS_OVERHEAD.time/1000.;
 
         for (Flamingos2.ReadMode mode : Flamingos2.ReadMode.values()) {
             final Flamingos2 obj = (Flamingos2) f2ObsComponent.getDataObject();
@@ -182,7 +182,7 @@ public final class PlannedTimeTest {
         f2SeqComponent.setDataObject(f2SeqDataObject);
 
         // Account for setup, exposure time, and readout time for the 2 steps
-        final double time = Flamingos2.getSpectroscopySetupSec() + 60.0 * 2
+        final double time = Flamingos2.getSpectroscopySetup().getSeconds() + 60.0 * 2
                 + f2DataObject.getReadMode().readoutTimeSec() * 2
                 + PlannedTime.Category.DHS_OVERHEAD.time/1000. * 2;
 
@@ -234,7 +234,7 @@ public final class PlannedTimeTest {
         f2SeqComponent.setDataObject(f2SeqDataObject);
 
         // Account for setup, exposure time, and readout time for the 2 steps.
-        final double time = Flamingos2.getSpectroscopySetupSec() + 60.0 * 2
+        final double time = Flamingos2.getSpectroscopySetup().getSeconds() + 60.0 * 2
                 + f2DataObject.getReadMode().readoutTimeSec() * 2
                 + PlannedTime.Category.DHS_OVERHEAD.time/1000. * 2;
 
@@ -263,7 +263,7 @@ public final class PlannedTimeTest {
         f2SeqComponent.setDataObject(f2SeqDataObject);
 
         // Account for setup, exposure time, and readout time for the 3 steps.
-        final double time = Flamingos2.getSpectroscopySetupSec() + 60.0 * 3
+        final double time = Flamingos2.getSpectroscopySetup().getSeconds() + 60.0 * 3
                 + f2DataObject.getReadMode().readoutTimeSec() * 3
                 + PlannedTime.Category.DHS_OVERHEAD.time/1000. * 3;
 

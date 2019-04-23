@@ -7,6 +7,7 @@ import edu.gemini.itc.gsaoi.Gsaoi;
 import edu.gemini.itc.gsaoi.GsaoiRecipe;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
+import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -99,7 +100,7 @@ public final class GsaoiPrinter extends PrinterBase
         return cc.createGsaoiConfig(instr, numberExposures);
     }
 
-    public PlannedTime.ItcOverheadProvider getInst() {
+    public ItcOverheadProvider getInst() {
         return new edu.gemini.spModel.gemini.gsaoi.Gsaoi();
     }
 

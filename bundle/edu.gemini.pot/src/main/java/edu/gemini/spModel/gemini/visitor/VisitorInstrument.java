@@ -30,6 +30,7 @@ import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 
 import java.beans.PropertyDescriptor;
+import java.time.Duration;
 import java.util.*;
 
 import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_CONFIG_NAME;
@@ -37,7 +38,7 @@ import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_CONFIG_NAME;
 public class VisitorInstrument extends SPInstObsComp
         implements PropertyProvider, GuideProbeProvider, PlannedTime.StepCalculator {
     // for serialization
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     /**
      * This obs component's SP type.
@@ -134,8 +135,8 @@ public class VisitorInstrument extends SPInstObsComp
      * Return the setup time in seconds before observing can begin
      */
     @Override
-    public double getSetupTime(ISPObservation obs) {
-        return 600.0;
+    public Duration getSetupTime(ISPObservation obs) {
+        return Duration.ofMinutes(10);
     }
 
 

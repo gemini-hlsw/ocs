@@ -6,7 +6,7 @@ import edu.gemini.qpt.shared.sp.{Group, Obs, Prog}
 import edu.gemini.shared.util.immutable.{None => JNone, DefaultImList}
 import edu.gemini.spModel.core.{Declination, RightAscension, Coordinates, SPProgramID}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
-import edu.gemini.spModel.obs.plannedtime.PlannedStepSummary
+import edu.gemini.spModel.obs.plannedtime.{ PlannedStepSummary, SetupTime }
 import edu.gemini.spModel.obsclass.ObsClass
 import edu.gemini.spModel.obs.SPObservation.Priority
 import edu.gemini.spModel.obs.{SchedulingBlock, ObservationStatus}
@@ -38,7 +38,7 @@ case class ObsBuilder(
   targetEnvironment: TargetEnvironment = TargetEnvironment.create(new SPTarget(0, 0)),
   obsClass: ObsClass = ObsClass.SCIENCE,
   centralWavelength: Double = 0.0,
-  steps: PlannedStepSummary = new PlannedStepSummary(0L, 0L, Array(), Array(), Array()),
+  steps: PlannedStepSummary = new PlannedStepSummary(SetupTime.ZERO, Array(), Array(), Array()),
   piPlannedTime: Long = 0,
   execPlannedTime: Long = 0,
   elapsedTime: Long = 0,

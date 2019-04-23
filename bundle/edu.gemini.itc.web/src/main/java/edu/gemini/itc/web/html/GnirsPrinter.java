@@ -12,6 +12,7 @@ import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.gemini.gnirs.*;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
+import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 import scala.Option;
 
 import java.io.PrintWriter;
@@ -231,7 +232,7 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
         return cc.createGnirsConfig(instr, numberExposures);
     }
 
-    public PlannedTime.ItcOverheadProvider getInst() {
+    public ItcOverheadProvider getInst() {
         return new InstGNIRS();
     }
 

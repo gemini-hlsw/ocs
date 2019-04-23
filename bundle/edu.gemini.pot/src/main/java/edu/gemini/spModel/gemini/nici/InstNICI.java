@@ -42,6 +42,7 @@ import edu.gemini.spModel.telescope.IssPortProvider;
 
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -72,7 +73,7 @@ import static edu.gemini.spModel.gemini.nici.NICIParams.*;
 public final class InstNICI extends SPInstObsComp implements PropertyProvider, GuideProbeProvider, IssPortProvider, StepCalculator {
     private static final Logger LOG = Logger.getLogger(InstNICI.class.getName());
 
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     public static final SPComponentType SP_TYPE = SPComponentType.INSTRUMENT_NICI;
 
@@ -244,11 +245,12 @@ public final class InstNICI extends SPInstObsComp implements PropertyProvider, G
         return "gemNICI";
     }
 
-    public double getSetupTime(ISPObservation obs) {
+    @Override
+    public Duration getSetupTime(ISPObservation obs) {
         // OT-726. Nici overhead is 30 minutes
         //return 30 * 60;
         // SCI-0107: set NICI setup time to 10 minutes
-        return 10 * 60;
+        return Duration.ofMinutes(10);
     }
 
     // Predicate that leaves all CategorizedTime except for the offset overhead.

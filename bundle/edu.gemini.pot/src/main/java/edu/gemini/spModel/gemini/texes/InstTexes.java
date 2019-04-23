@@ -22,6 +22,7 @@ import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.pot.sp.ISPObservation;
 
 import java.util.*;
+import java.time.Duration;
 import java.beans.PropertyDescriptor;
 
 /**
@@ -30,7 +31,7 @@ import java.beans.PropertyDescriptor;
 public final class InstTexes extends SPInstObsComp implements PropertyProvider {
 
     // for serialization
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
 
     public static final double DEF_POS_ANGLE = 0.0;  // deg
@@ -111,11 +112,11 @@ public final class InstTexes extends SPInstObsComp implements PropertyProvider {
     }
 
     /**
-     * Return the setup time in seconds before observing can begin
+     * Return the setup time before observing can begin
      */
     @Override
-    public double getSetupTime(ISPObservation obs) {
-        return 1200.0;
+    public Duration getSetupTime(ISPObservation obs) {
+        return Duration.ofMinutes(20);
     }
 
     /**

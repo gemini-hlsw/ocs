@@ -2,6 +2,7 @@ package edu.gemini.spModel.obs.plannedtime;
 
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPObservation;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
@@ -12,6 +13,7 @@ import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.dataset.DatasetLabel;
 import edu.gemini.spModel.obs.ObsClassService;
+import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.*;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
@@ -20,7 +22,7 @@ import edu.gemini.spModel.obsrecord.ObsExecRecord;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.util.SPTreeUtil;
 
-
+import java.time.Duration;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,30 +35,39 @@ import java.util.logging.Logger;
 public enum PlannedTimeCalculator {
     instance;
 
-    private static final ItemKey OBS_KEY      = new ItemKey("observe");
-    private static final ItemKey OBS_CLASS_KEY    = new ItemKey(OBS_KEY, InstConstants.OBS_CLASS_PROP);
-    private static final ItemKey OBS_TYPE_KEY     = new ItemKey(OBS_KEY, InstConstants.OBSERVE_TYPE_PROP);
+    private static final ItemKey OBS_KEY       = new ItemKey("observe");
+    private static final ItemKey OBS_CLASS_KEY = new ItemKey(OBS_KEY, InstConstants.OBS_CLASS_PROP);
+    private static final ItemKey OBS_TYPE_KEY  = new ItemKey(OBS_KEY, InstConstants.OBSERVE_TYPE_PROP);
 
     private static final Logger LOG = Logger.getLogger(PlannedTimeCalculator.class.getName());
+
+    public static final SetupTime DEFAULT_SETUP =
+        SetupTime.unsafeFromDuration(Duration.ofMinutes(15), Duration.ZERO, SetupTime.Type.FULL);
 
     public PlannedTime calc(ISPObservation obs)  {
         ObsExecRecord obsExecRecord = SPTreeUtil.getObsRecord(obs);
         ChargeClass obsChargeClass = chargeClass(obs);
 
         // add the setup time for the instrument
-        double setupTime = 15 * 60; // default setup time
-        double reacqTime = 0;       // default reacquisition time
-        ISPObsComponent instNode = SPTreeUtil.findInstrument(obs);
-        if (instNode != null) {
-            SPInstObsComp inst = (SPInstObsComp) instNode.getDataObject();
-            if (inst != null) setupTime = inst.getSetupTime(obs);
-            if (inst != null) reacqTime = inst.getReacquisitionTime(obs);
+        final SetupTime setupTime;
+        final ISPObsComponent instNode = SPTreeUtil.findInstrument(obs);
+        if (instNode == null) {
+            setupTime = DEFAULT_SETUP;
+        } else {
+            setupTime = ImOption.apply((SPInstObsComp) instNode.getDataObject())
+                                .flatMap(i -> {
+                                  final Duration s = i.getSetupTime(obs);
+                                  final Duration r = i.getReacquisitionTime(obs);
+                                  final SetupTime.Type t = ((SPObservation) obs.getDataObject()).getSetupTimeType();
+                                  return SetupTime.fromDuration(s, r, t);
+                                })
+                                .getOrElse(DEFAULT_SETUP);
         }
-        Setup setup = Setup.fromSeconds(setupTime, reacqTime, obsChargeClass);
+        final Setup setup = Setup.apply(setupTime, obsChargeClass);
 
         // Calculate the overhead time
         Option<Config> prev = None.instance();
-        List<PlannedTime.Step> steps = new ArrayList<PlannedTime.Step>();
+        List<PlannedTime.Step> steps = new ArrayList<>();
         ConfigSequence cs = ConfigBridge.extractSequence(obs, null, ConfigValMapInstances.IDENTITY_MAP, false);
         for (Config c : cs.getAllSteps()) {
             ChargeClass stepChargeClass = stepChargeClass(obsChargeClass, c);
@@ -66,37 +77,6 @@ public enum PlannedTimeCalculator {
             prev = new Some<Config>(c);
 
             steps.add(Step.apply(gtc, stepChargeClass, executed, obsType));
-        }
-
-        return PlannedTime.apply(setup, steps, cs);
-    }
-
-    /**
-     * For ITC.
-     * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
-     */
-    @Deprecated
-    public PlannedTime calc(Config[] conf, ItcOverheadProvider instr)  {
-        ChargeClass obsChargeClass = ChargeClass.PROGRAM;
-
-        // add the setup time for the instrument
-        double setupTime = 15 * 60; // default setup time
-        double reacqTime = 0;       // default reacquisition time
-        if (instr != null) {
-            setupTime = instr.getSetupTime(conf[0]);
-            reacqTime = instr.getReacquisitionTime();
-        }
-        Setup setup = Setup.fromSeconds(setupTime, reacqTime, obsChargeClass);
-
-        // Calculate the overhead time
-        Option<Config> prev = None.instance();
-        List<PlannedTime.Step> steps = new ArrayList<>();
-        ConfigSequence cs = new ConfigSequence(conf);
-        for (Config c : cs.getAllSteps()) {
-            CategorizedTimeGroup gtc    = instr.calc(c, prev);
-            prev = new Some<>(c);
-
-            steps.add(Step.apply(gtc));
         }
 
         return PlannedTime.apply(setup, steps, cs);

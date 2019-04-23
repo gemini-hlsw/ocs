@@ -11,6 +11,7 @@ import edu.gemini.spModel.gemini.niri.NiriReadoutTime;
 import edu.gemini.spModel.gemini.niri.Niri.Mask;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
+import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 import scala.Option;
 
 
@@ -166,7 +167,7 @@ public final class NiriPrinter extends PrinterBase implements OverheadTablePrint
         return cc.createNiriConfig(instr, numberExposures);
     }
 
-    public PlannedTime.ItcOverheadProvider getInst() {
+    public ItcOverheadProvider getInst() {
         return new InstNIRI();
     }
 

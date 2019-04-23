@@ -100,7 +100,7 @@ final class ObserveTimeLine extends TimeLine implements VetoableChangeListener {
 
         // add nodes to node list for the sequence
 
-        double startTime = plannedTime.setup.time / 1000.0;
+        double startTime = plannedTime.setup.time.toDuration().toMillis() / 1000.0;
         for (int step=0; step<plannedTime.steps.size(); ++step) {
             ObserveTimeLineNode n = new ObserveTimeLineNode(startTime, plannedTime, step);
             addNode(n);

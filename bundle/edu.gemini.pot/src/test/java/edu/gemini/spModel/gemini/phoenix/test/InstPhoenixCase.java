@@ -28,7 +28,7 @@ public final class InstPhoenixCase {
     // Setup some test objects.
     @Test
     public void testInitial() {
-        assertTrue(_ph1.getSetupTime(null) == 1200.0);
+        assertTrue(_ph1.getSetupTime(null).getSeconds() == 1200L);
 
         assertTrue(_ph1.getFilter() == Filter.DEFAULT);
         assertEquals(InstPhoenix.DEF_EXPOSURE_TIME, _ph1.getExposureTime(),

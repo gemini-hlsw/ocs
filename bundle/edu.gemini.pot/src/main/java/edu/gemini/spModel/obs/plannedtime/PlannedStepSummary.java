@@ -12,23 +12,22 @@ import java.util.Arrays;
  */
 public class PlannedStepSummary implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 
-	public static final PlannedStepSummary ZERO_PLANNED_STEPS = new PlannedStepSummary(0, 0, new long[0], new boolean[0], new String[0]);
+	public static final PlannedStepSummary ZERO_PLANNED_STEPS =
+        new PlannedStepSummary(SetupTime.ZERO, new long[0], new boolean[0], new String[0]);
 
-	private final long setupTime;
-    private final long reacquisitionTime;
+	private final SetupTime setupTime;
 	private final long[] stepTimes;
 	private final boolean[] executed;
 	private final String[] obsTypes;
 
-	public PlannedStepSummary(long setupTime, long reacquisitionTime, long[] stepTimes, boolean[] executed, String[] obsTypes) {
+	public PlannedStepSummary(SetupTime setupTime, long[] stepTimes, boolean[] executed, String[] obsTypes) {
 		assert stepTimes.length == executed.length;
 		this.setupTime = setupTime;
-        this.reacquisitionTime = reacquisitionTime;
 		this.stepTimes = stepTimes;
-		this.executed = executed;
-		this.obsTypes = obsTypes;
+		this.executed  = executed;
+		this.obsTypes  = obsTypes;
 	}
 
 	public int size() {
@@ -39,12 +38,8 @@ public class PlannedStepSummary implements Serializable {
 		return executed[step];
 	}
 
-	public long getSetupTime() {
+	public SetupTime getSetupTime() {
 		return setupTime;
-    }
-
-    public long getReacquisitionTime() {
-        return reacquisitionTime;
     }
 
     public long getStepTime(int step) {

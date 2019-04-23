@@ -1,6 +1,7 @@
 package edu.gemini.qpt.ui.view.property.adapter;
 
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,8 +15,13 @@ import edu.gemini.qpt.core.util.LttsServicesClient;
 import edu.gemini.qpt.shared.util.TimeUtils;
 import edu.gemini.qpt.ui.view.property.PropertyTable;
 import edu.gemini.qpt.ui.view.property.PropertyTable.Adapter;
+import edu.gemini.shared.util.immutable.None;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.TimingWindow;
 import edu.gemini.spModel.obs.plannedtime.PlannedStepSummary;
+import edu.gemini.spModel.obs.plannedtime.SetupTime;
 import edu.gemini.spModel.obscomp.InstConstants;
 
 public class ObsAdapter implements Adapter<Obs> {
@@ -105,19 +111,24 @@ public class ObsAdapter implements Adapter<Obs> {
 
 
     static String toSequenceString(Obs obs, Alloc[] a, int firstStep, int lastStep, Alloc.SetupType setupType) {
-        PlannedStepSummary steps = obs.getSteps();
+        final PlannedStepSummary steps = obs.getSteps();
+        final SetupTime           time = steps.getSetupTime();
         int readySteps = 0;
         StringBuilder builder = new StringBuilder();
+
+        final Option<Duration> setup;
         switch (setupType) {
-            case NONE: builder.append("No"); break;
-            case FULL: builder.append(TimeUtils.msToMMSS(steps.getSetupTime())); break;
-            case REACQUISITION: builder.append(TimeUtils.msToMMSS(steps.getReacquisitionTime())); break;
+            case NONE:          setup = ImOption.<Duration>empty();                     break;
+            case FULL:          setup = new Some<Duration>(time.fullSetupTime);         break;
+            case REACQUISITION: setup = new Some<Duration>(time.reacquisitionOnlyTime); break;
+            default: throw new IllegalArgumentException();
         }
-        builder.append(" setup");
+        builder.append(setup.map(d -> TimeUtils.msToMMSS(d.toMillis())).getOrElse("No")).append(" setup");
+
         int repeatCount = 0;
         long prevLength = -1;
         String prevType = null;
-        long total = steps.getSetupTime();
+        long total = setup.getOrElse(Duration.ZERO).toMillis();
         for (int i = firstStep; i <= lastStep; i++) {
 //            if (steps.isStepExecuted(i)) continue;
             ++readySteps;

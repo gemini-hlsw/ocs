@@ -28,6 +28,7 @@ import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 
 import java.beans.PropertyDescriptor;
+import java.time.Duration;
 import java.util.*;
 
 /**
@@ -36,7 +37,7 @@ import java.util.*;
 public final class InstPhoenix extends SPInstObsComp implements PropertyProvider, StepCalculator {
 
     // for serialization
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     /**
      * This obs component's SP type.
@@ -140,9 +141,10 @@ public final class InstPhoenix extends SPInstObsComp implements PropertyProvider
     /**
      * Return the setup time in seconds before observing can begin
      */
-    public double getSetupTime(ISPObservation obs) {
+    @Override
+    public Duration getSetupTime(ISPObservation obs) {
         //SCI-0107: change to 20 minutes
-        return 20 * 60;
+        return Duration.ofMinutes(20);
     }
 
     @Override public CategorizedTimeGroup calc(Config cur, Option<Config> prev) {
