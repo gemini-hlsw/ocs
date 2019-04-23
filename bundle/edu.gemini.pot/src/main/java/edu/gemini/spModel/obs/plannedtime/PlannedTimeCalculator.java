@@ -35,13 +35,13 @@ import java.util.logging.Logger;
 public enum PlannedTimeCalculator {
     instance;
 
-    private static final ItemKey OBS_KEY      = new ItemKey("observe");
-    private static final ItemKey OBS_CLASS_KEY    = new ItemKey(OBS_KEY, InstConstants.OBS_CLASS_PROP);
-    private static final ItemKey OBS_TYPE_KEY     = new ItemKey(OBS_KEY, InstConstants.OBSERVE_TYPE_PROP);
+    private static final ItemKey OBS_KEY       = new ItemKey("observe");
+    private static final ItemKey OBS_CLASS_KEY = new ItemKey(OBS_KEY, InstConstants.OBS_CLASS_PROP);
+    private static final ItemKey OBS_TYPE_KEY  = new ItemKey(OBS_KEY, InstConstants.OBSERVE_TYPE_PROP);
 
     private static final Logger LOG = Logger.getLogger(PlannedTimeCalculator.class.getName());
 
-    private static final SetupTime DEFAULT_SETUP =
+    public static final SetupTime DEFAULT_SETUP =
         SetupTime.unsafeFromDuration(Duration.ofMinutes(15), Duration.ZERO, SetupTime.Type.FULL);
 
     public PlannedTime calc(ISPObservation obs)  {
@@ -77,39 +77,6 @@ public enum PlannedTimeCalculator {
             prev = new Some<Config>(c);
 
             steps.add(Step.apply(gtc, stepChargeClass, executed, obsType));
-        }
-
-        return PlannedTime.apply(setup, steps, cs);
-    }
-
-    /**
-     * For ITC.
-     * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
-     */
-    @Deprecated
-    public PlannedTime calcForItc(Config[] conf, ItcOverheadProvider instr)  {
-        ChargeClass obsChargeClass = ChargeClass.PROGRAM;
-
-        // add the setup time for the instrument
-        final SetupTime setupTime;
-        if ((instr == null) || (conf.length == 0)) {
-            setupTime = DEFAULT_SETUP;
-        } else {
-            final Duration s = instr.getSetupTime(conf[0]);
-            final Duration r = instr.getReacquisitionTime(conf[0]);
-            setupTime = SetupTime.fromDuration(s, r, SetupTime.Type.FULL).getOrElse(DEFAULT_SETUP);
-        }
-        final Setup setup = Setup.apply(setupTime, obsChargeClass);
-
-        // Calculate the overhead time
-        Option<Config> prev = None.instance();
-        List<PlannedTime.Step> steps = new ArrayList<>();
-        ConfigSequence cs = new ConfigSequence(conf);
-        for (Config c : cs.getAllSteps()) {
-            CategorizedTimeGroup gtc    = instr.calc(c, prev);
-            prev = new Some<>(c);
-
-            steps.add(Step.apply(gtc));
         }
 
         return PlannedTime.apply(setup, steps, cs);

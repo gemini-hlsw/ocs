@@ -1,9 +1,20 @@
 package edu.gemini.itc.web.html;
 
+import edu.gemini.shared.util.immutable.None;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.config2.Config;
+import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.guide.StandardGuideOptions;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
+import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
+import edu.gemini.spModel.obs.plannedtime.SetupTime;
+import edu.gemini.spModel.time.ChargeClass;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 // Extracted from edu.gemini.spModel.obs.plannedtime.PlannedTime since it
 // doesn't seem useful elsewhere and indeed is only used by this package.
@@ -70,6 +81,38 @@ public final class PlannedTimeMath {
                 pt.setup.time.reacquisitionOnlyTime.toMillis() * numReacq;
         for (PlannedTime.Step step : pt.steps) totalTimeWithReacq += step.totalTime();
         return totalTimeWithReacq;
+    }
+
+
+    // Extracted from PlannedTimeCalculator since it is only used by the ITC.
+
+    public static PlannedTime calc(Config[] conf, PlannedTime.ItcOverheadProvider instr)  {
+        ChargeClass obsChargeClass = ChargeClass.PROGRAM;
+
+        // add the setup time for the instrument
+        final SetupTime setupTime;
+        if ((instr == null) || (conf.length == 0)) {
+            setupTime = PlannedTimeCalculator.DEFAULT_SETUP;
+        } else {
+            final Duration s = instr.getSetupTime(conf[0]);
+            final Duration r = instr.getReacquisitionTime(conf[0]);
+            setupTime = SetupTime.fromDuration(s, r, SetupTime.Type.FULL)
+                                 .getOrElse(PlannedTimeCalculator.DEFAULT_SETUP);
+        }
+        final PlannedTime.Setup setup = PlannedTime.Setup.apply(setupTime, obsChargeClass);
+
+        // Calculate the overhead time
+        Option<Config> prev = None.instance();
+        List<PlannedTime.Step> steps = new ArrayList<>();
+        ConfigSequence cs = new ConfigSequence(conf);
+        for (Config c : cs.getAllSteps()) {
+            PlannedTime.CategorizedTimeGroup gtc    = instr.calc(c, prev);
+            prev = new Some<>(c);
+
+            steps.add(PlannedTime.Step.apply(gtc));
+        }
+
+        return PlannedTime.apply(setup, steps, cs);
     }
 
 

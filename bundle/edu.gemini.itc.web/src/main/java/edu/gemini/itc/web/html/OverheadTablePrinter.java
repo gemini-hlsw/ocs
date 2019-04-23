@@ -91,7 +91,7 @@ public class OverheadTablePrinter {
             this.p = params;
             this.ccResult = printer.createInstConfig(this.numOfExposures);
             this.readoutTimePerCoadd = readoutTimePerCoadd;
-            this.pta = PlannedTimeCalculator.instance.calcForItc(this.ccResult.getConfig(), printer.getInst());
+            this.pta = PlannedTimeMath.calc(this.ccResult.getConfig(), printer.getInst());
             this.instrumentName = (SPComponentType) ccResult.getConfig()[0].getItemValue(ConfigCreator.InstInstrumentKey);
         } else {
             throw new OverheadTablePrinterException("<b>Observation Overheads</b><br> Warning: Observation overheads cannot be calculated for the number of exposures = 0.");
