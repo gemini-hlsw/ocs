@@ -8,9 +8,17 @@ import java.io.Serializable;
 import java.time.Duration;
 import java.util.Objects;
 
-
+/**
+ * SetupTime combines the time required for two distinct methods of determining
+ * the setup time along with a user preference for which one to use.  The
+ * preference is kept with the observation node itself in SPObservation while
+ * the setup time options are found in the individual instrument components.
+ */
 public final class SetupTime implements Serializable {
 
+    /**
+     * Which type of setup is expected.
+     */
     public enum Type {
         FULL,
         REACQUISITION,
@@ -31,6 +39,10 @@ public final class SetupTime implements Serializable {
         this.acquisitionType       = setupType;
     }
 
+    /**
+     * Extracts the time required for the setup corresponding to the setup time
+     * type.
+     */
     public Duration toDuration() {
         final Duration result;
         switch (acquisitionType) {

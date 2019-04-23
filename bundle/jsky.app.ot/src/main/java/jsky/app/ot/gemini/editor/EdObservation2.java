@@ -268,9 +268,10 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
 
         SetupTimeTypeEditor() {
             combo.setRenderer(new SetupTimeTypeRenderer());
-            combo.addActionListener(e ->
-                            getDataObject().setSetupTimeType((SetupTime.Type) combo.getSelectedItem())
-            );
+            combo.addActionListener(e -> {
+                getDataObject().setSetupTimeType((SetupTime.Type) combo.getSelectedItem());
+                _updateTotalPlannedTime();
+            });
 
             final Dimension p = combo.getPreferredSize();
             final Dimension d = new Dimension(190, p.height);
