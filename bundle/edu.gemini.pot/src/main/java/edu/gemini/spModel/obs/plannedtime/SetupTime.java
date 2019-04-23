@@ -26,8 +26,13 @@ public final class SetupTime implements Serializable {
         ;
     }
 
+    /** Full setup time including initial acquisition. */
     public final Duration fullSetupTime;
+
+    /** Setup time when only reacquisition is needed. */
     public final Duration reacquisitionOnlyTime;
+
+    /** Which type of acquisition is expected. */
     public final Type acquisitionType;
 
     private SetupTime(Duration full, Duration reacquisition, Type setupType) {

@@ -10,6 +10,8 @@ import edu.gemini.spModel.time.ChargeClass;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -352,16 +354,25 @@ public final class PlannedTime implements Serializable {
         this.sequence = sequence;
     }
 
-    public long totalTime() {
-        long res = setup.time.toDuration().toMillis();
-        for (Step step : steps) res += step.totalTime();
+    public <T> T foldSteps(T init, BiFunction<T, Step, T> sum) {
+        T res = init;
+        for (Step s : steps) res = sum.apply(res, s);
         return res;
     }
 
+    public <T> T fold(Function<Setup, T> init, BiFunction<T, Step, T> sum) {
+        return foldSteps(init.apply(setup), sum);
+    }
+
+    public long totalTime() {
+        return fold(s -> s.time.toDuration(), (d, s) -> d.plusMillis(s.totalTime())).toMillis();
+    }
+
     public long totalTime(ChargeClass chargeClass) {
-        long res = (setup.chargeClass == chargeClass) ? setup.time.toDuration().toMillis() : 0;
-        for (Step step : steps) res += step.totalTime(chargeClass);
-        return res;
+        return fold(
+                 s -> (s.chargeClass == chargeClass) ? s.time.toDuration() : Duration.ZERO,
+                 (d, s) -> d.plusMillis(s.totalTime(chargeClass))
+               ).toMillis();
     }
 
     public PlannedTimeSummary toPlannedTimeSummary() {
