@@ -405,12 +405,4 @@ public final class PlannedTime implements Serializable {
         return new PlannedTime(setup, steps, sequence);
     }
 
-    /**
-     * For ITC.
-     * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
-     */
-    @Deprecated
-    public interface ItcOverheadProvider {
-    }
-
 }

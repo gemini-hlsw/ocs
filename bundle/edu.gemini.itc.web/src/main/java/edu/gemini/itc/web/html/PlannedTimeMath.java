@@ -98,7 +98,7 @@ public final class PlannedTimeMath {
             final Duration s = instr.getSetupTime(conf[0]);
             final Duration r = instr.getReacquisitionTime(conf[0]);
             setupTime = SetupTime.fromDuration(s, r, SetupTime.Type.FULL)
-                    .getOrElse(PlannedTimeCalculator.DEFAULT_SETUP);
+                                 .getOrElse(PlannedTimeCalculator.DEFAULT_SETUP);
         }
         final PlannedTime.Setup setup = PlannedTime.Setup.apply(setupTime, obsChargeClass);
 

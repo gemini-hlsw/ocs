@@ -583,10 +583,10 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
     }
 
     public void setSetupTimeType(SetupTime.Type t) {
-        ImOption.apply(t).filter(y -> y != getSetupTimeType()).foreach(y -> {
-            final SetupTime.Type old = getSetupTimeType();
-            _setupTimeType = y;
-            firePropertyChange(SETUP_TIME_TYPE_PROP, old, y);
+        final SetupTime.Type oldType = getSetupTimeType();
+        ImOption.apply(t).filter(newType -> newType != oldType).foreach(newType -> {
+            _setupTimeType = newType;
+            firePropertyChange(SETUP_TIME_TYPE_PROP, oldType, newType);
         });
     }
 

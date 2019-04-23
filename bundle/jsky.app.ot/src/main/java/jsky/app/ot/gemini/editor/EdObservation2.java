@@ -200,7 +200,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
         private String formatDuration(Duration d) {
             return String.format(
                     "%s %s",
-                    formatLen(d.toMinutes(),      "min"),
+                    formatLen(d.toMinutes(),        "min"),
                     formatLen(d.getSeconds() % 60L, "sec")
             ).trim();
         }
