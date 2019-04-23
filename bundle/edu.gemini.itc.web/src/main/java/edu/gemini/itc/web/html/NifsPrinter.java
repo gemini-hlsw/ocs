@@ -13,6 +13,7 @@ import edu.gemini.spModel.gemini.nifs.InstNIFS;
 import edu.gemini.spModel.gemini.nifs.NIFSParams;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
+import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -127,7 +128,7 @@ public final class NifsPrinter extends PrinterBase implements OverheadTablePrint
         return cc.createNifsConfig(instr, numberExposures);
     }
 
-    public PlannedTime.ItcOverheadProvider getInst() {
+    public ItcOverheadProvider getInst() {
             return new InstNIFS();
 
     }

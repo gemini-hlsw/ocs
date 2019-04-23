@@ -10,6 +10,7 @@ import edu.gemini.spModel.guide.StandardGuideOptions;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
 import edu.gemini.spModel.obs.plannedtime.SetupTime;
+import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 import edu.gemini.spModel.time.ChargeClass;
 
 import java.time.Duration;
@@ -86,7 +87,7 @@ public final class PlannedTimeMath {
 
     // Extracted from PlannedTimeCalculator since it is only used by the ITC.
 
-    public static PlannedTime calc(Config[] conf, PlannedTime.ItcOverheadProvider instr)  {
+    public static PlannedTime calc(Config[] conf, ItcOverheadProvider instr)  {
         ChargeClass obsChargeClass = ChargeClass.PROGRAM;
 
         // add the setup time for the instrument
@@ -97,7 +98,7 @@ public final class PlannedTimeMath {
             final Duration s = instr.getSetupTime(conf[0]);
             final Duration r = instr.getReacquisitionTime(conf[0]);
             setupTime = SetupTime.fromDuration(s, r, SetupTime.Type.FULL)
-                                 .getOrElse(PlannedTimeCalculator.DEFAULT_SETUP);
+                    .getOrElse(PlannedTimeCalculator.DEFAULT_SETUP);
         }
         final PlannedTime.Setup setup = PlannedTime.Setup.apply(setupTime, obsChargeClass);
 

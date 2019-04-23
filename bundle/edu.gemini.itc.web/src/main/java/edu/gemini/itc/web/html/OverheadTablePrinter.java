@@ -9,6 +9,7 @@ import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.obs.plannedtime.OffsetOverheadCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
+import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 import edu.gemini.spModel.time.TimeAmountFormatter;
 
 import java.util.Comparator;
@@ -38,7 +39,7 @@ public class OverheadTablePrinter {
 
     public interface PrinterWithOverhead {
         ConfigCreator.ConfigCreatorResult createInstConfig(int numberExposures);
-        PlannedTime.ItcOverheadProvider getInst();
+        ItcOverheadProvider getInst();
         double getReadoutTimePerCoadd(); // this should return "0" for instruments with no coadds
     }
 

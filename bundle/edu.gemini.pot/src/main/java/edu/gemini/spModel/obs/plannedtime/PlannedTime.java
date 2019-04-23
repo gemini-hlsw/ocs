@@ -411,9 +411,6 @@ public final class PlannedTime implements Serializable {
      */
     @Deprecated
     public interface ItcOverheadProvider {
-        Duration getSetupTime(Config conf);
-        Duration getReacquisitionTime(Config conf);
-        CategorizedTimeGroup calc(Config stepConfig, Option<Config> prevStepConfig);
     }
 
 }
