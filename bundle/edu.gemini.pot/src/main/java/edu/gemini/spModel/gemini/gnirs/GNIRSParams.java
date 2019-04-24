@@ -4,6 +4,7 @@ import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.data.SuggestibleString;
 import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
 import edu.gemini.spModel.type.*;
+import edu.gemini.shared.util.immutable.*;
 
 import java.beans.PropertyEditorManager;
 import java.beans.PropertyEditorSupport;
@@ -1020,12 +1021,12 @@ public class GNIRSParams {
     public enum HartmannMask implements DisplayableSpType, SequenceableSpType {
 
         OUT("Out"),
-        LeftMask("Left"),
-        RightMask("Right"),
+        LEFT_MASK("Left"),
+        RIGHT_MASK("Right"),
         ;
 
-        public static HartmannMask DEFAULT = OUT;
-        private String _displayValue;
+        public static final HartmannMask DEFAULT = OUT;
+        private final String _displayValue;
 
         HartmannMask(String displayValue) {
             _displayValue = displayValue;
@@ -1094,24 +1095,28 @@ public class GNIRSParams {
         public String toString() {
             return _displayValue;
         }
-
     }
 
-    public static class Focus extends SuggestibleString {
-        public Focus() {
+    public static final class Focus extends SuggestibleString {
+
+        public Focus(String value) {
             super(FocusSuggestion.class);
-            setStringValue(FocusSuggestion.DEFAULT.displayValue());
+            setStringValue(value);
+        }
+
+        public Focus() {
+            this(FocusSuggestion.DEFAULT.displayValue());
+        }
+
+        public Focus copy() {
+            return new Focus(getStringValue());
         }
     }
 
-    public static class FocusEditor extends PropertyEditorSupport {
-        public Object getValue() {
-            Focus f = (Focus) super.getValue();
-            if (f == null) return null;
+    public static final class FocusEditor extends PropertyEditorSupport {
 
-            Focus res = new Focus();
-            res.setStringValue(f.getStringValue());
-            return res;
+        public Object getValue() {
+            return ImOption.apply((Focus) super.getValue()).map(f -> f.copy()).getOrNull();
         }
 
         public void setValue(Object value) {
@@ -1125,18 +1130,11 @@ public class GNIRSParams {
         }
 
         public String getAsText() {
-            Focus val = (Focus) getValue();
-            if (val == null) return null;
-            return val.getStringValue();
+            return ImOption.apply((Focus) getValue()).map(f -> f.getStringValue()).getOrNull();
         }
 
         public void setAsText(String string) throws IllegalArgumentException {
-            Focus val = (Focus) super.getValue();
-            if (val == null) {
-                val = new Focus();
-                super.setValue(val);
-            }
-            val.setStringValue(string);
+            setValue(new Focus(string));
         }
     }
     
