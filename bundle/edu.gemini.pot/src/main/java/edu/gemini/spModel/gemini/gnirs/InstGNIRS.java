@@ -392,16 +392,23 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
 
     // ------------------------------------------------------------------------
 
-
     /**
-     * Return the (read-only, static) value for focus.
+     * Get and set the focus
      */
+
+    private Focus _focus = new Focus();
+
     public Focus getFocus() {
-        return new Focus();
+        return _focus.copy();
     }
 
-    public void setFocus(Focus focus) {
-        // Required for reflection
+    public void setFocus(Focus newValue) {
+        final Focus oldValue = getFocus();
+
+        if (!oldValue.equals(newValue) && newValue.getStringValue() != null) {
+            _focus = newValue.copy();
+            firePropertyChange(FOCUS_PROP.getName(), oldValue, newValue);
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -427,8 +434,6 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
 
     // ------------------------------------------------------------------------
 
-    // ------------------------------------------------------------------------
-
     /**
      * Get the well depth  value.
      */
@@ -437,7 +442,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     }
 
     /**
-     * Set the decker
+     * Set the well depth
      */
     public void setWellDepth(WellDepth newValue) {
         WellDepth oldValue = getWellDepth();
@@ -809,6 +814,8 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         Pio.addParam(factory, paramSet, DECKER_PROP, getDecker().name());
         Pio.addParam(factory, paramSet, FILTER_PROP, getFilter().name());
         Pio.addParam(factory, paramSet, POS_ANGLE_CONSTRAINT_PROP.getName(), getPosAngleConstraint().name());
+        Pio.addParam(factory, paramSet, HARTMANN_MASK_PROP, getHartmannMask().name());
+        Pio.addParam(factory, paramSet, FOCUS_PROP.getName(), _focus.getStringValue());
 
         Pio.addBooleanParam(factory, paramSet, OVERRIDE_ACQ_OBS_WAVELENGTH_PROP.getName(), isOverrideAcqObsWavelength());
 
@@ -855,7 +862,6 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         if (v != null) {
             setWellDepth(WellDepth.valueOf(v));
         }
-
         v = Pio.getValue(paramSet, ACQUISITION_MIRROR_PROP);
         if (v != null) {
             setAcquisitionMirror(AcquisitionMirror.getAcquisitionMirror(v));
@@ -872,6 +878,13 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         if (v != null) {
             setFilter(Filter.getFilter(v));
         }
+        v = Pio.getValue(paramSet, HARTMANN_MASK_PROP);
+        if (v != null) {
+            setHartmannMask(HartmannMask.getHartmannMask(v));
+        }
+        v = ImOption.apply(Pio.getValue(paramSet, FOCUS_PROP.getName()))
+                .getOrElse(FocusSuggestion.DEFAULT.displayValue());
+            setFocus(new Focus(v));
 
         // REL-2090: Special workaround for elimination of former PositionAngleMode, since functionality has been
         // merged with PosAngleConstraint but we still need legacy code.
