@@ -4,6 +4,7 @@ import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.data.SuggestibleString;
 import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
 import edu.gemini.spModel.type.*;
+import edu.gemini.shared.util.immutable.*;
 
 import java.beans.PropertyEditorManager;
 import java.beans.PropertyEditorSupport;
@@ -1014,6 +1015,129 @@ public class GNIRSParams {
         }
     }
 
+    /**
+     * Hartmann Masks
+     */
+    public enum HartmannMask implements DisplayableSpType, SequenceableSpType {
+
+        OUT("Out"),
+        LEFT_MASK("Left"),
+        RIGHT_MASK("Right"),
+        ;
+
+        public static final HartmannMask DEFAULT = OUT;
+        private final String _displayValue;
+
+        HartmannMask(String displayValue) {
+            _displayValue = displayValue;
+        }
+
+        public String displayValue() {
+            return _displayValue;
+        }
+
+        public String sequenceValue() {
+            return _displayValue;
+        }
+
+        public String toString() {
+            return _displayValue;
+        }
+
+        /**
+         * Return the HartmannMask by name *
+         */
+        static public HartmannMask getHartmannMask(String name) {
+            return getHartmannMask(name, DEFAULT);
+        }
+
+        /**
+         * Return the HartmannMask by index *
+         */
+        static public HartmannMask getHartmannMaskByIndex(int index) {
+            return SpTypeUtil.valueOf(HartmannMask.class, index, DEFAULT);
+        }
+
+        /**
+         * Return the HartmannMask by name giving a value to return upon error *
+         */
+        static public HartmannMask getHartmannMask(String name, HartmannMask nvalue) {
+            return SpTypeUtil.oldValueOf(HartmannMask.class, name, nvalue);
+        }
+    }
+
+    /**
+     * Focus
+     */
+    public enum FocusSuggestion implements DisplayableSpType, SequenceableSpType {
+
+        BEST_FOCUS("best focus"),;
+
+        /**
+         * The default Focus value *
+         */
+        public static final FocusSuggestion DEFAULT = BEST_FOCUS;
+
+        private final String _displayValue;
+
+        FocusSuggestion(String displayValue) {
+            _displayValue = displayValue;
+        }
+
+        public String displayValue() {
+            return _displayValue;
+        }
+
+        public String sequenceValue() {
+            return _displayValue;
+        }
+
+        public String toString() {
+            return _displayValue;
+        }
+    }
+
+    public static final class Focus extends SuggestibleString {
+
+        public Focus(String value) {
+            super(FocusSuggestion.class);
+            setStringValue(value);
+        }
+
+        public Focus() {
+            this(FocusSuggestion.DEFAULT.displayValue());
+        }
+
+        public Focus copy() {
+            return new Focus(getStringValue());
+        }
+    }
+
+    public static final class FocusEditor extends PropertyEditorSupport {
+
+        public Object getValue() {
+            return ImOption.apply((Focus) super.getValue()).map(f -> f.copy()).getOrNull();
+        }
+
+        public void setValue(Object value) {
+            Focus f = (Focus) value;
+            Focus cur = (Focus) super.getValue();
+            if (cur == null) {
+                cur = new Focus();
+                super.setValue(cur);
+            }
+            cur.setStringValue(f.getStringValue());
+        }
+
+        public String getAsText() {
+            return ImOption.apply((Focus) getValue()).map(f -> f.getStringValue()).getOrNull();
+        }
+
+        public void setAsText(String string) throws IllegalArgumentException {
+            setValue(new Focus(string));
+        }
+    }
+    
     /**Well Depth Values **/
     public enum WellDepth implements DisplayableSpType, SequenceableSpType {
 

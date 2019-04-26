@@ -83,6 +83,8 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     public static final PropertyDescriptor FILTER_PROP;
     public static final PropertyDescriptor ACQUISITION_MIRROR_PROP;
     public static final PropertyDescriptor POS_ANGLE_CONSTRAINT_PROP;
+    public static final PropertyDescriptor HARTMANN_MASK_PROP;
+    public static final PropertyDescriptor FOCUS_PROP;
 
     // REL-2646.  This is an unfortunate requirement that falls out of REL-2646.
     // The observing wavelength for acquisition observations should be computed
@@ -140,6 +142,10 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         WELL_DEPTH_PROP = initProp("wellDepth", query_yes, iter_no);
         PORT_PROP = initProp("issPort", query_yes, iter_no);
         POS_ANGLE_CONSTRAINT_PROP = initProp("posAngleConstraint", query_no, iter_no);
+        HARTMANN_MASK_PROP = initProp("hartmannMask", query_yes, iter_yes);
+        HARTMANN_MASK_PROP.setExpert(true);
+        FOCUS_PROP = initProp("focus", query_no, iter_yes);
+        FOCUS_PROP.setExpert(true);
 
         OVERRIDE_ACQ_OBS_WAVELENGTH_PROP = initProp("overrideAcqObsWavelength", query_no, iter_no);
     }
@@ -156,6 +162,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     private Decker _decker = Decker.DEFAULT;
     private Filter _filter = Filter.DEFAULT;
     private WellDepth _wellDepth = WellDepth.DEFAULT;
+    private HartmannMask _hartmannMask = HartmannMask.DEFAULT;
 
     private IssPort port = IssPort.SIDE_LOOKING;
 
@@ -369,6 +376,48 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     // ------------------------------------------------------------------------
 
     /**
+     * Get the Hartmann mask value.
+     * NOTE: these are not available in the public interface but must be present for properties and to be iterable.
+     */
+    public HartmannMask getHartmannMask() {
+        return _hartmannMask;
+    }
+
+    /**
+     * Set the Hartmann mask.
+     */
+    public void setHartmannMask(HartmannMask newValue) {
+        HartmannMask oldValue = getHartmannMask();
+        if (oldValue != newValue) {
+            _hartmannMask = newValue;
+            firePropertyChange(HARTMANN_MASK_PROP.getName(), oldValue, newValue);
+        }
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Get and set the focus
+     */
+
+    private Focus _focus = new Focus();
+
+    public Focus getFocus() {
+        return _focus.copy();
+    }
+
+    public void setFocus(Focus newValue) {
+        final Focus oldValue = getFocus();
+
+        if (!oldValue.equals(newValue) && newValue.getStringValue() != null) {
+            _focus = newValue.copy();
+            firePropertyChange(FOCUS_PROP.getName(), oldValue, newValue);
+        }
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
      * Get the decker value.
      * NOTE: these are not available in the public interface but must be present for properties and to be iterable.
      */
@@ -389,8 +438,6 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
 
     // ------------------------------------------------------------------------
 
-    // ------------------------------------------------------------------------
-
     /**
      * Get the well depth  value.
      */
@@ -399,7 +446,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     }
 
     /**
-     * Set the decker
+     * Set the well depth
      */
     public void setWellDepth(WellDepth newValue) {
         WellDepth oldValue = getWellDepth();
@@ -771,6 +818,8 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         Pio.addParam(factory, paramSet, DECKER_PROP, getDecker().name());
         Pio.addParam(factory, paramSet, FILTER_PROP, getFilter().name());
         Pio.addParam(factory, paramSet, POS_ANGLE_CONSTRAINT_PROP.getName(), getPosAngleConstraint().name());
+        Pio.addParam(factory, paramSet, HARTMANN_MASK_PROP, getHartmannMask().name());
+        Pio.addParam(factory, paramSet, FOCUS_PROP.getName(), _focus.getStringValue());
 
         Pio.addBooleanParam(factory, paramSet, OVERRIDE_ACQ_OBS_WAVELENGTH_PROP.getName(), isOverrideAcqObsWavelength());
 
@@ -817,7 +866,6 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         if (v != null) {
             setWellDepth(WellDepth.valueOf(v));
         }
-
         v = Pio.getValue(paramSet, ACQUISITION_MIRROR_PROP);
         if (v != null) {
             setAcquisitionMirror(AcquisitionMirror.getAcquisitionMirror(v));
@@ -834,6 +882,13 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         if (v != null) {
             setFilter(Filter.getFilter(v));
         }
+        v = Pio.getValue(paramSet, HARTMANN_MASK_PROP);
+        if (v != null) {
+            setHartmannMask(HartmannMask.getHartmannMask(v));
+        }
+        v = ImOption.apply(Pio.getValue(paramSet, FOCUS_PROP.getName()))
+                .getOrElse(FocusSuggestion.DEFAULT.displayValue());
+            setFocus(new Focus(v));
 
         // REL-2090: Special workaround for elimination of former PositionAngleMode, since functionality has been
         // merged with PosAngleConstraint but we still need legacy code.
@@ -880,6 +935,8 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         sc.putParameter(DefaultParameter.getInstance(InstConstants.POS_ANGLE_PROP, getPosAngleDegrees()));
         sc.putParameter(DefaultParameter.getInstance(InstConstants.COADDS_PROP, getCoadds()));
         sc.putParameter(DefaultParameter.getInstance(PORT_PROP, getIssPort()));
+        sc.putParameter(DefaultParameter.getInstance(HARTMANN_MASK_PROP, getHartmannMask()));
+        sc.putParameter(DefaultParameter.getInstance(FOCUS_PROP.getName(), getFocus()));
 
         return sc;
     }
