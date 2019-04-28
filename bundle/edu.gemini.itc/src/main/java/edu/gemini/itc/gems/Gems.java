@@ -3,6 +3,7 @@ package edu.gemini.itc.gems;
 import edu.gemini.itc.base.AOSystem;
 import edu.gemini.itc.base.SampledSpectrumVisitor;
 import edu.gemini.itc.shared.SourceDefinition;
+import edu.gemini.spModel.core.UniformSource$;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.core.GaussianSource;
 import edu.gemini.spModel.core.PointSource$;
@@ -130,7 +131,7 @@ public class Gems implements AOSystem {
 
     // TODO: passing a boolean is a temporary workaround in order to deal with caller that expects this method to throw an exception
     public double getAOCorrectedFWHM(boolean doThrow) {
-        if (source.profile() == PointSource$.MODULE$) {
+        if (source.profile() == PointSource$.MODULE$ || source.profile() == UniformSource$.MODULE$) { //REL-1371, also getting FWHM from user input
             // point source
             switch (strehlBand.charAt(0)) {
                 case 'J':
