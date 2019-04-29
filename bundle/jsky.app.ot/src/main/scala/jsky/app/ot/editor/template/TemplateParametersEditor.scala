@@ -6,10 +6,9 @@ import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption}
 import edu.gemini.spModel.`type`.ObsoletableSpType
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
-import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{PercentageContainer, ImageQuality, CloudCover, SkyBackground, WaterVapor}
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, ImageQuality, PercentageContainer, SkyBackground, WaterVapor}
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.template.TemplateParameters
-
 import javax.swing.BorderFactory
 import javax.swing.event.{DocumentEvent, DocumentListener}
 import javax.swing.text.Document
@@ -21,8 +20,9 @@ import scala.swing._
 import scala.swing.ListView.Renderer
 import scala.swing.GridBagPanel.Anchor.{East, North}
 import scala.swing.GridBagPanel.Fill.{Horizontal, Vertical}
-
-import scalaz._, Scalaz._
+import scalaz._
+import Scalaz._
+import edu.gemini.spModel.too.Too
 
 // Editor for staff-use to modify TemplateParameters.  Allows multi-selection
 // and bulk editing to change many phase 1 observations at once.  For example,
@@ -114,6 +114,9 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       shell.setDataObject(up(shell.getDataObject.asInstanceOf[TemplateParameters]))
     }
 
+  private def isToo: Boolean =
+    shells.asScala.exists(Too.isToo(_))
+
   trait BoundWidget[A] extends Initializable { self: Component =>
     def get: TemplateParameters => A
     def set: (TemplateParameters, A) => TemplateParameters
@@ -175,7 +178,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
   }
 
   // A combo box with the given options, but capable of rendering a null
-  // selection (which is used to signify that one ore more different template
+  // selection (which is used to signify that one or more different template
   // parameters have a different value for this element)
   class BoundNullableCombo[A >: Null](opts: Seq[A])(
       show: A => String,
@@ -215,13 +218,13 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
     listenTo(this)
   }
 
-
   object TargetPanel extends GridBagPanel with Initializable {
-    trait TargetType { def display: String}
+    trait TargetType { def display: String }
     case object Sidereal extends TargetType    { val display = "Sidereal"     }
     case object NonSidereal extends TargetType { val display = "Non-Sidereal" }
+    case object ToO extends TargetType { val display = "Target of Opportunity" }
 
-    private val AllTargetTypes = List(Sidereal, NonSidereal)
+    private val AllTargetTypes = List(Sidereal, NonSidereal) ++ (if (isToo) List(ToO) else Nil)
 
     def setTarget[A](up: (SPTarget, A) => Unit)(tp: TemplateParameters, a: A): TemplateParameters = {
       val newTarget = tp.getTarget
@@ -229,8 +232,11 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       tp.copy(newTarget)
     }
 
-    def targetType(t: SPTarget): TargetType =
-      t.getSiderealTarget.map(_ => Sidereal).getOrElse(NonSidereal)
+    def targetType(t: SPTarget): TargetType = {
+      if (t.isTooTarget) ToO
+      else if (t.isSidereal) Sidereal
+      else NonSidereal
+    }
 
     object CoordinatesPanel extends ColumnPanel {
       val nameField = new BoundTextField[String](10)(
@@ -245,6 +251,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         get  = { tp => targetType(tp.getTarget) },
         set  = { setTarget((target, targetType) => {
           targetType match {
+            case ToO         => target.setTOO()
             case Sidereal    => target.setSidereal()
             case NonSidereal => target.setNonSidereal()
           }
