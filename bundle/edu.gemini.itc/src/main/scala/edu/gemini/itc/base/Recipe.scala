@@ -1,13 +1,15 @@
 package edu.gemini.itc.base
 
-import java.util. { ArrayList, List => JList }
-
 import edu.gemini.itc.shared._
 
 import scala.collection.JavaConversions._
-
 import scalaz._
 import Scalaz._
+import org.jaxen.expr.NumberExpr
+
+def getExposures: Int = {
+return exposureNumber
+}
 
 sealed trait Recipe
 
@@ -53,17 +55,26 @@ object Recipe {
   }
 
   def createS2NChart(result: SpectroscopyResult): SpcChartData = {
-    createS2NChart(result, 0)
+    createS2NChart(result, 0, 0)
   }
 
-  def createS2NChart(result: SpectroscopyResult, index: Int): SpcChartData = {
-    createS2NChart(result, "Intermediate Single Exp and Final S/N in aperture", index)
+  def createS2NChart(result: SpectroscopyResult, index: Int, exposureNumber: Int): SpcChartData = {
+    if (exposureNumber = 1) {
+      createS2NChart(result, "Final S/N in aperture", index)
+    }
+    else if (exposureNumber > 1) {
+      createS2NChart(result, "Intermediate Single Exp and Final S/N in aperture", index)
+    }
   }
 
-  def createS2NChart(result: SpectroscopyResult, title: String, index: Int): SpcChartData = {
+  def createS2NChart(result: SpectroscopyResult, title: String, index: Int, exposureNumber: Int): SpcChartData = {
     val data: JList[SpcSeriesData] = new ArrayList[SpcSeriesData]
-    data.add(SpcSeriesData(SingleS2NData, "Single Exp S/N", result.specS2N(index).getExpS2NSpectrum.getData))
-    data.add(SpcSeriesData(FinalS2NData,  "Final S/N  ",    result.specS2N(index).getFinalS2NSpectrum.getData))
+    if (exposureNumber = 1) {
+      data.add(SpcSeriesData(FinalS2NData, "Final S/N  ", result.specS2N(index).getFinalS2NSpectrum.getData))
+    } else if (exposureNumber > 1) {
+      data.add(SpcSeriesData(SingleS2NData, "Single Exp S/N", result.specS2N(index).getExpS2NSpectrum.getData))
+      data.add(SpcSeriesData(FinalS2NData, "Final S/N  ", result.specS2N(index).getFinalS2NSpectrum.getData))
+  }
     new SpcChartData(S2NChart, title, ChartAxis("Wavelength (nm)"), ChartAxis("Signal / Noise per spectral pixel"), data.toList)
   }
 
