@@ -38,7 +38,7 @@ object TemplateParametersEditor {
     if (s.size == 1) s.headOption else None
   }
 
-  trait Initializable {
+  sealed trait Initializable {
     def init(ps: Iterable[TemplateParameters]): Unit
   }
 
@@ -65,7 +65,7 @@ object TemplateParametersEditor {
     }
   }
 
-  abstract class ColumnPanel(hGap: Int = HGap, rowAnchor: GridBagPanel.Anchor.Value = East) extends GridBagPanel with Initializable {
+  sealed abstract class ColumnPanel(hGap: Int = HGap, rowAnchor: GridBagPanel.Anchor.Value = East) extends GridBagPanel with Initializable {
     def rows: Iterable[Row]
 
     def nextY(): Int = (-1 :: layout.values.toList.map(_.gridy)).max + 1
@@ -117,7 +117,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
   private def isToo: Boolean =
     shells.asScala.exists(Too.isToo(_))
 
-  trait BoundWidget[A] extends Initializable { self: Component =>
+  sealed trait BoundWidget[A] extends Initializable { self: Component =>
     def get: TemplateParameters => A
     def set: (TemplateParameters, A) => TemplateParameters
 
@@ -219,7 +219,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
   }
 
   object TargetPanel extends GridBagPanel with Initializable {
-    trait TargetType { def display: String }
+    sealed trait TargetType { def display: String }
     case object Sidereal extends TargetType    { val display = "Sidereal"     }
     case object NonSidereal extends TargetType { val display = "Non-Sidereal" }
     case object ToO extends TargetType { val display = "Target of Opportunity" }
