@@ -252,7 +252,7 @@ case class TimingWindowConstraint(windows: Seq[TimingWindow]) extends Constraint
           } else tw.getRepeat match {
             case REPEAT_NEVER => Solution(Seq(new Interval(tw.getStart, tw.getStart + tw.getDuration)))           // single window
             case REPEAT_FOREVER => Solution(createIntervals(tw.getStart, interval.end, Int.MaxValue, tw, Seq()))  // repeat forever, use interval end as limiter
-            case n => Solution(createIntervals(tw.getStart, interval.end, n, tw, Seq()))                          // repeat n times
+            case n => Solution(createIntervals(tw.getStart, interval.end, n+1, tw, Seq()))                        // repeat n times
           }
         })
       solutions.
