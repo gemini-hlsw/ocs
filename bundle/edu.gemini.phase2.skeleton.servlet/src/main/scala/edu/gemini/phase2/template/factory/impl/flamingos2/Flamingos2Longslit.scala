@@ -20,7 +20,7 @@ case class Flamingos2Longslit(blueprint:SpFlamingos2BlueprintLongslit, exampleTa
 //
 //          IF TARGET H-MAGNITUDE <= 12 INCLUDE {13}  # Bright, no sky subtraction
 //          IF TARGET H-MAGNITUDE  > 12 INCLUDE {14}  # Faint, with sky subtraction
-//          ELSE INCLUDE {13,14}                      # Unknown mag so include both acq templates
+//          ELSE INCLUDE {6,7}                      # Unknown mag so include both acq templates
 //
 //    INCLUDE {15,16}                           # Science
 //    INCLUDE {17,18}                           # Telluric std
@@ -39,7 +39,7 @@ case class Flamingos2Longslit(blueprint:SpFlamingos2BlueprintLongslit, exampleTa
   val acq = exampleTarget.flatMap(t => t.getMagnitude(H)).map(_.value) match {
     case Some(h) if h <= 12 => Seq(13)
     case Some(h) if h >  12 => Seq(14)
-    case _                  => Seq(13, 14)
+    case _                  => Seq(6,7)
   }
 
   val targetGroup = Seq(11,12) ++ acq ++ Seq(15,16,17,18)
