@@ -65,7 +65,7 @@ object TemplateParametersEditor {
     }
   }
 
-  sealed abstract class ColumnPanel(hGap: Int = HGap, rowAnchor: GridBagPanel.Anchor.Value = East) extends GridBagPanel with Initializable {
+  abstract class ColumnPanel(hGap: Int = HGap, rowAnchor: GridBagPanel.Anchor.Value = East) extends GridBagPanel with Initializable {
     def rows: Iterable[Row]
 
     def nextY(): Int = (-1 :: layout.values.toList.map(_.gridy)).max + 1
