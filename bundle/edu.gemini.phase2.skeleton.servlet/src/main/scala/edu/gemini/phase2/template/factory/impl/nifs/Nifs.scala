@@ -19,27 +19,27 @@ case class Nifs(blueprint:SpNifsBlueprint, exampleTarget: Option[SPTarget]) exte
 
   // # Select acquisition and science observation
   //   IF target information contains a K magnitude
-  //     IF BT  then ACQ={2}  # Bright Object
-  //     IF MT  then ACQ={3}  # Medium Object
-  //     IF FT  then ACQ={4}  # Faint Object
-  //     IF BAT then ACQ={5}  # Blind offset
+  //     IF BT  then ACQ={3}  # Bright Object
+  //     IF MT  then ACQ={4}  # Medium Object
+  //     IF FT  then ACQ={5}  # Faint Object
+  //     IF BAT then ACQ={23}  # Blind offset
   //   ELSE
   //     ACQ={2,3,4,5}
   //   SCI={6}
 
   val (acq, sci) =
     (tb.collect {
-      case BT  => List(2)
-      case MT  => List(3)
-      case FT  => List(4)
-      case BAT => List(5)
-    }.getOrElse(List(2, 3, 4, 5)),
+      case BT  => List(3)
+      case MT  => List(4)
+      case FT  => List(5)
+      case BAT => List(23)
+    }.getOrElse(List(3, 4, 5, 23)),
       6)
 
   // ### Target Group
-  // INCLUDE {0},{1},ACQ,SCI,{7},{8} in target-specific Scheduling Group
+  // INCLUDE {1},{2},ACQ,SCI,{7},{8} in target-specific Scheduling Group
 
-  include(List(0, 1) ++ acq ++ List(sci, 7, 8): _*) in TargetGroup
+  include(List(1, 2) ++ acq ++ List(sci, 7, 8): _*) in TargetGroup
 
   // # Disperser
   //   SET DISPERSER from PI (all observations)
