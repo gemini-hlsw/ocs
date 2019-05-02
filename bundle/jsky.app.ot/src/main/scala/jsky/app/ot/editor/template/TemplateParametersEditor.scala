@@ -232,10 +232,10 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       tp.copy(newTarget)
     }
 
-    def targetType(t: SPTarget): TargetType = {
-      if (t.isTooTarget) ToO
-      else if (t.isSidereal) Sidereal
-      else NonSidereal
+    def targetType(t: SPTarget): TargetType = t.getTarget match {
+      case _: SiderealTarget    => Sidereal
+      case _: NonSiderealTarget => NonSidereal
+      case _: TooTarget         => ToO
     }
 
     object CoordinatesPanel extends ColumnPanel {
