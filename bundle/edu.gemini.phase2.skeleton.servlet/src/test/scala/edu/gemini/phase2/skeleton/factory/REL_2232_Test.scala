@@ -57,21 +57,21 @@ object REL_2232_Test extends TemplateSpec("NIFS_BP.xml") with SpecificationLike 
   val nifs = NifsBlueprint(NifsDisperser.H)
   nifsTest("Non-AO NIFS Blueprint Expansion", nifs) { sp =>
     val map = bucketMap(sp)
-    checkLibs("BT group",  map(Some(BT)),  Set(2), Set(3, 4, 5))
-    checkLibs("MT group",  map(Some(MT)),  Set(3), Set(2, 4, 5))
-    checkLibs("FT group",  map(Some(FT)),  Set(4), Set(2, 3, 5))
-    checkLibs("BAT group", map(Some(BAT)), Set(5), Set(2, 3, 4))
-    checkLibs("Missing K-band group", map(None), Set(2, 3, 4, 5), Set())
+    checkLibs("BT group",  map(Some(BT)),  Set(3),  Set(4, 5, 23))
+    checkLibs("MT group",  map(Some(MT)),  Set(4),  Set(3, 5, 23))
+    checkLibs("FT group",  map(Some(FT)),  Set(5),  Set(3, 4, 23))
+    checkLibs("BAT group", map(Some(BAT)), Set(23), Set(3, 4, 5))
+    checkLibs("Missing K-band group", map(None), Set(3, 4, 5, 23), Set())
   }
 
   val nifsAO = NifsBlueprintAo(AltairNGS(false), NifsOccultingDisk.CLEAR, NifsDisperser.H)
   nifsTest("NIFS AO without Occulting Disk Blueprint Expansion", nifsAO) { sp =>
     val map = bucketMap(sp)
-    checkLibs("BT group",  map(Some(BT)),  Set(2), Set(3, 4, 5))
-    checkLibs("MT group",  map(Some(MT)),  Set(3), Set(2, 4, 5))
-    checkLibs("FT group",  map(Some(FT)),  Set(4), Set(2, 3, 5))
-    checkLibs("BAT group", map(Some(BAT)), Set(5), Set(2, 3, 4))
-    checkLibs("Missing K-band group", map(None), Set(2, 3, 4, 5), Set())
+    checkLibs("BT group",  map(Some(BT)),  Set(3),  Set(4, 5, 23))
+    checkLibs("MT group",  map(Some(MT)),  Set(4),  Set(3, 5, 23))
+    checkLibs("FT group",  map(Some(FT)),  Set(5),  Set(3, 4, 23))
+    checkLibs("BAT group", map(Some(BAT)), Set(23), Set(3, 4, 5))
+    checkLibs("Missing K-band group", map(None), Set(3, 4, 5, 23), Set())
   }
 
   val nifsAO_OD = NifsBlueprintAo(AltairNGS(false), NifsOccultingDisk.OD_2, NifsDisperser.H)
