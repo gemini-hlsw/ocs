@@ -24,7 +24,7 @@ case class Nifs(blueprint:SpNifsBlueprint, exampleTarget: Option[SPTarget]) exte
   //     IF FT  then ACQ={5}  # Faint Object
   //     IF BAT then ACQ={23}  # Blind offset
   //   ELSE
-  //     ACQ={2,3,4,5}
+  //     ACQ={3,4,5,23}
   //   SCI={6}
 
   val (acq, sci) =
