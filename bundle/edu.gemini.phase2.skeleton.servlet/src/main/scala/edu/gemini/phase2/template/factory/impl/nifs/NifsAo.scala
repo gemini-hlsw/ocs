@@ -24,12 +24,12 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget])
   // # Select acquisition and science observation
   // IF OCCULTING DISK == None
   //   IF target information contains a K magnitude
-  //     IF BT  then ACQ={2}  # Bright Object
-  //     IF MT  then ACQ={3}  # Medium Object
-  //     IF FT  then ACQ={4}  # Faint Object
-  //     IF BAT then ACQ={5}  # Blind offset
+  //     IF BT  then ACQ={3}  # Bright Object
+  //     IF MT  then ACQ={4}  # Medium Object
+  //     IF FT  then ACQ={5}  # Faint Object
+  //     IF BAT then ACQ={23}  # Blind offset
   //   ELSE
-  //     ACQ={2,3,4,5}
+  //     ACQ={3,4,5,23}
   //   SCI={6}
   // ELSEIF OCCULTING DISK != None
   //    IF target information contains a K magnitude
@@ -43,11 +43,11 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget])
 
   val (acq, sci) = if (!occultingDisk.isOccultingDisk) {
     (tb.collect {
-      case BT  => List(2)
-      case MT  => List(3)
-      case FT  => List(4)
-      case BAT => List(5)
-    }.getOrElse(List(2, 3, 4, 5)),
+      case BT  => List(3)
+      case MT  => List(4)
+      case FT  => List(5)
+      case BAT => List(23)
+    }.getOrElse(List(3, 4, 5, 23)),
       6)
   } else {
     (tb.collect {
@@ -60,8 +60,8 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget])
   }
 
   // ### Target Group
-  // INCLUDE {0},{1},ACQ,SCI,{7},{8} in target-specific Scheduling Group
-  include(List(0, 1) ++ acq ++ List(sci, 7, 8): _*) in TargetGroup
+  // INCLUDE {1},{2},ACQ,SCI,{7},{8} in target-specific Scheduling Group
+  include(List(1, 2) ++ acq ++ List(sci, 7, 8): _*) in TargetGroup
 
   // # AO Mode
   // # In NGS mode target and standards use the same Altair guide mode.
@@ -75,7 +75,7 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget])
   //       IF AO in PI includes "Laser Guide Star" (LGS mode) THEN SET for ACQ and SCI:
   //         AO=Altair Laser Guidestar => Laser Guide Star + AOWFS
   //         AO=Altair Laser Guidestar w/ PWFS1 => Laser Guide Star + PWFS1
-  //       AND SET for {0} {1} {7} {8}
+  //       AND SET for {1} {2} {7} {8}
   //         SET Guide Star Type=Natural Guide Star with Field Lens
   //
   //     IF OCCULTING DISK != None SET FOCAL PLANE MASK FROM OCCULTING DISK IN PI
@@ -103,7 +103,7 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget])
 
       if (m.isLGS) {
         forObs(sci :: acq : _*)(addAltair(m))
-        forObs(0, 1, 7, 8)(
+        forObs(1, 2, 7, 8)(
           addAltair(NGS_FL))
       }
 
