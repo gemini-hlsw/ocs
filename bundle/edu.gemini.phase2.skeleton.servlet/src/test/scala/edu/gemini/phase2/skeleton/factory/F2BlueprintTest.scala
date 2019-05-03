@@ -42,26 +42,25 @@ class F2BlueprintTest extends TemplateSpec("F2_BP.xml") with SpecificationLike w
     "Include notes, REL-2628" in {
       forAll { (b: Flamingos2BlueprintLongslit) =>
         expand(proposal(b, Nil, MagnitudeBand.R)) { (_, sp) =>
-          val notes = List("F2 Long-Slit Notes", "Repeats contain the ABBA offsets", "Use same PA for science and Telluric")
+          val notes = List("F2 Long-Slit Notes", "Repeats contain the ABBA offsets")//, "Use same PA for science and Telluric")
           groups(sp).forall(tg => notes.forall(existsNote(tg, _)))
         }
       }
     }
   }
 
-  "F2 Imaging" should {
-    "not include darks, REL-2906" in {
-      forAll { (b: Flamingos2BlueprintImaging) =>
-        expand(proposal(b, Nil, MagnitudeBand.R)) { (_, sp) =>
-          groups(sp).forall( tg =>
-            // None of the component is a dark
-            !libsMap(tg).exists {
-              case (_, obs) => obs.getSeqComponent.getSeqComponents.asScala.exists(_.getType == SPComponentType.OBSERVER_DARK)
-            }
-          )
-        }
-      }
-    }
-  }
-
+//  "F2 Imaging" should {
+//    "not include darks, REL-2906" in {
+//      forAll { (b: Flamingos2BlueprintImaging) =>
+//        expand(proposal(b, Nil, MagnitudeBand.R)) { (_, sp) =>
+//          groups(sp).forall( tg =>
+//            // None of the component is a dark
+//            !libsMap(tg).exists {
+//              case (_, obs) => obs.getSeqComponent.getSeqComponents.asScala.exists(_.getType == SPComponentType.OBSERVER_DARK)
+//            }
+//          )
+//        }
+//      }
+//    }
+//  }
 }
