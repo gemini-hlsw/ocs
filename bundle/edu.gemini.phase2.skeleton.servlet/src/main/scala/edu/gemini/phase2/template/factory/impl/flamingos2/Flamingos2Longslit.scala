@@ -33,8 +33,6 @@ case class Flamingos2Longslit(blueprint:SpFlamingos2BlueprintLongslit, exampleTa
 //        SET DISPERSER FROM PI
 //            Put FILTERS from PI into F2 ITERATOR
 //
-//        FOR {21,22,23,24,25,26,27}:
-//            SET CONDITIONS FROM PI
 
   val acq = exampleTarget.flatMap(t => t.getMagnitude(H)).map(_.value) match {
     case Some(h) if h <= 12 => Seq(13)
