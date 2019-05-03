@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2015B-1" subtype="basic" key="4a786fd7-7464-4d28-a40f-33b9aa95375b" name="NIFS-BP">
+  <container kind="program" type="Program" version="2018A-1" subtype="basic" key="4a786fd7-7464-4d28-a40f-33b9aa95375b" name="NIFS-BP">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="NIFS PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -22,6 +22,7 @@
       <param name="fetched" value="yes"/>
       <param name="completed" value="false"/>
       <param name="notifyPi" value="NO"/>
+      <param name="timingWindowNotification" value="true"/>
     </paramset>
     <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="137bdbbe-efd8-440f-8871-71acd3f341ad" name="Note">
       <paramset name="Note" kind="dataObj">
@@ -90,6 +91,8 @@ IMPORTANT NOTE: Darks will not be taken if they are not defined!
 
 SCIENCE/TELLURIC OBSERVATION:
 - Is the guiding set up properly?  (AO or non-AO)
+- If guiding on an extended object (e.g. a galaxy nucleus), does it have a sharp core with a FWHM &lt; 0.6 arcsec?
+     We may not be able to guide on broader targets and time lost on failed attempts will be charged to the program.
 - Does the instrument configuration look OK?  (i.e., Imaging mirror out, grating and filter are compatible)
 - Does the selected readmode make sense with the requested overheads and/or the science goals? (i.e., tellurics are NOT set to "faint object", etc...)
 - Are GCAL arc exposures merged with the science for wavelength calibration?  (At least 1 arc per 2 hours of observations).
@@ -671,9 +674,9 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
             <param name="NoteText" value="See http://internal.gemini.edu/science/instruments/NIFS/Operation_Procedures/NIFS_Occulting_Disk_Observations.html"/>
           </paramset>
         </container>
-        <container kind="obsComp" type="AO" version="2006B-1" subtype="Altair" key="4e4120e0-c61d-49ea-9854-e51637084ad8" name="Altair Adaptive Optics">
+        <container kind="obsComp" type="AO" version="2016B-1" subtype="Altair" key="4e4120e0-c61d-49ea-9854-e51637084ad8" name="Altair Adaptive Optics">
           <paramset name="Altair Adaptive Optics" kind="dataObj">
-            <param name="wavelength" value="WAVELENGTH_B"/>
+            <param name="wavelength" value="BS_850_2500"/>
             <param name="adc" value="OFF"/>
             <param name="cassRotator" value="FOLLOWING"/>
             <param name="ndFilter" value="OUT"/>
@@ -763,9 +766,9 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
             <param name="NoteText" value="See http://internal.gemini.edu/science/instruments/NIFS/Operation_Procedures/NIFS_Occulting_Disk_Observations.html"/>
           </paramset>
         </container>
-        <container kind="obsComp" type="AO" version="2006B-1" subtype="Altair" key="f13e1aaf-65b7-4a21-836c-cb21a80f4270" name="Altair Adaptive Optics">
+        <container kind="obsComp" type="AO" version="2016B-1" subtype="Altair" key="f13e1aaf-65b7-4a21-836c-cb21a80f4270" name="Altair Adaptive Optics">
           <paramset name="Altair Adaptive Optics" kind="dataObj">
-            <param name="wavelength" value="WAVELENGTH_B"/>
+            <param name="wavelength" value="BS_850_2500"/>
             <param name="adc" value="OFF"/>
             <param name="cassRotator" value="FOLLOWING"/>
             <param name="ndFilter" value="OUT"/>
@@ -1231,23 +1234,24 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="0a3b3e8c-8bda-49c6-8153-12934b07b382" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
-                <param name="name" value="Dark"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
-                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+              <paramset name="asterism">
+                <paramset name="target">
+                  <param name="name" value="Dark"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">NIFS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -1317,23 +1321,24 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="6481ac8e-e041-46d3-8731-7475c2a38d21" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
-                <param name="name" value="Dark"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
-                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+              <paramset name="asterism">
+                <paramset name="target">
+                  <param name="name" value="Dark"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">NIFS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -1403,23 +1408,24 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="ba9a712a-77ba-44a2-b672-fdd772ce113b" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
-                <param name="name" value="Dark"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
-                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+              <paramset name="asterism">
+                <paramset name="target">
+                  <param name="name" value="Dark"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">NIFS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -1489,23 +1495,24 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="3b75605b-3918-45e1-8534-9a6909a2a247" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
-                <param name="name" value="GCALflats"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
-                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+              <paramset name="asterism">
+                <paramset name="target">
+                  <param name="name" value="GCALflats"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">NIFS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -1611,23 +1618,24 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="fd50dbc1-692a-4727-9be9-0cc79cbe1314" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
-                <param name="name" value="GCALflats"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
-                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+              <paramset name="asterism">
+                <paramset name="target">
+                  <param name="name" value="GCALflats"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">NIFS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -1751,23 +1759,24 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="73bf71a3-779a-47ae-9092-0280c39c079f" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
-                <param name="name" value="GCALflats"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
-                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+              <paramset name="asterism">
+                <paramset name="target">
+                  <param name="name" value="GCALflats"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">NIFS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -1872,23 +1881,24 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="c94e7a7a-df59-4c12-832f-410e88d7b2c1" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
-                <param name="name" value="GCALflats"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
-                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+              <paramset name="asterism">
+                <paramset name="target">
+                  <param name="name" value="GCALflats"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">NIFS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -1992,23 +2002,24 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="66afad1b-70c9-4579-b317-77517c68c52a" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
-                <param name="name" value="GCALflats"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
-                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+              <paramset name="asterism">
+                <paramset name="target">
+                  <param name="name" value="GCALflats"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">NIFS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -2126,23 +2137,24 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="8b12fc98-1303-4819-8dfe-06dfe1cb978d" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
-                <param name="name" value="GCALflats"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
-                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+              <paramset name="asterism">
+                <paramset name="target">
+                  <param name="name" value="GCALflats"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">NIFS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -2260,23 +2272,24 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="151d2d26-41e8-438e-b552-e077f999ca3a" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
-                <param name="name" value="GCALflats"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
-                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+              <paramset name="asterism">
+                <paramset name="target">
+                  <param name="name" value="GCALflats"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">NIFS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -2394,23 +2407,24 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="5dfd81b2-1cba-44a1-b423-8a14d7508500" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
-                <param name="name" value="GCALflats"/>
-                <param name="system" value="J2000"/>
-                <param name="epoch" value="2000.0" units="years"/>
-                <param name="c1" value="00:00:00.000"/>
-                <param name="c2" value="00:00:00.00"/>
-                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
-                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
-                <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+              <paramset name="asterism">
+                <paramset name="target">
+                  <param name="name" value="GCALflats"/>
+                  <param name="redshift" value="0.0"/>
+                  <param name="parallax" value="0.0"/>
+                  <paramset name="coordinates">
+                    <param name="ra" value="0.0"/>
+                    <param name="dec" value="0.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">NIFS OIWFS</value>
-                  <value sequence="1">PWFS1</value>
-                  <value sequence="2">PWFS2</value>
-                </param>
+                <param name="primary" value="0"/>
+                <paramset name="guideGroup">
+                  <param name="tag" value="AutoDisabledTag"/>
+                </paramset>
               </paramset>
             </paramset>
           </paramset>
@@ -2514,7 +2528,6 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
       <param name="key" value="c3326b57-96f5-4975-bdd5-96990ceb13bf"/>
       <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
       <param name="c2cbec09-530c-4cce-bc93-cdf19f471e85" value="4"/>
-      <param name="e15b7ad0-0325-485b-8618-aa98b9d401fc" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5bdfe02f-9f0a-458c-87f9-b3fc07ee3118"/>
@@ -2934,10 +2947,6 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
       <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="bfc0a7b6-52b3-4a53-9fdd-470b4310d94a"/>
-      <param name="e15b7ad0-0325-485b-8618-aa98b9d401fc" value="3"/>
-    </paramset>
-    <paramset name="node">
       <param name="key" value="fd50dbc1-692a-4727-9be9-0cc79cbe1314"/>
       <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
     </paramset>
@@ -2961,7 +2970,6 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
       <param name="key" value="e378d626-1f8b-4878-b390-b9ce8c8cda71"/>
       <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
       <param name="c2cbec09-530c-4cce-bc93-cdf19f471e85" value="2"/>
-      <param name="e15b7ad0-0325-485b-8618-aa98b9d401fc" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="3e0f9c5c-6c9c-419e-82d7-5b4a2c3d4bf1"/>
@@ -3150,7 +3158,6 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
       <param name="key" value="dfe11324-c32c-4dac-a70a-06e87d8db3f6"/>
       <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
       <param name="cf210986-65a8-42c8-ab5d-be0fc8249aff" value="1"/>
-      <param name="e15b7ad0-0325-485b-8618-aa98b9d401fc" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="b4e372b4-1bda-48cd-93f9-df5a583de61e"/>
@@ -3168,7 +3175,6 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
       <param name="key" value="4be66da9-9b08-4528-a9f0-2b13c8acbe77"/>
       <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
       <param name="cf210986-65a8-42c8-ab5d-be0fc8249aff" value="1"/>
-      <param name="e15b7ad0-0325-485b-8618-aa98b9d401fc" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="0ffb87af-91b2-41c6-8127-52b45a1f7bac"/>
@@ -3182,7 +3188,6 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
       <param name="key" value="68e54c53-e2d8-4263-82e5-2564c629debd"/>
       <param name="c2cbec09-530c-4cce-bc93-cdf19f471e85" value="3"/>
       <param name="6c990ab9-f506-41b0-9005-9ca37fea82e8" value="2"/>
-      <param name="e15b7ad0-0325-485b-8618-aa98b9d401fc" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="55a9ecad-c935-4265-b5b5-306871792e69"/>
@@ -3195,7 +3200,6 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
     <paramset name="node">
       <param name="key" value="7b57e815-e4d3-4c3e-951f-ef8ab65e2755"/>
       <param name="c2cbec09-530c-4cce-bc93-cdf19f471e85" value="32"/>
-      <param name="e15b7ad0-0325-485b-8618-aa98b9d401fc" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="412100bb-2463-4848-b930-e580e41b0de8"/>
@@ -3333,6 +3337,7 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
       <param name="key" value="67047b13-b7bb-47a4-baaa-4cf8c9bef7ac"/>
       <param name="c2cbec09-530c-4cce-bc93-cdf19f471e85" value="16"/>
       <param name="6c990ab9-f506-41b0-9005-9ca37fea82e8" value="26"/>
+      <param name="7945c1cb-efe6-4d2d-8e38-db6d2d57f1bc" value="35"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="0ee2cc8a-61e0-4a3c-94fc-61431bdc2f5e"/>
