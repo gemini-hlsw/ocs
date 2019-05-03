@@ -1,15 +1,12 @@
 package edu.gemini.phase2.skeleton.factory
 
 import edu.gemini.model.p1.immutable._
-import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.MagnitudeBand
 import org.scalacheck.Prop._
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Arbitrary._
 import org.specs2.ScalaCheck
 import org.specs2.mutable.SpecificationLike
-
-import scala.collection.JavaConverters._
 
 class F2BlueprintTest extends TemplateSpec("F2_BP.xml") with SpecificationLike with ScalaCheck {
 
@@ -42,26 +39,31 @@ class F2BlueprintTest extends TemplateSpec("F2_BP.xml") with SpecificationLike w
     "Include notes, REL-2628" in {
       forAll { (b: Flamingos2BlueprintLongslit) =>
         expand(proposal(b, Nil, MagnitudeBand.R)) { (_, sp) =>
-          val notes = List("F2 Long-Slit Notes", "Repeats contain the ABBA offsets", "Use same PA for science and Telluric")
+          val notes = List("F2 Long-Slit Notes", "Repeats contain the ABBA offsets")//, "Use the same PA for science target and telluric", "Detector readout modes" /*?*/)
+//          val titles = groups(sp).map { tg => tg.getObsComponents
+//            .asScala.toList
+//            .map(_.getDataObject)
+//            .collect { case n: SPNote => n }
+//            .map(_.getTitle)}
+//          println(titles)
           groups(sp).forall(tg => notes.forall(existsNote(tg, _)))
         }
       }
     }
   }
 
-  "F2 Imaging" should {
-    "not include darks, REL-2906" in {
-      forAll { (b: Flamingos2BlueprintImaging) =>
-        expand(proposal(b, Nil, MagnitudeBand.R)) { (_, sp) =>
-          groups(sp).forall( tg =>
-            // None of the component is a dark
-            !libsMap(tg).exists {
-              case (_, obs) => obs.getSeqComponent.getSeqComponents.asScala.exists(_.getType == SPComponentType.OBSERVER_DARK)
-            }
-          )
-        }
-      }
-    }
-  }
-
+//  "F2 Imaging" should {
+//    "not include darks, REL-2906" in {
+//      forAll { (b: Flamingos2BlueprintImaging) =>
+//        expand(proposal(b, Nil, MagnitudeBand.R)) { (_, sp) =>
+//          groups(sp).forall( tg =>
+//            // None of the component is a dark
+//            !libsMap(tg).exists {
+//              case (_, obs) => obs.getSeqComponent.getSeqComponents.asScala.exists(_.getType == SPComponentType.OBSERVER_DARK)
+//            }
+//          )
+//        }
+//      }
+//    }
+//  }
 }
