@@ -510,6 +510,15 @@ Additional calibration targets and resources are located at the webpage http://w
         </paramset>
       </container>
 
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="06cc7674-7c8c-4f3d-b392-c58ed7f1755f" name="Note">
+        <paramset name="Note" kind="dataObj">
+          <param name="title" value="Use the same PA for science target and telluric"/>
+          <param name="NoteText">
+            <value>This will save telescope time, and will also diminish the effect of flexure.</value>
+          </param>
+        </paramset>
+      </container>
+
       <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="255efbef-a1be-4011-a28c-2fae0c7306f8" name="Note">
         <paramset name="Note" kind="dataObj">
           <param name="title" value="Repeats contain the ABBA offsets"/>
@@ -520,15 +529,6 @@ However, different approaches are possible: some PI's observing bright objects w
 
 Any offset strategy must take into account that the sky emission lines can vary significatively in scales of 2 to 5 minutes.
 </value>
-          </param>
-        </paramset>
-      </container>
-
-      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="06cc7674-7c8c-4f3d-b392-c58ed7f1755f" name="Note">
-        <paramset name="Note" kind="dataObj">
-          <param name="title" value="Use the same PA for science target and telluric"/>
-          <param name="NoteText">
-            <value>This will save telescope time, and will also diminish the effect of flexure.</value>
           </param>
         </paramset>
       </container>
