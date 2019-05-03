@@ -500,7 +500,7 @@ Additional calibration targets and resources are located at the webpage http://w
 
 9. At the NIR wavelength range, for a given brightness we usually face an uncertainty of factor 2-3 in BG plus target level per pixel just within any single bin of conditions CC/IQ/BG/WV. For a single CDS read ("bright target" mode) the science target peak signal should not surpass 22k ADUs.  For 4 and 8 reads ("medium" and "faint") should not surpass 88k and 172k ADUs.
 
-10. Please attach fintder charts via the OT "File Attachment" tab.
+10. Please attach finder charts via the OT "File Attachment" tab.
 
 11. Darks are now taken weekly.
 
@@ -509,12 +509,7 @@ Additional calibration targets and resources are located at the webpage http://w
           </param>
         </paramset>
       </container>
-      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="06cc7674-7c8c-4f3d-b392-c58ed7f1755f" name="Note">
-        <paramset name="Note" kind="dataObj">
-          <param name="title" value="Use the same PA for science target and telluric."/>
-          <param name="NoteText" value="This will save telescope time, and will also diminish the effect of flexure."/>
-        </paramset>
-      </container>
+
       <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="255efbef-a1be-4011-a28c-2fae0c7306f8" name="Note">
         <paramset name="Note" kind="dataObj">
           <param name="title" value="Repeats contain the ABBA offsets"/>
@@ -528,11 +523,21 @@ Any offset strategy must take into account that the sky emission lines can vary 
           </param>
         </paramset>
       </container>
+
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="06cc7674-7c8c-4f3d-b392-c58ed7f1755f" name="Note">
+        <paramset name="Note" kind="dataObj">
+          <param name="title" value="Use the same PA for science target and telluric"/>
+          <param name="NoteText">
+            <value>This will save telescope time, and will also diminish the effect of flexure.</value>
+          </param>
+        </paramset>
+      </container>
+
       <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="2fd4adbf-6226-40bd-a5c1-e418999a4756" name="Note">
         <paramset name="Note" kind="dataObj">
           <param name="title" value="Detector readout modes"/>
           <param name="NoteText">
-            <value>When choosing the detecotr readout modes or changing the exposure times, please have in mind:
+            <value>When choosing the detector readout modes or changing the exposure times, please have in mind:
 
 Single CDS read (Bright Object Mode) can be used for any exposure time (Minimum possible 2 seconds).  
 In imaging applications, the FLAMINGOS-2 detector is always sky-noise limited using single reads.
@@ -549,6 +554,7 @@ When modifying the exposure times set at the library example sequences, or on-th
           </param>
         </paramset>
       </container>
+
       <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="7e5794f2-320d-4181-8fe6-860c31dce8b1" name="Note">
         <paramset name="Note" kind="dataObj">
           <param name="title" value="Libraries"/>

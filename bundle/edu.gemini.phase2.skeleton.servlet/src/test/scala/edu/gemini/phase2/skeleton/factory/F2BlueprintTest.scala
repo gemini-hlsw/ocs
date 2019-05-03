@@ -3,6 +3,7 @@ package edu.gemini.phase2.skeleton.factory
 import edu.gemini.model.p1.immutable._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.MagnitudeBand
+import edu.gemini.spModel.obscomp.SPNote
 import org.scalacheck.Prop._
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Arbitrary._
@@ -42,7 +43,14 @@ class F2BlueprintTest extends TemplateSpec("F2_BP.xml") with SpecificationLike w
     "Include notes, REL-2628" in {
       forAll { (b: Flamingos2BlueprintLongslit) =>
         expand(proposal(b, Nil, MagnitudeBand.R)) { (_, sp) =>
-          val notes = List("F2 Long-Slit Notes", "Repeats contain the ABBA offsets")//, "Use same PA for science and Telluric")
+          //val notes = List("F2 Long-Slit Notes", "Repeats contain the ABBA offsets", "Use the same PA for science target and telluric")
+          val notes = List("F2 Long-Slit Notes", "Use the same PA for science target and telluric", "Repeats contain the ABBA offsets")
+          val titles = groups(sp).map { tg => tg.getObsComponents
+            .asScala.toList
+            .map(_.getDataObject)
+            .collect { case n: SPNote => n }
+            .map(_.getTitle)}
+          println(titles)
           groups(sp).forall(tg => notes.forall(existsNote(tg, _)))
         }
       }
