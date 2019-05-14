@@ -532,7 +532,7 @@ Any offset strategy must take into account that the sky emission lines can vary 
         <paramset name="Note" kind="dataObj">
           <param name="title" value="Detector readout modes"/>
           <param name="NoteText">
-            <value>When choosing the detecotr readout modes or changing the exposure times, please have in mind:
+            <value>When choosing the detector readout modes or changing the exposure times, please have in mind:
 
 Single CDS read (Bright Object Mode) can be used for any exposure time (Minimum possible 2 seconds).  
 In imaging applications, the FLAMINGOS-2 detector is always sky-noise limited using single reads.
