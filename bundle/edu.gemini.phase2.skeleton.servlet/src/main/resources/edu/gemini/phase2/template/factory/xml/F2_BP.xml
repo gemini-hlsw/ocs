@@ -500,7 +500,7 @@ Additional calibration targets and resources are located at the webpage http://w
 
 9. At the NIR wavelength range, for a given brightness we usually face an uncertainty of factor 2-3 in BG plus target level per pixel just within any single bin of conditions CC/IQ/BG/WV. For a single CDS read ("bright target" mode) the science target peak signal should not surpass 22k ADUs.  For 4 and 8 reads ("medium" and "faint") should not surpass 88k and 172k ADUs.
 
-10. Please attach finder charts via the OT "File Attachment" tab.
+10. Please attach fintder charts via the OT "File Attachment" tab.
 
 11. Darks are now taken weekly.
 
@@ -509,16 +509,12 @@ Additional calibration targets and resources are located at the webpage http://w
           </param>
         </paramset>
       </container>
-
       <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="06cc7674-7c8c-4f3d-b392-c58ed7f1755f" name="Note">
         <paramset name="Note" kind="dataObj">
-          <param name="title" value="Use the same PA for science target and telluric"/>
-          <param name="NoteText">
-            <value>This will save telescope time, and will also diminish the effect of flexure.</value>
-          </param>
+          <param name="title" value="Use the same PA for science target and telluric."/>
+          <param name="NoteText" value="This will save telescope time, and will also diminish the effect of flexure."/>
         </paramset>
       </container>
-
       <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="255efbef-a1be-4011-a28c-2fae0c7306f8" name="Note">
         <paramset name="Note" kind="dataObj">
           <param name="title" value="Repeats contain the ABBA offsets"/>
@@ -532,12 +528,11 @@ Any offset strategy must take into account that the sky emission lines can vary 
           </param>
         </paramset>
       </container>
-
       <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="2fd4adbf-6226-40bd-a5c1-e418999a4756" name="Note">
         <paramset name="Note" kind="dataObj">
           <param name="title" value="Detector readout modes"/>
           <param name="NoteText">
-            <value>When choosing the detector readout modes or changing the exposure times, please have in mind:
+            <value>When choosing the detecotr readout modes or changing the exposure times, please have in mind:
 
 Single CDS read (Bright Object Mode) can be used for any exposure time (Minimum possible 2 seconds).  
 In imaging applications, the FLAMINGOS-2 detector is always sky-noise limited using single reads.
@@ -554,7 +549,6 @@ When modifying the exposure times set at the library example sequences, or on-th
           </param>
         </paramset>
       </container>
-
       <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="7e5794f2-320d-4181-8fe6-860c31dce8b1" name="Note">
         <paramset name="Note" kind="dataObj">
           <param name="title" value="Libraries"/>
@@ -1764,7 +1758,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="99e952d4-4df0-4939-b2cf-ca23552ef3eb" name="F2-BP-13">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="MOS Mask daytime image"/>
-          <param name="libraryId" value="30"/>
+          <param name="libraryId" value="29"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
@@ -3094,7 +3088,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
     <paramset name="node">
       <param name="key" value="99e952d4-4df0-4939-b2cf-ca23552ef3eb"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="7"/>
-      <param name="ca139410-30af-4684-abfd-7d5c267a7dfd" value="8"/>
+      <param name="ca139410-30af-4684-abfd-7d5c267a7dfd" value="12"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d8bd935d-4c00-4d75-aa3a-3a8ebcc0f695"/>
