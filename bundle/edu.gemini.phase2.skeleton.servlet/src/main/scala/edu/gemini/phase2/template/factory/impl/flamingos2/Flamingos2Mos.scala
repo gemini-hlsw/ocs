@@ -13,7 +13,7 @@ case class Flamingos2Mos(blueprint:SpFlamingos2BlueprintMos) extends Flamingos2B
 //  INCLUDE {29}                              # Mask daytime image
 //
 // 	INCLUDE {22,23}                           # Telluric std
-// 	INCLUDE {24,25}                           # Science
+// 	INCLUDE {24,25,28}                        # Science
 // 	INCLUDE {26,27}                           # Telluric std
 //
 //  FOR {23,25,27,28}:                        # Science and Tellurics
@@ -33,7 +33,7 @@ case class Flamingos2Mos(blueprint:SpFlamingos2BlueprintMos) extends Flamingos2B
 //           NN should be the string "NN" since the mask number is unknown
 
   def preImaging = if (blueprint.preImaging) Seq(21) else Seq.empty
-  val targetGroup = preImaging ++ Seq(29,22,23,24,25,26,27)
+  val targetGroup = preImaging ++ Seq(29,22,23,24,25,28,26,27)
   val baselineFolder = Seq.empty
   val notes = Seq("F2 MOS Notes")
 

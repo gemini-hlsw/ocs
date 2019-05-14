@@ -39,19 +39,18 @@ class F2BlueprintTest extends TemplateSpec("F2_BP.xml") with SpecificationLike w
     "Include notes, REL-2628" in {
       forAll { (b: Flamingos2BlueprintLongslit) =>
         expand(proposal(b, Nil, MagnitudeBand.R)) { (_, sp) =>
-          val notes = List("F2 Long-Slit Notes", "Repeats contain the ABBA offsets")//, "Use the same PA for science target and telluric", "Detector readout modes" /*?*/)
-//          val titles = groups(sp).map { tg => tg.getObsComponents
-//            .asScala.toList
-//            .map(_.getDataObject)
-//            .collect { case n: SPNote => n }
-//            .map(_.getTitle)}
-//          println(titles)
+          val notes = List(
+            "F2 Long-Slit Notes",
+            "Repeats contain the ABBA offsets",
+            "Use the same PA for science target and telluric",
+            "Detector readout modes")
           groups(sp).forall(tg => notes.forall(existsNote(tg, _)))
         }
       }
     }
   }
 
+  // REL-3661: As of 2019B, F2 imaging can include darks.
 //  "F2 Imaging" should {
 //    "not include darks, REL-2906" in {
 //      forAll { (b: Flamingos2BlueprintImaging) =>

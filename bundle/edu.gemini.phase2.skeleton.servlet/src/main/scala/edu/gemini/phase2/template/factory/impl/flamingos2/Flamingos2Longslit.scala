@@ -42,7 +42,11 @@ case class Flamingos2Longslit(blueprint:SpFlamingos2BlueprintLongslit, exampleTa
 
   val targetGroup = Seq(11,12) ++ acq ++ Seq(15,16,17,18)
   val baselineFolder = Seq.empty
-  val notes = Seq("F2 Long-Slit Notes", "Repeats contain the ABBA offsets", "Use same PA for science and Telluric")
+  val notes = Seq(
+    "F2 Long-Slit Notes",
+    "Repeats contain the ABBA offsets",
+    "Use the same PA for science target and telluric",
+    "Detector readout modes")
 
   val scienceAndTellurics = Seq(12,15,16,18)
 
