@@ -500,7 +500,7 @@ Additional calibration targets and resources are located at the webpage http://w
 
 9. At the NIR wavelength range, for a given brightness we usually face an uncertainty of factor 2-3 in BG plus target level per pixel just within any single bin of conditions CC/IQ/BG/WV. For a single CDS read ("bright target" mode) the science target peak signal should not surpass 22k ADUs.  For 4 and 8 reads ("medium" and "faint") should not surpass 88k and 172k ADUs.
 
-10. Please attach fintder charts via the OT "File Attachment" tab.
+10. Please attach finder charts via the OT "File Attachment" tab.
 
 11. Darks are now taken weekly.
 
