@@ -511,7 +511,7 @@ Additional calibration targets and resources are located at the webpage http://w
       </container>
       <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="06cc7674-7c8c-4f3d-b392-c58ed7f1755f" name="Note">
         <paramset name="Note" kind="dataObj">
-          <param name="title" value="Use the same PA for science target and telluric."/>
+          <param name="title" value="Use the same PA for science target and telluric"/>
           <param name="NoteText" value="This will save telescope time, and will also diminish the effect of flexure."/>
         </paramset>
       </container>

@@ -46,8 +46,7 @@ case class Flamingos2Longslit(blueprint:SpFlamingos2BlueprintLongslit, exampleTa
     "F2 Long-Slit Notes",
     "Repeats contain the ABBA offsets",
     "Use the same PA for science target and telluric",
-    "Detector readout modes"
-  )
+    "Detector readout modes")
 
   val scienceAndTellurics = Seq(12,15,16,18)
 
