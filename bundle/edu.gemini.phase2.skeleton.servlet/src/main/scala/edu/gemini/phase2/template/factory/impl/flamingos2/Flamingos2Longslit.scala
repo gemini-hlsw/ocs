@@ -44,9 +44,11 @@ case class Flamingos2Longslit(blueprint:SpFlamingos2BlueprintLongslit, exampleTa
   val baselineFolder = Seq.empty
   val notes = Seq(
     "F2 Long-Slit Notes",
-    "Repeats contain the ABBA offsets",
     "Use the same PA for science target and telluric",
-    "Detector readout modes")
+    "Repeats contain the ABBA offsets",
+    "Detector readout modes",
+    "Libraries"
+  )
 
   val scienceAndTellurics = Seq(12,15,16,18)
 

@@ -140,6 +140,7 @@ Additional calibration targets and resources are located at the webpage http://w
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="d5b3c10e-482f-4521-affa-55f9fea0a6f2" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
@@ -249,6 +250,7 @@ Additional calibration targets and resources are located at the webpage http://w
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="fccd292a-dee4-4b53-bc05-cddb7afcf9db" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
@@ -376,6 +378,7 @@ Additional calibration targets and resources are located at the webpage http://w
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="54cc9eb2-1998-47aa-b290-112187ecf5ae" name="Observing Conditions">
           <paramset name="Observing Conditions" kind="dataObj">
@@ -569,6 +572,7 @@ Additional calibration targets and resources are located at the webpage http://w
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="acb451c1-0343-4541-8f1c-140ead74ea4c" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
@@ -585,18 +589,6 @@ Additional calibration targets and resources are located at the webpage http://w
             <param name="mosPreimaging" value="NO"/>
             <param name="useElectronicOffsetting" value="false"/>
             <param name="decker" value="LONG_SLIT"/>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="35cab660-6943-4749-aaf3-e54a7210f18c" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="698a4b60-c21f-4d79-9a94-396154a014b1" name="Observing Log">
@@ -713,6 +705,7 @@ Additional calibration targets and resources are located at the webpage http://w
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="7c01bdce-0507-4c38-aa72-e6812e1292fc" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
@@ -729,18 +722,6 @@ Additional calibration targets and resources are located at the webpage http://w
             <param name="mosPreimaging" value="NO"/>
             <param name="useElectronicOffsetting" value="false"/>
             <param name="decker" value="LONG_SLIT"/>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="041d9a43-0d03-482e-8791-c832bc6041dd" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="dc2b8cc8-ab3c-4c3f-b0e7-f88461eddd27" name="Observing Log">
@@ -821,6 +802,7 @@ Additional calibration targets and resources are located at the webpage http://w
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="76031020-18b6-44aa-b746-a352e89b0cc0" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
@@ -953,6 +935,7 @@ Additional calibration targets and resources are located at the webpage http://w
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="3292e6a4-cd09-4c25-adf8-c935c01ea671" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
@@ -1095,6 +1078,7 @@ Additional calibration targets and resources are located at the webpage http://w
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="062f2b37-35fb-478b-bf5e-2e4c97d76047" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
@@ -1197,6 +1181,7 @@ Additional calibration targets and resources are located at the webpage http://w
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="5817bb5d-3c6f-4335-bd24-ed32bee341fc" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
@@ -1299,6 +1284,7 @@ Additional calibration targets and resources are located at the webpage http://w
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="3659bdd4-0fe1-42da-ab22-453c19047703" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
@@ -1315,18 +1301,6 @@ Additional calibration targets and resources are located at the webpage http://w
             <param name="mosPreimaging" value="NO"/>
             <param name="useElectronicOffsetting" value="false"/>
             <param name="decker" value="LONG_SLIT"/>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="04a1e4b6-b886-4492-a085-ab44a30559ca" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="bbca5cdf-cb55-459a-b891-2b69e60c47b1" name="Observing Log">
@@ -1443,6 +1417,7 @@ Additional calibration targets and resources are located at the webpage http://w
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="19f284e5-2320-4812-84da-70903e8f6c5f" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
@@ -1459,18 +1434,6 @@ Additional calibration targets and resources are located at the webpage http://w
             <param name="mosPreimaging" value="NO"/>
             <param name="useElectronicOffsetting" value="false"/>
             <param name="decker" value="LONG_SLIT"/>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="4dd7c622-4e9f-451d-877e-6426e04f9db7" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="bf6a8c0d-c231-4b5c-a0f1-583a2f84545f" name="Observing Log">
@@ -1581,7 +1544,7 @@ Additional calibration targets and resources are located at the webpage http://w
       </container>
       <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="6fe6fd80-f197-4cbc-849e-69aa1e075283" name="Note">
         <paramset name="Note" kind="dataObj">
-          <param name="title" value="Use the same PA for the MOS science target and telluric."/>
+          <param name="title" value="Use the same PA for the MOS science target and telluric"/>
           <param name="NoteText" value="This will save telescope time, and will also diminish the effect of flexure."/>
         </paramset>
       </container>
@@ -1630,7 +1593,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
       </container>
       <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="82967823-b3f3-4c5a-89a4-d909d7b31df1" name="Note">
         <paramset name="Note" kind="dataObj">
-          <param name="title" value="MOS slits: only use slit widths of 4 pixels (0.72 arcsec) or larger. Slit lenght no less than 5 arcsec."/>
+          <param name="title" value="MOS slits: only use slit widths of 4 pixels (0.72 arcsec) or larger. Slit length no less than 5 arcsec."/>
           <param name="NoteText" value=""/>
         </paramset>
       </container>
@@ -1643,6 +1606,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="4a2885cd-a9a0-4670-a7dd-b34ae85490cc" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
@@ -1659,18 +1623,6 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
             <param name="mosPreimaging" value="YES"/>
             <param name="useElectronicOffsetting" value="false"/>
             <param name="decker" value="IMAGING"/>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="d6cc8929-cea7-48ac-8ee6-abe7a58a5239" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="61d98d08-e8e5-4732-95dd-c310d5bd8d55" name="Observing Log">
@@ -1764,6 +1716,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="56bafe71-5cab-4724-bb1c-e85967231632" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
@@ -1782,18 +1735,6 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
             <param name="mosPreimaging" value="NO"/>
             <param name="useElectronicOffsetting" value="false"/>
             <param name="decker" value="MOS"/>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="28a4b125-47ce-44f7-abdb-f3b8d2c56d17" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="7cd603ef-ff52-4a52-87ad-a7f0945e5ac3" name="Observing Log">
@@ -1856,6 +1797,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="688c29c4-eef0-4f35-8983-d3dce66a3a9e" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
@@ -1872,18 +1814,6 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
             <param name="mosPreimaging" value="NO"/>
             <param name="useElectronicOffsetting" value="false"/>
             <param name="decker" value="LONG_SLIT"/>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="4daef654-2e85-4c40-bd5e-cae4ae9257ac" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="d2935eb4-93eb-407e-afbb-ee941bb6d6c7" name="Observing Log">
@@ -2000,6 +1930,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="5d5d47eb-005d-4c84-a6ad-2c9878e0e7f5" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
@@ -2016,18 +1947,6 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
             <param name="mosPreimaging" value="NO"/>
             <param name="useElectronicOffsetting" value="false"/>
             <param name="decker" value="LONG_SLIT"/>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="93403353-fdc6-45e2-84f5-2b02c66e8306" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="f70f54af-d4e3-4c6a-acbc-1283e91b71bb" name="Observing Log">
@@ -2118,6 +2037,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="8878432e-1b56-40f7-9f28-6a70b3fc8970" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
@@ -2136,18 +2056,6 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
             <param name="mosPreimaging" value="NO"/>
             <param name="useElectronicOffsetting" value="false"/>
             <param name="decker" value="MOS"/>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="4e56d4ae-a001-4fac-874d-ee1764c2694c" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="08757dd9-93d2-4be8-a133-7660d560fbcc" name="Observing Log">
@@ -2251,6 +2159,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="5443c1cd-330a-48e2-b1c7-6136ad75a7cc" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
@@ -2269,18 +2178,6 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
             <param name="mosPreimaging" value="NO"/>
             <param name="useElectronicOffsetting" value="false"/>
             <param name="decker" value="MOS"/>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="454590ed-8187-4f13-9d2e-8e8a7158dda4" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="4c335ca9-b966-45b4-814e-4e0d145c094e" name="Observing Log">
@@ -2367,6 +2264,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="c61eca19-1bc2-4838-9d3f-69db0f394bcd" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
@@ -2385,18 +2283,6 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
             <param name="mosPreimaging" value="NO"/>
             <param name="useElectronicOffsetting" value="false"/>
             <param name="decker" value="MOS"/>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="228f4837-459c-4823-af30-a1beee9501be" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="b5205806-17d4-49cf-b049-52b315a0ac57" name="Observing Log">
@@ -2483,6 +2369,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="d7ad305d-ab21-491d-81cd-c53502757757" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
@@ -2499,18 +2386,6 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
             <param name="mosPreimaging" value="NO"/>
             <param name="useElectronicOffsetting" value="false"/>
             <param name="decker" value="LONG_SLIT"/>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="60581641-3d6f-455b-a195-1670a69dfec5" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="7634e8a9-f0cd-431b-8a88-4a90ed55d3a1" name="Observing Log">
@@ -2627,6 +2502,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="e271ab6c-d182-4c5c-b972-3f47c45b89c0" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
@@ -2643,18 +2519,6 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
             <param name="mosPreimaging" value="NO"/>
             <param name="useElectronicOffsetting" value="false"/>
             <param name="decker" value="LONG_SLIT"/>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="7a223352-4927-47bd-a1f2-dfe50148df05" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="a656386f-4232-44b0-99b5-9de9dbdb89f1" name="Observing Log">
@@ -2762,6 +2626,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
     <paramset name="node">
       <param name="key" value="ea6101f0-f34b-450c-bf7d-32136038d707"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="1"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f1211d6b-196c-48ba-8037-f23dd3522e0e"/>
@@ -2814,6 +2679,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
     <paramset name="node">
       <param name="key" value="82967823-b3f3-4c5a-89a4-d909d7b31df1"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="1"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="4e56d4ae-a001-4fac-874d-ee1764c2694c"/>
@@ -2866,6 +2732,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
     <paramset name="node">
       <param name="key" value="bc2199e1-68cd-436e-8e6a-c9f0f6f92ac5"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="5"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="50d2b9c3-5c09-4d87-b009-19ee2676fe3c"/>
@@ -3019,6 +2886,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
     <paramset name="node">
       <param name="key" value="1bd0aeef-f95c-4c89-b7ed-0b10ccaf112e"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="1"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="4b3fe28e-6db1-4684-b64e-db228791f6c1"/>
@@ -3039,6 +2907,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
     <paramset name="node">
       <param name="key" value="2fdd604a-d8ca-49a2-abe6-d4da74fafaa5"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="1"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d2578fee-0a32-4ef6-83b6-c8b7a32d604c"/>
@@ -3076,6 +2945,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
       <param name="key" value="45f027ad-bba5-4ad3-a97b-62af5dbdf911"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="7"/>
       <param name="ca139410-30af-4684-abfd-7d5c267a7dfd" value="2"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="6891cf03-2ba5-4ffa-8b3b-fa16bb8d5e06"/>
@@ -3089,6 +2959,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
       <param name="key" value="99e952d4-4df0-4939-b2cf-ca23552ef3eb"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="7"/>
       <param name="ca139410-30af-4684-abfd-7d5c267a7dfd" value="12"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d8bd935d-4c00-4d75-aa3a-3a8ebcc0f695"/>
@@ -3219,6 +3090,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
       <param name="key" value="1a918186-7fc2-4057-a5db-e08d08c9f34a"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="3"/>
       <param name="ca139410-30af-4684-abfd-7d5c267a7dfd" value="6"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="63034954-6892-4c56-9b20-5c2ae9a7a23c"/>
@@ -3328,6 +3200,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
     <paramset name="node">
       <param name="key" value="f58f0991-9ba0-484c-a193-8c872ab84812"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="1"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="6710fc7a-d4dd-4b39-a2c7-abc701f5a006"/>
@@ -3596,6 +3469,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
       <param name="key" value="a1172ce6-ad9e-48d9-b577-5b4a57799a3a"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="3"/>
       <param name="ca139410-30af-4684-abfd-7d5c267a7dfd" value="6"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="0955698a-ba2f-4746-a3d9-880eb9cc6703"/>
@@ -3620,6 +3494,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
     <paramset name="node">
       <param name="key" value="673d01e9-a308-4809-9b3f-457003d0d3a9"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="1"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="623e6c86-b326-4de4-8acd-735f118e5b61"/>
@@ -3684,6 +3559,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
     <paramset name="node">
       <param name="key" value="a94d4216-e8c8-4302-a7a9-7820e75ff986"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="1"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="2f85a74b-9be8-46a4-b68e-0bb6209a0494"/>
@@ -3692,6 +3568,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
     <paramset name="node">
       <param name="key" value="7c7d5c4c-ee8e-4080-9278-13a67d6b1332"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="1"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e2429464-958f-4328-a4d7-44f1de1d67f4"/>
@@ -3748,6 +3625,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
     <paramset name="node">
       <param name="key" value="e15ce507-371b-4d67-aaf8-15ddaa6c1374"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="1"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="4eafc9fd-368e-4ed5-9f04-ed2922dcfe3d"/>
@@ -3768,6 +3646,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
     <paramset name="node">
       <param name="key" value="6fe6fd80-f197-4cbc-849e-69aa1e075283"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="1"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="46296430-0713-4dbd-990a-2a5a18ffd9e6"/>
