@@ -10,22 +10,22 @@ import scala.collection.JavaConverters._
 final case class Flamingos2Mos(blueprint:SpFlamingos2BlueprintMos) extends Flamingos2Base[SpFlamingos2BlueprintMos] {
 
 //  IF PRE-IMAGING REQUIRED = YES
-//      INCLUDE {21}
+//      INCLUDE {31}
 //
-//  INCLUDE {29}                           # Mask daytime image
+//  INCLUDE {32}                           # Mask daytime image
 //
-//  INCLUDE {22,23}                           # Telluric std
-//  INCLUDE {24,25,28}                           # Science
-//  INCLUDE {26,27}                           # Telluric std
+//  INCLUDE {33,34}                           # Telluric std
+//  INCLUDE {35,36,37}                           # Science
+//  INCLUDE {38,39}                           # Telluric std
 //
-//  FOR {23,25,27,28}:                           # Science and Tellurics
+//  FOR {34,36,37,39}:                           # Science and Tellurics
 //      SET DISPERSER FROM PI
 //          Put FILTERS from PI into F2 ITERATOR
 //
-//  FOR {21,22,23,24,25,26,27,28,29}:
+//  FOR {31,32,33,34,35,36,37,38,39}:
 //      SET CONDITIONS FROM PI
 //
-//  FOR {24,25,28,29}:                              # MOS science
+//  FOR {32,35,36,37}:                              # MOS science
 //      SET "Custom MDF" = G(N/S)YYYYS(Q/C/DD/SV/LP/FT)XXX-NN
 //          where:
 //          (N/S) is the site
@@ -35,10 +35,10 @@ final case class Flamingos2Mos(blueprint:SpFlamingos2BlueprintMos) extends Flami
 //          NN should be the string "NN" since the mask number is unknown
 
   def preImaging: Option[Int] =
-    if (blueprint.preImaging) Some(21) else None
+    if (blueprint.preImaging) Some(31) else None
 
   override val targetGroup: Seq[Int] =
-    preImaging.foldRight(Seq(29,22,23,24,25,28,26,27)) { _ +: _ }
+    preImaging.foldRight(Seq(32,33,34,35,36,37,38,39)) { _ +: _ }
 
   override val baselineFolder: Seq[Int] =
     Seq.empty
@@ -54,10 +54,16 @@ final case class Flamingos2Mos(blueprint:SpFlamingos2BlueprintMos) extends Flami
     )
 
   val scienceAndTellurics: Seq[Int] =
-    Seq(23,25,27,28)
+    Seq(34,36,37,39)
 
   override def initialize(grp:ISPGroup, db:TemplateDb): Maybe[Unit] =
     forObservations(grp, scienceAndTellurics, forScienceAndTellurics)
+
+  def forScienceAndTellurics(obs:ISPObservation): Maybe[Unit] =
+    for {
+      _ <- obs.setDisperser(blueprint.disperser).right
+      _ <- obs.setFilters(blueprint.filters.asScala).right
+    } yield ()
 
   /**
     REL-3661 This will (almost) implement the feature of setting the custom
@@ -69,18 +75,12 @@ final case class Flamingos2Mos(blueprint:SpFlamingos2BlueprintMos) extends Flami
     it (TemplateServlet -- so it may need to be an argument to the servlet there)
 
   val mosScience: Seq[Int] =
-    Seq(24,25,28,29)
+    Seq(32,35,36,37)
 
   override def initialize(grp:ISPGroup, db:TemplateDb): Maybe[Unit] =
     for {
       _ <- forObservations(grp, scienceAndTellurics, forScienceAndTellurics).right
       _ <- forObservations(grp, mosScience,          forMosScience         ).right
-    } yield ()
-
-  def forScienceAndTellurics(obs:ISPObservation): Maybe[Unit] =
-    for {
-      _ <- obs.setDisperser(blueprint.disperser).right
-      _ <- obs.setFilters(blueprint.filters.asScala).right
     } yield ()
 
   def forMosScience(obs: ISPObservation): Maybe[Unit] =

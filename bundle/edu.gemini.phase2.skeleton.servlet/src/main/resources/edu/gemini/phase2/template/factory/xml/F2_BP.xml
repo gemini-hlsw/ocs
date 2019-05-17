@@ -1600,7 +1600,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="e15ce507-371b-4d67-aaf8-15ddaa6c1374" name="F2-BP-12">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="MOS Pre-imaging - sparse field"/>
-          <param name="libraryId" value="21"/>
+          <param name="libraryId" value="31"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
@@ -1710,7 +1710,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="99e952d4-4df0-4939-b2cf-ca23552ef3eb" name="F2-BP-13">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="MOS Mask daytime image"/>
-          <param name="libraryId" value="29"/>
+          <param name="libraryId" value="32"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
@@ -1791,7 +1791,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="bc2199e1-68cd-436e-8e6a-c9f0f6f92ac5" name="F2-BP-14">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Telluric Acquisition"/>
-          <param name="libraryId" value="22"/>
+          <param name="libraryId" value="33"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
@@ -1924,7 +1924,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="1bd0aeef-f95c-4c89-b7ed-0b10ccaf112e" name="F2-BP-15">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Telluric Observation"/>
-          <param name="libraryId" value="23"/>
+          <param name="libraryId" value="34"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
@@ -2031,7 +2031,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="2fdd604a-d8ca-49a2-abe6-d4da74fafaa5" name="F2-BP-16">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="MOS Acquisition"/>
-          <param name="libraryId" value="24"/>
+          <param name="libraryId" value="35"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
@@ -2153,7 +2153,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="f58f0991-9ba0-484c-a193-8c872ab84812" name="F2-BP-17">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="MOS Science - Sparse field"/>
-          <param name="libraryId" value="25"/>
+          <param name="libraryId" value="36"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
@@ -2258,7 +2258,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="45f027ad-bba5-4ad3-a97b-62af5dbdf911" name="F2-BP-18">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="MOS Science - Crowded field or Extended object"/>
-          <param name="libraryId" value="28"/>
+          <param name="libraryId" value="37"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
@@ -2363,7 +2363,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="1a918186-7fc2-4057-a5db-e08d08c9f34a" name="F2-BP-20">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Telluric Acquisition"/>
-          <param name="libraryId" value="26"/>
+          <param name="libraryId" value="38"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
@@ -2496,7 +2496,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="a1172ce6-ad9e-48d9-b577-5b4a57799a3a" name="F2-BP-21">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Telluric Observation"/>
-          <param name="libraryId" value="27"/>
+          <param name="libraryId" value="39"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
@@ -2732,7 +2732,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
     <paramset name="node">
       <param name="key" value="bc2199e1-68cd-436e-8e6a-c9f0f6f92ac5"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="5"/>
-      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="50d2b9c3-5c09-4d87-b009-19ee2676fe3c"/>
@@ -2886,7 +2886,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
     <paramset name="node">
       <param name="key" value="1bd0aeef-f95c-4c89-b7ed-0b10ccaf112e"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="1"/>
-      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="4b3fe28e-6db1-4684-b64e-db228791f6c1"/>
@@ -2907,7 +2907,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
     <paramset name="node">
       <param name="key" value="2fdd604a-d8ca-49a2-abe6-d4da74fafaa5"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="1"/>
-      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d2578fee-0a32-4ef6-83b6-c8b7a32d604c"/>
@@ -2945,7 +2945,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
       <param name="key" value="45f027ad-bba5-4ad3-a97b-62af5dbdf911"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="7"/>
       <param name="ca139410-30af-4684-abfd-7d5c267a7dfd" value="2"/>
-      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="6891cf03-2ba5-4ffa-8b3b-fa16bb8d5e06"/>
@@ -2959,7 +2959,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
       <param name="key" value="99e952d4-4df0-4939-b2cf-ca23552ef3eb"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="7"/>
       <param name="ca139410-30af-4684-abfd-7d5c267a7dfd" value="12"/>
-      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d8bd935d-4c00-4d75-aa3a-3a8ebcc0f695"/>
@@ -3090,7 +3090,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
       <param name="key" value="1a918186-7fc2-4057-a5db-e08d08c9f34a"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="3"/>
       <param name="ca139410-30af-4684-abfd-7d5c267a7dfd" value="6"/>
-      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="63034954-6892-4c56-9b20-5c2ae9a7a23c"/>
@@ -3200,7 +3200,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
     <paramset name="node">
       <param name="key" value="f58f0991-9ba0-484c-a193-8c872ab84812"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="1"/>
-      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="6710fc7a-d4dd-4b39-a2c7-abc701f5a006"/>
@@ -3469,7 +3469,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
       <param name="key" value="a1172ce6-ad9e-48d9-b577-5b4a57799a3a"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="3"/>
       <param name="ca139410-30af-4684-abfd-7d5c267a7dfd" value="6"/>
-      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="0955698a-ba2f-4746-a3d9-880eb9cc6703"/>
@@ -3625,7 +3625,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
     <paramset name="node">
       <param name="key" value="e15ce507-371b-4d67-aaf8-15ddaa6c1374"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="1"/>
-      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="1"/>
+      <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="4eafc9fd-368e-4ed5-9f04-ed2922dcfe3d"/>
