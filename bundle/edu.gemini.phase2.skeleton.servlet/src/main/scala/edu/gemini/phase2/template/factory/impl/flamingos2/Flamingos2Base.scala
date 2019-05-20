@@ -7,7 +7,7 @@ import edu.gemini.spModel.gemini.flamingos2.{SeqConfigFlamingos2, Flamingos2}
 
 trait Flamingos2Base[B <: SpFlamingos2BlueprintBase] extends GroupInitializer[B] {
 
-  implicit def pimpGmosN(obs:ISPObservation) = new {
+  implicit def f2ObsOps(obs:ISPObservation) = new {
 
     val ed = ObservationEditor[Flamingos2](obs, instrumentType, SeqConfigFlamingos2.SP_TYPE)
 

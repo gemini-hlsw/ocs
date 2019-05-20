@@ -35,16 +35,71 @@ class F2BlueprintTest extends TemplateSpec("F2_BP.xml") with SpecificationLike w
     } yield Flamingos2BlueprintImaging(f)
   }
 
+  implicit val ArbitraryFlamingos2BlueprintMos: Arbitrary[Flamingos2BlueprintMos] =
+    Arbitrary {
+      for {
+        d  <- arbitrary[Flamingos2Disperser]
+        fs <- Gen.nonEmptyListOf(arbitrary[Flamingos2Filter])
+        p  <- arbitrary[Boolean]
+      } yield Flamingos2BlueprintMos(d, fs, p)
+    }
+
+  "F2 Imaging" should {
+    "include all notes" in {
+      forAll { (b: Flamingos2BlueprintImaging) =>
+        expand(proposal(b, Nil, MagnitudeBand.R)) { (_, sp) =>
+          val notes = List(
+            "F2 Imaging Notes",
+            "Imaging flats",
+            "Detector readout modes",
+            "Libraries")
+          groups(sp).forall(tg => notes.forall(existsNote(tg, _)))
+        }
+      }
+    }
+  }
+
   "F2 Long-Slit" should {
-    "Include notes, REL-2628" in {
+    "include all notes" in {
       forAll { (b: Flamingos2BlueprintLongslit) =>
         expand(proposal(b, Nil, MagnitudeBand.R)) { (_, sp) =>
           val notes = List(
             "F2 Long-Slit Notes",
-            "Repeats contain the ABBA offsets",
             "Use the same PA for science target and telluric",
-            "Detector readout modes")
+            "Repeats contain the ABBA offsets",
+            "Detector readout modes",
+            "Libraries")
           groups(sp).forall(tg => notes.forall(existsNote(tg, _)))
+        }
+      }
+    }
+  }
+
+  "F2 MOS" should {
+    "include all notes" in {
+      forAll { (b: Flamingos2BlueprintMos) =>
+        expand(proposal(b, Nil, MagnitudeBand.R)) { (_, sp) =>
+          val notes = List(
+            "F2 MOS Notes",
+            "Use the same PA for the MOS science target and telluric",
+            "Detector readout modes",
+            "Libraries",
+            "MOS Arcs and flats",
+            "MOS slits: only use slit widths of 4 pixels (0.72 arcsec) or larger. Slit length no less than 5 arcsec.")
+          groups(sp).forall(tg => notes.forall(existsNote(tg, _)))
+        }
+      }
+    }
+
+    "include MOS observations" in {
+      forAll { (b: Flamingos2BlueprintMos) =>
+        val incl = Range.inclusive(if (b.preImaging) 31 else 32, 39).toSet
+        val excl = if (b.preImaging) Set.empty[Int] else Set(31)
+        expand(proposal(b, Nil, MagnitudeBand.R)) { (_, sp) =>
+          groups(sp).forall { tg =>
+            val ls = libs(tg)
+            ls.filter(incl) == incl && !ls.exists(excl)
+          }
         }
       }
     }
