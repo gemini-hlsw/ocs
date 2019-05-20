@@ -90,6 +90,19 @@ class F2BlueprintTest extends TemplateSpec("F2_BP.xml") with SpecificationLike w
         }
       }
     }
+
+    "include MOS observations" in {
+      forAll { (b: Flamingos2BlueprintMos) =>
+        val incl = Range.inclusive(if (b.preImaging) 31 else 32, 39).toSet
+        val excl = if (b.preImaging) Set.empty[Int] else Set(31)
+        expand(proposal(b, Nil, MagnitudeBand.R)) { (_, sp) =>
+          groups(sp).forall { tg =>
+            val ls = libs(tg)
+            ls.filter(incl) == incl && !ls.exists(excl)
+          }
+        }
+      }
+    }
   }
 
   // REL-3661: As of 2019B, F2 imaging can include darks.
