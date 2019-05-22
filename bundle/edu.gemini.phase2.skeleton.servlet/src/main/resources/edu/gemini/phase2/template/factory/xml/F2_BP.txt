@@ -8,6 +8,7 @@ Version 2017-Jan-16, update default imaging exposure times
 Version 2019-Apr-20, update of imaging, long-slit and MOS sequences and rules
 Version : 2019-Apr-22, Bryan Miller, update library ID numbers to make consistent with the BP library
 Version : 2019-May-02, fix library numbering
+Version : 2019-May-22, MOS library ID renumber, conditions updates
 
 Observations identified by library IDs, indicated with {}
 
