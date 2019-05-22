@@ -1737,6 +1737,18 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
             <param name="decker" value="MOS"/>
           </paramset>
         </container>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="46970b2a-2771-4681-beb7-6b758232945d" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="7cd603ef-ff52-4a52-87ad-a7f0945e5ac3" name="Observing Log">
           <paramset name="Observing Log" kind="dataObj">
             <paramset name="obsQaRecord"/>
@@ -2960,6 +2972,7 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="7"/>
       <param name="ca139410-30af-4684-abfd-7d5c267a7dfd" value="12"/>
       <param name="fa526af7-3659-4a66-aa9e-9e131f746993" value="4"/>
+      <param name="560d5f5c-2876-409d-817b-e94a73894677" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d8bd935d-4c00-4d75-aa3a-3a8ebcc0f695"/>
@@ -3340,6 +3353,10 @@ For K-long and HK observations, one shutter closed flat is obtained in order to 
     <paramset name="node">
       <param name="key" value="11a86a2a-7e95-4c19-8ce8-e936d4d44e49"/>
       <param name="3c790c7d-6f41-40a1-8a28-6bd99934b3d6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="46970b2a-2771-4681-beb7-6b758232945d"/>
+      <param name="560d5f5c-2876-409d-817b-e94a73894677" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="228f4837-459c-4823-af30-a1beee9501be"/>
