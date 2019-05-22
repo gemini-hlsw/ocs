@@ -40,7 +40,7 @@ def common(version: Version) = AppConfig(
     "-Dnetworkaddress.cache.ttl=60",
     "-Duser.language=en",
     "-Duser.country=US",
-    "-Xmx1024M"
+    "-Xmx2048M"
   ),
   props = Map(
     "org.osgi.service.http.port"                 -> "9080",

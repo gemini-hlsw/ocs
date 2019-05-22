@@ -15,18 +15,24 @@ case class Flamingos2Imaging(blueprint:SpFlamingos2BlueprintImaging) extends Fla
 //        FOR {1, 2, 3}:
 //  	    Put FILTERS from PI into F2 ITERATOR
 //  	    SET EXPOSURE TIME in Iterator/Static component:
-//                  Y = 60s
-//                  F1056 = 60s
-//                  F1063 = 60s
-//                  J-lo = 60s
-//                  J = 60s
+//                  Y = 40s
+//                  J-lo = 40s
+//                  J = 40s
 //                  H = 10s
-//                  Ks = 30s
+//                  Ks = 15s
+//                  K-red = 12s
+//                  K-blue = 12s
+//                  K-long = 8s
 //
 
   val targetGroup = Seq(1, 2, 3)
   val baselineFolder = Seq.empty
-  val notes = Seq("F2 Imaging Notes")
+  val notes = Seq(
+    "F2 Imaging Notes",
+    "Imaging flats",
+    "Detector readout modes",
+    "Libraries"
+  )
 
   val science = Seq(1, 2)
   val cal     = Seq(3)
@@ -34,10 +40,11 @@ case class Flamingos2Imaging(blueprint:SpFlamingos2BlueprintImaging) extends Fla
   def exposureTimes(filter: Flamingos2.Filter): Double = {
     import Flamingos2.Filter._
     filter match {
-      case H                        => 10.0
-      case K_LONG                   => 10.0
-      case K_SHORT | K_RED | K_BLUE => 20.0
-      case _                        => 60.0
+      case H              => 10.0
+      case K_SHORT        => 15.0
+      case K_LONG         =>  8.0
+      case K_RED | K_BLUE => 12.0
+      case _              => 40.0
     }
   }
 

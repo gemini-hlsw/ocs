@@ -33,8 +33,6 @@ case class Flamingos2Longslit(blueprint:SpFlamingos2BlueprintLongslit, exampleTa
 //        SET DISPERSER FROM PI
 //            Put FILTERS from PI into F2 ITERATOR
 //
-//        FOR {21,22,23,24,25,26,27}:
-//            SET CONDITIONS FROM PI
 
   val acq = exampleTarget.flatMap(t => t.getMagnitude(H)).map(_.value) match {
     case Some(h) if h <= 12 => Seq(13)
@@ -44,7 +42,13 @@ case class Flamingos2Longslit(blueprint:SpFlamingos2BlueprintLongslit, exampleTa
 
   val targetGroup = Seq(11,12) ++ acq ++ Seq(15,16,17,18)
   val baselineFolder = Seq.empty
-  val notes = Seq("F2 Long-Slit Notes", "Repeats contain the ABBA offsets", "Use same PA for science and Telluric")
+  val notes = Seq(
+    "F2 Long-Slit Notes",
+    "Use the same PA for science target and telluric",
+    "Repeats contain the ABBA offsets",
+    "Detector readout modes",
+    "Libraries"
+  )
 
   val scienceAndTellurics = Seq(12,15,16,18)
 

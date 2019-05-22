@@ -100,7 +100,9 @@ package object immutable {
   }
 
   type Flamingos2Fpu = M.Flamingos2Fpu
-  object Flamingos2Fpu extends EnumObject[M.Flamingos2Fpu]
+  object Flamingos2Fpu extends EnumObject[M.Flamingos2Fpu] {
+    val LONGSLIT_4 = M.Flamingos2Fpu.LONGSLIT_4
+  }
 
   type GmosNDisperser = M.GmosNDisperser
   object GmosNDisperser extends EnumObject[M.GmosNDisperser] {
