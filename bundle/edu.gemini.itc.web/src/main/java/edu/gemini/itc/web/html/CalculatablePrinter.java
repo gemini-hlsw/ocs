@@ -3,7 +3,7 @@ package edu.gemini.itc.web.html;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.shared.S2NMethod;
-
+import edu.gemini.shared.util.immutable.*;
 /*
  * A helper class that collects some printing methods that used to be defined on the calculatable objects directly
  * but had to be moved somewhere else in order to be able to separate the calculation from the presentation logic.
@@ -114,11 +114,10 @@ public final class CalculatablePrinter {
         else return "Observation is background noise limited.";
     }
 
-    public static String WarnIfReadNoiseLimited(final ImagingS2NCalculatable s2n) {
-        if (s2n.getVarReadout() > s2n.getVarSource() + s2n.getVarBackground() + s2n.getVarDark())
-            return "Warning: observation is read noise limited";
-        else
-            return "";
+    public static Option<String> ReadNoiseLimitedWarning(final ImagingS2NCalculatable s2n) {
+    return (Math.sqrt(s2n.getVarSource() + s2n.getVarDark() + s2n.getVarReadout()) > Math.sqrt(s2n.getVarBackground())) ?
+        ImOption.apply("Warning: observation is read noise limited; consider using a longer exposure time or a lower noise read mode.\n") :
+        ImOption.<String>empty();
     }
 
 }

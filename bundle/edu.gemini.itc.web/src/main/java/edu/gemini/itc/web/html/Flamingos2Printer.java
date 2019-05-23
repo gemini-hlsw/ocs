@@ -110,6 +110,8 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
         _println(CalculatablePrinter.getTextResult(result.iqCalc()));
         _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
 
+        CalculatablePrinter.ReadNoiseLimitedWarning(result.is2nCalc()).foreach(str -> _println(str));
+
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
