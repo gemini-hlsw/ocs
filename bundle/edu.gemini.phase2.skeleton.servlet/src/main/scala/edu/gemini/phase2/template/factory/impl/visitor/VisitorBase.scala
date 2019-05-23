@@ -10,13 +10,15 @@ trait VisitorBase extends GroupInitializer[SpVisitorBlueprint] with TemplateDsl 
   val seqConfigCompType = VisitorInstrument.SP_TYPE
 
   val AlopekeWavelength: Double = 0.674
+  val ZorroWavelength: Double   = 0.674
   val DssiWavelength: Double    = 0.700
 
   private val WavelengthMapping: List[(String, Double)] =
     List(
       "alopeke" -> AlopekeWavelength,
-      "dssi"    -> DssiWavelength
-    )
+      "zorro"   -> ZorroWavelength
+  "dssi"    -> DssiWavelength
+  )
 
 
   implicit def pimpInst(obs: ISPObservation) = new {
@@ -53,7 +55,7 @@ trait VisitorBase extends GroupInitializer[SpVisitorBlueprint] with TemplateDsl 
   private def wavelength: Double = {
     val inst = blueprint.name.toLowerCase
     WavelengthMapping.collectFirst { case (n, w) if inst.contains(n) => w }
-                     .getOrElse(0.0)
+      .getOrElse(0.0)
   }
 
   def setWavelength = Setter[Double](wavelength)(_.setWavelength(_))
