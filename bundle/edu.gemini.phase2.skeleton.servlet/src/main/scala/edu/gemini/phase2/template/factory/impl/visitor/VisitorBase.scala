@@ -16,8 +16,8 @@ trait VisitorBase extends GroupInitializer[SpVisitorBlueprint] with TemplateDsl 
   private val WavelengthMapping: List[(String, Double)] =
     List(
       "alopeke" -> AlopekeWavelength,
-      "zorro"   -> ZorroWavelength
-  "dssi"    -> DssiWavelength
+      "zorro"   -> ZorroWavelength,
+      "dssi"    -> DssiWavelength
   )
 
 
