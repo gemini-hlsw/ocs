@@ -97,8 +97,8 @@ public abstract class PrinterBase {
     protected void _printFileLink(final UUID id, final SpcDataType type, final int chartIndex, final List<Integer> seriesIndices, final Optional<String> txt) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(ServerInfo.getServerURL());
-        sb.append("itc/servlet/images");
+        //sb.append(ServerInfo.getServerURL()); // Write relative links (REL-3680)
+        sb.append("/itc/servlet/images");
         sb.append("?" + FilesServlet.ParamType        + "=" + FilesServlet.TypeTxt);
         sb.append("&" + FilesServlet.ParamName        + "=" + type.toString());
         sb.append("&" + FilesServlet.ParamChartIndex  + "=" + chartIndex);
@@ -120,8 +120,8 @@ public abstract class PrinterBase {
     }
 
     protected void _printImageLink(final UUID id, final SpcChartType type, final int index, final PlottingDetails pd) {
-        _print("<img alt=\"" + toImgAlt(type) + "\" src=\"" + ServerInfo.getServerURL() +
-                "itc/servlet/images" +
+        _print("<img alt=\"" + toImgAlt(type) + "\" src=\"" + // ServerInfo.getServerURL() + // Write relative links (REL-3680)
+                "/itc/servlet/images" +
                 "?" + FilesServlet.ParamType        + "=" + FilesServlet.TypeImg +
                 "&" + FilesServlet.ParamName        + "=" + type.toString() +
                 "&" + FilesServlet.ParamChartIndex  + "=" + index +
