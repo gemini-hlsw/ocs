@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2017A-1" subtype="basic" key="c313a6e9-cf0e-4a98-a2bf-192f3091d541" name="GMOS-N-BP-copy3">
+  <container kind="program" type="Program" version="2018A-1" subtype="basic" key="c313a6e9-cf0e-4a98-a2bf-192f3091d541" name="GMOS-N-BP-copy3">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="GMOS-N PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -22,6 +22,7 @@
       <param name="fetched" value="yes"/>
       <param name="completed" value="false"/>
       <param name="notifyPi" value="NO"/>
+      <param name="timingWindowNotification" value="true"/>
       <paramset name="gsa">
         <param name="sendToGsa" value="false"/>
         <param name="proprietaryMonths" value="0"/>
@@ -401,6 +402,20 @@ Longslit: Baseline Twilight flat
             </param>
           </paramset>
         </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="a98aeebc-5efc-4d6d-a778-55175907aa25" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="On-sky arcs for blue setups"/>
+            <param name="NoteText">
+              <value>On-sky CuAr arc exposures for spectroscopy blue-ward of the 557.7 nm sky line are provided as baseline (nighttime partner) calibrations since semester 2019A. For long-slit spectroscopy, this applies to the following configurations:
+-- B1200 grating used at central wavelenghts &lt;= 480 nm
+-- B600 grating used at central wavelengths &lt;= 405 nm 
+
+On-sky arc calibrations for setups covering the 557.7 nm or other sky lines can be requested as nighttime program calibrations (charged to the program time), if required. 
+
+Daytime baseline arc lamp exposures will be provided for all spectroscopic observations that do not include on-sky arcs.</value>
+            </param>
+          </paramset>
+        </container>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOS" key="073fc42b-738a-46e6-b35f-4e5081c796bc" name="GMOS-N">
           <paramset name="GMOS-N" kind="dataObj">
             <param name="exposureTime" value="900.0"/>
@@ -541,7 +556,7 @@ Longslit: Baseline Twilight flat
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="e8540b42-2a0e-4c3b-8b55-c1267d8eebd5" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -552,6 +567,7 @@ Longslit: Baseline Twilight flat
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -1025,7 +1041,7 @@ time for the given instrument configuration.
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="a91e4d8b-6f23-46e5-a1b1-c13cedf289b4" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -1036,6 +1052,7 @@ time for the given instrument configuration.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -1149,7 +1166,7 @@ The exposure is taken on the sky so the Translation stage should be
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="3b67109f-da99-4ec6-a45a-b8f4e1fb4b3f" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="Twilight"/>
                   <param name="redshift" value="0.0"/>
@@ -1160,6 +1177,7 @@ The exposure is taken on the sky so the Translation stage should be
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -1763,7 +1781,7 @@ required.
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="039f6d59-a669-4cc9-be57-40e70cffadec" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -1774,6 +1792,7 @@ required.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -2214,7 +2233,7 @@ when conditions are convenient for observing baseline standards.
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="551acb3c-4650-44b3-8ff3-6a9e68bea450" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -2225,6 +2244,7 @@ when conditions are convenient for observing baseline standards.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -2372,7 +2392,7 @@ The exposure is taken on the sky so the Translation stage should be
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="1c53f595-2f17-4ee4-9d8d-11825f49772c" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="Twilight"/>
                   <param name="redshift" value="0.0"/>
@@ -2383,6 +2403,7 @@ The exposure is taken on the sky so the Translation stage should be
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -2486,7 +2507,7 @@ The exposure is taken on the sky so the Translation stage should be
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="701c0703-dd1e-40db-b290-d09514376fda" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="Dark"/>
                   <param name="redshift" value="0.0"/>
@@ -2497,6 +2518,7 @@ The exposure is taken on the sky so the Translation stage should be
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -3111,6 +3133,18 @@ masks for use, with a technical limit of 99 masks).
             </param>
           </paramset>
         </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="3f0756e8-f7ea-4bc3-a58b-7ddc473aae04" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="On-sky arcs for blue setups"/>
+            <param name="NoteText">
+              <value>On-sky CuAr arc exposures for spectroscopy blue-ward of the 557.7 nm sky line are provided as baseline (nighttime partner) calibrations since semester 2019A. 
+
+On-sky arc calibrations for setups covering the 557.7 nm or other sky lines can be requested as nighttime program calibrations (charged to the program time), if required. 
+
+Daytime baseline arc lamp exposures will be provided for all spectroscopic observations that do not include on-sky arcs.</value>
+            </param>
+          </paramset>
+        </container>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOS" key="7cf7b449-9f3e-4e5b-aede-53291c2d106e" name="GMOS-N">
           <paramset name="GMOS-N" kind="dataObj">
             <param name="exposureTime" value="300.0"/>
@@ -3283,7 +3317,7 @@ time for the given slit width.
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="1eaf4e50-3d26-42a1-bda5-24db19072bce" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -3294,6 +3328,7 @@ time for the given slit width.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -3393,7 +3428,7 @@ time for the given slit width.
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="b481cf7e-4914-4b5d-97af-3c8a06b29e66" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="Mask image"/>
                   <param name="redshift" value="0.0"/>
@@ -3404,6 +3439,7 @@ time for the given slit width.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -3553,7 +3589,7 @@ Gemini Staff.
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="6fe1f4d6-bbda-45f2-b765-22a3dd4be866" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="Twilight"/>
                   <param name="redshift" value="0.0"/>
@@ -3564,6 +3600,7 @@ Gemini Staff.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -4053,7 +4090,7 @@ spectrophotometric baseline standards.
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="8aa5c8f5-00aa-4b35-b3b3-122295301c3c" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -4064,6 +4101,7 @@ spectrophotometric baseline standards.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -4954,7 +4992,7 @@ obtained on a best effort basis.</value>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="29470c84-127a-46b6-8c75-4acb7cea4591" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="Dark"/>
                   <param name="redshift" value="0.0"/>
@@ -4965,6 +5003,7 @@ obtained on a best effort basis.</value>
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -5026,7 +5065,7 @@ obtained on a best effort basis.</value>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="4bd30e62-a4be-4a58-8e23-fac4ae1ae354" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -5037,6 +5076,7 @@ obtained on a best effort basis.</value>
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -5167,7 +5207,7 @@ time for the given instrument configuration.
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="b7c0b88c-2b5b-4f02-b27f-81923fcb710f" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="Twilight"/>
                   <param name="redshift" value="0.0"/>
@@ -5178,6 +5218,7 @@ time for the given instrument configuration.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -5667,7 +5708,7 @@ time for the given instrument configuration.
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="167d4927-425d-4203-beb3-c4c6b6514ec6" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -5678,6 +5719,7 @@ time for the given instrument configuration.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -5994,6 +6036,21 @@ IFU: Baseline Twilight </value>
             </param>
           </paramset>
         </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="8da48740-4b68-4f80-89b4-8d78022fe45a" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="On-sky arcs for blue setups"/>
+            <param name="NoteText">
+              <value>On-sky CuAr arc exposures for spectroscopy blue-ward of the 557.7 nm sky line are provided as baseline (nighttime partner) calibrations since semester 2019A. For IFU spectroscopy, this applies to the following configurations:
+-- B1200 configurations using central wavelenghts &lt;= 480 nm
+-- B600 configurations using central wavelengths &lt;= 405 nm
+-- or IFU-2 configurations using B600+g', B1200+g'+OG515, R831+g'+GG455, or R600+g' 
+
+On-sky arc calibrations for setups covering the 557.7 nm or other sky lines can be requested as nighttime program calibrations (charged to the program time), if required. 
+
+Daytime baseline arc lamp exposures will be provided for all spectroscopic observations that do not include on-sky arcs.</value>
+            </param>
+          </paramset>
+        </container>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOS" key="77700abb-ff59-40c6-ba0b-b2fd25671b27" name="GMOS-N">
           <paramset name="GMOS-N" kind="dataObj">
             <param name="exposureTime" value="1200.0"/>
@@ -6127,7 +6184,7 @@ IFU: Baseline Twilight </value>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="8c6bd666-0b7c-460d-9902-2ed3cdb93f21" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -6138,6 +6195,7 @@ IFU: Baseline Twilight </value>
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -6261,7 +6319,7 @@ time for the given instrument configuration.
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="f45645a1-8c52-4703-8967-a62b8b23f45a" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="Twilight"/>
                   <param name="redshift" value="0.0"/>
@@ -6272,6 +6330,7 @@ time for the given instrument configuration.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -6411,7 +6470,7 @@ time for the given instrument configuration.
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="bd21b3ea-3dc8-495d-8ce1-611cfaf5554a" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -6422,6 +6481,7 @@ time for the given instrument configuration.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -6788,6 +6848,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="93570bc8-3ed1-4357-b4ce-e8fb19566bf2"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="bc304bbe-c57c-4867-aefe-ba650a1f02b8" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="66143c16-0211-4d8b-8ec8-06da9f91b98d"/>
@@ -7592,6 +7653,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="ebe88633-51f4-4069-ad2a-dd0287f63a67"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="bc304bbe-c57c-4867-aefe-ba650a1f02b8" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="6165bf89-c5ad-42f9-84d4-1443300a93ee"/>
@@ -7644,6 +7706,10 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="701c0703-dd1e-40db-b290-d09514376fda"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3f0756e8-f7ea-4bc3-a58b-7ddc473aae04"/>
+      <param name="bc304bbe-c57c-4867-aefe-ba650a1f02b8" value="495"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d93cef29-7308-42f8-9dfc-989f8ccba8a4"/>
@@ -7846,6 +7912,10 @@ time for the given instrument configuration.
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="8da48740-4b68-4f80-89b4-8d78022fe45a"/>
+      <param name="bc304bbe-c57c-4867-aefe-ba650a1f02b8" value="44"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="c22aa1c6-fd4a-4fbd-afbf-205134372213"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
     </paramset>
@@ -7880,6 +7950,10 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="77e09ae6-7eb7-4c5b-a5aa-b6df0a8b6fe4"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a98aeebc-5efc-4d6d-a778-55175907aa25"/>
+      <param name="bc304bbe-c57c-4867-aefe-ba650a1f02b8" value="327"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="1028f013-e16b-4074-9185-38f73d68c652"/>
@@ -8892,6 +8966,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="a72db9fc-d754-43d8-8a87-657d03f4e11a"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="bc304bbe-c57c-4867-aefe-ba650a1f02b8" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="3d053fa0-e634-4137-ab44-776d7e8ade7c"/>

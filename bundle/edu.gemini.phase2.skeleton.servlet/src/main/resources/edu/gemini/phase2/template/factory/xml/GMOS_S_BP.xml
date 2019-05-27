@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2017A-1" subtype="basic" key="d4ad9f8d-e5d1-4e36-a7c0-189f1d62531d" name="GMOS-S-BP">
+  <container kind="program" type="Program" version="2018A-1" subtype="basic" key="d4ad9f8d-e5d1-4e36-a7c0-189f1d62531d" name="GMOS-S-BP">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="GMOS-S PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -22,6 +22,7 @@
       <param name="fetched" value="yes"/>
       <param name="completed" value="false"/>
       <param name="notifyPi" value="NO"/>
+      <param name="timingWindowNotification" value="true"/>
     </paramset>
     <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="8fac8073-21a9-4f93-b228-fd6f82ca0aee" name="Note">
       <paramset name="Note" kind="dataObj">
@@ -44,6 +45,7 @@
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOSSouth" key="99ecfced-2fd3-4efa-b5e1-30553ef6e390" name="GMOS-S">
           <paramset name="GMOS-S" kind="dataObj">
@@ -142,6 +144,7 @@
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="07f8a210-29fd-4461-9f62-83d6b6932ca9" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -353,6 +356,7 @@ Details:
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="054e6bde-9c7c-44a3-a5fa-07dac51e2bba" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -381,6 +385,20 @@ Longslit: Twilight flat
 
 
 </value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="d0250479-652f-4d04-9489-420e5a6c70cf" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="On-sky arcs for blue setups"/>
+            <param name="NoteText">
+              <value>On-sky CuAr arc exposures for spectroscopy blue-ward of the 557.7 nm sky line are provided as baseline (nighttime partner) calibrations since semester 2019A. For long-slit spectroscopy, this applies to the following configurations:
+-- B1200 grating used at central wavelenghts &lt;= 480 nm
+-- B600 grating used at central wavelengths &lt;= 405 nm 
+
+On-sky arc calibrations for setups covering the 557.7 nm or other sky lines can be requested as nighttime program calibrations (charged to the program time), if required. 
+
+Daytime baseline arc lamp exposures will be provided for all spectroscopic observations that do not include on-sky arcs.</value>
             </param>
           </paramset>
         </container>
@@ -506,6 +524,7 @@ Longslit: Twilight flat
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="68c320f2-b83a-441d-b6ca-e70f07ba7142" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -539,7 +558,7 @@ between the CCDs and get full wavelength coverage.
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="f9b49d6c-f694-4a28-b2d9-519ad72ae5c3" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -550,6 +569,7 @@ between the CCDs and get full wavelength coverage.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -642,6 +662,7 @@ between the CCDs and get full wavelength coverage.
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="072c6c80-af09-4027-ba04-4923ab1a9cfe" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -843,6 +864,7 @@ the slit image (second step) should be left as defined at 20 seconds.
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="1b53e1f3-3397-4bbe-baca-8e0817c32c7a" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -955,6 +977,7 @@ when conditions are convenient for observing baseline standards.
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="df10fd18-68ab-4d18-8888-0ff5a7a760ae" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -983,7 +1006,7 @@ is taken.
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="054a24ca-ea22-4b7f-a2c7-effb7d389e8d" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -994,6 +1017,7 @@ is taken.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -1078,11 +1102,12 @@ is taken.
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="af53ee0c-0429-45f5-b127-be91b7a1e684" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="Twilight"/>
                   <param name="redshift" value="0.0"/>
@@ -1093,6 +1118,7 @@ is taken.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -1215,6 +1241,7 @@ The exposure is taken on the sky so the Translation stage should be
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="83539727-c6f5-4cd8-b103-bde5d53561df" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -1427,6 +1454,7 @@ Details:
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOSSouth" key="2eb7b4ce-c95a-4853-a1b1-08d095d6b009" name="GMOS-S">
           <paramset name="GMOS-S" kind="dataObj">
@@ -1515,6 +1543,20 @@ on overhead with an efficient science-flat-flat-science-science-flat-flat-scienc
 arrangement, minimizing the number of calibration congfiguration movements 
 required.
 </value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="449b4e2d-b636-4a2d-ad41-fd7f8241a117" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="On-sky arcs for blue setups"/>
+            <param name="NoteText">
+              <value>On-sky CuAr arc exposures for spectroscopy blue-ward of the 557.7 nm sky line are provided as baseline (nighttime partner) calibrations since semester 2019A. For long-slit spectroscopy, this applies to the following configurations:
+-- B1200 grating used at central wavelenghts &lt;= 480 nm
+-- B600 grating used at central wavelengths &lt;= 405 nm 
+
+On-sky arc calibrations for setups covering the 557.7 nm or other sky lines can be requested as nighttime program calibrations (charged to the program time), if required. 
+
+Daytime baseline arc lamp exposures will be provided for all spectroscopic observations that do not include on-sky arcs.</value>
             </param>
           </paramset>
         </container>
@@ -1722,11 +1764,12 @@ required.
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="56e4b346-fe23-4af9-b333-39cc9870692f" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -1737,6 +1780,7 @@ required.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -1861,6 +1905,7 @@ wavelength coverage.
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="aa001d34-b4ee-465c-9da9-2d41c71a4011" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -2065,6 +2110,7 @@ closest to  the central wavelength used for the spectroscopy</value>
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="3f5b9d3f-9904-4577-8916-e8178b73d6a4" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -2179,11 +2225,12 @@ when conditions are convenient for observing baseline standards.
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="87b8f4a9-9949-4e2b-b3fa-09221449fbf8" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -2194,6 +2241,7 @@ when conditions are convenient for observing baseline standards.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -2309,11 +2357,12 @@ is taken.
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="e764c388-c7e6-4676-927f-bc8dc46ddd2f" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="Twilight"/>
                   <param name="redshift" value="0.0"/>
@@ -2324,6 +2373,7 @@ is taken.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -2442,6 +2492,7 @@ The exposure is taken on the sky so the Translation stage should be
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="e03f8077-7034-4006-9e68-596a7393f3cb" name="Observing Conditions">
           <paramset name="Observing Conditions" kind="dataObj">
@@ -2458,7 +2509,7 @@ The exposure is taken on the sky so the Translation stage should be
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="73d3ccd2-71d5-4dba-86b0-5c1527c95aac" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="Dark"/>
                   <param name="redshift" value="0.0"/>
@@ -2469,6 +2520,7 @@ The exposure is taken on the sky so the Translation stage should be
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -2605,6 +2657,7 @@ Number of N&amp;S observations is 15</value>
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="87b945fd-e42c-4370-9787-d1a47dfae660" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -2711,6 +2764,7 @@ can be submitted.</value>
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="c37c7978-339e-470b-bb4d-eb23e3836a7b" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -2832,6 +2886,7 @@ masks for use, with a technical limit of 99 masks).</value>
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="3646c653-109b-4673-a142-b42038ae0258" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -3033,6 +3088,7 @@ gacq *filenumber*
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="820c70da-0cdd-4965-bad0-bd19aca28753" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -3076,6 +3132,20 @@ for either Queue, Classical, Director's Discretionary or Science Verification pr
 PPP is the program number, and MM is the mask number (a MOS PI may design several
 masks for use, with a technical limit of 99 masks).
 </value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="9c75238f-0922-42d1-997f-caf36fb08cbd" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="On-sky arcs for blue setups"/>
+            <param name="NoteText">
+              <value>On-sky CuAr arc exposures for spectroscopy blue-ward of the 557.7 nm sky line are provided as baseline (nighttime partner) calibrations since semester 2019A. For long-slit spectroscopy, this applies to the following configurations:
+-- B1200 grating used at central wavelenghts &lt;= 480 nm
+-- B600 grating used at central wavelengths &lt;= 405 nm 
+
+On-sky arc calibrations for setups covering the 557.7 nm or other sky lines can be requested as nighttime program calibrations (charged to the program time), if required. 
+
+Daytime baseline arc lamp exposures will be provided for all spectroscopic observations that do not include on-sky arcs.</value>
             </param>
           </paramset>
         </container>
@@ -3189,11 +3259,12 @@ masks for use, with a technical limit of 99 masks).
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="e705c95e-fa8c-4b00-b7b1-72c876e01a5a" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -3204,6 +3275,7 @@ masks for use, with a technical limit of 99 masks).
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -3333,11 +3405,12 @@ wavelength coverage.
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="8375495f-5c6b-49c4-9f0d-b95c729ae149" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="Mask image"/>
                   <param name="redshift" value="0.0"/>
@@ -3348,6 +3421,7 @@ wavelength coverage.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -3472,11 +3546,12 @@ Gemini Staff.</value>
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="781da594-c0a7-4617-bd2f-3f2008e0174a" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="Twilight"/>
                   <param name="redshift" value="0.0"/>
@@ -3487,6 +3562,7 @@ Gemini Staff.</value>
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -3606,6 +3682,7 @@ The exposure is taken on the sky so the Translation stage should be
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="5c6671e6-c7f2-4b67-8f38-674ed4d7c9bc" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -3810,6 +3887,7 @@ the slit image (second step) should be left as defined at 10 seconds.</value>
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="01d0a96a-3d0b-4444-9cf6-6c0d4ddee601" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -3973,11 +4051,12 @@ it possible to order the exposures as follows:
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="6b2aa6fe-d997-47ed-b78b-cd1f1efe5c65" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -3988,6 +4067,7 @@ it possible to order the exposures as follows:
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -4121,6 +4201,7 @@ is taken.
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOSSouth" key="b626a8f5-366a-4e8b-ab83-cce006223175" name="GMOS-S">
           <paramset name="GMOS-S" kind="dataObj">
@@ -4242,6 +4323,7 @@ masks for use, with a technical limit of 99 masks).</value>
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOSSouth" key="bb9e3c99-1761-4730-adcc-1c12853bc82c" name="GMOS-S">
           <paramset name="GMOS-S" kind="dataObj">
@@ -4431,6 +4513,7 @@ gacq *filenumber*
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="ab5358a7-ecf1-4ac3-a63a-be36ce7d9347" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -4516,6 +4599,20 @@ for either Queue, Classical, Director's Discretionary or Science Verification pr
 PPP is the program number, and MM is the mask number (a MOS PI may design several
 masks for use, with a technical limit of 99 masks).
 </value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="11c9fc1f-10aa-496c-89df-6ce32935cdba" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="On-sky arcs for blue setups"/>
+            <param name="NoteText">
+              <value>On-sky CuAr arc exposures for spectroscopy blue-ward of the 557.7 nm sky line are provided as baseline (nighttime partner) calibrations since semester 2019A. For long-slit spectroscopy, this applies to the following configurations:
+-- B1200 grating used at central wavelenghts &lt;= 480 nm
+-- B600 grating used at central wavelengths &lt;= 405 nm 
+
+On-sky arc calibrations for setups covering the 557.7 nm or other sky lines can be requested as nighttime program calibrations (charged to the program time), if required. 
+
+Daytime baseline arc lamp exposures will be provided for all spectroscopic observations that do not include on-sky arcs.</value>
             </param>
           </paramset>
         </container>
@@ -4770,11 +4867,12 @@ masks for use, with a technical limit of 99 masks).
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="689c3b36-b401-4734-b811-4826f23869e9" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="Dark"/>
                   <param name="redshift" value="0.0"/>
@@ -4785,6 +4883,7 @@ masks for use, with a technical limit of 99 masks).
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -4927,11 +5026,12 @@ closed for bad weather.</value>
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="484bd8f7-c018-4e15-b0e0-eb8524ac9446" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -4942,6 +5042,7 @@ closed for bad weather.</value>
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -5072,11 +5173,12 @@ wavelength coverage.
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="378a7b63-a2fc-4fb6-8c6d-33c0dc41d703" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="Twilight"/>
                   <param name="redshift" value="0.0"/>
@@ -5087,6 +5189,7 @@ wavelength coverage.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -5206,6 +5309,7 @@ The exposure is taken on the sky so the Translation stage should be
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="399c658e-f1a7-4276-b149-f951b143a516" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -5409,6 +5513,7 @@ the slit image (second step) should be left as defined at 10 seconds.</value>
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="25c5de90-702d-415f-8690-4e404a7d70d2" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -5570,11 +5675,12 @@ it possible to order the exposures as follows:
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="a8c8d695-8730-459d-870e-9dc86eef477c" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -5585,6 +5691,7 @@ it possible to order the exposures as follows:
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -5717,6 +5824,7 @@ is taken.
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="fae66661-dd6d-403f-81c7-8d49f5dc2a5b" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -5860,6 +5968,7 @@ For help setting up the acquistion, see the Description note for the "Longslit A
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOSSouth" key="738d3a5f-1820-4cfa-a125-17a8df892d88" name="GMOS-S">
           <paramset name="GMOS-S" kind="dataObj">
@@ -5901,6 +6010,20 @@ Two offset positions are used to fill in dead fibers.
 
 For targets fainter than R~18mag, imaging through the IFU will take too long.  Instead a blind offset acquisition should be used.  For more information on blind offsetting, please see http://www.gemini.edu/sciops/telescopes-and-sites/acquisition-hardware-and-techniques/acquisition-techniques.
 For help setting up the acquistion, see the Description note for the "Longslit Acquisition (Blind Offset)" within the Templates: Spectroscopy Acquisition Observations folder.  If it is not possible to find a nearby reference star with well known coordinates for blind offsetting, make the 2nd step be another imaging exposure, such that the position of the target on the CCD in imaging mode can be checked after the initial telescope offset has been determined and applied.   The blind offset method is preferred because the user can  directly measure from the acquisition image where the science target will approximately fall in the IFU field of view. </value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="573c68ee-fc6f-4e65-9109-f88799866512" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="On-sky arcs for blue setups"/>
+            <param name="NoteText">
+              <value>On-sky CuAr arc exposures for spectroscopy blue-ward of the 557.7 nm sky line are provided as baseline (nighttime partner) calibrations since semester 2019A. For long-slit spectroscopy, this applies to the following configurations:
+-- B1200 grating used at central wavelenghts &lt;= 480 nm
+-- B600 grating used at central wavelengths &lt;= 405 nm 
+
+On-sky arc calibrations for setups covering the 557.7 nm or other sky lines can be requested as nighttime program calibrations (charged to the program time), if required. 
+
+Daytime baseline arc lamp exposures will be provided for all spectroscopic observations that do not include on-sky arcs.</value>
             </param>
           </paramset>
         </container>
@@ -6025,11 +6148,12 @@ For help setting up the acquistion, see the Description note for the "Longslit A
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="dab8f78c-eca6-411a-9011-fc884058886b" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -6040,6 +6164,7 @@ For help setting up the acquistion, see the Description note for the "Longslit A
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -6155,11 +6280,12 @@ The readout is "fast" in order to save time.
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="e4c98cbf-a913-4d5f-a705-ba54db808b3f" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="Twilight"/>
                   <param name="redshift" value="0.0"/>
@@ -6170,6 +6296,7 @@ The readout is "fast" in order to save time.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -6282,6 +6409,7 @@ The exposure is taken on the sky so the Translation stage should be
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="e9abead7-eedf-4306-aa1d-3f9112c53b3d" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -6310,7 +6438,7 @@ on the side-looking ISS port.
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="d6b163ed-0c9d-4f94-a0c2-9de91e6cd982" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -6321,6 +6449,7 @@ on the side-looking ISS port.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -6410,6 +6539,7 @@ on the side-looking ISS port.
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="d103b406-3d3e-405b-8726-54b6a342515e" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -6566,6 +6696,7 @@ the slit image (second step) should be left as defined at 10 seconds.</value>
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="ca3184a8-6188-4a8f-9279-b445ce73ea71" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -6684,6 +6815,7 @@ it possible to order the exposures as follows:
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="0df01626-a118-4e59-b8c0-b4958866ebd7" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -6828,6 +6960,7 @@ For help setting up the acquistion, see the Description note for the "Longslit A
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="46b7a6c2-e926-4669-933c-472014c7796f" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -6852,6 +6985,20 @@ probe arm to move.
 
 
 Assumed Conditions: IQ=70%, CC=50%, SB=50%, WV=Any (good IQ, photometric, dark)</value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="cd3106c3-7c69-49ae-8ad0-09b63a42ac19" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="On-sky arcs for blue setups"/>
+            <param name="NoteText">
+              <value>On-sky CuAr arc exposures for spectroscopy blue-ward of the 557.7 nm sky line are provided as baseline (nighttime partner) calibrations since semester 2019A. For long-slit spectroscopy, this applies to the following configurations:
+-- B1200 grating used at central wavelenghts &lt;= 480 nm
+-- B600 grating used at central wavelengths &lt;= 405 nm 
+
+On-sky arc calibrations for setups covering the 557.7 nm or other sky lines can be requested as nighttime program calibrations (charged to the program time), if required. 
+
+Daytime baseline arc lamp exposures will be provided for all spectroscopic observations that do not include on-sky arcs.</value>
             </param>
           </paramset>
         </container>
@@ -6963,11 +7110,12 @@ Assumed Conditions: IQ=70%, CC=50%, SB=50%, WV=Any (good IQ, photometric, dark)<
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="0b278aaf-b2bf-4279-b546-e51f01ca98ad" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -6978,6 +7126,7 @@ Assumed Conditions: IQ=70%, CC=50%, SB=50%, WV=Any (good IQ, photometric, dark)<
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -7093,11 +7242,12 @@ The readout is "fast" in order to save time.
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="17b8eddb-8fcd-46b5-9afe-39673fe58fd5" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="Dark"/>
                   <param name="redshift" value="0.0"/>
@@ -7108,6 +7258,7 @@ The readout is "fast" in order to save time.
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -7235,6 +7386,7 @@ Number of Nod &amp; Shuffle observations is set to 15.</value>
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="97b8d401-c9a5-4e96-943a-182ea464539c" name="Observing Conditions">
           <paramset name="Observing Conditions" kind="dataObj">
@@ -7251,7 +7403,7 @@ Number of Nod &amp; Shuffle observations is set to 15.</value>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="7529da3b-ac22-4664-845b-13bef37ca39f" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="Twilight"/>
                   <param name="redshift" value="0.0"/>
@@ -7262,6 +7414,7 @@ Number of Nod &amp; Shuffle observations is set to 15.</value>
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -7365,6 +7518,7 @@ The exposure is taken on the sky so the Translation stage should be
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="cdfc6052-4907-4784-a79a-3e1a348e11d6" name="Observing Conditions">
           <paramset name="Observing Conditions" kind="dataObj">
@@ -7381,7 +7535,7 @@ The exposure is taken on the sky so the Translation stage should be
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="417b7be7-084e-4dbf-95d7-afb0f647b2e2" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
-              <paramset name="base">
+              <paramset name="asterism">
                 <paramset name="target">
                   <param name="name" value="CuAr"/>
                   <param name="redshift" value="0.0"/>
@@ -7392,6 +7546,7 @@ The exposure is taken on the sky so the Translation stage should be
                   </paramset>
                   <param name="tag" value="sidereal"/>
                 </paramset>
+                <param name="tag" value="single"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="primary" value="0"/>
@@ -7494,6 +7649,7 @@ the CCDs and get full  wavelength coverage.
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="fc7988fb-e0e7-49aa-9123-e794666782e3" name="Observing Conditions">
           <paramset name="Observing Conditions" kind="dataObj">
@@ -7651,6 +7807,7 @@ the slit image (second step) should be left as defined at 10 seconds.</value>
           <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="69a02b86-96d6-4fe8-842a-2037dd2199da" name="Observing Conditions">
           <paramset name="Observing Conditions" kind="dataObj">
@@ -7940,6 +8097,10 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="d6b163ed-0c9d-4f94-a0c2-9de91e6cd982"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cd3106c3-7c69-49ae-8ad0-09b63a42ac19"/>
+      <param name="26fe7595-bea1-48c9-a7a7-687b32655ed8" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="9bb6de87-5f42-4042-8ff0-091eed09c6a7"/>
@@ -8549,6 +8710,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="0af67cb2-503c-4eab-92ad-4e3511a0f90f"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="26fe7595-bea1-48c9-a7a7-687b32655ed8" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="6e642f10-749c-4e80-9303-22de94e7b999"/>
@@ -8565,6 +8727,10 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="d0643b87-2b19-4267-9306-763dbe6de393"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="449b4e2d-b636-4a2d-ad41-fd7f8241a117"/>
+      <param name="26fe7595-bea1-48c9-a7a7-687b32655ed8" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="10e70a23-8455-44a7-9470-4e94f19c5744"/>
@@ -8657,6 +8823,10 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="573c68ee-fc6f-4e65-9109-f88799866512"/>
+      <param name="26fe7595-bea1-48c9-a7a7-687b32655ed8" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="12d70967-223e-497f-8a4d-22df644398b6"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
@@ -8732,6 +8902,10 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="b94b0210-691a-4ea2-9153-c875c89f7d09"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9c75238f-0922-42d1-997f-caf36fb08cbd"/>
+      <param name="26fe7595-bea1-48c9-a7a7-687b32655ed8" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d9e2967b-de3f-4bf6-9552-000e41c06c6b"/>
@@ -8923,6 +9097,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="f2c043fe-df6b-4802-9b00-04abef079e67"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="26fe7595-bea1-48c9-a7a7-687b32655ed8" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="84d5bdbe-97b6-4922-baac-14d283ab4fc0"/>
@@ -9278,6 +9453,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="8d6577f6-f3d1-42cd-994d-c4322ba52c85"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="26fe7595-bea1-48c9-a7a7-687b32655ed8" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="1b5e79e1-c1cb-470e-95cb-68732fccf4c0"/>
@@ -9569,6 +9745,10 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="d0250479-652f-4d04-9489-420e5a6c70cf"/>
+      <param name="26fe7595-bea1-48c9-a7a7-687b32655ed8" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="fba25e96-354e-4814-9059-c4c2d92f6225"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
@@ -9699,6 +9879,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="fc2495c4-1b5a-4e84-9f6f-a02c1772dcd1"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="26fe7595-bea1-48c9-a7a7-687b32655ed8" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f933a46d-e7bb-4e93-a875-b0ea5eb457c8"/>
@@ -9908,6 +10089,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="eaf05aa4-94f4-4928-aab8-d5c81fbabc3b"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="26fe7595-bea1-48c9-a7a7-687b32655ed8" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="1126b566-c4fc-4d50-b229-7b3fbb7e3583"/>
@@ -10085,6 +10267,10 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="11c9fc1f-10aa-496c-89df-6ce32935cdba"/>
+      <param name="26fe7595-bea1-48c9-a7a7-687b32655ed8" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="b635876e-db19-4347-81b5-fd12d71f4d36"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
@@ -10180,6 +10366,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="545826ab-2d10-469e-bfae-bdfcd47936d1"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="26fe7595-bea1-48c9-a7a7-687b32655ed8" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="13610c2c-badc-4cf2-9a96-2332be406740"/>
