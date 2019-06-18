@@ -28,15 +28,16 @@ case class Configuration(
   // Default; this can be overridden in instances
   def startLevel(b: BundleSpec): Int =
     b.name.split("\\.").toList match {
-      case "edu" :: "gemini" :: "osgi" :: "main" :: Nil  => 0
-      case "org" :: "osgi"       :: _                    => 5
-      case "org" :: "scala-lang" :: _                    => 10
-      case "org" :: "scalaz"     :: _                    => 15
-      case "edu" :: "gemini"     :: "model" :: "p1" :: _ => 30
-      case "edu" :: "gemini"     :: "dataman" :: _       => 100
-      case "edu" :: "gemini"     :: _                    => 50
-      case "org" :: "jsky"       :: _                    => 50
-      case _                                             => 40
+      case "edu" :: "gemini"     :: "osgi"    :: "main"    :: Nil                 =>   0
+      case "org" :: "osgi"       :: _                                             =>   5
+      case "org" :: "scala-lang" :: _                                             =>  10
+      case "org" :: "scalaz"     :: _                                             =>  15
+      case "edu" :: "gemini"     :: "dataman" :: _                                => 100
+      case "edu" :: "gemini"     :: "model"   :: "p1"      :: _                   =>  30
+      case "edu" :: "gemini"     :: "spdb"    :: "reports" :: "collection" :: Nil =>  60
+      case "edu" :: "gemini"     :: _                                             =>  50
+      case "org" :: "jsky"       :: _                                             =>  50
+      case _                                                                      =>  40
     }
 
   def extending(c: Configuration) = copy(

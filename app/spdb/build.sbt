@@ -427,7 +427,8 @@ def odbtest(version: Version) = AppConfig(
     "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/home/software/ugemini/ephemerides",
     "edu.gemini.smartgcal.svnRootUrl"            -> "http://source.gemini.edu/gcal/branches/development/calibrations",
     "edu.gemini.spdb.dir"                        -> "/home/software/ugemini/spdb/spdb.active",
-    "edu.gemini.util.trpc.name"                  -> "Gemini ODB (Test)"
+    "edu.gemini.util.trpc.name"                  -> "Gemini ODB (Test)",
+    "org.osgi.framework.startlevel.beginning"    -> "50"
   )
 ) extending List(with_remote_gogo(version), odbtest_credentials(version))
 
