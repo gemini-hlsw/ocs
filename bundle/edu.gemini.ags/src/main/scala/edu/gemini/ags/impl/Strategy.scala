@@ -101,7 +101,7 @@ object Strategy {
 
     SPComponentType.INSTRUMENT_GNIRS      -> const(List(AltairAowfs, Pwfs2North, Pwfs1North, GnirsOiwfs)),
     //SPComponentType.INSTRUMENT_GSAOI      -> const(List(GemsStrategy) ++ List(Pwfs1South)),
-    SPComponentType.INSTRUMENT_GSAOI      -> const(List(NGS2Strategy, GemsStrategy) ++ List(Pwfs1South)),
+    SPComponentType.INSTRUMENT_GSAOI      -> const(List(NGS2Strategy) ++ List(Pwfs1South)),
     SPComponentType.INSTRUMENT_MICHELLE   -> const(List(Pwfs2North, Pwfs1North)),
     SPComponentType.INSTRUMENT_NICI       -> const(List(NiciOiwfs, Pwfs2South, Pwfs1South)),
     SPComponentType.INSTRUMENT_NIFS       -> const(List(AltairAowfs, Pwfs2North, Pwfs1North, NifsOiwfs)),

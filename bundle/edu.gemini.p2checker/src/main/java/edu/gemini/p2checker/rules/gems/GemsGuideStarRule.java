@@ -25,6 +25,7 @@ import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +39,7 @@ public final class GemsGuideStarRule implements IRule {
     private static final String CWFS = "The CWFS%d guide star falls out of the range of the guide probe.";
     private static final String ConfigError = "Configuration not supported. Please select 3 CWFS + 1 ODGW or 1 CWFS + 3 ODGW.";
     private static final String WindowOverlap = "The guide windows for %s and %s overlap.";
+    private static final String Pwfs1Missing = "An off-axis PWFS1 guide star is needed for slow focus sensing.";
     private static final String MagnitudeDifference = "CWFS guide star magnitudes must differ by at most %.1f mag in the R band.";
     private static final String TipTilt = "Less than 3 GeMS guide stars of the same origin. Tip-tilt correction will not be optimal.";
     private static final String SlowFocus = "Missing Slow-focus Sensor star. Slow Focus correction will be not be applied.";
@@ -106,7 +108,7 @@ public final class GemsGuideStarRule implements IRule {
             }
 
             // Extract the CWFS targets and count them.
-            GuideGroup primaryGuideGroup = env.getPrimaryGuideGroup();
+            final GuideGroup primaryGuideGroup = env.getPrimaryGuideGroup();
             final Map<SiderealTarget,CanopusWfs> cwfsTargets = new HashMap<>();
             int cwfs = 0;
             for (final CanopusWfs canwfs : CanopusWfs.values()) {
@@ -137,6 +139,10 @@ public final class GemsGuideStarRule implements IRule {
                 }
                 problems.addError(PREFIX + "GuideWindowOverlapError", String.format(WindowOverlap, sc1.getKey(), sc2.getKey()), targetNode);
             });
+
+            // Verify that there is a PWFS1 guide star, which is necessary for SFS in NGS2.
+            if (primaryGuideGroup.get(PwfsGuideProbe.pwfs1).isEmpty())
+                problems.addError(PREFIX + "PWFS1GuideStarMissing", Pwfs1Missing, targetNode);
 
             // Check for magnitude violations.
             final ImList<Double> cwfsMagnitudes = CanopusWfs.Group.extractRMagnitudes(cwfsTargetsImList);
