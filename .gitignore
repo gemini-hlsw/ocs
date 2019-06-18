@@ -52,3 +52,6 @@ project/OcsCredentials.scala
 .metals
 .vscode
 .bloop
+
+# Vim
+*.swp
