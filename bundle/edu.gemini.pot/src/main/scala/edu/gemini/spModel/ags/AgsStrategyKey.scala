@@ -41,6 +41,10 @@ object AgsStrategyKey {
     val id = "GPI_OIWFS"
   }
 
+  case object NGS2Key extends AgsStrategyKey {
+    val id = "NGS2"
+  }
+
   case object NiciOiwfsKey extends AgsStrategyKey {
     val id = "NICI_OIWFS"
   }
@@ -80,6 +84,7 @@ object AgsStrategyKey {
     GmosNorthOiwfsKey,
     GmosSouthOiwfsKey,
     GnirsOiwfsKey,
+    NGS2Key,
     NiciOiwfsKey,
     NifsOiwfsKey,
     NiriOiwfsKey,

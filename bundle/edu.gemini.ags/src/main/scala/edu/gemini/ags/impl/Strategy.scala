@@ -100,7 +100,8 @@ object Strategy {
     SPComponentType.INSTRUMENT_GMOSSOUTH  -> ((ctx: ObsContext) => oiStategies(ctx, GmosSouthOiwfs)),
 
     SPComponentType.INSTRUMENT_GNIRS      -> const(List(AltairAowfs, Pwfs2North, Pwfs1North, GnirsOiwfs)),
-    SPComponentType.INSTRUMENT_GSAOI      -> const(List(GemsStrategy) ++ List(Pwfs1South)),
+    //SPComponentType.INSTRUMENT_GSAOI      -> const(List(GemsStrategy) ++ List(Pwfs1South)),
+    SPComponentType.INSTRUMENT_GSAOI      -> const(List(NGS2Strategy, GemsStrategy) ++ List(Pwfs1South)),
     SPComponentType.INSTRUMENT_MICHELLE   -> const(List(Pwfs2North, Pwfs1North)),
     SPComponentType.INSTRUMENT_NICI       -> const(List(NiciOiwfs, Pwfs2South, Pwfs1South)),
     SPComponentType.INSTRUMENT_NIFS       -> const(List(AltairAowfs, Pwfs2North, Pwfs1North, NifsOiwfs)),
@@ -117,6 +118,7 @@ object Strategy {
       case SingleProbeStrategy(_, params, _) => isAvailable(params.guideProbe)
       case ScienceTargetStrategy(_, gp, _)   => isAvailable(gp)
       case GemsStrategy                      => isAvailable(CanopusWfs.cwfs3) // any canopus would serve
+      case NGS2Strategy                      => isAvailable(CanopusWfs.cwfs3) && isAvailable(PwfsGuideProbe.pwfs1)
       case _                                 => false
     }
   }
