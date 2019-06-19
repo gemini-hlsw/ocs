@@ -47,10 +47,14 @@ public class OptionTest extends TestCase {
                 return new Some<String>(integer.toString());
             }
         }));
+
+        // fold
+        assertSame(o.fold(() -> 0, i -> i + 1), 0);
+
     }
 
     public void testSome() throws Exception {
-        Option<Integer> o = new Some<Integer>(6);
+        Option<Integer> o = new Some<>(6);
 
         assertEquals(new Integer(6), o.getValue());
         assertFalse(o.isEmpty());
@@ -100,6 +104,8 @@ public class OptionTest extends TestCase {
         });
         assertEquals(new Some<String>("6"), res);
 
+        // fold
+        assertEquals(o.fold(() -> "", i -> String.valueOf(i)), "6");
     }
 
     public void testApply(){

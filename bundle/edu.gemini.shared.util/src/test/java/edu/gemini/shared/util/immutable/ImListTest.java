@@ -399,6 +399,27 @@ public class ImListTest extends TestCase {
         assertEquals(ImCollections.emptyList(), ImCollections.emptyList().zipWithIndex());
     }
 
+    public void testZipWithNext() {
+        // 0
+        assertEquals(ImCollections.emptyList(), ImCollections.emptyList().zipWithNext());
+
+        // 1
+        final ImList<Character> charList1 = create('a');
+        final ImList<Tuple2<Character, Option<Character>>> expected1 = create(
+            ctup('a', ImOption.empty())
+        );
+        assertEquals(expected1, charList1.zipWithNext());
+
+        // n
+        final ImList<Character> charListN = create('a', 'b', 'c');
+        final ImList<Tuple2<Character, Option<Character>>> expectedN = create(
+            ctup('a', new Some<>('b')),
+            ctup('b', new Some<>('c')),
+            ctup('c', ImOption.empty())
+        );
+        assertEquals(expectedN, charListN.zipWithNext());
+    }
+
     public void testUnzip() {
         ImList<Tuple2<Character, Integer>> zipped = create(ctup('a', 0), ctup('b', 1), ctup('c', 2));
         ImList<Integer> intList = create(0, 1, 2);

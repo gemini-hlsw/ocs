@@ -5,7 +5,9 @@ import scala.Option$;
 
 import java.util.Optional;
 
-public class ImOption {
+public final class ImOption {
+    private ImOption() { }
+
     public static <T> Option<T> apply(final T value) {
         if (value == null) {
             return None.instance();

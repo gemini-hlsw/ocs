@@ -187,6 +187,11 @@ public final class DefaultImList<T> implements ImList<T>, Serializable {
     }
 
     @Override
+    public T[] toArray() {
+        return (T[]) backingList.toArray();
+    }
+
+    @Override
     public Iterator<T> iterator() {
         return backingList.iterator();
     }
@@ -286,6 +291,11 @@ public final class DefaultImList<T> implements ImList<T>, Serializable {
             res.add(new Pair<>(t, index++));
         }
         return new DefaultImList<>(res);
+    }
+
+    @Override
+    public ImList<Tuple2<T, Option<T>>> zipWithNext() {
+        return zip(tail().map(t -> ImOption.apply(t)).append(ImOption.<T>empty()));
     }
 
     @Override

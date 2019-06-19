@@ -7,7 +7,9 @@ import java.util.stream.Stream;
 /**
  * Utility methods for working with immutable collections.
  */
-public class ImCollections {
+public final class ImCollections {
+
+    private ImCollections() { }
 
     @SuppressWarnings("rawtypes")
     public static final ImList EMPTY_LIST = new EmptyList();
@@ -123,6 +125,11 @@ public class ImCollections {
         }
 
         @Override
+        public Object[] toArray() {
+            return new Object[0];
+        }
+
+        @Override
         public <U> ImList<U> map(final Function1<? super Object, U> op) {
             return (ImList<U>) this;
         }
@@ -173,6 +180,11 @@ public class ImCollections {
 
         @Override
         public ImList<Tuple2<Object, Integer>> zipWithIndex() {
+            return emptyList();
+        }
+
+        @Override
+        public ImList<Tuple2<Object, Option<Object>>> zipWithNext() {
             return emptyList();
         }
 

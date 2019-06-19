@@ -86,6 +86,14 @@ public final class None<T> implements Option<T>, Serializable {
     }
 
     @Override
+    public <U> U fold(
+        Supplier<? extends U>             ifEmpty,
+        Function1<? super T, ? extends U> f
+    ) {
+        return ifEmpty.get();
+    }
+
+    @Override
     public T getOrNull() {
         return null;
     }

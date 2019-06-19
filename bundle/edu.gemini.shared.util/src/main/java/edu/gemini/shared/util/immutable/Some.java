@@ -41,6 +41,14 @@ public final class Some<T> implements Option<T> {
     }
 
     @Override
+    public <U> U fold(
+        Supplier<? extends U>             ifEmpty,
+        Function1<? super T, ? extends U> f
+    ) {
+        return f.apply(val);
+    }
+
+    @Override
     public T getOrNull() {
         return val;
     }

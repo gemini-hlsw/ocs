@@ -5,6 +5,9 @@
 package edu.gemini.spModel.obsrecord;
 
 import edu.gemini.pot.sp.Instrument;
+import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.shared.util.immutable.ImCollections;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.event.ExecEvent;
@@ -16,6 +19,7 @@ import edu.gemini.spModel.time.ObsTimeCharges;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * An implementation class that holds all the visits and handles event
@@ -113,6 +117,26 @@ final class PrivateVisitList implements Serializable {
         return 0;
     }
 
+    // Creates an ImList<PrivateVisit> from the ArrayList<PrivateVisit> _visits
+    // member. TODO: update _visits to be an ImList<PrivateVisit> instead but
+    // this needs to be done at a semester boundary because it will break
+    // serialization (unless we want to figure out what to do in `readObject`).
+    private ImList<PrivateVisit> imVisits() {
+        return DefaultImList.create(_visits);
+    }
+
+    private List<VisitTimes> calcVisitTimes(
+        Option<Instrument> instrument,
+        ObsClass           oc,
+        ObsQaRecord        qa,
+        ConfigStore        store
+    ) {
+        final List<ObsExecEvent[]> visits =
+          _visits.stream().map(v -> v.getEvents()).collect(Collectors.toList());
+
+        return VisitCalculator$.MODULE$.calcForJava(visits, instrument, oc, qa, store);
+    }
+
     ObsTimeCharges getTimeCharges(
         Option<Instrument> instrument,
         ObsClass           oc,
@@ -120,37 +144,43 @@ final class PrivateVisitList implements Serializable {
         ObsQaRecord        qa,
         ConfigStore        store
     ) {
-
-        VisitTimes vt = new VisitTimes();
-        for (PrivateVisit pv : _visits) {
-            vt.addVisitTimes(pv.getTimeCharges(instrument, oc, qa, store));
-        }
-
-        return vt.getTimeCharges(mainChargeClass);
+        return calcVisitTimes(instrument, oc, qa, store)
+                   .stream()
+                   .reduce(new VisitTimes(), (a, b) -> a.plus(b))
+                   .getTimeCharges(mainChargeClass);
     }
 
-    ObsVisit[] getObsVisits(Option<Instrument> instrument, ObsClass oc, ObsQaRecord qa, ConfigStore store) {
-        List<ObsVisit> obsVisitList = new ArrayList<ObsVisit>();
-        for (PrivateVisit pv : _visits) {
-            obsVisitList.add(pv.toObsVisit(instrument, oc, qa, store));
-        }
-        return obsVisitList.toArray(ObsVisit.EMPTY_ARRAY);
+    private ImList<ObsVisit> imObsVisits(
+        Option<Instrument> instrument,
+        ObsClass           oc,
+        ObsQaRecord        qa,
+        ConfigStore        store
+    ) {
+        return imVisits()
+            .zip(DefaultImList.create(calcVisitTimes(instrument, oc, qa, store)))
+            .map(t -> t._1().toObsVisit(instrument, oc, qa, store, t._2()));
     }
 
-    ObsVisit[] getObsVisits(Option<Instrument> instrument, ObsClass oc, ObsQaRecord qa, ConfigStore store, long startTime, long endTime) {
-        List<ObsVisit> obsVisitList = null;
-        for (PrivateVisit pv : _visits) {
-            ObsExecEvent evt = pv.getFirstEvent();
-            if (evt == null) continue;
+    ObsVisit[] getObsVisits(
+        Option<Instrument> instrument,
+        ObsClass           oc,
+        ObsQaRecord        qa,
+        ConfigStore        store
+    ) {
+        return imObsVisits(instrument, oc, qa, store).toArray();
+    }
 
-            long visitStart = evt.getTimestamp();
-            if ((startTime <= visitStart) && (visitStart < endTime)) {
-                if (obsVisitList == null) obsVisitList = new ArrayList<ObsVisit>();
-                obsVisitList.add(pv.toObsVisit(instrument, oc, qa, store));
-            }
-        }
-        if (obsVisitList == null) return ObsVisit.EMPTY_ARRAY;
-        return obsVisitList.toArray(ObsVisit.EMPTY_ARRAY);
+    ObsVisit[] getObsVisits(
+        Option<Instrument> instrument,
+        ObsClass           oc,
+        ObsQaRecord        qa,
+        ConfigStore        store,
+        long               startTime,
+        long               endTime
+    ) {
+        return imObsVisits(instrument, oc, qa, store)
+                   .filter(v -> (startTime <= v.getStartTime()) && (v.getStartTime() < endTime))
+                   .toArray();
     }
 
     public ObsExecStatus getObsExecStatus() {

@@ -211,6 +211,11 @@ public interface ImList<T> extends Iterable<T> {
     List<T> toList();
 
     /**
+     * Converts this ImList into a modifiable array.
+     */
+    T[] toArray();
+
+    /**
      * Applies the given map operation to the list, creating and returning
      * the mapped ImList.  Each element of the immutable list is processed by
      * the provided <code>op</code>, and the resulting objects are collected
@@ -370,6 +375,18 @@ public interface ImList<T> extends Iterable<T> {
      * @return a list of tuples combining this lists elements with its index
      */
     ImList<Tuple2<T, Integer>> zipWithIndex();
+
+    /**
+     * Zips the given list with the immediately following element wrapped in an
+     * Option.  The last element is tupled with a None.  For example:
+     *
+     * <pre>
+     *     zipWithNext(DefaultImList.create("a", "b", "c"))
+     * =>
+     *     (("a", Some("b")), ("b", Some("c")), ("c", None))
+     * </pre>
+     */
+    ImList<Tuple2<T, Option<T>>> zipWithNext();
 
     /**
      * Creates a new immutable list with the same elements as this list, but
