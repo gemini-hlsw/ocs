@@ -145,7 +145,7 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
                     final Object      o = n.getUserObject();
                     if (o != null && o instanceof Enum) {
                         ImOption.apply(m.get((Enum) o)).foreach(a ->
-                            n.setSelected(a == Availability.Installed)
+                            n.setSelectedCorrectly(a == Availability.Installed)
                         );
                     }
                 }
