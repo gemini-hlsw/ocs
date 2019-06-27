@@ -138,7 +138,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
     private final JComboBox<CatalogChoice> _catalogComboBox = new JComboBox<>(CatalogChoice.values());
     private final JComboBox<NirBandChoice> _nirBandComboBox = new JComboBox<>(NirBandChoice.values());
     private final JCheckBox _reviewCandidatesCheckBox = new JCheckBox("Review candidates before asterism search", true);
-    private final JComboBox<AnalyseChoice> _analyseComboBox = new JComboBox<>(AnalyseChoice.values());
     private final JCheckBox _allowPosAngleChangesCheckBox;
     private final JTabbedPane _tabbedPane = new JTabbedPane();
     private final CandidateGuideStarsTable _candidateGuideStarsTable;
@@ -278,23 +277,9 @@ public class GemsGuideStarSearchDialog extends JFrame {
             insets = valueInsets;
         }});
 
-        panel.add(new JLabel("Asterism"), new GridBagConstraints() {{
-            gridx = 0;
-            gridy = 5;
-            insets = labelInsets;
-            anchor = EAST;
-        }});
-
-        panel.add(_analyseComboBox, new GridBagConstraints() {{
-            gridx = 1;
-            gridy = 5;
-            insets = valueInsets;
-            anchor = WEST;
-        }});
-
         panel.add(_allowPosAngleChangesCheckBox, new GridBagConstraints() {{
             gridx = 1;
-            gridy = 6;
+            gridy = 5;
             gridwidth = 3;
             anchor = WEST;
             insets = valueInsets;
@@ -305,7 +290,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         _tabbedPane.add(makeCandidateAsterismsPanel());
         panel.add(_tabbedPane, new GridBagConstraints() {{
             gridx = 0;
-            gridy = 7;
+            gridy = 6;
             gridwidth = 4;
             weightx = 1;
             weighty = 1;
@@ -343,8 +328,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         searchParams.add(_nirBandComboBox);
         searchParams.add(_reviewCandidatesCheckBox);
 
-        // These 2 are not defined as search params in the pdf spec, but do influence the search parameters
-        searchParams.add(_analyseComboBox);
+        // Not defined as search params in the pdf spec, but do influence the search parameters
         searchParams.add(_allowPosAngleChangesCheckBox);
 
         ActionListener a = e -> {
@@ -364,7 +348,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
         _catalogComboBox.addActionListener(a);
         _nirBandComboBox.addActionListener(a);
         _reviewCandidatesCheckBox.addActionListener(a);
-        _analyseComboBox.addActionListener(a);
         _allowPosAngleChangesCheckBox.addActionListener(a);
         _allowPosAngleChangesCheckBox.addActionListener(e ->
             updateModelPosAngleConstraint(_allowPosAngleChangesCheckBox.isSelected())
@@ -426,6 +409,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
                 _useDefaultsAction.setEnabled(!usingDefaults());
                 break;
             case QUERY:
+            case ANALYZE:
                 _stopAction.setEnabled(true);
                 _actionButton.setAction(_stopAction);
                 setEnabledStates(false, false, false);
@@ -437,12 +421,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
                 _candidateAsterismsTreeTable.clear();
                 setEnabledStates(true, true, false);
                 _useDefaultsAction.setEnabled(!usingDefaults());
-                break;
-            case ANALYZE:
-                _stopAction.setEnabled(true);
-                _actionButton.setAction(_stopAction);
-                setEnabledStates(false, false, false);
-                _useDefaultsAction.setEnabled(false);
                 break;
             case SELECTION:
                 _actionButton.setAction(_addAction);
@@ -456,7 +434,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
         _catalogComboBox.setEnabled(enabled);
         _nirBandComboBox.setEnabled(enabled);
         _reviewCandidatesCheckBox.setEnabled(enabled);
-        _analyseComboBox.setEnabled(enabled);
         _allowPosAngleChangesCheckBox.setEnabled(enabled);
         _tabbedPane.setEnabled(enabled);
         _candidateGuideStarsTable.setEnabled(enabled);
@@ -505,7 +482,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
     private void useDefaults() {
         _catalogComboBox.setSelectedItem(CatalogChoice.DEFAULT);
         _nirBandComboBox.setSelectedItem(NirBandChoice.DEFAULT);
-        _analyseComboBox.setSelectedItem(AnalyseChoice.DEFAULT);
         _reviewCandidatesCheckBox.setSelected(true);
         _allowPosAngleChangesCheckBox.setSelected(posAngleConstraint == PosAngleConstraint.UNBOUNDED);
 
@@ -517,7 +493,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
     private boolean usingDefaults() {
         return _catalogComboBox.getSelectedItem() == CatalogChoice.DEFAULT
                 && _nirBandComboBox.getSelectedItem() == NirBandChoice.DEFAULT
-                && _analyseComboBox.getSelectedItem() == AnalyseChoice.DEFAULT
                 && _reviewCandidatesCheckBox.isSelected()
                 && posAngleConstraint == PosAngleConstraint.UNBOUNDED;
     }
@@ -526,12 +501,11 @@ public class GemsGuideStarSearchDialog extends JFrame {
         return _candidateGuideStarsTable.getModelVersion();
     }
 
-    public void query() throws Exception {
+    public void query() {
         setState(State.QUERY);
         CatalogChoice catalogChoice = (CatalogChoice) _catalogComboBox.getSelectedItem();
         _model.setCatalog(catalogChoice);
         _model.setBand((NirBandChoice) _nirBandComboBox.getSelectedItem());
-        _model.setAnalyseChoice((AnalyseChoice) _analyseComboBox.getSelectedItem());
         _model.setReviewCandidatesBeforeSearch(_reviewCandidatesCheckBox.isSelected());
         _model.setAllowPosAngleAdjustments(_allowPosAngleChangesCheckBox.isSelected());
         _model.setGemsCatalogSearchResults(new ArrayList<>());
@@ -599,7 +573,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
     private void analyze() {
         setState(State.ANALYZE);
         _model.setGemsGuideStars(null);
-        _model.setAnalyseChoice((AnalyseChoice) _analyseComboBox.getSelectedItem());
         _model.setAllowPosAngleAdjustments(_allowPosAngleChangesCheckBox.isSelected());
 
         final List<SiderealTarget> excludeCandidates =

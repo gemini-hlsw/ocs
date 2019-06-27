@@ -10,7 +10,7 @@ import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.gemini.gems.GemsInstrument
 import edu.gemini.spModel.gemini.gsaoi.{GsaoiOdgw, Gsaoi}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
-import edu.gemini.spModel.gems.{GemsGuideStarType, GemsTipTiltMode}
+import edu.gemini.spModel.gems.GemsGuideStarType
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetEnvironment
@@ -40,10 +40,9 @@ class GemsVoTableCatalogSpec extends Specification {
       val ctx = ObsContext.create(env, inst, JNone.instance[Site], conditions, null, null, JNone.instance())
       val base = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
       val instrument = GemsInstrument.gsaoi
-      val tipTiltMode = GemsTipTiltMode.instrument
 
       val posAngles = new java.util.HashSet[Angle]()
-      val options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles)
+      val options = new GemsGuideStarSearchOptions(instrument, posAngles)
 
       val mod = GemsTestVoTableMod.forCwfsMagnitudeLimitChange(conditions)
       val results = Await.result(GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml", mod)).search(ctx, base, options, scala.None)(implicitly), 30.seconds)
@@ -65,10 +64,9 @@ class GemsVoTableCatalogSpec extends Specification {
       val conditions = SPSiteQuality.Conditions.BEST
       val ctx = ObsContext.create(env, inst, JNone.instance[Site], conditions, null, null, JNone.instance())
       val instrument = GemsInstrument.gsaoi
-      val tipTiltMode = GemsTipTiltMode.instrument
 
       val posAngles = new java.util.HashSet[Angle]()
-      val options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles)
+      val options = new GemsGuideStarSearchOptions(instrument, posAngles)
 
       val mod = GemsTestVoTableMod.forCwfsMagnitudeLimitChange(conditions)
       val results = GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml", mod)).getRadiusConstraints(instrument, options.searchCriteria(ctx, scala.None).asScala.toList)
@@ -86,10 +84,9 @@ class GemsVoTableCatalogSpec extends Specification {
       val conditions = SPSiteQuality.Conditions.BEST
       val ctx = ObsContext.create(env, inst, JNone.instance[Site], conditions, null, null, JNone.instance())
       val instrument = GemsInstrument.gsaoi
-      val tipTiltMode = GemsTipTiltMode.instrument
 
       val posAngles = new java.util.HashSet[Angle]()
-      val options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles)
+      val options = new GemsGuideStarSearchOptions(instrument, posAngles)
 
       val mod = GemsTestVoTableMod.forCwfsMagnitudeLimitChange(conditions)
       val results = GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml", mod)).optimizeMagnitudeConstraints(options.searchCriteria(ctx, scala.None).asScala.toList)

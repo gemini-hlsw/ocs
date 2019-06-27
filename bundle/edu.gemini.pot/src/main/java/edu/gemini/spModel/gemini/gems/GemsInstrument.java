@@ -30,10 +30,6 @@ public enum GemsInstrument {
         public GemsGuideProbeGroup getGuiders() {
             return GsaoiOdgw.Group.instance;
         }
-
-        public List<GemsTipTiltMode> getTipTiltOptions() {
-            return Arrays.asList(GemsTipTiltMode.canopus, GemsTipTiltMode.instrument, GemsTipTiltMode.both);
-        }
     },
 
     flamingos2() {
@@ -44,16 +40,10 @@ public enum GemsInstrument {
         public GemsGuideProbeGroup getGuiders() {
             return Flamingos2OiwfsGuideProbe.Group.instance;
         }
-
-        public List<GemsTipTiltMode> getTipTiltOptions() {
-            return Arrays.asList(GemsTipTiltMode.canopus);
-        }
     };
 
     // Offset that usage of the instrument introduces to guide star searches.
     public abstract Option<Offset> getOffset();
 
     public abstract GemsGuideProbeGroup getGuiders();
-
-    public abstract List<GemsTipTiltMode> getTipTiltOptions();
 }

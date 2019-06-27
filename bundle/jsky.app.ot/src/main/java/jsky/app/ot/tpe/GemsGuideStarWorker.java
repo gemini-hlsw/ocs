@@ -1,5 +1,11 @@
 package jsky.app.ot.tpe;
 
+import edu.gemini.ags.api.AgsMagnitude;
+import edu.gemini.ags.api.AgsRegistrar;
+import edu.gemini.ags.api.AgsStrategy;
+import edu.gemini.ags.api.ProbeCandidates;
+import edu.gemini.ags.conf.ProbeLimitsTable;
+import edu.gemini.ags.impl.Strategy.*;
 import edu.gemini.ags.gems.*;
 import edu.gemini.ags.gems.mascot.Strehl;
 import edu.gemini.ags.gems.mascot.MascotProgress;
@@ -11,6 +17,7 @@ import edu.gemini.skycalc.Angle;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.skyobject.coords.SkyCoordinates;
 import edu.gemini.skycalc.Coordinates;
+import edu.gemini.spModel.ags.AgsStrategyKey;
 import edu.gemini.spModel.core.Angle$;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
@@ -226,15 +233,15 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      *
      * @return catalog search results
      */
-    public List<GemsCatalogSearchResults> search(GemsGuideStarSearchOptions.CatalogChoice catalog, GemsTipTiltMode tipTiltMode,
+    public List<GemsCatalogSearchResults> search(GemsGuideStarSearchOptions.CatalogChoice catalog,
                                                  ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
                                                  scala.Option<MagnitudeBand> nirBand,
-                                                 scala.concurrent.ExecutionContext ec) throws Exception {
+                                                 scala.concurrent.ExecutionContext ec) {
         try {
             interrupted = false;
             startProgress();
 
-            final List<GemsCatalogSearchResults> results = searchUnchecked(catalog, tipTiltMode, obsContext, posAngles, nirBand, ec);
+            final List<GemsCatalogSearchResults> results = searchUnchecked(catalog, obsContext, posAngles, nirBand, ec);
             if (interrupted) {
                 throw new CancellationException("Canceled");
             }
@@ -247,10 +254,10 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         }
     }
 
-    private static List<GemsCatalogSearchResults> searchUnchecked(GemsGuideStarSearchOptions.CatalogChoice catalog, GemsTipTiltMode tipTiltMode,
+    private static List<GemsCatalogSearchResults> searchUnchecked(GemsGuideStarSearchOptions.CatalogChoice catalog,
                                                          ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
                                                          scala.Option<MagnitudeBand> nirBand,
-                                                         scala.concurrent.ExecutionContext ec) throws Exception {
+                                                         scala.concurrent.ExecutionContext ec) {
         Coordinates basePos = obsContext.getBaseCoordinates().getOrNull();
         Angle baseRA = new Angle(basePos.getRaDeg(), Angle.Unit.DEGREES);
         Angle baseDec = new Angle(basePos.getDecDeg(), Angle.Unit.DEGREES);
@@ -259,9 +266,17 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         SPInstObsComp inst = obsContext.getInstrument();
 
         GemsInstrument instrument = inst instanceof Flamingos2 ? GemsInstrument.flamingos2 : GemsInstrument.gsaoi;
-        GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles);
+        GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(instrument, posAngles);
 
-        return new GemsVoTableCatalog(ConeSearchBackend.instance(), catalog.catalog()).search4Java(obsContext, ModelConverters.toCoordinates(base), options, nirBand, 30, ec);
+        final List<GemsCatalogSearchResults> results = new GemsVoTableCatalog(ConeSearchBackend.instance(), catalog.catalog()).search4Java(obsContext, ModelConverters.toCoordinates(base), options, nirBand, 30, ec);
+
+        // Look up a PWFS1 guide star.
+        final Option<AgsStrategy> pwfsOpt = AgsRegistrar.lookupForJava(AgsStrategyKey.Pwfs1SouthKey$.MODULE$);
+        // We did it up there for the basePos and baseRA / baseDec, so why not continue sound coding practices?
+        final AgsStrategy pwfs = pwfsOpt.getOrNull();
+        final AgsMagnitude.MagnitudeTable magTable = ProbeLimitsTable.loadOrThrow();
+        final List<ProbeCandidates> pwfsCandidates = pwfs.candidatesForJava(obsContext, magTable, 30, ec);
+        return results;
     }
 
 
@@ -272,7 +287,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         final WorldCoords basePos = tpe.getBasePos();
         final ObsContext obsContext = getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
         final Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
-        final List<GemsCatalogSearchResults> results = search(GemsGuideStarSearchOptions.DEFAULT, GemsTipTiltMode.canopus, obsContext, posAngles,
+        final List<GemsCatalogSearchResults> results = search(GemsGuideStarSearchOptions.DEFAULT, obsContext, posAngles,
                 scala.Option.empty(), ec);
         return findGuideStars(obsContext, posAngles, results);
     }
@@ -281,7 +296,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      * Returns the set of Gems guide stars with the highest ranking using the given settings
      */
     private GemsGuideStars findGuideStars(ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
-                                         List<GemsCatalogSearchResults> results) throws Exception {
+                                         List<GemsCatalogSearchResults> results) {
 
         interrupted = false;
         try {
@@ -303,7 +318,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      * Returns a list of all possible Gems guide star sets.
      */
     public List<GemsGuideStars> findAllGuideStars(ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
-                                                  List<GemsCatalogSearchResults> results) throws Exception {
+                                                  List<GemsCatalogSearchResults> results) {
         interrupted = false;
         try {
             startProgress();
@@ -326,7 +341,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         }
         final edu.gemini.spModel.core.Angle positionAngle = gemsGuideStarsList.get(0).pa();
 
-        return gemsGuideStarsList.stream().collect(ArrayList<GemsGuideStars>::new, (alst, ggs) -> {
+        return gemsGuideStarsList.stream().collect(ArrayList::new, (alst, ggs) -> {
             if (positionAngle.equals(ggs.pa())) alst.add(ggs);
         }, ArrayList::addAll);
     }

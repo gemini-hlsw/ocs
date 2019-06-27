@@ -48,17 +48,15 @@ class GemsGuideStarSearchController {
     /**
      * Searches for guide star candidates and saves the results in the model
      */
-    public void query(final scala.concurrent.ExecutionContext ec) throws Exception {
+    public void query(final scala.concurrent.ExecutionContext ec) {
         final WorldCoords basePos = _tpe.getBasePos();
         final ObsContext obsContext = _worker.getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
         final Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
 
         final MagnitudeBand nirBand = _model.getBand().getBand();
-
-        final GemsTipTiltMode tipTiltMode = _model.getAnalyseChoice().getGemsTipTiltMode();
         List<GemsCatalogSearchResults> results;
         try {
-            results = _worker.search(_model.getCatalog(), tipTiltMode, obsContext, posAngles,
+            results = _worker.search(_model.getCatalog(), obsContext, posAngles,
                     new scala.Some<>(nirBand), ec);
         } catch(Exception e) {
             DialogUtil.error(_dialog, e);
@@ -91,7 +89,7 @@ class GemsGuideStarSearchController {
      * @param excludeCandidates list of SkyObjects to exclude
      */
     // Called from the TPE
-    void analyze(final List<SiderealTarget> excludeCandidates) throws Exception {
+    void analyze(final List<SiderealTarget> excludeCandidates) {
         final TpeImageWidget tpe = TpeManager.create().getImageWidget();
         final WorldCoords basePos = tpe.getBasePos();
         final ObsContext obsContext = _worker.getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
@@ -106,7 +104,7 @@ class GemsGuideStarSearchController {
                                                   final List<GemsCatalogSearchResults> gemsCatalogSearchResults) {
         final List<GemsCatalogSearchResults> results = new ArrayList<>();
         for (GemsCatalogSearchResults in : gemsCatalogSearchResults) {
-            List<SiderealTarget> siderealTargets =new ArrayList<>(in.results().size());
+            List<SiderealTarget> siderealTargets = new ArrayList<>(in.results().size());
             siderealTargets.addAll(in.resultsAsJava());
             siderealTargets = removeAll(siderealTargets, excludeCandidates);
             if (!siderealTargets.isEmpty()) {

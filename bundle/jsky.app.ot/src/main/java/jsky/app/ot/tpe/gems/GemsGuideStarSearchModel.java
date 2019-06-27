@@ -16,7 +16,6 @@ class GemsGuideStarSearchModel {
 
     private CatalogChoice _catalog;
     private NirBandChoice _band;
-    private AnalyseChoice _analyseChoice;
     private boolean _reviewCandidatesBeforeSearch;
     private boolean _allowPosAngleAdjustments;
     private List<GemsCatalogSearchResults> _gemsCatalogSearchResults;
@@ -38,13 +37,6 @@ class GemsGuideStarSearchModel {
         _band = band;
     }
 
-    AnalyseChoice getAnalyseChoice() {
-        return _analyseChoice;
-    }
-
-    void setAnalyseChoice(final AnalyseChoice analyseChoice) {
-        _analyseChoice = analyseChoice;
-    }
 
     void setReviewCandidatesBeforeSearch(final boolean reviewCanditatesBeforeSearch) {
         _reviewCandidatesBeforeSearch = reviewCanditatesBeforeSearch;

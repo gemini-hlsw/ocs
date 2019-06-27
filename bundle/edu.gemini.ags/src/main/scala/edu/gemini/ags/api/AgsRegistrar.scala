@@ -17,6 +17,9 @@ object AgsRegistrar {
 
   def lookup(key: AgsStrategyKey): Option[AgsStrategy] = Strategy.fromKey(key)
 
+  def lookupForJava(key: AgsStrategyKey): edu.gemini.shared.util.immutable.Option[AgsStrategy] =
+    lookup(key).asGeminiOpt
+
   /**
    * Determines the default or best strategy for the given observation.
    */

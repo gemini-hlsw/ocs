@@ -6,7 +6,7 @@ import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.gems.{CanopusWfs, GemsInstrument}
 import edu.gemini.spModel.gemini.gsaoi.{GsaoiOdgw, Gsaoi}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
-import edu.gemini.spModel.gems.{GemsGuideStarType, GemsTipTiltMode}
+import edu.gemini.spModel.gems.GemsGuideStarType
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetEnvironment
@@ -31,9 +31,8 @@ class GemsGuideSearchOptionsSpec extends Specification {
   "GemsGuideSearchOptions" should {
     "provide search options for gsaoi in instrument tip tilt mode" in {
       val instrument = GemsInstrument.gsaoi
-      val tipTiltMode = GemsTipTiltMode.instrument
 
-      val options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles)
+      val options = new GemsGuideStarSearchOptions(instrument, posAngles)
       val criteria = options.searchCriteria(ctx, None).asScala
 
       criteria should be size 2
@@ -44,9 +43,8 @@ class GemsGuideSearchOptionsSpec extends Specification {
     }
     "provide search options for gsaoi in canopus tip tilt mode" in {
       val instrument = GemsInstrument.gsaoi
-      val tipTiltMode = GemsTipTiltMode.canopus
 
-      val options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles)
+      val options = new GemsGuideStarSearchOptions(instrument, posAngles)
       val criteria = options.searchCriteria(ctx, None).asScala
 
       criteria should be size 2
@@ -58,9 +56,8 @@ class GemsGuideSearchOptionsSpec extends Specification {
     "provide search options for gsaoi in both tip tilt modes" in {
       val ctx = ObsContext.create(targetEnvironment, inst, JNone.instance[Site], SPSiteQuality.Conditions.BEST, null, null, JNone.instance())
       val instrument = GemsInstrument.gsaoi
-      val tipTiltMode = GemsTipTiltMode.both
 
-      val options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles)
+      val options = new GemsGuideStarSearchOptions(instrument, posAngles)
       val criteria = options.searchCriteria(ctx, None).asScala
 
       criteria should be size 4

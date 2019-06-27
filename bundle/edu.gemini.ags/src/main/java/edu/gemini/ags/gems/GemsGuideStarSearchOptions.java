@@ -88,50 +88,12 @@ public class GemsGuideStarSearchOptions {
         }
     }
 
-
-    public enum AnalyseChoice {
-        BOTH("Canopus and GSAOI", GemsTipTiltMode.both),
-        CANOPUS("Canopus", GemsTipTiltMode.canopus),
-        GSAOI("GSAOI", GemsTipTiltMode.instrument),
-        ;
-
-        public static AnalyseChoice DEFAULT = CANOPUS; // REL-604
-
-        private String _displayValue;
-        private GemsTipTiltMode _gemsTipTiltMode;
-
-        AnalyseChoice(String name, GemsTipTiltMode gemsTipTiltMode) {
-            _displayValue = name;
-            _gemsTipTiltMode = gemsTipTiltMode;
-        }
-
-        public String displayValue() {
-            return _displayValue;
-        }
-
-        public String toString() {
-            return displayValue();
-        }
-
-        public GemsTipTiltMode getGemsTipTiltMode() {
-            return _gemsTipTiltMode;
-        }
-    }
-
     private final GemsInstrument instrument;
-    private final GemsTipTiltMode tipTiltMode;
     private final Set<Angle> posAngles;
     public static final CatalogChoice DEFAULT = CatalogChoice.DEFAULT;
 
-    public GemsGuideStarSearchOptions(final GemsInstrument instrument,
-                                      final GemsTipTiltMode tipTiltMode, final Set<Angle> posAngles) {
+    public GemsGuideStarSearchOptions(final GemsInstrument instrument, final Set<Angle> posAngles) {
         this.instrument = instrument;
-        if (instrument == GemsInstrument.flamingos2) {
-            // Flamingos 2 OIWFS can only ever be used for the flexure star.
-            this.tipTiltMode = GemsTipTiltMode.canopus;
-        } else {
-            this.tipTiltMode = tipTiltMode;
-        }
         this.posAngles = posAngles;
     }
 
@@ -144,21 +106,9 @@ public class GemsGuideStarSearchOptions {
      * @return all relevant CatalogSearchCriterion instances
      */
     public List<GemsCatalogSearchCriterion> searchCriteria(final ObsContext obsContext, final scala.Option<MagnitudeBand> nirBand) {
-        switch(tipTiltMode) {
-            case canopus: return Arrays.asList(
+        return Arrays.asList(
                     canopusCriterion(obsContext, GemsGuideStarType.tiptilt),
                     instrumentCriterion(obsContext, GemsGuideStarType.flexure, nirBand));
-            case instrument: return Arrays.asList(
-                    instrumentCriterion(obsContext, GemsGuideStarType.tiptilt, nirBand),
-                    canopusCriterion(obsContext, GemsGuideStarType.flexure));
-            default:
-            case both: return Arrays.asList(
-                    canopusCriterion(obsContext, GemsGuideStarType.tiptilt),
-                    instrumentCriterion(obsContext, GemsGuideStarType.flexure, nirBand),
-                    instrumentCriterion(obsContext, GemsGuideStarType.tiptilt, nirBand),
-                    canopusCriterion(obsContext, GemsGuideStarType.flexure)
-            );
-        }
     }
 
     private GemsCatalogSearchCriterion canopusCriterion(final ObsContext obsContext, final GemsGuideStarType ggst) {

@@ -13,7 +13,7 @@ import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.gemini.gems.{CanopusWfs, Gems}
 import edu.gemini.spModel.gemini.gsaoi.{Gsaoi, GsaoiOdgw}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
-import edu.gemini.spModel.gems.{GemsGuideStarType, GemsTipTiltMode}
+import edu.gemini.spModel.gems.GemsGuideStarType
 import edu.gemini.spModel.guide.GuideSpeed
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
@@ -58,11 +58,10 @@ class GemsStrategySpec extends Specification {
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
-      val tipTiltMode = GemsTipTiltMode.instrument
 
       val posAngles = Set.empty[Angle]
 
-      val results = Await.result(TestGemsStrategy("/gemsstrategyquery.xml", conditions).search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 1.minute)
+      val results = Await.result(TestGemsStrategy("/gemsstrategyquery.xml", conditions).search(ctx, posAngles, scala.None)(implicitly), 1.minute)
       results should be size 2
 
       results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(14.5), scala.Option(SaturationConstraint(7.3))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
@@ -78,11 +77,10 @@ class GemsStrategySpec extends Specification {
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.NOMINAL
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
-      val tipTiltMode = GemsTipTiltMode.canopus
 
       val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
-      testSearchOnNominal("/gems_pal1.xml", ctx, tipTiltMode, posAngles, 2, 2)
+      testSearchOnNominal("/gems_pal1.xml", ctx, posAngles, 2, 2)
 
       val gemsStrategy = TestGemsStrategy("/gems_pal1.xml", conditions)
       val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
@@ -138,7 +136,6 @@ class GemsStrategySpec extends Specification {
       val inst = new Gsaoi <| {_.setPosAngle(90.0)} <| {_.setIssPort(IssPort.UP_LOOKING)} <| {_.setFilter(Gsaoi.Filter.H)}
       val conditions = new SPSiteQuality.Conditions(CloudCover.PERCENT_50, ImageQuality.PERCENT_85, SkyBackground.ANY, WaterVapor.ANY)
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
-      val tipTiltMode = GemsTipTiltMode.canopus
 
       val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
@@ -210,7 +207,6 @@ class GemsStrategySpec extends Specification {
       val inst = new Gsaoi <| {_.setPosAngle(90.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.BEST
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
-      val tipTiltMode = GemsTipTiltMode.canopus
 
       val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
@@ -270,11 +266,10 @@ class GemsStrategySpec extends Specification {
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
-      val tipTiltMode = GemsTipTiltMode.canopus
 
       val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
-      testSearchOnStandardConditions("/gems_sn1987A.xml", ctx, tipTiltMode, posAngles, 12, 9)
+      testSearchOnStandardConditions("/gems_sn1987A.xml", ctx, posAngles, 12, 9)
 
       val gemsStrategy = TestGemsStrategy("/gems_sn1987A.xml", conditions)
       val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
@@ -339,11 +334,10 @@ class GemsStrategySpec extends Specification {
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.BEST.cc(SPSiteQuality.CloudCover.PERCENT_50)
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
-      val tipTiltMode = GemsTipTiltMode.canopus
 
       val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
-      testSearchOnBestConditions("/gems_sn1987A.xml", ctx, tipTiltMode, posAngles, 12, 9)
+      testSearchOnBestConditions("/gems_sn1987A.xml", ctx, posAngles, 12, 9)
 
       val gemsStrategy = TestGemsStrategy("/gems_sn1987A.xml", conditions)
       val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
@@ -396,11 +390,10 @@ class GemsStrategySpec extends Specification {
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY).wv(SPSiteQuality.WaterVapor.ANY)
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
-      val tipTiltMode = GemsTipTiltMode.canopus
 
       val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
-      testSearchOnStandardConditions("/gems_TYC_8345_1155_1.xml", ctx, tipTiltMode, posAngles, 31, 28)
+      testSearchOnStandardConditions("/gems_TYC_8345_1155_1.xml", ctx, posAngles, 31, 28)
 
       val gemsStrategy = TestGemsStrategy("/gems_TYC_8345_1155_1.xml", conditions)
       val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
@@ -462,11 +455,10 @@ class GemsStrategySpec extends Specification {
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY).wv(SPSiteQuality.WaterVapor.ANY)
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
-      val tipTiltMode = GemsTipTiltMode.canopus
 
       val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
-      testSearchOnStandardConditions("/gems_m6.xml", ctx, tipTiltMode, posAngles, 8, 7)
+      testSearchOnStandardConditions("/gems_m6.xml", ctx, posAngles, 8, 7)
 
       val gemsStrategy = TestGemsStrategy("/gems_m6.xml", conditions)
       val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
@@ -529,11 +521,10 @@ class GemsStrategySpec extends Specification {
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
-      val tipTiltMode = GemsTipTiltMode.canopus
 
       val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
-      testSearchOnStandardConditions("/gems_bpm_37093.xml", ctx, tipTiltMode, posAngles, 5, 5)
+      testSearchOnStandardConditions("/gems_bpm_37093.xml", ctx, posAngles, 5, 5)
 
       val gemsStrategy = TestGemsStrategy("/gems_bpm_37093.xml", conditions)
       val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
@@ -585,11 +576,10 @@ class GemsStrategySpec extends Specification {
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.BEST.cc(SPSiteQuality.CloudCover.PERCENT_50)
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
-      val tipTiltMode = GemsTipTiltMode.canopus
 
       val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
-      testSearchOnBestConditions("/gems_bpm_37093.xml", ctx, tipTiltMode, posAngles, 5, 5)
+      testSearchOnBestConditions("/gems_bpm_37093.xml", ctx, posAngles, 5, 5)
 
       val gemsStrategy = TestGemsStrategy("/gems_bpm_37093.xml", conditions)
       val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
@@ -648,12 +638,11 @@ class GemsStrategySpec extends Specification {
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
-      val tipTiltMode = GemsTipTiltMode.canopus
       val posAngles = Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
       // Targets loaded and stored in the ngs2_mag.xml file with the query:
       // curl -v "http://gncatalog.gemini.edu/cgi-bin/conesearch.py?CATALOG=ucac4&RA=265.153&DEC=-32.296&SR=0.028"
-      testSearchOnStandardConditions("/ngs2_mag.xml", ctx, tipTiltMode, posAngles, 12, 8)
+      testSearchOnStandardConditions("/ngs2_mag.xml", ctx, posAngles, 12, 8)
 
       val gemsStrategy = TestGemsStrategy("/ngs2_mag.xml", conditions);
       val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow())(implicitly), 5.minutes)
@@ -701,8 +690,8 @@ class GemsStrategySpec extends Specification {
     }
   }
 
-  def testSearchOnStandardConditions(file: String, ctx: ObsContext, tipTiltMode: GemsTipTiltMode, posAngles: Set[Angle], expectedTipTiltResultsCount: Int, expectedFlexureResultsCount: Int): Unit = {
-    val results = Await.result(TestGemsStrategy(file, ctx.getConditions).search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 1.minute)
+  def testSearchOnStandardConditions(file: String, ctx: ObsContext, posAngles: Set[Angle], expectedTipTiltResultsCount: Int, expectedFlexureResultsCount: Int): Unit = {
+    val results = Await.result(TestGemsStrategy(file, ctx.getConditions).search(ctx, posAngles, scala.None)(implicitly), 1.minute)
     results should be size 2
 
     results.head.criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, CanopusWfs.Group.instance))
@@ -713,8 +702,8 @@ class GemsStrategySpec extends Specification {
     results(1).results should be size expectedFlexureResultsCount
   }
 
-  def testSearchOnNominal(file: String, ctx: ObsContext, tipTiltMode: GemsTipTiltMode, posAngles: Set[Angle], expectedTipTiltResultsCount: Int, expectedFlexureResultsCount: Int): Unit = {
-    val results = Await.result(TestGemsStrategy(file, ctx.getConditions).search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 1.minute)
+  def testSearchOnNominal(file: String, ctx: ObsContext, posAngles: Set[Angle], expectedTipTiltResultsCount: Int, expectedFlexureResultsCount: Int): Unit = {
+    val results = Await.result(TestGemsStrategy(file, ctx.getConditions).search(ctx, posAngles, scala.None)(implicitly), 1.minute)
     results should be size 2
 
     results.head.criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, CanopusWfs.Group.instance))
@@ -725,8 +714,8 @@ class GemsStrategySpec extends Specification {
     results(1).results should be size expectedFlexureResultsCount
   }
 
-  def testSearchOnBestConditions(file: String, ctx: ObsContext, tipTiltMode: GemsTipTiltMode, posAngles: Set[Angle], expectedTipTiltResultsCount: Int, expectedFlexureResultsCount: Int): Unit = {
-    val results = Await.result(TestGemsStrategy(file, ctx.getConditions).search(tipTiltMode, ctx, posAngles, scala.None)(implicitly), 1.minute)
+  def testSearchOnBestConditions(file: String, ctx: ObsContext, posAngles: Set[Angle], expectedTipTiltResultsCount: Int, expectedFlexureResultsCount: Int): Unit = {
+    val results = Await.result(TestGemsStrategy(file, ctx.getConditions).search(ctx, posAngles, scala.None)(implicitly), 1.minute)
     results should be size 2
 
     results.head.criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, CanopusWfs.Group.instance))

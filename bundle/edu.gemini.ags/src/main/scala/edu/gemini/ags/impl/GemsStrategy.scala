@@ -91,7 +91,7 @@ trait GemsStrategy extends AgsStrategy {
     // why do we need multiple position angles?  catalog results are given in
     // a ring (limited by radius limits) around a base position ... confusion
     val posAngles   = (ctx.getPositionAngle :: (0 until 360 by 90).map(Angle.fromDegrees(_)).toList).toSet
-    search(GemsTipTiltMode.canopus, ctx, posAngles, None)(ec).map(simplifiedResult)
+    search(ctx, posAngles, None)(ec).map(simplifiedResult)
   }
 
   override def estimate(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Estimate] = {
@@ -99,7 +99,7 @@ trait GemsStrategy extends AgsStrategy {
     val anglesToTry = (0 until 360 by 90).map(Angle.fromDegrees(_)).toSet
 
     // Get the query results and convert them to GeMS-specific ones.
-    val results = search(GemsTipTiltMode.canopus, ctx, anglesToTry, None)(ec)
+    val results = search(ctx, anglesToTry, None)(ec)
 
     // Iterate over 90 degree position angles if no 3-star asterism is found at PA = 0.
     val gemsCatalogResults = results.map(result => GemsResultsAnalyzer.analyzeGoodEnough(ctx, anglesToTry, result, _.stars.size < 3))
@@ -111,13 +111,13 @@ trait GemsStrategy extends AgsStrategy {
     }
   }
 
-  protected [impl] def search(tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand])(ec: ExecutionContext): Future[List[GemsCatalogSearchResults]] =
+  protected [impl] def search(ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand])(ec: ExecutionContext): Future[List[GemsCatalogSearchResults]] =
     ctx.getBaseCoordinates.asScalaOpt.fold(Future.successful(List.empty[GemsCatalogSearchResults])) { base =>
     // Get the instrument: F2 or GSAOI?
     val gemsInstrument =
       (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI) ? GemsInstrument.gsaoi | GemsInstrument.flamingos2
     // Search options
-    val gemsOptions = new GemsGuideStarSearchOptions(gemsInstrument, tipTiltMode, posAngles.asJava)
+    val gemsOptions = new GemsGuideStarSearchOptions(gemsInstrument, posAngles.asJava)
 
     // Perform the catalog search, using GemsStrategy's backend
     val results = GemsVoTableCatalog(backend, UCAC4).search(ctx, base.toNewModel, gemsOptions, nirBand)(ec)
@@ -147,7 +147,7 @@ trait GemsStrategy extends AgsStrategy {
         Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
     }
 
-    val results = search(GemsTipTiltMode.canopus, ctx, posAngles, None)(ec)
+    val results = search(ctx, posAngles, None)(ec)
     results.map { r =>
       val gemsGuideStars = findGuideStars(ctx, posAngles, r)
 

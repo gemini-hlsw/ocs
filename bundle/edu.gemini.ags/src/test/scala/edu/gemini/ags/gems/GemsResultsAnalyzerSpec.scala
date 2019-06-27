@@ -19,7 +19,6 @@ import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
-import edu.gemini.spModel.gems.GemsTipTiltMode
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.target.SPTarget
@@ -56,12 +55,11 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
     "support Gsaoi Search on TYC 8345-1155-1" in {
       val base = new WorldCoords("17:25:27.529", "-48:27:24.02")
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
-      val tipTiltMode = GemsTipTiltMode.canopus
 
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY).wv(SPSiteQuality.WaterVapor.ANY)
-      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, tipTiltMode, conditions, new TestGemsVoTableCatalog("/gems_TYC_8345_1155_1.xml", conditions))
+      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, conditions, new TestGemsVoTableCatalog("/gems_TYC_8345_1155_1.xml", conditions))
 
-      val expectedResults = if (tipTiltMode == GemsTipTiltMode.both) 4 else 2
+      val expectedResults = 2
       results should have size expectedResults
 
       results.zipWithIndex.foreach { case (r, i) =>
@@ -110,12 +108,11 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
     "support Gsaoi Search on SN-1987A" in {
       val base = new WorldCoords("05:35:28.020", "-69:16:11.07")
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
-      val tipTiltMode = GemsTipTiltMode.canopus
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
 
-      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, tipTiltMode, conditions, new TestGemsVoTableCatalog("/gems_sn1987A.xml", conditions))
+      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, conditions, new TestGemsVoTableCatalog("/gems_sn1987A.xml", conditions))
 
-      val expectedResults = if (tipTiltMode == GemsTipTiltMode.both) 4 else 2
+      val expectedResults = 2
       results should have size expectedResults
 
       results.zipWithIndex.foreach { case (r, i) =>
@@ -164,12 +161,11 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
     "support Gsaoi Search on M6" in {
       val base = new WorldCoords("17:40:20.000", "-32:15:12.00")
       val inst = new Gsaoi
-      val tipTiltMode = GemsTipTiltMode.canopus
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
 
-      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, tipTiltMode, conditions, new TestGemsVoTableCatalog("/gems_m6.xml", conditions))
+      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, conditions, new TestGemsVoTableCatalog("/gems_m6.xml", conditions))
 
-      val expectedResults = if (tipTiltMode == GemsTipTiltMode.both) 4 else 2
+      val expectedResults = 2
       results should have size expectedResults
 
       results.zipWithIndex.foreach { case (r, i) =>
@@ -218,12 +214,11 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
     "support Gsaoi Search on BPM 37093" in {
       val base = new WorldCoords("12:38:49.820", "-49:48:00.20")
       val inst = new Gsaoi
-      val tipTiltMode = GemsTipTiltMode.canopus
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
 
-      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, tipTiltMode, conditions, new TestGemsVoTableCatalog("/gems_bpm_37093.xml", conditions))
+      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, conditions, new TestGemsVoTableCatalog("/gems_bpm_37093.xml", conditions))
 
-      val expectedResults = if (tipTiltMode == GemsTipTiltMode.both) 4 else 2
+      val expectedResults = 2
       results should have size expectedResults
 
       results.zipWithIndex.foreach { case (r, i) =>
@@ -316,7 +311,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
 
   }
 
-  def search(inst: SPInstObsComp, raStr: String, decStr: String, tipTiltMode: GemsTipTiltMode, conditions: Conditions, catalog: TestGemsVoTableCatalog): (List[GemsCatalogSearchResults], List[GemsGuideStars]) = {
+  def search(inst: SPInstObsComp, raStr: String, decStr: String, conditions: Conditions, catalog: TestGemsVoTableCatalog): (List[GemsCatalogSearchResults], List[GemsGuideStars]) = {
     import scala.collection.JavaConverters._
 
     val coords = new WorldCoords(raStr, decStr)
@@ -331,7 +326,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
 
     val posAngles = Set(Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270)).asJava
 
-    val options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles)
+    val options = new GemsGuideStarSearchOptions(instrument, posAngles)
 
     val results = Await.result(catalog.search(obsContext, base.toNewModel, options, scala.None)(implicitly), 5.seconds)
     val gemsResults = GemsResultsAnalyzer.analyze(obsContext, posAngles, results.asJava, scala.None)
