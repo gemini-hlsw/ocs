@@ -32,4 +32,9 @@ public final class EndIdleEvent extends ExecEvent {
         return "End Idle";
     }
 
+    @Override
+    public String toStringProperties() {
+        return "";
+    }
+
 }

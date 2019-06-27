@@ -11,9 +11,10 @@ import edu.gemini.pot.sp.SPObservationID;
  * observation has aborted with a reason why.
  *
  */
-public class ObservationAbortEvent extends SessionEvent {
+public final class ObservationAbortEvent extends SessionEvent {
+
     // The optional reason for the abort
-    private String _reason;
+    private final String _reason;
 
     /**
      * Specialized <tt>{@link SessionEvent}</tt> used to indicate that a session

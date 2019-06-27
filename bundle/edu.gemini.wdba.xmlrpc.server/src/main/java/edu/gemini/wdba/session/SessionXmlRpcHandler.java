@@ -11,8 +11,36 @@ import edu.gemini.wdba.glue.api.WdbaContext;
 import edu.gemini.wdba.xmlrpc.ISessionXmlRpc;
 import edu.gemini.wdba.xmlrpc.ServiceException;
 
+import java.util.logging.Logger;
 import java.util.List;
 import java.util.Map;
+
+//
+// Note, you can run these interactively from the command line via curl.  To do
+// so start your ODB and create an XML file that corresponds to the request.
+// Then just send it with
+//
+//    curl curl --data @req.xml http://localhost:8442/wdba
+//
+// An example request:
+//
+//<?xml version="1.0"?>
+//<methodCall>
+//  <methodName>WDBA_Session.sequenceStart</methodName>
+//  <params>
+//    <param>
+//      <value>session-0</value>
+//    </param>
+//    <param>
+//      <value>GS-2019A-Q-600-1</value>
+//    </param>
+//    <param>
+//      <value>S20190627S0001</value>
+//    </param>
+//  </params>
+//</methodCall>
+//
+//
 
 /**
  * Implementation of the OCS Session functionality.
@@ -21,6 +49,23 @@ import java.util.Map;
  * @author K.Gillies
  */
 public final class SessionXmlRpcHandler implements ISessionXmlRpc {
+
+    private static final Logger LOG = Logger.getLogger(SessionXmlRpcHandler.class.getName());
+
+    // SessionXmlRpcHandler appears to be an entry point for receiving events
+    // from the SeqExec so we'll log each call here.
+    private static void log(String method, String... args) {
+        final List<String> as = new java.util.ArrayList<>();
+        for (int i=0; i<args.length; i+=2) {
+            final String rhs = args[i];
+            final String lhs = (args[i+1] == null) ? "null" : "'" + args[i+1] + "'";
+            as.add(rhs + "=" + lhs);
+        }
+        LOG.info(as.stream().collect(
+            java.util.stream.Collectors.joining(", ", method + "(", ")")
+        ));
+    }
+
 
     // Create the "SessionManagement" instance when we have the WdbaContext.
     // Unfortunately SessionXmlRpcHandler has to have a no-args constructor so
@@ -152,6 +197,7 @@ public final class SessionXmlRpcHandler implements ISessionXmlRpc {
      * Sender indicates that an observation has started.
      */
     public boolean observationStart(String sessionId, String observationId) throws ServiceException {
+        log("observationStart", "sessionId", sessionId, "observationId", observationId);
         return sm().observationStart(sessionId, observationId);
     }
 
@@ -160,6 +206,7 @@ public final class SessionXmlRpcHandler implements ISessionXmlRpc {
      * the idle state.
      */
     public boolean observationEnd(String sessionId, String observationId) throws ServiceException {
+        log("observationEnd", "sessionId", sessionId, "observationId", observationId);
         return sm().observationEnd(sessionId, observationId);
     }
 
@@ -168,6 +215,7 @@ public final class SessionXmlRpcHandler implements ISessionXmlRpc {
      * a category for why it is idle.
      */
     public boolean setIdleCause(String sessionId, String category, String comment) throws ServiceException {
+        log("setIdleCause", "sessionId", sessionId, "category", category, "comment", comment);
         return sm().setIdleCause(sessionId, category, comment);
     }
 
@@ -175,6 +223,7 @@ public final class SessionXmlRpcHandler implements ISessionXmlRpc {
      * Indicate that the sequence of the observation in the session is started.
      */
     public boolean sequenceStart(String sessionId, String observationId, String startFileName) throws ServiceException {
+        log("sequenceStart", "sessionId", sessionId, "observationId", observationId, "startFileName", startFileName);
         return sm().sequenceStart(sessionId, observationId, startFileName);
     }
 
@@ -182,6 +231,7 @@ public final class SessionXmlRpcHandler implements ISessionXmlRpc {
      * Indicates that the sequence for the observation has ended.
      */
     public boolean sequenceEnd(String sessionId, String observationId) throws ServiceException {
+        log("sequenceEnd", "sessionId", sessionId, "observationId", observationId);
         return sm().sequenceEnd(sessionId, observationId);
     }
 
@@ -189,6 +239,7 @@ public final class SessionXmlRpcHandler implements ISessionXmlRpc {
      * Indicate that the sequence or observation has been abandoned for a specific reason.
      */
     public boolean observationAbort(String sessionId, String observationId, String reason) throws ServiceException {
+        log("observationAbort", "sessionId", sessionId, "observationId", observationId, "reason", reason);
         return sm().observationAbort(sessionId, observationId, reason);
     }
 
@@ -196,6 +247,7 @@ public final class SessionXmlRpcHandler implements ISessionXmlRpc {
      * Indicate that the sequence or observation has been paused for a specific reason.
      */
     public boolean observationPause(String sessionId, String observationId, String reason) throws ServiceException {
+        log("observationPause", "sessionId", sessionId, "observationId", observationId, "reason", reason);
         return sm().observationPause(sessionId, observationId, reason);
     }
 
@@ -203,6 +255,7 @@ public final class SessionXmlRpcHandler implements ISessionXmlRpc {
      * Indicate that the sequence or observation has been stopped for a specific reason.
      */
     public boolean observationStop(String sessionId, String observationId, String reason) throws ServiceException {
+        log("observationStop", "sessionId", sessionId, "observationId", observationId, "reason", reason);
         return sm().observationStop(sessionId, observationId, reason);
     }
 
@@ -210,6 +263,7 @@ public final class SessionXmlRpcHandler implements ISessionXmlRpc {
      * Indicate that the sequence or observation has been paused for a specific reason.
      */
     public boolean observationContinue(String sessionId, String observationId) throws ServiceException {
+        log("observationContinue", "sessionId", sessionId, "observationId", observationId);
         return sm().observationContinue(sessionId, observationId);
     }
 
@@ -217,6 +271,7 @@ public final class SessionXmlRpcHandler implements ISessionXmlRpc {
      * Indicates that the observe to collect a dataset has started
      */
     public boolean datasetStart(String sessionId, String observationId, String datasetId, String fileName) throws ServiceException {
+        log("datasetStart", "sessionId", sessionId, "observationId", observationId, "datasetId", datasetId, "fileName", fileName);
         return sm().datasetStart(sessionId, observationId, datasetId, fileName);
     }
 
@@ -224,6 +279,7 @@ public final class SessionXmlRpcHandler implements ISessionXmlRpc {
      * Indicates that one of the datasets for the observation has been completed.
      */
     public boolean datasetComplete(String sessionId, String observationId, String datasetId, String fileName) throws ServiceException {
+        log("datasetComplete", "sessionId", sessionId, "observationId", observationId, "datasetId", datasetId, "fileName", fileName);
         return sm().datasetComplete(sessionId, observationId, datasetId, fileName);
     }
 }

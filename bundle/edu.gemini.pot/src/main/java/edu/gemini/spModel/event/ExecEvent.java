@@ -7,6 +7,8 @@ import edu.gemini.spModel.pio.PioParseException;
 import edu.gemini.shared.util.GeminiRuntimeException;
 
 import java.io.Serializable;
+import java.time.Instant;
+import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 import java.util.Comparator;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -148,4 +150,20 @@ public abstract class ExecEvent implements Serializable {
      * Returns a human-readable name for the event.
      */
     public abstract String getName();
+
+    @Override
+    public String toString() {
+        final String subProps          = toStringProperties();
+        final String formattedSubProps = "".equals(subProps) ? "" : ", " + subProps;
+
+        return String.format(
+            "%s {timestamp=%d (%s)%s}",
+            getName(),
+            _timestamp,
+            ISO_INSTANT.format(Instant.ofEpochMilli(_timestamp)),
+            formattedSubProps
+        );
+    }
+
+    protected abstract String toStringProperties();
 }

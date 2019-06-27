@@ -5,6 +5,7 @@
 package edu.gemini.spModel.event;
 
 import edu.gemini.pot.sp.SPObservationID;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioParseException;
 import edu.gemini.spModel.pio.Pio;
@@ -17,7 +18,7 @@ public final class AbortObserveEvent extends ObsExecEvent {
 
     public static final String REASON_PARAM = "reason";
 
-    private String _reason;
+    private final String _reason;
 
     public AbortObserveEvent(long time, SPObservationID obsId, String reason) {
         super(time, obsId);
@@ -75,5 +76,14 @@ public final class AbortObserveEvent extends ObsExecEvent {
 
     public String getName() {
         return "Abort Observe";
+    }
+
+    @Override
+    public String toStringProperties() {
+        return String.format(
+            "%s, reason=%s",
+            super.toStringProperties(),
+            ImOption.apply(_reason).map(s -> String.format("'%s'", s)).getOrNull()
+        );
     }
 }

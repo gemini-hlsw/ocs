@@ -10,11 +10,13 @@ import edu.gemini.pot.sp.SPObservationID;
  * Specialized <tt>{@link SessionEvent}</tt> used to indicate that a dataset
  * has been collected and completed.
  */
-public class DatasetCompleteEvent extends SessionEvent {
+public final class DatasetCompleteEvent extends SessionEvent {
+
     // The dataset label
-    private String _dataLabel;
+    private final String _dataLabel;
+
     // The matching filename
-    private String _fileName;
+    private final String _fileName;
 
     /**
      * Specialized <tt>{@link SessionEvent}</tt> used to indicate that a dataset

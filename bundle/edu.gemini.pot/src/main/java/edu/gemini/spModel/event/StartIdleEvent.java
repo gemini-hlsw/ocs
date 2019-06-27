@@ -4,6 +4,7 @@
 
 package edu.gemini.spModel.event;
 
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioParseException;
 import edu.gemini.spModel.pio.Pio;
@@ -16,7 +17,7 @@ public final class StartIdleEvent extends ExecEvent {
 
     public static final String REASON_PARAM = "reason";
 
-    private String _reason;
+    private final String _reason;
 
     public StartIdleEvent(long time, String reason) {
         super(time);
@@ -75,4 +76,13 @@ public final class StartIdleEvent extends ExecEvent {
     public String getName() {
         return "Start Idle";
     }
+
+    @Override
+    public String toStringProperties() {
+        return String.format(
+            "reason=%s",
+            ImOption.apply(_reason).map(s -> String.format("'%s'", s)).getOrNull()
+        );
+    }
+
 }

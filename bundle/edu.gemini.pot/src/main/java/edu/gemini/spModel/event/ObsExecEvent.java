@@ -80,4 +80,9 @@ public abstract class ObsExecEvent extends ExecEvent {
         return 37 * res + _obsId.hashCode();
     }
 
+    @Override
+    protected String toStringProperties() {
+        return String.format("obsId=%s", _obsId);
+    }
+
 }

@@ -66,8 +66,8 @@ public final class ObsExecEventHandler {
         }
 
         @Override public void endDataset(ExecEvent event) { updateObsLog(); }
-        
-        private void updateObsLog() { updateObsLog(None.<DatasetLabel>instance()); }
+
+        private void updateObsLog() { updateObsLog(None.instance()); }
 
         private void updateObsLog(Option<DatasetLabel> label) {
             ObsExecLog.updateObsLog(db, obs.getObservationID(), label, new Some<ObsExecEvent>(evt));

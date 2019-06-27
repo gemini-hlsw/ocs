@@ -257,10 +257,12 @@ public final class ObsExecRecord implements Serializable {
     private synchronized void _handleStartDataset(Dataset dataset, Config config) {
         _cleanupTentativeDataset();
 
-        DatasetLabel label = dataset.getLabel();
+        final DatasetLabel label = dataset.getLabel();
         _tentativeDataset = dataset;
         if (config == null) config = new DefaultConfig();
         _tentativeConfig  = config;
+
+        LOG.info(String.format("Now expecting end dataset for '%s'.", label));
 
         // Add the dataset to the map, creating the DatasetRecord wrapper
         // for it.  Only do this for new datasets though. It would be best
@@ -303,6 +305,7 @@ public final class ObsExecRecord implements Serializable {
         _configStore.addConfigAndLabel(_tentativeConfig, label);
         _tentativeDataset = null;
         _tentativeConfig  = null;
+        LOG.info(String.format("Processed end dataset for '%s'.", label));
     }
 
     // Called to cleanup data structures when we don't receive the events

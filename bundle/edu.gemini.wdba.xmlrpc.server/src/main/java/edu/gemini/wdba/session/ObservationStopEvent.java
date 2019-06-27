@@ -5,15 +5,17 @@
 package edu.gemini.wdba.session;
 
 import edu.gemini.pot.sp.SPObservationID;
+import edu.gemini.shared.util.immutable.ImOption;
 
 /**
  * Specialized <tt>{@link SessionEvent}</tt> used to indicate that a session
  * observation has stopped with a reason why.
  *
  */
-public class ObservationStopEvent extends SessionEvent {
+public final class ObservationStopEvent extends SessionEvent {
+
     // The optional reason for the stopping
-    private String _reason;
+    private final String _reason;
 
     /**
      * Specialized <tt>{@link SessionEvent}</tt> used to indicate that a session

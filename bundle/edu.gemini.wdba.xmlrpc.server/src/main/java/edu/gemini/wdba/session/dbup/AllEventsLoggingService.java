@@ -118,6 +118,10 @@ public class AllEventsLoggingService extends AbstractSessionEventConsumer implem
         }
     }
 
+    public String getName() {
+        return "AllEventsLoggingService";
+    }
+
     public void doMsgUpdate(ExecEvent evt) throws WdbaGlueException {
         try {
             evt.doAction(_action);
