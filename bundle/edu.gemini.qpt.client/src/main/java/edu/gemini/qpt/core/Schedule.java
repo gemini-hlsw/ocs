@@ -359,14 +359,15 @@ public final class Schedule extends BaseMutableBean implements PioSerializable, 
 
     @SuppressWarnings("unchecked")
     public void setIctdSummary(Option<IctdSummary> ictd) {
-        final Option<IctdSummary> prev = this.ictdSummary;
-
         invalidateAllCaches();
 
         this.ictdSummary = ictd;
         doPublicFacilitiesUpdate(() -> ictd.foreach(i -> matchFacilitiesToIctd(i.featureAvailabilityJava())));
 
-        firePropertyChange(PROP_ICTD, prev, ictd);
+        // REL-3696: always fire the ICTD update property regardless of whether
+        // anything changed (previous is `null`) so that listeners respond to
+        // the update and reset to ICTD values.
+        firePropertyChange(PROP_ICTD, null, ictd);
     }
 
     /**
