@@ -25,14 +25,11 @@ public abstract class AbstractSessionEventConsumer implements ISessionEventListe
 
     private static final Logger LOG = Logger.getLogger(AbstractSessionEventConsumer.class.getName());
 
-    private EventQueue _evq = null;
-    private boolean _done = false;
-
     /**
      * Internal class to handle queuing of events for this thread
     **/
-    private class EventQueue {
-        private LinkedList<ExecEvent> _list = new LinkedList<ExecEvent>();
+    private static final class EventQueue {
+        private LinkedList<ExecEvent> _list = new LinkedList<>();
 
         // Add an event and notify listeners
         private synchronized void add(ExecEvent ev) {
@@ -49,10 +46,10 @@ public abstract class AbstractSessionEventConsumer implements ISessionEventListe
         }
     }
 
+    private final EventQueue _evq = new EventQueue();
+
     public AbstractSessionEventConsumer(ISessionEventProducer ssp) {
         if (ssp == null) throw new NullPointerException();
-
-        _evq = new EventQueue();
         ssp.addSessionEventListener(this);
     }
 
@@ -69,21 +66,22 @@ public abstract class AbstractSessionEventConsumer implements ISessionEventListe
      * @param sse an <code>ExecEvent</code>
      */
     public void sessionUpdate(ExecEvent sse) {
+        LOG.info(String.format("%s: enqueueing event: %s", getName(), sse));
         // Place on queue
         _evq.add(sse);
     }
 
-    public void stop() {
-        _done = true;
-    }
+    public abstract String getName();
 
     // Runnable
     public void run() {
         // Remove from queue and run
-        while (!_done) {
+        while (true) {
             try {
-                ExecEvent se = _evq.remove();
+                final ExecEvent se = _evq.remove();
+                LOG.info(String.format("%s: start processing event: %s", getName(), se));
                 doMsgUpdate(se);
+                LOG.info(String.format("%s: done processing event: %s", getName(), se));
             } catch (WdbaGlueException ex) {
                 LOG.severe("Logging the service exception from the thread!");
                 LOG.log(Level.SEVERE,  ex.getMessage(), ex);

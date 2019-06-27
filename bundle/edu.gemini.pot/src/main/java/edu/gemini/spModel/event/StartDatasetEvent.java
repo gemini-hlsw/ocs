@@ -73,11 +73,11 @@ public final class StartDatasetEvent extends ObsExecEvent {
     }
 
     @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("StartDatasetEvent{");
-        sb.append("timestamp=").append(getTimestamp()).append(", ");
-        sb.append("dataset=").append(_dataset);
-        sb.append('}');
-        return sb.toString();
+    public String toStringProperties() {
+        return String.format(
+            "%s, dataset=%s",
+            super.toStringProperties(),
+            _dataset
+        );
     }
 }

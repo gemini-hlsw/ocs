@@ -82,18 +82,20 @@ public class DBUpdateService extends AbstractSessionEventConsumer {
         nightlyRecord.addObservation(obsId);
         nightlyRecordNode.setDataObject(nightlyRecord);
 
-        LOG.info("Added observation ID to nightly plan: " + obsId.stringValue());
+        LOG.info("Added observation ID to nightly record: " + obsId.stringValue());
+    }
+
+    public String getName() {
+        return "DBUpdateService";
     }
 
     public void doMsgUpdate(ExecEvent evt) throws WdbaGlueException {
         try {
             if (evt instanceof StartSequenceEvent) {
-                ObsExecEvent oevt = (ObsExecEvent) evt;
-                SPObservationID obsId = oevt.getObsId();
-                _addToNightlyRecord(obsId);
+                _addToNightlyRecord(((ObsExecEvent) evt).getObsId());
             }
             if (evt instanceof ObsExecEvent) {
-                WdbaDatabaseAccessService dbAccess = _context.getWdbaDatabaseAccessService();
+                final WdbaDatabaseAccessService dbAccess = _context.getWdbaDatabaseAccessService();
                 ObsExecEventFunctor.handle((ObsExecEvent) evt, dbAccess.getDatabase(), _context.user);
             }
         } catch (Throwable ex) {

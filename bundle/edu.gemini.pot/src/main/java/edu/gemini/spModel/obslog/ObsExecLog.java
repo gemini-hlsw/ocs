@@ -261,6 +261,7 @@ public final class ObsExecLog extends AbstractDataObject implements ISPMergeable
                 seqData.foreach(sd -> log.execLogDataObject.setCompletedSteps(sd.seq, sd.label));
 
             } catch (Exception ex) {
+                LOG.log(Level.WARNING, String.format("Could not update %s ObsLog for event: %s", obsId, evt.getOrNull()), ex);
                 throw new RuntimeException(ex);
             }
         });

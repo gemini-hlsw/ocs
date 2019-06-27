@@ -16,11 +16,10 @@ import java.util.EventObject;
  * that require more information.
  */
 public class SessionEvent extends EventObject {
-    // Used when the observation id isn't needed
 
-    private EventMsg _msg;
-    private SPObservationID _observationID;
-    private long _time;
+    private final EventMsg _msg;
+    private final SPObservationID _observationID;
+    private final long _time;
 
     /**
      * Creates with the source the state itself, the sessionId, and the observationId.
@@ -34,22 +33,10 @@ public class SessionEvent extends EventObject {
      */
     public SessionEvent(Object source, SPObservationID observationID, EventMsg msg) {
         super(source);
-        _observationID = observationID;
-        _msg = msg;
-        _time = System.currentTimeMillis();
-    }
 
-    /**
-     * A copy constructor that takes a current event and a new message.  Used for creating new events
-     * from ones that have been received.  Note the time is that of the current event.
-     * @param evt A <code>SessionEvent</code> or subclass
-     * @param msg An <code>EventMsg</code>
-     */
-    public SessionEvent(SessionEvent evt, EventMsg msg) {
-        super(evt.getSource());
-        //_observationID = evt.getObservationID();
-        _time = evt.getTime();
-        _msg = msg;
+        _observationID = observationID;
+        _msg           = msg;
+        _time          = System.currentTimeMillis();
     }
 
     /**

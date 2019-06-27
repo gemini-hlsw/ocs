@@ -10,9 +10,10 @@ import edu.gemini.pot.sp.SPObservationID;
  * Specialized <tt>{@link SessionEvent}</tt> used to indicate the start of an
  * observation's sequence.
  */
-public class SequenceStartEvent extends SessionEvent {
+public final class SequenceStartEvent extends SessionEvent {
+
     // The starting filename
-    private String _startFileName;
+    private final String _startFileName;
 
     /**
      * Specialized <tt>{@link SessionEvent}</tt> used to indicate that a dataset
