@@ -1,6 +1,6 @@
 package edu.gemini.ags.gems
 
-import edu.gemini.spModel.core.{RBandsList, Angle}
+import edu.gemini.spModel.core.{Angle, RBandsList, SiderealTarget}
 import edu.gemini.spModel.gemini.gems.CanopusWfs
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
 import edu.gemini.spModel.gems.GemsGuideProbeGroup
@@ -11,9 +11,14 @@ import edu.gemini.shared.util.immutable.{None => JNone}
 import edu.gemini.pot.ModelConverters._
 
 import scala.annotation.tailrec
-
 import scalaz._
 import Scalaz._
+
+/**
+  * An NGS2 result comprises a classical GeMS catalog search result and a set of PWFS1 candidates.
+  */
+case class NGS2Result(gemsCatalogSearchResult: java.util.List[GemsCatalogSearchResults],
+                      pwfs1Results: java.util.List[SiderealTarget])
 
 case class GemsStrehl(avg: Double = .0, rms: Double = .0, min: Double = .0, max: Double = .0)
 
@@ -25,8 +30,6 @@ case class GemsStrehl(avg: Double = .0, rms: Double = .0, min: Double = .0, max:
  * There must be one flexure star taken from the opposite group. For example, if a Canopus
  * asterism is used for tiptilt, then the flexure star is a GSAOI ODGW star if using GSAOI
  * or an F2 OIWFS star if using Flamingos2.
- * If the tip tilt asterism is assigned to the GSAOI ODGW group, then the flexure star must
- * be assigned to CWFS3.
  * Flamingos 2 OIWFS can only ever be used for the flexure star.
  * The GemsCatalogSearchCriterion available in the input will contain all the options that
  * need be considered (i.e., the F2 OIWFS "group" will never appear with "tiptilt" type).

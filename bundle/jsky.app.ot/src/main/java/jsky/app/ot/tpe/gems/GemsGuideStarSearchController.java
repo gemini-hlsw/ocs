@@ -1,5 +1,6 @@
 package jsky.app.ot.tpe.gems;
 
+import edu.gemini.ags.gems.NGS2Result;
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.skycalc.Angle;
@@ -54,21 +55,21 @@ class GemsGuideStarSearchController {
         final Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
 
         final MagnitudeBand nirBand = _model.getBand().getBand();
-        List<GemsCatalogSearchResults> results;
+        NGS2Result results;
         try {
             results = _worker.search(_model.getCatalog(), obsContext, posAngles,
                     new scala.Some<>(nirBand), ec);
         } catch(Exception e) {
             DialogUtil.error(_dialog, e);
-            results = new ArrayList<>();
+            results = new NGS2Result(new ArrayList<>(), new ArrayList<>());
             _dialog.setState(GemsGuideStarSearchDialog.State.PRE_QUERY);
         }
 
         if (_model.isReviewCandidatesBeforeSearch()) {
-            _model.setGemsCatalogSearchResults(results);
+            _model.setGemsCatalogSearchResults(results.gemsCatalogSearchResult());
         } else {
-            _model.setGemsCatalogSearchResults(results);
-            _model.setGemsGuideStars(_worker.findAllGuideStars(obsContext, posAngles, results));
+            _model.setGemsCatalogSearchResults(results.gemsCatalogSearchResult());
+            _model.setGemsGuideStars(_worker.findAllGuideStars(obsContext, posAngles, results.gemsCatalogSearchResult()));
         }
     }
 

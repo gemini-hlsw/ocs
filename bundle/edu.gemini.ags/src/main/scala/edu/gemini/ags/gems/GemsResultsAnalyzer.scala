@@ -66,7 +66,7 @@ object GemsResultsAnalyzer {
         val flexureGroup = pair.flexureResults.criterion.key.group
         val tiptiltTargetsList = filter(obsContext, pair.tiptiltResults.results, tiptiltGroup, posAngles.asScala.toSet)
         val flexureTargetsList = filter(obsContext, pair.flexureResults.results, flexureGroup, posAngles.asScala.toSet)
-        val tiptiltGroupPreAsterismFilter: (List[SiderealTarget] => Boolean) = lst => tiptiltGroup.asterismPreFilter(lst.asImList)
+        val tiptiltGroupPreAsterismFilter: List[SiderealTarget] => Boolean = lst => tiptiltGroup.asterismPreFilter(lst.asImList)
 
         if (tiptiltTargetsList.nonEmpty && flexureTargetsList.nonEmpty) {
           // tell the UI to update
@@ -245,11 +245,11 @@ object GemsResultsAnalyzer {
   // combinations of cwfs1 and cwfs2, since cwfs3 is otherwise fixed)
   private def assignGuideProbeTarget(obsContext: ObsContext, posAngle: Angle, group: GemsGuideProbeGroup, target: SiderealTarget, tiptiltGroup: GemsGuideProbeGroup, otherTargets: List[GuideProbeTargets], tiptiltTargetList: List[SiderealTarget], reverseOrder: Boolean): Option[GuideProbeTargets] = {
     // First try to assign cwfs3 to the brightest star, if applicable (assignCwfs3ToBrightest arg = true)
-    val probe = guideProbe(obsContext, target, group, posAngle, tiptiltGroup, otherTargets, tiptiltTargetList, assignCwfs3ToBrightest = true, reverseOrder = reverseOrder)
+    val probe = guideProbe(obsContext, target, group, posAngle, tiptiltGroup, otherTargets, tiptiltTargetList, reverseOrder = reverseOrder)
     val gp = probe match {
       case None if "CWFS" == tiptiltGroup.getKey =>
         // if that didn't work, try to assign cwfs3 to the second brightest star (assignCwfs3ToBrightest arg = false)
-        guideProbe(obsContext, target, group, posAngle, tiptiltGroup, otherTargets, tiptiltTargetList, assignCwfs3ToBrightest = false, reverseOrder = reverseOrder)
+        guideProbe(obsContext, target, group, posAngle, tiptiltGroup, otherTargets, tiptiltTargetList, reverseOrder = reverseOrder)
       case                                     _ =>
         probe
     }
@@ -287,7 +287,9 @@ object GemsResultsAnalyzer {
   // otherwise the second brightest (OT-27).
   // If reverseOrder is true, reverse the order in which guide probes are tried (to make sure to get all
   // combinations of cwfs1 and cwfs2, since cwfs3 is otherwise fixed)
-  private def guideProbe(obsContext: ObsContext, target: SiderealTarget, group: GemsGuideProbeGroup, posAngle: Angle, tiptiltGroup: GemsGuideProbeGroup, otherTargets: List[GuideProbeTargets], tiptiltTargetList: List[SiderealTarget], assignCwfs3ToBrightest: Boolean, reverseOrder: Boolean): Option[ValidatableGuideProbe] = {
+  private def guideProbe(obsContext: ObsContext, target: SiderealTarget, group: GemsGuideProbeGroup, posAngle: Angle,
+                         tiptiltGroup: GemsGuideProbeGroup, otherTargets: List[GuideProbeTargets],
+                         tiptiltTargetList: List[SiderealTarget], reverseOrder: Boolean): Option[ValidatableGuideProbe] = {
     val ctx = obsContext.withPositionAngle(posAngle)
     val isFlexure = tiptiltGroup != group
     val isTiptilt = !isFlexure
@@ -296,7 +298,7 @@ object GemsResultsAnalyzer {
       val valid = validate(ctx, target, guideProbe)
       val otherTargetsValid = checkOtherTargets(guideProbe, otherTargets)
       if (valid && otherTargetsValid && isTiptilt && "CWFS" == tiptiltGroup.getKey) {
-        checkCwfs3Rule(guideProbe, target, tiptiltTargetList, assignCwfs3ToBrightest)
+        true
       } else if (valid && isTiptilt) {
         otherTargetsValid
       } else {
@@ -304,14 +306,8 @@ object GemsResultsAnalyzer {
       }
     }
 
-    // Special case:
-    // If the tip tilt asterism is assigned to the GSAOI ODGW group, then the flexure star must be assigned to CWFS3.
-    if (isFlexure && ("ODGW" == tiptiltGroup.getKey) && CanopusWfs.cwfs3.validate(toSPTarget(target), ctx) == GuideStarValidation.VALID) {
-      CanopusWfs.cwfs3.some
-    } else {
-      val members = if (reverseOrder) group.getMembers.asScala.toList.reverse else group.getMembers.asScala.toList
-      members.find(isValidGuideProbe)
-    }
+    val members = if (reverseOrder) group.getMembers.asScala.toList.reverse else group.getMembers.asScala.toList
+    members.find(isValidGuideProbe)
   }
 
   // Returns true if the given target is valid for the given guide probe
@@ -326,29 +322,6 @@ object GemsResultsAnalyzer {
       case _                         =>
         true
     }
-
-  // Returns true if the given cwfs guide probe can be assigned to the given target according to the rules in OT-27.
-  // If assignCwfs3ToBrightest is true, the brightest star in the asterism (in tiptiltTargetList) is assigned to cwfs3,
-  // otherwise the second brightest (OT-27).
-  private def checkCwfs3Rule(guideProbe: GuideProbe, target: SiderealTarget, tiptiltTargetList: List[SiderealTarget], assignCwfs3ToBrightest: Boolean): Boolean = {
-    val isCwfs3 = guideProbe == CanopusWfs.cwfs3
-    // sort, put brightest stars first
-    val targets = sortTargetsByBrightness(tiptiltTargetList)
-    targets match {
-      case Nil                                                                      =>
-        isCwfs3 // no asterism
-      case _ :: Nil                                                                 =>
-        isCwfs3 // single star asterism must be cwfs3
-      case brightest :: secondBrightest :: _ if isCwfs3 && assignCwfs3ToBrightest   =>
-        brightest == target
-      case brightest :: secondBrightest :: _ if isCwfs3 && !assignCwfs3ToBrightest  =>
-        secondBrightest == target
-      case brightest :: secondBrightest :: _ if !isCwfs3 && assignCwfs3ToBrightest  =>
-        brightest != target
-      case brightest :: secondBrightest :: _ if !isCwfs3 && !assignCwfs3ToBrightest =>
-        secondBrightest != target
-    }
-  }
 
   // Returns true if none of the other targets are assigned the given guide probe.
   //
