@@ -268,14 +268,22 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         GemsInstrument instrument = inst instanceof Flamingos2 ? GemsInstrument.flamingos2 : GemsInstrument.gsaoi;
         GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(instrument, posAngles);
 
+        System.out.println("*** PERFORMING GeMS LOOKUP ***");
         final List<GemsCatalogSearchResults> results = new GemsVoTableCatalog(ConeSearchBackend.instance(), catalog.catalog()).search4Java(obsContext, ModelConverters.toCoordinates(base), options, nirBand, 30, ec);
+        results.forEach(r -> r.resultsAsJava().forEach(t -> System.out.println(t.name())));
+        System.out.println("*** GeMS LOOKUP DONE ***");
 
         // Look up a PWFS1 guide star.
+        System.out.println("*** PERFORMING PWFS1 LOOKUP ***");
         final Option<AgsStrategy> pwfsOpt = AgsRegistrar.lookupForJava(AgsStrategyKey.Pwfs1SouthKey$.MODULE$);
         // We did it up there for the basePos and baseRA / baseDec, so why not continue sound coding practices?
         final AgsStrategy pwfs = pwfsOpt.getOrNull();
         final AgsMagnitude.MagnitudeTable magTable = ProbeLimitsTable.loadOrThrow();
         final List<ProbeCandidates> pwfsCandidates = pwfs.candidatesForJava(obsContext, magTable, 30, ec);
+        System.out.println("Size of ProbeCandidates: " + pwfsCandidates.size());
+        pwfsCandidates.forEach(c -> System.out.println(c.gp().getDisplayName() + " has " + c.targets().size() + " targets:"));
+        pwfsCandidates.forEach(c -> c.targets().forEach(t -> System.out.println(t.name())));
+        System.out.println("*** PWFS1 LOOKUP DONE ***");
         return results;
     }
 

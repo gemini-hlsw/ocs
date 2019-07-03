@@ -57,8 +57,8 @@ case class GemsGuideStars(pa: Angle, tiptiltGroup: GemsGuideProbeGroup, strehl: 
     val thisContainsOdgw1 = this.guideGroup.contains(GsaoiOdgw.odgw1)
     val thatContainsOdgw1 = that.guideGroup.contains(GsaoiOdgw.odgw1)
     if (thisContainsOdgw1 == thatContainsOdgw1) {
-      val thisStrel  = this.getAverageStrehlForCompare
-      val thatStrehl = that.getAverageStrehlForCompare
+      val thisStrel  = this.strehl.avg
+      val thatStrehl = that.strehl.avg
 
       val strehlDifference = (Math.abs(thisStrel - thatStrehl) / ((thisStrel + thatStrehl) / 2.0)) * 100
       if (strehlDifference > 2) {
@@ -84,46 +84,6 @@ case class GemsGuideStars(pa: Angle, tiptiltGroup: GemsGuideProbeGroup, strehl: 
     } else {
       thatContainsOdgw1.compareTo(thisContainsOdgw1)
     }
-  }
-
-
-  // Returns the average Strehl value, minus 20% if it is a Canopus asterism and cwfs3 is not assigned to the
-  // brightest star.
-  //
-  // OT-27:
-  // When using Canopus for tiptilt correction, the brightest star of the asterism (in R)
-  // must be assigned to CWFS3 unless by not doing so the average Strehl can be improved
-  // by more than 20%. In this case, the second brightest star should be assigned to CWFS3
-  // as long as the faintness limit (R=17.5) is met.
-  protected def getAverageStrehlForCompare: Double = {
-    val avg = strehl.avg
-    if ("CWFS" == tiptiltGroup.getKey && !cwfs3IsBrightest) {
-      // Previous code ensures that cwfs3 is either the brightest or second brightest
-      // so this assumes cwfs3 is the second brightest
-      avg - avg * 0.2
-    } else {
-      avg
-    }
-  }
-
-  // Returns true if cwfs3 is the brightest star in the Canopus asterism
-  private def cwfs3IsBrightest: Boolean = {
-    val cwfs1 = getRLikeMag(guideGroup.get(CanopusWfs.cwfs1).asScalaOpt)
-    val cwfs2 = getRLikeMag(guideGroup.get(CanopusWfs.cwfs2).asScalaOpt)
-    val cwfs3 = getRLikeMag(guideGroup.get(CanopusWfs.cwfs3).asScalaOpt)
-    cwfs3 < cwfs2 && cwfs3 < cwfs1
-  }
-
-  /**
-   * Find on the guide probe's primary target the value of the R-like magnitude
-   */
-  private def getRLikeMag(gp: Option[GuideProbeTargets]): Double = {
-    val r = for {
-      g <- gp
-      p <- g.getPrimary.asScalaOpt
-      m <- RBandsList.extract(p.toSiderealTarget(None))
-    } yield m.value
-    r.getOrElse(99.0)
   }
 
   override def toString: String = {
