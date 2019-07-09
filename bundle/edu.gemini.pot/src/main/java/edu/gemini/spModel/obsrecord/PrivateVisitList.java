@@ -167,7 +167,8 @@ final class PrivateVisitList implements Serializable {
         ObsQaRecord        qa,
         ConfigStore        store
     ) {
-        return imObsVisits(instrument, oc, qa, store).toArray();
+        final ImList<ObsVisit> vs = imObsVisits(instrument, oc, qa, store);
+        return vs.toList().toArray(new ObsVisit[vs.size()]);
     }
 
     ObsVisit[] getObsVisits(
@@ -178,9 +179,9 @@ final class PrivateVisitList implements Serializable {
         long               startTime,
         long               endTime
     ) {
-        return imObsVisits(instrument, oc, qa, store)
-                   .filter(v -> (startTime <= v.getStartTime()) && (v.getStartTime() < endTime))
-                   .toArray();
+        final ImList<ObsVisit> vs = imObsVisits(instrument, oc, qa, store)
+                   .filter(v -> (startTime <= v.getStartTime()) && (v.getStartTime() < endTime));
+        return vs.toList().toArray(new ObsVisit[vs.size()]);
     }
 
     public ObsExecStatus getObsExecStatus() {

@@ -10,6 +10,8 @@ import java.util.stream.Stream;
  * The Option implementation that represents the lack of a value.
  */
 public final class None<T> implements Option<T>, Serializable {
+    private static final long serialVersionUID = 7546264759005315670L;
+
     @SuppressWarnings("rawtypes")
     public static None INSTANCE = new None<>();
 

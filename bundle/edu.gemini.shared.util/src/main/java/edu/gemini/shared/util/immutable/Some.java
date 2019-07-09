@@ -9,6 +9,9 @@ import java.util.stream.Stream;
  * The Option implementation that represents the presence of a value.
  */
 public final class Some<T> implements Option<T> {
+
+    private static final long serialVersionUID = -3579855603834180011L;
+
     private final T val;
 
     public Some(final T val) {
