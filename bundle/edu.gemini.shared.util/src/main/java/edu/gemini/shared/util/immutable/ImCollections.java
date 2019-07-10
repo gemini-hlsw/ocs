@@ -7,7 +7,9 @@ import java.util.stream.Stream;
 /**
  * Utility methods for working with immutable collections.
  */
-public class ImCollections {
+public final class ImCollections {
+
+    private ImCollections() { }
 
     @SuppressWarnings("rawtypes")
     public static final ImList EMPTY_LIST = new EmptyList();

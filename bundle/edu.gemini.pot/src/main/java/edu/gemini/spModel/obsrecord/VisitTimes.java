@@ -66,6 +66,21 @@ final class VisitTimes implements Serializable {
         }
     }
 
+    /**
+     * Sums this `VisitTime` and that `VisitTime` producing a new `VisitTime`
+     * result.
+     */
+    VisitTimes plus(final VisitTimes that) {
+        final VisitTimes v = new VisitTimes();
+
+        v.addUnclassifiedTime(this.getUnclassifiedTime() + that.getUnclassifiedTime());
+        for (ChargeClass c : ChargeClass.values()) {
+            v.addClassifiedTime(c, this.getClassifiedTime(c) + that.getClassifiedTime(c));
+        }
+
+        return v;
+    }
+
     ObsTimeCharges getTimeCharges(ChargeClass mainChargeClass) {
         ObsTimeCharge[] charges = getClassifiedTimes();
         int index = mainChargeClass.ordinal();

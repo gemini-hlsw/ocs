@@ -50,6 +50,16 @@ public interface Option<T> extends Iterable<T>, Serializable {
     Option<T> orElse(final Supplier<Option<T>> supplier);
 
     /**
+     * Returns the output of <code>ifEmpty</code> when <code>None</code> and
+     * otherwise the result of function <code>f</code> applied to the value of
+     * <code>Some</code>.
+     */
+    <U> U fold(
+        Supplier<? extends U>             ifEmpty,
+        Function1<? super T, ? extends U> f
+    );
+
+    /**
      * Gets the value assuming there is one, but otherwise returns
      * <code>null</code>.
      */
