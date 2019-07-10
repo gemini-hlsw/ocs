@@ -37,7 +37,7 @@ public class NightObsTimesService {
      * the observation was observed
      */
     public static Collection<NightObsTimes> getObservingNightTimes(ISPObservation obs) {
-        List<NightObsTimes> res = new ArrayList<NightObsTimes>();
+        final List<NightObsTimes> res = new ArrayList<>();
 
         // Get the ObsRecord, if it exists.
         final ObsLog nodes = ObsLog.getIfExists(obs);

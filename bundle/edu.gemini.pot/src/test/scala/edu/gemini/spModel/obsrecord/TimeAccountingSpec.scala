@@ -22,6 +22,7 @@ import org.scalacheck.Prop._
 import org.scalacheck.Gen
 
 import org.specs2.ScalaCheck
+import org.specs2.matcher.MatchResult
 import org.specs2.mutable.Specification
 
 import java.time.{ Duration, Instant }
@@ -43,6 +44,12 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
       Gen.oneOf(ObsClass.values.toList)
     }
 
+  implicit val monoidUnionInterval: Monoid[Union[Interval]] =
+    Monoid.instance(_ + _, new Union[Interval]())
+
+  implicit val monoidVisitTimes: Monoid[VisitTimes] =
+    Monoid.instance(_.plus(_), new VisitTimes())
+
   val ObsId = new SPObservationID("GS-2019A-Q-1")
 
   val eventConstructors: List[Long => ObsExecEvent] = List(
@@ -62,9 +69,9 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
     Gen.oneOf(eventConstructors).map(c => c(at))
 
   final case class Test(
+    visits:     List[VisitEvents],
     instrument: Option[Instrument],
     obsClass:   ObsClass,
-    events:     VisitEvents,
     datasetQa:  Map[DatasetLabel, DatasetQaState],
     datasetOc:  Map[DatasetLabel, ObsClass]
   ) {
@@ -79,9 +86,13 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
       instrument.exists(_ == Instrument.Gpi) && (obsClass == ObsClass.ACQ)
 
     def visitTimes: VisitTimes =
-      TimeAccounting.calc(instrument, obsClass, events.sorted, datasetQa, datasetOc)
+      VisitCalculator.calc(visits, instrument, obsClass, datasetQa, datasetOc).suml
 
-    def show: String = {
+    def sum[A: Monoid](f: VisitEvents => A): A =
+      visits.foldMap(f)
+
+    override def toString: String = {
+
       def format(evt: ObsExecEvent): String = {
         val base = s"${evt.getTimestamp} - ${evt.getClass.getName}"
         evt match {
@@ -95,7 +106,9 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
         }
       }
 
-      events.sorted.map(format).mkString("\n")
+      visits.map { v =>
+        v.sorted.map(format).mkString("---\n\t", "\n\t", "")
+      }.mkString("\n")
     }
 
   }
@@ -121,66 +134,86 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
         List(new StartDatasetEvent(s, d), new EndDatasetEvent(e, lab))
       }.flatten
 
-      val qaMap = labs.zip(qas).toMap
-      val ocMap = labs.zip(ocs).toMap
+      val qaMap  = labs.zip(qas).toMap
+      val ocMap  = labs.zip(ocs).toMap
 
-      Test(inst, oclass, VisitEvents((es ::: des).toVector), qaMap, ocMap)
+      // Split the events into sections that start with a `StartVisitEvent`.
+      val events: List[Vector[ObsExecEvent]] =
+        (es ::: des).toVector.sortBy(_.timestamp).foldRight(List(Vector.empty[ObsExecEvent])) { (e, l) =>
+          val res = (e +: l.head) :: l.tail
+          e match {
+            case sv: StartVisitEvent => Vector.empty[ObsExecEvent] :: res
+            case _                   => res
+          }
+        }
+
+      val visits = (if (events.head.nonEmpty) events else events.tail).map(v => VisitEvents(v))
+
+      Test(visits, inst, oclass, qaMap, ocMap)
     }
 
   }
 
   val GmosSouth     = Some(Instrument.GmosSouth)
+
   val Semester2019A = new Semester(2019, Semester.Half.A)
   val GS19AStart    = Instant.ofEpochMilli(Semester2019A.getStartDate(GS).getTime)
   val GS19AEnd      = Instant.ofEpochMilli(Semester2019A.getEndDate(GS).getTime)
+
+  val Semester2019B = new Semester(2019, Semester.Half.B)
+  val GS19BStart    = Instant.ofEpochMilli(Semester2019B.getStartDate(GS).getTime)
+  val GS19BEnd      = Instant.ofEpochMilli(Semester2019B.getEndDate(GS).getTime)
+
   val DayInMs       = Duration.ofDays(1l).toMillis
 
   "TimeAccounting" should {
 
     "account for all time" in {
       forAll(genTest(GS19AStart, GS19AEnd)) { (t: Test) =>
-        t.events.total.sum shouldEqual t.visitTimes.getTotalTime
+        t.sum(_.total.sum) shouldEqual t.visitTimes.getTotalTime
       }
     }
 
     "never charge more than available dark time" in {
       forAll(genTest(GS19AStart, GS19AEnd)) { (t: Test) =>
-        t.visitTimes.getChargedTime must be_<=(t.events.dark.sum)
+        t.visitTimes.getChargedTime must be_<=(t.sum(_.dark.sum))
       }
     }
 
     "never charge more than available dark time - overlap" in {
       forAll(genTest(GS19AStart, GS19AEnd)) { (t: Test) =>
-        t.visitTimes.getChargedTime must be_<=(t.events.chargeable.sum)
+        t.visitTimes.getChargedTime must be_<=(t.sum(_.chargeable.sum))
       }
     }
 
     "calculate dark time <= total time" in {
       forAll(genTest(GS19AStart, GS19AEnd)) { (t: Test) =>
-        t.events.dark.sum must be_<=(t.events.total.sum)
+        t.sum(_.dark.sum) must be_<=(t.sum(_.total.sum))
       }
     }
 
     "include in noncharged all overlap time" in {
       forAll(genTest(GS19AStart, GS19AEnd)) { (t: Test) =>
-        t.events.overlap.sum must be_<=(t.visitTimes.getClassifiedTime(NONCHARGED))
+        t.sum(_.overlap.sum) must be_<=(t.visitTimes.getClassifiedTime(NONCHARGED))
       }
     }
 
     "add chargeable time between datasets to unclassified" in {
       forAll(genTest(GS19AStart, GS19AEnd)) { (t: Test) =>
-        // Union of the dataset intervals.
-        val u = new Union(t.events.datasetIntervals.unzip._2.asJava)
 
-        // Use a calc assuming all datasets are PASS (because if they are all
-        // FAIL or USABLE nothing is charged in some cases).
-        val v = TimeAccounting.calc(t.instrument, t.obsClass, t.events.sorted, const(PASS), t.datasetOc)
+        // VisitTimes for each visit
+        val xs = VisitCalculator.calc(t.visits, t.instrument, t.obsClass, const(PASS), t.datasetOc)
 
-        // If there were no datasets, then we don't charge at all.
-        if ((u.sum === 0) && !t.isAlwaysCharged)
-          v.getTotalTime shouldEqual v.getClassifiedTime(NONCHARGED)
-        else
-          v.getUnclassifiedTime shouldEqual (t.events.chargeable - u).sum
+        MatchResult.sequence(t.visits.zip(xs).map { case (v, x) =>
+          // Union of the dataset intervals for this visit
+          val u = new Union(v.datasetIntervals.unzip._2.asJava)
+
+          // If there were no datasets, then we don't charge at all.
+          if ((u.sum === 0) && !t.isAlwaysCharged)
+            x.getTotalTime shouldEqual x.getClassifiedTime(NONCHARGED)
+          else
+            x.getUnclassifiedTime shouldEqual (v.chargeable - u).sum
+        })
       }
     }
 
@@ -188,7 +221,7 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
       forAll(genTest(GS19AStart, GS19AEnd)) { (t: Test) =>
         t.datasetQa.values.exists(_.isChargeable) ||
           t.isAlwaysCharged ||
-          (t.visitTimes === VisitTimes.noncharged(t.events.total.sum))
+          (t.visitTimes === VisitTimes.noncharged(t.sum(_.total.sum)))
       }
     }
 
@@ -202,17 +235,16 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
 
       // All potentially chargeable time (i.e., dark time that isn't
       // overlapped by another observation).
-      val chargeable: Union[Interval] = t.events.chargeable
+      val chargeable: Union[Interval] = t.visits.foldMap(_.chargeable)
 
       // All potentially chargeable time that corresponds to datasets
       val datasetChargeable: Union[Interval] =
-        new Union(t.events.datasetIntervals.map(_._2).asJava) ∩ chargeable
+        t.visits.foldMap(v => new Union(v.datasetIntervals.map(_._2).asJava)) ∩ chargeable
 
       // Either:
       (t.visitTimes.getChargedTime > 0)  ||       // there is some charge
         (chargeable.sum == 0)            ||       // there is no chargeable time anyway
         (datasetChargeable.sum == chargeable.sum) // all the chargeable time was for failed datasets
-
     }
 
     "charge even if there are no passing datasets for visitor instruments" in {
@@ -246,47 +278,88 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
       }
     }
 
+    "charge for slew in 2019B+" in {
+      forAll(genTest(GS19BStart.plusMillis(DayInMs), GS19BEnd)) { (t: Test) =>
+
+        val start: Long =
+          GS19BStart.plusMillis(DayInMs/2).toEpochMilli
+
+        // Make a slew visit that happens before anything in the test.
+        val slew: VisitEvents =
+          VisitEvents(
+            new StartVisitEvent(start, ObsId),
+            new SlewEvent(start + 500, ObsId),
+            new EndVisitEvent(start + 1000, ObsId)
+          )
+
+        // REL-3674: charge for the slew before a chargeable visit.
+        // t1 will be a test with just the first generated visit
+        // ts will be t1 but with an initial slew
+        // Use GmosSouth because it isn't special cased like Visitor or GPI
+        val t1 = Test(t.visits.take(1),  GmosSouth, t.obsClass, t.datasetQa, t.datasetOc)
+        val ts = Test(slew :: t1.visits, GmosSouth, t.obsClass, t.datasetQa, t.datasetOc)
+
+        // If there is a slew in the next visit, there should be no charge.
+        val testHasSlew = t1.visits.headOption.exists { _.sorted.exists {
+          case s: SlewEvent => true
+          case _            => false
+        }}
+
+        val t1Charge = t1.visitTimes.getChargedTime
+        val tsCharge = ts.visitTimes.getChargedTime
+        val slewCharge = if (testHasSlew || t1Charge == 0) 0 else 1000
+
+        tsCharge shouldEqual (t1Charge + slewCharge)
+      }
+    }
+
     "produce the same result as pre-2019A for 'normal' chargeable event sequences" in {
       forAll(genTest(GS19AStart, GS19AStart.plusMillis(DayInMs - 1))) { (t: Test) =>
         // For this to work, we have to produce an event list that doesn't
         // trigger any of the bugs in the old implementation.
 
-        // Eliminate events that separate start/end dataset pairs.  First, get
-        // a union of intervals that doesn't include the time between start and
-        // and end events
-        val intervals = t.events.sorted.collect {
-          case s: StartDatasetEvent => (s.getDataset.getLabel, s)
-          case e: EndDatasetEvent   => (e.getDatasetLabel, e)
-        }.groupBy(_._1).values.map { v =>
-          // Bump the start of the interval so that the start time itself isn't
-          // included.
-          val i = VisitEvents(v.map(_._2)).intervalOption.get
-          if (i.getLength > 0) new Interval(i.getStart + 1, i.getEnd) else i
+        val visits = t.visits.map { v =>
+          // Eliminate events that separate start/end dataset pairs.  First, get
+          // a union of intervals that doesn't include the time between start and
+          // and end events
+          val intervals = v.sorted.collect {
+            case s: StartDatasetEvent => (s.getDataset.getLabel, s)
+            case e: EndDatasetEvent   => (e.getDatasetLabel,     e)
+          }.groupBy(_._1).values.map { events =>
+            // Bump the start of the interval so that the start time itself isn't
+            // included.
+            val i = VisitEvents(events.map(_._2)).intervalOption.get
+            if (i.getLength > 0) new Interval(i.getStart + 1, i.getEnd) else i
+          }
+          val union = v.total - new Union(intervals.asJavaCollection)
+
+          // Remove any events that fall inside dataset intervals and skip any
+          // leading start dataset events since those are eaten by the old impl.
+          VisitEvents(v.sorted.filter(e => union.contains(e.timestamp)).dropWhile {
+            case _: StartDatasetEvent => true
+            case _                    => false
+          })
         }
-        val union = t.events.total - new Union(intervals.asJavaCollection)
 
-        // Remove any events that fall inside dataset intervals and skip any
-        // leading start dataset events since those are eaten by the old impl.
-        val events = VisitEvents(t.events.sorted.filter(e => union.contains(e.timestamp)).dropWhile {
-          case _: StartDatasetEvent => true
-          case _                    => false
-        })
+        MatchResult.sequence(VisitCalculator
+          .calc(visits, t.instrument, t.obsClass, t.datasetQa, t.datasetOc)
+          .zip(visits)
+          .map { case (vtNew, visit) =>
 
-        // Of the remaining datasets, we need at least one to be PASS (or
-        // undefined or check) because the new algorithm explicitly doesn't
-        // charge if they are all failing.
-        val charge = t.isAlwaysCharged ||
-          events.datasetIntervals.exists { case (lab, _) => t.datasetQa(lab).isChargeable }
+            // Of the remaining datasets, we need at least one to be PASS (or
+            // undefined or check) because the new algorithm explicitly doesn't
+            // charge if they are all failing.
+            val charge = t.isAlwaysCharged ||
+              visit.datasetIntervals.exists { case (lab, _) => t.datasetQa(lab).isChargeable }
 
-        // If the new algorithm won't charge at all we can't really compare so
-        // just assign noncharged to vtOld.
-        val vtOld = if (charge) VisitCalculator.Primordial.calc(t.instrument, t.obsClass, events, t.datasetQa, t.datasetOc)
-                    else VisitTimes.noncharged(events.total.sum)
+            // If the new algorithm won't charge at all we can't really compare so
+            // just assign noncharged to vtOld.
+            val vtOld = if (charge) VisitCalculator.Primordial.calc(visit, t.instrument, t.obsClass, t.datasetQa, t.datasetOc, None)
+                        else VisitTimes.noncharged(visit.total.sum)
 
-        // Now the two methods should produce the same results.
-        val vtNew = VisitCalculator.Update2019A.calc(t.instrument, t.obsClass, events, t.datasetQa, t.datasetOc)
-
-        vtNew shouldEqual vtOld
+            vtNew shouldEqual vtOld
+          }
+        )
       }
     }
 
@@ -297,11 +370,11 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
       val dataset    = new Dataset(label, "", startTime)
       val startEvent = new StartDatasetEvent(startTime, dataset)
       val endEvent   = new EndDatasetEvent(startTime + 1000, label)
-      val events     = Vector(startEvent, endEvent)
+      val visit      = VisitEvents(startEvent, endEvent)
 
-      val actual = TimeAccounting.calc(GmosSouth, SCIENCE, events, const(PASS), const(SCIENCE))
+      val actual     = VisitCalculator.Update2019A.calc(visit, GmosSouth, SCIENCE, const(PASS), const(SCIENCE), None)
 
-      val expected = new VisitTimes()
+      val expected   = new VisitTimes()
       expected.addClassifiedTime(PROGRAM, 1000)
 
       expected shouldEqual actual
@@ -315,9 +388,9 @@ object TimeAccountingSpec extends Specification with ScalaCheck {
       val startEvent   = new StartDatasetEvent(startTime, dataset)
       val overlapEvent = new OverlapEvent(startTime + 1000, ObsId)
       val endEvent     = new EndDatasetEvent(startTime + 2000, label)
-      val events       = Vector(startEvent, overlapEvent, endEvent)
+      val visit        = VisitEvents(startEvent, overlapEvent, endEvent)
 
-      val actual = TimeAccounting.calc(GmosSouth, SCIENCE, events, const(PASS), const(SCIENCE))
+      val actual = VisitCalculator.Update2019A.calc(visit, GmosSouth, SCIENCE, const(PASS), const(SCIENCE), None)
 
       val expected = new VisitTimes()
       expected.addClassifiedTime(PROGRAM,    1000)

@@ -9,6 +9,9 @@ import java.util.stream.Stream;
  * The Option implementation that represents the presence of a value.
  */
 public final class Some<T> implements Option<T> {
+
+    private static final long serialVersionUID = -3579855603834180011L;
+
     private final T val;
 
     public Some(final T val) {
@@ -38,6 +41,14 @@ public final class Some<T> implements Option<T> {
     @Override
     public Option<T> orElse(final Supplier<Option<T>> supplier) {
         return this;
+    }
+
+    @Override
+    public <U> U fold(
+        Supplier<? extends U>             ifEmpty,
+        Function1<? super T, ? extends U> f
+    ) {
+        return f.apply(val);
     }
 
     @Override
