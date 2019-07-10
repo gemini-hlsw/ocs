@@ -29,7 +29,7 @@ public class GemsGuideStarSearchOptions {
         UCAC4_GEMINI("UCAC4", "UCAC4 at Gemini"),
         ;
 
-        public static CatalogChoice DEFAULT = UCAC4_GEMINI;
+        public static CatalogChoice DEFAULT = PPMXL_GEMINI;
 
         private String _displayValue;
         private String _catalogName;

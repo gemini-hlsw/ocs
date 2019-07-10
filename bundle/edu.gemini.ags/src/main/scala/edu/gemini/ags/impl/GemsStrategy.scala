@@ -14,7 +14,7 @@ import edu.gemini.spModel.ags.AgsStrategyKey.GemsKey
 import edu.gemini.spModel.gemini.flamingos2.{Flamingos2, Flamingos2OiwfsGuideProbe}
 import edu.gemini.spModel.gemini.gems.{CanopusWfs, GemsInstrument}
 import edu.gemini.spModel.gemini.gsaoi.{Gsaoi, GsaoiOdgw}
-import edu.gemini.spModel.gems.{GemsGuideProbeGroup, GemsTipTiltMode}
+import edu.gemini.spModel.gems.GemsGuideProbeGroup
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 
@@ -120,7 +120,7 @@ trait GemsStrategy extends AgsStrategy {
     val gemsOptions = new GemsGuideStarSearchOptions(gemsInstrument, posAngles.asJava)
 
     // Perform the catalog search, using GemsStrategy's backend
-    val results = GemsVoTableCatalog(backend, UCAC4).search(ctx, base.toNewModel, gemsOptions, nirBand)(ec)
+    val results = GemsVoTableCatalog(backend, PPMXL).search(ctx, base.toNewModel, gemsOptions, nirBand)(ec)
 
     // Now check that the results are valid: there must be a valid tip-tilt and flexure star each.
     results.map { r =>
@@ -177,8 +177,8 @@ trait GemsStrategy extends AgsStrategy {
         (ml |@| lim(can))(_ union _).flatten
       }
 
-      val canopusConstraint = canMagLimits.map(c => CatalogQuery(CanopusTipTiltId, base.toNewModel, RadiusConstraint.between(Angle.zero, CanopusWfs.Group.instance.getRadiusLimits.toNewModel), List(ctx.getConditions.adjust(c)), UCAC4))
-      val odgwConstraint    = odgwMagLimits.map(c => CatalogQuery(OdgwFlexureId,   base.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), List(ctx.getConditions.adjust(c)), UCAC4))
+      val canopusConstraint = canMagLimits.map(c => CatalogQuery(CanopusTipTiltId, base.toNewModel, RadiusConstraint.between(Angle.zero, CanopusWfs.Group.instance.getRadiusLimits.toNewModel), List(ctx.getConditions.adjust(c)), PPMXL))
+      val odgwConstraint    = odgwMagLimits.map(c => CatalogQuery(OdgwFlexureId,   base.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), List(ctx.getConditions.adjust(c)), PPMXL))
       List(canopusConstraint, odgwConstraint).flatten
     }
 
