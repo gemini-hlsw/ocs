@@ -245,8 +245,8 @@ private[obsrecord] object VisitCalculator {
   }
 
   // reverse order by valid time (newest first)
-  def all: List[VisitCalculator] =
-    List(Update2019B, Update2019A, Primordial)
+  def all: NonEmptyList[VisitCalculator] =
+    NonEmptyList(Update2019B, Update2019A, Primordial)
 
   /**
    * Finds the `VisitCalculator` that corresponds to the given visit.
@@ -255,7 +255,7 @@ private[obsrecord] object VisitCalculator {
     (for {
       h <- e.sorted.headOption
       s <- h.site
-      c <- all.find(_.validAt(s).isBefore(h.instant))
+      c <- all.list.find(_.validAt(s).isBefore(h.instant))
     } yield c).getOrElse(all.head)
 
 
