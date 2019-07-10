@@ -111,6 +111,9 @@ sealed abstract case class VisitEvents(sorted: Vector[ObsExecEvent]) {
 
 object VisitEvents {
 
+  def apply(events: ObsExecEvent*): VisitEvents =
+    apply(events.toVector)
+
   def apply(events: Vector[ObsExecEvent]): VisitEvents =
     new VisitEvents(events.sortBy(_.timestamp)) {}
 
