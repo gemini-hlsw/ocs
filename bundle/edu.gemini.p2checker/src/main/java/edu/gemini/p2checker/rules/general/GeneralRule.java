@@ -12,6 +12,7 @@ import edu.gemini.spModel.ags.AgsStrategyKey;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
+import edu.gemini.spModel.core.NonSiderealTarget;
 import edu.gemini.spModel.core.ProperMotion;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.core.Target;
@@ -390,22 +391,54 @@ public class GeneralRule implements IRule {
           }
       };
 
-    // targets are equal only if positions are defined and within _getMinDistance
-    private static boolean _areTargetsEquals(final SPTarget p1Target, final SPTarget target, final ObservationElements elems) {
+    // Two non-sidereal targets are the same if they have the same horizons id.
+    private static boolean _nonSiderealTargetsEqual(
+        final NonSiderealTarget p0,
+        final NonSiderealTarget p1
+    ) {
+        return p0.horizonsDesignation().equals(p1.horizonsDesignation());
+    }
+
+    // Sidereal targets are equal if positions are defined and within _getMinDistance
+    private static boolean _siderealTargetsEqual(
+        final SPTarget t0,
+        final SPTarget t1,
+        final ObservationElements elems
+    ) {
 
         final Option<Long> when = elems.getSchedulingBlockStart();
 
-        final Option<Double> spRA = target.getRaHours(when);
-        final Option<Double> spDec = target.getDecDegrees(when);
+        final Option<Double> ra0  = t0.getRaHours(when);
+        final Option<Double> dec0 = t0.getDecDegrees(when);
 
-        final Option<Double> p1RA = p1Target.getRaHours(when);
-        final Option<Double> p1Dec = p1Target.getDecDegrees(when);
+        final Option<Double> ra1  = t1.getRaHours(when);
+        final Option<Double> dec1 = t1.getDecDegrees(when);
 
         double minDistance = _getMinDistance(elems);
 
-        return _close(spRA,  p1RA,  minDistance) &&
-               _close(spDec, p1Dec, minDistance);
+        // TODO: I believe this code was written sometime in the early 18th
+        // century before the `Coordinates` class existed.  The way we should
+        // do this is to use `Coordinates.angularDistance`.
+        return _close(ra0, ra1, minDistance) && _close(dec0, dec1, minDistance);
 
+    }
+
+    private static boolean _targetsEqual(final SPTarget st0, final SPTarget st1, final ObservationElements elems) {
+        final Target t0 = st0.getTarget();
+        final Target t1 = st1.getTarget();
+
+        if (t0.isToo() && t1.isToo()) {
+            return true;
+
+        } else if (t0.isSidereal() && t1.isSidereal()) {
+            return _siderealTargetsEqual(st0, st1, elems);
+
+        } else if (t0.isNonSidereal() && t1.isNonSidereal()) {
+            return _nonSiderealTargetsEqual((NonSiderealTarget) t0, (NonSiderealTarget) t1);
+
+        } else {
+            return false;
+        }
     }
 
     // Consider it a match if the real observation is a ToO observation and the
@@ -556,7 +589,7 @@ public class GeneralRule implements IRule {
                         final List<TemplateParameters> matchingParams = new ArrayList<>();
                         TemplateParameters.foreach(templateFolderNode, tp -> {
                             final SPTarget p1Target = tp.getTarget();
-                            if (_areTargetsEquals(p1Target, obsTarget, elements) || _isTooTarget(p1Target, elements)) {
+                            if (_targetsEqual(p1Target, obsTarget, elements) || _isTooTarget(p1Target, elements)) {
                                 matchingParams.add(tp);
                             }
                         });
@@ -594,9 +627,8 @@ public class GeneralRule implements IRule {
             if (targetEnv != null) {
                 final ObsClass obsClass = ObsClassService.lookupObsClass(elements.getObservationNode());
                 if (obsClass == ObsClass.SCIENCE) {
-                    // Why only sidereal?
                     final ImList<SPTarget> targets = targetEnv.getTargetEnvironment().getAsterism().allSpTargetsJava();
-                    if (targets.forall(SPTarget::isSidereal))
+                    if (targets.forall(t -> t.isSidereal() || t.isNonSidereal()))
                         return targetEnv.getAsterism();
                 }
             }
