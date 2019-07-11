@@ -1,6 +1,8 @@
 package jsky.app.ot.editor.template
 
+import edu.gemini.horizons.server.backend.HorizonsService2.HS2
 import edu.gemini.pot.sp.ISPTemplateParameters
+import edu.gemini.shared.gui.ButtonFlattener
 import edu.gemini.shared.util.TimeValue
 import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption}
 import edu.gemini.spModel.`type`.ObsoletableSpType
@@ -9,6 +11,11 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, ImageQuality, PercentageContainer, SkyBackground, WaterVapor}
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.template.TemplateParameters
+import edu.gemini.spModel.too.Too
+
+import jsky.app.ot.gemini.editor.targetComponent.details2.NonSiderealNameResolver
+import jsky.util.gui.Resources
+
 import javax.swing.BorderFactory
 import javax.swing.event.{DocumentEvent, DocumentListener}
 import javax.swing.text.Document
@@ -22,7 +29,6 @@ import scala.swing.GridBagPanel.Anchor.{East, North}
 import scala.swing.GridBagPanel.Fill.{Horizontal, Vertical}
 import scalaz._
 import Scalaz._
-import edu.gemini.spModel.too.Too
 
 // Editor for staff-use to modify TemplateParameters.  Allows multi-selection
 // and bulk editing to change many phase 1 observations at once.  For example,
@@ -154,7 +160,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
 
     def displayedValue: Option[A] = \/.fromTryCatchNonFatal(read(readDoc)).toOption
 
-    private def showCommonValue(ps: Iterable[TemplateParameters]): Unit = {
+    def showCommonValue(ps: Iterable[TemplateParameters]): Unit = {
       deafToDoc()
       text = common(ps)(get).fold("") { show }
       listenToDoc()
@@ -219,10 +225,10 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
   }
 
   object TargetPanel extends GridBagPanel with Initializable {
-    sealed trait TargetType { def display: String }
-    case object Sidereal extends TargetType    { val display = "Sidereal"     }
-    case object NonSidereal extends TargetType { val display = "Non-Sidereal" }
-    case object ToO extends TargetType { val display = "Target of Opportunity" }
+    sealed abstract class TargetType(val display: String) extends Product with Serializable
+    case object Sidereal    extends TargetType("Sidereal")
+    case object NonSidereal extends TargetType("Non-Sidereal")
+    case object ToO         extends TargetType("Target of Opportunity")
 
     private val AllTargetTypes = List(Sidereal, NonSidereal) ++ (if (isToo) List(ToO) else Nil)
 
@@ -239,7 +245,18 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
     }
 
     object CoordinatesPanel extends ColumnPanel {
-      val nameField = new BoundTextField[String](10)(
+      val tooNameField = new BoundTextField[String](10)(
+        read = identity,
+        show = identity,
+        get  = _.getTarget.getName,
+        set  = setTarget(_.setName(_))
+      )
+
+      val tooRows      = List(
+        Row("Name", tooNameField)
+      )
+
+      val siderealNameField = new BoundTextField[String](10)(
         read = identity,
         show = identity,
         get  = _.getTarget.getName,
@@ -303,19 +320,77 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       val totalPMDec = totalPM >=> ProperMotion.deltaDec >=> DeclinationAngularVelocity.velocity    >=> AngularVelocity.masPerYear
 
       val siderealRows = List(
+        Row("Name",   siderealNameField),
         Row("RA",     raField),
         Row("Dec",    decField),
         Row("pm RA",  pmField(totalPMRA)),
         Row("pm Dec", pmField(totalPMDec))
       )
 
-      val rows = List(
-        Row("Name",   nameField ),
-        Row("Type",   typeCombo )
-      ) ++ siderealRows
+      val nonSiderealNameField = new BoundTextField[String](10)(
+        read = identity,
+        show = identity,
+        get  = _.getTarget.getName,
+        set  = setTarget(_.setName(_))
+      )
 
-      def showSiderealRows(v: Boolean): Unit =
-        siderealRows.foreach(_.visible = v)
+      val nonSiderealLookupButton: Button =
+        Button("")(nonSiderealNameResolver.lookup())
+
+      nonSiderealLookupButton.icon = Resources.getIcon("eclipse/search.gif")
+      ButtonFlattener.flatten(nonSiderealLookupButton.peer)
+
+      def setHorizonsDesignation(h: HorizonsDesignation, n: String): Unit = {
+
+        // We need an update if not all targets have an HorizonsDesignation
+        // equal to `h`.
+        val needsUpdate = common(load) { _.getTarget.getTarget match {
+          case NonSiderealTarget(_, _, h, _, _, _) => h
+          case _                                   => None
+        }}.flatten.forall(_ != h)
+
+        if (needsUpdate) {
+          // Update the HorizonsDesignation.
+          store { tp =>
+            val newTarget = tp.getTarget
+            nonSiderealNameResolver.updateDesignation(h, n, true, newTarget)
+            tp.copy(newTarget)
+          }
+
+          // Show the horizons query.
+          nonSiderealQueryField.showCommonValue(load)
+        }
+      }
+
+      val nonSiderealNameResolver: NonSiderealNameResolver =
+        new NonSiderealNameResolver(
+          nonSiderealNameField.peer,
+          (h, n) => HS2.delay(setHorizonsDesignation(h, n))
+        )
+
+      val nonSiderealQueryField = new BoundTextField[String](10)(
+        read = identity,
+        show = identity,
+        get  = _.getTarget.getNonSiderealTarget.flatMap(_.horizonsDesignation).map(_.queryString).getOrElse(""),
+        set  = (tp,q) => tp
+      ) {
+        editable = false
+      }
+
+      val nonSiderealRows = List(
+        Row("Name", nonSiderealNameField, nonSiderealLookupButton),
+        Row("Query", nonSiderealQueryField)
+      )
+
+      val rows = List(
+        Row("Type", typeCombo)
+      ) ++ tooRows ++ siderealRows ++ nonSiderealRows
+
+      def showTypeSpecificRows(t: Option[TargetType]): Unit = {
+        tooRows.foreach(        _.visible = t.contains(ToO        ))
+        siderealRows.foreach(   _.visible = t.contains(Sidereal   ))
+        nonSiderealRows.foreach(_.visible = t.contains(NonSidereal))
+      }
 
       layoutRows()
     }
@@ -410,9 +485,9 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
     }
 
     def showTypeSpecificWidgets(ps: Iterable[TemplateParameters]): Unit = {
-      val isSid = common(ps)(tp => targetType(tp.getTarget)).contains(Sidereal)
-      CoordinatesPanel.showSiderealRows(isSid)
-      magScroll.visible = isSid
+      val ttype = common(ps)(tp => targetType(tp.getTarget))
+      CoordinatesPanel.showTypeSpecificRows(ttype)
+      magScroll.visible = ttype.contains(Sidereal)
 
       revalidate()
       repaint()
