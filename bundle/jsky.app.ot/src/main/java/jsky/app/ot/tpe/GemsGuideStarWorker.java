@@ -23,11 +23,13 @@ import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.gems.GemsInstrument;
+import edu.gemini.spModel.guide.GuideStarValidation;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
+import edu.gemini.spModel.target.obsComp.PwfsProbeRangeArea;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import jsky.coords.WorldCoords;
 import jsky.util.gui.SwingWorker;
@@ -37,6 +39,7 @@ import jsky.util.gui.StatusLogger;
 
 import java.util.*;
 import java.util.concurrent.CancellationException;
+import java.util.stream.Collectors;
 
 /**
  * OT-36: Automate Gems guide star selection in background thread.
@@ -274,6 +277,10 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         results.forEach(r -> r.resultsAsJava().forEach(t -> System.out.println(t.name())));
         System.out.println("*** GeMS LOOKUP DONE ***");
 
+        // TODO: Using AGS here: it that alright?
+        // TODO: We are also getting guide stars that are not in range of the patrol field.
+        // TODO: Seems like this is happening in other manual lookups, e.g. QueryResultsFrame, the generic manual lookup not for GeMS.
+        // TODO: This code also has FOV info. How do we use it and filter?
         // Look up a PWFS1 guide star.
         System.out.println("*** PERFORMING PWFS1 LOOKUP ***");
         final Option<AgsStrategy> pwfsOpt = AgsRegistrar.lookupForJava(AgsStrategyKey.Pwfs1SouthKey$.MODULE$);
@@ -281,11 +288,23 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         final AgsStrategy pwfs = pwfsOpt.getOrNull();
         final AgsMagnitude.MagnitudeTable magTable = ProbeLimitsTable.loadOrThrow();
         final List<ProbeCandidates> pwfsCandidates = pwfs.candidatesForJava(obsContext, magTable, 30, ec);
-        System.out.println("Size of ProbeCandidates: " + pwfsCandidates.size());
+
+        System.out.println("Size of unfiltered ProbeCandidates: " + pwfsCandidates.size());
         pwfsCandidates.forEach(c -> System.out.println(c.gp().getDisplayName() + " has " + c.targets().size() + " targets:"));
         pwfsCandidates.forEach(c -> c.targets().forEach(t -> System.out.println(t.name())));
+
+        // TODO: This only filters out the guide stars beyond the probe range. It does not filter the guide stars
+        // TODO: that only reach the probe range.
+//        final List<SiderealTarget> pwfsValidCandidates = pwfsCandidates.get(0).targets().stream()
+//                .filter(t -> PwfsGuideProbe.pwfs1.validate(new SPTarget(t), obsContext) == GuideStarValidation.VALID)
+//                .collect(Collectors.toList());
+        final List<SiderealTarget> pwfsValidCandidates = pwfsCandidates.get(0).targets().stream()
+                .filter(t -> PwfsGuideProbe.pwfs1.checkBoundaries(new SPTarget(t), obsContext).exists(PwfsProbeRangeArea.inRange::equals))
+                .collect(Collectors.toList());
+        System.out.println("Size of filtered ProbeCandidates: " + pwfsValidCandidates.size());
+        pwfsValidCandidates.forEach(t -> System.out.println(t.name()));
         System.out.println("*** PWFS1 LOOKUP DONE ***");
-        return new NGS2Result(results, pwfsCandidates.get(0).targets());
+        return new NGS2Result(results, pwfsValidCandidates);
     }
 
 

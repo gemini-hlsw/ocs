@@ -92,6 +92,7 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     }
 
     private Vector<Vector<Object>> makeDataVector() {
+        System.out.println("--- CandidateGuideStarsTableModel.makeDataVector");
         _siderealTargets = GemsUtils4Java.uniqueTargets(_model.getGemsCatalogSearchResults());
         final Vector<Vector<Object>> rows = new Vector<>();
         for (SiderealTarget siderealTarget : _siderealTargets) {

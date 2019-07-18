@@ -106,6 +106,6 @@ object GemsGuideStars {
   val cardinalDirections = List(Angle.zero, Angle.fromDegrees(90.0), Angle.fromDegrees(180.0), Angle.fromDegrees(270.0))
 
   implicit val GemsGuideStarsOrdering:scala.Ordering[GemsGuideStars] = new scala.math.Ordering[GemsGuideStars] {
-    override def compare(x: GemsGuideStars, y: GemsGuideStars) = x.compareTo(y)
+    override def compare(x: GemsGuideStars, y: GemsGuideStars): Int = x.compareTo(y)
   }
 }
