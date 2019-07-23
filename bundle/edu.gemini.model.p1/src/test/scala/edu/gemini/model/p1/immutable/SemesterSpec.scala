@@ -6,7 +6,7 @@ import java.io.InputStreamReader
 class SemesterSpec extends Specification {
   "The Semester class" should {
     "have a default" in {
-      Semester.current must beEqualTo(Semester(2019, SemesterOption.B))
+      Semester.current must beEqualTo(Semester(2020, SemesterOption.A))
     }
     "deserialize any semester" in {
       val proposal = ProposalIo.read(new InputStreamReader(getClass.getResourceAsStream("proposal_with_old_semester.xml")))
