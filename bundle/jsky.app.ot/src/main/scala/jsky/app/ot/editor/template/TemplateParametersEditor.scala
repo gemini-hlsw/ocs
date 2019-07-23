@@ -267,12 +267,13 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         show = _.display,
         get  = { tp => targetType(tp.getTarget) },
         set  = { setTarget((target, targetType) => {
+          val name = target.getName
           targetType match {
             case ToO         => target.setTOO()
             case Sidereal    => target.setSidereal()
             case NonSidereal => target.setNonSidereal()
           }
-          target.setName(target.getName)
+          target.setName(name)
           target.setMagnitudes(Nil)
         })}
       )
@@ -496,6 +497,8 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
     def reinitTypeSpecificWidgets(): Unit = {
       val ps = load
       CoordinatesPanel.siderealRows.foreach(_.init(ps))
+      CoordinatesPanel.nonSiderealRows.foreach(_.init(ps))
+      CoordinatesPanel.tooRows.foreach(_.init(ps))
       MagnitudesPanel.init(ps)
       showTypeSpecificWidgets(ps)
     }
