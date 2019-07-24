@@ -761,6 +761,18 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           result \\ "flamingos2" must not(\\("name") \>~ ".*J-lo (1.122 um).*")
       }
     }
+    "Subaru prposal with Surprime Cam, REL-3638" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("subaru_suprime.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 4
+          changes must contain("Subaru proposal with Suprime Cam has been migrated to Hyper Suprime Cam")
+          result \\ "subaru" must \\("name") \> "Subaru (Hyper Suprime Cam)"
+          result \\ "subaru" must \\("instrument") \> "Hyper Suprime Cam"
+      }
+    }
   }
 
   def testF2R3KYConversion(xml: Elem) = {

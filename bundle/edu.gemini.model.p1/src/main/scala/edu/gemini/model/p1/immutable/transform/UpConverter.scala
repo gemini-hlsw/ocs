@@ -150,7 +150,20 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
   *  This Converter will support migrating to 2020A
   */
 case object SemesterConverter2019BTo2020A extends SemesterConverter {
-  override val transformers: List[TransformFunction] = Nil
+  lazy val subaruSuprimeMessage: String = "Subaru proposal with Suprime Cam has been migrated to Hyper Suprime Cam"
+  val subaruSuprimeTransform: TransformFunction = {
+    case p @ <subaru>{ns @ _*}</subaru> if (p \\ "instrument").exists(_.text == "Suprime Cam") =>
+      object SuprimeTransform extends BasicTransformer {
+        override def transform(n: xml.Node): xml.NodeSeq = n match {
+          case <instrument>{_ @ _*}</instrument> => <instrument>{"Hyper Suprime Cam"}</instrument>
+          case <name>{name}</name>               => <name>{name.text.replaceFirst("Suprime Cam", "Hyper Suprime Cam")}</name>
+          case elem: xml.Elem                    => elem.copy(child = elem.child.flatMap(transform))
+          case _                                 => n
+        }
+      }
+      StepResult(subaruSuprimeMessage, <subaru id={p.attribute("id")}>{SuprimeTransform.transform(ns)}</subaru>).successNel
+  }
+  override val transformers: List[TransformFunction] = List(subaruSuprimeTransform)
 }
 
 
