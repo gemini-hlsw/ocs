@@ -80,6 +80,7 @@
             <xsd:enumeration value="Milky way"/>
             <xsd:enumeration value="Minor planets"/>
             <xsd:enumeration value="Moon"/>
+            <xsd:enumeration value="Multi-messenger astrophysics"/>
             <xsd:enumeration value="Neutron stars"/>
             <xsd:enumeration value="Novae"/>
             <xsd:enumeration value="Nucleosynthesis"/>
