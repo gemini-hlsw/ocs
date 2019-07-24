@@ -2,6 +2,7 @@ package edu.gemini.model.p1.dtree.exchange
 
 import edu.gemini.model.p1.dtree.{TextNode, SingleSelectNode}
 import edu.gemini.model.p1.immutable._
+import edu.gemini.model.p1.{ mutable => M }
 
 object Subaru {
   def apply() = new InstrumentNode
@@ -9,7 +10,7 @@ object Subaru {
   class InstrumentNode extends SingleSelectNode[Unit, SubaruInstrument, SubaruBlueprint](()) {
     val title       = "Subaru Instrument"
     val description = "Select the Subaru instrument."
-    def choices     = SubaruInstrument.values.toList
+    def choices     = SubaruInstrument.values.toList.filterNot(_ == M.SubaruInstrument.SUPRIME_CAM)
 
     def apply(i: SubaruInstrument) = i match {
       case ins if ins == SubaruInstrument.forName("VISITOR") => Left(CustomNameNode(SubaruBlueprint(ins, None)))

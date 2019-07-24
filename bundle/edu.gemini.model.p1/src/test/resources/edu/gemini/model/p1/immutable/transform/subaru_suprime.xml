@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2019.2.1">
+    <meta band3optionChosen="false" overrideAffiliate="false"/>
+    <semester year="2019" half="B"/>
+    <title></title>
+    <abstract></abstract>
+    <scheduling></scheduling>
+    <keywords/>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets>
+        <sidereal epoch="J2000" id="target-0">
+            <name>Untitled</name>
+            <degDeg>
+                <ra>0</ra>
+                <dec>0</dec>
+            </degDeg>
+            <magnitudes/>
+        </sidereal>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC Any, IQ Any, SB Any/Bright, WV Any</name>
+            <cc>Any</cc>
+            <iq>Any</iq>
+            <sb>Any/Bright</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <subaru id="blueprint-0">
+            <name>Subaru (Suprime Cam)</name>
+            <visitor>false</visitor>
+            <instrument>Suprime Cam</instrument>
+        </subaru>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" target="target-0" condition="condition-0" blueprint="blueprint-0">
+            <progTime units="hr">1.0</progTime>
+            <partTime units="hr">0.0</partTime>
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <visibility>Limited</visibility>
+            </meta>
+        </observation>
+    </observations>
+    <proposalClass>
+        <exchange>
+            <partner>subaru</partner>
+        </exchange>
+    </proposalClass>
+</proposal>
