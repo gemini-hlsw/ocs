@@ -1,12 +1,9 @@
 package edu.gemini.pit.ui.editor
 
-import edu.gemini.model.p1.immutable.PrincipalInvestigator
-import edu.gemini.model.p1.immutable.InstitutionAddress
-import edu.gemini.model.p1.immutable.InvestigatorStatus
-
-
+import edu.gemini.model.p1.immutable.{InstitutionAddress, InvestigatorGender, InvestigatorStatus, PrincipalInvestigator}
 import edu.gemini.pit.ui.util._
 import java.awt.event.{KeyAdapter, KeyEvent}
+
 import edu.gemini.shared.gui.textComponent.SelectOnFocus
 
 import swing._
@@ -27,6 +24,8 @@ class PiEditor(pi: PrincipalInvestigator, editable:Boolean) extends StdModalEdit
     addRow(new Label("First Name:") { icon = SharedIcons.ICON_USER }, FirstName)
     addRow(new Label("Last Name:"), LastName)
     addRow(new Label("Degree Status:"), Status)
+    addRow(new Label("Gender"), Gender)
+    addRow(new Label("Gender identity is for statistics only and will not be provided to the TACs."))
     addRow(new Label("Email Address:"), Email)
     addRow(new Label("Phone Number(s):"), Phone)
     addSpacer()
@@ -43,6 +42,7 @@ class PiEditor(pi: PrincipalInvestigator, editable:Boolean) extends StdModalEdit
   Institution.Address.enabled = editable
   Institution.Country.enabled = editable
   Status.enabled = editable
+  Gender.enabled = editable
   Email.enabled = editable
   Phone.enabled = editable
   Contents.Footer.OkButton.enabled = editable
@@ -63,6 +63,14 @@ class PiEditor(pi: PrincipalInvestigator, editable:Boolean) extends StdModalEdit
   object Phone extends TextField(pi.phone.mkString(", ")) with SelectOnFocus
   object Status extends ComboBox(InvestigatorStatus.values.toSeq) with ValueRenderer[InvestigatorStatus] {
     selection.item = pi.status
+  }
+  object Gender extends ComboBox(InvestigatorGender.values.toSeq) with ValueRenderer[InvestigatorGender] {
+    selection.item = pi.gender
+
+    override def text(a: InvestigatorGender): String = a match {
+      case InvestigatorGender.NONE_SELECTED => ""
+      case x => x.value()
+    }
   }
 
   // Institution Fields
@@ -106,14 +114,15 @@ class PiEditor(pi: PrincipalInvestigator, editable:Boolean) extends StdModalEdit
   def editor = Editor
 
   // Construct a new value
-  def value = pi.copy(
+  def value: PrincipalInvestigator = pi.copy(
     firstName = FirstName.text,
     lastName = LastName.text,
     address = pi.address.copy(
       institution = Institution.Name.text,
       address = Institution.Address.text,
       country = Institution.Country.text),
-    status = Status.selection.item.asInstanceOf[InvestigatorStatus], // :-/
+    status = Status.selection.item,
+    gender = Gender.selection.item,
     phone = Phone.text.split(",").map(_.trim).filter(_.nonEmpty).toList,
     email = Email.text)
 

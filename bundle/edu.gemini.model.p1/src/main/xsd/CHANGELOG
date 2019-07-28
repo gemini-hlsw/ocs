@@ -4,6 +4,7 @@ Gemini Phase I Schema Changes
 ##########################
 * Added "Multi-messenger astrophysics" keyword
 * Hide "Suprime Cam" for subaru
+* Add gender field to Investigator
 
 # Version 2019.2.1 - 2019B
 ##########################
