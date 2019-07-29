@@ -28,8 +28,9 @@ class CoiEditor(coi: CoInvestigator, editable:Boolean) extends StdModalEditor[Co
     addRow(new Label("Last Name:"), LastName)
     addRow(new Label("Institution:"), InstitutionEditor)
     addRow(new Label("Degree Status:"), Status)
-    addRow(new Label("Gender"), Gender)
+    addRow(new Label("Gender:"), Gender)
     addRow(new Label("Gender identity is for statistics only and will not be provided to the TACs."))
+    addSpacer()
     addRow(new Label("Email Address:"), Email)
     addRow(new Label("Phone Number(s):"), Phone)
   }
