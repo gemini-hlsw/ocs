@@ -1,9 +1,7 @@
 package edu.gemini.pit.ui.editor
 
-import edu.gemini.model.p1.immutable.CoInvestigator
-import edu.gemini.model.p1.immutable.InvestigatorStatus
+import edu.gemini.model.p1.immutable.{CoInvestigator, InvestigatorGender, InvestigatorStatus}
 import edu.gemini.shared.gui.textComponent.SelectOnFocus
-
 
 import scala.swing.ComboBox
 import scala.swing.GridBagPanel
@@ -11,6 +9,7 @@ import scala.swing.Label
 import scala.swing.TextField
 import scala.swing.UIElement
 import edu.gemini.pit.ui.util._
+
 import swing.event.ValueChanged
 
 object CoiEditor {
@@ -29,6 +28,9 @@ class CoiEditor(coi: CoInvestigator, editable:Boolean) extends StdModalEditor[Co
     addRow(new Label("Last Name:"), LastName)
     addRow(new Label("Institution:"), InstitutionEditor)
     addRow(new Label("Degree Status:"), Status)
+    addRow(new Label("Gender:"), Gender)
+    addRow(new Label("Gender identity is for statistics only and will not be provided to the TACs."))
+    addSpacer()
     addRow(new Label("Email Address:"), Email)
     addRow(new Label("Phone Number(s):"), Phone)
   }
@@ -39,6 +41,7 @@ class CoiEditor(coi: CoInvestigator, editable:Boolean) extends StdModalEditor[Co
   Institution.enabled = editable
   Institution.enabled = editable
   Status.enabled = editable
+  Gender.enabled = editable
   Email.enabled = editable
   Phone.enabled = editable
   Contents.Footer.OkButton.enabled = editable
@@ -58,7 +61,7 @@ class CoiEditor(coi: CoInvestigator, editable:Boolean) extends StdModalEditor[Co
   object LastName extends TextField(coi.lastName) with SelectOnFocus with NonEmptyText
   object Institution extends TextField(coi.institution) with SelectOnFocus with NonEmptyText
   object Pick extends InstitutionChooser {
-    def currentInstitutionName = Institution.text
+    def currentInstitutionName: String = Institution.text
     def institutionSelected(inst: Institution) {
       Institution.text = inst.name
     }
@@ -73,16 +76,26 @@ class CoiEditor(coi: CoInvestigator, editable:Boolean) extends StdModalEditor[Co
   object Status extends ComboBox(InvestigatorStatus.values.toSeq) with ValueRenderer[InvestigatorStatus] {
     selection.item = coi.status
   }
+  object Gender extends ComboBox(InvestigatorGender.values.toSeq) with ValueRenderer[InvestigatorGender] {
+    selection.item = coi.gender
+
+    override def text(a: InvestigatorGender): String = a match {
+      case InvestigatorGender.NONE_SELECTED => ""
+      case x => x.value()
+    }
+  }
+
 
   // Construct the editor
   def editor = Editor
 
   // Construct a new value
-  def value = coi.copy(
+  def value: CoInvestigator = coi.copy(
     firstName = FirstName.text,
     lastName = LastName.text,
     institution = Institution.text,
     status = Status.selection.item,
+    gender = Gender.selection.item,
     phone = Phone.text.split(",").map(_.trim).toList,
     email = Email.text)
 

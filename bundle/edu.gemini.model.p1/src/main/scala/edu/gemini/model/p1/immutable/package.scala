@@ -379,6 +379,15 @@ package object immutable {
     val OTHER = M.InvestigatorStatus.OTHER
   }
 
+  type InvestigatorGender = M.InvestigatorGender
+  object InvestigatorGender extends EnumObject[M.InvestigatorGender] {
+    val NONE_SELECTED     = M.InvestigatorGender.NONE_SELECTED
+    val WOMAN             = M.InvestigatorGender.WOMAN
+    val MEN               = M.InvestigatorGender.MEN
+    val ANOTHER_GENDER    = M.InvestigatorGender.ANOTHER_GENDER
+    val PREFER_NOT_TO_SAY = M.InvestigatorGender.PREFER_NOT_TO_SAY
+  }
+
   type Keyword = M.Keyword
   object Keyword extends EnumObject[M.Keyword]
 

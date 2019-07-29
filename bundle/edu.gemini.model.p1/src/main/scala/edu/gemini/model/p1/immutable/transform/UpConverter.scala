@@ -163,7 +163,17 @@ case object SemesterConverter2019BTo2020A extends SemesterConverter {
       }
       StepResult(subaruSuprimeMessage, <subaru id={p.attribute("id")}>{SuprimeTransform.transform(ns)}</subaru>).successNel
   }
-  override val transformers: List[TransformFunction] = List(subaruSuprimeTransform)
+
+  lazy val genderMessage: String = "Add gender field"
+  val genderTransform: TransformFunction = {
+    case p @ <pi>{ns @ _*}</pi> =>
+      val addGender = ns :+ <gender>None selected</gender>
+      StepResult(genderMessage, <pi id={p.attribute("id")}>{addGender}</pi>).successNel
+    case p @ <coi>{ns @ _*}</coi> =>
+      val addGender = ns :+ <gender>None selected</gender>
+      StepResult(genderMessage, <coi id={p.attribute("id")}>{addGender}</coi>).successNel
+  }
+  override val transformers: List[TransformFunction] = List(subaruSuprimeTransform, genderTransform)
 }
 
 

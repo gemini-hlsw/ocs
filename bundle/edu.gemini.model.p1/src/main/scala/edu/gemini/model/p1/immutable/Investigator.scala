@@ -1,17 +1,16 @@
 package edu.gemini.model.p1.immutable
 
-import edu.gemini.model.p1.{ mutable => M }
+import edu.gemini.model.p1.{mutable => M}
+
 import scala.collection.JavaConverters._
 import java.util.UUID
 
 object Investigator {
-  def apply(m:M.Investigator) = m match {
+  def apply(m:M.Investigator): Investigator = m match {
     case pi:M.PrincipalInvestigator => PrincipalInvestigator.apply(pi)
     case coi:M.CoInvestigator       => CoInvestigator.apply(coi)
   }
 
-  //val noneID = UUID.randomUUID()
-  //val none = CoInvestigator(noneID, "None", "", Nil, "", InvestigatorStatus.OTHER, "")
 }
 
 sealed trait Investigator {
@@ -30,10 +29,11 @@ sealed trait Investigator {
   def email: String
   def phone: List[String]
   def status: InvestigatorStatus
+  def gender: InvestigatorGender
   def mutable(n:Namer):M.Investigator
 
-  def fullName = firstName + " " + lastName
-  override def toString = fullName
+  def fullName: String = s"$firstName $lastName"
+  override def toString: String = fullName
 
   def toPi: PrincipalInvestigator
   def toCoi: CoInvestigator
@@ -52,9 +52,10 @@ object PrincipalInvestigator extends UuidCache[M.PrincipalInvestigator] {
       m.getPhone.asScala.toList,
       m.getEmail,
       m.getStatus,
+      m.getGender,
       InstitutionAddress(m.getAddress))
 
-  def empty = apply(UUID.randomUUID(), "Principal", "Investigator", Nil, "", InvestigatorStatus.PH_D, InstitutionAddress.empty)
+  def empty = apply(UUID.randomUUID(), "Principal", "Investigator", Nil, "", InvestigatorStatus.PH_D, InvestigatorGender.NONE_SELECTED, InstitutionAddress.empty)
 
 }
 
@@ -65,9 +66,10 @@ case class PrincipalInvestigator(
   phone: List[String],
   email: String,
   status: InvestigatorStatus,
+  gender: InvestigatorGender,
   address: InstitutionAddress) extends Investigator {
 
-  def mutable(n:Namer) = {
+  def mutable(n:Namer): M.PrincipalInvestigator = {
     val m = Factory.createPrincipalInvestigator
     m.setId(n.nameOf(this))
     m.setFirstName(firstName)
@@ -75,11 +77,12 @@ case class PrincipalInvestigator(
     m.getPhone.addAll(phone.asJavaCollection)
     m.setEmail(email)
     m.setStatus(status)
+    m.setGender(gender)
     m.setAddress(address.mutable)
     m
   }
 
-  def toPi  = this
+  def toPi: PrincipalInvestigator = this
   def toCoi = CoInvestigator(
     uuid,
     firstName,
@@ -87,9 +90,10 @@ case class PrincipalInvestigator(
     phone,
     email,
     status,
+    gender,
     address.institution)
 
-  override def isComplete = super.isComplete && address.isComplete
+  override def isComplete: Boolean = super.isComplete && address.isComplete
 
 }
 
@@ -102,9 +106,10 @@ object CoInvestigator extends UuidCache[M.CoInvestigator] {
       m.getPhone.asScala.toList,
       m.getEmail,
       m.getStatus,
+      m.getGender,
       m.getInstitution)
 
-  def empty = apply(UUID.randomUUID(), "", "", Nil, "", InvestigatorStatus.PH_D, "")
+  def empty = apply(UUID.randomUUID(), "", "", Nil, "", InvestigatorStatus.PH_D, InvestigatorGender.NONE_SELECTED, "")
 
 }
 
@@ -115,9 +120,10 @@ case class CoInvestigator(
   phone: List[String],
   email: String,
   status: InvestigatorStatus,
+  gender: InvestigatorGender,
   institution: String) extends Investigator {
 
-  def mutable(n:Namer) = {
+  def mutable(n:Namer): M.CoInvestigator = {
     val m = Factory.createCoInvestigator
     m.setId(n.nameOf(this))
     m.setFirstName(firstName)
@@ -125,6 +131,7 @@ case class CoInvestigator(
     m.getPhone.addAll(phone.asJavaCollection)
     m.setEmail(email)
     m.setStatus(status)
+    m.setGender(gender)
     m.setInstitution(institution)
     m
   }
@@ -136,10 +143,11 @@ case class CoInvestigator(
     phone,
     email,
     status,
+    gender,
     InstitutionAddress.empty.copy(institution = institution))
 
-  def toCoi  = this
+  def toCoi: CoInvestigator = this
 
-  override def isComplete = super.isComplete && (!institution.trim.isEmpty)
+  override def isComplete: Boolean = super.isComplete && (!institution.trim.isEmpty)
 
 }

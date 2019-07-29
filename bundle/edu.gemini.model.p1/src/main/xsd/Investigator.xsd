@@ -46,15 +46,16 @@
         - first name
         - last name
         - status (Phd, Grad Thesis, Grad No Thesis, or Other)
+        - gender (None, Woman, Men, Another gender, Prefer not to say)
         - email (one or more)
         - phone (zero or more)
-        - fax (zero or more)
     -->
     <xsd:complexType name="Investigator">
         <xsd:sequence>
             <xsd:element name="firstName"  type="xsd:token"/>
             <xsd:element name="lastName"   type="xsd:token"/>
             <xsd:element name="status"     type="InvestigatorStatus"/>
+            <xsd:element name="gender"     type="InvestigatorGender"/>
             <xsd:element name="email"      type="xsd:token"/>
             <xsd:element name="phone"      type="xsd:token"   minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
@@ -70,6 +71,20 @@
     <xsd:simpleType name="InvestigatorRef">
         <xsd:restriction base="xsd:IDREF">
             <xsd:pattern value="investigator-\d+"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      Valid investigator gender
+    -->
+    <xsd:simpleType name="InvestigatorGender">
+        <xsd:restriction base="xsd:token">
+            <!-- Placeholder for no selection but it is not displayed -->
+            <xsd:enumeration value="None selected"/>
+            <xsd:enumeration value="Woman"/>
+            <xsd:enumeration value="Men"/>
+            <xsd:enumeration value="Another gender"/>
+            <xsd:enumeration value="Prefer not to say"/>
         </xsd:restriction>
     </xsd:simpleType>
 
