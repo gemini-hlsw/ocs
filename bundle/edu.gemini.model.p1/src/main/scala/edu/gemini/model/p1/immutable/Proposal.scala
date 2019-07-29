@@ -18,7 +18,7 @@ object Proposal {
   val title:Lens[Proposal, String] = Lens.lensu((a, b) => a.copy(title = b), _.title)
   val abstrakt:Lens[Proposal, String] = Lens.lensu((a, b) => a.copy(abstrakt = b), _.abstrakt)
   val scheduling:Lens[Proposal, String] = Lens.lensu((a, b) => a.copy(scheduling = b), _.scheduling)
-  val tacCategory:Lens[Proposal, Option[TacCategory]] = Lens.lensu((a, b) => a.copy(tacCategory = b), _.tacCategory)
+  val category:Lens[Proposal, Option[TacCategory]] = Lens.lensu((a, b) => a.copy(category = b), _.category)
   val keywords:Lens[Proposal, List[Keyword]] = Lens.lensu((a, b) => a.copy(keywords = b), _.keywords)
   val investigators:Lens[Proposal, Investigators] = Lens.lensu((a, b) => a.copy(investigators = b), _.investigators)
   val observations:Lens[Proposal, List[Observation]] = Lens.lensu((a, b) => a.copy(observations = clean(b)), _.observations)
@@ -97,7 +97,7 @@ case class Proposal(meta:Meta,
                     title:String,
                     abstrakt:String,
                     scheduling:String,
-                    tacCategory:Option[TacCategory],
+                    category:Option[TacCategory],
                     keywords:List[Keyword],
                     investigators:Investigators,
                     targets:List[Target],
@@ -158,7 +158,7 @@ case class Proposal(meta:Meta,
     m.setTitle(title)
     m.setAbstract(abstrakt)
     m.setScheduling(scheduling)
-    m.setTacCategory(tacCategory.orNull)
+    m.setTacCategory(category.orNull)
     m.setKeywords(Factory.createKeywords())
     m.getKeywords.getKeyword.addAll(keywords.asJavaCollection)
     m.setInvestigators(investigators.mutable(n))

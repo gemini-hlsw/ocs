@@ -5,6 +5,19 @@ Gemini Phase I Schema Changes
 * Added "Multi-messenger astrophysics" keyword
 * Hide "Suprime Cam" for subaru
 * Add gender field to Investigator
+* Changed TAC Category (now just Category) entries to:
+  1. Planetary systems
+  2. Star and planet formation
+  3. Stars and stellar evolution
+  4. Formation and evolution of compact objects
+  5. Resolved stellar populations and their environments
+  6. Galaxy evolution
+  7.Cosmology and fundamental physics
+  
+  Old entries are mapped as follows:
+  1. Solar System  -> Planetary systems
+  2. Galactic      -> Stars and stellar evolution
+  3. Extragalactic -> Galaxy evolution
 
 # Version 2019.2.1 - 2019B
 ##########################

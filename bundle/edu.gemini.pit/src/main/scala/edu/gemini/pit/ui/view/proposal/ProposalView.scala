@@ -26,7 +26,7 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
   implicit val boolMonoid = Monoid.instance[Boolean](_ || _,  false)
 
   // Bound
-  override def children = List(title, abstrakt, /* scheduling, */ tacCategory, keywords, attachment, investigators)
+  override def children = List(title, abstrakt, /* scheduling, */ category, keywords, attachment, investigators)
   val lens = Model.proposal
 
   // Our content, which is defined below
@@ -34,7 +34,7 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
     border = DLU4_BORDER
     addRow(new Label("Title:"), title)
     addRow(new Label("Abstract:"), new ScrollPane(abstrakt), GridBagPanel.Fill.Both, 100)
-    addRow(new Label("TAC Category:"), tacCategory)
+    addRow(new Label("Category:"), category)
     addRow(new Label("Keywords:"), keywords)
     addRow(new Label("Attachment:"), attachment)
     addSpacer()
@@ -45,7 +45,7 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
   override def refresh(m:Option[Proposal]) {
     title.enabled = canEdit
     abstrakt.enabled = canEdit
-    tacCategory.enabled = canEdit
+    category.enabled = canEdit
     attachment.select.enabled = canEdit
     attachment.remove.enabled = canEdit
   }
@@ -68,9 +68,9 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
   }
 
   // TAC category
-  object tacCategory extends ComboBox[TacCategory](TacCategory.values) with BoundCombo[Proposal, TacCategory] with Uninitialized.ValueRenderer[TacCategory] {
+  object category extends ComboBox[TacCategory](TacCategory.values) with BoundCombo[Proposal, TacCategory] with Uninitialized.ValueRenderer[TacCategory] {
     val boundView = panel
-    val lens = Uninitialized.lens(Proposal.tacCategory)
+    val lens = Uninitialized.lens(Proposal.category)
   }
 
   // Keywords

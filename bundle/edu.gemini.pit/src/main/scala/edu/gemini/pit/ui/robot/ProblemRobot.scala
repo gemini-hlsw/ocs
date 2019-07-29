@@ -74,7 +74,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     lazy val all = {
       val ps =
-        List(noObs, nonUpdatedInvestigatorName, noPIPhoneNumber, invalidPIPhoneNumber, titleCheck, band3option, abstractCheck, tacCategoryCheck,
+        List(noObs, nonUpdatedInvestigatorName, noPIPhoneNumber, invalidPIPhoneNumber, titleCheck, band3option, abstractCheck, categoryCheck,
           keywordCheck, attachmentCheck, attachmentValidityCheck, attachmentSizeCheck, missingObsDetailsCheck,
           duplicateInvestigatorCheck, ftReviewerOrMentor, ftAffiliationMismatch, band3Obs).flatten ++
           TimeProblems(p, s).all ++
@@ -100,8 +100,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       new Problem(Severity.Todo, "Please provide an abstract.", "Overview", s.inOverview(_.abstrakt.requestFocus()))
     }
 
-    private lazy val tacCategoryCheck = when(p.tacCategory.isEmpty) {
-      new Problem(Severity.Todo, "Please select a TAC category.", "Overview", s.inOverview(_.tacCategory.peer.setPopupVisible(true)))
+    private lazy val categoryCheck = when(p.category.isEmpty) {
+      new Problem(Severity.Todo, "Please select a science category.", "Overview", s.inOverview(_.category.peer.setPopupVisible(true)))
     }
 
     private lazy val keywordCheck = when(p.keywords.isEmpty) {

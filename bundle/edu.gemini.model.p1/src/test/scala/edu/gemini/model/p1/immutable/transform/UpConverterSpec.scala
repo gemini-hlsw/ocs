@@ -124,17 +124,6 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           proposal.schemaVersion must beEqualTo(Proposal.currentSchemaVersion)
       }
     }
-    "retain the tacCategory attribute" in {
-      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_ver_1.0.14.xml")))
-      val converted = UpConverter.convert(xml)
-      converted must beSuccessful.like {
-        case StepResult(changes, result) =>
-          changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
-
-          val proposal = ProposalIo.read(result.toString())
-          proposal.tacCategory must beSome(TacCategory.GALACTIC)
-      }
-    }
     "create a band3Option missing attribute from 1.0.0" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_ver_1.0.0_no_band3option.xml")))
       val converted = UpConverter.convert(xml)
@@ -773,6 +762,39 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           changes must contain("Subaru proposal with Suprime Cam has been migrated to Hyper Suprime Cam")
           result \\ "subaru" must \\("name") \> "Subaru (Hyper Suprime Cam)"
           result \\ "subaru" must \\("instrument") \> "Hyper Suprime Cam"
+      }
+    }
+    "update the tacCategory Solar System attribute" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_solarsystem.xml")))
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must contain(SemesterConverter2019BTo2020A.solarSystemCategoryMessage)
+
+          val proposal = ProposalIo.read(result.toString())
+          proposal.category must beSome(TacCategory.PLANETARY_SYSTEMS)
+      }
+    }
+    "update the tacCategory Galactic attribute" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_galactic.xml")))
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must contain(SemesterConverter2019BTo2020A.galacticCategoryMessage)
+
+          val proposal = ProposalIo.read(result.toString())
+          proposal.category must beSome(TacCategory.STARS_AND_STELLAR_EVOLUTION)
+      }
+    }
+    "update the tacCategory Extragalactic attribute" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_extragalactic.xml")))
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must contain(SemesterConverter2019BTo2020A.extragalacticCategoryMessage)
+
+          val proposal = ProposalIo.read(result.toString())
+          proposal.category must beSome(TacCategory.GALAXY_EVOLUTION)
       }
     }
   }

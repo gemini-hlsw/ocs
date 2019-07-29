@@ -503,7 +503,13 @@ package object immutable {
 
   type TacCategory = M.TacCategory
   object TacCategory extends EnumObject[M.TacCategory] {
-    val GALACTIC = M.TacCategory.GALACTIC
+    val PLANETARY_SYSTEMS                                   = M.TacCategory.PLANETARY_SYSTEMS
+    val STAR_AND_PLANET_FORMATION                           = M.TacCategory.STAR_AND_PLANET_FORMATION
+    val STARS_AND_STELLAR_EVOLUTION                         = M.TacCategory.STARS_AND_STELLAR_EVOLUTION
+    val FORMATION_AND_EVOLUTION_OF_COMPACT_OBJECTS          = M.TacCategory.FORMATION_AND_EVOLUTION_OF_COMPACT_OBJECTS
+    val RESOLVED_STELLAR_POPULATIONS_AND_THEIR_ENVIRONMENTS = M.TacCategory.RESOLVED_STELLAR_POPULATIONS_AND_THEIR_ENVIRONMENTS
+    val GALAXY_EVOLUTION                                    = M.TacCategory.GALAXY_EVOLUTION
+    val COSMOLOGY_AND_FUNDAMENTAL_PHYSICS                   = M.TacCategory.COSMOLOGY_AND_FUNDAMENTAL_PHYSICS
   }
 
   type TimeUnit = M.TimeUnit
