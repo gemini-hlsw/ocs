@@ -19,6 +19,7 @@
             <firstName>Guillermo</firstName>
             <lastName>Hagele</lastName>
             <status>PhD</status>
+            <gender>None selected</gender>
             <email>ghagele@fcaglp.unlp.edu.ar</email>
             <phone></phone>
             <address>
@@ -33,6 +34,7 @@ Prov. de Buenos Aires</address>
             <firstName>Guilllermo</firstName>
             <lastName>Bosch</lastName>
             <status>PhD</status>
+            <gender>None selected</gender>
             <email>guille@fcaglp.unlp.edu.ar</email>
             <phone></phone>
             <institution>Observatorio Astronomico de La Plata</institution>
@@ -41,6 +43,7 @@ Prov. de Buenos Aires</address>
             <firstName>Monica</firstName>
             <lastName>Cardaci</lastName>
             <status>PhD</status>
+            <gender>None selected</gender>
             <email>mcardaci@fcaglp.unlp.edu.ar</email>
             <phone></phone>
             <institution>Observatorio Astronomico de La Plata</institution>
@@ -49,6 +52,7 @@ Prov. de Buenos Aires</address>
             <firstName>Veronica</firstName>
             <lastName>Firpo</lastName>
             <status>PhD</status>
+            <gender>None selected</gender>
             <email>vfirpo@fcaglp.unlp.edu.ar</email>
             <phone></phone>
             <institution>Observatorio Astronomico de La Plata</institution>
@@ -57,6 +61,7 @@ Prov. de Buenos Aires</address>
             <firstName>Enrique</firstName>
             <lastName>Perez-Montero</lastName>
             <status>PhD</status>
+            <gender>None selected</gender>
             <email>epm@iaa.es</email>
             <phone></phone>
             <institution>IAA - Granada</institution>
@@ -65,6 +70,7 @@ Prov. de Buenos Aires</address>
             <firstName>Jose Maria</firstName>
             <lastName>Vilchez</lastName>
             <status>PhD</status>
+            <gender>None selected</gender>
             <email>jvm@iaa.es</email>
             <phone></phone>
             <institution>IAA - Granada</institution>
@@ -73,6 +79,7 @@ Prov. de Buenos Aires</address>
             <firstName>Ana</firstName>
             <lastName>Monreal-Ibero</lastName>
             <status>PhD</status>
+            <gender>None selected</gender>
             <email>ami@iaa.es</email>
             <phone></phone>
             <institution>IAA - Granada</institution>
@@ -81,6 +88,7 @@ Prov. de Buenos Aires</address>
             <firstName>Ricardo</firstName>
             <lastName>Amorin</lastName>
             <status>PhD</status>
+            <gender>None selected</gender>
             <email>amorin@iaa.es</email>
             <phone></phone>
             <institution>IAA - Granada</institution>

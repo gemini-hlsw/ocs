@@ -1,10 +1,12 @@
 package edu.gemini.model.p1.immutable.transform
 
-import org.specs2.matcher.XmlMatchers
+import org.specs2.matcher.{MatchResult, XmlMatchers}
 import org.specs2.mutable._
 import org.specs2.scalaz.ValidationMatchers._
+
 import xml._
 import java.io.InputStreamReader
+
 import edu.gemini.model.p1.immutable._
 import scalaz.NonEmptyList
 import XMLConverter._
@@ -16,7 +18,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have size 4
+          changes must have size 5
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
 
           val proposal = ProposalIo.read(result.toString())
@@ -47,7 +49,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
         case ConversionResult(transformed, from, changes, root) =>
           transformed must beTrue
           from must beEqualTo(Semester(2014, SemesterOption.A))
-          changes must have length 4
+          changes must have length 5
       }
 
     }
@@ -56,7 +58,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have size 4
+          changes must have size 5
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2013A to view the unmodified proposal")
@@ -86,10 +88,10 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       }
 
       UpConverter.upConvert(xml) must beSuccessful.like {
-        case ConversionResult(transformed, from, changes, root) =>
+        case ConversionResult(transformed, from, changes, _) =>
           transformed must beTrue
           from must beEqualTo(Semester(2013, SemesterOption.A))
-          changes must have length 4
+          changes must have length 5
       }
 
     }
@@ -98,7 +100,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have size 4
+          changes must have size 5
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2013A to view the unmodified proposal")
@@ -138,7 +140,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 5
+          changes must have length 6
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
@@ -158,7 +160,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
         case ConversionResult(transformed, from, changes, root) =>
           transformed must beTrue
           from must beEqualTo(Semester(2012, SemesterOption.B))
-          changes must have length 5
+          changes must have length 6
       }
     }
     "Renamed Keyword 'Herbig-Haro stars' to 'Herbig-Haro objects' on 1.0.0" in {
@@ -166,7 +168,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 6
+          changes must have length 7
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
@@ -206,7 +208,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
 
           val proposal = ProposalIo.read(result.toString())
           proposal.proposalClass.itac.map {
-            case i: Itac => i.ngoAuthority must beNone
+            i: Itac => i.ngoAuthority must beNone
           }
           true must beTrue
       }
@@ -220,7 +222,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
 
           val proposal = ProposalIo.read(result.toString())
           proposal.proposalClass.itac.map {
-            case i: Itac => i.ngoAuthority must beSome(NgoPartner.CL)
+            i: Itac => i.ngoAuthority must beSome(NgoPartner.CL)
           }
           true must beTrue
       }
@@ -243,7 +245,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 8
+          changes must have length 9
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
@@ -268,7 +270,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 8
+          changes must have length 9
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
@@ -294,7 +296,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 9
+          changes must have length 10
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
@@ -408,7 +410,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 6
+          changes must have length 7
           changes must contain("The original proposal contained T-ReCS observations. The instrument is not available and those resources have been removed.")
           // The texes blueprint must remain
           result must \\("gmosN")
@@ -420,7 +422,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 6
+          changes must have length 7
           changes must contain("The original proposal contained Michelle observations. The instrument is not available and those resources have been removed.")
           // The texes blueprint must remain
           result must \\("gmosN")
@@ -432,7 +434,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 6
+          changes must have length 7
           changes must contain("The original proposal contained NICI observations. The instrument is not available and those resources have been removed.")
           // The texes blueprint must remain
           result must \\("gmosN")
@@ -445,7 +447,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
         val converted = UpConverter.convert(xml)
         converted must beSuccessful.like {
           case StepResult(changes, result) =>
-            changes must have length 6
+            changes must have length 7
             // The texes blueprint must remain
             result must \\("Texes")
         }
@@ -457,7 +459,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 5
+          changes must have length 6
           changes must contain(SemesterConverter2018ATo2018B.dssiGNToAlopekeMessage)
           result must \\("Alopeke", "id")
           result must \\("Alopeke") \\ "mode" \> AlopekeMode.SPECKLE.value
@@ -470,7 +472,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 5
+          changes must have length 6
           changes must contain(SemesterConverter2019ATo2019B.dssiGSToZorroMessage)
           result must \\("Zorro", "id")
           result must \\("Zorro") \\ "mode" \> ZorroMode.SPECKLE.value
@@ -484,7 +486,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
         val converted = UpConverter.convert(xml)
         converted must beSuccessful.like {
           case StepResult(changes, result) =>
-            changes must have length 5
+            changes must have length 6
             changes must contain("The original proposal contained Phoenix observations. The instrument is not available and those resources have been removed.")
         }
       }
@@ -495,7 +497,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 5
+          changes must have length 6
           changes must contain(SemesterConverter2018ATo2018B.phoenixSiteMessage)
       }
     }
@@ -506,7 +508,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
         val converted = UpConverter.convert(xml)
         converted must beSuccessful.like {
           case StepResult(changes, result) =>
-            changes must have length 5
+            changes must have length 6
             changes must contain("Texes proposal has been assigned to Gemini North.")
             // The texes blueprint must remain and include a site
             result must \\("Texes", "id")
@@ -521,7 +523,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 7
+          changes must have length 8
           changes must contain("The unavailable GMOS-N 0.25\" slit has been converted to the 0.5\" slit.")
           // Check that fpu and name are replaced
           result must \\("fpu") \> "0.5 arcsec slit"
@@ -536,7 +538,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 7
+          changes must have length 8
           changes must contain("A default 1\" slit has been added to the GMOS-S MOS observation.")
           changes must contain("A default 1\" slit has been added to the GMOS-N MOS observation.")
           changes must contain(s"Please use the PIT from semester 2013B to view the unmodified proposal")
@@ -554,7 +556,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 6
+          changes must have length 7
           changes must contain("GNIRS observation doesn't have a central wavelength range, assigning to '< 2.5um'")
           // Check that the centralWavelength node is added
           result must \\("centralWavelength") \> "< 2.5um"
@@ -569,7 +571,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 6
+          changes must have length 7
           changes must contain("The unavailable Flamingos2 filters F1056 (1.056 um)/F1063 (1.063 um) have been converted to Y (1.020 um).")
           // Check that the centralWavelength node is added
           result \\ "flamingos2" must \\("filter") \> "Y (1.020 um)"
@@ -598,7 +600,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 5
+          changes must have length 6
           changes must contain("The Flamingos2 filter K-long (2.00 um) has been converted to K-long (2.20 um).")
           // Check that the filter node is added and the name updated
           result \\ "flamingos2" must \\("filter") \> "K-long (2.20 um)"
@@ -613,7 +615,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 5
+          changes must have length 6
           changes must contain("GMOS-N observations without an Altair setting have had Adaptive Optics set to None.")
           // Check that fpu and name are replaced
           result must \\("fpu") \> "0.5 arcsec slit"
@@ -629,7 +631,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 5
+          changes must have length 6
           // Check that fpu and name are replaced
           result must \\("name") \>~ ".*None.*"
       }
@@ -640,7 +642,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 5
+          changes must have length 6
           // Check that fpu and name are replaced
           result must \\("name") \> "GMOS-N LongSlit None B1200 GG455 (> 460 nm) 0.5 arcsec slit"
       }
@@ -651,7 +653,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 5
+          changes must have length 6
           // Check that fpu and name are replaced
           result must \\("name") \> "GMOS-N LongSlit N+S None B1200 GG455 (> 460 nm) 0.5 arcsec slit"
       }
@@ -662,7 +664,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 5
+          changes must have length 6
           // Check that fpu and name are replaced
           result must \\("name") \> "GMOS-N MOS None 0.75 arcsec slit R400 RG610 (> 615 nm) +Pre"
       }
@@ -673,7 +675,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 5
+          changes must have length 6
           // Check that fpu and name are replaced
           result must \\("name") \> "GMOS-N MOS N+S None 1.0 arcsec slit B600 g + GG455 (506 nm) "
       }
@@ -684,7 +686,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 5
+          changes must have length 6
           // Check that fpu and name are replaced
           result must \\("name") \> "GMOS-N IFU None B600 i + CaT (815 nm) IFU 1 slit"
       }
@@ -695,7 +697,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 7
+          changes must have length 8
           result \\ "graces" must \\("fiberMode") \> "2 fibers (target+sky, R~40k)"
           result \\ "graces" must \\("name") \> "Graces 2 fibers (target+sky, R~40k)"
           result \\ "graces" must \\("fiberMode") \> "1 fiber (target only, R~67.5k)"
@@ -709,7 +711,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 5
+          changes must have length 6
           result \\ "niri" must \\("filter") \> "HeI (1.083 um)"
           result \\ "niri" must not(\\("filter") \> "J-continuum (1.122 um)")
           result \\ "niri" must not(\\("filter") \> "Jcont (1.065 um)")
@@ -722,7 +724,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 5
+          changes must have length 6
           result \\ "gpi" must \\("observingMode") \>~ "H.direct"
           result \\ "gpi" must \\("name") \> "GPI H direct Prism"
       }
@@ -753,7 +755,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 5
+          changes must have length 6
           changes must contain("Flamingos2 Multi-Object Spectroscopy is not offered")
           result \\ "flamingos2" must not(\\("filter") \> "J-lo (1.122 um)")
           result \\ "flamingos2" must not(\\("filter") \> "Y (1.020 um)")
@@ -767,7 +769,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 4
+          changes must have length 5
           changes must contain("Subaru proposal with Suprime Cam has been migrated to Hyper Suprime Cam")
           result \\ "subaru" must \\("name") \> "Subaru (Hyper Suprime Cam)"
           result \\ "subaru" must \\("instrument") \> "Hyper Suprime Cam"
@@ -775,11 +777,11 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
     }
   }
 
-  def testF2R3KYConversion(xml: Elem) = {
+  def testF2R3KYConversion(xml: Elem): MatchResult[Result] = {
     val converted = UpConverter.convert(xml)
     converted must beSuccessful.like {
       case StepResult(changes, result) =>
-        changes must have length 6
+        changes must have length 7
         changes must contain("The unavailable Flamingos2 configuration R3K + Y has been converted to R3K + J-lo.")
         // Check that the centralWavelength node is added
         result \\ "flamingos2" must \\("filter") \> "J-lo (1.122 um)"

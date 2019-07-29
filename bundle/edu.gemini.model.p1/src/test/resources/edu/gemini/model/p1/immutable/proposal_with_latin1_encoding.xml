@@ -14,6 +14,7 @@
             <firstName>Principal</firstName>
             <lastName>Investigator</lastName>
             <status>PhD</status>
+            <gender>None selected</gender>
             <email>kepler@if.ufrgs.br</email>
             <phone>+555133086556</phone>
             <address>
@@ -29,6 +30,7 @@ Campus do Vale
             <firstName>Alejandro</firstName>
             <lastName>Corsico</lastName>
             <status>PhD</status>
+            <gender>None selected</gender>
             <email>acorsico@fcaglp.fcaglp.unlp.edu.ar</email>
             <phone />
             <institution>Observatorio Astronomico de La Plata</institution>
@@ -37,6 +39,7 @@ Campus do Vale
             <firstName>Atsuko</firstName>
             <lastName>Nitta</lastName>
             <status>PhD</status>
+            <gender>None selected</gender>
             <email>anitta@gemini.edu</email>
             <phone />
             <institution>Gemini Observatory - North</institution>
@@ -45,6 +48,7 @@ Campus do Vale
             <firstName>Barbara</firstName>
             <lastName>Castanheira</lastName>
             <status>PhD</status>
+            <gender>None selected</gender>
             <email>barbara@astro.as.utexas.edu</email>
             <phone />
             <institution>University of Texas</institution>
@@ -53,6 +57,7 @@ Campus do Vale
             <firstName>Alejandra</firstName>
             <lastName>Romero</lastName>
             <status>PhD</status>
+            <gender>None selected</gender>
             <email>aromero@fcaglp.unlp.edu.ar</email>
             <phone />
             <institution>Universidade Federal do Rio Grande do Sul (UFRGS)</institution>
@@ -61,6 +66,7 @@ Campus do Vale
             <firstName>Leamdro</firstName>
             <lastName>Althaus</lastName>
             <status>PhD</status>
+            <gender>None selected</gender>
             <email>atlhaus@fcaglp.fcaglp.unl.edu.ar</email>
             <phone />
             <institution>Universidad Nacional de La Plata</institution>
