@@ -83,6 +83,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           TacProblems(p, s).all ++
           Semester2018BProblems(p, s).all ++
           Semester2019BProblems(p, s).all ++
+          Semester2020AProblems(p, s).all ++
           List(incompleteInvestigator, missingObsElementCheck, emptyTargetCheck,
             emptyEphemerisCheck, singlePointEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
             badGuiding, cwfsCorrectionsIssue, badVisibility, iffyVisibility, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsIQ70Check, lgsGemsIQ85Check,
@@ -709,6 +710,26 @@ object TimeProblems {
       probs.right.getOrElse(Nil)
     case _                            => Nil
   }
+}
+
+case class Semester2020AProblems(p: Proposal, s: ShellAdvisor) {
+  private val semester2020A = Semester(2020, SemesterOption.A)
+
+  private val texesNotOfferedCheck = for {
+    o <- p.observations
+    b <- o.blueprint
+    if b.isInstanceOf[TexesBlueprint]
+    if p.semester == semester2020A
+  } yield new Problem(Severity.Error, "Texes is not offered for 2020A.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
+
+  private val phoenixNotOfferedCheck = for {
+    o <- p.observations
+    b <- o.blueprint
+    if b.isInstanceOf[PhoenixBlueprint]
+    if p.semester == semester2020A
+  } yield new Problem(Severity.Error, "Phoenix is not offered for 2020A.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
+
+  def all: List[Problem] = List(texesNotOfferedCheck, phoenixNotOfferedCheck).flatten
 }
 
 case class Semester2019BProblems(p: Proposal, s: ShellAdvisor) {
