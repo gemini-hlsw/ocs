@@ -81,12 +81,11 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           TimeProblems.noCFHClassical(p, s) ++
           TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
-          Semester2018BProblems(p, s).all ++
-          Semester2019BProblems(p, s).all ++
+          Semester2020AProblems(p, s).all ++
           List(incompleteInvestigator, missingObsElementCheck, emptyTargetCheck,
             emptyEphemerisCheck, singlePointEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
             badGuiding, cwfsCorrectionsIssue, badVisibility, iffyVisibility, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsIQ70Check, lgsGemsIQ85Check,
-            lgsCC50Check, texesCCCheck, texesWVCheck, gmosWVCheck, gmosR600Check, f2MOSCheck, band3IQ, band3LGS, band3RapidToO, sbIrObservation).flatten
+            lgsCC50Check, texesCCCheck, texesWVCheck, gmosWVCheck, gmosR600Check, f2MOSCheck, dssiObsolete, band3IQ, band3LGS, band3RapidToO, sbIrObservation).flatten
       ps.sorted
     }
 
@@ -292,6 +291,14 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       b <- o.blueprint.collect { case mos: Flamingos2BlueprintMos => mos }
     } yield new Problem(Severity.Error, "Flamingos2 Multi-Object Spectroscopy is not offered.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
 
+    private val dssiObsolete = for {
+      o <- p.nonEmptyObservations
+      b <- o.blueprint
+      if b.isInstanceOf[DssiBlueprint]
+    } yield {
+      val sol = if (b.site == Site.GN) "Use 'Alopeke instead for GN." else "Use Zorro instead for GS."
+      new Problem(Severity.Error, s"DSSI is no longer offered at Gemini for 2019B. $sol", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
+    }
 
     def isBand3(o: Observation) = o.band == Band.BAND_3 && (p.proposalClass match {
                   case q: QueueProposalClass if q.band3request.isDefined => true
@@ -711,50 +718,24 @@ object TimeProblems {
   }
 }
 
-case class Semester2019BProblems(p: Proposal, s: ShellAdvisor) {
-  // *** 2019B specific issues ***
-  private val semester2019B = Semester(2019, SemesterOption.B)
-
-  private val dssiObsolete = for {
-    o <- p.nonEmptyObservations
-    b <- o.blueprint
-    if b.isInstanceOf[DssiBlueprint]
-    if p.semester == semester2019B
-  } yield {
-    val sol = if (b.site == Site.GN) "Use 'Alopeke instead for GN." else "Use Zorro instead for GS."
-    new Problem(Severity.Error, s"DSSI is not offered at Gemini for 2019B. $sol", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
-  }
-
-  def all: List[Problem] = List(dssiObsolete).flatten
-}
-
-case class Semester2018BProblems(p: Proposal, s: ShellAdvisor) {
-  // *** 2018B specific issues ***
-  private val semester2018B = Semester(2018, SemesterOption.B)
+case class Semester2020AProblems(p: Proposal, s: ShellAdvisor) {
+  private val semester2020A = Semester(2020, SemesterOption.A)
 
   private val texesNotOfferedCheck = for {
-    o <- p.nonEmptyObservations
+    o <- p.observations
     b <- o.blueprint
     if b.isInstanceOf[TexesBlueprint]
-    if p.semester == semester2018B
-  } yield new Problem(Severity.Error, "Texes is not offered for 2018B.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
+    if p.semester == semester2020A
+  } yield new Problem(Severity.Error, "Texes is not offered for 2020A.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
 
-  private val gmosnAltairNotOfferedCheck = for {
-    o <- p.nonEmptyObservations
-    b <- o.blueprint
-    if b.isInstanceOf[GmosNBlueprintBase]
-    if p.semester == semester2018B
-    if b.asInstanceOf[GmosNBlueprintBase].altair != AltairNone
-  } yield new Problem(Severity.Error, "GMOS-N does not offer Altair in 2018B.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
-
-  private val phoenixOnlyGS = for {
-    o <- p.nonEmptyObservations
+  private val phoenixNotOfferedCheck = for {
+    o <- p.observations
     b <- o.blueprint
     if b.isInstanceOf[PhoenixBlueprint]
-    if b.site == Site.GN
-  } yield new Problem(Severity.Error, "Phoenix is only available at Gemini South for 2018B.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
+    if p.semester == semester2020A
+  } yield new Problem(Severity.Error, "Phoenix is not offered for 2020A.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
 
-  def all: List[Problem] = List(texesNotOfferedCheck, gmosnAltairNotOfferedCheck, phoenixOnlyGS).flatten
+  def all: List[Problem] = List(texesNotOfferedCheck, phoenixNotOfferedCheck).flatten
 }
 
 case class TimeProblems(p: Proposal, s: ShellAdvisor) {

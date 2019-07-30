@@ -186,7 +186,10 @@ case object SemesterConverter2019BTo2020A extends SemesterConverter {
       StepResult(extragalacticCategoryMessage, <proposal tacCategory={TacCategory.GALAXY_EVOLUTION.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
   }
 
-  override val transformers: List[TransformFunction] = List(subaruSuprimeTransform, genderTransform, categoryUpdateTransform)
+  val texesRemover: TransformFunction = removeBlueprint("texes", "Texes")._1
+  val phoenixRemover: TransformFunction = removeBlueprint("phoenix", "Phoenix")._1
+
+  override val transformers: List[TransformFunction] = List(subaruSuprimeTransform, genderTransform, categoryUpdateTransform, texesRemover, phoenixRemover)
 }
 
 

@@ -481,13 +481,15 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       }
     }
     "proposals with phoenix blueprints must be assigned to GS, REL-3349" in {
-      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_phoenix_no_site.xml")))
+      skipped {
+        val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_phoenix_no_site.xml")))
 
-      val converted = UpConverter.convert(xml)
-      converted must beSuccessful.like {
-        case StepResult(changes, result) =>
-          changes must have length 6
-          changes must contain(SemesterConverter2018ATo2018B.phoenixSiteMessage)
+        val converted = UpConverter.convert(xml)
+        converted must beSuccessful.like {
+          case StepResult(changes, result) =>
+            changes must have length 6
+            changes must contain(SemesterConverter2018ATo2018B.phoenixSiteMessage)
+        }
       }
     }
     "proposal with texes blueprints must have a site, REL-2463" in {
