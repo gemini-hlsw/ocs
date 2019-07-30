@@ -54,7 +54,7 @@
 
             </xsd:sequence>
             <xsd:attribute name="schemaVersion" type="SchemaVersion" use="required"/>
-            <xsd:attribute name="tacCategory"   type="TacCategory"   use="optional"/>
+            <xsd:attribute name="tacCategory" type="TacCategory" use="optional"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -88,13 +88,18 @@
 
 
     <!--
-      A proposal has a TAC category of Solar System, Galactic, or Extragalactic.
+      A proposal has a category of one of the following.
+      This has been changed to Category in the UI, but a Category class clashes with scalaz.
     -->
     <xsd:simpleType name="TacCategory">
         <xsd:restriction base="xsd:token">
-            <xsd:enumeration value="Solar System"/>
-            <xsd:enumeration value="Galactic"/>
-            <xsd:enumeration value="Extragalactic"/>
+            <xsd:enumeration value="Planetary systems"/>
+            <xsd:enumeration value="Star and planet formation"/>
+            <xsd:enumeration value="Stars and stellar evolution"/>
+            <xsd:enumeration value="Formation and evolution of compact objects"/>
+            <xsd:enumeration value="Resolved stellar populations and their environments"/>
+            <xsd:enumeration value="Galaxy evolution"/>
+            <xsd:enumeration value="Cosmology and fundamental physics"/>
         </xsd:restriction>
     </xsd:simpleType>
 

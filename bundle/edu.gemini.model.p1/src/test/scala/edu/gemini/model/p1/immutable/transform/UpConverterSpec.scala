@@ -58,7 +58,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have size 5
+          changes must have size 6
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2013A to view the unmodified proposal")
@@ -91,7 +91,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
         case ConversionResult(transformed, from, changes, _) =>
           transformed must beTrue
           from must beEqualTo(Semester(2013, SemesterOption.A))
-          changes must have length 5
+          changes must have length 6
       }
 
     }
@@ -100,7 +100,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have size 5
+          changes must have size 6
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2013A to view the unmodified proposal")
@@ -124,23 +124,12 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           proposal.schemaVersion must beEqualTo(Proposal.currentSchemaVersion)
       }
     }
-    "retain the tacCategory attribute" in {
-      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_ver_1.0.14.xml")))
-      val converted = UpConverter.convert(xml)
-      converted must beSuccessful.like {
-        case StepResult(changes, result) =>
-          changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
-
-          val proposal = ProposalIo.read(result.toString())
-          proposal.tacCategory must beSome(TacCategory.GALACTIC)
-      }
-    }
     "create a band3Option missing attribute from 1.0.0" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_ver_1.0.0_no_band3option.xml")))
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 6
+          changes must have length 7
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
@@ -160,7 +149,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
         case ConversionResult(transformed, from, changes, root) =>
           transformed must beTrue
           from must beEqualTo(Semester(2012, SemesterOption.B))
-          changes must have length 6
+          changes must have length 7
       }
     }
     "Renamed Keyword 'Herbig-Haro stars' to 'Herbig-Haro objects' on 1.0.0" in {
@@ -168,7 +157,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 7
+          changes must have length 8
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
@@ -245,7 +234,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 9
+          changes must have length 10
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
@@ -270,7 +259,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 9
+          changes must have length 10
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
@@ -296,7 +285,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 10
+          changes must have length 11
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
@@ -773,6 +762,39 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           changes must contain("Subaru proposal with Suprime Cam has been migrated to Hyper Suprime Cam")
           result \\ "subaru" must \\("name") \> "Subaru (Hyper Suprime Cam)"
           result \\ "subaru" must \\("instrument") \> "Hyper Suprime Cam"
+      }
+    }
+    "update the tacCategory Solar System attribute" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_solarsystem.xml")))
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must contain(SemesterConverter2019BTo2020A.solarSystemCategoryMessage)
+
+          val proposal = ProposalIo.read(result.toString())
+          proposal.category must beSome(TacCategory.PLANETARY_SYSTEMS)
+      }
+    }
+    "update the tacCategory Galactic attribute" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_galactic.xml")))
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must contain(SemesterConverter2019BTo2020A.galacticCategoryMessage)
+
+          val proposal = ProposalIo.read(result.toString())
+          proposal.category must beSome(TacCategory.STARS_AND_STELLAR_EVOLUTION)
+      }
+    }
+    "update the tacCategory Extragalactic attribute" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_extragalactic.xml")))
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must contain(SemesterConverter2019BTo2020A.extragalacticCategoryMessage)
+
+          val proposal = ProposalIo.read(result.toString())
+          proposal.category must beSome(TacCategory.GALAXY_EVOLUTION)
       }
     }
   }

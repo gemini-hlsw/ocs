@@ -173,7 +173,20 @@ case object SemesterConverter2019BTo2020A extends SemesterConverter {
       val addGender = ns :+ <gender>None selected</gender>
       StepResult(genderMessage, <coi id={p.attribute("id")}>{addGender}</coi>).successNel
   }
-  override val transformers: List[TransformFunction] = List(subaruSuprimeTransform, genderTransform)
+
+  lazy val solarSystemCategoryMessage: String = "The Solar System category is now classified as Planetary systems."
+  lazy val galacticCategoryMessage: String = "The Galactic category is now classified as Stars and stellar evolution."
+  lazy val extragalacticCategoryMessage: String = "The Extragalactic category is now classified as Galaxy evolution."
+  val categoryUpdateTransform: TransformFunction = {
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@tacCategory").exists(_.text == "Solar System") =>
+      StepResult(solarSystemCategoryMessage, <proposal tacCategory={TacCategory.PLANETARY_SYSTEMS.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@tacCategory").exists(_.text == "Galactic") =>
+      StepResult(galacticCategoryMessage, <proposal tacCategory={TacCategory.STARS_AND_STELLAR_EVOLUTION.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@tacCategory").exists(_.text == "Extragalactic") =>
+      StepResult(extragalacticCategoryMessage, <proposal tacCategory={TacCategory.GALAXY_EVOLUTION.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
+  }
+
+  override val transformers: List[TransformFunction] = List(subaruSuprimeTransform, genderTransform, categoryUpdateTransform)
 }
 
 
