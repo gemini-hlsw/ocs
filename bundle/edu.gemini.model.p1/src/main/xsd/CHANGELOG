@@ -5,6 +5,7 @@ Gemini Phase I Schema Changes
 * Added "Multi-messenger astrophysics" keyword
 * Hide "Suprime Cam" for subaru
 * Add gender field to Investigator
+* Added new instrument IGRINS. (REL-3714)
 * Changed TAC Category (now just Category) entries to:
   1. Planetary systems
   2. Star and planet formation

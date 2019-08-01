@@ -18,6 +18,15 @@ sealed abstract class Node[+I, C, S, +O](state: I) extends (S => Either[Node[O, 
 }
 
 /**
+  * A DummyNode that doesn't actually exist, to allow for instruments with no configurations.
+  */
+class DummyNode[O] extends Node[Unit, Unit, Unit, O] {
+  override val title: String = ???
+  override val description: String = ???
+  override def toUIPage: UIPage[Unit, Unit] = ???
+}
+
+/**
  * A SelectNode lets the user choose the next state based on a set of choices
  */
 abstract class SelectNode[+I, C, S, +O](state: I) extends Node[I, C, S, O](state) {

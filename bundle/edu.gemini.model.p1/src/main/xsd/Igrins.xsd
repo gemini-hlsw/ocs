@@ -1,0 +1,16 @@
+<!--
+  Schema definition for IGRINS blueprints
+-->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+
+    <!--
+      IGRINS Blueprint base type.
+    -->
+    <xsd:complexType name="IgrinsBlueprint">
+        <xsd:complexContent>
+            <xsd:extension base="BlueprintBase"/>
+        </xsd:complexContent>
+    </xsd:complexType>
+</xsd:schema>

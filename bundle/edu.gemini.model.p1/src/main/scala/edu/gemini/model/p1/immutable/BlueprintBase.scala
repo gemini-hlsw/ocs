@@ -28,17 +28,20 @@ object BlueprintBase {
     case b: M.GmosNBlueprintMos             => GmosNBlueprintMos(b)
 
     // GNIRS
-    case b:M.GnirsBlueprintImaging          => GnirsBlueprintImaging(b)
-    case b:M.GnirsBlueprintSpectroscopy     => GnirsBlueprintSpectroscopy(b)
+    case b: M.GnirsBlueprintImaging         => GnirsBlueprintImaging(b)
+    case b: M.GnirsBlueprintSpectroscopy    => GnirsBlueprintSpectroscopy(b)
 
     // GSOAI
-    case b:M.GsaoiBlueprint                 => GsaoiBlueprint(b)
+    case b: M.GsaoiBlueprint                => GsaoiBlueprint(b)
 
     // GPI
-    case b:M.GracesBlueprint                => GracesBlueprint(b)
+    case b: M.GracesBlueprint               => GracesBlueprint(b)
 
     // GPI
-    case b:M.GpiBlueprint                   => GpiBlueprint(b)
+    case b: M.GpiBlueprint                  => GpiBlueprint(b)
+
+    // IGRINS
+    case b: M.IgrinsBlueprint               => IgrinsBlueprint(b)
 
     // Michelle
     case b: M.MichelleBlueprintImaging      => MichelleBlueprintImaging(b)
