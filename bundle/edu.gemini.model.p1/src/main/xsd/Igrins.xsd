@@ -4,7 +4,7 @@
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <xsd:include schemaLocation="Instrument.xsd"/>
 
-    <!-- Options for Zorro Blueprint. -->
+    <!-- Options for IGRINS Blueprint. -->
     <xsd:complexType name="IgrinsBlueprintChoice">
         <xsd:sequence>
             <xsd:choice>
@@ -14,11 +14,11 @@
         </xsd:sequence>
     </xsd:complexType>
 
-    <!-- Zorro null. Empty blueprint, not available in PIT. -->
+    <!-- IGRINS null. Empty blueprint, not available in PIT. -->
     <xsd:complexType name="IgrinsBlueprintNull"/>
 
     <!--
-      Zorro Blueprint base type.
+      IGRINS Blueprint base type.
     -->
     <xsd:complexType name="IgrinsBlueprint">
         <xsd:complexContent>
