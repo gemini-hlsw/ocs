@@ -23,6 +23,8 @@ case class IgrinsBlueprint() extends GeminiBlueprintBase {
   }
 
   override def toChoice(n: Namer) = {
-    Factory.createIgrinsBlueprint
+    val m = Factory.createIgrinsBlueprintChoice
+    m.setIgrins(mutable(n))
+    m
   }
 }

@@ -1,12 +1,24 @@
 <!--
-  Schema definition for IGRINS blueprints
+  Schema definition for IGRINS blueprints.
 -->
-
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <xsd:include schemaLocation="Instrument.xsd"/>
 
+    <!-- Options for Zorro Blueprint. -->
+    <xsd:complexType name="IgrinsBlueprintChoice">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="null"  type="IgrinsBlueprintNull"/>
+                <xsd:element name="Igrins" type="IgrinsBlueprint"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Zorro null. Empty blueprint, not available in PIT. -->
+    <xsd:complexType name="IgrinsBlueprintNull"/>
+
     <!--
-      IGRINS Blueprint base type.
+      Zorro Blueprint base type.
     -->
     <xsd:complexType name="IgrinsBlueprint">
         <xsd:complexContent>

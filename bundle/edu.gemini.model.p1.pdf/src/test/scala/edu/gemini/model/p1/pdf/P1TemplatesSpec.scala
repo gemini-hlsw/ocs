@@ -141,6 +141,10 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
       val result = transformProposal("proposal_with_zorro.xml")
       XML.loadString(result) must (\\("table-cell") \ "block" \> "Zorro")
     }
+    "present the correct name when using IGRINS, REL-3714" in {
+      val result = transformProposal("proposal_with_igrins.xml")
+      XML.loadString(result) must (\\("table-cell") \ "block"\> "IGRINS")
+    }
     "present the correct name when using Visitor GN, REL-1090" in {
       val result = transformProposal("proposal_with_visitor_gn.xml")
       // Check that we use the proper public name of a north visitor
