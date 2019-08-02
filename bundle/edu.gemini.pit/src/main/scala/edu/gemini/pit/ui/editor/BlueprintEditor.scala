@@ -69,12 +69,9 @@ class BlueprintEditor private (initialState:UIState[_, _], editable:Boolean) ext
   }
 
   // Finish action
-  def finish = {
-    val a = nextState
-    a match {
-      case Some(Right((_, bp:BlueprintBase))) => bp
-      case _                                  => sys.error("Unexpected final state " + nextState) // TODO: this, more safely
-    }
+  def finish = nextState match {
+    case Some(Right((_, bp: BlueprintBase))) => bp
+    case _ => sys.error("Unexpected final state " + nextState) // TODO: this, more safely
   }
 
   // What would the next state be, based on the current selection?
