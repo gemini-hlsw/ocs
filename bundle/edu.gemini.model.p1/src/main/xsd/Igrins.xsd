@@ -22,7 +22,9 @@
     -->
     <xsd:complexType name="IgrinsBlueprint">
         <xsd:complexContent>
-            <xsd:extension base="BlueprintBase"/>
+            <xsd:extension base="BlueprintBase">
+                <xsd:sequence/>
+            </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
 </xsd:schema>
