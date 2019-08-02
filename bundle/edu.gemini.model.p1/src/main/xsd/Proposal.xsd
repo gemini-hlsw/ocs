@@ -132,7 +132,7 @@
             <xsd:element name="graces"     type="GracesBlueprintChoice"/>
             <xsd:element name="gpi"        type="GpiBlueprintChoice"/>
             <xsd:element name="keck"       type="KeckBlueprint"/>
-            <xsd:element name="igrins"     type="IgrinsBlueprint"/>
+            <xsd:element name="igrins"     type="IgrinsBlueprintChoice"/>
             <xsd:element name="michelle"   type="MichelleBlueprintChoice"/>
             <xsd:element name="nici"       type="NiciBlueprintChoice"/>
             <xsd:element name="nifs"       type="NifsBlueprintChoice"/>

@@ -20,7 +20,7 @@ class Root(sem:Semester) extends SingleSelectNode[Semester, Instrument, Any](sem
     case Gpi        => Left(inst.Gpi())
     case Graces     => Left(inst.Graces())
     case Gsaoi      => Left(inst.Gsaoi())
-    case Igrins     => Right(new IgrinsBlueprint)
+    case Igrins     => Right(IgrinsBlueprint())
     case Michelle   => Left(inst.Michelle())
     case Nici       => Left(inst.Nici())
     case Nifs       => Left(inst.Nifs())
