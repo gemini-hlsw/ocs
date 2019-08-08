@@ -111,6 +111,7 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
     case _: VisitorBlueprint            => SimpleOverheads(0.00, 10, 0.100).some
     case _: AlopekeBlueprint            => SimpleOverheads(0.00,  6, 0.000).some
     case _: ZorroBlueprint              => SimpleOverheads(0.00,  6, 0.000).some
+    case _: IgrinsBlueprint             => SimpleOverheads(0.20, 10, 0.000).some
 
     // NIRI relies on whether or not AO is being used.
     case nbp: NiriBlueprint             => SimpleOverheads(0.10, nbp.altair.ao.toBoolean ? 10 | 6, 0.193).some

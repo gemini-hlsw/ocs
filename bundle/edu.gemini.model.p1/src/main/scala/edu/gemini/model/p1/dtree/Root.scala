@@ -8,7 +8,7 @@ class Root(sem:Semester) extends SingleSelectNode[Semester, Instrument, Any](sem
   var title = "Select Instrument"
   var description = s"The following instruments are available for semester ${sem.year}${sem.half}. See the Gemini website for information on instrument capabilities and configuration options."
 
-  def choices = List(Alopeke, Flamingos2, GmosNorth, GmosSouth, Gnirs, Gpi, Graces, Gsaoi, Nifs, Niri, Visitor, Zorro)
+  def choices: List[Instrument] = List(Alopeke, Flamingos2, GmosNorth, GmosSouth, Gnirs, Gpi, Graces, Gsaoi, Igrins, Nifs, Niri, Visitor, Zorro)
 
   def apply(i:Instrument) = i match {
     case Alopeke    => Left(inst.Alopeke())
@@ -20,6 +20,7 @@ class Root(sem:Semester) extends SingleSelectNode[Semester, Instrument, Any](sem
     case Gpi        => Left(inst.Gpi())
     case Graces     => Left(inst.Graces())
     case Gsaoi      => Left(inst.Gsaoi())
+    case Igrins     => Right(IgrinsBlueprint())
     case Michelle   => Left(inst.Michelle())
     case Nici       => Left(inst.Nici())
     case Nifs       => Left(inst.Nifs())

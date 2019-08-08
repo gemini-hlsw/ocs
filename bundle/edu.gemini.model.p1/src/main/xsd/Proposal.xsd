@@ -1,4 +1,5 @@
-<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" jaxb:version="1.0">
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+            xmlns:xs="http://www.w3.org/2001/XMLSchema" jaxb:version="1.0">
     <xsd:include schemaLocation="Keyword.xsd"/>
     <xsd:include schemaLocation="Investigator.xsd"/>
     <xsd:include schemaLocation="Target.xsd"/>
@@ -9,6 +10,7 @@
     <xsd:include schemaLocation="Graces.xsd"/>
     <xsd:include schemaLocation="Gsaoi.xsd"/>
     <xsd:include schemaLocation="Gpi.xsd"/>
+    <xsd:include schemaLocation="Igrins.xsd"/>
     <xsd:include schemaLocation="Keck.xsd"/>
     <xsd:include schemaLocation="Michelle.xsd"/>
     <xsd:include schemaLocation="Nici.xsd"/>
@@ -130,6 +132,7 @@
             <xsd:element name="graces"     type="GracesBlueprintChoice"/>
             <xsd:element name="gpi"        type="GpiBlueprintChoice"/>
             <xsd:element name="keck"       type="KeckBlueprint"/>
+            <xsd:element name="igrins"     type="IgrinsBlueprintChoice"/>
             <xsd:element name="michelle"   type="MichelleBlueprintChoice"/>
             <xsd:element name="nici"       type="NiciBlueprintChoice"/>
             <xsd:element name="nifs"       type="NifsBlueprintChoice"/>

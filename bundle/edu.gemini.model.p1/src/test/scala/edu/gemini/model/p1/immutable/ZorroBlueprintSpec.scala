@@ -13,7 +13,7 @@ class ZorroBlueprintSpec extends Specification with SemesterProperties with XmlM
   // A proposal for Zorro with speckle mode and visitor set to false.
   private val proposal = ProposalIo.read(new InputStreamReader(getClass.getResourceAsStream("proposal_with_zorro.xml")))
 
-  "The 'Zorro Blueprint" should {
+  "The Zorro Blueprint" should {
     "not use Ao" in {
       ((_: ZorroBlueprint).ao must beEqualTo(AoNone)).forall(blueprints)
     }

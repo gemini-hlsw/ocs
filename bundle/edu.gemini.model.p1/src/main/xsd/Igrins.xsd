@@ -1,0 +1,30 @@
+<!--
+  Schema definition for IGRINS blueprints.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+
+    <!-- Options for IGRINS Blueprint. -->
+    <xsd:complexType name="IgrinsBlueprintChoice">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="null"  type="IgrinsBlueprintNull"/>
+                <xsd:element name="Igrins" type="IgrinsBlueprint"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- IGRINS null. Empty blueprint, not available in PIT. -->
+    <xsd:complexType name="IgrinsBlueprintNull"/>
+
+    <!--
+      IGRINS Blueprint base type.
+    -->
+    <xsd:complexType name="IgrinsBlueprint">
+        <xsd:complexContent>
+            <xsd:extension base="BlueprintBase">
+                <xsd:sequence/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+</xsd:schema>
