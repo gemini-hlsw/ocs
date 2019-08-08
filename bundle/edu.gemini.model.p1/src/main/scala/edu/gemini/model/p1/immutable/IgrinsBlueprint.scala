@@ -9,7 +9,7 @@ object IgrinsBlueprint {
 
 case class IgrinsBlueprint() extends GeminiBlueprintBase {
   override val name: String = "IGRINS"
-  override val visitor = true
+  override val visitor: Boolean = true
 
   def this(m: M.IgrinsBlueprint) = this()
 
