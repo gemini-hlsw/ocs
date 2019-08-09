@@ -25,7 +25,7 @@ import jsky.util.gui.StatusLogger
  * The catalog search will provide the inputs to the analysis phase, which actually assigns guide stars to guiders.
  * See OT-26
  */
-case class GemsVoTableCatalog(backend: VoTableBackend = ConeSearchBackend, catalog: CatalogName = UCAC4) {
+case class GemsVoTableCatalog(backend: VoTableBackend = ConeSearchBackend, catalog: CatalogName = PPMXL) {
 
   /**
    * Searches for the given base position according to the given options.
