@@ -537,7 +537,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     /**
      * Manual Detector Readout Area: see OT-53.
      */
-    private static class ReadoutArea implements Serializable {
+    public static class ReadoutArea implements Serializable {
         private static final long serialVersionUID = 1L;
         private static final int MIN_VALUE = 0;
         private static final int MAX_VALUE = 2047;
@@ -657,7 +657,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     /**
      * DetectorReadoutArea: see OT-52.
      */
-    enum DetectorReadoutArea implements DisplayableSpType {
+    public enum DetectorReadoutArea implements DisplayableSpType {
         FULL("Full (2048x2048)", new ReadoutArea(0, 0, 2047, 2047)),
         CENTRAL_1024("Central (1024x1024)", new ReadoutArea(512, 512, 1535, 1535)),
         CENTRAL_512("Central (512x512)", new ReadoutArea(768, 768, 1279, 1279)),
@@ -1042,7 +1042,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     /**
      * Detector Sampling Mode: OT-91
      */
-    enum DetectorSamplingMode implements DisplayableSpType, SequenceableSpType {
+    public enum DetectorSamplingMode implements DisplayableSpType, SequenceableSpType {
         FAST("Fast"),
         SINGLE_CDS("Single CDS"),
         MULTIPLE_CDS("Multiple CDS"),
@@ -1079,7 +1079,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     /**
      * Cassegrain (PositionAngle): see OT-84.
      */
-    private enum Cassegrain implements DisplayableSpType, SequenceableSpType {
+    public enum Cassegrain implements DisplayableSpType, SequenceableSpType {
         A0(0),
         A180(180),
         ;
