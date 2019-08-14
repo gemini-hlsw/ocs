@@ -172,7 +172,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
 
         Option<SPInstObsComp> gems = ImOption.fromScalaOpt(tpe.getContext().instrument().ifIs(SPComponentType.INSTRUMENT_GSAOI));
 
-        posAngleConstraint = gems.map(v -> ((Gsaoi) v).getPosAngleConstraint()).getOrElse(PosAngleConstraint.UNBOUNDED);
+        posAngleConstraint = gems.map(v -> ((Gsaoi) v).getPosAngleConstraint()).getOrElse(PosAngleConstraint.FIXED);
         _allowPosAngleChangesCheckBox = new JCheckBox("Allow position angle adjustments", posAngleConstraint == PosAngleConstraint.UNBOUNDED);
 
         // TPE REFACTOR -- i suppose we're assuming this isn't created from

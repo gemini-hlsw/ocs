@@ -515,7 +515,7 @@ public final class Gsaoi extends SPInstObsComp
         PropertySupport.setWrappedType(ROI_PROP, Roi.class);
     }
 
-    private PosAngleConstraint _posAngleConstraint = PosAngleConstraint.UNBOUNDED;
+    private PosAngleConstraint _posAngleConstraint = PosAngleConstraint.FIXED;
 
     private Filter filter = Filter.DEFAULT;
     private ReadMode readMode;
