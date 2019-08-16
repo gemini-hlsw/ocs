@@ -9,10 +9,12 @@ import edu.gemini.spModel.guide.{GuideProbe, GuideProbeGroup, GuideSpeed, GuideS
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
-
 import scalaz._
 import Scalaz._
+import edu.gemini.spModel.gemini.gems.CanopusWfs
+import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
 
+// REL-3719: As of NGS2, "Guide speed" messages no longer apply to Canopus.
 sealed trait AgsGuideQuality {
   def message: String
 }
@@ -61,6 +63,8 @@ sealed trait AgsAnalysis {
 }
 
 object AgsAnalysis {
+  def isCanopus(guideProbe: GuideProbe): Boolean = CanopusWfs.values().contains(guideProbe)
+
   final case class NoGuideStarForProbe(guideProbe: GuideProbe) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"${guideProbe.getKey} " else ""
@@ -76,7 +80,8 @@ object AgsAnalysis {
   final case class MagnitudeTooFaint(guideProbe: GuideProbe, target: SiderealTarget) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"use ${guideProbe.getKey}" else "guide"
-      s"Cannot $p with the star in these conditions, even using the slowest guide speed."
+      val gs = if (isCanopus(guideProbe)) "" else ", even using the slowest guide speed"
+      s"Cannot $p with the star in these conditions$gs."
     }
   }
 
@@ -114,8 +119,8 @@ object AgsAnalysis {
         case _                                   => s"${quality.message} "
       }
       val p = if (withProbe) s"${guideProbe.getKey} " else ""
-
-      s"$qualityMessage${p}Guide Speed: ${guideSpeed.name}."
+      val gs = if (isCanopus(guideProbe)) "Able to guide"  else s"Guide Speed: ${guideSpeed.name}"
+      s"$qualityMessage$p$gs."
     }
   }
 

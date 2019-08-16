@@ -26,6 +26,7 @@ import scala.swing.GridBagPanel.Fill
 import scala.swing.{Alignment, GridBagPanel, Label}
 import scalaz._
 import Scalaz._
+import edu.gemini.spModel.gemini.gems.CanopusWfs
 import javax.swing.border.Border
 
 
