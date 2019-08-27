@@ -228,6 +228,21 @@ case object PPMXLAdapter extends CatalogAdapter with StandardAdapter {
     magMap2.values.toList
   }
 }
+/*
+case object GaiaAdapter extends CatalogAdapter {
+  override val idField    = FieldId("designation",     VoTableParser.UCD_OBJID)
+  override val raField    = FieldId("ra",              VoTableParser.UCD_RA   )
+  override val decField   = FieldId("dec",             VoTableParser.UCD_DEC  )
+  override val pmRaField  = FieldId("pmra",            VoTableParser.UCD_PMRA )
+  override val pmDecField = FieldId("pmdec",           VoTableParser.UCD_PMDEC)
+  override val rvField    = FieldId("radial_velocity", VoTableParser.UCD_RV   )
+  override val zField     = FieldId("n/a",             VoTableParser.UCD_Z    )
+  override val plxField   = FieldId("parallax",        VoTableParser.UCD_PLX  )
+
+  protected def fieldToBand(field: FieldId): Option[MagnitudeBand] = None
+
+}
+*/
 
 case object SimbadAdapter extends CatalogAdapter {
   private val errorFluxIDExtra = "FLUX_ERROR_(.)_.+"
@@ -299,11 +314,13 @@ trait VoTableParser {
 
   protected def parseFieldDescriptor(xml: Node): Option[FieldDescriptor] = xml match {
     case f @ <FIELD>{_*}</FIELD> =>
-      (for {
-        id   <- f \ "@ID"
-        name <- f \ "@name"
-        ucd  <- f \ "@ucd"
-      } yield FieldDescriptor(FieldId(id.text, Ucd(ucd.text)), name.text)).headOption
+      def attr(n: String) = (f \ s"@$n").headOption.map(_.text)
+
+      val name = attr("name")
+      ^^(attr("ID") orElse name, attr("ucd"), name) { (i, u, n) =>
+        FieldDescriptor(FieldId(i, Ucd(u)), n)
+      }
+
     case _                       => None
   }
 
