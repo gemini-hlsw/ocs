@@ -78,4 +78,9 @@ object NGS2Strategy extends AgsStrategy {
     * Indicates the bands that will be used for a given probe
     */
   override def probeBands: BandsList = RBandsList
+
+  /**
+    * NGS2 does not have a guide strategy.
+    */
+  override val hasGuideSpeed: Boolean = false
 }

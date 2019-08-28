@@ -26,8 +26,7 @@ import scala.swing.GridBagPanel.Fill
 import scala.swing.{Alignment, GridBagPanel, Label}
 import scalaz._
 import Scalaz._
-import edu.gemini.spModel.gemini.gems.CanopusWfs
-import javax.swing.border.Border
+import jsky.app.ot.gemini.editor.targetComponent.TargetGuidingFeedback.ProbeLimits.{le, lim}
 
 
 object TargetFeedback {
@@ -63,7 +62,9 @@ object TargetGuidingFeedback {
       foreground = DARK_GRAY
       background = bg
       text       = probeLimits.map(_.searchRange).getOrElse("")
-      tooltip    = probeLimits.collect{case pl if pl.fast < pl.slow => pl.detailRange}.orNull
+      tooltip    = probeLimits.collect {
+        case pl@ProbeLimitsWithGuideSpeed(_, _, fast, _, faint) if fast < faint => pl.detailRange.orNull
+      }.orNull
       opaque     = true
       horizontalAlignment = Alignment.Right
     }
@@ -94,6 +95,9 @@ object TargetGuidingFeedback {
 
 
   object ProbeLimits {
+    def showGuideSpeed(ctx: ObsContext): Boolean =
+      AgsRegistrar.currentStrategy(ctx).map(_.hasGuideSpeed).getOrElse(true)
+
     def apply(probeBands: BandsList, ctx: ObsContext, mc: MagnitudeCalc): Option[ProbeLimits] = {
       val conditions = ctx.getConditions
       val fast = mc.apply(conditions, FAST)
@@ -101,7 +105,10 @@ object TargetGuidingFeedback {
       def faint(gs: GuideSpeed) = mc.apply(conditions, gs).faintnessConstraint.brightness
 
       fast.saturationConstraint.map { sat =>
-        ProbeLimits(probeBands, sat.brightness, faint(FAST), faint(MEDIUM), faint(SLOW))
+        if (showGuideSpeed(ctx))
+          ProbeLimitsWithGuideSpeed(probeBands, sat.brightness, faint(FAST), faint(MEDIUM), faint(SLOW))
+        else
+          ProbeLimitsWithoutGuideSpeed(probeBands, sat.brightness, faint(SLOW))
       }
     }
 
@@ -109,14 +116,22 @@ object TargetGuidingFeedback {
     def lim(d: Double): String = f"$d%.1f"
   }
 
-  case class ProbeLimits(bands: BandsList, sat: Double, fast: Double, medium: Double, slow: Double) {
-    import ProbeLimits.{le, lim}
+  sealed trait ProbeLimits {
+    def bands: BandsList
+    def sat: Double
+    def faint: Double
 
     def searchRange: String =
-      s"${lim(sat)} $le ${bands.bands.map(_.name).mkString(", ")} $le ${lim(slow)}"
+      s"${lim(sat)} $le ${bands.bands.map(_.name).mkString(", ")} $le ${lim(faint)}"
 
-    def detailRange: String =
-      s"${lim(sat)} $le FAST $le ${lim(fast)} < MEDIUM $le ${lim(medium)} < SLOW $le ${lim(slow)}"
+    def detailRange: Option[String] = None
+  }
+
+  case class ProbeLimitsWithoutGuideSpeed(bands: BandsList, sat: Double, faint: Double) extends ProbeLimits
+
+  case class ProbeLimitsWithGuideSpeed(bands: BandsList, sat: Double, fast: Double, medium: Double, faint: Double) extends ProbeLimits {
+    override def detailRange: Option[String] =
+      s"${lim(sat)} $le FAST $le ${lim(fast)} < MEDIUM $le ${lim(medium)} < SLOW $le ${lim(faint)}".some
   }
 
   // GuidingFeedback.Rows corresponding to the observation as a whole.
@@ -171,8 +186,8 @@ object TargetGuidingFeedback {
 
   // GuidingFeedback.Row related to the given guide star itself.
   def guideStarAnalysis(ctx: ObsContext, mt: MagnitudeTable, gp: ValidatableGuideProbe, target: SPTarget): Option[AnalysisRow] =
-    AgsAnalysis.analysis(ctx, mt, gp, target.toSiderealTarget(ctx.getSchedulingBlockStart)).map { a =>
-      val plo = mt(ctx, gp).flatMap(ProbeLimits(gp.getBands(), ctx, _))
+    AgsAnalysis.analysis(ctx, mt, gp, target.toSiderealTarget(ctx.getSchedulingBlockStart), ProbeLimits.showGuideSpeed(ctx)).map { a =>
+      val plo = mt(ctx, gp).flatMap(ProbeLimits(gp.getBands, ctx, _))
       AnalysisRow(a, plo, includeProbeName = false)
     }
 }

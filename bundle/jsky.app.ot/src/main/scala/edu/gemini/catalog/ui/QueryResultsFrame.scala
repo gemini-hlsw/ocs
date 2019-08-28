@@ -724,7 +724,8 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         sel        <- guider.selection.item.some
         c          <- ctx
         s          <- sel.strategy.magnitudes(c, i.mt).map(k => ProbeLimits(sel.strategy.probeBands, c, k._2))
-      } limitsLabel.text = ~s.map(_.detailRange)
+        dr         <- s.flatMap(_.detailRange)
+      } limitsLabel.text = dr
     }
 
     /**

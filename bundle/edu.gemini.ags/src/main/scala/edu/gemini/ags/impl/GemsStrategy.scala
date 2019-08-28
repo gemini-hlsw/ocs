@@ -35,6 +35,9 @@ trait GemsStrategy extends AgsStrategy {
 
   override def key = GemsKey
 
+  // NGS2 GeMS has no concept of guide speed.
+  private val showGuideSpeed: Boolean = false
+
   // Since the constraints are run in parallel, we need a way to identify them after
   // they are done, so we create IDs for each. This is a pretty nasty way to do things, but
   // since we cannot predict in what order the results will return, we need to be able
@@ -49,10 +52,10 @@ trait GemsStrategy extends AgsStrategy {
   }
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
-    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar)
+    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, showGuideSpeed = showGuideSpeed)
 
   def analyzeMagnitude(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
-    AgsAnalysis.magnitudeAnalysis(ctx, mt, guideProbe, guideStar)
+    AgsAnalysis.magnitudeAnalysis(ctx, mt, guideProbe, guideStar, showGuideSpeed = showGuideSpeed)
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] = {
     import AgsAnalysis._
@@ -63,7 +66,7 @@ trait GemsStrategy extends AgsStrategy {
         case _                      => true
       }
 
-      val probeAnalysis = grp.getMembers.asScala.toList.flatMap { p => analysis(ctx, mt, p) }
+      val probeAnalysis = grp.getMembers.asScala.toList.flatMap { p => analysis(ctx, mt, p, showGuideSpeed = showGuideSpeed) }
       probeAnalysis.filter(hasGuideStarForProbe) match {
         case Nil =>
           // Pick the first guide probe as representative, since we are called with either Canopus or GsaoiOdwg

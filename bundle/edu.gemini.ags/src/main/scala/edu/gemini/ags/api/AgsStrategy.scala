@@ -62,6 +62,11 @@ trait AgsStrategy {
    * Indicates the bands that will be used for a given probe
    */
   def probeBands: BandsList
+
+  /**
+    * Determine if guide speed is applicable to this strategy.
+    */
+  def hasGuideSpeed: Boolean = true
 }
 
 object AgsStrategy {
