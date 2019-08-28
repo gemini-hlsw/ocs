@@ -34,8 +34,8 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
     // Color for AO WFS limit.
     private static final Color AO_FOV_COLOR = Color.RED;
 
-    // Color for windows drawn around CWFS primary guide stars.
-    private static final Color GS_WINDOW_COLOR = Color.MAGENTA;
+    // TODO-NGS2: Color for windows drawn around CWFS primary guide stars. Rodrigo is unsure what color he wants to use.
+    private static final Color GS_WINDOW_COLOR = Color.CYAN;
 
     /**
      * Construct the feature with its name and description.
@@ -161,7 +161,12 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
                                                 else
                                                     g2d.setColor(OtColor.makeSlightlyTransparent(GS_WINDOW_COLOR));
 
+                                                // TODO-NGS2: It is very difficult to see the guide window.
+                                                // TODO-NGS2: Rodrigo: try making it two pixels thick?
+                                                final Stroke oldStroke = g2d.getStroke();
+                                                g2d.setStroke(new BasicStroke(2));
                                                 g2d.draw(window);
+                                                g2d.setStroke(oldStroke);
                                             })))));
 
             g2d.setColor(c);
