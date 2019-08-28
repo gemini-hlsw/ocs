@@ -257,6 +257,10 @@ class VoTableParserSpec extends Specification with VoTableParser {
       // missing attributes
       parseFieldDescriptor(<FIELD ID="abc"/>) should beNone
     }
+    "swap in name for ID if missing in a field definition" in {
+      val fieldXml = <FIELD datatype="double" name="ref_epoch" ucd="meta.ref;time.epoch" unit="yr"/>
+      parseFieldDescriptor(fieldXml) should beSome(FieldDescriptor(FieldId("ref_epoch", Ucd("meta.ref;time.epoch")), "ref_epoch"))
+    }
     "be able to parse a list of fields" in {
       val result =
         FieldDescriptor(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "gmag_err") ::
