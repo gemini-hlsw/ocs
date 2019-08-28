@@ -57,18 +57,23 @@ class GemsGuideStarSearchController {
         final MagnitudeBand nirBand = _model.getBand().getBand();
         NGS2Result results;
         try {
-            results = _worker.search(_model.getCatalog(), obsContext, posAngles,
-                    new scala.Some<>(nirBand), ec);
-        } catch(Exception e) {
+            results = _worker.search(_model.getCatalog(), obsContext, posAngles, new scala.Some<>(nirBand), ec);
+        } catch (final Exception e) {
             DialogUtil.error(_dialog, e);
             results = new NGS2Result(new ArrayList<>(), new ArrayList<>());
             _dialog.setState(GemsGuideStarSearchDialog.State.PRE_QUERY);
         }
 
+        // TODO-NGS2: This is where I am stuck for manual mode. I went further and had to undo my changes.
+        // TODO-NGS2: We now have Canopus and PWFS1 SFS results stored in the NGS2Results object.
+        // TODO-NGS2: We have to modify the GemsGuideStarSearchModel to accommodate them.
+        // TODO-NGS2: Right now, we just drop the PWFS1 guide star and only include the Canopus guide stars.
         if (_model.isReviewCandidatesBeforeSearch()) {
+            // TODO-NGS2: Change this method to take an NGS2Result?
             _model.setGemsCatalogSearchResults(results.gemsCatalogSearchResult());
         } else {
             _model.setGemsCatalogSearchResults(results.gemsCatalogSearchResult());
+            // TODO-NGS2: Change this method to take an NGS2Result?
             _model.setGemsGuideStars(_worker.findAllGuideStars(obsContext, posAngles, results.gemsCatalogSearchResult()));
         }
     }

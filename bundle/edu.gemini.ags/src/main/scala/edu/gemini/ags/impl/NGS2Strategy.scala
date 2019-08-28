@@ -19,8 +19,6 @@ import Scalaz._
   * The new NGS2 strategy, which requires Canopus guide stars and a PWFS1 guide star.
   */
 object NGS2Strategy extends AgsStrategy {
-  private val strategies: List[AgsStrategy] = List(GemsStrategy, Pwfs1SouthNGS2)
-
   override def key: AgsStrategyKey = NGS2Key
 
   override def magnitudes(ctx: ObsContext, mt: AgsMagnitude.MagnitudeTable): List[(GuideProbe, AgsMagnitude.MagnitudeCalc)] =

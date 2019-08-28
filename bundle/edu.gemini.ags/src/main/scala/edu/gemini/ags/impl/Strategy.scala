@@ -35,7 +35,7 @@ object Strategy {
   val Pwfs1North      = SingleProbeStrategy(Pwfs1NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs1))
   val Pwfs2North      = SingleProbeStrategy(Pwfs2NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs2))
   val Pwfs1South      = SingleProbeStrategy(Pwfs1SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs1))
-  val Pwfs1SouthNGS2  = SingleProbeStrategy(Pwfs1SouthKey,      Pwfs1NGS2Params) // We want PPMXL and not UCAC4 for NGS2
+  val Pwfs1SouthNGS2  = SingleProbeStrategy(Pwfs1SouthNGS2Key,  Pwfs1NGS2Params)
   val Pwfs2South      = SingleProbeStrategy(Pwfs2SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs2))
   val NiciOiwfs       = ScienceTargetStrategy(NiciOiwfsKey,     NiciOiwfsGuideProbe.instance, NiciBandsList)
   val Off             = OffStrategy
@@ -102,7 +102,7 @@ object Strategy {
     SPComponentType.INSTRUMENT_GMOSSOUTH  -> ((ctx: ObsContext) => oiStategies(ctx, GmosSouthOiwfs)),
 
     SPComponentType.INSTRUMENT_GNIRS      -> const(List(AltairAowfs, Pwfs2North, Pwfs1North, GnirsOiwfs)),
-    //SPComponentType.INSTRUMENT_GSAOI      -> const(List(GemsStrategy) ++ List(Pwfs1South)),
+    // TODO-NGS2: Remove GemsStrategy from here. It is for debugging purposes only.
     SPComponentType.INSTRUMENT_GSAOI      -> const(List(NGS2Strategy, GemsStrategy) ++ List(Pwfs1South)),
     SPComponentType.INSTRUMENT_MICHELLE   -> const(List(Pwfs2North, Pwfs1North)),
     SPComponentType.INSTRUMENT_NICI       -> const(List(NiciOiwfs, Pwfs2South, Pwfs1South)),

@@ -25,10 +25,10 @@ import jsky.util.gui.Resources
 import scala.collection.JavaConverters._
 import scala.swing.GridBagPanel.Fill
 import scala.swing.{Alignment, GridBagPanel, Label}
-
 import scalaz._
 import Scalaz._
-
+import edu.gemini.ags.impl.{NGS2Strategy, SingleProbeStrategyParams}
+import edu.gemini.spModel.ags.AgsStrategyKey.Pwfs1SouthNGS2Key
 import jsky.app.ot.gemini.editor.targetComponent.TargetGuidingFeedback.ProbeLimits.{le, lim}
 
 
@@ -99,11 +99,12 @@ object TargetGuidingFeedback {
 
   object ProbeLimits {
     def showGuideSpeed(ctx: ObsContext): Boolean =
-      AgsRegistrar.currentStrategy(ctx).map(_.hasGuideSpeed).getOrElse(true)
+      AgsRegistrar.currentStrategy(ctx).forall(_.hasGuideSpeed)
 
     def apply(probeBands: BandsList, ctx: ObsContext, mc: MagnitudeCalc): Option[ProbeLimits] = {
       val conditions = ctx.getConditions
       val fast = mc.apply(conditions, FAST)
+      val isPwfs1NGS2 = AgsRegistrar.currentStrategy(ctx).map(_.key).contains(Pwfs1SouthNGS2Key)
 
       def faint(gs: GuideSpeed) = mc.apply(conditions, gs).faintnessConstraint.brightness
 
@@ -111,11 +112,12 @@ object TargetGuidingFeedback {
         if (showGuideSpeed(ctx))
           ProbeLimitsWithGuideSpeed(probeBands, sat.brightness, faint(FAST), faint(MEDIUM), faint(SLOW))
         else
-          ProbeLimitsWithoutGuideSpeed(probeBands, sat.brightness, faint(SLOW))
+          ProbeLimitsWithoutGuideSpeed(probeBands, sat.brightness, faint(SLOW), isPwfs1NGS2)
       }
     }
 
     val le = '\u2264'
+    // TODO-NGS2: Perhaps we should change this to f"$d%.2f"? PWFS1 faintness limits have two decimal places.
     def lim(d: Double): String = f"$d%.1f"
   }
 
@@ -130,7 +132,12 @@ object TargetGuidingFeedback {
     def detailRange: Option[String] = None
   }
 
-  case class ProbeLimitsWithoutGuideSpeed(bands: BandsList, sat: Double, faint: Double) extends ProbeLimits
+  // TODO-NGS2: The hack from SingleProbeStrategyParams propagates.
+  // TODO-NGS2: This is terrible, but we need to add 2.5 to faintness for NGS2 PWFS1.
+  // TODO-NGS2: This magic number should be moved somewhere, but where?
+  case class ProbeLimitsWithoutGuideSpeed(bands: BandsList, sat: Double, faint_unadjusted: Double, isPwfs1NGS2: Boolean) extends ProbeLimits {
+    override val faint: Double = faint_unadjusted + 2.5
+  }
 
   case class ProbeLimitsWithGuideSpeed(bands: BandsList, sat: Double, fast: Double, medium: Double, faint: Double) extends ProbeLimits {
     override def detailRange: Option[String] =

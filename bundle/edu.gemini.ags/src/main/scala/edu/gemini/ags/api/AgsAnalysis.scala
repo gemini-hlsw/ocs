@@ -13,7 +13,7 @@ import scalaz._
 import Scalaz._
 import edu.gemini.spModel.gemini.gems.CanopusWfs
 
-// REL-3719: As of NGS2, "Guide speed" messages no longer apply to Canopus.
+// REL-3719: As of NGS2, "Guide speed" messages no longer apply to NGS2 guide stars, i.e. Canopus and PWFS1 SFS.
 sealed trait AgsGuideQuality {
   def message: String
 }

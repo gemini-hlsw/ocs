@@ -132,9 +132,13 @@ case object Pwfs1NGS2Params extends SingleProbeStrategyParams {
   override def validator(ctx: ObsContext): GuideStarValidator =
     vignettingProofPatrolField(ctx).validator(ctx)
 
+  // TODO-NGS2: Check this.
+  // TODO-NGS2: The magic number 2.5 should be moved somewhere, but where?
   /**
     * Since PWFS1 is used only for slow focus sensing in NGS2 and not for guiding, we can use stars up to 2.5 mag
     * fainter than with regular PWFS1.
+    * This is an ugly copy-paste hack, but I'm not sure how else to get the additional 2.5 mag faintness in the
+    * magnitude calculation short of adding another PWFS guide probe, which would be a nightmare.
     */
   override def magnitudeCalc(ctx: ObsContext, mt: MagnitudeTable): Option[MagnitudeCalc] = {
     mt(ctx, guideProbe) match {
