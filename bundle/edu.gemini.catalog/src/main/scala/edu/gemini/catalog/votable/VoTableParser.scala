@@ -15,7 +15,7 @@ object VoTableParser extends VoTableParser {
   type CatalogResult = CatalogProblem \/ ParsedVoResource
 
   // by band
-  private val MagnitudeOrdering: scala.math.Ordering[Magnitude] =
+  val MagnitudeOrdering: scala.math.Ordering[Magnitude] =
     scala.math.Ordering.by(_.band)
 
   val UCD_OBJID      = Ucd("meta.id;meta.main")
@@ -73,14 +73,13 @@ object VoTableParser extends VoTableParser {
 // A CatalogAdapter improves parsing handling catalog-specific options like parsing magnitudes and selecting key fields
 sealed trait CatalogAdapter {
   // Required fields
-  val idField: FieldId
-  val raField: FieldId
-  val decField: FieldId
-  val pmRaField  = FieldId("pmra", VoTableParser.UCD_PMRA)
-  val pmDecField = FieldId("pmde", VoTableParser.UCD_PMDEC)
-  val rvField    = FieldId("RV_VALUE", VoTableParser.UCD_RV)
-  val zField     = FieldId("Z_VALUE", VoTableParser.UCD_Z)
-  val plxField   = FieldId("PLX_VALUE", VoTableParser.UCD_PLX)
+  def idField: FieldId
+  def raField: FieldId
+  def decField: FieldId
+  def pmRaField  = FieldId("pmra",      VoTableParser.UCD_PMRA )
+  def pmDecField = FieldId("pmde",      VoTableParser.UCD_PMDEC)
+  def zField     = FieldId("Z_VALUE",   VoTableParser.UCD_Z    )
+  def plxField   = FieldId("PLX_VALUE", VoTableParser.UCD_PLX  )
 
   // Indicates if the field is a magnitude
   def isMagnitudeField(v: (FieldId, String)): Boolean =
@@ -99,8 +98,9 @@ sealed trait CatalogAdapter {
     false
 
   // filter magnitudes as a whole, removing invalid values and duplicates
-  def filterAndDeduplicateMagnitudes(magnitudeFields: List[(FieldId, Magnitude)]): List[Magnitude] =
-    magnitudeFields.collect { case (_, mag) if validMagnitude(mag) => mag }
+  // (This is written to be overridden--see PPMXL adapter. By default nothing is done.)
+  def filterAndDeduplicateMagnitudes(ms: List[(FieldId, Magnitude)]): List[Magnitude] =
+    ms.unzip._2
 
   // Indicates if a parsed magnitude is valid
   def validMagnitude(m: Magnitude): Boolean =
@@ -126,6 +126,48 @@ sealed trait CatalogAdapter {
     } yield (fieldId, b, v)
   }
 
+
+  private def combineWithErrorsSystemAndFilter(
+    m: List[(FieldId, MagnitudeBand, Double)],
+    e: List[(FieldId, MagnitudeBand, Double)],
+    s: List[(MagnitudeBand, MagnitudeSystem)]
+  ): List[Magnitude] = {
+
+    val mags      = m.map { case (f, b, d) => f -> new Magnitude(d, b, b.defaultSystem) }
+    val magErrors = e.map { case (_, b, d) => b -> d }.toMap
+    val magSys    = s.toMap
+
+    // Link magnitudes with their errors
+    filterAndDeduplicateMagnitudes(mags).map { m =>
+      (for {
+          _ <- Magnitude.error  := magErrors.get(m.band)
+          _ <- Magnitude.system := magSys.getOrElse(m.band, m.system)
+      } yield ()).exec(m)
+    }.filter(validMagnitude)
+  }
+
+  /**
+   * A default method for turning all of a table row's fields into a list of
+   * Magnitudes.  GAIA has a different mechanism for doing this.
+   * @param entries fields in a VO table row
+   * @return magnitude data parsed from the table row
+   */
+  def parseMagnitudes(
+    entries: Map[FieldId, String]
+  ): CatalogProblem \/ List[Magnitude] = {
+    val mags    = entries.filter(isMagnitudeField)
+    val magErrs = entries.filter(isMagnitudeErrorField)
+    val magSys  = entries.filter(isMagnitudeSystemField)
+
+    for {
+      magnitudes    <- mags.map(parseMagnitude).toList.sequenceU
+      magnitudeErrs <- magErrs.map(parseMagnitude).toList.sequenceU
+      magnitudeSys  <- magSys.map(parseMagnitudeSys).toList.sequenceU
+    } yield combineWithErrorsSystemAndFilter(magnitudes, magnitudeErrs, magnitudeSys.flatten)
+              .sorted(VoTableParser.MagnitudeOrdering)
+
+  }
+
   // From a Field extract the band from either the field id or the UCD
   protected def fieldToBand(field: FieldId): Option[MagnitudeBand]
 
@@ -135,7 +177,9 @@ sealed trait CatalogAdapter {
 
   // Indicates if the field has a magnitude field
   protected def containsMagnitude(v: FieldId): Boolean =
-    v.ucd.includes(VoTableParser.UCD_MAG) && v.ucd.matches(CatalogAdapter.magRegex) && !ignoreMagnitudeField(v)
+    v.ucd.includes(VoTableParser.UCD_MAG)    &&
+      v.ucd.matches(CatalogAdapter.magRegex) &&
+      !ignoreMagnitudeField(v)
 }
 
 object CatalogAdapter {
@@ -170,6 +214,7 @@ trait StandardAdapter {
       b <- parseBandToken(t.token)
     } yield parseBand(field, b)).headOption.flatten
   }
+
 }
 
 case object UCAC4Adapter extends CatalogAdapter with StandardAdapter {
@@ -228,21 +273,6 @@ case object PPMXLAdapter extends CatalogAdapter with StandardAdapter {
     magMap2.values.toList
   }
 }
-/*
-case object GaiaAdapter extends CatalogAdapter {
-  override val idField    = FieldId("designation",     VoTableParser.UCD_OBJID)
-  override val raField    = FieldId("ra",              VoTableParser.UCD_RA   )
-  override val decField   = FieldId("dec",             VoTableParser.UCD_DEC  )
-  override val pmRaField  = FieldId("pmra",            VoTableParser.UCD_PMRA )
-  override val pmDecField = FieldId("pmdec",           VoTableParser.UCD_PMDEC)
-  override val rvField    = FieldId("radial_velocity", VoTableParser.UCD_RV   )
-  override val zField     = FieldId("n/a",             VoTableParser.UCD_Z    )
-  override val plxField   = FieldId("parallax",        VoTableParser.UCD_PLX  )
-
-  protected def fieldToBand(field: FieldId): Option[MagnitudeBand] = None
-
-}
-*/
 
 case object SimbadAdapter extends CatalogAdapter {
   private val errorFluxIDExtra = "FLUX_ERROR_(.)_.+"
@@ -389,21 +419,7 @@ trait VoTableParser {
         p <- plx.filter(_.nonEmpty)
       } yield CatalogAdapter.parseDoubleValue(VoTableParser.UCD_RV, p).map(p => Parallax(math.max(0.0, p)))).sequenceU
 
-    def combineWithErrorsSystemAndFilter(m: List[(FieldId, MagnitudeBand, Double)], e: List[(FieldId, MagnitudeBand, Double)], s: List[(MagnitudeBand, MagnitudeSystem)], adapter: CatalogAdapter): List[Magnitude] = {
-      val mags = m.map {
-          case (f, b, d) => f -> new Magnitude(d, b, b.defaultSystem)
-        }
-      val magErrors = e.map {
-          case (_, b, d) => b -> d
-        }.toMap
-      val magSys = s.toMap
-      // Filter magnitudes as a whole
-      val magnitudes = adapter.filterAndDeduplicateMagnitudes(mags)
-      // Link magnitudes with their errors
-      magnitudes.map(i => i.copy(error = magErrors.get(i.band), system = magSys.getOrElse(i.band, i.system))).filter(adapter.validMagnitude)
-    }
-
-    def toSiderealTarget(id: String, ra: String, dec: String, pm: (Option[String], Option[String]), z: Option[String], plx: Option[String]): \/[CatalogProblem, SiderealTarget] = {
+    def toSiderealTarget(id: String, ra: String, dec: String, pm: (Option[String], Option[String]), z: Option[String], plx: Option[String]): \/[CatalogProblem, SiderealTarget] =
       for {
         adapter        <- catalogAdapter
         r              <- Angle.parseDegrees(ra).leftMap(_ => FieldValueProblem(VoTableParser.UCD_RA, ra))
@@ -412,24 +428,17 @@ trait VoTableParser {
         properMotion   <- parseProperMotion(adapter, pm)
         redshift       <- parseZ(z)
         parallax       <- parsePlx(plx)
-        mags            = entries.filter(adapter.isMagnitudeField)
-        magErrs         = entries.filter(adapter.isMagnitudeErrorField)
-        magSys          = entries.filter(adapter.isMagnitudeSystemField)
-        magnitudes     <- mags.map(adapter.parseMagnitude).toList.sequenceU
-        magnitudeErrs  <- magErrs.map(adapter.parseMagnitude).toList.sequenceU
-        magnitudeSys   <- magSys.map(adapter.parseMagnitudeSys).toList.sequenceU
+        mags           <- adapter.parseMagnitudes(entries)
       } yield {
         val coordinates = Coordinates(RightAscension.fromAngle(r), declination)
-        val combMags    = combineWithErrorsSystemAndFilter(magnitudes, magnitudeErrs, magnitudeSys.flatten, adapter).sorted(VoTableParser.MagnitudeOrdering)
         SiderealTarget.empty.copy(
           name         = id,
           coordinates  = coordinates,
           properMotion = properMotion,
           redshift     = redshift,
           parallax     = parallax,
-          magnitudes   = combMags)
+          magnitudes   = mags)
       }
-    }
 
     val result = for {
       adapter         <- catalogAdapter
