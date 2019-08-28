@@ -3,6 +3,7 @@ package jsky.app.ot.gemini.editor.targetComponent
 import java.awt.Color
 import java.awt.Color._
 
+import javax.swing.border.Border
 import javax.swing.{BorderFactory, Icon}
 import edu.gemini.ags.api.AgsAnalysis.{NoGuideStarForGroup, NoGuideStarForProbe}
 import edu.gemini.ags.api.{AgsAnalysis, AgsRegistrar}
@@ -24,8 +25,10 @@ import jsky.util.gui.Resources
 import scala.collection.JavaConverters._
 import scala.swing.GridBagPanel.Fill
 import scala.swing.{Alignment, GridBagPanel, Label}
+
 import scalaz._
 import Scalaz._
+
 import jsky.app.ot.gemini.editor.targetComponent.TargetGuidingFeedback.ProbeLimits.{le, lim}
 
 

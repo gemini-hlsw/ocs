@@ -479,7 +479,8 @@ final public class TelescopePosTableModel extends AbstractTableModel {
                                 ctx,
                                 magTable,
                                 vgp,
-                                ModelConverters.toSideralTarget(guideStar, ctx.getSchedulingBlockStart())
+                                ModelConverters.toSideralTarget(guideStar, ctx.getSchedulingBlockStart()),
+                                true
                         )
                 ).asGeminiOpt();
                 return agsAnalysis.map(AgsAnalysis::quality);
