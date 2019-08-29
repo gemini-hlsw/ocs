@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 import edu.gemini.catalog.api._
+import edu.gemini.catalog.api.CatalogName._
 import edu.gemini.spModel.core._
 import org.apache.commons.httpclient.NameValuePair
 import org.specs2.mutable.Specification

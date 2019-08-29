@@ -13,6 +13,7 @@ import edu.gemini.ags.api.GuideInFOV.{Outside, Inside}
 import edu.gemini.ags.api._
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
+import edu.gemini.catalog.api.CatalogName.{PPMXL, UCAC4}
 import edu.gemini.catalog.ui.adapters.TableQueryResultAdapter
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.catalog.votable._

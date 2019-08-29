@@ -3,6 +3,7 @@ package edu.gemini.ags.impl
 import edu.gemini.ags.api.AgsMagnitude
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.catalog.api._
+import edu.gemini.catalog.api.CatalogName.UCAC4
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider
