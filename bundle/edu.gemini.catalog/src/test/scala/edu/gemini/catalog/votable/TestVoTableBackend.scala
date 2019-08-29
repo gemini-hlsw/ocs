@@ -1,6 +1,7 @@
 package edu.gemini.catalog.votable
 
-import edu.gemini.catalog.api.{UCAC4, CatalogQuery}
+import edu.gemini.catalog.api.CatalogQuery
+import edu.gemini.catalog.api.CatalogName.UCAC4
 import edu.gemini.spModel.core.SiderealTarget
 
 import java.net.URL

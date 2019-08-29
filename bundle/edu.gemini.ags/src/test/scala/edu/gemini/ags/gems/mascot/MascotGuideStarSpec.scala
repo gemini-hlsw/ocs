@@ -1,6 +1,7 @@
 package edu.gemini.ags.gems.mascot
 
-import edu.gemini.catalog.api.{PPMXL, RadiusConstraint, CatalogQuery}
+import edu.gemini.catalog.api.{RadiusConstraint, CatalogQuery}
+import edu.gemini.catalog.api.CatalogName.PPMXL
 import edu.gemini.catalog.votable.{TestVoTableBackend, VoTableClient}
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.target.SPTarget

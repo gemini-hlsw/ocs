@@ -1,6 +1,7 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.catalog.api._
+import edu.gemini.catalog.api.CatalogName.UCAC4
 import edu.gemini.catalog.votable._
 import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.core.{Angle, MagnitudeBand, Coordinates}

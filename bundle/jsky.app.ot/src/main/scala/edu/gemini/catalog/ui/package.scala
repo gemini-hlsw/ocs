@@ -7,6 +7,7 @@ import edu.gemini.ags.api.GuideInFOV.{Outside, Inside}
 import edu.gemini.ags.api._
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
+import edu.gemini.catalog.api.CatalogName.UCAC4
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.{None => JNone}
 import edu.gemini.shared.util.immutable.ScalaConverters._

@@ -3,7 +3,7 @@ package jsky.app.ot.tpe.gems;
 import edu.gemini.ags.gems.GemsUtils4Java;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SiderealTarget;
-import edu.gemini.catalog.api.UCAC4$;
+import edu.gemini.catalog.api.CatalogName.UCAC4$;
 import jsky.catalog.FieldDesc;
 import jsky.catalog.FieldDescAdapter;
 import jsky.catalog.TableQueryResult;

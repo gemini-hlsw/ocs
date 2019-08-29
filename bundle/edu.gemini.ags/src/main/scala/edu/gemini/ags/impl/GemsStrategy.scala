@@ -5,6 +5,7 @@ import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy}
 import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
 import edu.gemini.ags.gems._
 import edu.gemini.catalog.api._
+import edu.gemini.catalog.api.CatalogName.UCAC4
 import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.pot.ModelConverters._
