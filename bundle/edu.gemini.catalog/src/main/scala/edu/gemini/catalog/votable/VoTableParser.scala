@@ -79,6 +79,7 @@ sealed trait CatalogAdapter {
   def pmRaField  = FieldId("pmra",      VoTableParser.UCD_PMRA )
   def pmDecField = FieldId("pmde",      VoTableParser.UCD_PMDEC)
   def zField     = FieldId("Z_VALUE",   VoTableParser.UCD_Z    )
+  def rvField    = FieldId("RV_VALUE",  VoTableParser.UCD_RV   )
   def plxField   = FieldId("PLX_VALUE", VoTableParser.UCD_PLX  )
 
   // Indicates if the field is a magnitude
@@ -409,24 +410,49 @@ trait VoTableParser {
         } yield ProperMotion(RightAscensionAngularVelocity(pmrav), DeclinationAngularVelocity(pmdecv))
       }.sequenceU
 
+    def parseDoubleVal[A](
+      s: Option[String], u: Ucd
+    )(
+      f: Double => CatalogProblem \/ A
+    ): CatalogProblem \/ Option[A] =
+      s.filter(_.nonEmpty).traverseU { ds =>
+        for {
+          d <- CatalogAdapter.parseDoubleValue(u, ds)
+          a <- f(d)
+        } yield a
+      }
+
     def parseZ(z: Option[String]): CatalogProblem \/ Option[Redshift] =
-      (for {
-        r <- z.filter(_.nonEmpty)
-      } yield CatalogAdapter.parseDoubleValue(VoTableParser.UCD_RV, r).map(Redshift.apply)).sequenceU
+      parseDoubleVal(z, VoTableParser.UCD_Z) { d =>
+        Redshift(d).right[CatalogProblem]
+      }
+
+    def parseRv(kps: Option[String]): CatalogProblem \/ Option[Redshift] =
+      parseDoubleVal(kps, VoTableParser.UCD_RV) { d =>
+        if (d.abs > Redshift.C.toKilometersPerSecond) GenericError("Invalid radial velocity: " + kps).left
+        else Redshift.fromRadialVelocityJava(d).right
+      }
 
     def parsePlx(plx: Option[String]): CatalogProblem \/ Option[Parallax] =
-      (for {
-        p <- plx.filter(_.nonEmpty)
-      } yield CatalogAdapter.parseDoubleValue(VoTableParser.UCD_RV, p).map(p => Parallax(math.max(0.0, p)))).sequenceU
+      parseDoubleVal(plx, VoTableParser.UCD_PLX)(d => Parallax(0.0 max d).right)
 
-    def toSiderealTarget(id: String, ra: String, dec: String, pm: (Option[String], Option[String]), z: Option[String], plx: Option[String]): \/[CatalogProblem, SiderealTarget] =
+    def toSiderealTarget(
+      id:  String,
+      ra:  String,
+      dec: String,
+      pm:  (Option[String], Option[String]),
+      z:   Option[String],
+      kps: Option[String],
+      plx: Option[String]
+    ): \/[CatalogProblem, SiderealTarget] =
       for {
         adapter        <- catalogAdapter
         r              <- Angle.parseDegrees(ra).leftMap(_ => FieldValueProblem(VoTableParser.UCD_RA, ra))
         d              <- Angle.parseDegrees(dec).leftMap(_ => FieldValueProblem(VoTableParser.UCD_DEC, dec))
         declination    <- Declination.fromAngle(d) \/> FieldValueProblem(VoTableParser.UCD_DEC, dec)
         properMotion   <- parseProperMotion(adapter, pm)
-        redshift       <- parseZ(z)
+        redshift0      <- parseZ(z)
+        redshift1      <- parseRv(kps)
         parallax       <- parsePlx(plx)
         mags           <- adapter.parseMagnitudes(entries)
       } yield {
@@ -435,7 +461,7 @@ trait VoTableParser {
           name         = id,
           coordinates  = coordinates,
           properMotion = properMotion,
-          redshift     = redshift,
+          redshift     = redshift0 orElse redshift1,
           parallax     = parallax,
           magnitudes   = mags)
       }
@@ -447,8 +473,9 @@ trait VoTableParser {
       dec             <- entries.get(adapter.decField) \/> MissingValue(adapter.decField)
       (pmRa, pmDec)    = (entries.get(adapter.pmRaField), entries.get(adapter.pmDecField))
       z                = entries.get(adapter.zField)
+      kps              = entries.get(adapter.rvField)
       plx              = entries.get(adapter.plxField)
-    } yield toSiderealTarget(id, ra, dec, (pmRa, pmDec), z, plx)
+    } yield toSiderealTarget(id, ra, dec, (pmRa, pmDec), z, kps, plx)
 
     result.join
   }

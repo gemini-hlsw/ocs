@@ -100,6 +100,96 @@ class VoTableParserSpec extends Specification with VoTableParser {
       </DATA>
     </TABLE>
 
+    val skyObjectsWithRedshift =
+      <TABLE>
+        <FIELD ID="flags1" datatype="int" name="flags1" ucd="meta.code"/>
+        <FIELD ID="umag" datatype="double" name="umag" ucd="phot.mag;em.opt.u"/>
+        <FIELD ID="flags2" datatype="int" name="flags2" ucd="meta.code"/>
+        <FIELD ID="imag" datatype="double" name="imag" ucd="phot.mag;em.opt.i"/>
+        <FIELD ID="decj2000" datatype="double" name="dej2000" ucd="pos.eq.dec;meta.main"/>
+        <FIELD ID="raj2000" datatype="double" name="raj2000" ucd="pos.eq.ra;meta.main"/>
+        <FIELD ID="rmag" datatype="double" name="rmag" ucd="phot.mag;em.opt.r"/>
+        <FIELD ID="objid" datatype="int" name="objid" ucd="meta.id;meta.main"/>
+        <FIELD ID="gmag" datatype="double" name="gmag" ucd="phot.mag;em.opt.g"/>
+        <FIELD ID="zmag" datatype="double" name="zmag" ucd="phot.mag;em.opt.z"/>
+        <FIELD ID="type" datatype="int" name="type" ucd="meta.code"/>
+        <FIELD ID="ppmxl" datatype="int" name="ppmxl" ucd="meta.id;meta.main"/>
+        <FIELD ID="Z_VALUE" datatype="double" name="Z_VALUE" ucd="src.redshift"/>
+        <FIELD ID="RV_VALUE" datatype="double" name="RV_VALUE" ucd="spect.dopplerVeloc.opt"/>
+        <DATA>
+          <TABLEDATA>
+            <TR>
+              <TD>268435728</TD>
+              <TD>23.0888</TD>
+              <TD>8208</TD>
+              <TD>20.3051</TD>
+              <TD>0.209323681906</TD>
+              <TD>359.745951955</TD>
+              <TD>20.88</TD>
+              <TD>-2140405448</TD>
+              <TD>22.082</TD>
+              <TD>19.8812</TD>
+              <TD>3</TD>
+              <TD>-2140405448</TD>
+              <TD>0.000068</TD>
+              <TD></TD>
+            </TR>
+            <TR>
+              <TD>536871168</TD>
+              <TD>23.0853</TD>
+              <TD>65552</TD>
+              <TD>20.7891</TD>
+              <TD>0.210251239819</TD>
+              <TD>359.749274134</TD>
+              <TD>21.7686</TD>
+              <TD>-2140404569</TD>
+              <TD>23.0889</TD>
+              <TD>20.0088</TD>
+              <TD>3</TD>
+              <TD>-2140404569</TD>
+              <TD></TD>
+              <TD>20.30</TD>
+            </TR>
+          </TABLEDATA>
+      </DATA>
+    </TABLE>
+
+    val skyObjectsWithRadialVelocityError =
+      <TABLE>
+        <FIELD ID="flags1" datatype="int" name="flags1" ucd="meta.code"/>
+        <FIELD ID="umag" datatype="double" name="umag" ucd="phot.mag;em.opt.u"/>
+        <FIELD ID="flags2" datatype="int" name="flags2" ucd="meta.code"/>
+        <FIELD ID="imag" datatype="double" name="imag" ucd="phot.mag;em.opt.i"/>
+        <FIELD ID="decj2000" datatype="double" name="dej2000" ucd="pos.eq.dec;meta.main"/>
+        <FIELD ID="raj2000" datatype="double" name="raj2000" ucd="pos.eq.ra;meta.main"/>
+        <FIELD ID="rmag" datatype="double" name="rmag" ucd="phot.mag;em.opt.r"/>
+        <FIELD ID="objid" datatype="int" name="objid" ucd="meta.id;meta.main"/>
+        <FIELD ID="gmag" datatype="double" name="gmag" ucd="phot.mag;em.opt.g"/>
+        <FIELD ID="zmag" datatype="double" name="zmag" ucd="phot.mag;em.opt.z"/>
+        <FIELD ID="type" datatype="int" name="type" ucd="meta.code"/>
+        <FIELD ID="ppmxl" datatype="int" name="ppmxl" ucd="meta.id;meta.main"/>
+        <FIELD ID="RV_VALUE" datatype="double" name="RV_VALUE" ucd="spect.dopplerVeloc.opt"/>
+        <DATA>
+          <TABLEDATA>
+            <TR>
+              <TD>536871168</TD>
+              <TD>23.0853</TD>
+              <TD>65552</TD>
+              <TD>20.7891</TD>
+              <TD>0.210251239819</TD>
+              <TD>359.749274134</TD>
+              <TD>21.7686</TD>
+              <TD>-2140404569</TD>
+              <TD>23.0889</TD>
+              <TD>20.0088</TD>
+              <TD>3</TD>
+              <TD>-2140404569</TD>
+              <TD>299792.459</TD>
+            </TR>
+          </TABLEDATA>
+      </DATA>
+    </TABLE>
+
     val skyObjectsWithErrors =
       <TABLE>
         <FIELD ID="gmag_err" datatype="double" name="gmag_err" ucd="stat.error;phot.mag;em.opt.g"/>
@@ -232,6 +322,20 @@ class VoTableParserSpec extends Specification with VoTableParser {
       <VOTABLE>
         <RESOURCE type="results">
           {skyObjectsWithProperMotion}
+        </RESOURCE>
+      </VOTABLE>
+
+    val voTableWithRedshift =
+      <VOTABLE>
+        <RESOURCE type="results">
+          {skyObjectsWithRedshift}
+        </RESOURCE>
+      </VOTABLE>
+
+    val voTableWithRadialVelocityError =
+      <VOTABLE>
+        <RESOURCE type="results">
+          {skyObjectsWithRadialVelocityError}
         </RESOURCE>
       </VOTABLE>
 
@@ -413,6 +517,22 @@ class VoTableParserSpec extends Specification with VoTableParser {
       // There is only one table
       parse(voTable).tables.head should beEqualTo(result)
       parse(voTable).tables.head.containsError should beFalse
+    }
+    "be able to parse an xml into a list of SiderealTargets including redshift" in {
+      val result = parse(voTableWithRedshift).tables.head
+
+      // There should be no errors
+      result.containsError should beFalse
+      val redshifts = result.rows.map(_.toOption.get.redshift.get.z)
+
+      // 2 redshift values both roughly equal to 0.000068.  One specified as
+      // redshift and the other converted from radial velocity
+      redshifts.size shouldEqual 2
+      redshifts.forall(r => (r - 0.000068).abs < 0.000001) shouldEqual true
+    }
+    "balk if the radial velocity is faster than the speed of light" in {
+      val result = parse(voTableWithRadialVelocityError).tables.head
+      result.rows.head.swap.toOption.get.displayValue.startsWith("Invalid radial velocity:") shouldEqual true
     }
     "be able to parse an xml into a list of SiderealTargets including magnitude errors" in {
       val magsTarget1 = List(new Magnitude(23.0888, MagnitudeBand.U, 0.518214), new Magnitude(22.082, MagnitudeBand._g, 0.0960165), new Magnitude(20.88, MagnitudeBand.R, 0.0503736), new Magnitude(20.3051, MagnitudeBand.I, 0.0456069), new Magnitude(19.8812, MagnitudeBand._z, 0.138202), new Magnitude(13.74, MagnitudeBand.J, 0.03))
@@ -647,6 +767,5 @@ class VoTableParserSpec extends Specification with VoTableParser {
       target.map(_.name) should beSome("NGC  2438")
       target.map(_.magnitudeIn(MagnitudeBand.J)) should beSome(Some(new Magnitude(17.02, MagnitudeBand.J, 0.15, MagnitudeSystem.Vega)))
     }
-
   }
 }
