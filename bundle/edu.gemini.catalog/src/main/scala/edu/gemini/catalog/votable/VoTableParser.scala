@@ -288,6 +288,102 @@ object CatalogAdapter {
     }
   }
 
+  case object Gaia extends CatalogAdapter {
+
+    val catalog: CatalogName =
+      CatalogName.Gaia
+
+    override val idField    = FieldId("designation",     VoTableParser.UCD_OBJID)
+    override val raField    = FieldId("ra",              VoTableParser.UCD_RA   )
+    override val decField   = FieldId("dec",             VoTableParser.UCD_DEC  )
+    override val pmRaField  = FieldId("pmra",            VoTableParser.UCD_PMRA )
+    override val pmDecField = FieldId("pmdec",           VoTableParser.UCD_PMDEC)
+    override val rvField    = FieldId("radial_velocity", VoTableParser.UCD_RV   )
+    override val plxField   = FieldId("parallax",        VoTableParser.UCD_PLX  )
+
+    // These are used to derive all other magnitude values.
+    val gMagField = FieldId("phot_g_mean_mag", Ucd("phot.mag;stat.mean;em.opt"))
+    val bpRpField = FieldId("bp_rp",           Ucd("phot.color"               ))
+
+    final case class Conversion(
+      b:   MagnitudeBand,
+      g:   Double,
+      p1:  Double,
+      p2:  Double,
+      p3:  Double,
+      min: Double,
+      max: Double
+    ) {
+
+      def convert(gMag: Double, bpRp: Double): Option[Magnitude] =
+        ((min < bpRp) && (bpRp < max)) option
+          Magnitude(
+            gMag + g + p1*bpRp + p2*Math.pow(bpRp, 2) + p3*Math.pow(bpRp, 3),
+            b,
+            None,
+            MagnitudeSystem.Vega  // Note that Gaia magnitudes are in the Vega system.
+          )
+    }
+
+    val conversions: List[Conversion] =
+      List(
+        Conversion(MagnitudeBand.V,   0.017600,  0.00686, 0.173200, 0.000000, -0.50, 2.75),
+        Conversion(MagnitudeBand.R,   0.003226, -0.38330, 0.134500, 0.000000, -0.50, 2.75),
+        Conversion(MagnitudeBand.I,  -0.020850, -0.74190, 0.096310, 0.000000, -0.50, 2.75),
+        Conversion(MagnitudeBand._r,  0.128790, -0.24662, 0.027464, 0.049465,  0.20, 2.00),
+        Conversion(MagnitudeBand._i,  0.296760, -0.64728, 0.101410, 0.000000,  0.00, 4.50),
+        Conversion(MagnitudeBand._g, -0.135180,  0.46245, 0.251710, 0.021349, -0.50, 2.00),
+        Conversion(MagnitudeBand.K,   0.188500, -2.09200, 0.134500, 0.000000,  0.25, 5.50),
+        Conversion(MagnitudeBand.H,   0.162100, -1.96800, 0.132800, 0.000000,  0.25, 5.00),
+        Conversion(MagnitudeBand.J,   0.018830, -0.39400, 0.078930, 0.000000, -0.50, 5.50)
+      )
+
+    override def isMagnitudeField(v: (FieldId, String)): Boolean =
+      sys.error("unused")
+
+    override def isMagnitudeErrorField(v: (FieldId, String)): Boolean =
+      sys.error("unused")
+
+    override def filterAndDeduplicateMagnitudes(ms: List[(FieldId, Magnitude)]): List[Magnitude] =
+      sys.error("unused")
+
+    override def parseMagnitudeSys(p: (FieldId, String)): CatalogProblem \/ Option[(MagnitudeBand, MagnitudeSystem)] =
+      sys.error("unused")
+
+    override def parseMagnitude(p: (FieldId, String)): CatalogProblem \/ (FieldId, MagnitudeBand, Double) =
+      sys.error("unused")
+
+    override def fieldToBand(f: FieldId): Option[MagnitudeBand] =
+      sys.error("unused")
+
+    override def ignoreMagnitudeField(f: FieldId): Boolean =
+      sys.error("unused")
+
+    override def containsMagnitude(f: FieldId): Boolean =
+      sys.error("unused")
+
+    override def parseMagnitudes(
+      entries: Map[FieldId, String]
+    ): CatalogProblem \/ List[Magnitude] = {
+
+      type Try[A] = CatalogProblem \/ A
+
+      def doubleValue(f: FieldId): OptionT[Try, Double] =
+        OptionT[Try, Double](
+          entries
+            .get(f)
+            .filter(_.nonEmpty)
+            .traverseU(CatalogAdapter.parseDoubleValue(f.ucd, _))
+        )
+
+      (for {
+        gMag <- doubleValue(gMagField)
+        bpRp <- doubleValue(bpRpField)
+      } yield conversions.flatMap(_.convert(gMag, bpRp).toList)).getOrElse(Nil)
+
+    }
+  }
+
   case object Simbad extends CatalogAdapter {
 
     val catalog: CatalogName =
@@ -357,7 +453,7 @@ object CatalogAdapter {
   }
 
   val All: List[CatalogAdapter] =
-    List(UCAC4, PPMXL, Simbad)
+    List(UCAC4, PPMXL, Gaia, Simbad)
 
   def forCatalog(c: CatalogName): Option[CatalogAdapter] =
     All.find(_.catalog === c)
