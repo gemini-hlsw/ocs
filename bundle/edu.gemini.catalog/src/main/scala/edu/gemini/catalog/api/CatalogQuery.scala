@@ -38,6 +38,27 @@ object CatalogName {
     override val  supportedBands = List(MagnitudeBand._g, MagnitudeBand._r, MagnitudeBand._i, MagnitudeBand.B, MagnitudeBand.V, MagnitudeBand.UC, MagnitudeBand.J, MagnitudeBand.H, MagnitudeBand.K)
   }
 
+  case object Gaia extends CatalogName("gaia", "GAIA @ ESA") {
+
+    // Gaia bands (why isn't this a Set?)
+    override val supportedBands: List[MagnitudeBand] =
+      List(
+        MagnitudeBand.V,
+        MagnitudeBand.R,
+        MagnitudeBand.I,
+        MagnitudeBand._r,
+        MagnitudeBand._i,
+        MagnitudeBand._g,
+        MagnitudeBand.K,
+        MagnitudeBand.H,
+        MagnitudeBand.J
+      )
+
+    override val rBand: MagnitudeBand =
+      MagnitudeBand.R
+
+  }
+
   case object TWOMASS_PSC extends CatalogName("twomass_psc", "TwoMass PSC @ Gemini")
 
   case object TWOMASS_XSC extends CatalogName("twomass_xsc", "TwoMass XSC @ Gemini")
