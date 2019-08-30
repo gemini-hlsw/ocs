@@ -190,6 +190,54 @@ case object ConeSearchBackend extends CachedBackend with RemoteCallBackend {
   override def queryUrl(e: SearchKey): String = s"${e.url}/cgi-bin/conesearch.py"
 }
 
+case object GaiaBackend extends CachedBackend with RemoteCallBackend {
+  // For Java
+  val instance = this
+
+  val MaxResultCount: Int         = 1000
+  val BrightLimit: Int            =    6
+  val FaintLimit: Int             =   19
+  val ProperMotionLimitMasYr: Int =  100
+
+  def adql(cs: ConeSearchCatalogQuery): String = {
+    import CatalogAdapter.Gaia
+
+    val fields = Gaia.allFields.map(_.id).mkString(",")
+
+    f"""|SELECT TOP $MaxResultCount $fields
+        |      FROM gaiadr2.gaia_source
+        |     WHERE CONTAINS(POINT('ICRS',${Gaia.raField.id},${Gaia.decField.id}),CIRCLE('ICRS', ${cs.base.ra.toDegrees}%9.8f, ${cs.base.dec.toDegrees}%9.8f, ${cs.radiusConstraint.maxLimit.toDegrees}%9.8f))
+        |       AND (${Gaia.plxField.id} > 0)
+        |       AND (${Gaia.gMagField.id} BETWEEN ${BrightLimit} AND ${FaintLimit})
+        |       AND (${Gaia.bpRpField.id} IS NOT NULL)
+        |       AND (SQRT(POWER(${Gaia.pmRaField.id}, 2.0) + POWER(${Gaia.pmDecField.id}, 2.0)) < ${ProperMotionLimitMasYr})
+        |  ORDER BY ${Gaia.gMagField.id}
+      """.stripMargin
+  }
+
+  override protected [votable] def queryParams(q: CatalogQuery): Array[NameValuePair] =
+    q match {
+
+      case cs: ConeSearchCatalogQuery =>
+        Array(
+          new NameValuePair("REQUEST", "doQuery"      ),
+          new NameValuePair("LANG",    "ADQL"         ),
+          new NameValuePair("FORMAT",  "votable_plain"),
+          new NameValuePair("QUERY",   adql(cs)       )
+        )
+
+      case _                          =>
+        Array.empty
+    }
+
+
+  override val catalogUrls: NonEmptyList[URL] =
+    NonEmptyList(new URL("http://gea.esac.esa.int/tap-server/tap/sync"))
+
+  override def queryUrl(e: SearchKey): String =
+    e.url.toExternalForm
+}
+
 case object SimbadNameBackend extends CachedBackend with RemoteCallBackend {
   override val catalogUrls = NonEmptyList(new URL("http://simbad.cfa.harvard.edu/simbad"), new URL("http://simbad.u-strasbg.fr/simbad"))
 

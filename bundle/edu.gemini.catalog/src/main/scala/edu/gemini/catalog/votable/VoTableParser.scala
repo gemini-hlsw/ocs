@@ -305,6 +305,23 @@ object CatalogAdapter {
     val gMagField = FieldId("phot_g_mean_mag", Ucd("phot.mag;stat.mean;em.opt"))
     val bpRpField = FieldId("bp_rp",           Ucd("phot.color"               ))
 
+    /**
+     * List of all Gaia fields of interest.  These are used in forming the ADQL
+     * query that produces the VO Table.  See VoTableClient and the GaiaBackend.
+     */
+    val allFields: List[FieldId] =
+      List(
+        idField,
+        raField,
+        pmRaField,
+        decField,
+        pmDecField,
+        plxField,
+        rvField,
+        gMagField,
+        bpRpField
+      )
+
     final case class Conversion(
       b:   MagnitudeBand,
       g:   Double,
