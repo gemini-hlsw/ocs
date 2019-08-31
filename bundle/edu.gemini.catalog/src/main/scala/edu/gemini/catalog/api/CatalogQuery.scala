@@ -1,6 +1,6 @@
 package edu.gemini.catalog.api
 
-import edu.gemini.spModel.core.{MagnitudeBand, Coordinates, SiderealTarget}
+import edu.gemini.spModel.core.{MagnitudeBand, Coordinates, SiderealTarget, VersionToken}
 
 import scalaz._
 import Scalaz._
@@ -18,9 +18,17 @@ case class MagnitudeQueryFilter(mc: MagnitudeConstraints) extends QueryResultsFi
 }
 
 sealed abstract class CatalogName(val id: String, val displayName: String) extends Product with Serializable {
-  def supportedBands: List[MagnitudeBand] = Nil
+
+  def supportedBands: List[MagnitudeBand] =
+    Nil
+
   // Indicates what is the band used when a generic R band is required
-  def rBand: MagnitudeBand = MagnitudeBand.UC
+  def rBand: MagnitudeBand =
+    MagnitudeBand.UC
+
+  def voTableVersion: VersionToken =
+    VersionToken.unsafeFromIntegers(1, 2)
+
 }
 
 object CatalogName {
@@ -56,6 +64,9 @@ object CatalogName {
 
     override val rBand: MagnitudeBand =
       MagnitudeBand.R
+
+    override val voTableVersion: VersionToken =
+      VersionToken.unsafeFromIntegers(1, 3)
 
   }
 

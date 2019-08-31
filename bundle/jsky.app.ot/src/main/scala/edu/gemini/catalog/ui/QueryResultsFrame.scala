@@ -13,7 +13,7 @@ import edu.gemini.ags.api.GuideInFOV.{Outside, Inside}
 import edu.gemini.ags.api._
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
-import edu.gemini.catalog.api.CatalogName.{PPMXL, UCAC4}
+import edu.gemini.catalog.api.CatalogName.{PPMXL, UCAC4, Gaia}
 import edu.gemini.catalog.ui.adapters.TableQueryResultAdapter
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.catalog.votable._
@@ -483,7 +483,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
     lazy val catalogBox: ComboBox[CatalogName] with TextRenderer[CatalogName] {
       def text(a: CatalogName): String
-    } = new ComboBox(List[CatalogName](UCAC4, PPMXL)) with TextRenderer[CatalogName] {
+    } = new ComboBox(List[CatalogName](UCAC4, PPMXL, Gaia)) with TextRenderer[CatalogName] {
 
       override def text(a: CatalogName): String =
         Option(a).foldMap(_.displayName)
@@ -862,7 +862,8 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
         // Start with the guider's query and update it with the values on the UI
         val calculatedQuery = guider.selection.item.query.headOption.collect {
-          case c: ConeSearchCatalogQuery => c.copy(base = coordinates, radiusConstraint = radiusConstraint, magnitudeConstraints = currentFilters, catalog = selectedCatalog)
+          case c: ConeSearchCatalogQuery =>
+            c.copy(base = coordinates, radiusConstraint = radiusConstraint, magnitudeConstraints = currentFilters, catalog = selectedCatalog)
         }
         (info.some, calculatedQuery.getOrElse(defaultQuery))
       }
@@ -911,11 +912,11 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
   }
 
-  private def catalogSearch(query: CatalogQuery, backend: VoTableBackend, message: String, onSuccess: (QueryResult) => Unit): Unit = {
+  private def catalogSearch(query: CatalogQuery, message: String, onSuccess: (QueryResult) => Unit): Unit = {
     import scala.concurrent.ExecutionContext.Implicits.global
 
     val glass = GlassLabel.show(peer, message)
-    VoTableClient.catalog(query, backend)(global).onComplete {
+    VoTableClient.catalog(query, None)(global).onComplete {
       case scala.util.Failure(f)                           =>
         glass.foreach(_.hide())
         errorLabel.show(s"Exception: ${f.getMessage}")
@@ -931,16 +932,15 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   }
 
   private def doNameSearch(search: String): Unit = {
-    catalogSearch(CatalogQuery(search), SimbadNameBackend, "Searching...", { x =>
+    catalogSearch(CatalogQuery(search), "Searching...", { x =>
       updateName(search, x.result.targets.rows)
     })
   }
 
-  private def reloadSearchData(obsInfo: Option[ObservationInfo], query: CatalogQuery) {
-    catalogSearch(query, ConeSearchBackend, "Searching...", { x =>
+  private def reloadSearchData(obsInfo: Option[ObservationInfo], query: CatalogQuery): Unit =
+    catalogSearch(query, "Searching...", { x =>
       updateResults(obsInfo, x)
     })
-  }
 
   // Shows the frame and loads the query
   protected[ui] def showWithQuery(ctx: ObsContext, mt: MagnitudeTable, q: CatalogQuery): Unit = Swing.onEDT {

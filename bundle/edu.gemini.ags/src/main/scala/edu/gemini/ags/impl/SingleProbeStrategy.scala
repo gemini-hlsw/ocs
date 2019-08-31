@@ -50,7 +50,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     val empty = Future.successful(List((params.guideProbe: GuideProbe, List.empty[SiderealTarget])))
 
     // We cannot let VoTableClient to filter targets as usual, instead we provide an empty magnitude constraint and filter locally
-    catalogQueries(withCorrectedSite(ctx), mt).strengthR(backend).headOption.map { case (a, b) => VoTableClient.catalog(a, b)(ec) }.map(_.flatMap {
+    catalogQueries(withCorrectedSite(ctx), mt).strengthR(Some(backend)).headOption.map { case (a, b) => VoTableClient.catalog(a, b)(ec) }.map(_.flatMap {
         case r if r.result.containsError => Future.failed(CatalogException(r.result.problems))
         case r                           => Future.successful(List((params.guideProbe, r.result.targets.rows)))
     }).getOrElse(empty)
