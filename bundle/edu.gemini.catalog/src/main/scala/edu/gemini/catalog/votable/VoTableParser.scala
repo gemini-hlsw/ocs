@@ -31,20 +31,19 @@ object VoTableParser extends VoTableParser {
   val UCD_MAG        = UcdWord("phot.mag")
   val STAT_ERR       = UcdWord("stat.error")
 
-  val xsd = "/votable-1.2.xsd"
+  private def validate(catalogName: CatalogName, xmlText: String): CatalogProblem \/ Unit =
+    \/.fromTryCatchNonFatal {
+      import javax.xml.transform.stream.StreamSource
+      import javax.xml.validation.SchemaFactory
 
-  private def validate(xmlText: String): Throwable \/ String = \/.fromTryCatchNonFatal {
-    import javax.xml.transform.stream.StreamSource
-    import javax.xml.validation.SchemaFactory
+      val xsd        = s"/votable-${catalogName.voTableVersion.format}.xsd"
+      val schemaLang = "http://www.w3.org/2001/XMLSchema"
+      val factory    = SchemaFactory.newInstance(schemaLang)
+      val schema     = factory.newSchema(new StreamSource(getClass.getResourceAsStream(xsd)))
+      val validator  = schema.newValidator()
 
-    val schemaLang = "http://www.w3.org/2001/XMLSchema"
-    val factory    = SchemaFactory.newInstance(schemaLang)
-    val schema     = factory.newSchema(new StreamSource(getClass.getResourceAsStream(xsd)))
-    val validator  = schema.newValidator()
-
-    validator.validate(new StreamSource(new ByteArrayInputStream(xmlText.getBytes(java.nio.charset.Charset.forName("UTF-8")))))
-    xmlText
-  }
+      validator.validate(new StreamSource(new ByteArrayInputStream(xmlText.getBytes(java.nio.charset.Charset.forName("UTF-8")))))
+    }.leftMap(_ => ValidationError(catalogName))
 
   /**
    * parse takes an input stream and attempts to read the xml content and convert it to a VoTable resource
@@ -65,8 +64,9 @@ object VoTableParser extends VoTableParser {
           } else {
             \/.right(parse(adapter, xml))
           }
-        case _ if validate(xmlText).isLeft => \/.left(ValidationError(catalog))
-        case _                             => \/.right(parse(adapter, XML.loadString(xmlText)))
+
+        case _                  =>
+          validate(catalog, xmlText).as(parse(adapter, XML.loadString(xmlText)))
       }
     }
 }
@@ -304,6 +304,23 @@ object CatalogAdapter {
     // These are used to derive all other magnitude values.
     val gMagField = FieldId("phot_g_mean_mag", Ucd("phot.mag;stat.mean;em.opt"))
     val bpRpField = FieldId("bp_rp",           Ucd("phot.color"               ))
+
+    /**
+     * List of all Gaia fields of interest.  These are used in forming the ADQL
+     * query that produces the VO Table.  See VoTableClient and the GaiaBackend.
+     */
+    val allFields: List[FieldId] =
+      List(
+        idField,
+        raField,
+        pmRaField,
+        decField,
+        pmDecField,
+        plxField,
+        rvField,
+        gMagField,
+        bpRpField
+      )
 
     final case class Conversion(
       b:   MagnitudeBand,

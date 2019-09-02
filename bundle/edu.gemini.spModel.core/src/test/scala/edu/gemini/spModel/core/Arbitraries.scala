@@ -186,4 +186,9 @@ trait Arbitraries {
   implicit def arbMap[K: Arbitrary: Order, V: Arbitrary]: Arbitrary[K ==>> V] =
     Arbitrary(arbitrary[List[(K, V)]].map(==>>.fromList(_)))
 
+  implicit val arbVersionToken: Arbitrary[VersionToken] =
+    Arbitrary(nonEmptyListOf(posNum[Int]).map {
+      case i :: is => VersionToken.unsafeFromIntegers(i, is: _*)
+      case _       => sys.error("generated empty list!?")
+    })
 }
