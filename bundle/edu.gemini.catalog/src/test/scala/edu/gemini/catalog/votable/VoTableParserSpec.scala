@@ -336,6 +336,9 @@ class VoTableParserSpec extends Specification with VoTableParser {
         <FIELD datatype="double" name="pmdec_error" ucd="stat.error;pos.pm;pos.eq.dec" unit="mas.yr**-1">
           <DESCRIPTION>Standard error of proper motion in declination direction</DESCRIPTION>
         </FIELD>
+        <FIELD datatype="double" name="ref_epoch" ucd="meta.ref;time.epoch" unit="yr">
+          <DESCRIPTION>Reference epoch</DESCRIPTION>
+        </FIELD>
         <FIELD datatype="float" name="phot_g_mean_mag" ucd="phot.mag;stat.mean;em.opt" unit="mag">
           <DESCRIPTION>G-band mean magnitude</DESCRIPTION>
         </FIELD>
@@ -358,6 +361,7 @@ class VoTableParserSpec extends Specification with VoTableParser {
               <TD>2.0096218591421637</TD>
               <TD>2.412759805075276</TD>
               <TD>2.292112882376078</TD>
+              <TD>2015.5</TD>
               <TD>19.782911</TD>
               <TD></TD> <!-- No BP - RP means no magnitude information -->
               <TD></TD>
@@ -373,6 +377,7 @@ class VoTableParserSpec extends Specification with VoTableParser {
               <TD></TD>
               <TD></TD>
               <TD></TD>
+              <TD>2015.5</TD>
               <TD></TD> <!-- No G-band means no magnitude information -->
               <TD></TD>
               <TD></TD>
@@ -388,6 +393,7 @@ class VoTableParserSpec extends Specification with VoTableParser {
               <TD>0.028741305378710533</TD>
               <TD>12.976157539714205</TD>
               <TD>0.031294621220519486</TD>
+              <TD>2015.5</TD>
               <TD>13.91764</TD>
               <TD>2.68324375</TD> <!-- Out of range for r and g conversion -->
               <TD></TD>
@@ -403,6 +409,7 @@ class VoTableParserSpec extends Specification with VoTableParser {
               <TD>0.19897351485381112</TD>
               <TD>22.438383124975978</TD>
               <TD>0.18174463860202664</TD>
+              <TD>2015.5</TD>
               <TD>14.292543</TD>
               <TD>1.0745363</TD>
               <TD>20.30</TD>  <!-- Radial velocity -->
@@ -704,6 +711,9 @@ class VoTableParserSpec extends Specification with VoTableParser {
         (m.band === V) && ((m.value - v).abs < 0.000001)
       }) shouldEqual true
 
+      // All targets with a proper motion have epoch 2015.5
+      val e2015_5 = Epoch(2015.5)
+      result.forall(_.properMotion.forall(_.epoch == e2015_5))
     }
 
     "be able to validate and parse an xml from sds9" in {

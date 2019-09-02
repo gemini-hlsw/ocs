@@ -19,6 +19,7 @@ object VoTableParser extends VoTableParser {
     scala.math.Ordering.by(_.band)
 
   val UCD_OBJID      = Ucd("meta.id;meta.main")
+  val UCD_EPOCH      = Ucd("meta.ref;time.epoch")
   val UCD_RA         = Ucd("pos.eq.ra;meta.main")
   val UCD_DEC        = Ucd("pos.eq.dec;meta.main")
   val UCD_PMDEC      = Ucd("pos.pm;pos.eq.dec")
@@ -81,6 +82,7 @@ sealed trait CatalogAdapter {
   def idField: FieldId
   def raField: FieldId
   def decField: FieldId
+  def epochField = FieldId("ref_epoch", VoTableParser.UCD_EPOCH)
   def pmRaField  = FieldId("pmra",      VoTableParser.UCD_PMRA )
   def pmDecField = FieldId("pmde",      VoTableParser.UCD_PMDEC)
   def zField     = FieldId("Z_VALUE",   VoTableParser.UCD_Z    )
@@ -316,6 +318,7 @@ object CatalogAdapter {
         pmRaField,
         decField,
         pmDecField,
+        epochField,
         plxField,
         rvField,
         gMagField,
@@ -533,12 +536,20 @@ trait VoTableParser {
   protected def tableRow2Target(adapter: CatalogAdapter, fields: List[FieldDescriptor])(row: TableRow): CatalogProblem \/ SiderealTarget = {
     val entries = row.itemsMap
 
-    def parseProperMotion(pm: (Option[String], Option[String])): CatalogProblem \/ Option[ProperMotion] =
+    def parseEpoch(e: Option[String]): CatalogProblem \/ Epoch =
+      e.fold(Epoch.J2000.right[CatalogProblem]) { s =>
+        CatalogAdapter.parseDoubleValue(VoTableParser.UCD_EPOCH, s).map(Epoch.apply)
+      }
+
+    def parseProperMotion(pm: (Option[String], Option[String]), epoch: Option[String]): CatalogProblem \/ Option[ProperMotion] =
       (pm._1.filter(_.nonEmpty) |@| pm._2.filter(_.nonEmpty)) { (pmra, pmdec) =>
         for {
           pmrav  <- adapter.parseAngularVelocity(VoTableParser.UCD_PMRA, pmra)
+          pmra    = RightAscensionAngularVelocity(pmrav)
           pmdecv <- adapter.parseAngularVelocity(VoTableParser.UCD_PMDEC, pmdec)
-        } yield ProperMotion(RightAscensionAngularVelocity(pmrav), DeclinationAngularVelocity(pmdecv))
+          pmdec   = DeclinationAngularVelocity(pmdecv)
+          e      <- parseEpoch(epoch)
+        } yield ProperMotion(pmra, pmdec, e)
       }.sequenceU
 
     def parseDoubleVal[A](
@@ -568,19 +579,20 @@ trait VoTableParser {
       parseDoubleVal(plx, VoTableParser.UCD_PLX)(d => Parallax(0.0 max d).right)
 
     def toSiderealTarget(
-      id:  String,
-      ra:  String,
-      dec: String,
-      pm:  (Option[String], Option[String]),
-      z:   Option[String],
-      kps: Option[String],
-      plx: Option[String]
+      id:    String,
+      ra:    String,
+      dec:   String,
+      pm:    (Option[String], Option[String]),
+      epoch: Option[String],
+      z:     Option[String],
+      kps:   Option[String],
+      plx:   Option[String]
     ): \/[CatalogProblem, SiderealTarget] =
       for {
         r              <- Angle.parseDegrees(ra).leftMap(_ => FieldValueProblem(VoTableParser.UCD_RA, ra))
         d              <- Angle.parseDegrees(dec).leftMap(_ => FieldValueProblem(VoTableParser.UCD_DEC, dec))
         declination    <- Declination.fromAngle(d) \/> FieldValueProblem(VoTableParser.UCD_DEC, dec)
-        properMotion   <- parseProperMotion(pm)
+        properMotion   <- parseProperMotion(pm, epoch)
         redshift0      <- parseZ(z)
         redshift1      <- parseRv(kps)
         parallax       <- parsePlx(plx)
@@ -603,10 +615,11 @@ trait VoTableParser {
       dec             <- entries.get(adapter.decField) \/> MissingValue(adapter.decField)
       pmRa             = entries.get(adapter.pmRaField)
       pmDec            = entries.get(adapter.pmDecField)
+      epoch            = entries.get(adapter.epochField)
       z                = entries.get(adapter.zField)
       kps              = entries.get(adapter.rvField)
       plx              = entries.get(adapter.plxField)
-      t               <- toSiderealTarget(id, ra, dec, (pmRa, pmDec), z, kps, plx)
+      t               <- toSiderealTarget(id, ra, dec, (pmRa, pmDec), epoch, z, kps, plx)
     } yield t
 
   }
