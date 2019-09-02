@@ -713,7 +713,6 @@ class VoTableParserSpec extends Specification with VoTableParser {
 
       // All targets with a proper motion have epoch 2015.5
       val e2015_5 = Epoch(2015.5)
-      println(result.mkString("\n"))
       result.forall(_.properMotion.forall(_.epoch == e2015_5))
     }
 
