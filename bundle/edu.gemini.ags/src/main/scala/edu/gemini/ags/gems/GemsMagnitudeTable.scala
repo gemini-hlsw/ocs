@@ -37,18 +37,18 @@ object GemsMagnitudeTable extends MagnitudeTable {
     val NGS2ConditionsAdjuster: ConstraintsAdjuster[Conditions] = {
       def faintnessAdjuster(c: Conditions, bands: BandsList): Double = {
         (c.iq, c.sb, bands) match {
-          case (ImageQuality.ANY,        SkyBackground.ANY, RBandsList)        => -0.3
+          case (ImageQuality.ANY,        SkyBackground.ANY,        RBandsList) => -0.3
           case (ImageQuality.ANY,        SkyBackground.PERCENT_80, RBandsList) => -0.2
           case (ImageQuality.ANY,        SkyBackground.PERCENT_50, RBandsList) => -0.5
           case (ImageQuality.ANY,        SkyBackground.PERCENT_20, RBandsList) => -0.5
-          case (ImageQuality.PERCENT_85, SkyBackground.ANY, RBandsList)        => -0.5
+          case (ImageQuality.PERCENT_85, SkyBackground.ANY,        RBandsList) => -0.5
           case _                                                               =>  0.0
         }
       }
 
       def brightnessAdjuster(c: Conditions, bands: BandsList): Double = {
         (c.iq, c.sb, bands) match {
-          case (ImageQuality.ANY, SkyBackground.ANY, RBandsList)        => 0.2
+          case (ImageQuality.ANY, SkyBackground.ANY,        RBandsList) => 0.2
           case (ImageQuality.ANY, SkyBackground.PERCENT_80, RBandsList) => 0.3
           case _                                                        => 0.0
         }

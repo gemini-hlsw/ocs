@@ -11,16 +11,45 @@ import edu.gemini.shared.util.immutable.{None => JNone}
 import edu.gemini.pot.ModelConverters._
 
 import scala.annotation.tailrec
+import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
 
 /**
   * An NGS2 result comprises a classical GeMS catalog search result and a set of PWFS1 candidates.
   */
-case class NGS2Result(gemsCatalogSearchResult: java.util.List[GemsCatalogSearchResults],
-                      pwfs1Results: java.util.List[SiderealTarget])
+final case class NGS2Result(
+  gemsCatalogSearchResult: List[GemsCatalogSearchResults],
+  pwfs1Results:            List[SiderealTarget]
+) {
 
-case class GemsStrehl(avg: Double = .0, rms: Double = .0, min: Double = .0, max: Double = .0)
+  def gemsCatalogSearchResultAsJava: java.util.List[GemsCatalogSearchResults] =
+    gemsCatalogSearchResult.asJava
+
+  def pwfs1ResultsAsJava: java.util.List[SiderealTarget] =
+    pwfs1Results.asJava
+
+}
+
+object NGS2Result {
+
+  val Empty: NGS2Result =
+    NGS2Result(Nil, Nil)
+
+  def fromJava(
+    g: java.util.List[GemsCatalogSearchResults],
+    p: java.util.List[SiderealTarget]
+  ): NGS2Result =
+    NGS2Result(g.asScala.toList, p.asScala.toList)
+
+}
+
+final case class GemsStrehl(
+  avg: Double,
+  rms: Double,
+  min: Double,
+  max: Double
+)
 
 /**
  * The guideGroup should contain the designation of guide stars to guiders for the tip tilt
@@ -39,7 +68,12 @@ case class GemsStrehl(avg: Double = .0, rms: Double = .0, min: Double = .0, max:
  * @param strehl calculated by the mascot algorithm
  * @param guideGroup guide group Contents
  */
-case class GemsGuideStars(pa: Angle, tiptiltGroup: GemsGuideProbeGroup, strehl: GemsStrehl, guideGroup: GuideGroup) extends Comparable[GemsGuideStars] {
+final case class GemsGuideStars(
+  pa:           Angle,
+  tiptiltGroup: GemsGuideProbeGroup,
+  strehl:       GemsStrehl,
+  guideGroup:   GuideGroup
+) extends Comparable[GemsGuideStars] {
 
   /**
    * From OT-27: Ranking Results

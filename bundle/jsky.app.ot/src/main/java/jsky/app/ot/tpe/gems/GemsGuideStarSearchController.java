@@ -60,7 +60,7 @@ class GemsGuideStarSearchController {
             results = _worker.search(_model.getCatalog(), obsContext, posAngles, new scala.Some<>(nirBand), ec);
         } catch (final Exception e) {
             DialogUtil.error(_dialog, e);
-            results = new NGS2Result(new ArrayList<>(), new ArrayList<>());
+            results = NGS2Result.Empty();
             _dialog.setState(GemsGuideStarSearchDialog.State.PRE_QUERY);
         }
 
@@ -70,11 +70,11 @@ class GemsGuideStarSearchController {
         // TODO-NGS2: Right now, we just drop the PWFS1 guide star and only include the Canopus guide stars.
         if (_model.isReviewCandidatesBeforeSearch()) {
             // TODO-NGS2: Change this method to take an NGS2Result?
-            _model.setGemsCatalogSearchResults(results.gemsCatalogSearchResult());
+            _model.setGemsCatalogSearchResults(results.gemsCatalogSearchResultAsJava());
         } else {
-            _model.setGemsCatalogSearchResults(results.gemsCatalogSearchResult());
+            _model.setGemsCatalogSearchResults(results.gemsCatalogSearchResultAsJava());
             // TODO-NGS2: Change this method to take an NGS2Result?
-            _model.setGemsGuideStars(_worker.findAllGuideStars(obsContext, posAngles, results.gemsCatalogSearchResult()));
+            _model.setGemsGuideStars(_worker.findAllGuideStars(obsContext, posAngles, results.gemsCatalogSearchResultAsJava()));
         }
     }
 

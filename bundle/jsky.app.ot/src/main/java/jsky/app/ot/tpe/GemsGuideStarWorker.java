@@ -307,9 +307,9 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         final List<SiderealTarget> pwfsCandidates =
             pwfsProbeCandidates
                 .stream()
-                .filter(pc -> pc.gp() == PwfsGuideProbe.pwfs1)
+                .filter(pc -> pc.guideProbe() == PwfsGuideProbe.pwfs1)
                 .findFirst()
-                .map(pc -> pc.targets())
+                .map(pc -> pc.targetsAsJava())
                 .orElseGet(() -> Collections.<SiderealTarget>emptyList());
 
         final List<SiderealTarget> pwfsValidCandidates =
@@ -321,7 +321,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 //        System.out.println("Size of filtered ProbeCandidates: " + pwfsValidCandidates.size());
 //        pwfsValidCandidates.forEach(t -> System.out.println(t.name()));
 //        System.out.println("*** PWFS1 LOOKUP DONE ***");
-        return new NGS2Result(results, pwfsValidCandidates);
+        return NGS2Result.fromJava(results, pwfsValidCandidates);
     }
 
 
@@ -348,7 +348,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             if (!results.pwfs1Results().isEmpty()) {
                 startProgress();
                 final List<GemsGuideStars> gemsResults = GemsResultsAnalyzer.instance().analyze(obsContext, posAngles,
-                        results.gemsCatalogSearchResult(), new scala.Some<>(this));
+                        results.gemsCatalogSearchResultAsJava(), new scala.Some<>(this));
                 if (interrupted && gemsResults.size() == 0) {
                     throw new CancellationException("Canceled");
                 }
@@ -358,7 +358,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
                 if (gemsResults.size() > 0) {
                     // TODO: What do we do with the PWFS1 guide stars??? Why does this only return one set of
                     // TODO: GemsGuideStars out of the list?
-                    final ImList<SiderealTarget> pwfsStars = DefaultImList.create(results.pwfs1Results());
+                    final ImList<SiderealTarget> pwfsStars = DefaultImList.create(results.pwfs1ResultsAsJava());
                     gemsResults.get(0).guideGroup().put(GuideProbeTargets.create(PwfsGuideProbe.pwfs1, pwfsStars.map(SPTarget::new)));
                     return gemsResults.get(0);
                 }
@@ -408,7 +408,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     // PWFS1 star.
     private static void checkResults(final NGS2Result results) {
         final Map<String, Boolean> keyMap = new HashMap<>();
-        for (final GemsCatalogSearchResults searchResults : results.gemsCatalogSearchResult()) {
+        for (final GemsCatalogSearchResults searchResults : results.gemsCatalogSearchResultAsJava()) {
             final String key = searchResults.criterion().key().group().getKey();
             if (searchResults.results().nonEmpty()) {
                 keyMap.put(key, true);

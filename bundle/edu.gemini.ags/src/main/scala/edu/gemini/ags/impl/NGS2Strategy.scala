@@ -1,6 +1,6 @@
 package edu.gemini.ags.impl
 
-import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy}
+import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy, ProbeCandidates}
 import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.ags.AgsStrategyKey.NGS2Key
@@ -39,7 +39,7 @@ object NGS2Strategy extends AgsStrategy {
     else
       GemsStrategy.analyzeMagnitude(ctx, mt, guideProbe, guideStar)
 
-  override def candidates(ctx: ObsContext, mt: AgsMagnitude.MagnitudeTable)(ec: ExecutionContext): Future[List[(GuideProbe, List[SiderealTarget])]] =
+  override def candidates(ctx: ObsContext, mt: AgsMagnitude.MagnitudeTable)(ec: ExecutionContext): Future[List[ProbeCandidates]] =
     for {
       g <- GemsStrategy.candidates(ctx, mt)(ec)
       p <- Pwfs1SouthNGS2.candidates(ctx, mt)(ec)

@@ -19,8 +19,18 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scalaz._
 import Scalaz._
 
-// For Java access, since Java doesn't have tuples.
-case class ProbeCandidates(gp: GuideProbe, targets: java.util.List[SiderealTarget])
+/**
+ * Pairs a `GuideProbe` with candidate guide stars.
+ */
+final case class ProbeCandidates(
+  guideProbe: GuideProbe,
+  targets:    List[SiderealTarget]
+) {
+
+  def targetsAsJava: java.util.List[SiderealTarget] =
+    targets.asJava
+
+}
 
 trait AgsStrategy {
   def key: AgsStrategyKey
@@ -39,12 +49,10 @@ trait AgsStrategy {
 
   def analyzeMagnitude(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis]
 
-  def candidates(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[(GuideProbe, List[SiderealTarget])]]
+  def candidates(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[ProbeCandidates]]
 
   def candidatesForJava(ctx: ObsContext, mt: MagnitudeTable, timeoutSec: Int, ec: ExecutionContext): java.util.List[ProbeCandidates] =
-    Await.result(candidates(ctx, mt)(ec), timeoutSec.seconds).map {
-      case (gp, tgts) => ProbeCandidates(gp, tgts.asJava)
-    }.asJava
+    Await.result(candidates(ctx, mt)(ec), timeoutSec.seconds).asJava
 
   /**
    * Returns a list of catalog queries that would be used to search for guide stars with the given context

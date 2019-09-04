@@ -1,7 +1,7 @@
 package edu.gemini.ags.impl
 
 import edu.gemini.spModel.guide.OrderGuideGroup
-import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy}
+import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy, ProbeCandidates}
 import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
 import edu.gemini.ags.gems._
 import edu.gemini.catalog.api._
@@ -78,16 +78,16 @@ trait GemsStrategy extends AgsStrategy {
     mapGroup(CanopusWfs.Group.instance) // TODO: REL-2941 ++ mapGroup(GsaoiOdgw.Group.instance)
   }
 
-  override def candidates(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[(GuideProbe, List[SiderealTarget])]] = {
+  override def candidates(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[ProbeCandidates]] = {
 
     // Extract something we can understand from the GemsCatalogSearchResults.
-    def simplifiedResult(results: List[GemsCatalogSearchResults]): List[(GuideProbe, List[SiderealTarget])] =
+    def simplifiedResult(results: List[GemsCatalogSearchResults]): List[ProbeCandidates] =
       results.flatMap { result =>
         val so = result.results  // extract the sky objects from this thing
         // For each guide probe associated with these sky objects, add a tuple
         // (guide probe, sky object list) to the results
         result.criterion.key.group.getMembers.asScala.toList.map { guideProbe =>
-          (guideProbe, so)
+          ProbeCandidates(guideProbe, so)
         }
       }
 

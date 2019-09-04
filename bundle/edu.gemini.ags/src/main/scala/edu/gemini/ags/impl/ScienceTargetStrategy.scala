@@ -2,7 +2,7 @@ package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.ags.api.{AgsAnalysis, AgsStrategy}
+import edu.gemini.ags.api.{AgsAnalysis, AgsStrategy, ProbeCandidates}
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.BandsList
 import edu.gemini.spModel.core.SiderealTarget
@@ -33,8 +33,8 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGui
     ts.list.toList
   }
 
-  override def candidates(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[(GuideProbe, List[SiderealTarget])]] =
-    Future.successful(List((guideProbe, toSiderealTargets(ctx))))
+  override def candidates(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[ProbeCandidates]] =
+    Future.successful(List(ProbeCandidates(guideProbe, toSiderealTargets(ctx))))
 
   override def select(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Option[AgsStrategy.Selection]] = {
     // As of 17B there are no instruments that use this strategy with a multi-target asterism (which
