@@ -55,6 +55,7 @@ object Strategy {
     Pwfs2North,
     Pwfs1South,
     Pwfs2South,
+    Pwfs1SouthNGS2,
     Off
   )
 

@@ -41,11 +41,10 @@ trait AgsStrategy {
 
   def candidates(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[(GuideProbe, List[SiderealTarget])]]
 
-  def candidatesForJava(ctx: ObsContext, mt: MagnitudeTable, timeout: Int = 10, ec: ExecutionContext): java.util.List[ProbeCandidates] = {
-    Await.result(candidates(ctx, mt)(ec), 10.seconds).map {
+  def candidatesForJava(ctx: ObsContext, mt: MagnitudeTable, timeoutSec: Int, ec: ExecutionContext): java.util.List[ProbeCandidates] =
+    Await.result(candidates(ctx, mt)(ec), timeoutSec.seconds).map {
       case (gp, tgts) => ProbeCandidates(gp, tgts.asJava)
     }.asJava
-  }
 
   /**
    * Returns a list of catalog queries that would be used to search for guide stars with the given context

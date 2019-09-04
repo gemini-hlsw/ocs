@@ -258,23 +258,28 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         }
     }
 
-    private static NGS2Result searchUnchecked(GemsGuideStarSearchOptions.CatalogChoice catalog,
-                                              ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
-                                              scala.Option<MagnitudeBand> nirBand,
-                                              scala.concurrent.ExecutionContext ec) {
-        Coordinates basePos = obsContext.getBaseCoordinates().getOrNull();
-        Angle baseRA = new Angle(basePos.getRaDeg(), Angle.Unit.DEGREES);
-        Angle baseDec = new Angle(basePos.getDecDeg(), Angle.Unit.DEGREES);
-        SkyCoordinates base = new HmsDegCoordinates.Builder(baseRA, baseDec).build();
+    private static NGS2Result searchUnchecked(
+        GemsGuideStarSearchOptions.CatalogChoice catalog,
+        ObsContext                               obsContext,
+        Set<edu.gemini.spModel.core.Angle>       posAngles,
+        scala.Option<MagnitudeBand>              nirBand,
+        scala.concurrent.ExecutionContext        ec
+    ) {
+        final Coordinates basePos = obsContext.getBaseCoordinates().getOrNull();
+        final Angle        baseRA = new Angle(basePos.getRaDeg(), Angle.Unit.DEGREES);
+        final Angle       baseDec = new Angle(basePos.getDecDeg(), Angle.Unit.DEGREES);
+        final SkyCoordinates base = new HmsDegCoordinates.Builder(baseRA, baseDec).build();
+        final SPInstObsComp  inst = obsContext.getInstrument();
 
-        SPInstObsComp inst = obsContext.getInstrument();
-
-        GemsInstrument instrument = inst instanceof Flamingos2 ? GemsInstrument.flamingos2 : GemsInstrument.gsaoi;
-        GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(instrument, posAngles);
+        final GemsInstrument          instrument = inst instanceof Flamingos2 ? GemsInstrument.flamingos2 : GemsInstrument.gsaoi;
+        final GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(instrument, posAngles);
 
         // TODO-DEBUG:
 //        System.out.println("*** PERFORMING GeMS LOOKUP ***");
-        final List<GemsCatalogSearchResults> results = new GemsVoTableCatalog(ConeSearchBackend.instance(), catalog.catalog()).search4Java(obsContext, ModelConverters.toCoordinates(base), options, nirBand, 30, ec);
+        final List<GemsCatalogSearchResults> results =
+            new GemsVoTableCatalog(ConeSearchBackend.instance(), catalog.catalog())
+                .search4Java(obsContext, ModelConverters.toCoordinates(base), options, nirBand, 30, ec);
+
 //        results.forEach(r -> r.resultsAsJava().forEach(t -> System.out.println(t.name())));
 //        System.out.println("*** GeMS LOOKUP DONE ***");
 
@@ -282,12 +287,15 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         // TODO-NGS2: The bounds given for NGS2 for PWFS1 should prevent vignetting. How can we filter out stars that are
         // TODO-NGS2: not in the annulus? See comment below about pwfsValidCandidates.
         // Look up a PWFS1 guide star.
-        final Option<AgsStrategy> pwfsOpt = AgsRegistrar.lookupForJava(AgsStrategyKey.Pwfs1SouthNGS2Key$.MODULE$);
+        final Option<AgsStrategy> pwfsOpt =
+            AgsRegistrar.lookupForJava(AgsStrategyKey.Pwfs1SouthNGS2Key$.MODULE$);
 
         // We did it up there for the basePos and baseRA / baseDec, so why not continue sound coding practices?
-        final AgsStrategy pwfs = pwfsOpt.getOrNull();
-        final AgsMagnitude.MagnitudeTable magTable = ProbeLimitsTable.loadOrThrow();
-        final List<ProbeCandidates> pwfsCandidates = pwfs.candidatesForJava(obsContext, magTable, 30, ec);
+        final List<ProbeCandidates> pwfsProbeCandidates =
+            pwfsOpt.fold(
+                ()   -> Collections.<ProbeCandidates>emptyList(),
+                pwfs -> pwfs.candidatesForJava(obsContext, ProbeLimitsTable.loadOrThrow(), 30, ec)
+            );
 
         // TODO-DEBUG:
 //        System.out.println("Size of unfiltered ProbeCandidates: " + pwfsCandidates.size());
@@ -296,9 +304,20 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 
         // TODO-NGS2: This only filters out the guide stars beyond the probe range. It does not filter the guide stars
         // TODO-NGS2: that only reach the probe range.
-        final List<SiderealTarget> pwfsValidCandidates = pwfsCandidates.get(0).targets().stream()
+        final List<SiderealTarget> pwfsCandidates =
+            pwfsProbeCandidates
+                .stream()
+                .filter(pc -> pc.gp() == PwfsGuideProbe.pwfs1)
+                .findFirst()
+                .map(pc -> pc.targets())
+                .orElseGet(() -> Collections.<SiderealTarget>emptyList());
+
+        final List<SiderealTarget> pwfsValidCandidates =
+            pwfsCandidates
+                .stream()
                 .filter(t -> PwfsGuideProbe.pwfs1.checkBoundaries(new SPTarget(t), obsContext).exists(PwfsProbeRangeArea.inRange::equals))
                 .collect(Collectors.toList());
+
 //        System.out.println("Size of filtered ProbeCandidates: " + pwfsValidCandidates.size());
 //        pwfsValidCandidates.forEach(t -> System.out.println(t.name()));
 //        System.out.println("*** PWFS1 LOOKUP DONE ***");
