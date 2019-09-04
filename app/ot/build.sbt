@@ -77,9 +77,8 @@ def common(version: Version) = AppConfig(
 def with_test_dbs(version: Version) = AppConfig(
   id = "with-test-dbs",
   props = Map(
-//    "edu.gemini.util.trpc.peer.GN" -> "gnodbtest.gemini.edu:8443:Gemini North ODB (Test)",
-//    "edu.gemini.util.trpc.peer.GS" -> "gsodbtest.gemini.edu:8443:Gemini South ODB (Test)",
-    "edu.gemini.util.trpc.peer.GS" -> "cpongs2dev-lv1:8443:Gemini NGS2 ODB (Test)"
+    "edu.gemini.util.trpc.peer.GN" -> "gnodbtest.gemini.edu:8443:Gemini North ODB (Test)",
+    "edu.gemini.util.trpc.peer.GS" -> "gsodbtest.gemini.edu:8443:Gemini South ODB (Test)"
   )
 ) extending List(common(version))
 

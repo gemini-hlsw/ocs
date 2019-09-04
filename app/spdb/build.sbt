@@ -37,8 +37,7 @@ ocsAppManifest := {
             odbproduction(v),
               gsodb(v),
               gnodb(v),
-      gnagsodb(v),
-      cpongs2(v)
+      gnagsodb(v)
     )
   )
 }
@@ -528,31 +527,6 @@ def gnagsodb(version: Version) = AppConfig(
     "edu.gemini.oodb.mail.smtpHost"        -> "smtp.hi.gemini.edu",
     "edu.gemini.util.trpc.name"            -> "Gemini North AGS ODB",
     "osgi.shell.telnet.ip"                 -> "10.1.46.11"
-  )
-) extending List(odbproduction(version), gnodb_credentials(version))
-
-// GN AGS ODB: hbfauxodb-lv1 / gnauxodb
-def cpongs2(version: Version) = AppConfig(
-  id = "cpongs2dev-lv1",
-  distribution = List(Linux64),
-  vmargs = List(
-    "-Dcom.cosylab.epics.caj.CAJContext.addr_list=10.2.2.255",
-    "-Dedu.gemini.site=north",
-    "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=gsagn.hi.gemini.edu",
-    "-Dcron.odbMail.SITE_SMTP_SERVER=smtp.hi.gemini.edu",
-    "-Djava.rmi.server.hostname=gnauxodb",
-    "-Xms2G",
-    "-Xmx2G"
-  ),
-  props = Map(
-    "edu.gemini.auxfile.fits.dest"         -> "/gemsoft/var/data/ictd/GN@SEMESTER@/@PROG_ID@",
-    "edu.gemini.auxfile.fits.host"         -> "gnconfig.gemini.edu",
-    "edu.gemini.auxfile.other.dest"        -> "/gemsoft/var/data/finder/GNqueue/Finders/@SEMESTER@/@PROG_ID@",
-    "edu.gemini.auxfile.root"              -> "/home/software/.auxfile",
-    "edu.gemini.dataman.gsa.summit.host"   -> "fits.hi.gemini.edu",
-    "edu.gemini.oodb.mail.smtpHost"        -> "smtp.hi.gemini.edu",
-    "edu.gemini.util.trpc.name"            -> "Gemini South NGS2",
-    "osgi.shell.telnet.ip"                 -> "172.17.104.21"
   )
 ) extending List(odbproduction(version), gnodb_credentials(version))
 
