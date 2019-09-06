@@ -1,7 +1,7 @@
 package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.AgsStrategy
-import edu.gemini.catalog.api.PPMXL
+import edu.gemini.catalog.api.CatalogName.Gaia
 import edu.gemini.catalog.votable.ConeSearchBackend
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.ags.AgsStrategyKey
@@ -38,7 +38,7 @@ object Strategy {
   val NiciOiwfs       = ScienceTargetStrategy(NiciOiwfsKey,     NiciOiwfsGuideProbe.instance, NiciBandsList)
   val Off             = OffStrategy
 
-  val GemsNgs2        = NGS2Strategy(PPMXL, ConeSearchBackend)
+  val GemsNgs2        = NGS2Strategy(Gaia, None)
 
   /**
    * All strategies that correspond to top-level AGS queries. Internally, some

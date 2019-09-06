@@ -58,8 +58,7 @@ class GemsGuideStarSearchController {
         final MagnitudeBand nirBand = _model.getBand().getBand();
         NGS2Result results;
         try {
-            // TODO-NGS2: ConeSearchBackend -> None
-            results = _worker.search(_model.getCatalog(), ConeSearchBackend.instance(), obsContext, posAngles, new scala.Some<>(nirBand), ec);
+            results = _worker.search(_model.getCatalog(), scala.Option.empty(), obsContext, posAngles, new scala.Some<>(nirBand), ec);
         } catch (final Exception e) {
             DialogUtil.error(_dialog, e);
             results = NGS2Result.Empty();

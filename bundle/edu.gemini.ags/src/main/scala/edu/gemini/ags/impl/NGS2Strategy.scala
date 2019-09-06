@@ -21,7 +21,7 @@ import Scalaz._
  */
 final case class NGS2Strategy(
   catalogName: CatalogName,
-  backend:     VoTableBackend // TODO-NGS2: Temporary until GAIA updates are added, at which point it becomes an Option[VoTableBackend]
+  backend:     Option[VoTableBackend]
 ) extends AgsStrategy {
 
   override def key: AgsStrategyKey = NGS2Key

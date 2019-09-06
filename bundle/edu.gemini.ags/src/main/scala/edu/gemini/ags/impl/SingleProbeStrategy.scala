@@ -26,7 +26,7 @@ import Scalaz._
  * The same logic is applied to various single-star guiding scenarios (i.e.,
  * everything except for GeMS).
  */
-final case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyParams, backend: VoTableBackend = ConeSearchBackend) extends AgsStrategy {
+final case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyParams, backend: Option[VoTableBackend] = None) extends AgsStrategy {
   import SingleProbeStrategy._
 
   private val LOGGER = Logger.getLogger(classOf[SingleProbeStrategy].getName)
@@ -50,7 +50,7 @@ final case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStr
     val empty = Future.successful(List(ProbeCandidates(params.guideProbe: GuideProbe, List.empty[SiderealTarget])))
 
     // We cannot let VoTableClient to filter targets as usual, instead we provide an empty magnitude constraint and filter locally
-    catalogQueries(withCorrectedSite(ctx), mt).strengthR(Some(backend)).headOption.map { case (a, b) => VoTableClient.catalog(a, b)(ec) }.map(_.flatMap {
+    catalogQueries(withCorrectedSite(ctx), mt).strengthR(backend).headOption.map { case (a, b) => VoTableClient.catalog(a, b)(ec) }.map(_.flatMap {
         case r if r.result.containsError => Future.failed(CatalogException(r.result.problems))
         case r                           => Future.successful(List(ProbeCandidates(params.guideProbe, r.result.targets.rows)))
     }).getOrElse(empty)

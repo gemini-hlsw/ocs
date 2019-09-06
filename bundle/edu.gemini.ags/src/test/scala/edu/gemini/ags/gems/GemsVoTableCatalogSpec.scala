@@ -1,6 +1,7 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.catalog.api._
+import edu.gemini.catalog.api.CatalogName.PPMXL
 import edu.gemini.catalog.votable.TestVoTableBackend
 import edu.gemini.spModel.gemini.gems.CanopusWfs
 import scala.concurrent.duration._
@@ -45,7 +46,7 @@ class GemsVoTableCatalogSpec extends Specification {
       val options = new GemsGuideStarSearchOptions(instrument, posAngles)
 
       val mod = GemsTestVoTableMod.forCwfsMagnitudeLimitChange(conditions)
-      val results = Await.result(GemsVoTableCatalog(PPMXL, TestVoTableBackend("/gemsvotablecatalogquery.xml", mod)).search(ctx, base, options, scala.None)(implicitly), 30.seconds)
+      val results = Await.result(GemsVoTableCatalog(PPMXL, Some(TestVoTableBackend("/gemsvotablecatalogquery.xml", mod))).search(ctx, base, options, scala.None)(implicitly), 30.seconds)
       results should be size 2
 
       results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt",  RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))), Some(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
@@ -69,7 +70,7 @@ class GemsVoTableCatalogSpec extends Specification {
       val options = new GemsGuideStarSearchOptions(instrument, posAngles)
 
       val mod = GemsTestVoTableMod.forCwfsMagnitudeLimitChange(conditions)
-      val results = GemsVoTableCatalog(PPMXL, TestVoTableBackend("/gemsvotablecatalogquery.xml", mod)).getRadiusConstraints(instrument, options.searchCriteria(ctx, scala.None).asScala.toList)
+      val results = GemsVoTableCatalog(PPMXL, Some(TestVoTableBackend("/gemsvotablecatalogquery.xml", mod))).getRadiusConstraints(instrument, options.searchCriteria(ctx, scala.None).asScala.toList)
       results should be size 1
       results.head should beEqualTo(RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01878572819686042)))
     }
@@ -89,13 +90,13 @@ class GemsVoTableCatalogSpec extends Specification {
       val options = new GemsGuideStarSearchOptions(instrument, posAngles)
 
       val mod = GemsTestVoTableMod.forCwfsMagnitudeLimitChange(conditions)
-      val results = GemsVoTableCatalog(PPMXL, TestVoTableBackend("/gemsvotablecatalogquery.xml", mod)).optimizeMagnitudeConstraints(options.searchCriteria(ctx, scala.None).asScala.toList)
+      val results = GemsVoTableCatalog(PPMXL, Some(TestVoTableBackend("/gemsvotablecatalogquery.xml", mod))).optimizeMagnitudeConstraints(options.searchCriteria(ctx, scala.None).asScala.toList)
       results should be size 2
       results.head should beEqualTo(MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))))
       results(1) should beEqualTo(MagnitudeConstraints(RBandsList,FaintnessConstraint(18.0),Some(SaturationConstraint(11.5))))
     }
     "preserve the radius constraint for a single item without offsets" in {
-      val catalog = GemsVoTableCatalog(PPMXL, TestVoTableBackend(""))
+      val catalog = GemsVoTableCatalog(PPMXL, Some(TestVoTableBackend("")))
       val key = GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance)
       val radiusConstraint = RadiusConstraint.between(Angle.fromArcmin(10.0), Angle.fromArcmin(2.0))
       val criterion = CatalogSearchCriterion("test", radiusConstraint, magnitudeRange, None, None)
@@ -105,7 +106,7 @@ class GemsVoTableCatalogSpec extends Specification {
       (~catalog.optimizeRadiusConstraint(List(s)).map(_.minLimit) ~= radiusConstraint.minLimit) should beTrue
     }
     "offset the radius constraint for a single item with offsets" in {
-      val catalog = GemsVoTableCatalog(PPMXL, TestVoTableBackend(""))
+      val catalog = GemsVoTableCatalog(PPMXL, Some(TestVoTableBackend("")))
       val key = GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance)
       val radiusConstraint = RadiusConstraint.between(Angle.fromArcmin(10.0), Angle.fromArcmin(2.0))
       val offset = Offset(3.arcmins[OffsetP], 4.arcmins[OffsetQ]).some
@@ -117,7 +118,7 @@ class GemsVoTableCatalogSpec extends Specification {
       (~catalog.optimizeRadiusConstraint(List(s)).map(_.minLimit) ~= radiusConstraint.minLimit) should beTrue
     }
     "find the max and min for a list of radius constraint without offsets" in {
-      val catalog = GemsVoTableCatalog(PPMXL, TestVoTableBackend(""))
+      val catalog = GemsVoTableCatalog(PPMXL, Some(TestVoTableBackend("")))
       val key = GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance)
       val radiusConstraint1 = RadiusConstraint.between(Angle.fromArcmin(10.0), Angle.fromArcmin(2.0))
       val radiusConstraint2 = RadiusConstraint.between(Angle.fromArcmin(15.0), Angle.fromArcmin(3.0))
@@ -130,7 +131,7 @@ class GemsVoTableCatalogSpec extends Specification {
       (~catalog.optimizeRadiusConstraint(List(s1, s2)).map(_.minLimit) ~= Angle.fromArcmin(2.0)) should beTrue
     }
     "find the max and min for a list of radius constraints with offsets" in {
-      val catalog = GemsVoTableCatalog(PPMXL, TestVoTableBackend(""))
+      val catalog = GemsVoTableCatalog(PPMXL, Some(TestVoTableBackend("")))
       val key = GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance)
       val radiusConstraint1 = RadiusConstraint.between(Angle.fromArcmin(10.0), Angle.fromArcmin(2.0))
       val radiusConstraint2 = RadiusConstraint.between(Angle.fromArcmin(15.0), Angle.fromArcmin(3.0))

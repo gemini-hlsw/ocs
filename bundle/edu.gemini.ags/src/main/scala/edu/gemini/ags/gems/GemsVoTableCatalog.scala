@@ -27,7 +27,7 @@ import jsky.util.gui.StatusLogger
  */
 final case class GemsVoTableCatalog(
   catalog: CatalogName,
-  backend: VoTableBackend // TODO-NGS2: GAIA updates
+  backend: Option[VoTableBackend]
 ) {
 
   /**
@@ -76,7 +76,7 @@ final case class GemsVoTableCatalog(
       (CatalogQuery(basePosition, c.criterion.radiusConstraint, c.criterion.magConstraint, catalog), c)
     }
     val qm = queryArgs.toMap
-    VoTableClient.catalogs(queryArgs.map(_._1), Some(backend))(ec).map(l => l.map { qr => GemsCatalogSearchResults(qm(qr.query), qr.result.targets.rows)})
+    VoTableClient.catalogs(queryArgs.map(_._1), backend)(ec).map(l => l.map { qr => GemsCatalogSearchResults(qm(qr.query), qr.result.targets.rows)})
   }
 
   /**
@@ -99,7 +99,7 @@ final case class GemsVoTableCatalog(
       magLimits    <- magConstraints
     } yield CatalogQuery(basePosition, radiusLimits, magLimits, catalog)
 
-    VoTableClient.catalogs(queries, Some(backend))(ec).flatMap {
+    VoTableClient.catalogs(queries, backend)(ec).flatMap {
       case l if l.exists(_.result.containsError) =>
         Future.failed(CatalogException(l.map(_.result.problems).suml))
       case l =>

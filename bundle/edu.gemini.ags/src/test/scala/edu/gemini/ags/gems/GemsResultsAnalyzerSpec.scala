@@ -3,7 +3,7 @@ package edu.gemini.ags.gems
 import edu.gemini.ags.TargetsHelper
 import edu.gemini.ags.gems.mascot.MascotProgress
 import edu.gemini.ags.gems.mascot.Strehl
-import edu.gemini.catalog.api.PPMXL
+import edu.gemini.catalog.api.CatalogName.PPMXL
 import edu.gemini.catalog.votable.TestVoTableBackend
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates
 import edu.gemini.shared.util.immutable.{None => JNone}
@@ -49,7 +49,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
   def testGemsVoTableCatalog(file: String, c: Conditions): GemsVoTableCatalog =
     GemsVoTableCatalog(
       PPMXL,
-      TestVoTableBackend(file, GemsTestVoTableMod.forCwfsMagnitudeLimitChange(c))
+      Some(TestVoTableBackend(file, GemsTestVoTableMod.forCwfsMagnitudeLimitChange(c)))
     )
 
   val NoTime = JNone.instance[java.lang.Long]

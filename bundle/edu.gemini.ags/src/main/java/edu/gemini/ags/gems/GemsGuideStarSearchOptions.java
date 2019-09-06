@@ -1,6 +1,7 @@
 package edu.gemini.ags.gems;
 
 import edu.gemini.catalog.api.CatalogName;
+import edu.gemini.catalog.api.CatalogName.Gaia$;
 import edu.gemini.catalog.api.CatalogName.PPMXL$;
 import edu.gemini.catalog.api.CatalogName.UCAC4$;
 import edu.gemini.catalog.api.MagnitudeConstraints;
@@ -25,11 +26,12 @@ import java.util.*;
 public final class GemsGuideStarSearchOptions {
 
     public enum CatalogChoice {
+        GAIA_ESA(    Gaia$.MODULE$,  "Gaia at ESA"),
         PPMXL_GEMINI(PPMXL$.MODULE$, "PPMXL at Gemini"),
         UCAC4_GEMINI(UCAC4$.MODULE$, "UCAC4 at Gemini"),
         ;
 
-        public static final CatalogChoice DEFAULT = PPMXL_GEMINI;
+        public static final CatalogChoice DEFAULT = GAIA_ESA;
 
         private final CatalogName _catalogName;
         private final String      _displayValue;
@@ -152,7 +154,7 @@ public final class GemsGuideStarSearchOptions {
 
         // Adjust the mag limits for the worst conditions (as is done in the ags servlet)
         final MagnitudeConstraints magConstraints =
-            calculator.adjustGemsMagnitudeConstraintForJava(gType, nirBand, obsContext.getConditions());
+                calculator.adjustGemsMagnitudeConstraintForJava(gType, nirBand, obsContext.getConditions());
 
         final CatalogSearchCriterion criterion =
             calculator.searchCriterionBuilder(

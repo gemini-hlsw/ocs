@@ -242,7 +242,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      */
     public NGS2Result search(
         GemsGuideStarSearchOptions.CatalogChoice catalog,
-        VoTableBackend                           backend,
+        scala.Option<VoTableBackend>             backend,
         ObsContext                               obsContext,
         Set<edu.gemini.spModel.core.Angle>       posAngles,
         scala.Option<MagnitudeBand>              nirBand,
@@ -267,7 +267,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 
     private static NGS2Result searchUnchecked(
         GemsGuideStarSearchOptions.CatalogChoice catalog,
-        VoTableBackend                           backend,
+        scala.Option<VoTableBackend>             backend,
         ObsContext                               obsContext,
         Set<edu.gemini.spModel.core.Angle>       posAngles,
         scala.Option<MagnitudeBand>              nirBand,
@@ -343,7 +343,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         final NGS2Result                           results =
             search(
                 GemsGuideStarSearchOptions.DEFAULT,
-                ConeSearchBackend.instance(), // TODO-NGS2: set to None after GAIA
+                scala.Option.empty(),
                 obsContext,
                 posAngles,
                 scala.Option.empty(),

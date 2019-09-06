@@ -5,6 +5,7 @@ import edu.gemini.ags.api.AgsStrategy.Estimate
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.ags.gems.{CatalogSearchCriterion, GemsCatalogSearchCriterion, GemsCatalogSearchKey, GemsTestVoTableMod}
 import edu.gemini.catalog.api._
+import edu.gemini.catalog.api.CatalogName.PPMXL
 import edu.gemini.catalog.votable.TestVoTableBackend
 import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
 import edu.gemini.spModel.core._
@@ -33,7 +34,7 @@ import Scalaz._
 class GemsStrategySpec extends Specification {
 
   def testGemsStrategy(file: String, c: Conditions): GemsStrategy =
-    GemsStrategy(PPMXL, TestVoTableBackend(file, GemsTestVoTableMod.forCwfsMagnitudeLimitChange(c)))
+    GemsStrategy(PPMXL, Some(TestVoTableBackend(file, GemsTestVoTableMod.forCwfsMagnitudeLimitChange(c))))
 
   "GemsStrategy" should {
     "support estimate" in {
