@@ -1,6 +1,6 @@
 package edu.gemini.catalog.api
 
-import edu.gemini.spModel.core.{MagnitudeBand, Coordinates, SiderealTarget}
+import edu.gemini.spModel.core.{MagnitudeBand, Coordinates, SiderealTarget, VersionToken}
 
 import scalaz._
 import Scalaz._
@@ -17,27 +17,67 @@ case class MagnitudeQueryFilter(mc: MagnitudeConstraints) extends QueryResultsFi
   def filter(t: SiderealTarget): Boolean = mc.filter(t)
 }
 
-sealed abstract class CatalogName(val id: String, val displayName: String) {
-  def supportedBands: List[MagnitudeBand] = Nil
-  // Indicates what is the band used when a generic R band is required
-  def rBand: MagnitudeBand = MagnitudeBand.UC
-}
+sealed abstract class CatalogName(val id: String, val displayName: String) extends Product with Serializable {
 
-case object SDSS extends CatalogName("sdss9", "SDSS9 @ Gemini")
-case object GSC234 extends CatalogName("gsc234", "GSC234 @ Gemini")
-case object PPMXL extends CatalogName("ppmxl", "PPMXL @ Gemini") {
-  override val supportedBands = List(MagnitudeBand.B, MagnitudeBand.R, MagnitudeBand.I, MagnitudeBand.J, MagnitudeBand.H, MagnitudeBand.K)
-  override val rBand: MagnitudeBand = MagnitudeBand.R
+  def supportedBands: List[MagnitudeBand] =
+    Nil
+
+  // Indicates what is the band used when a generic R band is required
+  def rBand: MagnitudeBand =
+    MagnitudeBand.UC
+
+  def voTableVersion: VersionToken =
+    VersionToken.unsafeFromIntegers(1, 2)
+
 }
-case object UCAC4 extends CatalogName("ucac4", "UCAC4 @ Gemini") {
-  override val  supportedBands = List(MagnitudeBand._g, MagnitudeBand._r, MagnitudeBand._i, MagnitudeBand.B, MagnitudeBand.V, MagnitudeBand.UC, MagnitudeBand.J, MagnitudeBand.H, MagnitudeBand.K)
-}
-case object TWOMASS_PSC extends CatalogName("twomass_psc", "TwoMass PSC @ Gemini")
-case object TWOMASS_XSC extends CatalogName("twomass_xsc", "TwoMass XSC @ Gemini")
-case object SIMBAD extends CatalogName("simbad", "Simbad")
 
 object CatalogName {
-  implicit val equals: Equal[CatalogName] = Equal.equal[CatalogName]((a, b) => a.id === b.id)
+
+  case object SDSS extends CatalogName("sdss9", "SDSS9 @ Gemini")
+
+  case object GSC234 extends CatalogName("gsc234", "GSC234 @ Gemini")
+
+  case object PPMXL extends CatalogName("ppmxl", "PPMXL @ Gemini") {
+    override val supportedBands = List(MagnitudeBand.B, MagnitudeBand.R, MagnitudeBand.I, MagnitudeBand.J, MagnitudeBand.H, MagnitudeBand.K)
+    override val rBand: MagnitudeBand = MagnitudeBand.R
+  }
+
+  case object UCAC4  extends CatalogName("ucac4", "UCAC4 @ Gemini") {
+    override val  supportedBands = List(MagnitudeBand._g, MagnitudeBand._r, MagnitudeBand._i, MagnitudeBand.B, MagnitudeBand.V, MagnitudeBand.UC, MagnitudeBand.J, MagnitudeBand.H, MagnitudeBand.K)
+  }
+
+  case object Gaia extends CatalogName("gaia", "GAIA @ ESA") {
+
+    // Gaia bands (why isn't this a Set?)
+    override val supportedBands: List[MagnitudeBand] =
+      List(
+        MagnitudeBand.V,
+        MagnitudeBand.R,
+        MagnitudeBand.I,
+        MagnitudeBand._r,
+        MagnitudeBand._i,
+        MagnitudeBand._g,
+        MagnitudeBand.K,
+        MagnitudeBand.H,
+        MagnitudeBand.J
+      )
+
+    override val rBand: MagnitudeBand =
+      MagnitudeBand.R
+
+    override val voTableVersion: VersionToken =
+      VersionToken.unsafeFromIntegers(1, 3)
+
+  }
+
+  case object TWOMASS_PSC extends CatalogName("twomass_psc", "TwoMass PSC @ Gemini")
+
+  case object TWOMASS_XSC extends CatalogName("twomass_xsc", "TwoMass XSC @ Gemini")
+
+  case object SIMBAD extends CatalogName("simbad", "Simbad")
+
+  implicit val CatalogNameEquals: Equal[CatalogName] =
+    Equal.equal[CatalogName]((a, b) => a.id === b.id)
 }
 
 /**
@@ -99,7 +139,7 @@ object CatalogQuery {
 
   def apply(base: Coordinates, radiusConstraint: RadiusConstraint, catalog: CatalogName):CatalogQuery = ConeSearchCatalogQuery(None, base, radiusConstraint, Nil, catalog)
 
-  def apply(search: String):CatalogQuery = NameCatalogQuery(search, SIMBAD)
+  def apply(search: String):CatalogQuery = NameCatalogQuery(search, CatalogName.SIMBAD)
 
   implicit val equals: Equal[CatalogQuery] = Equal.equalA[CatalogQuery]
 }

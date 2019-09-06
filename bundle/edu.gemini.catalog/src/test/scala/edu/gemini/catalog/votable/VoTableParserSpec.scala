@@ -1,6 +1,6 @@
 package edu.gemini.catalog.votable
 
-import edu.gemini.catalog.api.{SIMBAD, PPMXL, UCAC4}
+import edu.gemini.catalog.api.CatalogName
 import edu.gemini.spModel.core._
 import org.specs2.mutable.Specification
 
@@ -95,6 +95,96 @@ class VoTableParserSpec extends Specification with VoTableParser {
               <TD>20.0088</TD>
               <TD>3</TD>
               <TD>-2140404569</TD>
+            </TR>
+          </TABLEDATA>
+      </DATA>
+    </TABLE>
+
+    val skyObjectsWithRedshift =
+      <TABLE>
+        <FIELD ID="flags1" datatype="int" name="flags1" ucd="meta.code"/>
+        <FIELD ID="umag" datatype="double" name="umag" ucd="phot.mag;em.opt.u"/>
+        <FIELD ID="flags2" datatype="int" name="flags2" ucd="meta.code"/>
+        <FIELD ID="imag" datatype="double" name="imag" ucd="phot.mag;em.opt.i"/>
+        <FIELD ID="decj2000" datatype="double" name="dej2000" ucd="pos.eq.dec;meta.main"/>
+        <FIELD ID="raj2000" datatype="double" name="raj2000" ucd="pos.eq.ra;meta.main"/>
+        <FIELD ID="rmag" datatype="double" name="rmag" ucd="phot.mag;em.opt.r"/>
+        <FIELD ID="objid" datatype="int" name="objid" ucd="meta.id;meta.main"/>
+        <FIELD ID="gmag" datatype="double" name="gmag" ucd="phot.mag;em.opt.g"/>
+        <FIELD ID="zmag" datatype="double" name="zmag" ucd="phot.mag;em.opt.z"/>
+        <FIELD ID="type" datatype="int" name="type" ucd="meta.code"/>
+        <FIELD ID="ppmxl" datatype="int" name="ppmxl" ucd="meta.id;meta.main"/>
+        <FIELD ID="Z_VALUE" datatype="double" name="Z_VALUE" ucd="src.redshift"/>
+        <FIELD ID="RV_VALUE" datatype="double" name="RV_VALUE" ucd="spect.dopplerVeloc.opt"/>
+        <DATA>
+          <TABLEDATA>
+            <TR>
+              <TD>268435728</TD>
+              <TD>23.0888</TD>
+              <TD>8208</TD>
+              <TD>20.3051</TD>
+              <TD>0.209323681906</TD>
+              <TD>359.745951955</TD>
+              <TD>20.88</TD>
+              <TD>-2140405448</TD>
+              <TD>22.082</TD>
+              <TD>19.8812</TD>
+              <TD>3</TD>
+              <TD>-2140405448</TD>
+              <TD>0.000068</TD>
+              <TD></TD>
+            </TR>
+            <TR>
+              <TD>536871168</TD>
+              <TD>23.0853</TD>
+              <TD>65552</TD>
+              <TD>20.7891</TD>
+              <TD>0.210251239819</TD>
+              <TD>359.749274134</TD>
+              <TD>21.7686</TD>
+              <TD>-2140404569</TD>
+              <TD>23.0889</TD>
+              <TD>20.0088</TD>
+              <TD>3</TD>
+              <TD>-2140404569</TD>
+              <TD></TD>
+              <TD>20.30</TD>
+            </TR>
+          </TABLEDATA>
+      </DATA>
+    </TABLE>
+
+    val skyObjectsWithRadialVelocityError =
+      <TABLE>
+        <FIELD ID="flags1" datatype="int" name="flags1" ucd="meta.code"/>
+        <FIELD ID="umag" datatype="double" name="umag" ucd="phot.mag;em.opt.u"/>
+        <FIELD ID="flags2" datatype="int" name="flags2" ucd="meta.code"/>
+        <FIELD ID="imag" datatype="double" name="imag" ucd="phot.mag;em.opt.i"/>
+        <FIELD ID="decj2000" datatype="double" name="dej2000" ucd="pos.eq.dec;meta.main"/>
+        <FIELD ID="raj2000" datatype="double" name="raj2000" ucd="pos.eq.ra;meta.main"/>
+        <FIELD ID="rmag" datatype="double" name="rmag" ucd="phot.mag;em.opt.r"/>
+        <FIELD ID="objid" datatype="int" name="objid" ucd="meta.id;meta.main"/>
+        <FIELD ID="gmag" datatype="double" name="gmag" ucd="phot.mag;em.opt.g"/>
+        <FIELD ID="zmag" datatype="double" name="zmag" ucd="phot.mag;em.opt.z"/>
+        <FIELD ID="type" datatype="int" name="type" ucd="meta.code"/>
+        <FIELD ID="ppmxl" datatype="int" name="ppmxl" ucd="meta.id;meta.main"/>
+        <FIELD ID="RV_VALUE" datatype="double" name="RV_VALUE" ucd="spect.dopplerVeloc.opt"/>
+        <DATA>
+          <TABLEDATA>
+            <TR>
+              <TD>536871168</TD>
+              <TD>23.0853</TD>
+              <TD>65552</TD>
+              <TD>20.7891</TD>
+              <TD>0.210251239819</TD>
+              <TD>359.749274134</TD>
+              <TD>21.7686</TD>
+              <TD>-2140404569</TD>
+              <TD>23.0889</TD>
+              <TD>20.0088</TD>
+              <TD>3</TD>
+              <TD>-2140404569</TD>
+              <TD>299792.459</TD>
             </TR>
           </TABLEDATA>
       </DATA>
@@ -214,6 +304,120 @@ class VoTableParserSpec extends Specification with VoTableParser {
         </DATA>
        </TABLE>
 
+    val gaia =
+      <TABLE>
+        <FIELD arraysize="*" datatype="char" name="designation" ucd="meta.id;meta.main">
+          <DESCRIPTION>Unique source designation (unique across all Data Releases)</DESCRIPTION>
+        </FIELD>
+        <FIELD datatype="double" name="ra" ref="GAIADR2" ucd="pos.eq.ra;meta.main" unit="deg" utype="Char.SpatialAxis.Coverage.Location.Coord.Position2D.Value2.C1">
+          <DESCRIPTION>Right ascension</DESCRIPTION>
+        </FIELD>
+        <FIELD datatype="double" name="ra_error" ucd="stat.error;pos.eq.ra" unit="mas">
+          <DESCRIPTION>Standard error of right ascension</DESCRIPTION>
+        </FIELD>
+        <FIELD datatype="double" name="dec" ref="GAIADR2" ucd="pos.eq.dec;meta.main" unit="deg" utype="Char.SpatialAxis.Coverage.Location.Coord.Position2D.Value2.C2">
+          <DESCRIPTION>Declination</DESCRIPTION>
+        </FIELD>
+        <FIELD datatype="double" name="dec_error" ucd="stat.error;pos.eq.dec" unit="mas">
+          <DESCRIPTION>Standard error of declination</DESCRIPTION>
+        </FIELD>
+        <FIELD datatype="double" name="parallax" ucd="pos.parallax" unit="mas">
+          <DESCRIPTION>Parallax</DESCRIPTION>
+        </FIELD>
+        <FIELD datatype="double" name="pmra" ucd="pos.pm;pos.eq.ra" unit="mas.yr**-1">
+          <DESCRIPTION>Proper motion in right ascension direction</DESCRIPTION>
+        </FIELD>
+        <FIELD datatype="double" name="pmra_error" ucd="stat.error;pos.pm;pos.eq.ra" unit="mas.yr**-1">
+          <DESCRIPTION>Standard error of proper motion in right ascension direction</DESCRIPTION>
+        </FIELD>
+        <FIELD datatype="double" name="pmdec" ucd="pos.pm;pos.eq.dec" unit="mas.yr**-1">
+          <DESCRIPTION>Proper motion in declination direction</DESCRIPTION>
+        </FIELD>
+        <FIELD datatype="double" name="pmdec_error" ucd="stat.error;pos.pm;pos.eq.dec" unit="mas.yr**-1">
+          <DESCRIPTION>Standard error of proper motion in declination direction</DESCRIPTION>
+        </FIELD>
+        <FIELD datatype="double" name="ref_epoch" ucd="meta.ref;time.epoch" unit="yr">
+          <DESCRIPTION>Reference epoch</DESCRIPTION>
+        </FIELD>
+        <FIELD datatype="float" name="phot_g_mean_mag" ucd="phot.mag;stat.mean;em.opt" unit="mag">
+          <DESCRIPTION>G-band mean magnitude</DESCRIPTION>
+        </FIELD>
+        <FIELD datatype="float" name="bp_rp" ucd="phot.color" unit="mag">
+          <DESCRIPTION>BP - RP colour</DESCRIPTION>
+        </FIELD>
+        <FIELD datatype="double" name="radial_velocity" ucd="spect.dopplerVeloc.opt" unit="km.s**-1">
+          <DESCRIPTION>Radial velocity</DESCRIPTION>
+        </FIELD>
+        <DATA>
+          <TABLEDATA>
+            <TR>
+              <TD>Gaia DR2 5500810292414804352</TD>
+              <TD>95.97543693997628</TD>
+              <TD>0.8972436225190542</TD>
+              <TD>-52.74602088557901</TD>
+              <TD>1.1187287208599193</TD>
+              <TD>-0.059333971256738484</TD>
+              <TD>5.444032860309618</TD>
+              <TD>2.0096218591421637</TD>
+              <TD>2.412759805075276</TD>
+              <TD>2.292112882376078</TD>
+              <TD>2015.5</TD>
+              <TD>19.782911</TD>
+              <TD></TD> <!-- No BP - RP means no magnitude information -->
+              <TD></TD>
+            </TR>
+            <TR>
+              <TD>Gaia DR2 5500810842175280768</TD>
+              <TD>96.07794677734371</TD>
+              <TD>1.7974083970121115</TD>
+              <TD>-52.752866472994484</TD>
+              <TD>1.3361631129404261</TD>
+              <TD></TD>
+              <TD></TD>
+              <TD></TD>
+              <TD></TD>
+              <TD></TD>
+              <TD>2015.5</TD>
+              <TD></TD> <!-- No G-band means no magnitude information -->
+              <TD></TD>
+              <TD></TD>
+            </TR>
+            <TR>
+              <TD>Gaia DR2 5500810223699979264</TD>
+              <TD>95.96329279548434</TD>
+              <TD>0.01360005536042634</TD>
+              <TD>-52.77304994651542</TD>
+              <TD>0.01653042640473304</TD>
+              <TD>1.0777658952216769</TD>
+              <TD>-0.8181139364821904</TD>
+              <TD>0.028741305378710533</TD>
+              <TD>12.976157539714205</TD>
+              <TD>0.031294621220519486</TD>
+              <TD>2015.5</TD>
+              <TD>13.91764</TD>
+              <TD>2.68324375</TD> <!-- Out of range for r and g conversion -->
+              <TD></TD>
+            </TR>
+            <TR>
+              <TD>Gaia DR2 5500810326779190016</TD>
+              <TD>95.98749097569124</TD>
+              <TD>0.0862887211183082</TD>
+              <TD>-52.741666247338124</TD>
+              <TD>0.09341802945058283</TD>
+              <TD>3.6810721649521616</TD>
+              <TD>6.456830239423608</TD>
+              <TD>0.19897351485381112</TD>
+              <TD>22.438383124975978</TD>
+              <TD>0.18174463860202664</TD>
+              <TD>2015.5</TD>
+              <TD>14.292543</TD>
+              <TD>1.0745363</TD>
+              <TD>20.30</TD>  <!-- Radial velocity -->
+            </TR>
+          </TABLEDATA>
+        </DATA>
+      </TABLE>
+
     val voTable =
       <VOTABLE>
         <RESOURCE type="results">
@@ -232,6 +436,27 @@ class VoTableParserSpec extends Specification with VoTableParser {
       <VOTABLE>
         <RESOURCE type="results">
           {skyObjectsWithProperMotion}
+        </RESOURCE>
+      </VOTABLE>
+
+    val voTableWithRedshift =
+      <VOTABLE>
+        <RESOURCE type="results">
+          {skyObjectsWithRedshift}
+        </RESOURCE>
+      </VOTABLE>
+
+    val voTableWithRadialVelocityError =
+      <VOTABLE>
+        <RESOURCE type="results">
+          {skyObjectsWithRadialVelocityError}
+        </RESOURCE>
+      </VOTABLE>
+
+    val voTableGaia =
+      <VOTABLE>
+        <RESOURCE type="results">
+          {gaia}
         </RESOURCE>
       </VOTABLE>
 
@@ -256,6 +481,10 @@ class VoTableParserSpec extends Specification with VoTableParser {
       parseFieldDescriptor(<TAG/>) should beNone
       // missing attributes
       parseFieldDescriptor(<FIELD ID="abc"/>) should beNone
+    }
+    "swap in name for ID if missing in a field definition" in {
+      val fieldXml = <FIELD datatype="double" name="ref_epoch" ucd="meta.ref;time.epoch" unit="yr"/>
+      parseFieldDescriptor(fieldXml) should beSome(FieldDescriptor(FieldId("ref_epoch", Ucd("meta.ref;time.epoch")), "ref_epoch"))
     }
     "be able to parse a list of fields" in {
       val result =
@@ -303,100 +532,100 @@ class VoTableParserSpec extends Specification with VoTableParser {
                 TableRowItem(FieldDescriptor(FieldId("decj2000", Ucd("pos.eq.dec;meta.main")),"dej2000"), "0.209323681906") ::
                 TableRowItem(FieldDescriptor(FieldId("raj2000", Ucd("pos.eq.ra;meta.main")), "raj2000"), "359.745951955") :: Nil
               )
-      tableRow2Target(None, fields)(validRow) should beEqualTo(\/-(SiderealTarget.empty.copy(name = "123456", coordinates = Coordinates(RightAscension.fromAngle(Angle.parseDegrees("359.745951955").getOrElse(Angle.zero)), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)))))
+      tableRow2Target(CatalogAdapter.PPMXL, fields)(validRow) should beEqualTo(\/-(SiderealTarget.empty.copy(name = "123456", coordinates = Coordinates(RightAscension.fromAngle(Angle.parseDegrees("359.745951955").getOrElse(Angle.zero)), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)))))
 
       val rowWithMissingId = TableRow(
                 TableRowItem(FieldDescriptor(FieldId("decj2000", Ucd("pos.eq.dec;meta.main")), "dej2000"), "0.209323681906") ::
                 TableRowItem(FieldDescriptor(FieldId("raj2000", Ucd("pos.eq.ra;meta.main")), "raj2000"), "359.745951955") :: Nil
               )
-      tableRow2Target(None, fields)(rowWithMissingId) should beEqualTo(-\/(MissingValue(FieldId("ppmxl", VoTableParser.UCD_OBJID))))
+      tableRow2Target(CatalogAdapter.PPMXL, fields)(rowWithMissingId) should beEqualTo(-\/(MissingValue(FieldId("ppmxl", VoTableParser.UCD_OBJID))))
 
       val rowWithBadRa = TableRow(
                 TableRowItem(FieldDescriptor(FieldId("ppmxl", Ucd("meta.id;meta.main")), "ppmxl"), "123456") ::
                 TableRowItem(FieldDescriptor(FieldId("decj2000", Ucd("pos.eq.dec;meta.main")), "dej2000"), "0.209323681906") ::
                 TableRowItem(FieldDescriptor(FieldId("raj2000", Ucd("pos.eq.ra;meta.main")), "raj2000"), "ABC") :: Nil
             )
-      tableRow2Target(None, fields)(rowWithBadRa) should beEqualTo(-\/(FieldValueProblem(VoTableParser.UCD_RA, "ABC")))
+      tableRow2Target(CatalogAdapter.PPMXL, fields)(rowWithBadRa) should beEqualTo(-\/(FieldValueProblem(VoTableParser.UCD_RA, "ABC")))
     }
     "be able to parse magnitude bands in PPMXL" in {
       val iMagField = Ucd("phot.mag;em.opt.i")
       // Optical band
-      PPMXLAdapter.parseMagnitude((FieldId("id", iMagField), "20.3051")) should beEqualTo(\/-((FieldId("id", iMagField), MagnitudeBand.I, 20.3051)))
+      CatalogAdapter.PPMXL.parseMagnitude((FieldId("id", iMagField), "20.3051")) should beEqualTo(\/-((FieldId("id", iMagField), MagnitudeBand.I, 20.3051)))
 
       val jIRMagField = Ucd("phot.mag;em.IR.J")
       // IR band
-      PPMXLAdapter.parseMagnitude((FieldId("id", jIRMagField), "13.2349")) should beEqualTo(\/-((FieldId("id", jIRMagField), MagnitudeBand.J, 13.2349)))
+      CatalogAdapter.PPMXL.parseMagnitude((FieldId("id", jIRMagField), "13.2349")) should beEqualTo(\/-((FieldId("id", jIRMagField), MagnitudeBand.J, 13.2349)))
 
       val jIRErrMagField = Ucd("stat.error;phot.mag;em.IR.J")
       // IR Error
-      PPMXLAdapter.parseMagnitude((FieldId("id", jIRErrMagField), "0.02")) should beEqualTo(\/-((FieldId("id", jIRErrMagField), MagnitudeBand.J, 0.02)))
+      CatalogAdapter.PPMXL.parseMagnitude((FieldId("id", jIRErrMagField), "0.02")) should beEqualTo(\/-((FieldId("id", jIRErrMagField), MagnitudeBand.J, 0.02)))
 
       // No magnitude field
       val badField = Ucd("meta.name")
-      PPMXLAdapter.parseMagnitude((FieldId("id", badField), "id")) should beEqualTo(-\/(UnmatchedField(badField)))
+      CatalogAdapter.PPMXL.parseMagnitude((FieldId("id", badField), "id")) should beEqualTo(-\/(UnmatchedField(badField)))
 
       // Bad value
-      PPMXLAdapter.parseMagnitude((FieldId("id", iMagField), "stringValue")) should beEqualTo(-\/(FieldValueProblem(iMagField, "stringValue")))
+      CatalogAdapter.PPMXL.parseMagnitude((FieldId("id", iMagField), "stringValue")) should beEqualTo(-\/(FieldValueProblem(iMagField, "stringValue")))
 
       // Unknown magnitude
       val noBandField = Ucd("phot.mag;em.opt.p")
-      PPMXLAdapter.parseMagnitude((FieldId("id", noBandField), "stringValue")) should beEqualTo(-\/(UnmatchedField(noBandField)))
+      CatalogAdapter.PPMXL.parseMagnitude((FieldId("id", noBandField), "stringValue")) should beEqualTo(-\/(UnmatchedField(noBandField)))
     }
     "be able to map sloan magnitudes in UCAC4, OCSADV-245" in {
       val gMagField = Ucd("phot.mag;em.opt.R")
       // gmag maps to g'
-      UCAC4Adapter.parseMagnitude((FieldId("gmag", gMagField), "20.3051")) should beEqualTo(\/-((FieldId("gmag", gMagField), MagnitudeBand._g, 20.3051)))
+      CatalogAdapter.UCAC4.parseMagnitude((FieldId("gmag", gMagField), "20.3051")) should beEqualTo(\/-((FieldId("gmag", gMagField), MagnitudeBand._g, 20.3051)))
 
       val rMagField = Ucd("phot.mag;em.opt.R")
       // rmag maps to r'
-      UCAC4Adapter.parseMagnitude((FieldId("rmag", rMagField), "20.3051")) should beEqualTo(\/-((FieldId("rmag", rMagField), MagnitudeBand._r, 20.3051)))
+      CatalogAdapter.UCAC4.parseMagnitude((FieldId("rmag", rMagField), "20.3051")) should beEqualTo(\/-((FieldId("rmag", rMagField), MagnitudeBand._r, 20.3051)))
 
       val iMagField = Ucd("phot.mag;em.opt.I")
       // imag maps to r'
-      UCAC4Adapter.parseMagnitude((FieldId("imag", iMagField), "20.3051")) should beEqualTo(\/-((FieldId("imag", iMagField), MagnitudeBand._i, 20.3051)))
+      CatalogAdapter.UCAC4.parseMagnitude((FieldId("imag", iMagField), "20.3051")) should beEqualTo(\/-((FieldId("imag", iMagField), MagnitudeBand._i, 20.3051)))
     }
     "be able to map sloan magnitudes in Simbad" in {
       val zMagField = Ucd("phot.mag;em.opt.I")
       // FLUX_z maps to z'
-      SimbadAdapter.parseMagnitude((FieldId("FLUX_z", zMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_z", zMagField), MagnitudeBand._z, 20.3051)))
+      CatalogAdapter.Simbad.parseMagnitude((FieldId("FLUX_z", zMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_z", zMagField), MagnitudeBand._z, 20.3051)))
 
       val rMagField = Ucd("phot.mag;em.opt.R")
       // FLUX_r maps to r'
-      SimbadAdapter.parseMagnitude((FieldId("FLUX_r", rMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_r", rMagField), MagnitudeBand._r, 20.3051)))
+      CatalogAdapter.Simbad.parseMagnitude((FieldId("FLUX_r", rMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_r", rMagField), MagnitudeBand._r, 20.3051)))
 
       val uMagField = Ucd("phot.mag;em.opt.u")
       // FLUX_u maps to u'
-      SimbadAdapter.parseMagnitude((FieldId("FLUX_u", uMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_u", uMagField), MagnitudeBand._u, 20.3051)))
+      CatalogAdapter.Simbad.parseMagnitude((FieldId("FLUX_u", uMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_u", uMagField), MagnitudeBand._u, 20.3051)))
 
       val gMagField = Ucd("phot.mag;em.opt.b")
       // FLUX_g maps to g'
-      SimbadAdapter.parseMagnitude((FieldId("FLUX_g", gMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_g", gMagField), MagnitudeBand._g, 20.3051)))
+      CatalogAdapter.Simbad.parseMagnitude((FieldId("FLUX_g", gMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_g", gMagField), MagnitudeBand._g, 20.3051)))
 
       val iMagField = Ucd("phot.mag;em.opt.i")
       // FLUX_u maps to u'
-      SimbadAdapter.parseMagnitude((FieldId("FLUX_i", iMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_i", iMagField), MagnitudeBand._i, 20.3051)))
+      CatalogAdapter.Simbad.parseMagnitude((FieldId("FLUX_i", iMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_i", iMagField), MagnitudeBand._i, 20.3051)))
     }
     "be able to map non-sloan magnitudes in Simbad" in {
       val rMagField = Ucd("phot.mag;em.opt.R")
       // FLUX_R maps to R
-      SimbadAdapter.parseMagnitude((FieldId("FLUX_R", rMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_R", rMagField), MagnitudeBand.R, 20.3051)))
+      CatalogAdapter.Simbad.parseMagnitude((FieldId("FLUX_R", rMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_R", rMagField), MagnitudeBand.R, 20.3051)))
 
       val uMagField = Ucd("phot.mag;em.opt.U")
       // FLUX_U maps to U
-      SimbadAdapter.parseMagnitude((FieldId("FLUX_U", uMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_U", uMagField), MagnitudeBand.U, 20.3051)))
+      CatalogAdapter.Simbad.parseMagnitude((FieldId("FLUX_U", uMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_U", uMagField), MagnitudeBand.U, 20.3051)))
 
       val iMagField = Ucd("phot.mag;em.opt.I")
       // FLUX_I maps to I
-      SimbadAdapter.parseMagnitude((FieldId("FLUX_I", iMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_I", iMagField), MagnitudeBand.I, 20.3051)))
+      CatalogAdapter.Simbad.parseMagnitude((FieldId("FLUX_I", iMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_I", iMagField), MagnitudeBand.I, 20.3051)))
     }
     "be able to map magnitude errors in Simbad" in {
       // Magnitude errors in simbad don't include the band in the UCD, we must get it from the ID :(
       val magErrorUcd = Ucd("stat.error;phot.mag")
       // FLUX_r maps to r'
-      SimbadAdapter.parseMagnitude((FieldId("FLUX_ERROR_r", magErrorUcd), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_ERROR_r", magErrorUcd), MagnitudeBand._r, 20.3051)))
+      CatalogAdapter.Simbad.parseMagnitude((FieldId("FLUX_ERROR_r", magErrorUcd), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_ERROR_r", magErrorUcd), MagnitudeBand._r, 20.3051)))
 
       // FLUX_R maps to R
-      SimbadAdapter.parseMagnitude((FieldId("FLUX_ERROR_R", magErrorUcd), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_ERROR_R", magErrorUcd), MagnitudeBand.R, 20.3051)))
+      CatalogAdapter.Simbad.parseMagnitude((FieldId("FLUX_ERROR_R", magErrorUcd), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_ERROR_R", magErrorUcd), MagnitudeBand.R, 20.3051)))
     }
     "be able to parse an xml into a list of SiderealTargets list of rows with a list of fields" in {
       val magsTarget1 = List(new Magnitude(23.0888, MagnitudeBand.U), new Magnitude(22.082, MagnitudeBand._g), new Magnitude(20.88, MagnitudeBand.R), new Magnitude(20.3051, MagnitudeBand.I), new Magnitude(19.8812, MagnitudeBand._z))
@@ -407,8 +636,24 @@ class VoTableParserSpec extends Specification with VoTableParser {
         \/-(SiderealTarget.empty.copy(name = "-2140404569", coordinates = Coordinates(RightAscension.fromDegrees(359.749274134), Declination.fromAngle(Angle.parseDegrees("0.210251239819").getOrElse(Angle.zero)).getOrElse(Declination.zero)), magnitudes = magsTarget2))
       ))
       // There is only one table
-      parse(voTable).tables.head should beEqualTo(result)
-      parse(voTable).tables.head.containsError should beFalse
+      parse(CatalogAdapter.PPMXL, voTable).tables.head should beEqualTo(result)
+      parse(CatalogAdapter.PPMXL, voTable).tables.head.containsError should beFalse
+    }
+    "be able to parse an xml into a list of SiderealTargets including redshift" in {
+      val result = parse(CatalogAdapter.PPMXL, voTableWithRedshift).tables.head
+
+      // There should be no errors
+      result.containsError should beFalse
+      val redshifts = result.rows.map(_.toOption.get.redshift.get.z)
+
+      // 2 redshift values both roughly equal to 0.000068.  One specified as
+      // redshift and the other converted from radial velocity
+      redshifts.size shouldEqual 2
+      redshifts.forall(r => (r - 0.000068).abs < 0.000001) shouldEqual true
+    }
+    "balk if the radial velocity is faster than the speed of light" in {
+      val result = parse(CatalogAdapter.PPMXL, voTableWithRadialVelocityError).tables.head
+      result.rows.head.swap.toOption.get.displayValue.startsWith("Invalid radial velocity:") shouldEqual true
     }
     "be able to parse an xml into a list of SiderealTargets including magnitude errors" in {
       val magsTarget1 = List(new Magnitude(23.0888, MagnitudeBand.U, 0.518214), new Magnitude(22.082, MagnitudeBand._g, 0.0960165), new Magnitude(20.88, MagnitudeBand.R, 0.0503736), new Magnitude(20.3051, MagnitudeBand.I, 0.0456069), new Magnitude(19.8812, MagnitudeBand._z, 0.138202), new Magnitude(13.74, MagnitudeBand.J, 0.03))
@@ -418,7 +663,7 @@ class VoTableParserSpec extends Specification with VoTableParser {
         \/-(SiderealTarget.empty.copy(name = "-2140405448", coordinates = Coordinates(RightAscension.fromDegrees(359.745951955), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), magnitudes = magsTarget1)),
         \/-(SiderealTarget.empty.copy(name = "-2140404569", coordinates = Coordinates(RightAscension.fromDegrees(359.749274134), Declination.fromAngle(Angle.parseDegrees("0.210251239819").getOrElse(Angle.zero)).getOrElse(Declination.zero)), magnitudes = magsTarget2))
       ))
-      parse(voTableWithErrors).tables.head should beEqualTo(result)
+      parse(CatalogAdapter.PPMXL, voTableWithErrors).tables.head should beEqualTo(result)
     }
     "be able to parse an xml into a list of SiderealTargets including proper motion" in {
       val magsTarget1 = List(new Magnitude(14.76, MagnitudeBand._r, MagnitudeSystem.AB))
@@ -430,37 +675,69 @@ class VoTableParserSpec extends Specification with VoTableParser {
         \/-(SiderealTarget("550-001323", Coordinates(RightAscension.fromDegrees(9.897141944444456), Declination.fromAngle(Angle.parseDegrees("19.98878944444442").getOrElse(Angle.zero)).getOrElse(Declination.zero)), pm1, None, None, magsTarget1, None, None)),
         \/-(SiderealTarget("550-001324", Coordinates(RightAscension.fromDegrees(9.91958055555557), Declination.fromAngle(Angle.parseDegrees("19.997709722222226").getOrElse(Angle.zero)).getOrElse(Declination.zero)), pm2, None, None, magsTarget2, None, None))
       ))
-      parse(voTableWithProperMotion).tables.head should beEqualTo(result)
+      parse(CatalogAdapter.UCAC4, voTableWithProperMotion).tables.head should beEqualTo(result)
     }
+
+    "be able to read Gaia results" in {
+
+      // Extract just the targets.
+      val result = parse(CatalogAdapter.Gaia, voTableGaia).tables.head.rows.sequenceU.getOrElse(Nil)
+
+      // 6 targets (i.e., and no errors)
+      result.size shouldEqual 4
+
+      val List(a, b, c, d) = result
+
+      // First two targets have no magnitudes because the necessary conversion
+      // information is not present.
+      a.magnitudes shouldEqual Nil
+      b.magnitudes shouldEqual Nil
+
+      // Third target has bp-rp out of range for r and g bands.
+      import MagnitudeBand._
+      c.magnitudes.map(_.band).toSet shouldEqual Set(V, R, I, _i, K, H, J)
+
+      // Final target has everything.
+      d.magnitudes.map(_.band).toSet shouldEqual CatalogName.Gaia.supportedBands.toSet
+
+      // Even radial velocity.
+      ((d.redshift.get.z - 0.000068).abs < 0.000001) shouldEqual true
+
+      // Check conversion
+      val g     = 14.2925430
+      val bp_rp =  1.0745363
+      val v     = g + 0.0176 + bp_rp * (0.00686 + 0.1732 * bp_rp)
+      (d.magnitudes.exists { m =>
+        (m.band === V) && ((m.value - v).abs < 0.000001)
+      }) shouldEqual true
+
+      // All targets with a proper motion have epoch 2015.5
+      val e2015_5 = Epoch(2015.5)
+      result.forall(_.properMotion.forall(_.epoch == e2015_5))
+    }
+
     "be able to validate and parse an xml from sds9" in {
       val badXml = "votable-non-validating.xml"
-      VoTableParser.parse(UCAC4, getClass.getResourceAsStream(s"/$badXml")) should beEqualTo(-\/(ValidationError(UCAC4)))
+      VoTableParser.parse(CatalogName.UCAC4, getClass.getResourceAsStream(s"/$badXml")) should beEqualTo(-\/(ValidationError(CatalogName.UCAC4)))
     }
     "be able to detect unknown catalogs" in {
       val xmlFile = "votable-unknown.xml"
-      val result  = VoTableParser.parse(UCAC4, getClass.getResourceAsStream(s"/$xmlFile"))
-      result.map { parsed =>
-        parsed.containsError must beEqualTo(true)
-        parsed.tables.map { table =>
-          table.containsError must beEqualTo(true)
-          table.rows.map(_ must beEqualTo(-\/(UnknownCatalog)))
-        }
-      }
-      result.isRight must beEqualTo(true)
+      val result  = VoTableParser.parse(CatalogName.GSC234, getClass.getResourceAsStream(s"/$xmlFile"))
+      result must beEqualTo(-\/(UnknownCatalog))
     }
     "be able to validate and parse an xml from ucac4" in {
       val xmlFile = "votable-ucac4.xml"
-      VoTableParser.parse(UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
-      VoTableParser.parse(UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables should be size 1
+      VoTableParser.parse(CatalogName.UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
+      VoTableParser.parse(CatalogName.UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables should be size 1
     }
     "be able to validate and parse an xml from ppmxl" in {
       val xmlFile = "votable-ppmxl.xml"
-      VoTableParser.parse(PPMXL, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
-      VoTableParser.parse(PPMXL, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables should be size 1
+      VoTableParser.parse(CatalogName.PPMXL, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
+      VoTableParser.parse(CatalogName.PPMXL, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables should be size 1
     }
     "be able to select r1mag over r2mag and b2mag when b1mag is absent in ppmxl" in {
       val xmlFile = "votable-ppmxl.xml"
-      val result = VoTableParser.parse(PPMXL, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.map(TargetsTable.apply).map(_.rows).flatMap(_.find(_.name == "-1471224894")).headOption
+      val result = VoTableParser.parse(CatalogName.PPMXL, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.map(TargetsTable.apply).map(_.rows).flatMap(_.find(_.name == "-1471224894")).headOption
 
       val magR = result >>= {_.magnitudeIn(MagnitudeBand.R)}
       magR.map(_.value) should beSome(18.149999999999999)
@@ -470,7 +747,7 @@ class VoTableParserSpec extends Specification with VoTableParser {
     "be able to ignore bogus magnitudes on ppmxl" in {
       val xmlFile = "votable-ppmxl.xml"
       // Check a well-known target containing invalid magnitude values an bands H, I, K and J
-      val result = VoTableParser.parse(PPMXL, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.map(TargetsTable.apply).map(_.rows).flatMap(_.find(_.name == "-1471224894")).headOption
+      val result = VoTableParser.parse(CatalogName.PPMXL, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.map(TargetsTable.apply).map(_.rows).flatMap(_.find(_.name == "-1471224894")).headOption
       val magH = result >>= {_.magnitudeIn(MagnitudeBand.H)}
       val magI = result >>= {_.magnitudeIn(MagnitudeBand.I)}
       val magK = result >>= {_.magnitudeIn(MagnitudeBand.K)}
@@ -482,9 +759,9 @@ class VoTableParserSpec extends Specification with VoTableParser {
     }
     "be able to filter out bad magnitudes" in {
       val xmlFile = "fmag.xml"
-      VoTableParser.parse(UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
+      VoTableParser.parse(CatalogName.UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
       // The sample has only one row
-      val result = VoTableParser.parse(UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
+      val result = VoTableParser.parse(CatalogName.UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
 
       val mags = result.map(_.magnitudeIn(MagnitudeBand.R))
       // Does not contain R as it is filtered out being magnitude 20 and error 99
@@ -492,9 +769,9 @@ class VoTableParserSpec extends Specification with VoTableParser {
     }
     "convert fmag to UC" in {
       val xmlFile = "fmag.xml"
-      VoTableParser.parse(UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
+      VoTableParser.parse(CatalogName.UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
       // The sample has only one row
-      val result = VoTableParser.parse(UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
+      val result = VoTableParser.parse(CatalogName.UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
 
       val mags = result.map(_.magnitudeIn(MagnitudeBand.UC))
       // Fmag gets converted to UC
@@ -503,7 +780,7 @@ class VoTableParserSpec extends Specification with VoTableParser {
     "extract Sloan's band" in {
       val xmlFile = "sloan.xml"
       // The sample has only one row
-      val result = VoTableParser.parse(UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
+      val result = VoTableParser.parse(CatalogName.UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
 
       val gmag = result.map(_.magnitudeIn(MagnitudeBand._g))
       // gmag gets converted to g'
@@ -519,7 +796,7 @@ class VoTableParserSpec extends Specification with VoTableParser {
       // From http://simbad.u-strasbg.fr/simbad/sim-id?Ident=Vega&output.format=VOTable
       val xmlFile = "simbad-vega.xml"
       // The sample has only one row
-      val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
+      val result = VoTableParser.parse(CatalogName.SIMBAD, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
 
       // id and coordinates
       result.map(_.name) should beEqualTo(\/.right("* alf Lyr"))
@@ -546,7 +823,7 @@ class VoTableParserSpec extends Specification with VoTableParser {
       // From http://simbad.u-strasbg.fr/simbad/sim-id?Ident=2MFGC6625&output.format=VOTable
       val xmlFile = "simbad-2MFGC6625.xml"
       // The sample has only one row
-      val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
+      val result = VoTableParser.parse(CatalogName.SIMBAD, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
 
       // id and coordinates
       result.map(_.name) should beEqualTo(\/.right("2MFGC 6625"))
@@ -569,7 +846,7 @@ class VoTableParserSpec extends Specification with VoTableParser {
       // From http://simbad.u-strasbg.fr/simbad/sim-id?Ident=2SLAQ%20J000008.13%2B001634.6&output.format=VOTable
       val xmlFile = "simbad-J000008.13.xml"
       // The sample has only one row
-      val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
+      val result = VoTableParser.parse(CatalogName.SIMBAD, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
 
       // id and coordinates
       result.map(_.name) should beEqualTo(\/.right("2SLAQ J000008.13+001634.6"))
@@ -598,7 +875,7 @@ class VoTableParserSpec extends Specification with VoTableParser {
       // From http://simbad.u-strasbg.fr/simbad/sim-id?output.format=VOTable&Ident=HIP43018
       val xmlFile = "simbad_hip43018.xml"
       // We are interested only on the first row
-      val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
+      val result = VoTableParser.parse(CatalogName.SIMBAD, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
 
       // parallax is reported as -0.57 by Simbad, the parser makes it a 0
       result.map(_.parallax) should beEqualTo(\/.right(Parallax(0).some))
@@ -606,19 +883,19 @@ class VoTableParserSpec extends Specification with VoTableParser {
     "parse simbad with a not-found name" in {
       val xmlFile = "simbad-not-found.xml"
       // Simbad returns non-valid xml when an element is not found, we need to skip validation :S
-      val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile"))
+      val result = VoTableParser.parse(CatalogName.SIMBAD, getClass.getResourceAsStream(s"/$xmlFile"))
       result must beEqualTo(\/.right(ParsedVoResource(List())))
     }
     "parse simbad with an npe" in {
       val xmlFile = "simbad-npe.xml"
       // Simbad returns non-valid xml when there is an internal error like an NPE
-      val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile"))
-      result must beEqualTo(\/.left(ValidationError(SIMBAD)))
+      val result = VoTableParser.parse(CatalogName.SIMBAD, getClass.getResourceAsStream(s"/$xmlFile"))
+      result must beEqualTo(\/.left(ValidationError(CatalogName.SIMBAD)))
     }
     "ppmxl proper motion should be in mas/y. REL-2841" in {
       val xmlFile = "votable-ppmxl-proper-motion.xml"
       // PPMXL returns proper motion on degrees per year, it should be converted to mas/year
-      val result = VoTableParser.parse(PPMXL, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil))
+      val result = VoTableParser.parse(CatalogName.PPMXL, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil))
 
       val targets = for {
         t <- result.tables.map(TargetsTable.apply)
@@ -634,7 +911,7 @@ class VoTableParserSpec extends Specification with VoTableParser {
     "support simbad repeated magnitude entries, REL-2853" in {
       val xmlFile = "simbad-ngc-2438.xml"
       // Simbad returns an xml with multiple measurements of the same band, use only the first one
-      val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil))
+      val result = VoTableParser.parse(CatalogName.SIMBAD, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil))
 
       val target = (for {
           t <- result.tables.map(TargetsTable.apply)
@@ -643,6 +920,5 @@ class VoTableParserSpec extends Specification with VoTableParser {
       target.map(_.name) should beSome("NGC  2438")
       target.map(_.magnitudeIn(MagnitudeBand.J)) should beSome(Some(new Magnitude(17.02, MagnitudeBand.J, 0.15, MagnitudeSystem.Vega)))
     }
-
   }
 }

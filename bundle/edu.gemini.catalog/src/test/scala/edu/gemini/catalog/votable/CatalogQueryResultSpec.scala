@@ -1,6 +1,7 @@
 package edu.gemini.catalog.votable
 
 import edu.gemini.catalog.api._
+import edu.gemini.catalog.api.CatalogName._
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import org.specs2.mutable.Specification

@@ -1,6 +1,7 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.catalog.api._
+import edu.gemini.catalog.api.CatalogName.UCAC4
 import edu.gemini.catalog.votable._
 import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.core.{Angle, MagnitudeBand, Coordinates}
@@ -72,7 +73,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = ConeSearchBackend, catal
       (CatalogQuery(basePosition, c.criterion.radiusConstraint, c.criterion.magConstraint, catalog), c)
     }
     val qm = queryArgs.toMap
-    VoTableClient.catalogs(queryArgs.map(_._1), backend)(ec).map(l => l.map { qr => GemsCatalogSearchResults(qm.get(qr.query).get, qr.result.targets.rows)})
+    VoTableClient.catalogs(queryArgs.map(_._1), Some(backend))(ec).map(l => l.map { qr => GemsCatalogSearchResults(qm.get(qr.query).get, qr.result.targets.rows)})
   }
 
   /**
@@ -95,7 +96,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = ConeSearchBackend, catal
       magLimits    <- magConstraints
     } yield CatalogQuery(basePosition, radiusLimits, magLimits, catalog)
 
-    VoTableClient.catalogs(queries, backend)(ec).flatMap {
+    VoTableClient.catalogs(queries, Some(backend))(ec).flatMap {
       case l if l.exists(_.result.containsError) =>
         Future.failed(CatalogException(l.map(_.result.problems).suml))
       case l =>
