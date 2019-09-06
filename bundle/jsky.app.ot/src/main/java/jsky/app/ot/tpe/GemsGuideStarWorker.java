@@ -6,6 +6,7 @@ import edu.gemini.ags.api.AgsStrategy;
 import edu.gemini.ags.api.ProbeCandidates;
 import edu.gemini.ags.impl.Pwfs1NGS2Params;
 import edu.gemini.ags.impl.SingleProbeStrategy;
+import edu.gemini.ags.impl.SingleProbeStrategyParams;
 import edu.gemini.ags.conf.ProbeLimitsTable;
 import edu.gemini.ags.gems.*;
 import edu.gemini.ags.gems.mascot.Strehl;
@@ -88,7 +89,12 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 
     public Object construct() {
         try {
-            return findGuideStars(ec);
+            final Option<GemsGuideStars> gs = findGuideStars(ec);
+
+            // Sorry, something is expecting a NoStarsException to signify that
+            // the search failed.
+            return gs.map(g -> (Object) g) // widen to Object
+                     .getOrElse(() -> new NoStarsException("Could not find required guide stars"));
         } catch (Exception e) {
             return e;
         }
@@ -291,52 +297,35 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 //        results.forEach(r -> r.resultsAsJava().forEach(t -> System.out.println(t.name())));
 //        System.out.println("*** GeMS LOOKUP DONE ***");
 
-        // TODO-NGS2: PWFS1 guide stars MUST be in the annulus: we are getting candidates that aren't as we cannot vignette.
-        // TODO-NGS2: The bounds given for NGS2 for PWFS1 should prevent vignetting. How can we filter out stars that are
-        // TODO-NGS2: not in the annulus? See comment below about pwfsValidCandidates.
-        // Look up a PWFS1 guide star.
+        // Construct the AGS Strategy for finding the PWFS1 guide star.
         final AgsStrategy pwfs = new SingleProbeStrategy(
             AgsStrategyKey$.MODULE$.pwfs1SouthNGS2Key(),
             new Pwfs1NGS2Params(catalog.catalog()),
             backend
         );
 
-        // We did it up there for the basePos and baseRA / baseDec, so why not continue sound coding practices?
-        final List<ProbeCandidates> pwfsProbeCandidates =
-            pwfs.candidatesForJava(obsContext, ProbeLimitsTable.loadOrThrow(), 30, ec);
+        // Run the select and then dig out the actual guide star. The position
+        // angle is irrelevant for PWFS1.
+        final Option<SiderealTarget> pwfsGuideStar =
+            pwfs.selectForJava(obsContext, ProbeLimitsTable.loadOrThrow(), 30, ec)
+                .flatMap(tup ->
+                    ImOption.fromOptional(
+                        tup._2()
+                           .stream()
+                           .filter(a -> a.guideProbe() == PwfsGuideProbe.pwfs1)
+                           .findFirst()
+                           .map(a -> a.guideStar())
+                    )
+                );
 
-        // TODO-DEBUG:
-//        System.out.println("Size of unfiltered ProbeCandidates: " + pwfsCandidates.size());
-//        pwfsCandidates.forEach(c -> System.out.println(c.gp().getDisplayName() + " has " + c.targets().size() + " targets:"));
-//        pwfsCandidates.forEach(c -> c.targets().forEach(t -> System.out.println(t.name())));
-
-        // TODO-NGS2: This only filters out the guide stars beyond the probe range. It does not filter the guide stars
-        // TODO-NGS2: that only reach the probe range.
-        final List<SiderealTarget> pwfsCandidates =
-            pwfsProbeCandidates
-                .stream()
-                .filter(pc -> pc.guideProbe() == PwfsGuideProbe.pwfs1)
-                .findFirst()
-                .map(pc -> pc.targetsAsJava())
-                .orElseGet(() -> Collections.<SiderealTarget>emptyList());
-
-        final List<SiderealTarget> pwfsValidCandidates =
-            pwfsCandidates
-                .stream()
-                .filter(t -> PwfsGuideProbe.pwfs1.checkBoundaries(new SPTarget(t), obsContext).exists(PwfsProbeRangeArea.inRange::equals))
-                .collect(Collectors.toList());
-
-//        System.out.println("Size of filtered ProbeCandidates: " + pwfsValidCandidates.size());
-//        pwfsValidCandidates.forEach(t -> System.out.println(t.name()));
-//        System.out.println("*** PWFS1 LOOKUP DONE ***");
-        return NGS2Result.fromJava(results, pwfsValidCandidates);
+        return NGS2Result.fromJava(results, pwfsGuideStar);
     }
 
 
     /**
      * Returns the set of Gems guide stars with the highest ranking using the default settings.
      */
-    private GemsGuideStars findGuideStars(scala.concurrent.ExecutionContext ec) {
+    private Option<GemsGuideStars> findGuideStars(scala.concurrent.ExecutionContext ec) {
         final WorldCoords                          basePos = tpe.getBasePos();
         final ObsContext                        obsContext = getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
         final Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
@@ -355,13 +344,16 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     /**
      * Returns the set of Gems guide stars with the highest ranking using the given settings
      */
-    private GemsGuideStars findGuideStars(final ObsContext obsContext, final Set<edu.gemini.spModel.core.Angle> posAngles,
-                                          final NGS2Result results) {
+    private Option<GemsGuideStars> findGuideStars(
+        final ObsContext                         obsContext,
+        final Set<edu.gemini.spModel.core.Angle> posAngles,
+        final NGS2Result                         results
+    ) {
 
         interrupted = false;
         try {
             // If no PWFS1 guide star, don't even bother.
-            if (!results.pwfs1Results().isEmpty()) {
+            if (results.pwfs1Result().nonEmpty()) {
                 startProgress();
                 final List<GemsGuideStars> gemsResults = GemsResultsAnalyzer.instance().analyze(obsContext, posAngles,
                         results.gemsCatalogSearchResultAsJava(), new scala.Some<>(this));
@@ -370,16 +362,24 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
                 }
                 interrupted = false;
 
+                return ImOption
+                         .fromOptional(gemsResults.stream().findFirst())
+                         .flatMap(g ->
+                           results.pwfs1ResultAsJava().map(t ->
+                             new GemsGuideStars(
+                                g.pa(),
+                                g.tiptiltGroup(),
+                                g.strehl(),
+                                g.guideGroup().put(
+                                  GuideProbeTargets.create(PwfsGuideProbe.pwfs1, new SPTarget(t))
+                                )
+                             )
+                           )
+                         );
 
-                if (gemsResults.size() > 0) {
-                    // TODO: What do we do with the PWFS1 guide stars??? Why does this only return one set of
-                    // TODO: GemsGuideStars out of the list?
-                    final ImList<SiderealTarget> pwfsStars = DefaultImList.create(results.pwfs1ResultsAsJava());
-                    gemsResults.get(0).guideGroup().put(GuideProbeTargets.create(PwfsGuideProbe.pwfs1, pwfsStars.map(SPTarget::new)));
-                    return gemsResults.get(0);
-                }
+            } else {
+                return ImOption.empty();
             }
-            throw new NoStarsException("No guide stars were found");
         } finally {
             stopProgress();
             interrupted = false;
@@ -434,7 +434,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         }
 
         // NGS2: Ensure a PWFS1 guide star has been found for slow focus sensing.
-        keyMap.put(AgsStrategyKey.Pwfs1SouthKey$.MODULE$.id(), !results.pwfs1Results().isEmpty());
+        keyMap.put(AgsStrategyKey.Pwfs1SouthKey$.MODULE$.id(), results.pwfs1Result().nonEmpty());
 
         for (final String key : keyMap.keySet()) {
             if (!keyMap.get(key)) {

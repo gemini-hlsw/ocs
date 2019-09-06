@@ -8,7 +8,7 @@ import edu.gemini.spModel.core.{Angle, BandsList, Coordinates, SiderealTarget}
 import edu.gemini.spModel.guide.{GuideProbe, GuideStarValidation, ValidatableGuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
-import edu.gemini.shared.util.immutable.{Option => JOption, Some => JSome}
+import edu.gemini.shared.util.immutable.{Option => JOption, Pair => JPair, Some => JSome}
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env._
 
@@ -62,6 +62,12 @@ trait AgsStrategy {
   def estimate(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[AgsStrategy.Estimate]
 
   def select(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Option[AgsStrategy.Selection]]
+
+  def selectForJava(ctx: ObsContext, mt: MagnitudeTable, timeoutSec: Int, ec: ExecutionContext): JOption[JPair[Angle, java.util.List[AgsStrategy.Assignment]]] =
+    Await.result(select(ctx, mt)(ec), timeoutSec.seconds).map { sel =>
+      new JPair(sel.posAngle, sel.assignments.asJava)
+    }.asGeminiOpt
+
 
   def guideProbes: List[GuideProbe]
 

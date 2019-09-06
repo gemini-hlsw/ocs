@@ -7,7 +7,7 @@ import edu.gemini.spModel.gems.GemsGuideProbeGroup
 import edu.gemini.spModel.target.env.GuideGroup
 import edu.gemini.spModel.target.env.GuideProbeTargets
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.shared.util.immutable.{None => JNone}
+import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption}
 import edu.gemini.pot.ModelConverters._
 
 import scala.annotation.tailrec
@@ -20,27 +20,27 @@ import Scalaz._
   */
 final case class NGS2Result(
   gemsCatalogSearchResult: List[GemsCatalogSearchResults],
-  pwfs1Results:            List[SiderealTarget]
+  pwfs1Result:             Option[SiderealTarget]
 ) {
 
   def gemsCatalogSearchResultAsJava: java.util.List[GemsCatalogSearchResults] =
     gemsCatalogSearchResult.asJava
 
-  def pwfs1ResultsAsJava: java.util.List[SiderealTarget] =
-    pwfs1Results.asJava
+  def pwfs1ResultAsJava: JOption[SiderealTarget] =
+    pwfs1Result.asGeminiOpt
 
 }
 
 object NGS2Result {
 
   val Empty: NGS2Result =
-    NGS2Result(Nil, Nil)
+    NGS2Result(Nil, None)
 
   def fromJava(
     g: java.util.List[GemsCatalogSearchResults],
-    p: java.util.List[SiderealTarget]
+    p: JOption[SiderealTarget]
   ): NGS2Result =
-    NGS2Result(g.asScala.toList, p.asScala.toList)
+    NGS2Result(g.asScala.toList, p.asScalaOpt)
 
 }
 
