@@ -1,8 +1,8 @@
 package edu.gemini.ags.gems;
 
 import edu.gemini.catalog.api.CatalogName;
-import edu.gemini.catalog.api.PPMXL$;
-import edu.gemini.catalog.api.UCAC4$;
+import edu.gemini.catalog.api.CatalogName.PPMXL$;
+import edu.gemini.catalog.api.CatalogName.UCAC4$;
 import edu.gemini.catalog.api.MagnitudeConstraints;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.spModel.core.Angle;

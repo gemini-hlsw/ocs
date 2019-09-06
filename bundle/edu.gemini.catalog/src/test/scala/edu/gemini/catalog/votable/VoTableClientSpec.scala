@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 import edu.gemini.catalog.api._
+import edu.gemini.catalog.api.CatalogName._
 import edu.gemini.spModel.core._
 import org.apache.commons.httpclient.NameValuePair
 import org.specs2.mutable.Specification
@@ -47,15 +48,15 @@ class VoTableClientSpec extends Specification with VoTableClient {
     }
     "make a query" in {
       // This test loads a file. There is not much to test but it exercises the query backend chain
-      Await.result(VoTableClient.catalog(query, TestVoTableBackend("/votable-ucac4.xml"))(implicitly), 5.seconds).result.containsError should beFalse
+      Await.result(VoTableClient.catalog(query, Some(TestVoTableBackend("/votable-ucac4.xml")))(implicitly), 5.seconds).result.containsError should beFalse
     }
     "use the cache to skip queries" in {
       val counter = new AtomicInteger(0)
       val countingBackend = CountingCachedBackend(counter, "/votable-ucac4.xml")
       // Backend should be hit at most once per url
       val r = for {
-          f1 <- VoTableClient.catalog(query, countingBackend)(implicitly)
-          f2 <- VoTableClient.catalog(query, countingBackend)(implicitly)
+          f1 <- VoTableClient.catalog(query, Some(countingBackend))(implicitly)
+          f2 <- VoTableClient.catalog(query, Some(countingBackend))(implicitly)
         } yield (f1, f2)
       // Check both have the same results
       val result = Await.result(r, 10.seconds)
@@ -70,8 +71,8 @@ class VoTableClientSpec extends Specification with VoTableClient {
       val query2 = CatalogQuery(coordinates, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.1)), noMagnitudeConstraint, UCAC4)
       // Backend should be hit at most once per url
       val r = for {
-          f1 <- VoTableClient.catalog(query, countingBackend)(implicitly)
-          f2 <- VoTableClient.catalog(query2, countingBackend)(implicitly)
+          f1 <- VoTableClient.catalog(query, Some(countingBackend))(implicitly)
+          f2 <- VoTableClient.catalog(query2, Some(countingBackend))(implicitly)
         } yield (f1, f2)
       Await.result(r, 10.seconds)
       // Depending on timing it could hit all or less than all parallel urls
@@ -85,9 +86,9 @@ class VoTableClientSpec extends Specification with VoTableClient {
       val query2 = CatalogQuery(coordinates, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromArcmin(12)), noMagnitudeConstraint, UCAC4)
       // Backend should be hit at most once per url
       val r = for {
-          f1 <- VoTableClient.catalog(query, countingBackend)(implicitly)
+          f1 <- VoTableClient.catalog(query, Some(countingBackend))(implicitly)
           _  <- Future.successful(TimeUnit.SECONDS.sleep(1)) // Give it time to hit the first query
-          f2 <- VoTableClient.catalog(query2, countingBackend)(implicitly)
+          f2 <- VoTableClient.catalog(query2, Some(countingBackend))(implicitly)
         } yield (f1, f2)
       // Depending on timing it could hit all or less than all parallel urls
       counter.get() should be_<=(countingBackend.catalogUrls.size)
@@ -101,10 +102,10 @@ class VoTableClientSpec extends Specification with VoTableClient {
       val query3 = CatalogQuery(coordinates, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.2)), noMagnitudeConstraint, UCAC4)
       // Backend should be hit at most once per url
       val r = for {
-          f1 <- VoTableClient.catalog(query, countingBackend)(implicitly)
+          f1 <- VoTableClient.catalog(query, Some(countingBackend))(implicitly)
           _  <- Future.successful(TimeUnit.SECONDS.sleep(1)) // Give it time to hit the first query
-          f2 <- VoTableClient.catalog(query2, countingBackend)(implicitly)
-          f3 <- VoTableClient.catalog(query3, countingBackend)(implicitly)
+          f2 <- VoTableClient.catalog(query2, Some(countingBackend))(implicitly)
+          f3 <- VoTableClient.catalog(query3, Some(countingBackend))(implicitly)
         } yield (f1, f2, f3)
       // Depending on timing it could hit all or less than all parallel urls
       counter.get() should be_<=(2 * countingBackend.catalogUrls.size)
@@ -116,8 +117,8 @@ class VoTableClientSpec extends Specification with VoTableClient {
       val query2 = CatalogQuery(coordinates, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.1)), noMagnitudeConstraint, UCAC4)
       // Backend should be hit at most once per url
       val r = for {
-          f1 <- VoTableClient.catalog(query, countingBackend)(implicitly)
-          f2 <- VoTableClient.catalog(query2, countingBackend)(implicitly)
+          f1 <- VoTableClient.catalog(query, Some(countingBackend))(implicitly)
+          f2 <- VoTableClient.catalog(query2, Some(countingBackend))(implicitly)
         } yield (f1, f2)
       val result = Await.result(r, 10.seconds)
       // Check that each query is matched
@@ -131,9 +132,9 @@ class VoTableClientSpec extends Specification with VoTableClient {
       val query2 = CatalogQuery(coordinates, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.05)), noMagnitudeConstraint, UCAC4)
       //
       val r = for {
-          f1 <- VoTableClient.catalog(query, countingBackend)(implicitly)
+          f1 <- VoTableClient.catalog(query, Some(countingBackend))(implicitly)
           _  <- Future.successful(TimeUnit.SECONDS.sleep(1)) // Give it time to hit the first query
-          f2 <- VoTableClient.catalog(query2, countingBackend)(implicitly)
+          f2 <- VoTableClient.catalog(query2, Some(countingBackend))(implicitly)
         } yield (f1, f2)
       val result = Await.result(r, 10.seconds)
       // Check that the second query has less hits than the first given its smaller range
@@ -145,7 +146,7 @@ class VoTableClientSpec extends Specification with VoTableClient {
       val mc = MagnitudeConstraints(SingleBand(MagnitudeBand.J), FaintnessConstraint(15.0), None)
       val query = CatalogQuery(coordinates, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.1)), mc, UCAC4)
 
-      val result = Await.result(VoTableClient.catalog(query, countingBackend)(implicitly), 10.seconds)
+      val result = Await.result(VoTableClient.catalog(query, Some(countingBackend))(implicitly), 10.seconds)
       // Extract the query params from the results
       result.query should beEqualTo(query)
     }
