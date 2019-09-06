@@ -4,12 +4,15 @@ import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.ags.api.AgsRegistrar;
 import edu.gemini.ags.api.AgsStrategy;
 import edu.gemini.ags.api.ProbeCandidates;
+import edu.gemini.ags.impl.Pwfs1NGS2Params;
+import edu.gemini.ags.impl.SingleProbeStrategy;
 import edu.gemini.ags.conf.ProbeLimitsTable;
 import edu.gemini.ags.gems.*;
 import edu.gemini.ags.gems.mascot.Strehl;
 import edu.gemini.ags.gems.mascot.MascotProgress;
 import edu.gemini.catalog.votable.CatalogException;
 import edu.gemini.catalog.votable.ConeSearchBackend;
+import edu.gemini.catalog.votable.VoTableBackend;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
@@ -237,15 +240,19 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      *
      * @return catalog search results
      */
-    public NGS2Result search(GemsGuideStarSearchOptions.CatalogChoice catalog,
-                             ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
-                             scala.Option<MagnitudeBand> nirBand,
-                             scala.concurrent.ExecutionContext ec) {
+    public NGS2Result search(
+        GemsGuideStarSearchOptions.CatalogChoice catalog,
+        VoTableBackend                           backend,
+        ObsContext                               obsContext,
+        Set<edu.gemini.spModel.core.Angle>       posAngles,
+        scala.Option<MagnitudeBand>              nirBand,
+        scala.concurrent.ExecutionContext        ec
+    ) {
         try {
             interrupted = false;
             startProgress();
 
-            final NGS2Result results = searchUnchecked(catalog, obsContext, posAngles, nirBand, ec);
+            final NGS2Result results = searchUnchecked(catalog, backend, obsContext, posAngles, nirBand, ec);
             if (interrupted) {
                 throw new CancellationException("Canceled");
             }
@@ -260,6 +267,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 
     private static NGS2Result searchUnchecked(
         GemsGuideStarSearchOptions.CatalogChoice catalog,
+        VoTableBackend                           backend,
         ObsContext                               obsContext,
         Set<edu.gemini.spModel.core.Angle>       posAngles,
         scala.Option<MagnitudeBand>              nirBand,
@@ -277,7 +285,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         // TODO-DEBUG:
 //        System.out.println("*** PERFORMING GeMS LOOKUP ***");
         final List<GemsCatalogSearchResults> results =
-            new GemsVoTableCatalog(ConeSearchBackend.instance(), catalog.catalog())
+            new GemsVoTableCatalog(catalog.catalog(), backend)
                 .search4Java(obsContext, ModelConverters.toCoordinates(base), options, nirBand, 30, ec);
 
 //        results.forEach(r -> r.resultsAsJava().forEach(t -> System.out.println(t.name())));
@@ -287,15 +295,15 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         // TODO-NGS2: The bounds given for NGS2 for PWFS1 should prevent vignetting. How can we filter out stars that are
         // TODO-NGS2: not in the annulus? See comment below about pwfsValidCandidates.
         // Look up a PWFS1 guide star.
-        final Option<AgsStrategy> pwfsOpt =
-            AgsRegistrar.lookupForJava(AgsStrategyKey.Pwfs1SouthNGS2Key$.MODULE$);
+        final AgsStrategy pwfs = new SingleProbeStrategy(
+            AgsStrategyKey$.MODULE$.pwfs1SouthNGS2Key(),
+            new Pwfs1NGS2Params(catalog.catalog()),
+            backend
+        );
 
         // We did it up there for the basePos and baseRA / baseDec, so why not continue sound coding practices?
         final List<ProbeCandidates> pwfsProbeCandidates =
-            pwfsOpt.fold(
-                ()   -> Collections.<ProbeCandidates>emptyList(),
-                pwfs -> pwfs.candidatesForJava(obsContext, ProbeLimitsTable.loadOrThrow(), 30, ec)
-            );
+            pwfs.candidatesForJava(obsContext, ProbeLimitsTable.loadOrThrow(), 30, ec);
 
         // TODO-DEBUG:
 //        System.out.println("Size of unfiltered ProbeCandidates: " + pwfsCandidates.size());
@@ -329,10 +337,18 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      * Returns the set of Gems guide stars with the highest ranking using the default settings.
      */
     private GemsGuideStars findGuideStars(scala.concurrent.ExecutionContext ec) {
-        final WorldCoords basePos = tpe.getBasePos();
-        final ObsContext obsContext = getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
+        final WorldCoords                          basePos = tpe.getBasePos();
+        final ObsContext                        obsContext = getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
         final Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
-        final NGS2Result results = search(GemsGuideStarSearchOptions.DEFAULT, obsContext, posAngles, scala.Option.empty(), ec);
+        final NGS2Result                           results =
+            search(
+                GemsGuideStarSearchOptions.DEFAULT,
+                ConeSearchBackend.instance(), // TODO-NGS2: set to None after GAIA
+                obsContext,
+                posAngles,
+                scala.Option.empty(),
+                ec
+            );
         return findGuideStars(obsContext, posAngles, results);
     }
 

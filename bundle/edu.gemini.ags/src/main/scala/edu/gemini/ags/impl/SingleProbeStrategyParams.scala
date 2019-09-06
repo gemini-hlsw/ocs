@@ -114,11 +114,13 @@ case class PwfsParams(site: Site, guideProbe: PwfsGuideProbe) extends SingleProb
   }
 }
 
-case object Pwfs1NGS2Params extends SingleProbeStrategyParams {
+final case class Pwfs1NGS2Params(
+  override val catalogName: CatalogName
+) extends SingleProbeStrategyParams {
+
   override val guideProbe: PwfsGuideProbe = PwfsGuideProbe.pwfs1
   override val site: Site                 = Site.GS
   override def stepSize: Angle            = Angle.fromDegrees(360)
-  override val catalogName: CatalogName   = PPMXL
 
   private def vignettingProofPatrolField(ctx: ObsContext): PatrolField = {
     val min = guideProbe.getVignettingClearance(ctx)

@@ -1,6 +1,7 @@
 package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.AgsStrategy
+import edu.gemini.catalog.api.PPMXL
 import edu.gemini.catalog.votable.ConeSearchBackend
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.ags.AgsStrategyKey
@@ -22,9 +23,6 @@ import scalaz.syntax.foldable._
 object Strategy {
   import SingleProbeStrategyParams._
 
-  // Backend for searching on catalogs
-  val backend = ConeSearchBackend
-
   val AltairAowfs     = SingleProbeStrategy(AltairAowfsKey,     AltairAowfsParams)
   val Flamingos2Oiwfs = SingleProbeStrategy(Flamingos2OiwfsKey, Flamingos2OiwfsParams)
   val GmosNorthOiwfs  = SingleProbeStrategy(GmosNorthOiwfsKey,  GmosOiwfsParams(Site.GN))
@@ -35,19 +33,25 @@ object Strategy {
   val Pwfs1North      = SingleProbeStrategy(Pwfs1NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs1))
   val Pwfs2North      = SingleProbeStrategy(Pwfs2NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs2))
   val Pwfs1South      = SingleProbeStrategy(Pwfs1SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs1))
-  val Pwfs1SouthNGS2  = SingleProbeStrategy(Pwfs1SouthNGS2Key,  Pwfs1NGS2Params)
   val Pwfs2South      = SingleProbeStrategy(Pwfs2SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs2))
+
   val NiciOiwfs       = ScienceTargetStrategy(NiciOiwfsKey,     NiciOiwfsGuideProbe.instance, NiciBandsList)
   val Off             = OffStrategy
 
-  val All = List(
+  val GemsNgs2        = NGS2Strategy(PPMXL, ConeSearchBackend)
+
+  /**
+   * All strategies that correspond to top-level AGS queries. Internally, some
+   * strategies (e.g., NGS2Strategy) may combine secondary strategies that are
+   * not listed here.
+   */
+  val Auto: List[AgsStrategy] = List(
     AltairAowfs,
     Flamingos2Oiwfs,
-    GemsStrategy,
+    GemsNgs2,
     GmosNorthOiwfs,
     GmosSouthOiwfs,
     GnirsOiwfs,
-    NGS2Strategy,
     NiciOiwfs,
     NifsOiwfs,
     NiriOiwfs,
@@ -55,12 +59,13 @@ object Strategy {
     Pwfs2North,
     Pwfs1South,
     Pwfs2South,
-    Pwfs1SouthNGS2,
     Off
   )
 
-  private val KeyMap: Map[AgsStrategyKey, AgsStrategy] = All.map(s => s.key -> s).toMap
+  private val KeyMap: Map[AgsStrategyKey, AgsStrategy] =
+    Auto.map(s => s.key -> s).toMap
 
+  /** Obtains the matching Strategy configured for use in AGS. */
   def fromKey(k: AgsStrategyKey): Option[AgsStrategy] = KeyMap.get(k)
 
   //
@@ -84,7 +89,7 @@ object Strategy {
     SPComponentType.INSTRUMENT_ACQCAM     -> const(List(Pwfs1North, Pwfs2North, Pwfs1South, Pwfs2South)),
 
     SPComponentType.INSTRUMENT_FLAMINGOS2 -> ((ctx: ObsContext) =>
-      List(GemsStrategy) ++ oiStategies(ctx, Flamingos2Oiwfs)
+      List(GemsNgs2) ++ oiStategies(ctx, Flamingos2Oiwfs)
     ),
 
     SPComponentType.INSTRUMENT_GHOST      -> const(List(Pwfs2South, Pwfs1South)),
@@ -103,8 +108,7 @@ object Strategy {
     SPComponentType.INSTRUMENT_GMOSSOUTH  -> ((ctx: ObsContext) => oiStategies(ctx, GmosSouthOiwfs)),
 
     SPComponentType.INSTRUMENT_GNIRS      -> const(List(AltairAowfs, Pwfs2North, Pwfs1North, GnirsOiwfs)),
-    // TODO-NGS2: Remove GemsStrategy from here. It is for debugging purposes only.
-    SPComponentType.INSTRUMENT_GSAOI      -> const(List(NGS2Strategy, GemsStrategy) ++ List(Pwfs1South)),
+    SPComponentType.INSTRUMENT_GSAOI      -> const(List(GemsNgs2, Pwfs1South)),
     SPComponentType.INSTRUMENT_MICHELLE   -> const(List(Pwfs2North, Pwfs1North)),
     SPComponentType.INSTRUMENT_NICI       -> const(List(NiciOiwfs, Pwfs2South, Pwfs1South)),
     SPComponentType.INSTRUMENT_NIFS       -> const(List(AltairAowfs, Pwfs2North, Pwfs1North, NifsOiwfs)),
@@ -120,8 +124,7 @@ object Strategy {
     s match {
       case SingleProbeStrategy(_, params, _) => isAvailable(params.guideProbe)
       case ScienceTargetStrategy(_, gp, _)   => isAvailable(gp)
-      case GemsStrategy                      => isAvailable(CanopusWfs.cwfs3) // any canopus would serve
-      case NGS2Strategy                      => isAvailable(CanopusWfs.cwfs3) && isAvailable(PwfsGuideProbe.pwfs1)
+      case NGS2Strategy(_, _)                => isAvailable(CanopusWfs.cwfs3) && isAvailable(PwfsGuideProbe.pwfs1)
       case _                                 => false
     }
   }

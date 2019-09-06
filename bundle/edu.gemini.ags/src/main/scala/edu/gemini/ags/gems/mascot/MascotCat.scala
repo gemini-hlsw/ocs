@@ -15,9 +15,6 @@ import edu.gemini.spModel.target.SPTarget
 object MascotCat {
   val Log = Logger.getLogger(MascotCat.getClass.getSimpleName)
 
-  // default catalog
-  val defaultCatalogName = "PPMXL Catalog at CDS"
-
   // Default min radius for catalog query in arcmin
   val defaultMinRadius = 0.0
 

@@ -5,7 +5,7 @@ import java.util.Comparator
 /**
  *
  */
-sealed trait AgsStrategyKey {
+sealed trait AgsStrategyKey extends Product with Serializable {
   def id: String
   def displayName: String = id.replaceAll("_", " ")
 }
@@ -79,6 +79,9 @@ object AgsStrategyKey {
   case object Pwfs1SouthNGS2Key extends AgsStrategyKey {
     val id = "GS_PWFS1_SFS"
   }
+
+  val pwfs1SouthNGS2Key: AgsStrategyKey =
+    Pwfs1SouthNGS2Key
 
   case object Pwfs2SouthKey extends AgsStrategyKey {
     val id = "GS_PWFS2"

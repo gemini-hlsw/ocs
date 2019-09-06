@@ -3,6 +3,7 @@ package edu.gemini.ags.gems
 import edu.gemini.ags.TargetsHelper
 import edu.gemini.ags.gems.mascot.MascotProgress
 import edu.gemini.ags.gems.mascot.Strehl
+import edu.gemini.catalog.api.PPMXL
 import edu.gemini.catalog.votable.TestVoTableBackend
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates
 import edu.gemini.shared.util.immutable.{None => JNone}
@@ -45,9 +46,11 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
 
   private val LOGGER = Logger.getLogger(classOf[GemsResultsAnalyzerSpec].getName)
 
-  class TestGemsVoTableCatalog(file: String, c: Conditions) extends GemsVoTableCatalog {
-    override val backend = TestVoTableBackend(file, GemsTestVoTableMod.forCwfsMagnitudeLimitChange(c))
-  }
+  def testGemsVoTableCatalog(file: String, c: Conditions): GemsVoTableCatalog =
+    GemsVoTableCatalog(
+      PPMXL,
+      TestVoTableBackend(file, GemsTestVoTableMod.forCwfsMagnitudeLimitChange(c))
+    )
 
   val NoTime = JNone.instance[java.lang.Long]
 
@@ -57,7 +60,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
 
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY).wv(SPSiteQuality.WaterVapor.ANY)
-      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, conditions, new TestGemsVoTableCatalog("/gems_TYC_8345_1155_1.xml", conditions))
+      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, conditions, testGemsVoTableCatalog("/gems_TYC_8345_1155_1.xml", conditions))
 
       val expectedResults = 2
       results should have size expectedResults
@@ -110,7 +113,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
 
-      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, conditions, new TestGemsVoTableCatalog("/gems_sn1987A.xml", conditions))
+      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, conditions, testGemsVoTableCatalog("/gems_sn1987A.xml", conditions))
 
       val expectedResults = 2
       results should have size expectedResults
@@ -163,7 +166,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val inst = new Gsaoi
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
 
-      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, conditions, new TestGemsVoTableCatalog("/gems_m6.xml", conditions))
+      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, conditions, testGemsVoTableCatalog("/gems_m6.xml", conditions))
 
       val expectedResults = 2
       results should have size expectedResults
@@ -216,7 +219,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val inst = new Gsaoi
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
 
-      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, conditions, new TestGemsVoTableCatalog("/gems_bpm_37093.xml", conditions))
+      val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, conditions, testGemsVoTableCatalog("/gems_bpm_37093.xml", conditions))
 
       val expectedResults = 2
       results should have size expectedResults
@@ -311,7 +314,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
 
   }
 
-  def search(inst: SPInstObsComp, raStr: String, decStr: String, conditions: Conditions, catalog: TestGemsVoTableCatalog): (List[GemsCatalogSearchResults], List[GemsGuideStars]) = {
+  def search(inst: SPInstObsComp, raStr: String, decStr: String, conditions: Conditions, catalog: GemsVoTableCatalog): (List[GemsCatalogSearchResults], List[GemsGuideStars]) = {
     import scala.collection.JavaConverters._
 
     val coords = new WorldCoords(raStr, decStr)

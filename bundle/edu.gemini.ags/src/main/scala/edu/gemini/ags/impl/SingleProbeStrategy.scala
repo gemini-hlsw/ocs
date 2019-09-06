@@ -26,7 +26,7 @@ import Scalaz._
  * The same logic is applied to various single-star guiding scenarios (i.e.,
  * everything except for GeMS).
  */
-case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyParams, backend: VoTableBackend = ConeSearchBackend) extends AgsStrategy {
+final case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyParams, backend: VoTableBackend = ConeSearchBackend) extends AgsStrategy {
   import SingleProbeStrategy._
 
   private val LOGGER = Logger.getLogger(classOf[SingleProbeStrategy].getName)

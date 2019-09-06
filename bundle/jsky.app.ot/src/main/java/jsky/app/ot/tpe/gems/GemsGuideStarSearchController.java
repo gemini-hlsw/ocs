@@ -1,6 +1,7 @@
 package jsky.app.ot.tpe.gems;
 
 import edu.gemini.ags.gems.NGS2Result;
+import edu.gemini.catalog.votable.ConeSearchBackend;
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.skycalc.Angle;
@@ -57,7 +58,8 @@ class GemsGuideStarSearchController {
         final MagnitudeBand nirBand = _model.getBand().getBand();
         NGS2Result results;
         try {
-            results = _worker.search(_model.getCatalog(), obsContext, posAngles, new scala.Some<>(nirBand), ec);
+            // TODO-NGS2: ConeSearchBackend -> None
+            results = _worker.search(_model.getCatalog(), ConeSearchBackend.instance(), obsContext, posAngles, new scala.Some<>(nirBand), ec);
         } catch (final Exception e) {
             DialogUtil.error(_dialog, e);
             results = NGS2Result.Empty();

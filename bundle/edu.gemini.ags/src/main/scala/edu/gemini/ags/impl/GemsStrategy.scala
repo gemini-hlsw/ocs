@@ -1,6 +1,5 @@
 package edu.gemini.ags.impl
 
-import edu.gemini.spModel.guide.OrderGuideGroup
 import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy, ProbeCandidates}
 import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
 import edu.gemini.ags.gems._
@@ -10,11 +9,12 @@ import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.SiderealTarget
-import edu.gemini.spModel.ags.AgsStrategyKey.GemsKey
+import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.gemini.flamingos2.{Flamingos2, Flamingos2OiwfsGuideProbe}
 import edu.gemini.spModel.gemini.gems.{CanopusWfs, GemsInstrument}
 import edu.gemini.spModel.gemini.gsaoi.{Gsaoi, GsaoiOdgw}
 import edu.gemini.spModel.gems.GemsGuideProbeGroup
+import edu.gemini.spModel.guide.OrderGuideGroup
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 
@@ -29,14 +29,19 @@ import edu.gemini.spModel.telescope.PosAngleConstraint
 import scalaz._
 import Scalaz._
 
-trait GemsStrategy extends AgsStrategy {
-  // By default use the remote backend but it can be overriden in tests
-  private [impl] def backend:VoTableBackend
+final case class GemsStrategy(
+  catalogName: CatalogName,
+  backend:     VoTableBackend  // TODO-NGS2: Temporary until GAIA updates are added, at which point it becomes an Option[VoTableBackend]
+) extends AgsStrategy {
 
-  override def key = GemsKey
+  import GemsStrategy._
+
+  override def key: AgsStrategyKey =
+    AgsStrategyKey.GemsKey
 
   // NGS2 GeMS has no concept of guide speed.
-  private val showGuideSpeed: Boolean = false
+  private val showGuideSpeed: Boolean =
+    false
 
   // Since the constraints are run in parallel, we need a way to identify them after
   // they are done, so we create IDs for each. This is a pretty nasty way to do things, but
@@ -123,7 +128,7 @@ trait GemsStrategy extends AgsStrategy {
     val gemsOptions = new GemsGuideStarSearchOptions(gemsInstrument, posAngles.asJava)
 
     // Perform the catalog search, using GemsStrategy's backend
-    val results = GemsVoTableCatalog(backend, PPMXL).search(ctx, base.toNewModel, gemsOptions, nirBand)(ec)
+    val results = GemsVoTableCatalog(catalogName, backend).search(ctx, base.toNewModel, gemsOptions, nirBand)(ec)
 
     // Now check that the results are valid: there must be a valid tip-tilt and flexure star each.
     results.map { r =>
@@ -180,8 +185,8 @@ trait GemsStrategy extends AgsStrategy {
         (ml |@| lim(can))(_ union _).flatten
       }
 
-      val canopusConstraint = canMagLimits.map(c => CatalogQuery(CanopusTipTiltId, base.toNewModel, RadiusConstraint.between(Angle.zero, CanopusWfs.Group.instance.getRadiusLimits.toNewModel), List(ctx.getConditions.adjust(c)), PPMXL))
-      val odgwConstraint    = odgwMagLimits.map(c => CatalogQuery(OdgwFlexureId,   base.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), List(ctx.getConditions.adjust(c)), PPMXL))
+      val canopusConstraint = canMagLimits.map(c => CatalogQuery(CanopusTipTiltId, base.toNewModel, RadiusConstraint.between(Angle.zero, CanopusWfs.Group.instance.getRadiusLimits.toNewModel), List(ctx.getConditions.adjust(c)), catalogName))
+      val odgwConstraint    = odgwMagLimits.map(c => CatalogQuery(OdgwFlexureId,   base.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), List(ctx.getConditions.adjust(c)), catalogName))
       List(canopusConstraint, odgwConstraint).flatten
     }
 
@@ -195,8 +200,9 @@ trait GemsStrategy extends AgsStrategy {
     Flamingos2OiwfsGuideProbe.instance :: (GsaoiOdgw.values() ++ CanopusWfs.values()).toList
 }
 
-object GemsStrategy extends GemsStrategy {
-  override private [impl] val backend = ConeSearchBackend
+object GemsStrategy {
 
-  private [impl] lazy val canopusProbes: ISet[GuideProbe] = ISet.fromList(List(CanopusWfs.cwfs1, CanopusWfs.cwfs2, CanopusWfs.cwfs3))
+  private val canopusProbes: ISet[GuideProbe] =
+    ISet.fromList(List(CanopusWfs.cwfs1, CanopusWfs.cwfs2, CanopusWfs.cwfs3))
+
 }
