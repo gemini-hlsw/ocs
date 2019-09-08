@@ -27,8 +27,8 @@ import scala.swing.GridBagPanel.Fill
 import scala.swing.{Alignment, GridBagPanel, Label}
 import scalaz._
 import Scalaz._
-import edu.gemini.ags.impl.{NGS2Strategy, SingleProbeStrategyParams}
-import edu.gemini.spModel.ags.AgsStrategyKey.Pwfs1SouthNGS2Key
+import edu.gemini.ags.impl.{Ngs2XStrategy, SingleProbeStrategyParams}
+import edu.gemini.spModel.ags.AgsStrategyKey.Pwfs1SouthNgs2XKey
 import jsky.app.ot.gemini.editor.targetComponent.TargetGuidingFeedback.ProbeLimits.{le, lim}
 
 
@@ -104,7 +104,7 @@ object TargetGuidingFeedback {
     def apply(probeBands: BandsList, ctx: ObsContext, mc: MagnitudeCalc): Option[ProbeLimits] = {
       val conditions = ctx.getConditions
       val fast = mc.apply(conditions, FAST)
-      val isPwfs1NGS2 = AgsRegistrar.currentStrategy(ctx).map(_.key).contains(Pwfs1SouthNGS2Key)
+      val isPwfs1NGS2 = AgsRegistrar.currentStrategy(ctx).map(_.key).contains(Pwfs1SouthNgs2XKey)
 
       def faint(gs: GuideSpeed) = mc.apply(conditions, gs).faintnessConstraint.brightness
 

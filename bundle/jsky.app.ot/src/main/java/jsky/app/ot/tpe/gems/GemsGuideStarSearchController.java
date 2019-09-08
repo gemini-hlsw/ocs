@@ -1,13 +1,11 @@
 package jsky.app.ot.tpe.gems;
 
-import edu.gemini.ags.gems.NGS2Result;
-import edu.gemini.catalog.votable.ConeSearchBackend;
+import edu.gemini.ags.gems.Ngs2XResult;
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.SiderealTarget;
-import edu.gemini.spModel.gems.GemsTipTiltMode;
 import edu.gemini.ags.gems.GemsCatalogSearchResults;
 import edu.gemini.ags.gems.GemsGuideStars;
 import edu.gemini.spModel.obs.context.ObsContext;
@@ -56,12 +54,12 @@ class GemsGuideStarSearchController {
         final Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
 
         final MagnitudeBand nirBand = _model.getBand().getBand();
-        NGS2Result result;
+        Ngs2XResult result;
         try {
             result = _worker.search(_model.getCatalog(), scala.Option.empty(), obsContext, posAngles, new scala.Some<>(nirBand), ec);
         } catch (final Exception e) {
             DialogUtil.error(_dialog, e);
-            result = NGS2Result.Empty();
+            result = Ngs2XResult.Empty();
             _dialog.setState(GemsGuideStarSearchDialog.State.PRE_QUERY);
         }
 

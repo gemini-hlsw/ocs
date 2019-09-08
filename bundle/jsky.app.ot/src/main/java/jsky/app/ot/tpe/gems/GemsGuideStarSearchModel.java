@@ -1,10 +1,8 @@
 package jsky.app.ot.tpe.gems;
 
 import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
-import edu.gemini.ags.gems.GemsCatalogSearchResults;
 import edu.gemini.ags.gems.GemsGuideStars;
-import edu.gemini.ags.gems.NGS2Result;
-import edu.gemini.shared.util.immutable.ImList;
+import edu.gemini.ags.gems.Ngs2XResult;
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SiderealTarget;
@@ -20,7 +18,7 @@ class GemsGuideStarSearchModel {
     private NirBandChoice        _band;
     private boolean              _reviewCandidatesBeforeSearch;
     private boolean              _allowPosAngleAdjustments;
-    private NGS2Result           _ngs2Result;
+    private Ngs2XResult _ngs2Result;
     private List<GemsGuideStars> _gemsGuideStars;
 
     public CatalogChoice getCatalog() {
@@ -56,11 +54,11 @@ class GemsGuideStarSearchModel {
         return _allowPosAngleAdjustments;
     }
 
-    NGS2Result getNGS2Result() {
+    Ngs2XResult getNGS2Result() {
         return _ngs2Result;
     }
 
-    void setNGS2Result(final NGS2Result ngs2Result) {
+    void setNGS2Result(final Ngs2XResult ngs2Result) {
         _ngs2Result = ngs2Result;
     }
 

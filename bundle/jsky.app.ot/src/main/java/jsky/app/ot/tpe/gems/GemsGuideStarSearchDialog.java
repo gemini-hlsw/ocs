@@ -2,7 +2,7 @@ package jsky.app.ot.tpe.gems;
 
 import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
 import edu.gemini.ags.gems.GemsGuideStars;
-import edu.gemini.ags.gems.NGS2Result;
+import edu.gemini.ags.gems.Ngs2XResult;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.Function1;
 import edu.gemini.shared.util.immutable.ImOption;
@@ -402,7 +402,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         switch (state) {
             case PRE_QUERY:
                 _actionButton.setAction(_queryAction);
-                _model.setNGS2Result(NGS2Result.Empty());
+                _model.setNGS2Result(Ngs2XResult.Empty());
                 _model.setGemsGuideStars(Collections.emptyList());
                 _candidateGuideStarsTable.clear();
                 _candidateAsterismsTreeTable.clear();
@@ -509,7 +509,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         _model.setBand((NirBandChoice) _nirBandComboBox.getSelectedItem());
         _model.setReviewCandidatesBeforeSearch(_reviewCandidatesCheckBox.isSelected());
         _model.setAllowPosAngleAdjustments(_allowPosAngleChangesCheckBox.isSelected());
-        _model.setNGS2Result(NGS2Result.Empty());
+        _model.setNGS2Result(Ngs2XResult.Empty());
         _model.setGemsGuideStars(Collections.emptyList());
 
         new SwingWorker() {
