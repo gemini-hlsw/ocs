@@ -2,6 +2,7 @@ package jsky.app.ot.tpe.gems;
 
 import edu.gemini.ags.gems.GemsGuideStars;
 import edu.gemini.ags.gems.GemsStrehl;
+import edu.gemini.spModel.core.SiderealTarget;
 import jsky.util.gui.Resources;
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
@@ -127,12 +128,9 @@ class CandidateAsterismsTreeTable extends JXTreeTable {
 
         public CheckBoxTableCellEditor() {
             this(new JCheckBox());
-            _checkBox.addActionListener(e -> {
-                selectRelatedRows();
-                // Do later after model is updated?
-                SwingUtilities.invokeLater(CandidateAsterismsTreeTable.this::addCheckedAsterisms);
-            });
+            _checkBox.addActionListener(e -> selectRelatedRows());
         }
+
         public CheckBoxTableCellEditor(JCheckBox checkBox) {
             super(checkBox);
             _checkBox = checkBox;
@@ -210,7 +208,6 @@ class CandidateAsterismsTreeTable extends JXTreeTable {
         getCandidateAsterismsTreeTableModel().setPrimary(row);
         selectRelatedRows();
         repaint();
-        addCheckedAsterisms();
     }
     /**
      * Selects all rows related to the currently selected row
@@ -320,8 +317,8 @@ class CandidateAsterismsTreeTable extends JXTreeTable {
     /**
      * Adds the checked asterisms to the target environment
      */
-    public void addCheckedAsterisms() {
+    public void addCheckedAsterisms(final SiderealTarget slowFocusSensor) {
         CandidateAsterismsTreeTableModel model = getCandidateAsterismsTreeTableModel();
-        _controller.add(model.getCheckedAsterisms(), model.getPrimaryIndex(0));
+        _controller.add(model.getCheckedAsterisms(), model.getPrimaryIndex(0), slowFocusSensor);
     }
 }

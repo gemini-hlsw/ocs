@@ -56,12 +56,12 @@ class GemsGuideStarSearchController {
         final Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
 
         final MagnitudeBand nirBand = _model.getBand().getBand();
-        NGS2Result results;
+        NGS2Result result;
         try {
-            results = _worker.search(_model.getCatalog(), scala.Option.empty(), obsContext, posAngles, new scala.Some<>(nirBand), ec);
+            result = _worker.search(_model.getCatalog(), scala.Option.empty(), obsContext, posAngles, new scala.Some<>(nirBand), ec);
         } catch (final Exception e) {
             DialogUtil.error(_dialog, e);
-            results = NGS2Result.Empty();
+            result = NGS2Result.Empty();
             _dialog.setState(GemsGuideStarSearchDialog.State.PRE_QUERY);
         }
 
@@ -69,13 +69,9 @@ class GemsGuideStarSearchController {
         // TODO-NGS2: We now have Canopus and PWFS1 SFS results stored in the NGS2Results object.
         // TODO-NGS2: We have to modify the GemsGuideStarSearchModel to accommodate them.
         // TODO-NGS2: Right now, we just drop the PWFS1 guide star and only include the Canopus guide stars.
-        if (_model.isReviewCandidatesBeforeSearch()) {
-            // TODO-NGS2: Change this method to take an NGS2Result?
-            _model.setGemsCatalogSearchResults(results.gemsCatalogSearchResultAsJava());
-        } else {
-            _model.setGemsCatalogSearchResults(results.gemsCatalogSearchResultAsJava());
-            // TODO-NGS2: Change this method to take an NGS2Result?
-            _model.setGemsGuideStars(_worker.findAllGuideStars(obsContext, posAngles, results.gemsCatalogSearchResultAsJava()));
+        _model.setNGS2Result(result);
+        if (!_model.isReviewCandidatesBeforeSearch()) {
+            _model.setGemsGuideStars(_worker.findAllGuideStars(obsContext, posAngles, result.gemsCatalogSearchResultAsJava()));
         }
     }
 
@@ -83,8 +79,8 @@ class GemsGuideStarSearchController {
         final Set<edu.gemini.spModel.core.Angle> posAngles = new HashSet<>();
         posAngles.add(obsContext.getPositionAngle());
         if (_model.isAllowPosAngleAdjustments()) {
-            posAngles.add(ModelConverters.toNewAngle(new Angle(0., Angle.Unit.DEGREES)));
-            posAngles.add(ModelConverters.toNewAngle(new Angle(90., Angle.Unit.DEGREES)));
+            posAngles.add(ModelConverters.toNewAngle(new Angle(  0., Angle.Unit.DEGREES)));
+            posAngles.add(ModelConverters.toNewAngle(new Angle( 90., Angle.Unit.DEGREES)));
             posAngles.add(ModelConverters.toNewAngle(new Angle(180., Angle.Unit.DEGREES)));
             posAngles.add(ModelConverters.toNewAngle(new Angle(270., Angle.Unit.DEGREES)));
         }
@@ -97,12 +93,13 @@ class GemsGuideStarSearchController {
      */
     // Called from the TPE
     void analyze(final List<SiderealTarget> excludeCandidates) {
-        final TpeImageWidget tpe = TpeManager.create().getImageWidget();
-        final WorldCoords basePos = tpe.getBasePos();
+        final TpeImageWidget    tpe = TpeManager.create().getImageWidget();
+        final WorldCoords   basePos = tpe.getBasePos();
         final ObsContext obsContext = _worker.getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
         final Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
+
         _model.setGemsGuideStars(_worker.findAllGuideStars(obsContext, posAngles,
-                filter(excludeCandidates, _model.getGemsCatalogSearchResults())));
+                filter(excludeCandidates, _model.getNGS2Result().gemsCatalogSearchResultAsJava())));
     }
 
     // Returns a list of the given gemsCatalogSearchResults, with any SiderealTargets removed that are not
@@ -143,7 +140,11 @@ class GemsGuideStarSearchController {
      * @param selectedAsterisms information used to create the guide groups
      * @param primaryIndex if more than one item in list, the index of the primary guide group
      */
-    public void add(final List<GemsGuideStars> selectedAsterisms, final int primaryIndex) {
-        _worker.applyResults(selectedAsterisms, primaryIndex);
+    public void add(
+        final List<GemsGuideStars> selectedAsterisms,
+        final int                  primaryIndex,
+        final SiderealTarget       slowFocusSensor
+    ) {
+        _worker.applyResults(selectedAsterisms, primaryIndex, slowFocusSensor);
     }
 }

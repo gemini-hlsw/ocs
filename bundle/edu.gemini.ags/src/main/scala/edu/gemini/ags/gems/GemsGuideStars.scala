@@ -20,14 +20,14 @@ import Scalaz._
   */
 final case class NGS2Result(
   gemsCatalogSearchResult: List[GemsCatalogSearchResults],
-  pwfs1Result:             Option[SiderealTarget]
+  slowFocusSensor:         Option[SiderealTarget]
 ) {
 
   def gemsCatalogSearchResultAsJava: java.util.List[GemsCatalogSearchResults] =
     gemsCatalogSearchResult.asJava
 
-  def pwfs1ResultAsJava: JOption[SiderealTarget] =
-    pwfs1Result.asGeminiOpt
+  def slowFocusSensorAsJava: JOption[SiderealTarget] =
+    slowFocusSensor.asGeminiOpt
 
 }
 
@@ -38,9 +38,9 @@ object NGS2Result {
 
   def fromJava(
     g: java.util.List[GemsCatalogSearchResults],
-    p: JOption[SiderealTarget]
+    s: JOption[SiderealTarget]
   ): NGS2Result =
-    NGS2Result(g.asScala.toList, p.asScalaOpt)
+    NGS2Result(g.asScala.toList, s.asScalaOpt)
 
 }
 

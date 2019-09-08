@@ -3,6 +3,8 @@ package jsky.app.ot.tpe.gems;
 import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
 import edu.gemini.ags.gems.GemsCatalogSearchResults;
 import edu.gemini.ags.gems.GemsGuideStars;
+import edu.gemini.ags.gems.NGS2Result;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SiderealTarget;
@@ -14,11 +16,11 @@ import java.util.List;
  */
 class GemsGuideStarSearchModel {
 
-    private CatalogChoice _catalog;
-    private NirBandChoice _band;
-    private boolean _reviewCandidatesBeforeSearch;
-    private boolean _allowPosAngleAdjustments;
-    private List<GemsCatalogSearchResults> _gemsCatalogSearchResults;
+    private CatalogChoice        _catalog;
+    private NirBandChoice        _band;
+    private boolean              _reviewCandidatesBeforeSearch;
+    private boolean              _allowPosAngleAdjustments;
+    private NGS2Result           _ngs2Result;
     private List<GemsGuideStars> _gemsGuideStars;
 
     public CatalogChoice getCatalog() {
@@ -54,12 +56,12 @@ class GemsGuideStarSearchModel {
         return _allowPosAngleAdjustments;
     }
 
-    List<GemsCatalogSearchResults> getGemsCatalogSearchResults() {
-        return _gemsCatalogSearchResults;
+    NGS2Result getNGS2Result() {
+        return _ngs2Result;
     }
 
-    void setGemsCatalogSearchResults(final List<GemsCatalogSearchResults> gemsCatalogSearchResults) {
-        _gemsCatalogSearchResults = gemsCatalogSearchResults;
+    void setNGS2Result(final NGS2Result ngs2Result) {
+        _ngs2Result = ngs2Result;
     }
 
     List<GemsGuideStars> getGemsGuideStars() {
@@ -71,6 +73,12 @@ class GemsGuideStarSearchModel {
     }
 
     Option<SiderealTarget> targetAt(final int i) {
-        return ImOption.apply(_gemsCatalogSearchResults.get(0)).flatMap(c -> c.targetAt(i));
+        return ImOption.fromOptional(
+            _ngs2Result.gemsCatalogSearchResultAsJava()
+                       .stream()
+                       .flatMap(r -> r.resultsAsJava().stream())
+                       .skip(i)
+                       .findFirst()
+        );
     }
 }

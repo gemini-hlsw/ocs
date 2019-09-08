@@ -2,6 +2,7 @@ package jsky.app.ot.tpe.gems;
 
 import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
 import edu.gemini.ags.gems.GemsGuideStars;
+import edu.gemini.ags.gems.NGS2Result;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.Function1;
 import edu.gemini.shared.util.immutable.ImOption;
@@ -401,8 +402,8 @@ public class GemsGuideStarSearchDialog extends JFrame {
         switch (state) {
             case PRE_QUERY:
                 _actionButton.setAction(_queryAction);
-                _model.setGemsCatalogSearchResults(null);
-                _model.setGemsGuideStars(null);
+                _model.setNGS2Result(NGS2Result.Empty());
+                _model.setGemsGuideStars(Collections.emptyList());
                 _candidateGuideStarsTable.clear();
                 _candidateAsterismsTreeTable.clear();
                 setEnabledStates(true, false, false);
@@ -417,7 +418,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
                 break;
             case PRE_ANALYZE:
                 _actionButton.setAction(_analyzeAction);
-                _model.setGemsGuideStars(null);
+                _model.setGemsGuideStars(Collections.emptyList());
                 _candidateAsterismsTreeTable.clear();
                 setEnabledStates(true, true, false);
                 _useDefaultsAction.setEnabled(!usingDefaults());
@@ -508,8 +509,8 @@ public class GemsGuideStarSearchDialog extends JFrame {
         _model.setBand((NirBandChoice) _nirBandComboBox.getSelectedItem());
         _model.setReviewCandidatesBeforeSearch(_reviewCandidatesCheckBox.isSelected());
         _model.setAllowPosAngleAdjustments(_allowPosAngleChangesCheckBox.isSelected());
-        _model.setGemsCatalogSearchResults(new ArrayList<>());
-        _model.setGemsGuideStars(new ArrayList<>());
+        _model.setNGS2Result(NGS2Result.Empty());
+        _model.setGemsGuideStars(Collections.emptyList());
 
         new SwingWorker() {
 
@@ -572,7 +573,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
 
     private void analyze() {
         setState(State.ANALYZE);
-        _model.setGemsGuideStars(null);
+        _model.setGemsGuideStars(Collections.emptyList());
         _model.setAllowPosAngleAdjustments(_allowPosAngleChangesCheckBox.isSelected());
 
         final List<SiderealTarget> excludeCandidates =
@@ -618,7 +619,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
         _candidateAsterismsTreeTable.packAll();
         _candidateAsterismsTreeTable.getColumn(CandidateAsterismsTreeTableModel.Col.PRIMARY.ordinal()).setWidth(5);
         setState(State.SELECTION);
-        _candidateAsterismsTreeTable.addCheckedAsterisms();
         _paLabel.setText(getPosAngleStr());
     }
 
@@ -657,7 +657,9 @@ public class GemsGuideStarSearchDialog extends JFrame {
 
     // Adds the selected asterism groups to the target env
     private void add() {
-        _candidateAsterismsTreeTable.addCheckedAsterisms();
+        _model.getNGS2Result().slowFocusSensorAsJava().foreach(sfs ->
+            _candidateAsterismsTreeTable.addCheckedAsterisms(sfs)
+        );
         setVisible(false);
         _tpe.repaint();
     }

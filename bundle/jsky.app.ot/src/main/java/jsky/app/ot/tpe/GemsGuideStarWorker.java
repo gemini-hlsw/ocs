@@ -1,18 +1,13 @@
 package jsky.app.ot.tpe;
 
-import edu.gemini.ags.api.AgsMagnitude;
-import edu.gemini.ags.api.AgsRegistrar;
 import edu.gemini.ags.api.AgsStrategy;
-import edu.gemini.ags.api.ProbeCandidates;
 import edu.gemini.ags.impl.Pwfs1NGS2Params;
 import edu.gemini.ags.impl.SingleProbeStrategy;
-import edu.gemini.ags.impl.SingleProbeStrategyParams;
 import edu.gemini.ags.conf.ProbeLimitsTable;
 import edu.gemini.ags.gems.*;
 import edu.gemini.ags.gems.mascot.Strehl;
 import edu.gemini.ags.gems.mascot.MascotProgress;
 import edu.gemini.catalog.votable.CatalogException;
-import edu.gemini.catalog.votable.ConeSearchBackend;
 import edu.gemini.catalog.votable.VoTableBackend;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.shared.util.immutable.*;
@@ -27,13 +22,11 @@ import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.gems.GemsInstrument;
-import edu.gemini.spModel.guide.GuideStarValidation;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
-import edu.gemini.spModel.target.obsComp.PwfsProbeRangeArea;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import jsky.coords.WorldCoords;
 import jsky.util.gui.SwingWorker;
@@ -43,7 +36,6 @@ import jsky.util.gui.StatusLogger;
 
 import java.util.*;
 import java.util.concurrent.CancellationException;
-import java.util.stream.Collectors;
 
 /**
  * OT-36: Automate Gems guide star selection in background thread.
@@ -178,11 +170,20 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      * @param selectedAsterisms information used to create the guide groups
      * @param primaryIndex      if more than one item in list, the index of the primary guide group
      */
-    public void applyResults(final List<GemsGuideStars> selectedAsterisms, final int primaryIndex) {
-        applyResults(tpe.getContext(), selectedAsterisms, primaryIndex);
+    public void applyResults(
+        final List<GemsGuideStars> selectedAsterisms,
+        final int                  primaryIndex,
+        final SiderealTarget       slowFocusSensor
+    ) {
+        applyResults(tpe.getContext(), selectedAsterisms, primaryIndex, slowFocusSensor);
     }
 
-    private static void applyResults(final TpeContext ctx, final List<GemsGuideStars> selectedAsterisms, final int primaryIndex) {
+    private static void applyResults(
+        final TpeContext           ctx,
+        final List<GemsGuideStars> selectedAsterisms,
+        final int                  primaryIndex,       // TODO-NGS2: let's just get rid of the primaryIndex business?
+        final SiderealTarget       slowFocusSensor
+    ) {
         final TargetObsComp targetObsComp = ctx.targets().orNull();
         if (targetObsComp != null) {
             final TargetEnvironment env = targetObsComp.getTargetEnvironment();
@@ -213,13 +214,14 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             // If there WAS an index, the primary is now off by 1.
             final int idx = primaryIndex + (autoGpOpt.isDefined() ? 1 : 0);
 
-            if (guideGroupList.size() == 0) {
-                targetObsComp.setTargetEnvironment(env.setGuideEnvironment(env.getGuideEnvironment().setOptions(
-                        newGroups)));
-            } else {
-                targetObsComp.setTargetEnvironment(env.setGuideEnvironment(env.getGuideEnvironment().setOptions(
-                        newGroups).setPrimaryIndex(idx)));
-            }
+            final GuideProbeTargets pwfs1 = GuideProbeTargets.create(PwfsGuideProbe.pwfs1, new SPTarget(slowFocusSensor));
+
+            final GuideEnvironment genv =
+                env.getGuideEnvironment().setOptions(newGroups.map(g -> g.put(pwfs1)));
+
+            targetObsComp.setTargetEnvironment(
+                env.setGuideEnvironment((guideGroupList.size() == 0) ? genv : genv.setPrimaryIndex(idx))
+            );
             ctx.targets().commit();
         }
     }
@@ -353,7 +355,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         interrupted = false;
         try {
             // If no PWFS1 guide star, don't even bother.
-            if (results.pwfs1Result().nonEmpty()) {
+            if (results.slowFocusSensor().nonEmpty()) {
                 startProgress();
                 final List<GemsGuideStars> gemsResults = GemsResultsAnalyzer.instance().analyze(obsContext, posAngles,
                         results.gemsCatalogSearchResultAsJava(), new scala.Some<>(this));
@@ -365,7 +367,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
                 return ImOption
                          .fromOptional(gemsResults.stream().findFirst())
                          .flatMap(g ->
-                           results.pwfs1ResultAsJava().map(t ->
+                           results.slowFocusSensorAsJava().map(t ->
                              new GemsGuideStars(
                                 g.pa(),
                                 g.tiptiltGroup(),
@@ -434,7 +436,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         }
 
         // NGS2: Ensure a PWFS1 guide star has been found for slow focus sensing.
-        keyMap.put(AgsStrategyKey.Pwfs1SouthKey$.MODULE$.id(), results.pwfs1Result().nonEmpty());
+        keyMap.put(AgsStrategyKey.Pwfs1SouthKey$.MODULE$.id(), results.slowFocusSensor().nonEmpty());
 
         for (final String key : keyMap.keySet()) {
             if (!keyMap.get(key)) {
