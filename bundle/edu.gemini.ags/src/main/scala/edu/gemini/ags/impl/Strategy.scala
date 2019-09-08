@@ -38,7 +38,7 @@ object Strategy {
   val NiciOiwfs       = ScienceTargetStrategy(NiciOiwfsKey,     NiciOiwfsGuideProbe.instance, NiciBandsList)
   val Off             = OffStrategy
 
-  val GemsNgs2        = Ngs2XStrategy(Gaia, None)
+  val GemsNgs2        = Ngs2Strategy(Gaia, None)
 
   /**
    * All strategies that correspond to top-level AGS queries. Internally, some
@@ -124,7 +124,7 @@ object Strategy {
     s match {
       case SingleProbeStrategy(_, params, _) => isAvailable(params.guideProbe)
       case ScienceTargetStrategy(_, gp, _)   => isAvailable(gp)
-      case Ngs2XStrategy(_, _)                => isAvailable(CanopusWfs.cwfs3) && isAvailable(PwfsGuideProbe.pwfs1)
+      case Ngs2Strategy(_, _)                => isAvailable(CanopusWfs.cwfs3) && isAvailable(PwfsGuideProbe.pwfs1)
       case _                                 => false
     }
   }

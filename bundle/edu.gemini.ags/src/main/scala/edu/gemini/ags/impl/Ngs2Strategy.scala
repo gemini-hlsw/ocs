@@ -4,7 +4,7 @@ import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy, ProbeCandidat
 import edu.gemini.catalog.api.{ CatalogName, CatalogQuery }
 import edu.gemini.catalog.votable.VoTableBackend
 import edu.gemini.spModel.ags.AgsStrategyKey
-import edu.gemini.spModel.ags.AgsStrategyKey.Ngs2XKey
+import edu.gemini.spModel.ags.AgsStrategyKey.Ngs2Key
 import edu.gemini.spModel.core.{BandsList, RBandsList, SiderealTarget}
 import edu.gemini.spModel.guide.{GuideProbe, ValidatableGuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
@@ -19,18 +19,18 @@ import Scalaz._
  * The new NGS2 strategy, which requires Canopus guide stars and a PWFS1 guide
  * star.
  */
-final case class Ngs2XStrategy(
+final case class Ngs2Strategy(
   catalogName: CatalogName,
   backend:     Option[VoTableBackend]
 ) extends AgsStrategy {
 
-  override def key: AgsStrategyKey = Ngs2XKey
+  override def key: AgsStrategyKey = Ngs2Key
 
   // Tip-tilt asterism selection
   private val gems = GemsStrategy(catalogName, backend)
 
   // SFS star selection
-  private val pwfs = SingleProbeStrategy(AgsStrategyKey.Pwfs1SouthNgs2XKey, Pwfs1NGS2Params(catalogName), backend)
+  private val pwfs = SingleProbeStrategy(AgsStrategyKey.Pwfs1SouthNgs2Key, Pwfs1NGS2Params(catalogName), backend)
 
   override def magnitudes(ctx: ObsContext, mt: AgsMagnitude.MagnitudeTable): List[(GuideProbe, AgsMagnitude.MagnitudeCalc)] =
     gems.magnitudes(ctx, mt) ++ pwfs.magnitudes(ctx, mt)

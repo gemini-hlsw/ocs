@@ -18,7 +18,7 @@ import Scalaz._
 /**
   * An NGS2 result comprises a classical GeMS catalog search result and a set of PWFS1 candidates.
   */
-final case class Ngs2XResult(
+final case class Ngs2Result(
   gemsCatalogSearchResult: List[GemsCatalogSearchResults],
   slowFocusSensor:         Option[SiderealTarget]
 ) {
@@ -31,16 +31,16 @@ final case class Ngs2XResult(
 
 }
 
-object Ngs2XResult {
+object Ngs2Result {
 
-  val Empty: Ngs2XResult =
-    Ngs2XResult(Nil, None)
+  val Empty: Ngs2Result =
+    Ngs2Result(Nil, None)
 
   def fromJava(
     g: java.util.List[GemsCatalogSearchResults],
     s: JOption[SiderealTarget]
-  ): Ngs2XResult =
-    Ngs2XResult(g.asScala.toList, s.asScalaOpt)
+  ): Ngs2Result =
+    Ngs2Result(g.asScala.toList, s.asScalaOpt)
 
 }
 

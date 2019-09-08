@@ -44,7 +44,7 @@ object AgsStrategyKey {
     val id = "GPI_OIWFS"
   }
 
-  case object Ngs2XKey extends AgsStrategyKey {
+  case object Ngs2Key extends AgsStrategyKey {
     val id = "NGS2"
 
     // TODO-NGS2: Uncomment this. This is the name we want at the end. Leaving it like this for now for debugging.
@@ -76,12 +76,12 @@ object AgsStrategyKey {
   }
 
   // This should never be displayed: it is only used to get the right magnitude checks for NGS2 PWFS1.
-  case object Pwfs1SouthNgs2XKey extends AgsStrategyKey {
+  case object Pwfs1SouthNgs2Key extends AgsStrategyKey {
     val id = "GS_PWFS1_SFS"
   }
 
   val pwfs1SouthNGS2Key: AgsStrategyKey =
-    Pwfs1SouthNgs2XKey
+    Pwfs1SouthNgs2Key
 
   case object Pwfs2SouthKey extends AgsStrategyKey {
     val id = "GS_PWFS2"
@@ -98,14 +98,14 @@ object AgsStrategyKey {
     GmosNorthOiwfsKey,
     GmosSouthOiwfsKey,
     GnirsOiwfsKey,
-    Ngs2XKey,
+    Ngs2Key,
     NiciOiwfsKey,
     NifsOiwfsKey,
     NiriOiwfsKey,
     Pwfs1NorthKey,
     Pwfs2NorthKey,
     Pwfs1SouthKey,
-    Pwfs1SouthNgs2XKey,
+    Pwfs1SouthNgs2Key,
     Pwfs2SouthKey,
     OffKey
   )

@@ -248,7 +248,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      *
      * @return catalog search results
      */
-    public Ngs2XResult search(
+    public Ngs2Result search(
         GemsGuideStarSearchOptions.CatalogChoice catalog,
         scala.Option<VoTableBackend>             backend,
         ObsContext                               obsContext,
@@ -260,7 +260,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             interrupted = false;
             startProgress();
 
-            final Ngs2XResult results = searchUnchecked(catalog, backend, obsContext, posAngles, nirBand, ec);
+            final Ngs2Result results = searchUnchecked(catalog, backend, obsContext, posAngles, nirBand, ec);
             if (interrupted) {
                 throw new CancellationException("Canceled");
             }
@@ -273,7 +273,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         }
     }
 
-    private static Ngs2XResult searchUnchecked(
+    private static Ngs2Result searchUnchecked(
         GemsGuideStarSearchOptions.CatalogChoice catalog,
         scala.Option<VoTableBackend>             backend,
         ObsContext                               obsContext,
@@ -320,7 +320,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
                     )
                 );
 
-        return Ngs2XResult.fromJava(results, pwfsGuideStar);
+        return Ngs2Result.fromJava(results, pwfsGuideStar);
     }
 
 
@@ -331,7 +331,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         final WorldCoords                          basePos = tpe.getBasePos();
         final ObsContext                        obsContext = getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
         final Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
-        final Ngs2XResult results =
+        final Ngs2Result results =
             search(
                 GemsGuideStarSearchOptions.DEFAULT,
                 scala.Option.empty(),
@@ -349,7 +349,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     private Option<GemsGuideStars> findGuideStars(
         final ObsContext                         obsContext,
         final Set<edu.gemini.spModel.core.Angle> posAngles,
-        final Ngs2XResult results
+        final Ngs2Result results
     ) {
 
         interrupted = false;
@@ -424,7 +424,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 
     // Checks that the results are valid: There must be at least 1 valid tiptilt and flexure star each, as well as a
     // PWFS1 star.
-    private static void checkResults(final Ngs2XResult results) {
+    private static void checkResults(final Ngs2Result results) {
         final Map<String, Boolean> keyMap = new HashMap<>();
         for (final GemsCatalogSearchResults searchResults : results.gemsCatalogSearchResultAsJava()) {
             final String key = searchResults.criterion().key().group().getKey();
