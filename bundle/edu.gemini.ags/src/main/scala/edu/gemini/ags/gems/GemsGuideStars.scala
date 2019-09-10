@@ -16,15 +16,16 @@ import scalaz._
 import Scalaz._
 
 /**
-  * An NGS2 result comprises a classical GeMS catalog search result and a set of PWFS1 candidates.
-  */
+ * An NGS2 result combines a List of CWFS candidates with the selected PWFS1
+ * slow focus sensor star.
+ */
 final case class Ngs2Result(
-  gemsCatalogSearchResult: List[GemsCatalogSearchResults],
-  slowFocusSensor:         Option[SiderealTarget]
+  cwfsCandidates:  List[SiderealTarget],
+  slowFocusSensor: Option[SiderealTarget]
 ) {
 
-  def gemsCatalogSearchResultAsJava: java.util.List[GemsCatalogSearchResults] =
-    gemsCatalogSearchResult.asJava
+  def cwfsCandidatesAsJava: java.util.List[SiderealTarget] =
+    cwfsCandidates.asJava
 
   def slowFocusSensorAsJava: JOption[SiderealTarget] =
     slowFocusSensor.asGeminiOpt
@@ -37,10 +38,10 @@ object Ngs2Result {
     Ngs2Result(Nil, None)
 
   def fromJava(
-    g: java.util.List[GemsCatalogSearchResults],
+    c: java.util.List[SiderealTarget],
     s: JOption[SiderealTarget]
   ): Ngs2Result =
-    Ngs2Result(g.asScala.toList, s.asScalaOpt)
+    Ngs2Result(c.asScala.toList, s.asScalaOpt)
 
 }
 
@@ -99,7 +100,7 @@ final case class GemsGuideStars(
 
       val strehlDifference = (Math.abs(thisStrel - thatStrehl) / ((thisStrel + thatStrehl) / 2.0)) * 100
       if (strehlDifference > 2) {
-        thisStrel.compareTo(thatStrehl)
+        -thisStrel.compareTo(thatStrehl)  // higher strehl should come first
       } else {
         val thisPa = this.pa
         val thatPa = that.pa
@@ -115,7 +116,7 @@ final case class GemsGuideStars(
         if (thisPa =/= thatPa) {
           matchesCardinalDirection(GemsGuideStars.cardinalDirections)
         } else {
-          thisStrel.compareTo(thatStrehl)
+          -thisStrel.compareTo(thatStrehl) // higher strehl first
         }
       }
     } else {

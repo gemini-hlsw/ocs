@@ -35,6 +35,7 @@ import org.specs2.mutable.SpecificationLike
 import AlmostEqual.AlmostEqualOps
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.collection.JavaConverters._
 
 import scalaz._
 import Scalaz._
@@ -62,14 +63,8 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY).wv(SPSiteQuality.WaterVapor.ANY)
       val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, conditions, testGemsVoTableCatalog("/gems_TYC_8345_1155_1.xml", conditions))
 
-      val expectedResults = 2
-      results should have size expectedResults
-
-      results.zipWithIndex.foreach { case (r, i) =>
-        LOGGER.info("Result #" + i)
-        LOGGER.info(" Criteria:" + r.criterion)
-        LOGGER.info(" Results size:" + r.results.size)
-      }
+      LOGGER.info(" Criteria:" + results.criterion)
+      LOGGER.info(" Results size:" + results.results.size)
 
       LOGGER.info("gems results: size = " + gemsGuideStars.size)
       gemsGuideStars should have size 228
@@ -115,14 +110,8 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
 
       val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, conditions, testGemsVoTableCatalog("/gems_sn1987A.xml", conditions))
 
-      val expectedResults = 2
-      results should have size expectedResults
-
-      results.zipWithIndex.foreach { case (r, i) =>
-        LOGGER.info("Result #" + i)
-        LOGGER.info(" Criteria:" + r.criterion)
-        LOGGER.info(" Results size:" + r.results.size)
-      }
+      LOGGER.info(" Criteria:" + results.criterion)
+      LOGGER.info(" Results size:" + results.results.size)
 
       LOGGER.info("gems results: size = " + gemsGuideStars.size)
       gemsGuideStars should have size 208
@@ -168,14 +157,8 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
 
       val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, conditions, testGemsVoTableCatalog("/gems_m6.xml", conditions))
 
-      val expectedResults = 2
-      results should have size expectedResults
-
-      results.zipWithIndex.foreach { case (r, i) =>
-        LOGGER.info("Result #" + i)
-        LOGGER.info(" Criteria:" + r.criterion)
-        LOGGER.info(" Results size:" + r.results.size)
-      }
+      LOGGER.info(" Criteria:" + results.criterion)
+      LOGGER.info(" Results size:" + results.results.size)
 
       LOGGER.info("gems results: size = " + gemsGuideStars.size)
       gemsGuideStars should have size 252
@@ -221,14 +204,8 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
 
       val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, conditions, testGemsVoTableCatalog("/gems_bpm_37093.xml", conditions))
 
-      val expectedResults = 2
-      results should have size expectedResults
-
-      results.zipWithIndex.foreach { case (r, i) =>
-        LOGGER.info("Result #" + i)
-        LOGGER.info(" Criteria:" + r.criterion)
-        LOGGER.info(" Results size:" + r.results.size)
-      }
+      LOGGER.info(" Criteria:" + results.criterion)
+      LOGGER.info(" Results size:" + results.results.size)
 
       LOGGER.info("gems results: size = " + gemsGuideStars.size)
       gemsGuideStars should have size 100
@@ -314,7 +291,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
 
   }
 
-  def search(inst: SPInstObsComp, raStr: String, decStr: String, conditions: Conditions, catalog: GemsVoTableCatalog): (List[GemsCatalogSearchResults], List[GemsGuideStars]) = {
+  def search(inst: SPInstObsComp, raStr: String, decStr: String, conditions: Conditions, catalog: GemsVoTableCatalog): (GemsCatalogSearchResults, List[GemsGuideStars]) = {
     import scala.collection.JavaConverters._
 
     val coords = new WorldCoords(raStr, decStr)
@@ -327,13 +304,13 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
     val base = new HmsDegCoordinates.Builder(baseRA.toOldModel, baseDec.toOldModel).build
     val instrument = if (inst.isInstanceOf[Flamingos2]) GemsInstrument.flamingos2 else GemsInstrument.gsaoi
 
-    val posAngles = Set(Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270)).asJava
+    val posAngles = Set(Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
-    val options = new GemsGuideStarSearchOptions(instrument, posAngles)
+    val options = new GemsGuideStarSearchOptions(instrument, posAngles.asJava)
 
-    val results = Await.result(catalog.search(obsContext, base.toNewModel, options, scala.None)(implicitly), 5.seconds)
-    val gemsResults = GemsResultsAnalyzer.analyze(obsContext, posAngles, results.asJava, scala.None)
-    (results, gemsResults.asScala.toList)
+    val results = Await.result(catalog.search(obsContext, base.toNewModel, options)(implicitly), 5.seconds)
+    val gemsResults = GemsResultsAnalyzer.analyze(obsContext, posAngles, results.results, scala.None)
+    (results, gemsResults)
   }
 
   def progress(s: Strehl, count: Int, total: Int, usable: Boolean): Boolean = true

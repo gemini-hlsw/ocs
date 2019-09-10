@@ -86,8 +86,8 @@ final case class GemsStrategy(
   override def candidates(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[ProbeCandidates]] = {
 
     // Extract something we can understand from the GemsCatalogSearchResults.
-    def simplifiedResult(results: List[GemsCatalogSearchResults]): List[ProbeCandidates] =
-      results.flatMap { result =>
+    def simplifiedResult(results: Option[GemsCatalogSearchResults]): List[ProbeCandidates] =
+      results.toList.flatMap { result =>
         val so = result.results  // extract the sky objects from this thing
         // For each guide probe associated with these sky objects, add a tuple
         // (guide probe, sky object list) to the results
@@ -96,54 +96,52 @@ final case class GemsStrategy(
         }
       }
 
-    // why do we need multiple position angles?  catalog results are given in
-    // a ring (limited by radius limits) around a base position ... confusion
-    val posAngles   = (ctx.getPositionAngle :: (0 until 360 by 90).map(Angle.fromDegrees(_)).toList).toSet
-    search(ctx, posAngles, None)(ec).map(simplifiedResult)
+    // Here we don't care about position angle because we aren't doing an
+    // analysis.
+    search(ctx, Set(Angle.zero))(ec).map(simplifiedResult)
   }
 
   override def estimate(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Estimate] = {
     // Create a set of the angles to try.
     val anglesToTry = (0 until 360 by 90).map(Angle.fromDegrees(_)).toSet
 
-    // Get the query results and convert them to GeMS-specific ones.
-    val results = search(ctx, anglesToTry, None)(ec)
-
     // Iterate over 90 degree position angles if no 3-star asterism is found at PA = 0.
-    val gemsCatalogResults = results.map(result => GemsResultsAnalyzer.analyzeGoodEnough(ctx, anglesToTry, result, _.stars.size < 3))
+    val gemsCatalogResults: Future[List[GemsGuideStars]] =
+      search(ctx, anglesToTry)(ec).map { result =>
+        val targets = result.fold(List.empty[SiderealTarget])(_.results)
+        GemsResultsAnalyzer.analyzeGoodEnough(ctx, anglesToTry, targets, _.stars.size < 3)
+      }
 
-    // We only want Canopus targets, so filter to those and then determine if the asterisms are big enough.
+    // Determine if the asterisms are big enough.
     gemsCatalogResults.map { ggsLst =>
       val largestAsterism = ggsLst.map(_.guideGroup.grp.toManualGroup.targetMap.keySet.intersection(GemsStrategy.canopusProbes).size).fold(0)(math.max)
       AgsStrategy.Estimate.toEstimate(largestAsterism / 3.0)
     }
   }
 
-  protected [impl] def search(ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand])(ec: ExecutionContext): Future[List[GemsCatalogSearchResults]] =
-    ctx.getBaseCoordinates.asScalaOpt.fold(Future.successful(List.empty[GemsCatalogSearchResults])) { base =>
-    // Get the instrument: F2 or GSAOI?
-    val gemsInstrument =
-      (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI) ? GemsInstrument.gsaoi | GemsInstrument.flamingos2
-    // Search options
-    val gemsOptions = new GemsGuideStarSearchOptions(gemsInstrument, posAngles.asJava)
+  protected [impl] def search(
+    ctx:       ObsContext,
+    posAngles: Set[Angle]
+  )(
+    ec: ExecutionContext
+  ): Future[Option[GemsCatalogSearchResults]] =
 
-    // Perform the catalog search, using GemsStrategy's backend
-    val results = GemsVoTableCatalog(catalogName, backend).search(ctx, base.toNewModel, gemsOptions, nirBand)(ec)
+    // TODO-NGS: we need to search from the center of the bounding box of the
+    // intersection of the AO areas at all offset positions, not the base
+    // position itself.
+    ctx.getBaseCoordinates.asScalaOpt.fold(Future.successful(Option.empty[GemsCatalogSearchResults])) { base =>
+      // Get the instrument: F2 or GSAOI?
+      val gemsInstrument =
+        (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI) ? GemsInstrument.gsaoi | GemsInstrument.flamingos2
 
-    // Now check that the results are valid: there must be a valid tip-tilt and flexure star each.
-    results.map { r =>
-      val AllKeys:List[GemsGuideProbeGroup] = List(CanopusWfs.Group.instance, GsaoiOdgw.Group.instance)
-      val containedKeys = r.map(_.criterion.key.group)
-      // Return a list only if both guide probes returned a value
-      ~(containedKeys.forall(AllKeys.contains) option r)
+      // Search options
+      val gemsOptions = new GemsGuideStarSearchOptions(gemsInstrument, posAngles.asJava)
+
+      // Perform the catalog search, using GemsStrategy's backend
+      GemsVoTableCatalog(catalogName, backend)
+        .search(ctx, base.toNewModel, gemsOptions)(ec)
+        .map(r => Some(r))
     }
-  }
-
-  private def findGuideStars(ctx: ObsContext, posAngles: Set[Angle], results: List[GemsCatalogSearchResults]): Option[GemsGuideStars] = {
-    // Passing in null to say we don't want a ProgressMeter.
-    val gemsResults = GemsResultsAnalyzer.analyze(ctx, posAngles.asJava, results.asJava, None).asScala
-    gemsResults.headOption
-  }
 
   override def select(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Option[Selection]] = {
     val posAngles = ctx.getInstrument.getType match {
@@ -155,9 +153,11 @@ final case class GemsStrategy(
         Set(ctx.getPositionAngle, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
     }
 
-    val results = search(ctx, posAngles, None)(ec)
-    results.map { r =>
-      val gemsGuideStars = findGuideStars(ctx, posAngles, r)
+    search(ctx, posAngles)(ec).map { r =>
+      val gemsGuideStars =
+        GemsResultsAnalyzer
+          .analyze(ctx, posAngles, r.toList.flatMap(_.results), None)
+          .headOption // they are ordered by strehl and we want the best strehl
 
       // Now we must convert from an Option[GemsGuideStars] to a Selection.
       gemsGuideStars.map { x =>

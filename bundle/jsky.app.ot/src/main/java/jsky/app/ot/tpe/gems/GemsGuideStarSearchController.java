@@ -53,10 +53,9 @@ class GemsGuideStarSearchController {
         final ObsContext obsContext = _worker.getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
         final Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
 
-        final MagnitudeBand nirBand = _model.getBand().getBand();
         Ngs2Result result;
         try {
-            result = _worker.search(_model.getCatalog(), scala.Option.empty(), obsContext, posAngles, new scala.Some<>(nirBand), ec);
+            result = _worker.search(_model.getCatalog(), scala.Option.empty(), obsContext, posAngles, ec);
         } catch (final Exception e) {
             DialogUtil.error(_dialog, e);
             result = Ngs2Result.Empty();
@@ -69,7 +68,7 @@ class GemsGuideStarSearchController {
         // TODO-NGS2: Right now, we just drop the PWFS1 guide star and only include the Canopus guide stars.
         _model.setNGS2Result(result);
         if (!_model.isReviewCandidatesBeforeSearch()) {
-            _model.setGemsGuideStars(_worker.findAllGuideStars(obsContext, posAngles, result.gemsCatalogSearchResultAsJava()));
+            _model.setGemsGuideStars(_worker.findAllGuideStars(obsContext, posAngles, result.cwfsCandidatesAsJava()));
         }
     }
 
@@ -96,41 +95,14 @@ class GemsGuideStarSearchController {
         final ObsContext obsContext = _worker.getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
         final Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
 
-        _model.setGemsGuideStars(_worker.findAllGuideStars(obsContext, posAngles,
-                filter(excludeCandidates, _model.getNGS2Result().gemsCatalogSearchResultAsJava())));
-    }
+        final List<SiderealTarget> candidates =
+            new ArrayList<>(_model.getNGS2Result().cwfsCandidatesAsJava());
 
-    // Returns a list of the given gemsCatalogSearchResults, with any SiderealTargets removed that are not
-    // in the candidates list.
-    private List<GemsCatalogSearchResults> filter(final List<SiderealTarget> excludeCandidates,
-                                                  final List<GemsCatalogSearchResults> gemsCatalogSearchResults) {
-        final List<GemsCatalogSearchResults> results = new ArrayList<>();
-        for (GemsCatalogSearchResults in : gemsCatalogSearchResults) {
-            List<SiderealTarget> siderealTargets = new ArrayList<>(in.results().size());
-            siderealTargets.addAll(in.resultsAsJava());
-            siderealTargets = removeAll(siderealTargets, excludeCandidates);
-            if (!siderealTargets.isEmpty()) {
-                final GemsCatalogSearchResults out = new GemsCatalogSearchResults(siderealTargets, in.criterion());
-                results.add(out);
-            }
-        }
-        return results;
-    }
+        candidates.removeAll(excludeCandidates);
 
-    // Removes all the objects in the targets list that are also in the excludeCandidates list by comparing names
-    private List<SiderealTarget> removeAll(final List<SiderealTarget> targets, final List<SiderealTarget> excludeCandidates) {
-        return targets.stream().filter(siderealTarget -> !contains(excludeCandidates, siderealTarget)).collect(Collectors.toList());
-    }
-
-    // Returns true if a SkyObject with the same name is in the list
-    private boolean contains(final List<SiderealTarget> targets, final SiderealTarget target) {
-        final String name = target.name();
-        if (name != null) {
-            for (SiderealTarget s : targets) {
-                if (name.equals(s.name())) return true;
-            }
-        }
-        return false;
+        _model.setGemsGuideStars(
+            _worker.findAllGuideStars(obsContext, posAngles, candidates)
+        );
     }
 
     /**

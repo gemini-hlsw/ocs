@@ -21,6 +21,7 @@ import edu.gemini.spModel.core.Angle$;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
+import edu.gemini.spModel.gemini.gems.CanopusWfs;
 import edu.gemini.spModel.gemini.gems.GemsInstrument;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
@@ -253,14 +254,13 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         scala.Option<VoTableBackend>             backend,
         ObsContext                               obsContext,
         Set<edu.gemini.spModel.core.Angle>       posAngles,
-        scala.Option<MagnitudeBand>              nirBand,
         scala.concurrent.ExecutionContext        ec
     ) {
         try {
             interrupted = false;
             startProgress();
 
-            final Ngs2Result results = searchUnchecked(catalog, backend, obsContext, posAngles, nirBand, ec);
+            final Ngs2Result results = searchUnchecked(catalog, backend, obsContext, posAngles, ec);
             if (interrupted) {
                 throw new CancellationException("Canceled");
             }
@@ -278,7 +278,6 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         scala.Option<VoTableBackend>             backend,
         ObsContext                               obsContext,
         Set<edu.gemini.spModel.core.Angle>       posAngles,
-        scala.Option<MagnitudeBand>              nirBand,
         scala.concurrent.ExecutionContext        ec
     ) {
         final Coordinates basePos = obsContext.getBaseCoordinates().getOrNull();
@@ -290,14 +289,10 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         final GemsInstrument          instrument = inst instanceof Flamingos2 ? GemsInstrument.flamingos2 : GemsInstrument.gsaoi;
         final GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(instrument, posAngles);
 
-        // TODO-DEBUG:
-//        System.out.println("*** PERFORMING GeMS LOOKUP ***");
-        final List<GemsCatalogSearchResults> results =
+        // Get the candidate guide stars for canopus.
+        final GemsCatalogSearchResults results =
             new GemsVoTableCatalog(catalog.catalog(), backend)
-                .search4Java(obsContext, ModelConverters.toCoordinates(base), options, nirBand, 30, ec);
-
-//        results.forEach(r -> r.resultsAsJava().forEach(t -> System.out.println(t.name())));
-//        System.out.println("*** GeMS LOOKUP DONE ***");
+                .search4Java(obsContext, ModelConverters.toCoordinates(base), options, 30, ec);
 
         // Construct the AGS Strategy for finding the PWFS1 guide star.
         final AgsStrategy pwfs = new SingleProbeStrategy(
@@ -320,7 +315,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
                     )
                 );
 
-        return Ngs2Result.fromJava(results, pwfsGuideStar);
+        return new Ngs2Result(results.results(), ImOption.toScalaOpt(pwfsGuideStar));
     }
 
 
@@ -337,7 +332,6 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
                 scala.Option.empty(),
                 obsContext,
                 posAngles,
-                scala.Option.empty(),
                 ec
             );
         return findGuideStars(obsContext, posAngles, results);
@@ -349,7 +343,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     private Option<GemsGuideStars> findGuideStars(
         final ObsContext                         obsContext,
         final Set<edu.gemini.spModel.core.Angle> posAngles,
-        final Ngs2Result results
+        final Ngs2Result                         results
     ) {
 
         interrupted = false;
@@ -357,8 +351,13 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             // If no PWFS1 guide star, don't even bother.
             if (results.slowFocusSensor().nonEmpty()) {
                 startProgress();
-                final List<GemsGuideStars> gemsResults = GemsResultsAnalyzer.instance().analyze(obsContext, posAngles,
-                        results.gemsCatalogSearchResultAsJava(), new scala.Some<>(this));
+                final List<GemsGuideStars> gemsResults =
+                    GemsResultsAnalyzer.instance().analyzeForJava(
+                        obsContext,
+                        posAngles,
+                        results.cwfsCandidatesAsJava(),
+                        ImOption.apply(this)
+                    );
                 if (interrupted && gemsResults.size() == 0) {
                     throw new CancellationException("Canceled");
                 }
@@ -391,13 +390,21 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     /**
      * Returns a list of all possible Gems guide star sets.
      */
-    public List<GemsGuideStars> findAllGuideStars(ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
-                                                  List<GemsCatalogSearchResults> results) {
+    public List<GemsGuideStars> findAllGuideStars(
+        ObsContext                         obsContext,
+        Set<edu.gemini.spModel.core.Angle> posAngles,
+        List<SiderealTarget>               candidates
+    ) {
         interrupted = false;
         try {
             startProgress();
-            final List<GemsGuideStars> gemsResults = GemsResultsAnalyzer.instance().analyze(obsContext, posAngles,
-                    results, new scala.Some<>(this));
+            final List<GemsGuideStars> gemsResults =
+                GemsResultsAnalyzer.instance().analyzeForJava(
+                        obsContext,
+                        posAngles,
+                        candidates,
+                        ImOption.apply(this)
+                );
             if (interrupted && gemsResults.size() == 0) {
                 throw new CancellationException("Canceled");
             }
@@ -421,29 +428,22 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         }, ArrayList::addAll);
     }
 
+    private static void throwNoStars(final String name) {
+        throw new NoStarsException(String.format("No %s guide stars were found", name));
+    }
 
     // Checks that the results are valid: There must be at least 1 valid tiptilt and flexure star each, as well as a
     // PWFS1 star.
     private static void checkResults(final Ngs2Result results) {
-        final Map<String, Boolean> keyMap = new HashMap<>();
-        for (final GemsCatalogSearchResults searchResults : results.gemsCatalogSearchResultAsJava()) {
-            final String key = searchResults.criterion().key().group().getKey();
-            if (searchResults.results().nonEmpty()) {
-                keyMap.put(key, true);
-            } else if (!keyMap.containsKey(key)) {
-                keyMap.put(key, false);
-            }
+
+        // GeMS canopus results.
+        if (results.cwfsCandidatesAsJava().isEmpty()) {
+            throwNoStars(CanopusWfs.Group.instance.getKey());
         }
 
         // NGS2: Ensure a PWFS1 guide star has been found for slow focus sensing.
-        keyMap.put(AgsStrategyKey.Pwfs1SouthKey$.MODULE$.id(), results.slowFocusSensor().nonEmpty());
-
-        for (final String key : keyMap.keySet()) {
-            if (!keyMap.get(key)) {
-                throw new NoStarsException("No "
-                        + key
-                        + " guide stars were found");
-            }
+        if (results.slowFocusSensor().isEmpty()) {
+            throwNoStars(AgsStrategyKey.Pwfs1SouthKey$.MODULE$.id());
         }
     }
 

@@ -18,8 +18,8 @@ import scalaz._
 import Scalaz._
 
 class GemsGuideSearchOptionsSpec extends Specification {
-  val ra = Angle.fromHMS(3, 19, 48.2341).getOrElse(Angle.zero)
-  val dec = Angle.fromDMS(41, 30, 42.078).getOrElse(Angle.zero)
+  val ra     = Angle.fromHMS( 3, 19, 48.2341).getOrElse(Angle.zero)
+  val dec    = Angle.fromDMS(41, 30, 42.0780).getOrElse(Angle.zero)
   val target = new SPTarget(ra.toDegrees, dec.toDegrees)
   val targetEnvironment = TargetEnvironment.create(target)
   val inst = new Gsaoi
@@ -29,46 +29,16 @@ class GemsGuideSearchOptionsSpec extends Specification {
   val posAngles = new java.util.HashSet[Angle]()
 
   "GemsGuideSearchOptions" should {
-    "provide search options for gsaoi in instrument tip tilt mode" in {
+    "provide search options for canopus" in {
+      val ctx        = ObsContext.create(targetEnvironment, inst, JNone.instance[Site], SPSiteQuality.Conditions.BEST, null, null, JNone.instance())
       val instrument = GemsInstrument.gsaoi
 
-      val options = new GemsGuideStarSearchOptions(instrument, posAngles)
-      val criteria = options.searchCriteria(ctx, None).asScala
+      val options  = new GemsGuideStarSearchOptions(instrument, posAngles)
+      val criteria = options.canopusCriterion(ctx)
 
-      criteria should be size 2
-      criteria.head.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance))
-      criteria.head.criterion.magConstraint should beEqualTo(MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))))
-      criteria(1).key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, CanopusWfs.Group.instance))
-      criteria(1).criterion.magConstraint should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(18.0), Some(SaturationConstraint(11.5))))
-    }
-    "provide search options for gsaoi in canopus tip tilt mode" in {
-      val instrument = GemsInstrument.gsaoi
+      criteria.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, CanopusWfs.Group.instance))
+      criteria.criterion.magConstraint should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(17.0), Some(SaturationConstraint(10.5))))
 
-      val options = new GemsGuideStarSearchOptions(instrument, posAngles)
-      val criteria = options.searchCriteria(ctx, None).asScala
-
-      criteria should be size 2
-      criteria.head.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, CanopusWfs.Group.instance))
-      criteria.head.criterion.magConstraint should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(18.0), Some(SaturationConstraint(11.5))))
-      criteria(1).key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance))
-      criteria(1).criterion.magConstraint should beEqualTo(MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(17.0), Some(SaturationConstraint(8.0))))
-    }
-    "provide search options for gsaoi in both tip tilt modes" in {
-      val ctx = ObsContext.create(targetEnvironment, inst, JNone.instance[Site], SPSiteQuality.Conditions.BEST, null, null, JNone.instance())
-      val instrument = GemsInstrument.gsaoi
-
-      val options = new GemsGuideStarSearchOptions(instrument, posAngles)
-      val criteria = options.searchCriteria(ctx, None).asScala
-
-      criteria should be size 4
-      criteria.head.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, CanopusWfs.Group.instance))
-      criteria.head.criterion.magConstraint should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(18.0), Some(SaturationConstraint(11.5))))
-      criteria(1).key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance))
-      criteria(1).criterion.magConstraint should beEqualTo(MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(17.0), Some(SaturationConstraint(8.0))))
-      criteria(2).key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance))
-      criteria(2).criterion.magConstraint should beEqualTo(MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))))
-      criteria(3).key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, CanopusWfs.Group.instance))
-      criteria(3).criterion.magConstraint should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(18.0), Some(SaturationConstraint(11.5))))
     }
   }
 }

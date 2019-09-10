@@ -18,7 +18,7 @@ class GemsGuideStarSearchModel {
     private NirBandChoice        _band;
     private boolean              _reviewCandidatesBeforeSearch;
     private boolean              _allowPosAngleAdjustments;
-    private Ngs2Result _ngs2Result;
+    private Ngs2Result           _ngs2Result;
     private List<GemsGuideStars> _gemsGuideStars;
 
     public CatalogChoice getCatalog() {
@@ -72,9 +72,8 @@ class GemsGuideStarSearchModel {
 
     Option<SiderealTarget> targetAt(final int i) {
         return ImOption.fromOptional(
-            _ngs2Result.gemsCatalogSearchResultAsJava()
+            _ngs2Result.cwfsCandidatesAsJava()
                        .stream()
-                       .flatMap(r -> r.resultsAsJava().stream())
                        .skip(i)
                        .findFirst()
         );
