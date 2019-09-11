@@ -292,7 +292,13 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         // Get the candidate guide stars for canopus.
         final GemsCatalogSearchResults results =
             new GemsVoTableCatalog(catalog.catalog(), backend)
-                .search4Java(obsContext, ModelConverters.toCoordinates(base), options, 30, ec);
+                .search4Java(
+                    obsContext,
+                    ModelConverters.toCoordinates(base),
+                    options,
+                    30,
+                    ec
+                );
 
         // Construct the AGS Strategy for finding the PWFS1 guide star.
         final AgsStrategy pwfs = new SingleProbeStrategy(
@@ -300,6 +306,11 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             new Pwfs1NGS2Params(catalog.catalog()),
             backend
         );
+
+        // TODO-NGS2: |  This won't work because we don't know the pos angle and
+        // TODO-NGS2: |  we can't allow the pos angle to be selected by the PWFS
+        // TODO-NGS2: |  search in general -- needs to take the pos angle from
+        // TODO-NGS2: V  the result of the GeMS analysis.
 
         // Run the select and then dig out the actual guide star. The position
         // angle is irrelevant for PWFS1.

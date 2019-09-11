@@ -5,9 +5,10 @@ import edu.gemini.catalog.api.{ CatalogName, CatalogQuery }
 import edu.gemini.catalog.votable.VoTableBackend
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.ags.AgsStrategyKey.Ngs2Key
-import edu.gemini.spModel.core.{BandsList, RBandsList, SiderealTarget}
+import edu.gemini.spModel.core.{Angle, BandsList, RBandsList, SiderealTarget}
 import edu.gemini.spModel.guide.{GuideProbe, ValidatableGuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.telescope.{PosAngleConstraint, PosAngleConstraintAware}
 
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -68,10 +69,22 @@ final case class Ngs2Strategy(
       p <- pwfs.estimate(ctx, mt)(ec)
     } yield AgsStrategy.Estimate(g.probability * p.probability)
 
+  private def ctxAtFixedPositionAngle(c: ObsContext, a: Angle): ObsContext = {
+    val i  = c.getInstrument
+    val c0 = i match {
+      case a: PosAngleConstraintAware =>
+        a.setPosAngleConstraint(PosAngleConstraint.FIXED)
+        c.withInstrument(i)
+      case _                          =>
+        c
+    }
+    c0.withPositionAngle(a)
+  }
+
   override def select(ctx: ObsContext, mt: AgsMagnitude.MagnitudeTable)(ec: ExecutionContext): Future[Option[AgsStrategy.Selection]] =
     for {
       gOpt <- gems.select(ctx, mt)(ec)
-      ctx2 = gOpt.map(r => ctx.withPositionAngle(r.posAngle)).getOrElse(ctx)
+      ctx2 = gOpt.map(r => ctxAtFixedPositionAngle(ctx, r.posAngle)).getOrElse(ctx)
       pOpt <- pwfs.select(ctx2, mt)(ec)
     } yield {
       for {

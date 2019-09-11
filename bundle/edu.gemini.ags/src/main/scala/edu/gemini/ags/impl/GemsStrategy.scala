@@ -126,9 +126,6 @@ final case class GemsStrategy(
     ec: ExecutionContext
   ): Future[Option[GemsCatalogSearchResults]] =
 
-    // TODO-NGS: we need to search from the center of the bounding box of the
-    // intersection of the AO areas at all offset positions, not the base
-    // position itself.
     ctx.getBaseCoordinates.asScalaOpt.fold(Future.successful(Option.empty[GemsCatalogSearchResults])) { base =>
       // Get the instrument: F2 or GSAOI?
       val gemsInstrument =

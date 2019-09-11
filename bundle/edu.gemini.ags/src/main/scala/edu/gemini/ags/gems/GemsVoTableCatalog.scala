@@ -55,6 +55,11 @@ final case class GemsVoTableCatalog(
   def search(obsContext: ObsContext, basePosition: Coordinates, options: GemsGuideStarSearchOptions)(ec: ExecutionContext): Future[GemsCatalogSearchResults] = {
     val gemsCriterion = options.canopusCriterion(obsContext)
 
+    // TODO-NGS2: this assumes no offset positions. we need to do something like
+    // TODO-NGS2: in RadiusLimitCalc (and see how to respect the min radius in
+    // TODO-NGS2: Gaia searches since otherwise we may get way too many useless
+    // TODO-NGS2: results)
+
     val queryArgs = CatalogQuery(
       basePosition,
       gemsCriterion.criterion.radiusConstraint,

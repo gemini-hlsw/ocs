@@ -147,38 +147,6 @@ object GemsResultsAnalyzer {
       mascotProgress.asScalaOpt
     ).asJava
 
-  /*
-  {
-
-    val base            = obsContext.getBaseCoordinates.asScalaOpt.map(_.toNewModel)
-    val validCandidates = groupAndValidateCandidates(obsContext, posAngles, candidates)
-    val factor          = strehlFactor(new Some(obsContext))
-
-    base.fold(List.empty[GemsGuideStars]) { b =>
-
-      // tell the UI to update (ugh)
-      mascotProgress.foreach(_.setProgressTitle(s"Finding asterisms for CWFS"))
-
-      validCandidates.toList.flatMap { case (angles, targets) =>
-
-        // N.B. any angle will do so we can pick the minimum one. Assumes that
-        // angles is non-empty, which we know but should probably guarantee in
-        // the groupAndValidateCandidates return type.
-        MascotCat.findBestAsterismInTargetsList(
-          targets,
-          b.ra.toAngle.toDegrees,
-          b.dec.toDegrees,
-          RBandsList,
-          factor,
-          mascotProgress,
-          asterismPreFilter(_)
-        ).strehlList.map(toGemsGuideStars(_, angles.min))
-
-      }.sorted
-    }
-  }
-  */
-
   /**
    * Analyze the given position angles and search results to select tip tilt
    * asterisms. This version allows the progress argument to stop the strehl
@@ -212,10 +180,6 @@ object GemsResultsAnalyzer {
     mascotOption: Option[MascotProgress] \/ (Strehl => Boolean)
   ): List[GemsGuideStars] = {
 
-
-    // TODO-NGS: we need to search from the center of the bounding box of the
-    // intersection of the AO areas at all offset positions, not the base
-    // position itself.
 
     val base            = obsContext.getBaseCoordinates.asScalaOpt.map(_.toNewModel)
     val validCandidates = groupAndValidateCandidates(obsContext, posAngles, candidates)
@@ -316,8 +280,8 @@ object GemsResultsAnalyzer {
   protected [ags] def sortTargetsByBrightness(targetsList: List[SiderealTarget]): List[SiderealTarget] =
     targetsList.sortBy(RBandsList.extract)(MagnitudeOptionOrdering)
 
-
-  def toSPTarget(siderealTarget: SiderealTarget):SPTarget = new SPTarget(siderealTarget)
+  def toSPTarget(siderealTarget: SiderealTarget): SPTarget =
+    new SPTarget(siderealTarget)
 
 }
 
