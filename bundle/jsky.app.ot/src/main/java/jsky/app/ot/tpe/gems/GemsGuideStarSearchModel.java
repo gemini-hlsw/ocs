@@ -15,7 +15,6 @@ import java.util.List;
 class GemsGuideStarSearchModel {
 
     private CatalogChoice        _catalog;
-    private NirBandChoice        _band;
     private boolean              _reviewCandidatesBeforeSearch;
     private boolean              _allowPosAngleAdjustments;
     private Ngs2Result           _ngs2Result;
@@ -28,15 +27,6 @@ class GemsGuideStarSearchModel {
     public void setCatalog(final CatalogChoice catalog) {
         _catalog = catalog;
     }
-
-    public NirBandChoice getBand() {
-        return _band;
-    }
-
-    public void setBand(final NirBandChoice band) {
-        _band = band;
-    }
-
 
     void setReviewCandidatesBeforeSearch(final boolean reviewCanditatesBeforeSearch) {
         _reviewCandidatesBeforeSearch = reviewCanditatesBeforeSearch;

@@ -19,15 +19,9 @@ object GemsUtils4Java {
   /**
    * Outputs the target magnitudes used by the Asterism table on the Manual Search for GEMS
    */
-  def probeMagnitudeInUse(guideProbe: GuideProbe, referenceBand: MagnitudeBand, mags: ImList[Magnitude]): String = {
+  def probeMagnitudeInUse(mags: ImList[Magnitude]): String = {
     val availableMagnitudes = mags.asScalaList
-    // TODO Use GemsMagnitudeTable
-    val bandsList = if (CanopusWfs.Group.instance.getMembers.contains(guideProbe)) {
-        RBandsList
-      } else {
-        SingleBand(referenceBand)
-      }
-    val r = availableMagnitudes.find(m => bandsList.bandSupported(m.band))
+    val r = availableMagnitudes.find(m => RBandsList.bandSupported(m.band))
     ~r.map(m => f"${m.value}%5.2f (${m.band.name}%s)")
   }
 

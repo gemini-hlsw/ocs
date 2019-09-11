@@ -1,7 +1,9 @@
 package jsky.app.ot.tpe.gems;
 
-import edu.gemini.ags.gems.GemsUtils4Java;
+import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.catalog.api.CatalogName.UCAC4$;
 import jsky.catalog.FieldDesc;
@@ -22,7 +24,15 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     // The NIR band is selected in the UI, the others are listed afterwards (UNUSED_BAND*).
     // Always including them in the table makes the SkyObjectFactory code easier later on.
     private enum Cols {
-        CHECK, ID, _r, R, UC, NIR_BAND, RA, DEC, UNUSED_BAND1, UNUSED_BAND2
+        CHECK, ID, _r, R, UC, RA, DEC, J, H, K
+    }
+
+    private static final Set<Cols> BANDS_COLUMNS;
+
+    static {
+        final Set<Cols> tmp = new HashSet<>();
+        Collections.addAll(tmp, Cols._r, Cols.R, Cols.UC, Cols.J, Cols.H, Cols.K);
+        BANDS_COLUMNS = Collections.unmodifiableSet(tmp);
     }
 
     private static final String RA_COL = "ra_col";
@@ -37,11 +47,13 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     private final GemsGuideStarSearchModel _model;
     private final boolean _isUCAC4;
 
-    // The selected NIR band
-    private final String _nirBand;
-
     // The unselected bands (displayed at end)
-    private final String[] _unusedBands;
+    private final ImList<MagnitudeBand> _jhk =
+        DefaultImList.create(
+            MagnitudeBand.unsafeFromString("J"), // can't reference directly
+            MagnitudeBand.unsafeFromString("H"), // from Java so going through
+            MagnitudeBand.unsafeFromString("K")  // the lookup by string route
+        );
 
     // Table column names
     private final Vector<String> _columnNames;
@@ -50,10 +62,8 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     private List<SiderealTarget> _siderealTargets;
 
     CandidateGuideStarsTableModel(final GemsGuideStarSearchModel model) {
-        _model = model;
-        _nirBand = _model.getBand().name();
-        _unusedBands = getOtherNirBands(_nirBand);
-        _isUCAC4 = model.getCatalog().catalog() == UCAC4$.MODULE$;
+        _model       = model;
+        _isUCAC4     = model.getCatalog().catalog() == UCAC4$.MODULE$;
         _columnNames = makeColumnNames();
         setDataVector(makeDataVector(), _columnNames);
     }
@@ -68,27 +78,10 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
         } else {
             columnNames.add("R");
         }
-        columnNames.add(_nirBand);
         columnNames.add(RA_TITLE);
         columnNames.add(DEC_TITLE);
-        columnNames.add(_unusedBands[0]);
-        columnNames.add(_unusedBands[1]);
+        _jhk.foreach(b -> columnNames.add(b.name()));
         return columnNames;
-    }
-
-    private String[] getOtherNirBands(String band) {
-        final String[] bands = new String[2];
-        if ("J".equals(band)) {
-            bands[0] = "H";
-            bands[1] = "K";
-        } else if ("H".equals(band)) {
-            bands[0] = "J";
-            bands[1] = "K";
-        } else if ("K".equals(band)) {
-            bands[0] = "J";
-            bands[1] = "H";
-        }
-        return bands;
     }
 
     private Vector<Vector<Object>> makeDataVector() {
@@ -96,11 +89,10 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
         _siderealTargets = _model.getNGS2Result().cwfsCandidatesAsJava();
         final Vector<Vector<Object>> rows = new Vector<>();
         for (SiderealTarget siderealTarget : _siderealTargets) {
-            if (_isUCAC4) {
-                rows.add(CatalogUtils4Java.makeUCAC4Row(siderealTarget, _nirBand, _unusedBands));
-            } else {
-                rows.add(CatalogUtils4Java.makeRow(siderealTarget, _nirBand, _unusedBands));
-            }
+            rows.add(new Vector<Object>(_isUCAC4                     ?
+                CatalogUtils4Java.makeUCAC4Row(siderealTarget, _jhk) :
+                CatalogUtils4Java.makeRow(siderealTarget, _jhk)
+            ));
         }
         return rows;
     }
@@ -116,8 +108,7 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
             return Boolean.class;
         if (columnIndex == Cols.ID.ordinal())
             return Object.class;
-        if (columnIndex == Cols.R.ordinal() || columnIndex == Cols._r.ordinal() || columnIndex == Cols.UC.ordinal() || columnIndex == Cols.NIR_BAND.ordinal()
-                || columnIndex == Cols.UNUSED_BAND1.ordinal() || columnIndex == Cols.UNUSED_BAND2.ordinal())
+        if (BANDS_COLUMNS.stream().map(c -> c.ordinal()).anyMatch(i -> i == columnIndex))
             return Double.class;
         return String.class;
     }

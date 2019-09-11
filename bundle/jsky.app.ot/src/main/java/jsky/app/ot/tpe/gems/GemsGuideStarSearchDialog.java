@@ -137,7 +137,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
     private final JLabel _manualSelectionLabel = new JLabel("<html><body><p style='font-style:italic'>To manually add a target to a manual guide group, select one of the +CWFS1/2/3 options in the Position Editor and then click on a guide star.</p></body></html>");
 
     private final JComboBox<CatalogChoice> _catalogComboBox = new JComboBox<>(CatalogChoice.values());
-    private final JComboBox<NirBandChoice> _nirBandComboBox = new JComboBox<>(NirBandChoice.values());
     private final JCheckBox _reviewCandidatesCheckBox = new JCheckBox("Review candidates before asterism search", true);
     private final JCheckBox _allowPosAngleChangesCheckBox;
     private final JTabbedPane _tabbedPane = new JTabbedPane();
@@ -263,13 +262,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
             anchor = EAST;
         }});
 
-        panel.add(_nirBandComboBox, new GridBagConstraints() {{
-            gridx = 3;
-            gridy = 2;
-            anchor = WEST;
-            insets = valueInsets;
-        }});
-
         panel.add(_reviewCandidatesCheckBox, new GridBagConstraints() {{
             gridx = 1;
             gridy = 3;
@@ -326,7 +318,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
         // guide stars, the tool moves back to Pre-Analyze.
         final List<JComponent> searchParams = new ArrayList<>();
         searchParams.add(_catalogComboBox);
-        searchParams.add(_nirBandComboBox);
         searchParams.add(_reviewCandidatesCheckBox);
 
         // Not defined as search params in the pdf spec, but do influence the search parameters
@@ -347,7 +338,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
             }
         };
         _catalogComboBox.addActionListener(a);
-        _nirBandComboBox.addActionListener(a);
         _reviewCandidatesCheckBox.addActionListener(a);
         _allowPosAngleChangesCheckBox.addActionListener(a);
         _allowPosAngleChangesCheckBox.addActionListener(e ->
@@ -433,7 +423,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
 
     private void setEnabledStates(boolean enabled, boolean guideStarTabState, boolean asterismTabState) {
         _catalogComboBox.setEnabled(enabled);
-        _nirBandComboBox.setEnabled(enabled);
         _reviewCandidatesCheckBox.setEnabled(enabled);
         _allowPosAngleChangesCheckBox.setEnabled(enabled);
         _tabbedPane.setEnabled(enabled);
@@ -482,7 +471,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
 
     private void useDefaults() {
         _catalogComboBox.setSelectedItem(CatalogChoice.DEFAULT);
-        _nirBandComboBox.setSelectedItem(NirBandChoice.DEFAULT);
         _reviewCandidatesCheckBox.setSelected(true);
         _allowPosAngleChangesCheckBox.setSelected(posAngleConstraint == PosAngleConstraint.UNBOUNDED);
 
@@ -493,7 +481,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
     // Returns true if using default settings
     private boolean usingDefaults() {
         return _catalogComboBox.getSelectedItem() == CatalogChoice.DEFAULT
-                && _nirBandComboBox.getSelectedItem() == NirBandChoice.DEFAULT
                 && _reviewCandidatesCheckBox.isSelected()
                 && posAngleConstraint == PosAngleConstraint.UNBOUNDED;
     }
@@ -506,7 +493,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
         setState(State.QUERY);
         CatalogChoice catalogChoice = (CatalogChoice) _catalogComboBox.getSelectedItem();
         _model.setCatalog(catalogChoice);
-        _model.setBand((NirBandChoice) _nirBandComboBox.getSelectedItem());
         _model.setReviewCandidatesBeforeSearch(_reviewCandidatesCheckBox.isSelected());
         _model.setAllowPosAngleAdjustments(_allowPosAngleChangesCheckBox.isSelected());
         _model.setNGS2Result(Ngs2Result.Empty());
@@ -613,7 +599,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
     private void analyzeDone() {
         final Option<Long> when = _tpe.getObsContext().flatMap(ObsContext::getSchedulingBlockStart);
         CandidateAsterismsTreeTableModel treeTableModel = new CandidateAsterismsTreeTableModel(
-                _model.getGemsGuideStars(), _model.getBand().getBand(), when);
+                _model.getGemsGuideStars(), when);
         _candidateAsterismsTreeTable.setTreeTableModel(treeTableModel);
         _candidateAsterismsTreeTable.expandAll();
         _candidateAsterismsTreeTable.packAll();

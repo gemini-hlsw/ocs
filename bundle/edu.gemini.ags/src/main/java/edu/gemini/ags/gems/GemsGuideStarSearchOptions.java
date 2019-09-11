@@ -56,35 +56,6 @@ public final class GemsGuideStarSearchOptions {
         }
     }
 
-
-    // TODO-NGS: don't need this
-    public enum NirBandChoice {
-        J(MagnitudeBand.J$.MODULE$),
-        H(MagnitudeBand.H$.MODULE$),
-        K(MagnitudeBand.K$.MODULE$),
-        ;
-
-        public static final NirBandChoice DEFAULT = H;
-
-        private final MagnitudeBand _band;
-
-        NirBandChoice(MagnitudeBand band) {
-            _band = band;
-        }
-
-        public MagnitudeBand getBand() {
-            return _band;
-        }
-
-        public String displayValue() {
-            return _band.name();
-        }
-
-        public String toString() {
-            return displayValue();
-        }
-    }
-
     private final GemsInstrument instrument;
     private final Set<Angle>     posAngles;
 
