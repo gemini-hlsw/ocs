@@ -40,8 +40,14 @@ final case class GemsVoTableCatalog(
    * @param timeout      Timeout in seconds
    * @return list of search results
    */
-  def search4Java(obsContext: ObsContext, basePosition: Coordinates, options: GemsGuideStarSearchOptions, timeout: Int = 10, ec: ExecutionContext): GemsCatalogSearchResults =
-    Await.result(search(obsContext, basePosition, options)(ec), timeout.seconds)
+  def search4Java(
+    obsContext:   ObsContext,
+    basePosition: Coordinates,
+    options:      GemsGuideStarSearchOptions,
+    timeout:      Int = 10,
+    ec:           ExecutionContext
+  ): java.util.List[SiderealTarget] =
+    Await.result(search(obsContext, basePosition, options)(ec), timeout.seconds).asJava
 
   /**
    * Searches for the given base position according to the given options.
@@ -52,7 +58,14 @@ final case class GemsVoTableCatalog(
    * @param options      the search options
    * @return  Future with a list of search results
    */
-  def search(obsContext: ObsContext, basePosition: Coordinates, options: GemsGuideStarSearchOptions)(ec: ExecutionContext): Future[GemsCatalogSearchResults] = {
+  def search(
+    obsContext:   ObsContext,
+    basePosition: Coordinates,
+    options:      GemsGuideStarSearchOptions
+  )(
+    ec: ExecutionContext
+  ): Future[List[SiderealTarget]] = {
+
     val gemsCriterion = options.canopusCriterion(obsContext)
 
     // TODO-NGS2: this assumes no offset positions. we need to do something like
@@ -67,9 +80,8 @@ final case class GemsVoTableCatalog(
       catalog
     )
 
-    VoTableClient.catalog(queryArgs, backend)(ec).map { qr =>
-      GemsCatalogSearchResults(gemsCriterion, qr.result.targets.rows)
-    }
+    VoTableClient.catalog(queryArgs, backend)(ec).map(_.result.targets.rows)
+
   }
 
 }

@@ -63,8 +63,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY).wv(SPSiteQuality.WaterVapor.ANY)
       val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, conditions, testGemsVoTableCatalog("/gems_TYC_8345_1155_1.xml", conditions))
 
-      LOGGER.info(" Criteria:" + results.criterion)
-      LOGGER.info(" Results size:" + results.results.size)
+      LOGGER.info(" Results size:" + results.size)
 
       LOGGER.info("gems results: size = " + gemsGuideStars.size)
       gemsGuideStars should have size 228
@@ -110,8 +109,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
 
       val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, conditions, testGemsVoTableCatalog("/gems_sn1987A.xml", conditions))
 
-      LOGGER.info(" Criteria:" + results.criterion)
-      LOGGER.info(" Results size:" + results.results.size)
+      LOGGER.info(" Results size:" + results.size)
 
       LOGGER.info("gems results: size = " + gemsGuideStars.size)
       gemsGuideStars should have size 208
@@ -157,8 +155,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
 
       val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, conditions, testGemsVoTableCatalog("/gems_m6.xml", conditions))
 
-      LOGGER.info(" Criteria:" + results.criterion)
-      LOGGER.info(" Results size:" + results.results.size)
+      LOGGER.info(" Results size:" + results.size)
 
       LOGGER.info("gems results: size = " + gemsGuideStars.size)
       gemsGuideStars should have size 252
@@ -204,8 +201,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
 
       val (results, gemsGuideStars) = search(inst, base.getRA.toString, base.getDec.toString, conditions, testGemsVoTableCatalog("/gems_bpm_37093.xml", conditions))
 
-      LOGGER.info(" Criteria:" + results.criterion)
-      LOGGER.info(" Results size:" + results.results.size)
+      LOGGER.info(" Results size:" + results.size)
 
       LOGGER.info("gems results: size = " + gemsGuideStars.size)
       gemsGuideStars should have size 100
@@ -291,7 +287,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
 
   }
 
-  def search(inst: SPInstObsComp, raStr: String, decStr: String, conditions: Conditions, catalog: GemsVoTableCatalog): (GemsCatalogSearchResults, List[GemsGuideStars]) = {
+  def search(inst: SPInstObsComp, raStr: String, decStr: String, conditions: Conditions, catalog: GemsVoTableCatalog): (List[SiderealTarget], List[GemsGuideStars]) = {
     import scala.collection.JavaConverters._
 
     val coords = new WorldCoords(raStr, decStr)
@@ -309,7 +305,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
     val options = new GemsGuideStarSearchOptions(instrument, posAngles.asJava)
 
     val results = Await.result(catalog.search(obsContext, base.toNewModel, options)(implicitly), 5.seconds)
-    val gemsResults = GemsResultsAnalyzer.analyze(obsContext, posAngles, results.results, scala.None)
+    val gemsResults = GemsResultsAnalyzer.analyze(obsContext, posAngles, results, scala.None)
     (results, gemsResults)
   }
 

@@ -290,7 +290,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         final GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(instrument, posAngles);
 
         // Get the candidate guide stars for canopus.
-        final GemsCatalogSearchResults results =
+        final List<SiderealTarget> candidates =
             new GemsVoTableCatalog(catalog.catalog(), backend)
                 .search4Java(
                     obsContext,
@@ -326,7 +326,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
                     )
                 );
 
-        return new Ngs2Result(results.results(), ImOption.toScalaOpt(pwfsGuideStar));
+        return Ngs2Result.fromJava(candidates, pwfsGuideStar);
     }
 
 

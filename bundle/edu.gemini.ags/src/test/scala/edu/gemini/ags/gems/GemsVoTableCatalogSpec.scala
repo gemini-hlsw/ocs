@@ -48,8 +48,7 @@ class GemsVoTableCatalogSpec extends Specification {
       val mod = GemsTestVoTableMod.forCwfsMagnitudeLimitChange(conditions)
       val results = Await.result(GemsVoTableCatalog(PPMXL, Some(TestVoTableBackend("/gemsvotablecatalogquery.xml", mod))).search(ctx, base, options)(implicitly), 30.seconds)
 
-      results.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, CanopusWfs.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt",  RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))), Some(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
-      results.results should be size 5
+      results should be size 5
     }
   }
 }

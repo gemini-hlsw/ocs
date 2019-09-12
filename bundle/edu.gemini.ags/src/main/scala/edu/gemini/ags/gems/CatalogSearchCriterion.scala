@@ -98,19 +98,6 @@ case class CatalogSearchCriterion(name: String, radiusConstraint: RadiusConstrai
 case class GemsCatalogSearchCriterion(key: GemsCatalogSearchKey, criterion: CatalogSearchCriterion)
 
 /**
- * Results of a GeMS catalog search
- * See OT-24
- */
-case class GemsCatalogSearchResults(criterion: GemsCatalogSearchCriterion, results: List[SiderealTarget]) {
-  // Constructors for Java
-  def this(results: java.util.List[SiderealTarget], criterion: GemsCatalogSearchCriterion) = this(criterion, results.asScala.toList)
-
-  def resultsAsJava: java.util.List[SiderealTarget] = new java.util.ArrayList[SiderealTarget](results.asJava)
-
-  def targetAt(i: Int): GOption[SiderealTarget] = results.lift(i).asGeminiOpt
-}
-
-/**
  * Represents the GeMS catalog star options
  * See OT-24
  */
