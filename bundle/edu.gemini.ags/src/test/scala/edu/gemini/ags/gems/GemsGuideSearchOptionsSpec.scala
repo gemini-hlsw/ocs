@@ -36,8 +36,7 @@ class GemsGuideSearchOptionsSpec extends Specification {
       val options  = new GemsGuideStarSearchOptions(instrument, posAngles)
       val criteria = options.canopusCriterion(ctx)
 
-      criteria.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, CanopusWfs.Group.instance))
-      criteria.criterion.magConstraint should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(17.0), Some(SaturationConstraint(10.5))))
+      criteria.magConstraint should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(17.0), Some(SaturationConstraint(10.5))))
 
     }
   }

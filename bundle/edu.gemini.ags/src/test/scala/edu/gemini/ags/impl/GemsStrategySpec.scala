@@ -3,7 +3,7 @@ package edu.gemini.ags.impl
 import edu.gemini.ags.api.{AgsAnalysis, AgsGuideQuality, AgsStrategy}
 import edu.gemini.ags.api.AgsStrategy.Estimate
 import edu.gemini.ags.conf.ProbeLimitsTable
-import edu.gemini.ags.gems.{CatalogSearchCriterion, GemsCatalogSearchCriterion, GemsCatalogSearchKey, GemsTestVoTableMod}
+import edu.gemini.ags.gems.{CatalogSearchCriterion, GemsTestVoTableMod}
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.api.CatalogName.PPMXL
 import edu.gemini.catalog.votable.TestVoTableBackend

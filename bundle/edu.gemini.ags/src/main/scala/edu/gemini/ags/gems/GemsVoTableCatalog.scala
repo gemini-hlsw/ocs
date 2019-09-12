@@ -75,8 +75,8 @@ final case class GemsVoTableCatalog(
 
     val queryArgs = CatalogQuery(
       basePosition,
-      gemsCriterion.criterion.radiusConstraint,
-      gemsCriterion.criterion.magConstraint,
+      gemsCriterion.radiusConstraint,
+      gemsCriterion.magConstraint,
       catalog
     )
 

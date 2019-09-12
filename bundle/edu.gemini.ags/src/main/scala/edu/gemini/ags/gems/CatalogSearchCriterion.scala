@@ -91,14 +91,3 @@ case class CatalogSearchCriterion(name: String, radiusConstraint: RadiusConstrai
     Matcher(adjustedBase(base), adjustedLimits)
 
 }
-
-/**
- * See OT-24
- */
-case class GemsCatalogSearchCriterion(key: GemsCatalogSearchKey, criterion: CatalogSearchCriterion)
-
-/**
- * Represents the GeMS catalog star options
- * See OT-24
- */
-case class GemsCatalogSearchKey(starType: GemsGuideStarType, group: GemsGuideProbeGroup)

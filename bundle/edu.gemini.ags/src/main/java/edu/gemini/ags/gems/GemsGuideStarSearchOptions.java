@@ -73,7 +73,7 @@ public final class GemsGuideStarSearchOptions {
         return instrument;
     }
 
-    public GemsCatalogSearchCriterion canopusCriterion(
+    public CatalogSearchCriterion canopusCriterion(
         final ObsContext obsContext
     ) {
         final CanopusWfsCalculator calculator =
@@ -88,18 +88,12 @@ public final class GemsGuideStarSearchOptions {
 
         final GemsGuideProbeGroup group = CanopusWfs.Group.instance;
 
-        final CatalogSearchCriterion criterion =
-            calculator.searchCriterionBuilder(
-                String.format("%s %s", group.getDisplayName(), tiptilt.name()),
-                group.getRadiusLimits(),
-                instrument,
-                magConstraints,
-                posAngles
-            );
-
-        return new GemsCatalogSearchCriterion(
-            new GemsCatalogSearchKey(tiptilt, group),
-            criterion
+        return calculator.searchCriterionBuilder(
+            String.format("%s %s", group.getDisplayName(), tiptilt.name()),
+            group.getRadiusLimits(),
+            instrument,
+            magConstraints,
+            posAngles
         );
     }
 }
