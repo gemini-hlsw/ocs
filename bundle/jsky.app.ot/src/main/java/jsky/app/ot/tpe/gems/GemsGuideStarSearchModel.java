@@ -1,6 +1,6 @@
 package jsky.app.ot.tpe.gems;
 
-import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
+import edu.gemini.ags.gems.GemsCatalogChoice;
 import edu.gemini.ags.gems.GemsGuideStars;
 import edu.gemini.ags.gems.Ngs2Result;
 import edu.gemini.shared.util.immutable.ImOption;
@@ -14,17 +14,17 @@ import java.util.List;
  */
 class GemsGuideStarSearchModel {
 
-    private CatalogChoice        _catalog;
+    private GemsCatalogChoice    _catalog;
     private boolean              _reviewCandidatesBeforeSearch;
     private boolean              _allowPosAngleAdjustments;
     private Ngs2Result           _ngs2Result;
     private List<GemsGuideStars> _gemsGuideStars;
 
-    public CatalogChoice getCatalog() {
+    public GemsCatalogChoice getCatalog() {
         return _catalog;
     }
 
-    public void setCatalog(final CatalogChoice catalog) {
+    public void setCatalog(final GemsCatalogChoice catalog) {
         _catalog = catalog;
     }
 

@@ -249,11 +249,11 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      * @return catalog search results
      */
     public Ngs2Result search(
-        GemsGuideStarSearchOptions.CatalogChoice catalog,
-        scala.Option<VoTableBackend>             backend,
-        ObsContext                               obsContext,
-        Set<edu.gemini.spModel.core.Angle>       posAngles,
-        scala.concurrent.ExecutionContext        ec
+        GemsCatalogChoice                  catalog,
+        scala.Option<VoTableBackend>       backend,
+        ObsContext                         obsContext,
+        Set<edu.gemini.spModel.core.Angle> posAngles,
+        scala.concurrent.ExecutionContext  ec
     ) {
         try {
             interrupted = false;
@@ -273,11 +273,11 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     }
 
     private static Ngs2Result searchUnchecked(
-        GemsGuideStarSearchOptions.CatalogChoice catalog,
-        scala.Option<VoTableBackend>             backend,
-        ObsContext                               obsContext,
-        Set<edu.gemini.spModel.core.Angle>       posAngles,
-        scala.concurrent.ExecutionContext        ec
+        GemsCatalogChoice                  catalog,
+        scala.Option<VoTableBackend>       backend,
+        ObsContext                         obsContext,
+        Set<edu.gemini.spModel.core.Angle> posAngles,
+        scala.concurrent.ExecutionContext  ec
     ) {
         final Coordinates basePos = obsContext.getBaseCoordinates().getOrNull();
         final Angle        baseRA = new Angle(basePos.getRaDeg(), Angle.Unit.DEGREES);
@@ -334,7 +334,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         final Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
         final Ngs2Result results =
             search(
-                GemsGuideStarSearchOptions.DEFAULT,
+                GemsCatalogChoice.DEFAULT,
                 scala.Option.empty(),
                 obsContext,
                 posAngles,

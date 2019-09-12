@@ -1,6 +1,6 @@
 package jsky.app.ot.tpe.gems;
 
-import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
+import edu.gemini.ags.gems.GemsCatalogChoice;
 import edu.gemini.ags.gems.GemsGuideStars;
 import edu.gemini.ags.gems.Ngs2Result;
 import edu.gemini.pot.sp.SPComponentType;
@@ -136,7 +136,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
     private final JLabel _actionLabel = new JLabel();
     private final JLabel _manualSelectionLabel = new JLabel("<html><body><p style='font-style:italic'>To manually add a target to a manual guide group, select one of the +CWFS1/2/3 options in the Position Editor and then click on a guide star.</p></body></html>");
 
-    private final JComboBox<CatalogChoice> _catalogComboBox = new JComboBox<>(CatalogChoice.values());
+    private final JComboBox<GemsCatalogChoice> _catalogComboBox = new JComboBox<>(GemsCatalogChoice.values());
     private final JCheckBox _reviewCandidatesCheckBox = new JCheckBox("Review candidates before asterism search", true);
     private final JCheckBox _allowPosAngleChangesCheckBox;
     private final JTabbedPane _tabbedPane = new JTabbedPane();
@@ -470,7 +470,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
     }
 
     private void useDefaults() {
-        _catalogComboBox.setSelectedItem(CatalogChoice.DEFAULT);
+        _catalogComboBox.setSelectedItem(GemsCatalogChoice.DEFAULT);
         _reviewCandidatesCheckBox.setSelected(true);
         _allowPosAngleChangesCheckBox.setSelected(posAngleConstraint == PosAngleConstraint.UNBOUNDED);
 
@@ -480,7 +480,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
 
     // Returns true if using default settings
     private boolean usingDefaults() {
-        return _catalogComboBox.getSelectedItem() == CatalogChoice.DEFAULT
+        return _catalogComboBox.getSelectedItem() == GemsCatalogChoice.DEFAULT
                 && _reviewCandidatesCheckBox.isSelected()
                 && posAngleConstraint == PosAngleConstraint.UNBOUNDED;
     }
@@ -491,7 +491,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
 
     public void query() {
         setState(State.QUERY);
-        CatalogChoice catalogChoice = (CatalogChoice) _catalogComboBox.getSelectedItem();
+        GemsCatalogChoice catalogChoice = (GemsCatalogChoice) _catalogComboBox.getSelectedItem();
         _model.setCatalog(catalogChoice);
         _model.setReviewCandidatesBeforeSearch(_reviewCandidatesCheckBox.isSelected());
         _model.setAllowPosAngleAdjustments(_allowPosAngleChangesCheckBox.isSelected());
