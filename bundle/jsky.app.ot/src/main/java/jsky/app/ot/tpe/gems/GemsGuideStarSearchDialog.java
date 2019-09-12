@@ -254,13 +254,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
             anchor = WEST;
         }});
 
-        panel.add(new JLabel("NIR"), new GridBagConstraints() {{
-            gridx = 2;
-            gridy = 2;
-            insets = labelInsets;
-            anchor = EAST;
-        }});
-
         panel.add(_reviewCandidatesCheckBox, new GridBagConstraints() {{
             gridx = 1;
             gridy = 3;

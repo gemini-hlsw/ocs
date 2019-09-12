@@ -69,6 +69,7 @@ final case class GemsVoTableCatalog(
     catalogQuery(ctx, mt, catalog).fold(Future.successful(List.empty[SiderealTarget])) { q =>
       VoTableClient.catalog(q, backend)(ec).map(_.result.targets.rows)
     }
+  // TODO-NGS2: sort on R magnitude (share GemsResultsAnalyzer.MagnitudeOptionOrdering somehow)
 
 }
 
