@@ -1,6 +1,7 @@
 package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy, ProbeCandidates}
+import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.catalog.api.{ CatalogName, CatalogQuery }
 import edu.gemini.catalog.votable.VoTableBackend
 import edu.gemini.spModel.ags.AgsStrategyKey
@@ -33,25 +34,25 @@ final case class Ngs2Strategy(
   // SFS star selection
   private val pwfs = SingleProbeStrategy(AgsStrategyKey.Pwfs1SouthNgs2Key, Pwfs1NGS2Params(catalogName), backend)
 
-  override def magnitudes(ctx: ObsContext, mt: AgsMagnitude.MagnitudeTable): List[(GuideProbe, AgsMagnitude.MagnitudeCalc)] =
+  override def magnitudes(ctx: ObsContext, mt: MagnitudeTable): List[(GuideProbe, AgsMagnitude.MagnitudeCalc)] =
     gems.magnitudes(ctx, mt) ++ pwfs.magnitudes(ctx, mt)
 
-  override def analyze(ctx: ObsContext, mt: AgsMagnitude.MagnitudeTable): List[AgsAnalysis] =
+  override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
     gems.analyze(ctx, mt) ++ pwfs.analyze(ctx, mt)
 
-  override def analyze(ctx: ObsContext, mt: AgsMagnitude.MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
+  override def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
     if (pwfs.guideProbes.contains(guideProbe))
       pwfs.analyze(ctx, mt, guideProbe, guideStar)
     else
       gems.analyze(ctx, mt, guideProbe, guideStar)
 
-  override def analyzeMagnitude(ctx: ObsContext, mt: AgsMagnitude.MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
+  override def analyzeMagnitude(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
     if (pwfs.guideProbes.contains(guideProbe))
       pwfs.analyzeMagnitude(ctx, mt, guideProbe, guideStar)
     else
       gems.analyzeMagnitude(ctx, mt, guideProbe, guideStar)
 
-  override def candidates(ctx: ObsContext, mt: AgsMagnitude.MagnitudeTable)(ec: ExecutionContext): Future[List[ProbeCandidates]] =
+  override def candidates(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[ProbeCandidates]] =
     for {
       g <- gems.candidates(ctx, mt)(ec)
       p <- pwfs.candidates(ctx, mt)(ec)
@@ -60,10 +61,10 @@ final case class Ngs2Strategy(
   /**
     * Returns a list of catalog queries that would be used to search for guide stars with the given context
     */
-  override def catalogQueries(ctx: ObsContext, mt: AgsMagnitude.MagnitudeTable): List[CatalogQuery] =
+  override def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] =
     gems.catalogQueries(ctx, mt) ++ pwfs.catalogQueries(ctx, mt)
 
-  override def estimate(ctx: ObsContext, mt: AgsMagnitude.MagnitudeTable)(ec: ExecutionContext): Future[AgsStrategy.Estimate] =
+  override def estimate(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[AgsStrategy.Estimate] =
     for {
       g <- gems.estimate(ctx, mt)(ec)
       p <- pwfs.estimate(ctx, mt)(ec)
@@ -81,7 +82,7 @@ final case class Ngs2Strategy(
     c0.withPositionAngle(a)
   }
 
-  override def select(ctx: ObsContext, mt: AgsMagnitude.MagnitudeTable)(ec: ExecutionContext): Future[Option[AgsStrategy.Selection]] =
+  override def select(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Option[AgsStrategy.Selection]] =
     for {
       gOpt <- gems.select(ctx, mt)(ec)
       ctx2 = gOpt.map(r => ctxAtFixedPositionAngle(ctx, r.posAngle)).getOrElse(ctx)

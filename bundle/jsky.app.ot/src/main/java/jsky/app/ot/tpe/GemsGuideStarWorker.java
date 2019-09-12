@@ -252,14 +252,13 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         GemsCatalogChoice                  catalog,
         scala.Option<VoTableBackend>       backend,
         ObsContext                         obsContext,
-        Set<edu.gemini.spModel.core.Angle> posAngles,
         scala.concurrent.ExecutionContext  ec
     ) {
         try {
             interrupted = false;
             startProgress();
 
-            final Ngs2Result results = searchUnchecked(catalog, backend, obsContext, posAngles, ec);
+            final Ngs2Result results = searchUnchecked(catalog, backend, obsContext, ec);
             if (interrupted) {
                 throw new CancellationException("Canceled");
             }
@@ -276,15 +275,8 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         GemsCatalogChoice                  catalog,
         scala.Option<VoTableBackend>       backend,
         ObsContext                         obsContext,
-        Set<edu.gemini.spModel.core.Angle> posAngles,
         scala.concurrent.ExecutionContext  ec
     ) {
-        final Coordinates basePos = obsContext.getBaseCoordinates().getOrNull();
-        final Angle        baseRA = new Angle(basePos.getRaDeg(), Angle.Unit.DEGREES);
-        final Angle       baseDec = new Angle(basePos.getDecDeg(), Angle.Unit.DEGREES);
-        final SkyCoordinates base = new HmsDegCoordinates.Builder(baseRA, baseDec).build();
-        final SPInstObsComp  inst = obsContext.getInstrument();
-
         // Get the candidate guide stars for canopus.
         final List<SiderealTarget> candidates =
             new GemsVoTableCatalog(catalog.catalog(), backend)
@@ -337,7 +329,6 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
                 GemsCatalogChoice.DEFAULT,
                 scala.Option.empty(),
                 obsContext,
-                posAngles,
                 ec
             );
         return findGuideStars(obsContext, posAngles, results);

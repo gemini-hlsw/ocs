@@ -54,7 +54,7 @@ class GemsGuideStarSearchController {
 
         Ngs2Result result;
         try {
-            result = _worker.search(_model.getCatalog(), scala.Option.empty(), obsContext, posAngles, ec);
+            result = _worker.search(_model.getCatalog(), scala.Option.empty(), obsContext, ec);
         } catch (final Exception e) {
             DialogUtil.error(_dialog, e);
             result = Ngs2Result.Empty();
