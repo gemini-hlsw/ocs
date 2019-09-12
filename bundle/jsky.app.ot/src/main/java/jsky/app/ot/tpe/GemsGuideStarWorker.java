@@ -22,7 +22,6 @@ import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.gems.CanopusWfs;
-import edu.gemini.spModel.gemini.gems.GemsInstrument;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
@@ -286,16 +285,12 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         final SkyCoordinates base = new HmsDegCoordinates.Builder(baseRA, baseDec).build();
         final SPInstObsComp  inst = obsContext.getInstrument();
 
-        final GemsInstrument          instrument = inst instanceof Flamingos2 ? GemsInstrument.flamingos2 : GemsInstrument.gsaoi;
-        final GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(instrument, posAngles);
-
         // Get the candidate guide stars for canopus.
         final List<SiderealTarget> candidates =
             new GemsVoTableCatalog(catalog.catalog(), backend)
                 .search4Java(
                     obsContext,
-                    ModelConverters.toCoordinates(base),
-                    options,
+                    ProbeLimitsTable.loadOrThrow(),
                     30,
                     ec
                 );

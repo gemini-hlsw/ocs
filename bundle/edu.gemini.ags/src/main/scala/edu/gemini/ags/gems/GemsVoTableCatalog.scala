@@ -1,14 +1,18 @@
 package edu.gemini.ags.gems
 
+import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
+import edu.gemini.ags.impl.RadiusLimitCalc
+import edu.gemini.ags.gems.GemsMagnitudeTable.CanopusWfsMagnitudeLimitsCalculator
 import edu.gemini.catalog.api._
-import edu.gemini.catalog.api.CatalogName.UCAC4
 import edu.gemini.catalog.votable._
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.core.{Angle, MagnitudeBand, Coordinates}
-import edu.gemini.spModel.gemini.gems.GemsInstrument
+import edu.gemini.spModel.gems.GemsGuideStarType.tiptilt
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
+import edu.gemini.spModel.guide.GuideSpeed
 import edu.gemini.spModel.obs.context.ObsContext
-
+import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
 import scala.concurrent.{ExecutionContext, Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -20,6 +24,8 @@ import Scalaz._
 
 import jsky.util.gui.StatusLogger
 
+import GemsVoTableCatalog._
+
 /**
  * Implements GeMS guide star search. The catalog search will provide the inputs
  * to the analysis phase, which actually assigns guide stars to guiders.
@@ -30,58 +36,123 @@ final case class GemsVoTableCatalog(
 ) {
 
   /**
-   * Searches for the given base position according to the given options.
-   * Multiple queries are performed in parallel in background threads.
-   * This method is synchronous and can be used form the Java side of the OT
+   * Searches for candidate stars that may serve as either Canopus WFS guide
+   * stars or else PWFS1 slow focus sensor stars. This method is synchronous
+   * and can be used from Java.
    *
-   * @param obsContext   the context of the observation (needed to adjust for selected conditions)
-   * @param basePosition the base position to search for
-   * @param options      the search options
-   * @param timeout      Timeout in seconds
-   * @return list of search results
+   * @param ctx     observation context
+   * @param timeout timeout in seconds
+   * @return list of candidate guide stars
    */
   def search4Java(
-    obsContext:   ObsContext,
-    basePosition: Coordinates,
-    options:      GemsGuideStarSearchOptions,
-    timeout:      Int = 10,
-    ec:           ExecutionContext
+    ctx:     ObsContext,
+    mt:      MagnitudeTable,
+    timeout: Int = 10,
+    ec:      ExecutionContext
   ): java.util.List[SiderealTarget] =
-    Await.result(search(obsContext, basePosition, options)(ec), timeout.seconds).asJava
+    Await.result(search(ctx, mt)(ec), timeout.seconds).asJava
 
   /**
-   * Searches for the given base position according to the given options.
-   * Multiple queries are performed in parallel in background threads.
+   * Searches for candidate stars that may serve as either Canopus WFS guide
+   * stars or else PWFS1 slow focus sensor stars.
    *
-   * @param obsContext   the context of the observation (needed to adjust for selected conditions)
-   * @param basePosition the base position to search for
-   * @param options      the search options
-   * @return  Future with a list of search results
+   * @param ctx the context of the observation
+   * @return Future list of candidate guide stars
    */
   def search(
-    obsContext:   ObsContext,
-    basePosition: Coordinates,
-    options:      GemsGuideStarSearchOptions
+    ctx: ObsContext,
+    mt:  MagnitudeTable
   )(
     ec: ExecutionContext
-  ): Future[List[SiderealTarget]] = {
+  ): Future[List[SiderealTarget]] =
 
-    val gemsCriterion = options.canopusCriterion(obsContext)
+    catalogQuery(ctx, mt, catalog).fold(Future.successful(List.empty[SiderealTarget])) { q =>
+      VoTableClient.catalog(q, backend)(ec).map(_.result.targets.rows)
+    }
 
-    // TODO-NGS2: this assumes no offset positions. we need to do something like
-    // TODO-NGS2: in RadiusLimitCalc (and see how to respect the min radius in
-    // TODO-NGS2: Gaia searches since otherwise we may get way too many useless
-    // TODO-NGS2: results)
+}
 
-    val queryArgs = CatalogQuery(
-      basePosition,
-      gemsCriterion.radiusConstraint,
-      gemsCriterion.magConstraint,
+object GemsVoTableCatalog {
+
+  // TODO-NGS2: remove SingleProbeStrategyParams.Pwfs1NGS2Params
+
+  // Magnitude adjustment for the nominal faintness limit of the PWFS1 guide
+  // probe. Since it is not being used for guiding, we can tolerate stars 2.5
+  // mags fainter than normal.
+  val Pwfs1SlowFocusSensorAdjustment = 2.5
+
+  /**
+   * Calculates the range of magnitude constraints required for CWFS candidates.
+   * @param ctx observation context
+   * @return magnitude constraints for CWFS candidates in the given observing
+   *         conditions
+   */
+  def cwfsMagnitudeConstraints(ctx: ObsContext): MagnitudeConstraints =
+    CanopusWfsMagnitudeLimitsCalculator
+      .adjustGemsMagnitudeConstraintForJava(tiptilt, None, ctx.getConditions)
+
+  /**
+   * Calculates the range of magnitude constraints required for PWFS1 SFS
+   * candidates.
+   * @param ctx observation context
+   * @return magnitude constraints for PWFS1 SFS candidates in the given
+   *         observing conditions
+   */
+  def pwfsMagnitudeConstraints(
+    ctx: ObsContext,
+    mt:  MagnitudeTable
+  ): Option[MagnitudeConstraints] =
+
+    mt(ctx, PwfsGuideProbe.pwfs1).map { f =>
+      f(ctx.getConditions, GuideSpeed.FAST)
+        .adjust(_ + Pwfs1SlowFocusSensorAdjustment, identity)
+    }
+
+  /**
+   * Calculates the range of magnitude constraints required to include both
+   * PWFS1 as SFS and Canopus WFS in the given observing conditions.
+   *
+   * @param ctx observation context
+   *
+   * @return broadest necessary magnitude constraints for a candidate that may
+   *         serve as a PWFS1 SFS star or a Canopus WFS star
+   */
+  def magnitudeConstraints(
+    ctx: ObsContext,
+    mt:  MagnitudeTable
+  ): MagnitudeConstraints = {
+    val c = cwfsMagnitudeConstraints(ctx)
+    pwfsMagnitudeConstraints(ctx, mt).flatMap(_.union(c)).getOrElse(c)
+  }
+
+  /**
+   * Calculates the radius constraints required to include both PWFS1 and
+   * Canopus WFS stars, taking into account offset positions.
+   */
+  def radiusConstraint(ctx: ObsContext): RadiusConstraint =
+
+    RadiusLimitCalc
+      .getAgsQueryRadiusLimits(PwfsGuideProbe.pwfs1, ctx)
+      .getOrElse(RadiusConstraint.empty)
+
+  /**
+   * Returns the catalog query necessary to include both PWFS1 SFS and Canopus
+   * WFS candidates in a single query.
+   */
+  def catalogQuery(
+    ctx:     ObsContext,
+    mt:      MagnitudeTable,
+    catalog: CatalogName
+  ): Option[CatalogQuery] =
+
+    for {
+      b0 <- ctx.getBaseCoordinates.asScalaOpt
+      b1 <- b0.toCoreCoordinates.asScalaOpt
+    } yield CatalogQuery(
+      b1,
+      radiusConstraint(ctx),
+      magnitudeConstraints(ctx, mt),
       catalog
     )
-
-    VoTableClient.catalog(queryArgs, backend)(ec).map(_.result.targets.rows)
-
-  }
 
 }

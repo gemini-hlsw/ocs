@@ -2,6 +2,7 @@ package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy, ProbeCandidates}
 import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
+import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.ags.gems._
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.api.CatalogName.UCAC4
@@ -11,7 +12,7 @@ import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.gemini.flamingos2.{Flamingos2, Flamingos2OiwfsGuideProbe}
-import edu.gemini.spModel.gemini.gems.{CanopusWfs, GemsInstrument}
+import edu.gemini.spModel.gemini.gems.CanopusWfs
 import edu.gemini.spModel.gemini.gsaoi.{Gsaoi, GsaoiOdgw}
 import edu.gemini.spModel.gems.GemsGuideProbeGroup
 import edu.gemini.spModel.guide.OrderGuideGroup
@@ -121,16 +122,9 @@ final case class GemsStrategy(
   ): Future[List[SiderealTarget]] =
 
     ctx.getBaseCoordinates.asScalaOpt.fold(Future.successful(List.empty[SiderealTarget])) { base =>
-      // Get the instrument: F2 or GSAOI?
-      val gemsInstrument =
-        (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI) ? GemsInstrument.gsaoi | GemsInstrument.flamingos2
-
-      // Search options
-      val gemsOptions = new GemsGuideStarSearchOptions(gemsInstrument, posAngles.asJava)
-
       // Perform the catalog search, using GemsStrategy's backend
       GemsVoTableCatalog(catalogName, backend)
-        .search(ctx, base.toNewModel, gemsOptions)(ec)
+        .search(ctx, ProbeLimitsTable.loadOrThrow)(ec)
     }
 
   override def select(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Option[Selection]] = {

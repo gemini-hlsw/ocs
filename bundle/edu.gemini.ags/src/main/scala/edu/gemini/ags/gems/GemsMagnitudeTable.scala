@@ -4,7 +4,7 @@ import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.catalog.api._
 import edu.gemini.spModel.core._
-import edu.gemini.spModel.gemini.gems.{CanopusWfs, GemsInstrument}
+import edu.gemini.spModel.gemini.gems.CanopusWfs
 import edu.gemini.spModel.gemini.gsaoi.{Gsaoi, GsaoiOdgw}
 import edu.gemini.spModel.gems.GemsGuideStarType
 import edu.gemini.spModel.guide.{GuideProbe, GuideSpeed}
@@ -103,24 +103,7 @@ object GemsMagnitudeTable extends MagnitudeTable {
     def gemsMagnitudeConstraint(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]): MagnitudeConstraints
 
     def adjustGemsMagnitudeConstraintForJava(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand], conditions: Conditions): MagnitudeConstraints
-
-    def searchCriterionBuilder(name: String, radiusLimit: skycalc.Angle, instrument: GemsInstrument, magConstraint: MagnitudeConstraints, posAngles: java.util.Set[Angle]): CatalogSearchCriterion = {
-      val radiusConstraint = RadiusConstraint.between(Angle.zero, radiusLimit.toNewModel)
-      val searchOffset = instrument.getOffset.asScalaOpt.map(_.toNewModel)
-      val searchPA = posAngles.asScala.headOption
-      CatalogSearchCriterion(name, radiusConstraint, magConstraint, searchOffset, searchPA)
-    }
-
   }
-
-  /**
-   * Unfortunately, we need a lookup table for the Mascot algorithm to map GemsInstruments to GemsMagnitudeLimitsCalculators.
-   * We cannot include this in the GemsInstrument as this would cause dependency issues and we want to decouple these.
-   */
-  lazy val GemsInstrumentToMagnitudeLimitsCalculator = Map[GemsInstrument, LimitsCalculator](
-    GemsInstrument.gsaoi      -> GsaoiOdgwMagnitudeLimitsCalculator,
-    GemsInstrument.flamingos2 -> Flamingos2OiwfsMagnitudeLimitsCalculator
-  )
 
   lazy val GsaoiOdgwMagnitudeLimitsCalculator = new LimitsCalculator {
     /**

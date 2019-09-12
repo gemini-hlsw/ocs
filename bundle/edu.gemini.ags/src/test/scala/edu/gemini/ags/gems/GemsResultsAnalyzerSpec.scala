@@ -1,6 +1,7 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.ags.TargetsHelper
+import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.ags.gems.mascot.MascotProgress
 import edu.gemini.ags.gems.mascot.Strehl
 import edu.gemini.catalog.api.CatalogName.PPMXL
@@ -15,7 +16,6 @@ import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gems.CanopusWfs
 import edu.gemini.spModel.gemini.gems.Gems
-import edu.gemini.spModel.gemini.gems.GemsInstrument
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
@@ -295,16 +295,10 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
     val env = TargetEnvironment.create(baseTarget)
     val offsets = new java.util.HashSet[Offset]
     val obsContext = ObsContext.create(env, inst, JNone.instance[Site], conditions, offsets, new Gems, JNone.instance())
-    val baseRA = Angle.fromDegrees(coords.getRaDeg)
-    val baseDec = Angle.fromDegrees(coords.getDecDeg)
-    val base = new HmsDegCoordinates.Builder(baseRA.toOldModel, baseDec.toOldModel).build
-    val instrument = if (inst.isInstanceOf[Flamingos2]) GemsInstrument.flamingos2 else GemsInstrument.gsaoi
 
     val posAngles = Set(Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
-    val options = new GemsGuideStarSearchOptions(instrument, posAngles.asJava)
-
-    val results = Await.result(catalog.search(obsContext, base.toNewModel, options)(implicitly), 5.seconds)
+    val results = Await.result(catalog.search(obsContext, ProbeLimitsTable.loadOrThrow)(implicitly), 5.seconds)
     val gemsResults = GemsResultsAnalyzer.analyze(obsContext, posAngles, results, scala.None)
     (results, gemsResults)
   }

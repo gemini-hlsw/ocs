@@ -9,7 +9,6 @@ import edu.gemini.catalog.api.MagnitudeConstraints;
 import edu.gemini.spModel.core.Angle;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.gemini.gems.CanopusWfs;
-import edu.gemini.spModel.gemini.gems.GemsInstrument;
 import edu.gemini.spModel.gems.GemsGuideProbeGroup;
 import static edu.gemini.spModel.gems.GemsGuideStarType.tiptilt;
 import edu.gemini.spModel.gems.GemsTipTiltMode;
@@ -56,44 +55,6 @@ public final class GemsGuideStarSearchOptions {
         }
     }
 
-    private final GemsInstrument instrument;
-    private final Set<Angle>     posAngles;
-
     public static final CatalogChoice DEFAULT = CatalogChoice.DEFAULT;
 
-    public GemsGuideStarSearchOptions(
-        final GemsInstrument instrument,
-        final Set<Angle>     posAngles
-    ) {
-        this.instrument = instrument;
-        this.posAngles  = posAngles;
-    }
-
-    public GemsInstrument getInstrument() {
-        return instrument;
-    }
-
-    public CatalogSearchCriterion canopusCriterion(
-        final ObsContext obsContext
-    ) {
-        final CanopusWfsCalculator calculator =
-            GemsMagnitudeTable.CanopusWfsMagnitudeLimitsCalculator();
-
-        final MagnitudeConstraints magConstraints =
-            calculator.adjustGemsMagnitudeConstraintForJava(
-                tiptilt,
-                scala.Option.empty(),
-                obsContext.getConditions()
-            );
-
-        final GemsGuideProbeGroup group = CanopusWfs.Group.instance;
-
-        return calculator.searchCriterionBuilder(
-            String.format("%s %s", group.getDisplayName(), tiptilt.name()),
-            group.getRadiusLimits(),
-            instrument,
-            magConstraints,
-            posAngles
-        );
-    }
 }
