@@ -86,7 +86,7 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
 
     private Vector<Vector<Object>> makeDataVector() {
         System.out.println("--- CandidateGuideStarsTableModel.makeDataVector");
-        _siderealTargets = _model.getNGS2Result().cwfsCandidatesAsJava();
+        _siderealTargets = _model.getCandidates();
         final Vector<Vector<Object>> rows = new Vector<>();
         for (SiderealTarget siderealTarget : _siderealTargets) {
             rows.add(new Vector<Object>(_isUCAC4                     ?

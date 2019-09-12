@@ -317,8 +317,8 @@ class CandidateAsterismsTreeTable extends JXTreeTable {
     /**
      * Adds the checked asterisms to the target environment
      */
-    public void addCheckedAsterisms(final SiderealTarget slowFocusSensor) {
+    public void addCheckedAsterisms() {
         CandidateAsterismsTreeTableModel model = getCandidateAsterismsTreeTableModel();
-        _controller.add(model.getCheckedAsterisms(), model.getPrimaryIndex(0), slowFocusSensor);
+        _controller.add(model.getCheckedAsterisms(), model.getPrimaryIndex(0));
     }
 }

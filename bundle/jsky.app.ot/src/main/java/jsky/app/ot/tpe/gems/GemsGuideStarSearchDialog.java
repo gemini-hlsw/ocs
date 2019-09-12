@@ -2,7 +2,6 @@ package jsky.app.ot.tpe.gems;
 
 import edu.gemini.ags.gems.GemsCatalogChoice;
 import edu.gemini.ags.gems.GemsGuideStars;
-import edu.gemini.ags.gems.Ngs2Result;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.Function1;
 import edu.gemini.shared.util.immutable.ImOption;
@@ -392,7 +391,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         switch (state) {
             case PRE_QUERY:
                 _actionButton.setAction(_queryAction);
-                _model.setNGS2Result(Ngs2Result.Empty());
+                _model.setCandidates(Collections.emptyList());
                 _model.setGemsGuideStars(Collections.emptyList());
                 _candidateGuideStarsTable.clear();
                 _candidateAsterismsTreeTable.clear();
@@ -495,7 +494,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         _model.setCatalog(catalogChoice);
         _model.setReviewCandidatesBeforeSearch(_reviewCandidatesCheckBox.isSelected());
         _model.setAllowPosAngleAdjustments(_allowPosAngleChangesCheckBox.isSelected());
-        _model.setNGS2Result(Ngs2Result.Empty());
+        _model.setCandidates(Collections.emptyList());
         _model.setGemsGuideStars(Collections.emptyList());
 
         new SwingWorker() {
@@ -643,9 +642,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
 
     // Adds the selected asterism groups to the target env
     private void add() {
-        _model.getNGS2Result().slowFocusSensorAsJava().foreach(sfs ->
-            _candidateAsterismsTreeTable.addCheckedAsterisms(sfs)
-        );
+        _candidateAsterismsTreeTable.addCheckedAsterisms();
         setVisible(false);
         _tpe.repaint();
     }

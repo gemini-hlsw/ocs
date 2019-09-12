@@ -15,36 +15,6 @@ import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
 
-/**
- * An NGS2 result combines a List of CWFS candidates with the selected PWFS1
- * slow focus sensor star.
- */
-final case class Ngs2Result(
-  cwfsCandidates:  List[SiderealTarget],
-  slowFocusSensor: Option[SiderealTarget]
-) {
-
-  def cwfsCandidatesAsJava: java.util.List[SiderealTarget] =
-    cwfsCandidates.asJava
-
-  def slowFocusSensorAsJava: JOption[SiderealTarget] =
-    slowFocusSensor.asGeminiOpt
-
-}
-
-object Ngs2Result {
-
-  val Empty: Ngs2Result =
-    Ngs2Result(Nil, None)
-
-  def fromJava(
-    c: java.util.List[SiderealTarget],
-    s: JOption[SiderealTarget]
-  ): Ngs2Result =
-    Ngs2Result(c.asScala.toList, s.asScalaOpt)
-
-}
-
 final case class GemsStrehl(
   avg: Double,
   rms: Double,

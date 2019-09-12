@@ -2,11 +2,11 @@ package jsky.app.ot.tpe.gems;
 
 import edu.gemini.ags.gems.GemsCatalogChoice;
 import edu.gemini.ags.gems.GemsGuideStars;
-import edu.gemini.ags.gems.Ngs2Result;
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SiderealTarget;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -17,7 +17,7 @@ class GemsGuideStarSearchModel {
     private GemsCatalogChoice    _catalog;
     private boolean              _reviewCandidatesBeforeSearch;
     private boolean              _allowPosAngleAdjustments;
-    private Ngs2Result           _ngs2Result;
+    private List<SiderealTarget> _candidates;
     private List<GemsGuideStars> _gemsGuideStars;
 
     public GemsCatalogChoice getCatalog() {
@@ -44,12 +44,12 @@ class GemsGuideStarSearchModel {
         return _allowPosAngleAdjustments;
     }
 
-    Ngs2Result getNGS2Result() {
-        return _ngs2Result;
+    List<SiderealTarget> getCandidates() {
+        return _candidates;
     }
 
-    void setNGS2Result(final Ngs2Result ngs2Result) {
-        _ngs2Result = ngs2Result;
+    void setCandidates(final List<SiderealTarget> candidates) {
+        _candidates = Collections.unmodifiableList(candidates);
     }
 
     List<GemsGuideStars> getGemsGuideStars() {
@@ -61,11 +61,6 @@ class GemsGuideStarSearchModel {
     }
 
     Option<SiderealTarget> targetAt(final int i) {
-        return ImOption.fromOptional(
-            _ngs2Result.cwfsCandidatesAsJava()
-                       .stream()
-                       .skip(i)
-                       .findFirst()
-        );
+        return ImOption.fromOptional(_candidates.stream().skip(i).findFirst());
     }
 }

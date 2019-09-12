@@ -2,6 +2,7 @@ package edu.gemini.ags.gems
 
 import java.util.logging.Logger
 
+import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.ags.gems.mascot.{MascotCat, MascotProgress, Strehl}
 import edu.gemini.ags.gems.mascot.MascotCat.StrehlResults
 import edu.gemini.catalog.api.MagnitudeConstraints
@@ -11,8 +12,11 @@ import edu.gemini.spModel.gemini.gsaoi.{GsaoiOdgw, Gsaoi}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gems.GemsGuideProbeGroup
 import edu.gemini.spModel.gems.GemsGuideStarType.tiptilt
-import edu.gemini.spModel.guide.{GuideStarValidation, ValidatableGuideProbe, GuideProbe}
+import edu.gemini.spModel.guide.{GuideProbe, PatrolField, ValidatableGuideProbe}
+import edu.gemini.spModel.guide.GuideStarValidation.VALID
 import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
+import edu.gemini.spModel.target.obsComp.PwfsGuideProbe.pwfs1
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption}
 import edu.gemini.pot.ModelConverters._
@@ -57,44 +61,84 @@ object GemsResultsAnalyzer {
    * dim or too bright. (Typically the candidates will have been filtered by the
    * catalog search already, but in general any list of targets could be used.)
    */
-  private def groupAndValidateCandidates(
+  private def groupAndValidateTiptilt(
     obsContext: ObsContext,
     posAngles:  Set[Angle],
     candidates: List[SiderealTarget]
   ): Map[Set[Angle], List[SiderealTarget]] = {
 
-    // Canopus magnitude constraints for the conditions in the `ObsContext`.
-    val magc   = GemsMagnitudeTable
-                  .CanopusWfsMagnitudeLimitsCalculator
-                  .adjustGemsMagnitudeConstraintForJava(tiptilt, None, obsContext.getConditions)
+    val when = obsContext.getSchedulingBlockStart.asScalaOpt
+
+    def validate(target: SiderealTarget, ctx: ObsContext): Boolean =
+      when.flatMap(target.coords(_))
+          .map(edu.gemini.skycalc.Coordinates.fromCoreCoordinates)
+          .exists(CanopusWfs.areProbesInRange(_, ctx))
+
+    groupAndValidate(
+      obsContext,
+      posAngles,
+      candidates,
+      GemsVoTableCatalog.cwfsMagnitudeConstraints(obsContext),
+      validate
+    )
+
+  }
+
+  /**
+   * Selects the brightest candidate per Set of position angles that can reach it.
+   */
+  private def selectSlowFocus(
+    obsContext: ObsContext,
+    posAngles:  Set[Angle],
+    candidates: List[SiderealTarget]
+  ): Map[Set[Angle], SiderealTarget] = {
+
+    // The validation calculation is fairly expensive and could be optimized
+    // since we basically need one preconstructed validator per position angle
+    // instead of making a new one for each target and angle combination.
+    def validate(target: SiderealTarget, ctx: ObsContext): Boolean = {
+      val min = pwfs1.getVignettingClearance(ctx)
+      val pf  = pwfs1.getCorrectedPatrolField(PatrolField.fromRadiusLimits(min, PwfsGuideProbe.PWFS_RADIUS), ctx)
+      val v   = pf.validator(ctx)
+      v.validate(toSPTarget(target), ctx) == VALID
+    }
+
+    GemsVoTableCatalog
+      .pwfsMagnitudeConstraints(obsContext, ProbeLimitsTable.loadOrThrow)
+      .fold(Map.empty[Set[Angle], SiderealTarget]) { magc =>
+        groupAndValidate(obsContext, posAngles, candidates, magc, validate)
+          .mapValues(_.minBy(t => RBandsList.extract(t))(MagnitudeOptionOrdering))
+      }
+  }
+
+  private def groupAndValidate(
+    obsContext: ObsContext,
+    posAngles:  Set[Angle],
+    candidates: List[SiderealTarget],
+    magc:       MagnitudeConstraints,
+    rangeCheck: (SiderealTarget, ObsContext) => Boolean
+  ): Map[Set[Angle], List[SiderealTarget]] = {
 
     // Filter to include only candidates that are in the magnitude range for the
     // observation's conditions.
-    val valid  = candidates.filter(magc.searchBands.extract(_).exists(magc.contains))
-    val when   = obsContext.getSchedulingBlockStart
+    val valid = candidates.filter(magc.searchBands.extract(_).exists(magc.contains))
 
     // Observation contexts at each of the position angles.  Position angles
     // matter even though the "range" is circular because the same star has to
     // be reachable by a probe at all offset positions.
-    val ctxs   = posAngles.toList.map(obsContext.withPositionAngle)
+    val ctxs  = posAngles.toList.map(obsContext.withPositionAngle)
 
     // Which position angles work for candidate c?
     valid.foldRight(Map.empty[Set[Angle], List[SiderealTarget]]) { (c, m) =>
 
-      // Candidate coordinates in ancient "skycalc" format.
-      val coordsOpt = toSPTarget(c).getSkycalcCoordinates(when).asScalaOpt
-
-      // Set[Angle] where candidate is reachable.
-      val angles = coordsOpt.fold(Set.empty[Angle]) { coords =>
-        ctxs.foldLeft(Set.empty[Angle]) { (s, ctx) =>
-          if (CanopusWfs.areProbesInRange(coords, ctx)) s + ctx.getPositionAngle
-          else s
-        }
+      val angles = ctxs.foldLeft(Set.empty[Angle]) { (s, ctx) =>
+        if (rangeCheck(c, ctx)) s + ctx.getPositionAngle else s
       }
 
       if (angles.isEmpty) m // not reachable at all
       else m + ((angles, c :: m.getOrElse(angles, List.empty[SiderealTarget])))
     }
+
   }
 
   // Used by Mascot to discard pairs and triplets where one star differs in
@@ -171,6 +215,20 @@ object GemsResultsAnalyzer {
   ): List[GemsGuideStars] =
     analyzeEither(obsContext, posAngles, candidates, \/-(shouldContinue))
 
+  /**
+   * Combines the CWFS candidates for a set of position angles with the best
+   * SFS for those angles (if any).  If there is no SFS star for a given set
+   * of candidates, the candidates are removed.
+   */
+  private def combine(
+    cwfs: Map[Set[Angle], List[SiderealTarget]],
+    sfs:  Map[Set[Angle], SiderealTarget]
+  ): Map[Set[Angle], (List[SiderealTarget], SiderealTarget)] =
+    cwfs.collect {
+      case (as, cs) if sfs.isDefinedAt(as) => (as, (cs, sfs(as)))
+    }
+
+
   // Performs the actual analysis for the `analyze*` methods, which only differ
   // in how they interact with the world.
   private def analyzeEither(
@@ -180,17 +238,18 @@ object GemsResultsAnalyzer {
     mascotOption: Option[MascotProgress] \/ (Strehl => Boolean)
   ): List[GemsGuideStars] = {
 
-
-    val base            = obsContext.getBaseCoordinates.asScalaOpt.map(_.toNewModel)
-    val validCandidates = groupAndValidateCandidates(obsContext, posAngles, candidates)
-    val factor          = strehlFactor(new Some(obsContext))
+    val base         = obsContext.getBaseCoordinates.asScalaOpt.map(_.toNewModel)
+    val validTiptilt = groupAndValidateTiptilt(obsContext, posAngles, candidates)
+    val slowFocus    = selectSlowFocus(obsContext, posAngles, candidates)
+    val combined     = combine(validTiptilt, slowFocus)
+    val factor       = strehlFactor(new Some(obsContext))
 
     base.fold(List.empty[GemsGuideStars]) { b =>
 
       // tell the UI to update (ugh)
       mascotOption.swap.toOption.flatten.foreach(_.setProgressTitle(s"Finding asterisms for CWFS"))
 
-      validCandidates.toList.flatMap { case (angles, targets) =>
+      combined.toList.flatMap { case (angles, (targets, sfs)) =>
 
         // N.B. any angle will do so we can pick the minimum one. Assumes that
         // angles is non-empty, which we know but should probably guarantee in
@@ -200,7 +259,7 @@ object GemsResultsAnalyzer {
           b.ra.toAngle.toDegrees,
           b.dec.toDegrees,
           factor
-        ).strehlList.map(toGemsGuideStars(_, angles.min))
+        ).strehlList.map(toGemsGuideStars(_, sfs, angles.min))
 
       }.sorted
     }
@@ -216,13 +275,14 @@ object GemsResultsAnalyzer {
       c => MascotCat.findBestAsterismInTargetsList(_, _, _, RBandsList,_ , c, asterismPreFilter(_))
     )
 
-  private def toGemsGuideStars(strehl: Strehl, posAngle: Angle): GemsGuideStars = {
+  private def toGemsGuideStars(strehl: Strehl, sfs: SiderealTarget, posAngle: Angle): GemsGuideStars = {
 
     // All the CWFS guide windows are equivalent.  Assign them in any order.
     val guideProbeTargets =
-      targetListFromStrehl(strehl).zip(CanopusWfs.values).map { case (t, w) =>
-        GuideProbeTargets.create(w, toSPTarget(t))
-      }
+      GuideProbeTargets.create(pwfs1, toSPTarget(sfs)) ::
+        targetListFromStrehl(strehl).zip(CanopusWfs.values).map { case (t, w) =>
+          GuideProbeTargets.create(w, toSPTarget(t))
+        }
 
     GemsGuideStars(
       posAngle,
