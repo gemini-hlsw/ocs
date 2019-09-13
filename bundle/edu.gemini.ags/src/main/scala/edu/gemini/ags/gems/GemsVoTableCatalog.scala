@@ -75,8 +75,6 @@ final case class GemsVoTableCatalog(
 
 object GemsVoTableCatalog {
 
-  // TODO-NGS2: remove SingleProbeStrategyParams.Pwfs1NGS2Params
-
   // Magnitude adjustment for the nominal faintness limit of the PWFS1 guide
   // probe. Since it is not being used for guiding, we can tolerate stars 2.5
   // mags fainter than normal.

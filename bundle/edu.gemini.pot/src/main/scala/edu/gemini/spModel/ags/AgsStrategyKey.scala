@@ -20,14 +20,6 @@ object AgsStrategyKey {
     val id = "F2_OIWFS"
   }
 
-  // TODO-NGS2: We might want to rename this to CanopusKey or something.
-  case object GemsKey extends AgsStrategyKey {
-    val id = "GEMS" // TODO: was GemsAgs in GemsAgsStrategy. Does this matter?
-
-    // TODO-NGS2: Change this to something else.
-    override def displayName = "GeMS AGS"
-  }
-
   case object GmosNorthOiwfsKey extends AgsStrategyKey {
     val id = "GMOS-N_OIWFS"
   }
@@ -47,7 +39,7 @@ object AgsStrategyKey {
   case object Ngs2Key extends AgsStrategyKey {
     val id = "NGS2"
 
-     override def displayName = "GeMS AGS"
+    override def displayName = "GeMS AGS"
   }
 
   case object NiciOiwfsKey extends AgsStrategyKey {
@@ -72,11 +64,6 @@ object AgsStrategyKey {
 
   case object Pwfs1SouthKey extends AgsStrategyKey {
     val id = "GS_PWFS1"
-  }
-
-  // This should never be displayed: it is only used to get the right magnitude checks for NGS2 PWFS1.
-  case object Pwfs1SouthNgs2Key extends AgsStrategyKey {
-    val id = "GS_PWFS1_SFS"
   }
 
   case object Pwfs2SouthKey extends AgsStrategyKey {

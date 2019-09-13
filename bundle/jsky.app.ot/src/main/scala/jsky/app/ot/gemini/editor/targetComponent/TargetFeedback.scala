@@ -28,7 +28,6 @@ import scala.swing.{Alignment, GridBagPanel, Label}
 import scalaz._
 import Scalaz._
 import edu.gemini.ags.impl.{Ngs2Strategy, SingleProbeStrategyParams}
-import edu.gemini.spModel.ags.AgsStrategyKey.Pwfs1SouthNgs2Key
 import jsky.app.ot.gemini.editor.targetComponent.TargetGuidingFeedback.ProbeLimits.{le, lim}
 
 
