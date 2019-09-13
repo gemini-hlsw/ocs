@@ -443,7 +443,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         // Display label at left, PA at right
         JPanel panel2 = new JPanel(new BorderLayout(0, 5));
         panel.add(panel2, BorderLayout.SOUTH);
-        panel2.add(new JLabel("Check to include in target list, double-click to set as primary and view in position editor."),
+        panel2.add(new JLabel("Check to include in target list, double-click to set as primary."),
                 BorderLayout.WEST);
         panel2.add(_paLabel, BorderLayout.EAST);
         return panel;
