@@ -6,8 +6,7 @@ import edu.gemini.ags.gems.GemsMagnitudeTable.CanopusWfsMagnitudeLimitsCalculato
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable._
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.core.SiderealTarget
-import edu.gemini.spModel.core.{Angle, MagnitudeBand, Coordinates}
+import edu.gemini.spModel.core._
 import edu.gemini.spModel.gems.GemsGuideStarType.tiptilt
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.guide.GuideSpeed
@@ -67,9 +66,10 @@ final case class GemsVoTableCatalog(
   ): Future[List[SiderealTarget]] =
 
     catalogQuery(ctx, mt, catalog).fold(Future.successful(List.empty[SiderealTarget])) { q =>
-      VoTableClient.catalog(q, backend)(ec).map(_.result.targets.rows)
+      VoTableClient
+        .catalog(q, backend)(ec)
+        .map(_.result.targets.rows.sortBy(RBandsList.extract)(Magnitude.MagnitudeOptionValueOrdering))
     }
-  // TODO-NGS2: sort on R magnitude (share GemsResultsAnalyzer.MagnitudeOptionOrdering somehow)
 
 }
 
