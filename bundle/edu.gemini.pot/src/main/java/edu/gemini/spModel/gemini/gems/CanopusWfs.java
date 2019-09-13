@@ -214,6 +214,29 @@ public enum CanopusWfs implements GuideProbe, ValidatableGuideProbe, OffsetValid
     }
 
     /**
+     * Coordinates of the center of the probe range at all offset positions.
+     * @param ctx
+     * @return
+     */
+    public static Option<Coordinates> centerOfProbeRange(final ObsContext ctx) {
+        final Area        a = probeRange(ctx);
+        final Rectangle2D r = a.getBounds2D();
+        final Double      p = -r.getCenterX();
+        final Double      q = -r.getCenterY();
+
+        return ctx.getBaseCoordinates()
+                   .flatMap(c -> c.toCoreCoordinates())
+                   .map(c ->
+                       Coordinates.fromCoreCoordinates(
+                           c.offset(
+                               edu.gemini.spModel.core.Angle$.MODULE$.fromArcsecs(p),
+                               edu.gemini.spModel.core.Angle$.MODULE$.fromArcsecs(q)
+                           )
+                       )
+                   );
+    }
+
+    /**
      * Check if the primary guide star is in range from the given offset
      */
     @Override
