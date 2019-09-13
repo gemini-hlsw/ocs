@@ -1,6 +1,8 @@
 package edu.gemini.itc.baseline.util
 
 import edu.gemini.itc.shared._
+import edu.gemini.spModel.core.{BlackBody, EmissionLine, Library, PowerLaw, SpectralDistribution, UserDefined}
+import org.apache.ecs.xhtml.b
 
 // TEMPORARY helper
 // All input objects will become immutable data only objects (probably Scala case classes).
@@ -111,10 +113,19 @@ object Hash {
       odp.analysisMethod
     )
 
+  def calc(src: SpectralDistribution): Int =
+    src match {
+      case b: BlackBody => hash(b.temperature)
+      case p: PowerLaw => hash(p.index)
+      case e: EmissionLine => hash(e.wavelength.length.toString, e.width.toString, e.flux.toString, e.continuum.toString)
+      case u: UserDefined => hash(u.name)
+      case l: Library => hash(l.sedSpectrum)
+    }
+
   def calc(src: SourceDefinition): Int =
     hash(
       src.profile,
-      src.distribution,
+      calc(src.distribution),
       src.norm,               // this is the magnitude value
       src.normBand.name,      // this is the magnitude band name
       src.redshift.z

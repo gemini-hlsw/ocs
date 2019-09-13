@@ -14,7 +14,7 @@ unmanagedJars in Compile ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.scala-lang" %  "scala-compiler" % scalaVersion.value,
-  "com.squants"    %% "squants"        % "0.6.2"
+  "org.typelevel"  %% "squants"  % "1.5.0"
   )
 
 osgiSettings

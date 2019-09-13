@@ -23,28 +23,28 @@ case class Fixture[T <: InstrumentDetails](
                     tep: TelescopeDetails,
                     pdp: PlottingDetails
                        ) {
-  val hash = Hash.calc(ins) + Hash.calc(src) + Hash.calc(ocp) + Hash.calc(odp) + Hash.calc(tep) + Hash.calc(pdp)
+  val hash: Int = Hash.calc(ins) + Hash.calc(src) + Hash.calc(ocp) + Hash.calc(odp) + Hash.calc(tep) + Hash.calc(pdp)
 }
 
 object Fixture {
 
   // ==== Create fixtures by putting together matching sources, modes and configurations and mixing in conditions and telescope configurations
 
-  def rBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(RBandSources, ImagingModes,      configs, conds)
+  def rBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions): List[Fixture[T]] = fixtures(RBandSources, ImagingModes,      configs, conds)
 
-  def kBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(KBandSources, SpectroscopyModes, configs, conds)
+  def kBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions): List[Fixture[T]] = fixtures(KBandSources, SpectroscopyModes, configs, conds)
 
-  def kBandIfuFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(KBandSources, IfuModes,          configs, conds)
+  def kBandIfuFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions): List[Fixture[T]] = fixtures(KBandSources, IfuModes,          configs, conds)
 
-  def kBandIfuGmosFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(KBandSources, IfuSingleModes, configs, conds)
+  def kBandIfuGmosFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions): List[Fixture[T]] = fixtures(KBandSources, IfuSingleModes, configs, conds)
 
-  def kBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(KBandSources, ImagingModes,      configs, conds)
+  def kBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions): List[Fixture[T]] = fixtures(KBandSources, ImagingModes,      configs, conds)
 
-  def nBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(NBandSources, SpectroscopyModes, configs, conds)
+  def nBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions): List[Fixture[T]] = fixtures(NBandSources, SpectroscopyModes, configs, conds)
 
-  def nBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(NBandSources, ImagingModes,      configs, conds)
+  def nBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions): List[Fixture[T]] = fixtures(NBandSources, ImagingModes,      configs, conds)
 
-  def qBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(QBandSources, SpectroscopyModes, configs, conds)
+  def qBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions): List[Fixture[T]] = fixtures(QBandSources, SpectroscopyModes, configs, conds)
 
   // create fixtures from combinations of given input values
   private def fixtures[T <: InstrumentDetails](sources: List[SourceDefinition], modes: List[ObservationDetails], configs: List[T], conds: List[ObservingConditions]) = for {
@@ -58,19 +58,19 @@ object Fixture {
 
   // ==== IMAGING ANALYSIS MODES
   lazy val ImagingModes = List(
-    new ObservationDetails(
+    ObservationDetails(
       ImagingS2N(10, None, 200.0, 0.5, 5.0),
       AutoAperture(5.0)
     ),
-    new ObservationDetails(
+    ObservationDetails(
       ImagingS2N(10, Some(2), 200.0, 0.5, 5.0),
       UserAperture(2.0, 5.0)
     ),
-    new ObservationDetails(
+    ObservationDetails(
       ImagingInt(5, 300.0, None, 1.0, 5.0),
       AutoAperture(5.5)
     ),
-    new ObservationDetails(
+    ObservationDetails(
       ImagingInt(5, 300.0, Some(5), 1.0, 5.0),
       UserAperture(2.0, 5.0)
     )
@@ -78,45 +78,45 @@ object Fixture {
 
   // ==== SPECTROSCOPY ANALYSIS MODES
   lazy val SpectroscopyModes = List(
-    new ObservationDetails(
+    ObservationDetails(
       SpectroscopyS2N(6, Some(4), 300.0, 0.5, 10.0),
       AutoAperture(4.5)
     ),
-    new ObservationDetails(
+    ObservationDetails(
       SpectroscopyS2N(6, None, 300.0, 1.0, 10.0),
       UserAperture(2.5, 6.0)
     )
   )
 
   // ==== IFU ANALYSIS MODES
-  lazy val IfuModes = IfuSingleModes ++ IfuSummedModes ++ IfuRadialModes
+  lazy val IfuModes: List[ObservationDetails] = IfuSingleModes ++ IfuSummedModes ++ IfuRadialModes
 
   lazy val IfuSingleModes = List(
-    new ObservationDetails(
+    ObservationDetails(
       SpectroscopyS2N(10, None, 150.0, 0.5, 10.0),
       IfuSingle(1, 0.5)
     )
   )
   lazy val IfuSummedModes = List(
-    new ObservationDetails(
+    ObservationDetails(
       SpectroscopyS2N(6, Some(10), 300.0, 1.0, 8.0),
       IfuSummed(1, 2, 5, 0.0, 0.0)
     )
   )
   lazy val IfuRadialModes = List(
-    new ObservationDetails(
+    ObservationDetails(
       SpectroscopyS2N(3, None, 400.0, 1.0, 7.0),
       IfuRadial(1, 0.0, 0.0)
     ),
-    new ObservationDetails(
+    ObservationDetails(
       SpectroscopyS2N(3, Some(4), 400.0, 1.0, 7.0),
       IfuRadial(1, 0.5, 1.0)
     ),
-    new ObservationDetails(
+    ObservationDetails(
       SpectroscopyS2N(6, None, 300.0, 1.0, 6.0),
       IfuRadial(5, 0.0, 1.0)
     ),
-    new ObservationDetails(
+    ObservationDetails(
       SpectroscopyS2N(6, Some(2), 300.0, 1.0, 6.0),
       IfuRadial(5, 1.0, 1.0)
     )
@@ -126,13 +126,13 @@ object Fixture {
 
   // ------- U - BAND
   lazy val UBandSources = List(
-    new SourceDefinition(
+    SourceDefinition(
       GaussianSource(1.0),
       BlackBody(10000),
       1.0e-3, MagnitudeSystem.Vega, MagnitudeBand.U,
       Redshift(0.0)
     ),
-    new SourceDefinition(
+    SourceDefinition(
       GaussianSource(1.0),
       PowerLaw(-1.0),
       1.0e-3, MagnitudeSystem.Vega, MagnitudeBand.U,
@@ -142,14 +142,14 @@ object Fixture {
 
   // ------- R - BAND
   lazy val RBandSources = List(
-    new SourceDefinition(
+    SourceDefinition(
       PointSource,
       LibraryStar.A0V,
       20.0, MagnitudeSystem.Vega, MagnitudeBand.R,
       Redshift(0.0)
 
     ),
-    new SourceDefinition(
+    SourceDefinition(
       GaussianSource(1.0),
       BlackBody(8000),
       1.0e-3, MagnitudeSystem.Jy, MagnitudeBand.R,
@@ -160,14 +160,14 @@ object Fixture {
 
   // ------- K - BAND
   lazy val KBandSources = List(
-    new SourceDefinition(
+    SourceDefinition(
       PointSource,
       LibraryStar.A0V,
       12.0, MagnitudeSystem.Vega, MagnitudeBand.K,
       Redshift(0.0)
 
     ),
-    new SourceDefinition(
+    SourceDefinition(
       UniformSource,
       EmissionLine(2.2.microns, 250.0.kps, 5.0e-19.wattsPerSquareMeter, 1.0e-16.wattsPerSquareMeterPerMicron),
       22.0, SurfaceBrightness.Vega, MagnitudeBand.K,
@@ -178,14 +178,14 @@ object Fixture {
 
   // ------- N - BAND
   lazy val NBandSources = List(
-    new SourceDefinition(
+    SourceDefinition(
       PointSource,
       LibraryNonStar.NGC1068,
       9.0, MagnitudeSystem.AB, MagnitudeBand.N,
       Redshift(0.0)
 
     ),
-    new SourceDefinition(
+    SourceDefinition(
       UniformSource,
       EmissionLine(12.8.microns, 500.kps, 5.0e-19.wattsPerSquareMeter, 1.0e-16.wattsPerSquareMeterPerMicron),
       12.0, SurfaceBrightness.Vega, MagnitudeBand.N,
@@ -196,14 +196,14 @@ object Fixture {
 
   // ------- Q - BAND
   lazy val QBandSources = List(
-    new SourceDefinition(
+    SourceDefinition(
       GaussianSource(1.0),
       BlackBody(10000),
       1.0e-3, MagnitudeSystem.Vega, MagnitudeBand.Q,
       Redshift(0.0)
 
     ),
-    new SourceDefinition(
+    SourceDefinition(
       UniformSource,
       PowerLaw(-1.0),
       11.0, SurfaceBrightness.Vega, MagnitudeBand.Q,
@@ -225,7 +225,7 @@ object Fixture {
 
   // Defines a set of relevant observing conditions; total 9*4*3=108 conditions
   import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.SkyBackground._
-  lazy val ObservingConditions =
+  lazy val ObservingConditions: List[ObservingConditions] =
     for {
       (iq, cc, wv)  <- weatherConditions
       sb            <- List(PERCENT_50, PERCENT_80) // SB20=1, SB50=2, SB80=3, ANY=4
@@ -234,17 +234,17 @@ object Fixture {
 
   // Defines a set of relevant telescope configurations; total 1*2*2=4 configurations
   // NOTE: looking at TeleParameters.getWFS() it seems that AOWFS is always replaced with OIWFS
-  lazy val TelescopeConfigurations =
+  lazy val TelescopeConfigurations: List[TelescopeDetails] =
     for {
       coating       <- List(Coating.SILVER)       // don't test aluminium coating
       port          <- IssPort.values()
       wfs           <- List(GuideProbe.Type.OIWFS, GuideProbe.Type.PWFS)  // don't use AOWFS (?)
     } yield new TelescopeDetails(coating, port, wfs)
 
-  lazy val NoAltair    = None                                                                     // use this for spectroscopy
-  lazy val AltairNgsFL = Some(new AltairParameters(4.0,  9.0, FieldLens.IN,   GuideStarType.NGS)) // altair with NGS and field lens
-  lazy val AltairNgs   = Some(new AltairParameters(5.0, 10.0, FieldLens.OUT,  GuideStarType.NGS)) // altair with NGS w/o field lens
-  lazy val AltairLgs   = Some(new AltairParameters(6.0, 10.0, FieldLens.IN,   GuideStarType.LGS)) // altair with LGS (must have field lens in)
+  lazy val NoAltair: None.type = None                                                                     // use this for spectroscopy
+  lazy val AltairNgsFL = Some(AltairParameters(4.0, 9.0, FieldLens.IN, GuideStarType.NGS)) // altair with NGS and field lens
+  lazy val AltairNgs   = Some(AltairParameters(5.0, 10.0, FieldLens.OUT, GuideStarType.NGS)) // altair with NGS w/o field lens
+  lazy val AltairLgs   = Some(AltairParameters(6.0, 10.0, FieldLens.IN, GuideStarType.LGS)) // altair with LGS (must have field lens in)
 
   // ==== PLOTTING PARAMETERS
   // NOTE: These values only impact the resulting graphs which are not part of the baseline.

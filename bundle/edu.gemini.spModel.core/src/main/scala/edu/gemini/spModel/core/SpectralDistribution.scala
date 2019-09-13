@@ -40,7 +40,7 @@ sealed abstract class LibraryStar(val sedSpectrum: String) extends Library
 object LibraryStar {
 
   /** Finds the library star identified by the spectrum name. */
-  def findByName(n: String) = Values.find(_.sedSpectrum == n)
+  def findByName(n: String): Option[LibraryStar] = Values.find(_.sedSpectrum == n)
 
   /** Known library stars. */
   case object O5V     extends LibraryStar("O5V")
@@ -128,7 +128,7 @@ sealed abstract class LibraryNonStar(val label: String, val sedSpectrum: String)
 object LibraryNonStar {
 
   /** Finds a non-star spectrum identified by the given spectrum name (i.e. the ITC file name). */
-  def findByName(n: String) = values.find(_.sedSpectrum == n)
+  def findByName(n: String): Option[LibraryNonStar] = values.find(_.sedSpectrum == n)
 
   /** Known non-star library obejcts. */
   case object EllipticalGalaxy  extends LibraryNonStar("Elliptical Galaxy",                       "elliptical-galaxy")

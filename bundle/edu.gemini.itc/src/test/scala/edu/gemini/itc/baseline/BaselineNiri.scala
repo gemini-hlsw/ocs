@@ -9,10 +9,10 @@ import edu.gemini.spModel.gemini.niri.Niri._
  */
 object BaselineNiri {
 
-  lazy val Fixtures = KBandImaging ++ KBandSpectroscopy
+  lazy val Fixtures: List[Fixture[NiriParameters]] = KBandImaging ++ KBandSpectroscopy
 
   private lazy val KBandImaging = Fixture.kBandImgFixtures(List(
-    new NiriParameters(
+    NiriParameters(
       Filter.BBF_J,
       Disperser.NONE,
       Camera.F14,
@@ -22,7 +22,7 @@ object BaselineNiri {
       BuiltinROI.FULL_FRAME,
       Fixture.AltairNgsFL),
 
-    new NiriParameters(
+    NiriParameters(
       Filter.BBF_J,
       Disperser.NONE,
       Camera.F14,
@@ -32,7 +32,7 @@ object BaselineNiri {
       BuiltinROI.FULL_FRAME,
       Fixture.AltairNgs),
 
-    new NiriParameters(
+    NiriParameters(
       Filter.BBF_J,
       Disperser.NONE,
       Camera.F14,
@@ -44,7 +44,7 @@ object BaselineNiri {
 
 
 
-    new NiriParameters(
+    NiriParameters(
       Filter.BBF_K,
       Disperser.NONE,
       Camera.F32,
@@ -54,7 +54,7 @@ object BaselineNiri {
       BuiltinROI.CENTRAL_512,
       Fixture.AltairNgsFL),
 
-    new NiriParameters(
+    NiriParameters(
       Filter.BBF_K,
       Disperser.NONE,
       Camera.F32,
@@ -64,7 +64,7 @@ object BaselineNiri {
       BuiltinROI.CENTRAL_768,
       Fixture.AltairNgs),
 
-    new NiriParameters(
+    NiriParameters(
       Filter.BBF_K,
       Disperser.NONE,
       Camera.F32,
@@ -77,10 +77,10 @@ object BaselineNiri {
   ))
 
   private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
-    new NiriParameters(
+    NiriParameters(
       Filter.BBF_K,
       Disperser.K,
-      Camera.F6,                        // ITC supports only F6 in spectroscopy mode
+      Camera.F6, // ITC supports only F6 in spectroscopy mode
       ReadMode.IMAG_SPEC_NB,
       WellDepth.SHALLOW,
       Mask.MASK_1,

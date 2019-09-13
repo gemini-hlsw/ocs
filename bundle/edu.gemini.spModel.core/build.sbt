@@ -11,7 +11,7 @@ libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
   "org.scalaz" %% "scalaz-core" % ScalaZVersion,
   "org.scalaz" %% "scalaz-effect" % ScalaZVersion,
-  "com.squants"  %% "squants"  % "0.6.3"
+  "org.typelevel"  %% "squants"  % "1.5.0"
   )
 
 osgiSettings

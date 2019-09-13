@@ -17,7 +17,7 @@ unmanagedJars in Compile ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.squants"  %% "squants"  % "0.6.2"
+    "org.typelevel"  %% "squants"  % "1.5.0"
   )
 
 osgiSettings
@@ -63,4 +63,3 @@ OsgiKeys.importPackage := Seq(
 
 OsgiKeys.additionalHeaders +=
   ("Web-ContextPath" -> "itc")
-
