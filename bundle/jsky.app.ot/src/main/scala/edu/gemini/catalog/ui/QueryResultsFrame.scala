@@ -721,10 +721,10 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       val i = observationInfoFromForm
       val ctx = i.toContext
       for {
-        sel        <- guider.selection.item.some
-        c          <- ctx
-        s          <- sel.strategy.magnitudes(c, i.mt).map(k => ProbeLimits(sel.strategy.probeBands, c, k._2))
-        dr         <- s.flatMap(_.detailRange)
+        sel <- guider.selection.item.some
+        c   <- ctx
+        s   <- sel.strategy.magnitudes(c, i.mt).map(k => ProbeLimits.fromCalc(sel.strategy.probeBands, c, k._2))
+        dr  <- s.flatMap(_.detailRange)
       } limitsLabel.text = dr
     }
 

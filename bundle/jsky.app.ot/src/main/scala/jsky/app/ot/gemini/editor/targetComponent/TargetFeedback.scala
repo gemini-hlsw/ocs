@@ -98,21 +98,15 @@ object TargetGuidingFeedback {
 
 
   object ProbeLimits {
-    def showGuideSpeed(ctx: ObsContext): Boolean =
-      AgsRegistrar.currentStrategy(ctx).forall(_.hasGuideSpeed)
 
-    def apply(probeBands: BandsList, ctx: ObsContext, mc: MagnitudeCalc): Option[ProbeLimits] = {
+    def fromCalc(probeBands: BandsList, ctx: ObsContext, mc: MagnitudeCalc): Option[ProbeLimits] = {
       val conditions = ctx.getConditions
       val fast = mc.apply(conditions, FAST)
-//      val isPwfs1NGS2 = AgsRegistrar.currentStrategy(ctx).map(_.key).contains(Pwfs1SouthNgs2Key)
 
       def faint(gs: GuideSpeed) = mc.apply(conditions, gs).faintnessConstraint.brightness
 
       fast.saturationConstraint.map { sat =>
-        if (showGuideSpeed(ctx))
-          ProbeLimitsWithGuideSpeed(probeBands, sat.brightness, faint(FAST), faint(MEDIUM), faint(SLOW))
-        else
-          ProbeLimitsWithoutGuideSpeed(probeBands, sat.brightness, faint(SLOW), true)
+        ProbeLimitsWithGuideSpeed(probeBands, sat.brightness, faint(FAST), faint(MEDIUM), faint(SLOW))
       }
     }
 
@@ -132,23 +126,22 @@ object TargetGuidingFeedback {
     def detailRange: Option[String] = None
   }
 
-  // TODO-NGS2: The hack from SingleProbeStrategyParams propagates.
-  // TODO-NGS2: This is terrible, but we need to add 2.5 to faintness for NGS2 PWFS1.
-  // TODO-NGS2: This magic number should be moved somewhere, but where?
-  case class ProbeLimitsWithoutGuideSpeed(bands: BandsList, sat: Double, faint_unadjusted: Double, isPwfs1NGS2: Boolean) extends ProbeLimits {
-    override val faint: Double = faint_unadjusted + 2.5
-  }
+  final case class ProbeLimitsWithGuideSpeed(bands: BandsList, sat: Double, fast: Double, medium: Double, faint: Double) extends ProbeLimits {
+    override def detailRange: Option[String] = {
+      val f = lim(fast)
+      val m = lim(medium)
+      val s = lim(faint)
 
-  case class ProbeLimitsWithGuideSpeed(bands: BandsList, sat: Double, fast: Double, medium: Double, faint: Double) extends ProbeLimits {
-    override def detailRange: Option[String] =
-      s"${lim(sat)} $le FAST $le ${lim(fast)} < MEDIUM $le ${lim(medium)} < SLOW $le ${lim(faint)}".some
+      !(f.equals(m) && m.equals(s)) option
+        s"${lim(sat)} $le FAST $le $f < MEDIUM $le $m < SLOW $le $s"
+    }
   }
 
   // GuidingFeedback.Rows corresponding to the observation as a whole.
   def obsAnalysis(ctx: ObsContext, mt: MagnitudeTable): List[AnalysisRow] = {
     AgsRegistrar.currentStrategy(ctx).map { strategy =>
       val (calcTable, analysis, probeBands) = (strategy.magnitudes(ctx, mt).toMap, strategy.analyze(ctx, mt), strategy.probeBands)
-      val probeLimitsMap = calcTable.mapValues(ProbeLimits(probeBands, ctx, _))
+      val probeLimitsMap = calcTable.mapValues(ProbeLimits.fromCalc(probeBands, ctx, _))
 
       analysis.map { a =>
         val plo = for {
@@ -196,10 +189,19 @@ object TargetGuidingFeedback {
 
   // GuidingFeedback.Row related to the given guide star itself.
   def guideStarAnalysis(ctx: ObsContext, mt: MagnitudeTable, gp: ValidatableGuideProbe, target: SPTarget): Option[AnalysisRow] =
-    AgsAnalysis.analysis(ctx, mt, gp, target.toSiderealTarget(ctx.getSchedulingBlockStart), ProbeLimits.showGuideSpeed(ctx)).map { a =>
-      val plo = mt(ctx, gp).flatMap(ProbeLimits(gp.getBands, ctx, _))
-      AnalysisRow(a, plo, includeProbeName = false)
-    }
+    AgsRegistrar
+      .currentStrategy(ctx)
+      .flatMap { strategy =>
+        strategy
+          .analyze(ctx, mt, gp, target.toSiderealTarget(ctx.getSchedulingBlockStart))
+          .map { a =>
+            val plo = strategy.magnitudes(ctx, mt).toMap.get(gp).flatMap { mc =>
+              ProbeLimits.fromCalc(gp.getBands, ctx, mc)
+            }
+            AnalysisRow(a, plo, includeProbeName = false)
+         }
+       }
+
 }
 
 

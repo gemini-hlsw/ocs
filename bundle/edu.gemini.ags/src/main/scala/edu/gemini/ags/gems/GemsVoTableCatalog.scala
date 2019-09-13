@@ -105,7 +105,7 @@ object GemsVoTableCatalog {
   ): Option[MagnitudeConstraints] =
 
     mt(ctx, PwfsGuideProbe.pwfs1).map { f =>
-      f(ctx.getConditions, GuideSpeed.FAST)
+      f(ctx.getConditions, GuideSpeed.SLOW)
         .adjust(_ + Pwfs1SlowFocusSensorAdjustment, identity)
     }
 
