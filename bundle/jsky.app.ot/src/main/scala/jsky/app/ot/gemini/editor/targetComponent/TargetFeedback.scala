@@ -104,7 +104,7 @@ object TargetGuidingFeedback {
     def apply(probeBands: BandsList, ctx: ObsContext, mc: MagnitudeCalc): Option[ProbeLimits] = {
       val conditions = ctx.getConditions
       val fast = mc.apply(conditions, FAST)
-      val isPwfs1NGS2 = AgsRegistrar.currentStrategy(ctx).map(_.key).contains(Pwfs1SouthNgs2Key)
+//      val isPwfs1NGS2 = AgsRegistrar.currentStrategy(ctx).map(_.key).contains(Pwfs1SouthNgs2Key)
 
       def faint(gs: GuideSpeed) = mc.apply(conditions, gs).faintnessConstraint.brightness
 
@@ -112,7 +112,7 @@ object TargetGuidingFeedback {
         if (showGuideSpeed(ctx))
           ProbeLimitsWithGuideSpeed(probeBands, sat.brightness, faint(FAST), faint(MEDIUM), faint(SLOW))
         else
-          ProbeLimitsWithoutGuideSpeed(probeBands, sat.brightness, faint(SLOW), isPwfs1NGS2)
+          ProbeLimitsWithoutGuideSpeed(probeBands, sat.brightness, faint(SLOW), true)
       }
     }
 

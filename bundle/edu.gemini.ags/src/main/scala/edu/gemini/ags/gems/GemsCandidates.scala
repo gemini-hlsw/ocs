@@ -37,6 +37,19 @@ object GemsCandidates {
   ): GemsCandidates =
     GemsCandidates(posAngle, cwfsCandidates.asScala.toList, slowFocusSensor)
 
+  def pwfs1BoundsCheck(ctx: ObsContext): SiderealTarget => Boolean = { t =>
+    val min = pwfs1.getVignettingClearance(ctx)
+    val pf  = pwfs1.getCorrectedPatrolField(PatrolField.fromRadiusLimits(min, PwfsGuideProbe.PWFS_RADIUS), ctx)
+    pf.validator(ctx).validate(new SPTarget(t), ctx) == VALID
+  }
+
+  def cwfsBoundsCheck(ctx: ObsContext): SiderealTarget => Boolean = { t =>
+    val when = ctx.getSchedulingBlockStart.asScalaOpt
+    when.flatMap(t.coords(_))
+        .map(edu.gemini.skycalc.Coordinates.fromCoreCoordinates)
+        .exists(CanopusWfs.areProbesInRange(_, ctx))
+  }
+
   def groupAndValidate(
     obsContext:   ObsContext,
     posAngles:    Set[Angle],
@@ -108,19 +121,16 @@ object GemsCandidates {
 
     val magc  = GemsVoTableCatalog.cwfsMagnitudeConstraints(obsContext)
     val valid = candidates.filter(ops.magConstraintsFilter(magc))
-    val when  = obsContext.getSchedulingBlockStart.asScalaOpt
-    val ctxs  = ops.posAngleContexts(obsContext, posAngles)
 
-    def rangeCheck(target: SiderealTarget, ctx: ObsContext): Boolean =
-      when.flatMap(target.coords(_))
-          .map(edu.gemini.skycalc.Coordinates.fromCoreCoordinates)
-          .exists(CanopusWfs.areProbesInRange(_, ctx))
+    val ctxs         = ops.posAngleContexts(obsContext, posAngles)
+    val boundsChecks = ctxs.map(cwfsBoundsCheck)
 
     // Which position angles work for candidate t?
     valid.foldRight(Map.empty[Set[Angle], List[SiderealTarget]]) { (t, m) =>
 
-      val angles = ctxs.foldLeft(Set.empty[Angle]) { (s, ctx) =>
-        if (rangeCheck(t, ctx)) s + ctx.getPositionAngle else s
+      val angles = ctxs.zip(boundsChecks).foldLeft(Set.empty[Angle]) {
+        case (s, (ctx, boundsCheck)) =>
+          if (boundsCheck(t)) s + ctx.getPositionAngle else s
       }
 
       if (angles.isEmpty) m // not reachable at all
@@ -144,16 +154,13 @@ object GemsCandidates {
         val magTargets = candidates.filter(ops.magConstraintsFilter(magc))
 
         // A PWFS1 range validator for each contex (i.e., position angle)
-        val ctxs       = ops.posAngleContexts(obsContext, posAngles)
-        val validators = ctxs.map { ctx =>
-          val min = pwfs1.getVignettingClearance(ctx)
-          val pf  = pwfs1.getCorrectedPatrolField(PatrolField.fromRadiusLimits(min, PwfsGuideProbe.PWFS_RADIUS), ctx)
-          pf.validator(ctx)
-        }
+        val ctxs         = ops.posAngleContexts(obsContext, posAngles)
+        val boundsChecks = ctxs.map(pwfs1BoundsCheck)
 
-        ctxs.zip(validators).foldLeft(Map.empty[Angle, SiderealTarget]) { case (m, (c, v)) =>
-          val valid = magTargets.filter(t => v.validate(new SPTarget(t), c) == VALID)
-          ops.findMinMag(valid).fold(m) { t => m + ((c.getPositionAngle, t)) }
+        ctxs.zip(boundsChecks).foldLeft(Map.empty[Angle, SiderealTarget]) {
+          case (m, (c, boundsCheck)) =>
+            val valid = magTargets.filter(boundsCheck)
+            ops.findMinMag(valid).fold(m) { t => m + ((c.getPositionAngle, t)) }
         }
       }
 

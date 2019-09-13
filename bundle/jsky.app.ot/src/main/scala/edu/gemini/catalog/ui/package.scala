@@ -11,7 +11,7 @@ import edu.gemini.catalog.api.CatalogName.UCAC4
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.{None => JNone}
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.ags.AgsStrategyKey.{GemsKey, Pwfs1NorthKey, Pwfs1SouthKey, Pwfs2NorthKey, Pwfs2SouthKey}
+import edu.gemini.spModel.ags.AgsStrategyKey.{Ngs2Key, Pwfs1NorthKey, Pwfs1SouthKey, Pwfs2NorthKey, Pwfs2SouthKey}
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.altair.{AltairParams, InstAltair}
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
@@ -80,7 +80,7 @@ case class ObservationInfo(ctx: Option[ObsContext],
   def guideProbe: Option[ValidatableGuideProbe] =
     strategy.map(_.strategy).flatMap { s =>
       s.key match {
-        case GemsKey => Some(CanopusWfs.cwfs3)
+        case Ngs2Key => Some(CanopusWfs.cwfs1)
         case _       => s.guideProbes.headOption.collect {
           case v: ValidatableGuideProbe => v
         }

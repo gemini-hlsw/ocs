@@ -126,3 +126,14 @@ case class MagnitudeConstraints(searchBands: BandsList, faintnessConstraint: Fai
     MagnitudeConstraints(searchBands, FaintnessConstraint(fl), sl.map(SaturationConstraint.apply))
   }
 }
+
+object MagnitudeConstraints {
+
+  def unbounded(searchBands: BandsList): MagnitudeConstraints =
+    MagnitudeConstraints(
+      searchBands,
+      FaintnessConstraint(Double.MaxValue),
+      Some(SaturationConstraint(Double.MinValue))
+    )
+
+}

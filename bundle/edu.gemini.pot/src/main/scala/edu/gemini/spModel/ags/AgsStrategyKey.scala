@@ -47,8 +47,7 @@ object AgsStrategyKey {
   case object Ngs2Key extends AgsStrategyKey {
     val id = "NGS2"
 
-    // TODO-NGS2: Uncomment this. This is the name we want at the end. Leaving it like this for now for debugging.
-    // override def displayName = "GeMS AGS"
+     override def displayName = "GeMS AGS"
   }
 
   case object NiciOiwfsKey extends AgsStrategyKey {
@@ -80,9 +79,6 @@ object AgsStrategyKey {
     val id = "GS_PWFS1_SFS"
   }
 
-  val pwfs1SouthNGS2Key: AgsStrategyKey =
-    Pwfs1SouthNgs2Key
-
   case object Pwfs2SouthKey extends AgsStrategyKey {
     val id = "GS_PWFS2"
   }
@@ -94,7 +90,6 @@ object AgsStrategyKey {
   val All = List(
     AltairAowfsKey,
     Flamingos2OiwfsKey,
-    GemsKey,
     GmosNorthOiwfsKey,
     GmosSouthOiwfsKey,
     GnirsOiwfsKey,
@@ -105,7 +100,6 @@ object AgsStrategyKey {
     Pwfs1NorthKey,
     Pwfs2NorthKey,
     Pwfs1SouthKey,
-    Pwfs1SouthNgs2Key,
     Pwfs2SouthKey,
     OffKey
   )

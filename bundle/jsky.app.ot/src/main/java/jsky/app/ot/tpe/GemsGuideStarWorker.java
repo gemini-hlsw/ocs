@@ -1,7 +1,6 @@
 package jsky.app.ot.tpe;
 
 import edu.gemini.ags.api.AgsStrategy;
-import edu.gemini.ags.impl.Pwfs1NGS2Params;
 import edu.gemini.ags.impl.SingleProbeStrategy;
 import edu.gemini.ags.conf.ProbeLimitsTable;
 import edu.gemini.ags.gems.*;
