@@ -1,5 +1,6 @@
 package edu.gemini.ags.impl
 
+import edu.gemini.ags.api.AgsAnalysis.NoGuideStarForProbe
 import edu.gemini.ags.api.{AgsAnalysis, AgsGuideQuality, AgsMagnitude, AgsStrategy, ProbeCandidates}
 import edu.gemini.ags.api.AgsMagnitude.{ MagnitudeCalc, MagnitudeTable }
 import edu.gemini.ags.api.AgsStrategy.{ Assignment, Selection }
@@ -14,6 +15,7 @@ import edu.gemini.spModel.gemini.gems.CanopusWfs
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.guide.{GuideSpeed, GuideProbe, ValidatableGuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe.pwfs1
 import edu.gemini.spModel.telescope.{PosAngleConstraint, PosAngleConstraintAware}
 import edu.gemini.pot.ModelConverters._
@@ -57,14 +59,34 @@ final case class Ngs2Strategy(
 
   }
 
+  // Similar to toplevel AgsAnalysis.analysis but we want to call our version of
+  // analyze and not AgsAnalysis.analysis ...
+  private def contextAnalysis(
+    ctx:        ObsContext,
+    mt:         MagnitudeTable,
+    guideProbe: ValidatableGuideProbe
+  ): Option[AgsAnalysis] = {
+
+    def selection(ctx: ObsContext, guideProbe: GuideProbe): Option[SPTarget] =
+     for {
+       gpt   <- ctx.getTargets.getPrimaryGuideProbeTargets(guideProbe).asScalaOpt
+       gStar <- gpt.getPrimary.asScalaOpt
+     } yield gStar
+
+     selection(ctx, guideProbe).fold(Some(NoGuideStarForProbe(guideProbe)): Option[AgsAnalysis]) { guideStar =>
+       analyze(ctx, mt, guideProbe, guideStar.toSiderealTarget(ctx.getSchedulingBlockStart))
+     }
+
+  }
+
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] = {
-    val pwfs = AgsAnalysis.analysis(ctx, mt, pwfs1, false).toList
+    val pwfs = contextAnalysis(ctx, mt, pwfs1).toList
 
     val cwfs =
       CanopusWfs
         .values
         .toList
-        .flatMap(AgsAnalysis.analysis(ctx, mt, _, false).toList)
+        .flatMap(contextAnalysis(ctx, mt, _).toList)
         .filter {
           case AgsAnalysis.NoGuideStarForProbe(_) => false
           case _                                  => true
@@ -198,12 +220,8 @@ final case class Ngs2Strategy(
     CanopusWfs.values.toList ++ List(pwfs1)
 
   /**
-    * Indicates the bands that will be used for a given probe
-    */
+   * Indicates the bands that will be used for a given probe
+   */
   override def probeBands: BandsList = RBandsList
 
-  /**
-    * NGS2 does not have a guide strategy.
-    */
-  override val hasGuideSpeed: Boolean = false
 }

@@ -138,7 +138,7 @@ object AgsAnalysis {
    * Analysis of the selected guide star (if any) in the given context.
    */
   protected [ags] def analysis(ctx: ObsContext, mt: MagnitudeTable,
-                               guideProbe: ValidatableGuideProbe, showGuideSpeed: Boolean): Option[AgsAnalysis] = {
+                               guideProbe: ValidatableGuideProbe): Option[AgsAnalysis] = {
     def selection(ctx: ObsContext, guideProbe: GuideProbe): Option[SPTarget] =
       for {
         gpt   <- ctx.getTargets.getPrimaryGuideProbeTargets(guideProbe).asScalaOpt
@@ -146,7 +146,7 @@ object AgsAnalysis {
       } yield gStar
 
     selection(ctx, guideProbe).fold(Some(NoGuideStarForProbe(guideProbe)): Option[AgsAnalysis]) { guideStar =>
-      AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar.toSiderealTarget(ctx.getSchedulingBlockStart), showGuideSpeed)
+      AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar.toSiderealTarget(ctx.getSchedulingBlockStart))
     }
   }
 
@@ -155,11 +155,11 @@ object AgsAnalysis {
    * guide star is actually selected in the target environment.
    */
   def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe,
-               guideStar: SiderealTarget, showGuideSpeed: Boolean): Option[AgsAnalysis] = {
+               guideStar: SiderealTarget): Option[AgsAnalysis] = {
     val spTarget = new SPTarget(SiderealTarget.empty.copy(coordinates = Coordinates(guideStar.coordinates.ra, guideStar.coordinates.dec)))
 
     if (guideProbe.validate(spTarget, ctx) != GuideStarValidation.VALID) Some(NotReachable(guideProbe, guideStar))
-    else magnitudeAnalysis(ctx, mt, guideProbe, guideStar, showGuideSpeed)
+    else magnitudeAnalysis(ctx, mt, guideProbe, guideStar)
   }
 
   /**
@@ -167,7 +167,7 @@ object AgsAnalysis {
    * regardless of its reachability.
    */
   def magnitudeAnalysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe,
-                        guideStar: SiderealTarget, showGuideSpeed: Boolean): Option[AgsAnalysis] = {
+                        guideStar: SiderealTarget): Option[AgsAnalysis] = {
     import AgsGuideQuality._
     import GuideSpeed._
 
@@ -186,8 +186,8 @@ object AgsAnalysis {
       def almostTooFaint: Boolean = !saturated && mag <= faintnessLimit + adj
       def tooFaint:       Boolean = mag > faintnessLimit + adj
 
-      if (almostTooFaint) Usable(guideProbe, guideStar, showGuideSpeed ? SLOW.some | None, PossiblyUnusable)
-      else if (tooFaint)  MagnitudeTooFaint(guideProbe, guideStar, showGuideSpeed)
+      if (almostTooFaint) Usable(guideProbe, guideStar, SLOW.some, PossiblyUnusable)
+      else if (tooFaint)  MagnitudeTooFaint(guideProbe, guideStar, true)
       else                MagnitudeTooBright(guideProbe, guideStar)
     }
 
@@ -208,7 +208,7 @@ object AgsAnalysis {
           else IqDegradation
       }
 
-      Usable(guideProbe, guideStar, showGuideSpeed ? guideSpeed.some | None, quality)
+      Usable(guideProbe, guideStar, guideSpeed.some, quality)
     }
 
     // Find the first band in the guide star that is on the list of possible bands

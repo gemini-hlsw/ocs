@@ -59,7 +59,6 @@ sealed trait SingleProbeStrategyParams {
     else Some(lst.minBy(t => magnitude(toSiderealTarget(t))))
   }
 
-  def hasGuideSpeed: Boolean = true
 }
 
 object SingleProbeStrategyParams {
@@ -112,50 +111,4 @@ case class PwfsParams(site: Site, guideProbe: PwfsGuideProbe) extends SingleProb
   override def validator(ctx: ObsContext): GuideStarValidator =
     vignettingProofPatrolField(ctx).validator(ctx)
   }
-}
-
-final case class Pwfs1NGS2Params(
-  override val catalogName: CatalogName
-) extends SingleProbeStrategyParams {
-
-  override val guideProbe: PwfsGuideProbe = PwfsGuideProbe.pwfs1
-  override val site: Site                 = Site.GS
-  override def stepSize: Angle            = Angle.fromDegrees(360)
-
-  private def vignettingProofPatrolField(ctx: ObsContext): PatrolField = {
-    val min = guideProbe.getVignettingClearance(ctx)
-    guideProbe.getCorrectedPatrolField(PatrolField.fromRadiusLimits(min, PwfsGuideProbe.PWFS_RADIUS), ctx)
-  }
-
-  override def radiusConstraint(ctx: ObsContext): Option[RadiusConstraint] =
-    RadiusLimitCalc.getAgsQueryRadiusLimits(Some(vignettingProofPatrolField(ctx)), ctx)
-
-  // We have a special validator for Pwfs.
-  override def validator(ctx: ObsContext): GuideStarValidator =
-    vignettingProofPatrolField(ctx).validator(ctx)
-
-  // TODO-NGS2: Check this.
-  // TODO-NGS2: The magic number 2.5 should be moved somewhere, but where?
-  /**
-    * Since PWFS1 is used only for slow focus sensing in NGS2 and not for guiding, we can use stars up to 2.5 mag
-    * fainter than with regular PWFS1.
-    * This is an ugly copy-paste hack, but I'm not sure how else to get the additional 2.5 mag faintness in the
-    * magnitude calculation short of adding another PWFS guide probe, which would be a nightmare.
-    */
-  override def magnitudeCalc(ctx: ObsContext, mt: MagnitudeTable): Option[MagnitudeCalc] = {
-    mt(ctx, guideProbe) match {
-      case Some(ProbeLimitsCalc(band, saturationAdjustment, faintnessTable)) =>
-        new MagnitudeCalc {
-          override def apply(c: SPSiteQuality.Conditions, gs: GuideSpeed): MagnitudeConstraints = {
-            val unadjustedFaint = faintnessTable(FaintnessKey(c.iq, c.sb, gs))
-            val bright = unadjustedFaint - saturationAdjustment
-            val faint  = unadjustedFaint + 2.5
-            c.cc.adjust(MagnitudeConstraints(BandsList.bandList(band), FaintnessConstraint(faint), Some(SaturationConstraint(bright))))
-          }
-        }.some
-      case _ => None
-    }
-  }
-
-  override val hasGuideSpeed: Boolean = false
 }
