@@ -65,26 +65,9 @@ class GemsGuideStarSearchController {
             _dialog.setState(GemsGuideStarSearchDialog.State.PRE_QUERY);
         }
 
-/*
-        // Extract just the candidates valid at the pos angles
-        final ImList<GemsCandidates> gcs =
-            DefaultImList.create(
-                GemsCandidates$.MODULE$.groupAndValidateForJava(obsContext, posAngles, candidates)
-            );
-
-        final List<SiderealTarget> filteredCandidates =
-            gcs.flatMap(gc -> DefaultImList.create(gc.cwfsCandidatesAsJava()).cons(gc.slowFocusSensor()))
-               .toList();
-
-        // TODO-NGS2: trying to solve the problem of showing all the candidates
-        // the problem here is that i filtered out the SFS candidates so when it
-        // goes to find asterisms it fails to find SFS stars.
-
-        _model.setCandidates(filteredCandidates);
-*/
+        _model.setCandidates(obsContext, posAngles, candidates);
 
         if (!_model.isReviewCandidatesBeforeSearch()) {
-//            _model.setGemsGuideStars(_worker.findAllGuideStars(obsContext, posAngles, filteredCandidates));
             _model.setGemsGuideStars(_worker.findAllGuideStars(obsContext, posAngles, candidates));
         }
     }
@@ -113,7 +96,7 @@ class GemsGuideStarSearchController {
         final Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
 
         final List<SiderealTarget> candidates =
-            new ArrayList<>(_model.getCandidates());
+            new ArrayList<>(_model.getAllCandidates());
 
         candidates.removeAll(excludeCandidates);
 

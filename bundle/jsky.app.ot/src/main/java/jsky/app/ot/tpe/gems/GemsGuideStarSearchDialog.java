@@ -384,7 +384,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         switch (state) {
             case PRE_QUERY:
                 _actionButton.setAction(_queryAction);
-                _model.setCandidates(Collections.emptyList());
+                _model.resetCandidates();
                 _model.setGemsGuideStars(Collections.emptyList());
                 _candidateGuideStarsTable.clear();
                 _candidateAsterismsTreeTable.clear();
@@ -487,7 +487,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         _model.setCatalog(catalogChoice);
         _model.setReviewCandidatesBeforeSearch(_reviewCandidatesCheckBox.isSelected());
         _model.setAllowPosAngleAdjustments(_allowPosAngleChangesCheckBox.isSelected());
-        _model.setCandidates(Collections.emptyList());
+        _model.resetCandidates();
         _model.setGemsGuideStars(Collections.emptyList());
 
         new SwingWorker() {

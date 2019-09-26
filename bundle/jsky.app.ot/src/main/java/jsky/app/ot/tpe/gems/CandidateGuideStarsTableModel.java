@@ -3,6 +3,7 @@ package jsky.app.ot.tpe.gems;
 import edu.gemini.shared.util.immutable.DefaultImList;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.Angle;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.catalog.api.CatalogName.UCAC4$;
@@ -40,15 +41,15 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     private static final String SERV_TYPE = "serv_type";
     private static final String LONG_NAME = "long_name";
 
-    private final String RA_TITLE = "RA";
-    private final String DEC_TITLE = "Dec";
+    private static final String RA_TITLE = "RA";
+    private static final String DEC_TITLE = "Dec";
 
     // User interface model
     private final GemsGuideStarSearchModel _model;
     private final boolean _isUCAC4;
 
     // The unselected bands (displayed at end)
-    private final ImList<MagnitudeBand> _jhk =
+    private static final ImList<MagnitudeBand> JHK =
         DefaultImList.create(
             MagnitudeBand.unsafeFromString("J"), // can't reference directly
             MagnitudeBand.unsafeFromString("H"), // from Java so going through
@@ -62,17 +63,18 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     private List<SiderealTarget> _siderealTargets;
 
     CandidateGuideStarsTableModel(final GemsGuideStarSearchModel model) {
-        _model       = model;
-        _isUCAC4     = model.getCatalog().catalog() == UCAC4$.MODULE$;
-        _columnNames = makeColumnNames();
-        setDataVector(makeDataVector(), _columnNames);
+        _model           = model;
+        _siderealTargets = model.getCwfsCandidates();
+        _isUCAC4         = model.getCatalog().catalog() == UCAC4$.MODULE$;
+        _columnNames     = makeColumnNames(_isUCAC4);
+        setDataVector(makeDataVector(_siderealTargets, _isUCAC4), _columnNames);
     }
 
-    private Vector<String> makeColumnNames() {
+    private static Vector<String> makeColumnNames(final boolean isUCAC4) {
         final Vector<String> columnNames = new Vector<>();
         columnNames.add(""); // checkbox column
         columnNames.add("Id");
-        if (_isUCAC4) {
+        if (isUCAC4) {
             columnNames.add("r'");
             columnNames.add("UC");
         } else {
@@ -80,18 +82,19 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
         }
         columnNames.add(RA_TITLE);
         columnNames.add(DEC_TITLE);
-        _jhk.foreach(b -> columnNames.add(b.name()));
+        JHK.foreach(b -> columnNames.add(b.name()));
         return columnNames;
     }
 
-    private Vector<Vector<Object>> makeDataVector() {
-        System.out.println("--- CandidateGuideStarsTableModel.makeDataVector");
-        _siderealTargets = _model.getCandidates();
+    private static Vector<Vector<Object>> makeDataVector(
+      final List<SiderealTarget> siderealTargets,
+      final boolean              isUCAC4
+    ) {
         final Vector<Vector<Object>> rows = new Vector<>();
-        for (SiderealTarget siderealTarget : _siderealTargets) {
-            rows.add(new Vector<Object>(_isUCAC4                     ?
-                CatalogUtils4Java.makeUCAC4Row(siderealTarget, _jhk) :
-                CatalogUtils4Java.makeRow(siderealTarget, _jhk)
+        for (SiderealTarget siderealTarget : siderealTargets) {
+            rows.add(new Vector<Object>(isUCAC4                     ?
+                CatalogUtils4Java.makeUCAC4Row(siderealTarget, JHK) :
+                CatalogUtils4Java.makeRow(siderealTarget, JHK)
             ));
         }
         return rows;
@@ -145,7 +148,7 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
         return new SkycatTable(entry, CandidateGuideStarsTableModel.this.getDataVector(), getFields()) {
             @Override
             public Option<SiderealTarget> getSiderealTarget(int i) {
-                return _model.targetAt(i);
+                return _model.cwfsTargetAt(i);
             }
 
             @Override
