@@ -47,7 +47,12 @@ final class Ngs2MagnitudeConstraintsSpec extends Specification {
         val af = a.faintnessConstraint.brightness
         val as = a.saturationConstraint.get.brightness
 
-        (ef - af).abs < 0.000001 && (es - as).abs < 0.000001
+        // For commissioning (see GemsMagnitudeTable.FaintLimit):
+        ((ef + 1.5) - af).abs < 0.000001 && (es - as).abs < 0.000001
+
+        // post commissioning we will presumably know the real faintness limits
+        // and update the values accordingly.
+//        (ef - af).abs < 0.000001 && (es - as).abs < 0.000001
       }
 
     "adjust for conditions" in {

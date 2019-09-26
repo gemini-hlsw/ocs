@@ -142,7 +142,12 @@ object GemsMagnitudeTable extends MagnitudeTable {
     // These values correspond to:
     // CC = 50, IQ = 70, SB = 50 or 20
     // CC = 50, IQ = 20, SB = ANY
-    private val FaintLimit  = 16.5
+
+
+    // This corresponds to requirements. For commissioning we were asked to go
+    // 1.5 mag fainter.
+//    private val FaintLimit  = 16.5
+    private val FaintLimit  = 18.0
     private val BrightLimit = 10.0
 
     override def gemsMagnitudeConstraint(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]): MagnitudeConstraints =
