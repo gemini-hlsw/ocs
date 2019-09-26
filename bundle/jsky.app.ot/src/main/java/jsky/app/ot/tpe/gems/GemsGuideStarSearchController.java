@@ -1,11 +1,15 @@
 package jsky.app.ot.tpe.gems;
 
+import edu.gemini.ags.gems.GemsGuideStars;
+import edu.gemini.ags.gems.GemsCandidates;
+import edu.gemini.ags.gems.GemsCandidates$;
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.skycalc.Angle;
+import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.SiderealTarget;
-import edu.gemini.ags.gems.GemsGuideStars;
 import edu.gemini.spModel.obs.context.ObsContext;
 import jsky.app.ot.tpe.GemsGuideStarWorker;
 import jsky.app.ot.tpe.TpeImageWidget;
@@ -61,8 +65,26 @@ class GemsGuideStarSearchController {
             _dialog.setState(GemsGuideStarSearchDialog.State.PRE_QUERY);
         }
 
-        _model.setCandidates(candidates);
+/*
+        // Extract just the candidates valid at the pos angles
+        final ImList<GemsCandidates> gcs =
+            DefaultImList.create(
+                GemsCandidates$.MODULE$.groupAndValidateForJava(obsContext, posAngles, candidates)
+            );
+
+        final List<SiderealTarget> filteredCandidates =
+            gcs.flatMap(gc -> DefaultImList.create(gc.cwfsCandidatesAsJava()).cons(gc.slowFocusSensor()))
+               .toList();
+
+        // TODO-NGS2: trying to solve the problem of showing all the candidates
+        // the problem here is that i filtered out the SFS candidates so when it
+        // goes to find asterisms it fails to find SFS stars.
+
+        _model.setCandidates(filteredCandidates);
+*/
+
         if (!_model.isReviewCandidatesBeforeSearch()) {
+//            _model.setGemsGuideStars(_worker.findAllGuideStars(obsContext, posAngles, filteredCandidates));
             _model.setGemsGuideStars(_worker.findAllGuideStars(obsContext, posAngles, candidates));
         }
     }

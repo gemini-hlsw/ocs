@@ -50,6 +50,17 @@ object GemsCandidates {
         .exists(CanopusWfs.areProbesInRange(_, ctx))
   }
 
+  def groupAndValidateForJava(
+    obsContext:   ObsContext,
+    posAngles:    java.util.Set[Angle],
+    candidates:   java.util.List[SiderealTarget]
+  ): java.util.List[GemsCandidates] =
+    groupAndValidate(
+      obsContext,
+      posAngles.asScala.toSet,
+      candidates.asScala.toList
+    ).asJava
+
   def groupAndValidate(
     obsContext:   ObsContext,
     posAngles:    Set[Angle],
