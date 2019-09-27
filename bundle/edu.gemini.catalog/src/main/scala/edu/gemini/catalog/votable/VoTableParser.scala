@@ -335,6 +335,9 @@ object CatalogAdapter {
       max: Double
     ) {
 
+      /**
+       * Convert the catalog g-mag value to a magnitude in another band.
+       */
       def convert(gMag: Double, bpRp: Double): Option[Magnitude] =
         ((min < bpRp) && (bpRp < max)) option
           Magnitude(
@@ -343,6 +346,7 @@ object CatalogAdapter {
             None,
             MagnitudeSystem.Vega  // Note that Gaia magnitudes are in the Vega system.
           )
+
     }
 
     val conversions: List[Conversion] =
@@ -357,6 +361,26 @@ object CatalogAdapter {
         Conversion(MagnitudeBand.H,   0.162100, -1.96800, 0.132800,  0.000000,  0.25, 5.00),
         Conversion(MagnitudeBand.J,   0.018830, -1.39400, 0.078930,  0.000000, -0.50, 5.50)
       )
+
+    private def unconvert(mag: Magnitude, f: Conversion=>Double): Option[Double] =
+      conversions.find(_.b === mag.band).map { c =>
+        val bpRp = f(c)
+        mag.value - (c.g + bpRp*(c.p1 + bpRp*(c.p2 + bpRp*c.p3)))
+      }
+
+    /**
+     * Convert from a particular band back to the catalog gmag value using the
+     * minimum supported bp-rp value.
+     */
+    def unconvertMin(mag: Magnitude): Option[Double] =
+      unconvert(mag, _.min)
+
+    /**
+     * Convert from a particular band back to the catalog gmag value using the
+     * maximum supported bp-rp value.
+     */
+    def unconvertMax(mag: Magnitude): Option[Double] =
+      unconvert(mag, _.max)
 
     override def isMagnitudeField(v: (FieldId, String)): Boolean =
       sys.error("unused")

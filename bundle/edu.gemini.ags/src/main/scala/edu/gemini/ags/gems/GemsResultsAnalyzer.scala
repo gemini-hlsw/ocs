@@ -223,7 +223,7 @@ object GemsResultsAnalyzer {
           case (Some(SingleBand(MagnitudeBand.K)), Some(SPSiteQuality.ImageQuality.PERCENT_70)) => 0.18
           case (Some(SingleBand(MagnitudeBand.K)), Some(SPSiteQuality.ImageQuality.PERCENT_85)) => 0.12
           case (Some(SingleBand(MagnitudeBand.K)), None)                                        => 0.01
-          case _                                                                    => 0.3
+          case _                                                                                => 0.3
         }
     }.getOrElse(0.3)
   }
