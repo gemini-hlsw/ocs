@@ -1,12 +1,13 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.ags.conf.ProbeLimitsTable
+import edu.gemini.ags.impl.RadiusLimitCalc
 import edu.gemini.catalog.api.MagnitudeConstraints
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.gems.CanopusWfs
+import edu.gemini.spModel.guide.{GuideStarValidator, PatrolField}
 import edu.gemini.spModel.guide.GuideStarValidation.VALID
-import edu.gemini.spModel.guide.PatrolField
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
@@ -37,10 +38,14 @@ object GemsCandidates {
   ): GemsCandidates =
     GemsCandidates(posAngle, cwfsCandidates.asScala.toList, slowFocusSensor)
 
-  def pwfs1BoundsCheck(ctx: ObsContext): SiderealTarget => Boolean = { t =>
+  def pwfs1Validator(ctx: ObsContext): GuideStarValidator = {
     val min = pwfs1.getVignettingClearance(ctx)
     val pf  = pwfs1.getCorrectedPatrolField(PatrolField.fromRadiusLimits(min, PwfsGuideProbe.PWFS_RADIUS), ctx)
-    pf.validator(ctx).validate(new SPTarget(t), ctx) == VALID
+    pf.validator(ctx)
+  }
+
+  def pwfs1BoundsCheck(ctx: ObsContext): SiderealTarget => Boolean = { t =>
+    pwfs1Validator(ctx).validate(new SPTarget(t), ctx) == VALID
   }
 
   def cwfsBoundsCheck(ctx: ObsContext): SiderealTarget => Boolean = { t =>
@@ -130,9 +135,23 @@ object GemsCandidates {
     candidates: List[SiderealTarget]
   ): Map[Set[Angle], List[SiderealTarget]] = {
 
-    val magc  = GemsVoTableCatalog.cwfsMagnitudeConstraints(obsContext)
-    val valid = candidates.filter(ops.magConstraintsFilter(magc))
+    val magc                   = GemsVoTableCatalog.cwfsMagnitudeConstraints(obsContext)
+    val candidatesWithValidMag = candidates.filter(ops.magConstraintsFilter(magc))
 
+    // A quick radius filter because the exact match done later is expensive
+    // and in a crowded field it takes a while to exact match them all.
+    val radiusFilter =
+      for {
+        rc <- RadiusLimitCalc.getAgsQueryRadiusLimits(CanopusWfs.cwfs1, obsContext)
+        c0 <- obsContext.getBaseCoordinates.asScalaOpt
+        c1 <- c0.toCoreCoordinates.asScalaOpt
+      } yield rc.targetsFilter(c1)
+
+    // candidates with valid magnitude that are also within the correct distance,
+    // ignoring position angle
+    val valid = radiusFilter.fold(candidatesWithValidMag)(candidatesWithValidMag.filter)
+
+    // Precise bounds checks
     val ctxs         = ops.posAngleContexts(obsContext, posAngles)
     val boundsChecks = ctxs.map(cwfsBoundsCheck)
 
@@ -166,7 +185,9 @@ object GemsCandidates {
 
         // A PWFS1 range validator for each contex (i.e., position angle)
         val ctxs         = ops.posAngleContexts(obsContext, posAngles)
-        val boundsChecks = ctxs.map(pwfs1BoundsCheck)
+        val boundsChecks = ctxs.map(pwfs1Validator).zip(ctxs).map { case (v,c) =>
+          { (t: SiderealTarget) => v.validate(new SPTarget(t), c) == VALID }
+        }
 
         ctxs.zip(boundsChecks).foldLeft(Map.empty[Angle, SiderealTarget]) {
           case (m, (c, boundsCheck)) =>

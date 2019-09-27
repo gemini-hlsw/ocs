@@ -193,7 +193,7 @@ case object GaiaBackend extends CachedBackend with RemoteCallBackend {
   // For Java
   val instance = this
 
-  val MaxResultCount: Int         = 10000
+  val MaxResultCount: Int         = 50000  // Arbitrary max limit -- for a crowded field this needs to be largish
   val BrightLimit: Int            =     0  // Bright limit if none can be computed
   val FaintLimit: Int             =   100  // Faint limit if none can be computed
   val ProperMotionLimitMasYr: Int =   100
