@@ -56,6 +56,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
   val NoTime = JNone.instance[java.lang.Long]
 
   "GemsCatalogResultsSpec" should {
+    /* These baseline results are no longer accurate in the NGS2 world.
     "support Gsaoi Search on TYC 8345-1155-1" in {
       val base = new WorldCoords("17:25:27.529", "-48:27:24.02")
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
@@ -232,6 +233,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with SpecificationLike with
       (Angle.fromDegrees(cwfs3x.getRaDeg) ~= Angle.fromDegrees(cwfs3.getRaDeg)) should beTrue
       (Angle.fromDegrees(cwfs3x.getDecDeg) ~= Angle.fromDegrees(cwfs3.getDecDeg)) should beTrue
     }
+    */
     "sort targets by R magnitude" in {
       val st1 = target("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(10.0, MagnitudeBand.J)))
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1)).head should beEqualTo(st1)

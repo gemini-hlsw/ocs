@@ -22,7 +22,7 @@ public class GsaoiPropertyTest extends BeanPropertyTestBase {
 
         new PropertyTest(COADDS_PROP, InstConstants.DEF_COADDS, 42),
         new PropertyTest(POS_ANGLE_PROP, 0.0, 10.0),
-        new PropertyTest(POS_ANGLE_CONSTRAINT_PROP, PosAngleConstraint.UNBOUNDED, PosAngleConstraint.FIXED),
+        new PropertyTest(POS_ANGLE_CONSTRAINT_PROP, PosAngleConstraint.FIXED, PosAngleConstraint.UNBOUNDED),
         new PropertyTest(EXPOSURE_TIME_PROP, 60.0 , 123.0) // REL-445
     );
 
