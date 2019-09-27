@@ -62,7 +62,6 @@ sealed trait AgsAnalysis {
 }
 
 object AgsAnalysis {
-  def isCanopus(guideProbe: GuideProbe): Boolean = CanopusWfs.values().contains(guideProbe)
 
   final case class NoGuideStarForProbe(guideProbe: GuideProbe) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {

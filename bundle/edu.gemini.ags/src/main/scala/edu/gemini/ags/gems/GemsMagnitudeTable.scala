@@ -135,6 +135,11 @@ object GemsMagnitudeTable extends MagnitudeTable {
     def getNominalMagnitudeConstraints(cwfs: CanopusWfs): MagnitudeConstraints
   }
 
+  // For commissioning we were asked to go 1.5 mag fainter.  Leaving this here
+  // to make it easy to remove or adjust when the actual magnitude limits are
+  // known.
+  val CommissioningAdj = 1.5
+
   lazy val CanopusWfsMagnitudeLimitsCalculator = new CanopusWfsCalculator {
     override def adjustGemsMagnitudeConstraintForJava(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand], conditions: Conditions): MagnitudeConstraints =
       CwfsAdjust(gemsMagnitudeConstraint(starType, nirBand))(conditions)
@@ -143,12 +148,9 @@ object GemsMagnitudeTable extends MagnitudeTable {
     // CC = 50, IQ = 70, SB = 50 or 20
     // CC = 50, IQ = 20, SB = ANY
 
-
-    // This corresponds to requirements. For commissioning we were asked to go
-    // 1.5 mag fainter.
-//    private val FaintLimit  = 16.5
-    private val FaintLimit  = 18.0
-    private val BrightLimit = 10.0
+    private val NominalFaintLimit = 16.5
+    private val FaintLimit        = NominalFaintLimit + CommissioningAdj
+    private val BrightLimit       = 10.0
 
     override def gemsMagnitudeConstraint(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]): MagnitudeConstraints =
       magLimits(RBandsList, FaintLimit, BrightLimit)
