@@ -859,7 +859,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
         val coordinates = Coordinates(ra.value, dec.value)
         val info = observationInfoFromForm
-        val defaultQuery = CatalogQuery(coordinates, radiusConstraint, currentFilters, selectedCatalog)
+        val defaultQuery = ConeSearchCatalogQuery(None, coordinates, radiusConstraint, currentFilters, selectedCatalog)
 
         // Start with the guider's query and update it with the values on the UI
         val calculatedQuery = guider.selection.item.query.headOption.collect {
@@ -933,7 +933,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   }
 
   private def doNameSearch(search: String): Unit = {
-    catalogSearch(CatalogQuery(search), "Searching...", { x =>
+    catalogSearch(CatalogQuery.nameSearch(search), "Searching...", { x =>
       updateName(search, x.result.targets.rows)
     })
   }

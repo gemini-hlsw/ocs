@@ -198,6 +198,18 @@ case object GaiaBackend extends CachedBackend with RemoteCallBackend {
   val FaintLimit: Int             =   100  // Faint limit if none can be computed
   val ProperMotionLimitMasYr: Int =   100
 
+  // Override the cache `widen` to widen significantly less for Gaia because it
+  // is so deep. Instead of 10', use 0.5' (which is roughly half the AO port size).
+  override protected def widen(q: CatalogQuery): CatalogQuery =
+    q match {
+      case c: ConeSearchCatalogQuery =>
+        val widerLimit = min(c.radiusConstraint.maxLimit.toArcmins + 0.5, c.radiusConstraint.maxLimit.toArcmins * 1.5)
+        c.copy(radiusConstraint = RadiusConstraint.between(c.radiusConstraint.minLimit, Angle.fromArcmin(widerLimit)))
+
+      case _                         =>
+        q
+    }
+
   def adql(cs: ConeSearchCatalogQuery): String = {
     import CatalogAdapter.Gaia
 

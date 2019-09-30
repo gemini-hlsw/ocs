@@ -94,26 +94,68 @@ sealed trait CatalogQuery {
 /**
  * CatalogQuery using the ConeSearch method with additional constraints on radius and magnitude
  */
-case class ConeSearchCatalogQuery(id: Option[Int], base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: List[MagnitudeConstraints], catalog: CatalogName) extends CatalogQuery {
+final case class ConeSearchCatalogQuery(
+  id:                   Option[Int],
+  base:                 Coordinates,
+  radiusConstraint:     RadiusConstraint,
+  magnitudeConstraints: List[MagnitudeConstraints],
+  catalog:              CatalogName
+) extends CatalogQuery {
 
-  val filters: NonEmptyList[QueryResultsFilter] = NonEmptyList(RadiusFilter(base, radiusConstraint), magnitudeConstraints.map(MagnitudeQueryFilter.apply): _*)
-  override def filter(t: SiderealTarget):Boolean = filters.toList.forall(_.filter(t))
+  val filters: NonEmptyList[QueryResultsFilter] =
+    NonEmptyList(
+      RadiusFilter(base, radiusConstraint),
+      magnitudeConstraints.map(MagnitudeQueryFilter.apply): _*
+    )
 
-  override def isSuperSetOf(q: CatalogQuery): Boolean = q match {
-    case c: ConeSearchCatalogQuery =>
+  override def filter(t: SiderealTarget): Boolean =
+    filters.toList.forall(_.filter(t))
 
-      // Angular separation, or distance between the two.
-      val distance = Coordinates.difference(base, c.base).distance
+  private def closeEnough(c: ConeSearchCatalogQuery): Boolean = {
+    // Angular separation, or distance between the two.
+    val distance = Coordinates.difference(base, c.base).distance
 
-      // Add the given query's outer radius limit to the distance to get the
-      // maximum distance from this base position of any potential guide star.
-      val max = distance + c.radiusConstraint.maxLimit
+    // Add the given query's outer radius limit to the distance to get the
+    // maximum distance from this base position of any potential guide star.
+    val max = distance + c.radiusConstraint.maxLimit
 
-      // See whether the other base position falls out of range of our
-      // radius limits.
-      radiusConstraint.maxLimit >= max && q.catalog === catalog
-    case _ => false
+    // See whether the other base position falls out of range of our
+    // radius limits.
+    radiusConstraint.maxLimit >= max
   }
+
+  // Compare the List[MagnitudeConstraints] with tolerance.
+  private def closeMagnitudes(c: ConeSearchCatalogQuery): Boolean = {
+    def closeMagConstraint(m0: MagConstraint, m1: MagConstraint): Boolean =
+      (m0.brightness - m1.brightness).abs < 0.000001
+
+    def closeOption[A](o0: Option[A], o1: Option[A])(f: (A, A) => Boolean) =
+      (o0, o1) match {
+        case (Some(a0), Some(a1)) => f(a0, a1)
+        case (None,     None    ) => true
+        case _                    => false
+      }
+
+    val m0 = magnitudeConstraints.groupBy(_.searchBands)
+    val m1 = c.magnitudeConstraints.groupBy(_.searchBands)
+
+    (m0.keySet == m1.keySet) && m0.forall {
+      case (key, v0) =>
+        (v0.size === m1(key).size) && v0.zip(m1(key)).forall { case (mc0, mc1) =>
+          closeMagConstraint(mc0.faintnessConstraint, mc1.faintnessConstraint) &&
+            closeOption(mc0.saturationConstraint, mc1.saturationConstraint)(closeMagConstraint)
+        }
+    }
+  }
+
+  override def isSuperSetOf(q: CatalogQuery): Boolean =
+    q match {
+      case c: ConeSearchCatalogQuery =>
+        (q.catalog === catalog) && closeEnough(c) && closeMagnitudes(c)
+
+      case _                         =>
+        false
+    }
 }
 
 object ConeSearchCatalogQuery {
@@ -130,16 +172,17 @@ case class NameCatalogQuery(search: String, catalog: CatalogName) extends Catalo
 }
 
 object CatalogQuery {
-  // Useful constructors
-  def apply(id: Int, base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: List[MagnitudeConstraints], catalog: CatalogName):CatalogQuery = ConeSearchCatalogQuery(id.some, base, radiusConstraint, magnitudeConstraints, catalog)
 
-  def apply(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: List[MagnitudeConstraints], catalog: CatalogName):CatalogQuery = ConeSearchCatalogQuery(None, base, radiusConstraint, magnitudeConstraints, catalog)
+  def coneSearch(
+    c: edu.gemini.spModel.core.Coordinates,
+    r: RadiusConstraint,
+    m: MagnitudeConstraints,
+    n: CatalogName
+  ): CatalogQuery =
+    ConeSearchCatalogQuery(None, c, r, List(m), n)
 
-  def apply(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: MagnitudeConstraints, catalog: CatalogName):CatalogQuery = ConeSearchCatalogQuery(None, base, radiusConstraint, List(magnitudeConstraints), catalog)
-
-  def apply(base: Coordinates, radiusConstraint: RadiusConstraint, catalog: CatalogName):CatalogQuery = ConeSearchCatalogQuery(None, base, radiusConstraint, Nil, catalog)
-
-  def apply(search: String):CatalogQuery = NameCatalogQuery(search, CatalogName.SIMBAD)
+  def nameSearch(search: String): CatalogQuery =
+    NameCatalogQuery(search, CatalogName.SIMBAD)
 
   implicit val equals: Equal[CatalogQuery] = Equal.equalA[CatalogQuery]
 }

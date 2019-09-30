@@ -19,12 +19,14 @@ class CatalogQuerySpec extends Specification {
   val rad10 = RadiusConstraint.between(Angle.zero, a10)
   val rad5 = RadiusConstraint.between(Angle.zero, a5)
 
-  val faint10 = FaintnessConstraint(10)
-  val saturation0= SaturationConstraint(0)
-  val mag10 = MagnitudeConstraints(RBandsList, faint10, Some(saturation0))
+  val faint10     = FaintnessConstraint(10.0)
+  val faint10_1   = FaintnessConstraint(10.1)
+  val saturation0 = SaturationConstraint(0.0)
+  val mag10       = MagnitudeConstraints(RBandsList, faint10,   Some(saturation0))
+  val mag10_1     = MagnitudeConstraints(RBandsList, faint10_1, Some(saturation0))
   val base = Coordinates.zero
-  val par10_10 = CatalogQuery(base, rad10, mag10, UCAC4)
-  val par5_10 = CatalogQuery(base, rad5, mag10, UCAC4)
+  val par10_10    = CatalogQuery.coneSearch(base, rad10, mag10, UCAC4)
+  val par5_10     = CatalogQuery.coneSearch(base, rad5, mag10, UCAC4)
   val ma2 = Angle.zero - Angle.fromArcsecs(2)
   val ma4_9 = Angle.zero - Angle.fromArcsecs(4.99999)
   val ma7   = Angle.zero - Angle.fromArcsecs(7.0)
@@ -65,24 +67,24 @@ class CatalogQuerySpec extends Specification {
           Coordinates(RightAscension.fromAngle(a0),    Declination.fromAngle(a4_9).getOrElse(Declination.zero)),
           Coordinates(RightAscension.fromAngle(a0),    Declination.fromAngle(ma2).getOrElse(Declination.zero)),
           Coordinates(RightAscension.fromAngle(a0),    Declination.fromAngle(ma4_9).getOrElse(Declination.zero)))
-      forall(coordinates)(c => par10_10 should beSuperSetOf(CatalogQuery(c, rad5, mag10, UCAC4)))
+      forall(coordinates)(c => par10_10 should beSuperSetOf(CatalogQuery.coneSearch(c, rad5, mag10, UCAC4)))
     }
     "be a superset at the pole" in {
       val pole = Coordinates(RightAscension.zero, Declination.fromAngle(Angle.fromDegrees(90.0)).getOrElse(Declination.zero))
       val close = Coordinates(RightAscension.zero, Declination.fromAngle(Angle.fromDegrees(90.0) - Angle.fromArcsecs(2)).getOrElse(Declination.zero))
       // 10 arcsec radius at the pole
-      val poleP = CatalogQuery(pole, rad10, mag10, UCAC4)
+      val poleP = CatalogQuery.coneSearch(pole, rad10, mag10, UCAC4)
       // 5 arcsec radius close to the pole
-      val closeP = CatalogQuery(close, rad5, mag10, UCAC4)
+      val closeP = CatalogQuery.coneSearch(close, rad5, mag10, UCAC4)
       poleP should beSuperSetOf(closeP)
     }
     "not be a superset far of the pole" in {
       val pole = Coordinates(RightAscension.zero, Declination.fromAngle(Angle.fromDegrees(90.0)).getOrElse(Declination.zero))
       val far = Coordinates(RightAscension.zero, Declination.fromAngle(Angle.fromDegrees(90.0) - Angle.fromArcsecs(7)).getOrElse(Declination.zero))
       // 10 arcsec radius at the pole
-      val poleP = CatalogQuery(pole, rad10, mag10, UCAC4)
+      val poleP = CatalogQuery.coneSearch(pole, rad10, mag10, UCAC4)
       // 5 arcsec radius, but a bit too far from the pole
-      val farP = CatalogQuery(far, rad5, mag10, UCAC4)
+      val farP = CatalogQuery.coneSearch(far, rad5, mag10, UCAC4)
       poleP should beNoSuperSetOf(farP)
     }
     "not be a superset out of the range limits" in {
@@ -104,11 +106,15 @@ class CatalogQuerySpec extends Specification {
         Coordinates(RightAscension.fromAngle(a0),    Declination.fromAngle(ma11).getOrElse(Declination.zero)),
         Coordinates(RightAscension.fromAngle(a0),    Declination.fromAngle(a20).getOrElse(Declination.zero)),
         Coordinates(RightAscension.fromAngle(a0),    Declination.fromAngle(ma20).getOrElse(Declination.zero)))
-      forall(coordinates)(c => par10_10 should beNoSuperSetOf(CatalogQuery(c, rad5, mag10, UCAC4)))
+      forall(coordinates)(c => par10_10 should beNoSuperSetOf(CatalogQuery.coneSearch(c, rad5, mag10, UCAC4)))
     }
-    "not be a supersef far out of range" in {
-      val far = CatalogQuery(Coordinates(RightAscension.fromDegrees(180), Declination.zero), rad5, mag10, UCAC4)
+    "not be a superset far out of range" in {
+      val far = CatalogQuery.coneSearch(Coordinates(RightAscension.fromDegrees(180), Declination.zero), rad5, mag10, UCAC4)
       par10_10 should beNoSuperSetOf(far)
+    }
+    "not be a superset when magnitude limits don't match" in {
+      val diffMag = CatalogQuery.coneSearch(base, rad10, mag10_1, UCAC4)
+      par10_10 should beNoSuperSetOf(diffMag)
     }
   }
 

@@ -1,6 +1,6 @@
 package edu.gemini.ags.gems.mascot
 
-import edu.gemini.catalog.api.{RadiusConstraint, CatalogQuery}
+import edu.gemini.catalog.api.{RadiusConstraint, CatalogQuery, ConeSearchCatalogQuery}
 import edu.gemini.catalog.api.CatalogName.PPMXL
 import edu.gemini.catalog.votable.{TestVoTableBackend, VoTableClient}
 import edu.gemini.spModel.core._
@@ -246,7 +246,7 @@ class MascotGuideStarSpec extends Specification {
     "find best asterism by query result" in {
       val coordinates = Coordinates(RightAscension.fromAngle(Angle.fromHMS(3, 19, 48.2341).getOrElse(Angle.zero)), Declination.fromAngle(Angle.fromDMS(41, 30, 42.078).getOrElse(Angle.zero)).getOrElse(Declination.zero))
 
-      val query = CatalogQuery(coordinates, RadiusConstraint.between(Angle.fromArcmin(MascotCat.defaultMinRadius), Angle.fromArcmin(MascotCat.defaultMaxRadius)), PPMXL)
+      val query = ConeSearchCatalogQuery(None, coordinates, RadiusConstraint.between(Angle.fromArcmin(MascotCat.defaultMinRadius), Angle.fromArcmin(MascotCat.defaultMaxRadius)), Nil, PPMXL)
       val r = VoTableClient.catalog(query, Some(TestVoTableBackend("/mascotquery.xml")))(implicitly).map { t =>
         val base = new SPTarget(coordinates.ra.toAngle.toDegrees, coordinates.dec.toDegrees)
         val env = TargetEnvironment.create(base)

@@ -147,7 +147,7 @@ object GemsVoTableCatalog {
     for {
       b0 <- ctx.getBaseCoordinates.asScalaOpt
       b1 <- b0.toCoreCoordinates.asScalaOpt
-    } yield CatalogQuery(
+    } yield CatalogQuery.coneSearch(
       b1,
       radiusConstraint(ctx),
       magnitudeConstraints(ctx, mt),
