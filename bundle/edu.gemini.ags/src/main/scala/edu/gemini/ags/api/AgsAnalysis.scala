@@ -117,7 +117,7 @@ object AgsAnalysis {
         case _                                   => s"${quality.message} "
       }
       val p = if (withProbe) s"${guideProbe.getKey} " else ""
-      val gs = guideSpeed.map(gs => s"Guide Speed: ${gs.name}").getOrElse("Usable")
+      val gs = guideSpeed.fold("Usable")(gs => s"Guide Speed: ${gs.name}")
       s"$qualityMessage$p$gs."
     }
   }
@@ -182,8 +182,8 @@ object AgsAnalysis {
       val saturationLimit = magCalc(conds, FAST).saturationConstraint
       val saturated       = saturationLimit.exists(_.brightness > mag)
 
-      def almostTooFaint: Boolean = !saturated && mag <= faintnessLimit + adj
-      def tooFaint:       Boolean = mag > faintnessLimit + adj
+      def almostTooFaint: Boolean = !saturated && (mag <= (faintnessLimit + adj))
+      def tooFaint:       Boolean = mag > (faintnessLimit + adj)
 
       if (almostTooFaint) Usable(guideProbe, guideStar, SLOW.some, PossiblyUnusable)
       else if (tooFaint)  MagnitudeTooFaint(guideProbe, guideStar, true)
