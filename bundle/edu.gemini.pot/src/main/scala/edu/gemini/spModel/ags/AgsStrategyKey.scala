@@ -5,7 +5,7 @@ import java.util.Comparator
 /**
  *
  */
-sealed trait AgsStrategyKey {
+sealed trait AgsStrategyKey extends Product with Serializable {
   def id: String
   def displayName: String = id.replaceAll("_", " ")
 }
@@ -18,11 +18,6 @@ object AgsStrategyKey {
 
   case object Flamingos2OiwfsKey extends AgsStrategyKey {
     val id = "F2_OIWFS"
-  }
-
-  case object GemsKey extends AgsStrategyKey {
-    val id = "GEMS" // TODO: was GemsAgs in GemsAgsStrategy. Does this matter?
-    override def displayName = "GeMS AGS"
   }
 
   case object GmosNorthOiwfsKey extends AgsStrategyKey {
@@ -39,6 +34,12 @@ object AgsStrategyKey {
 
   case object GpiOiwfsKey extends AgsStrategyKey {
     val id = "GPI_OIWFS"
+  }
+
+  case object Ngs2Key extends AgsStrategyKey {
+    val id = "NGS2"
+
+    override def displayName = "GeMS AGS"
   }
 
   case object NiciOiwfsKey extends AgsStrategyKey {
@@ -76,10 +77,10 @@ object AgsStrategyKey {
   val All = List(
     AltairAowfsKey,
     Flamingos2OiwfsKey,
-    GemsKey,
     GmosNorthOiwfsKey,
     GmosSouthOiwfsKey,
     GnirsOiwfsKey,
+    Ngs2Key,
     NiciOiwfsKey,
     NifsOiwfsKey,
     NiriOiwfsKey,

@@ -1,10 +1,14 @@
 package edu.gemini.qpt.shared.util;
 
 import edu.gemini.qpt.shared.sp.Inst;
+import edu.gemini.spModel.gemini.gems.CanopusWfs;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,6 +29,37 @@ public final class EnumPio {
         return params;
     }
 
+    private static final Map<String, String> CLASS_NAME_UPDATES;
+
+    static {
+        final Map<String, String> m = new HashMap<>();
+        m.put(
+            "edu.gemini.spModel.gemini.gmos.GmosNorthType$DetectorManufacturerNorth",
+            "edu.gemini.spModel.gemini.gmos.GmosCommonType$DetectorManufacturer"
+        );
+        m.put(
+            "edu.gemini.spModel.gemini.gmos.GmosSouthType$DetectorManufacturerSouth",
+            "edu.gemini.spModel.gemini.gmos.GmosCommonType$DetectorManufacturer"
+        );
+        m.put(
+            "edu.gemini.qpt.core.sp.Inst",
+            Inst.class.getName()
+        );
+        m.put(
+            "edu.gemini.spModel.gemini.gems.Canopus$Wfs$1",
+            CanopusWfs.cwfs1.getClass().getName()
+        );
+        m.put(
+            "edu.gemini.spModel.gemini.gems.Canopus$Wfs$2",
+            CanopusWfs.cwfs2.getClass().getName()
+        );
+        m.put(
+            "edu.gemini.spModel.gemini.gems.Canopus$Wfs$3",
+            CanopusWfs.cwfs3.getClass().getName()
+        );
+        CLASS_NAME_UPDATES = Collections.unmodifiableMap(m);
+    }
+
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static Enum<?> getEnum(final ParamSet params) {
         try {
@@ -35,14 +70,7 @@ public final class EnumPio {
             // called sp101. This was an annoying mistake, sorry.
             cname = cname.replace("sp101", "sp");
 
-            // Patch for Gmos change
-            if (cname.equals("edu.gemini.spModel.gemini.gmos.GmosNorthType$DetectorManufacturerNorth")
-                    || cname.equals("edu.gemini.spModel.gemini.gmos.GmosSouthType$DetectorManufacturerSouth")) {
-                cname = "edu.gemini.spModel.gemini.gmos.GmosCommonType$DetectorManufacturer";
-            }
-
-            // Patch for package change
-            if (cname.equals("edu.gemini.qpt.core.sp.Inst")) cname = Inst.class.getName();
+            cname = CLASS_NAME_UPDATES.getOrDefault(cname, cname);
 
             // We need to do this for subclassed enum constants like
             // GMOSNorthType.FilterNorth.u_G0308, which has a runtime type of

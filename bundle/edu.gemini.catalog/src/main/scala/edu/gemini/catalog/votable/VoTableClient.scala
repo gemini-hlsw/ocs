@@ -4,9 +4,8 @@ import java.net.{URL, UnknownHostException}
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Logger
 
-import edu.gemini.catalog.api.{CatalogName, RadiusConstraint, NameCatalogQuery, ConeSearchCatalogQuery, CatalogQuery}
-import edu.gemini.spModel.core.Angle
-import edu.gemini.spModel.core.SiderealTarget
+import edu.gemini.catalog.api.{CatalogName, RadiusConstraint, MagnitudeConstraints, NameCatalogQuery, ConeSearchCatalogQuery, CatalogQuery}
+import edu.gemini.spModel.core.{Angle, Magnitude, MagnitudeBand, MagnitudeSystem, NiciBandsList, NoBands, RBandsList, SiderealTarget, SingleBand}
 import org.apache.commons.httpclient.{NameValuePair, HttpClient}
 import org.apache.commons.httpclient.methods.GetMethod
 
@@ -194,21 +193,67 @@ case object GaiaBackend extends CachedBackend with RemoteCallBackend {
   // For Java
   val instance = this
 
-  val MaxResultCount: Int         = 1000
-  val BrightLimit: Int            =    6
-  val FaintLimit: Int             =   19
-  val ProperMotionLimitMasYr: Int =  100
+  val MaxResultCount: Int         = 50000  // Arbitrary max limit -- for a crowded field this needs to be largish
+  val BrightLimit: Int            =     0  // Bright limit if none can be computed
+  val FaintLimit: Int             =   100  // Faint limit if none can be computed
+  val ProperMotionLimitMasYr: Int =   100
+
+  // Override the cache `widen` to widen significantly less for Gaia because it
+  // is so deep. Instead of 10', use 0.5' (which is roughly half the AO port size).
+  override protected def widen(q: CatalogQuery): CatalogQuery =
+    q match {
+      case c: ConeSearchCatalogQuery =>
+        val widerLimit = min(c.radiusConstraint.maxLimit.toArcmins + 0.5, c.radiusConstraint.maxLimit.toArcmins * 1.5)
+        c.copy(radiusConstraint = RadiusConstraint.between(c.radiusConstraint.minLimit, Angle.fromArcmin(widerLimit)))
+
+      case _                         =>
+        q
+    }
 
   def adql(cs: ConeSearchCatalogQuery): String = {
     import CatalogAdapter.Gaia
 
     val fields = Gaia.allFields.map(_.id).mkString(",")
 
+    // The magnitude limits to pass to the server are on g-band but are
+    // specified in another band.  We have to unconvert to get back the g-band
+    // limits.
+
+    val magc   = cs.magnitudeConstraints.reduceOption { (c0, c1) =>
+      c0.union(c1).getOrElse(MagnitudeConstraints.unbounded(c0.searchBands))
+    }
+
+    val band   = magc.flatMap {
+      _.searchBands match {
+        case RBandsList    => Some(MagnitudeBand.R)
+        case NiciBandsList => Some(MagnitudeBand.R)
+        case SingleBand(b) => Some(b)
+        case NoBands       => None
+      }
+    }
+
+    def mag(v: Double, b: MagnitudeBand): Magnitude =
+      Magnitude(v, b, None, MagnitudeSystem.Vega)
+
+    val faint  =
+      for {
+        b <- band
+        v <- magc.map(_.faintnessConstraint.brightness)
+        g <- CatalogAdapter.Gaia.unconvertMin(mag(v, b))
+      } yield g.ceil.round.toInt
+
+    val bright =
+      for {
+        b <- band
+        v <- magc.flatMap(_.saturationConstraint.map(_.brightness))
+        g <- CatalogAdapter.Gaia.unconvertMax(mag(v, b))
+      } yield g.floor.round.toInt
+
     f"""|SELECT TOP $MaxResultCount $fields
         |      FROM gaiadr2.gaia_source
         |     WHERE CONTAINS(POINT('ICRS',${Gaia.raField.id},${Gaia.decField.id}),CIRCLE('ICRS', ${cs.base.ra.toDegrees}%9.8f, ${cs.base.dec.toDegrees}%9.8f, ${cs.radiusConstraint.maxLimit.toDegrees}%9.8f))=1
         |       AND (${Gaia.plxField.id} > 0)
-        |       AND (${Gaia.gMagField.id} BETWEEN ${BrightLimit} AND ${FaintLimit})
+        |       AND (${Gaia.gMagField.id} BETWEEN ${bright.getOrElse(BrightLimit)} AND ${faint.getOrElse(FaintLimit)})
         |       AND (${Gaia.bpRpField.id} IS NOT NULL)
         |       AND (SQRT(POWER(${Gaia.pmRaField.id}, 2.0) + POWER(${Gaia.pmDecField.id}, 2.0)) < ${ProperMotionLimitMasYr})
         |  ORDER BY ${Gaia.gMagField.id}

@@ -1,14 +1,17 @@
 package edu.gemini.ags.gems
 
+import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
+import edu.gemini.ags.impl.RadiusLimitCalc
+import edu.gemini.ags.gems.GemsMagnitudeTable.CanopusWfsMagnitudeLimitsCalculator
 import edu.gemini.catalog.api._
-import edu.gemini.catalog.api.CatalogName.UCAC4
 import edu.gemini.catalog.votable._
-import edu.gemini.spModel.core.SiderealTarget
-import edu.gemini.spModel.core.{Angle, MagnitudeBand, Coordinates}
-import edu.gemini.spModel.gemini.gems.GemsInstrument
+import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.spModel.core._
+import edu.gemini.spModel.gems.GemsGuideStarType.tiptilt
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
+import edu.gemini.spModel.guide.GuideSpeed
 import edu.gemini.spModel.obs.context.ObsContext
-
+import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
 import scala.concurrent.{ExecutionContext, Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -20,148 +23,135 @@ import Scalaz._
 
 import jsky.util.gui.StatusLogger
 
+import GemsVoTableCatalog._
+
 /**
- * Implements GeMS guide star search.
- * The catalog search will provide the inputs to the analysis phase, which actually assigns guide stars to guiders.
- * See OT-26
+ * Implements GeMS guide star search. The catalog search will provide the inputs
+ * to the analysis phase, which actually assigns guide stars to guiders.
  */
-case class GemsVoTableCatalog(backend: VoTableBackend = ConeSearchBackend, catalog: CatalogName = UCAC4) {
+final case class GemsVoTableCatalog(
+  catalog: CatalogName,
+  backend: Option[VoTableBackend]
+) {
 
   /**
-   * Searches for the given base position according to the given options.
-   * Multiple queries are performed in parallel in background threads.
-   * This method is synchronous and can be used form the Java side of the OT
+   * Searches for candidate stars that may serve as either Canopus WFS guide
+   * stars or else PWFS1 slow focus sensor stars. This method is synchronous
+   * and can be used from Java.
    *
-   * @param obsContext   the context of the observation (needed to adjust for selected conditions)
-   * @param basePosition the base position to search for
-   * @param options      the search options
-   * @param nirBand      optional NIR magnitude band (default is H)
-   * @param timeout      Timeout in seconds
-   * @return list of search results
+   * @param ctx     observation context
+   * @param timeout timeout in seconds
+   * @return list of candidate guide stars
    */
-  def search4Java(obsContext: ObsContext, basePosition: Coordinates, options: GemsGuideStarSearchOptions, nirBand: Option[MagnitudeBand], timeout: Int = 10, ec: ExecutionContext): java.util.List[GemsCatalogSearchResults] =
-    Await.result(search(obsContext, basePosition, options, nirBand)(ec), timeout.seconds).asJava
+  def search4Java(
+    ctx:     ObsContext,
+    mt:      MagnitudeTable,
+    timeout: Int = 10,
+    ec:      ExecutionContext
+  ): java.util.List[SiderealTarget] =
+    Await.result(search(ctx, mt)(ec), timeout.seconds).asJava
 
   /**
-   * Searches for the given base position according to the given options.
-   * Multiple queries are performed in parallel in background threads.
+   * Searches for candidate stars that may serve as either Canopus WFS guide
+   * stars or else PWFS1 slow focus sensor stars.
    *
-   * @param obsContext   the context of the observation (needed to adjust for selected conditions)
-   * @param basePosition the base position to search for
-   * @param options      the search options
-   * @param nirBand      optional NIR magnitude band (default is H)
-   * @return  Future with a list of search results
+   * @param ctx the context of the observation
+   * @return Future list of candidate guide stars
    */
-  def search(obsContext: ObsContext, basePosition: Coordinates, options: GemsGuideStarSearchOptions, nirBand: Option[MagnitudeBand])(ec: ExecutionContext): Future[List[GemsCatalogSearchResults]] = {
-    val criteria = options.searchCriteria(obsContext, nirBand).asScala.toList
-    val inst = options.getInstrument
+  def search(
+    ctx: ObsContext,
+    mt:  MagnitudeTable
+  )(
+    ec: ExecutionContext
+  ): Future[List[SiderealTarget]] =
 
-    val resultSequence = inst match {
-      case GemsInstrument.flamingos2 => searchCatalog(basePosition, criteria)(ec)
-      case i                         => searchOptimized(basePosition, obsContext.getConditions, criteria, i)(ec)
+    catalogQuery(ctx, mt, catalog).fold(Future.successful(List.empty[SiderealTarget])) { q =>
+      VoTableClient
+        .catalog(q, backend)(ec)
+        .map(_.result.targets.rows.sortBy(RBandsList.extract)(Magnitude.MagnitudeOptionValueOrdering))
     }
 
-    // sort on criteria order
-    resultSequence.map(_.sortWith({
-      case (x, y) =>
-        criteria.indexOf(x.criterion) < criteria.indexOf(y.criterion)
-    }))
-  }
+}
 
-  private def searchCatalog(basePosition: Coordinates, criteria: List[GemsCatalogSearchCriterion])(ec: ExecutionContext): Future[List[GemsCatalogSearchResults]] = {
-    val queryArgs = criteria.map { c =>
-      (CatalogQuery(basePosition, c.criterion.radiusConstraint, c.criterion.magConstraint, catalog), c)
-    }
-    val qm = queryArgs.toMap
-    VoTableClient.catalogs(queryArgs.map(_._1), Some(backend))(ec).map(l => l.map { qr => GemsCatalogSearchResults(qm.get(qr.query).get, qr.result.targets.rows)})
-  }
+object GemsVoTableCatalog {
+
+  // Magnitude adjustment for the nominal faintness limit of the PWFS1 guide
+  // probe. Since it is not being used for guiding, we can tolerate stars 2.5
+  // mags fainter than normal.
+  val Pwfs1SlowFocusSensorAdjustment = 2.5
 
   /**
-   * Searches the given catalogs for the given base position according to the given criteria.
-   * This method attempts to merge the criteria to avoid multiple catalog queries and then
-   * runs the catalog searches in parallel in background threads and notifies the
-   * searchResultsListener when done.
+   * Calculates the range of magnitude constraints required for CWFS candidates.
+   * @param ctx observation context
+   * @return magnitude constraints for CWFS candidates in the given observing
+   *         conditions
+   */
+  def cwfsMagnitudeConstraints(ctx: ObsContext): MagnitudeConstraints =
+    CanopusWfsMagnitudeLimitsCalculator
+      .adjustGemsMagnitudeConstraintForJava(tiptilt, None, ctx.getConditions)
+
+  /**
+   * Calculates the range of magnitude constraints required for PWFS1 SFS
+   * candidates.
+   * @param ctx observation context
+   * @return magnitude constraints for PWFS1 SFS candidates in the given
+   *         observing conditions
+   */
+  def pwfsMagnitudeConstraints(
+    ctx: ObsContext,
+    mt:  MagnitudeTable
+  ): Option[MagnitudeConstraints] =
+
+    mt(ctx, PwfsGuideProbe.pwfs1).map { f =>
+      f(ctx.getConditions, GuideSpeed.SLOW)
+        .adjust(_ + Pwfs1SlowFocusSensorAdjustment, identity)
+    }
+
+  /**
+   * Calculates the range of magnitude constraints required to include both
+   * PWFS1 as SFS and Canopus WFS in the given observing conditions.
    *
-   * @param basePosition the base position to search for
-   * @param criterions list of search criteria
-   * @param inst the instrument option for the search
-   * @return a list of threads used for background catalog searches
+   * @param ctx observation context
+   *
+   * @return broadest necessary magnitude constraints for a candidate that may
+   *         serve as a PWFS1 SFS star or a Canopus WFS star
    */
-  private def searchOptimized(basePosition: Coordinates, conditions: Conditions, criterions: List[GemsCatalogSearchCriterion], inst: GemsInstrument)(ec: ExecutionContext): Future[List[GemsCatalogSearchResults]] = {
-    val radiusConstraints = getRadiusConstraints(inst, criterions)
-    val magConstraints = optimizeMagnitudeConstraints(criterions)
-
-    val queries = for {
-      radiusLimits <- radiusConstraints
-      magLimits    <- magConstraints
-    } yield CatalogQuery(basePosition, radiusLimits, magLimits, catalog)
-
-    VoTableClient.catalogs(queries, Some(backend))(ec).flatMap {
-      case l if l.exists(_.result.containsError) =>
-        Future.failed(CatalogException(l.map(_.result.problems).suml))
-      case l =>
-        Future.successful {
-          val targets = l.foldMap { _.result.targets.rows }
-          assignToCriterion(basePosition, criterions, targets)
-        }
-    }
+  def magnitudeConstraints(
+    ctx: ObsContext,
+    mt:  MagnitudeTable
+  ): MagnitudeConstraints = {
+    val c = cwfsMagnitudeConstraints(ctx)
+    pwfsMagnitudeConstraints(ctx, mt).flatMap(_.union(c)).getOrElse(c)
   }
 
   /**
-   * Assign targets to matching criteria
+   * Calculates the radius constraints required to include both PWFS1 and
+   * Canopus WFS stars, taking into account offset positions.
    */
-  private def assignToCriterion(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], targets: List[SiderealTarget]): List[GemsCatalogSearchResults] = {
+  def radiusConstraint(ctx: ObsContext): RadiusConstraint =
 
-    def matchCriteria(basePosition: Coordinates, criter: GemsCatalogSearchCriterion): List[SiderealTarget] = {
-      val matcher = criter.criterion.matcher(basePosition)
-      targets.filter(matcher.matches).distinct
-    }
+    RadiusLimitCalc
+      .getAgsQueryRadiusLimits(PwfsGuideProbe.pwfs1, ctx)
+      .getOrElse(RadiusConstraint.empty)
 
-    criterions.map(c => GemsCatalogSearchResults(c, matchCriteria(basePosition, c)))
-  }
+  /**
+   * Returns the catalog query necessary to include both PWFS1 SFS and Canopus
+   * WFS candidates in a single query.
+   */
+  def catalogQuery(
+    ctx:     ObsContext,
+    mt:      MagnitudeTable,
+    catalog: CatalogName
+  ): Option[CatalogQuery] =
 
-  // Returns a list of radius limits used in the criteria.
-  // If inst is flamingos2, use separate limits, since the difference in size between the OIWFS and Canopus
-  // areas is too large to get good results.
-  // Otherwise, for GSAOI, merge the radius limits into one, since the Canopus and GSAOI radius are both about
-  // 1 arcmin.
-  protected [gems] def getRadiusConstraints(inst: GemsInstrument, criterions: List[GemsCatalogSearchCriterion]): List[RadiusConstraint] = {
-    inst match {
-      case GemsInstrument.flamingos2 => criterions.map(_.criterion.adjustedLimits)
-      case _                         => optimizeRadiusConstraint(criterions).toList
-    }
-  }
+    for {
+      b0 <- ctx.getBaseCoordinates.asScalaOpt
+      b1 <- b0.toCoreCoordinates.asScalaOpt
+    } yield CatalogQuery.coneSearch(
+      b1,
+      radiusConstraint(ctx),
+      magnitudeConstraints(ctx, mt),
+      catalog
+    )
 
-  // Combines multiple radius limits into one
-  protected [gems] def optimizeRadiusConstraint(criterList: List[GemsCatalogSearchCriterion]): Option[RadiusConstraint] = {
-    criterList.nonEmpty option {
-      val result = criterList.foldLeft((Double.MinValue, Double.MaxValue)) { (prev, current) =>
-        val c = current.criterion
-        val radiusConstraint = c.adjustedLimits
-        val maxLimit = radiusConstraint.maxLimit
-        val correctedMax = (c.offset |@| c.posAngle) { (o, _) =>
-          // If an offset and pos angle were defined, normally an adjusted base position
-          // would be used, however since we are merging queries here, use the original
-          // base position and adjust the radius limits
-          maxLimit + o.distance
-        } | maxLimit
-        (max(correctedMax.toDegrees, prev._1), min(radiusConstraint.minLimit.toDegrees, prev._2))
-      }
-      RadiusConstraint.between(Angle.fromDegrees(result._1), Angle.fromDegrees(result._2))
-    }
-  }
-
-  // Sets the min/max magnitude limits in the given query arguments
-  protected [gems] def optimizeMagnitudeConstraints(criterions: List[GemsCatalogSearchCriterion]): List[MagnitudeConstraints] = {
-    val constraintsPerBand = criterions.map(_.criterion.magConstraint).groupBy(_.searchBands).toList
-    // Get max/min limits per band
-    constraintsPerBand.flatMap {
-      case (_, Nil) =>
-        None
-      case (_, h :: tail) =>
-        tail.foldLeft(h.some) { (a, b) =>
-          a >>= (_ union b)
-        }
-    }
-  }
 }

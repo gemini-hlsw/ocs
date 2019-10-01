@@ -1,25 +1,31 @@
 package jsky.app.ot.tpe;
 
+import edu.gemini.ags.api.AgsStrategy;
+import edu.gemini.ags.impl.SingleProbeStrategy;
+import edu.gemini.ags.conf.ProbeLimitsTable;
 import edu.gemini.ags.gems.*;
 import edu.gemini.ags.gems.mascot.Strehl;
 import edu.gemini.ags.gems.mascot.MascotProgress;
 import edu.gemini.catalog.votable.CatalogException;
-import edu.gemini.catalog.votable.ConeSearchBackend;
+import edu.gemini.catalog.votable.VoTableBackend;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.skyobject.coords.SkyCoordinates;
 import edu.gemini.skycalc.Coordinates;
+import edu.gemini.spModel.ags.AgsStrategyKey;
+import edu.gemini.spModel.ags.AgsStrategyKey$;
 import edu.gemini.spModel.core.Angle$;
 import edu.gemini.spModel.core.MagnitudeBand;
+import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
-import edu.gemini.spModel.gemini.gems.GemsInstrument;
-import edu.gemini.spModel.gems.GemsTipTiltMode;
+import edu.gemini.spModel.gemini.gems.CanopusWfs;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.*;
+import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import jsky.coords.WorldCoords;
 import jsky.util.gui.SwingWorker;
@@ -74,7 +80,12 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 
     public Object construct() {
         try {
-            return findGuideStars(ec);
+            final Option<GemsGuideStars> gs = findGuideStars(ec);
+
+            // Sorry, something is expecting a NoStarsException to signify that
+            // the search failed.
+            return gs.map(g -> (Object) g) // widen to Object
+                     .getOrElse(() -> new NoStarsException("Could not find required guide stars"));
         } catch (Exception e) {
             return e;
         }
@@ -158,11 +169,18 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      * @param selectedAsterisms information used to create the guide groups
      * @param primaryIndex      if more than one item in list, the index of the primary guide group
      */
-    public void applyResults(final List<GemsGuideStars> selectedAsterisms, final int primaryIndex) {
+    public void applyResults(
+        final List<GemsGuideStars> selectedAsterisms,
+        final int                  primaryIndex
+    ) {
         applyResults(tpe.getContext(), selectedAsterisms, primaryIndex);
     }
 
-    private static void applyResults(final TpeContext ctx, final List<GemsGuideStars> selectedAsterisms, final int primaryIndex) {
+    private static void applyResults(
+        final TpeContext           ctx,
+        final List<GemsGuideStars> selectedAsterisms,
+        final int                  primaryIndex       // TODO-NGS2: let's just get rid of the primaryIndex business?
+    ) {
         final TargetObsComp targetObsComp = ctx.targets().orNull();
         if (targetObsComp != null) {
             final TargetEnvironment env = targetObsComp.getTargetEnvironment();
@@ -193,13 +211,12 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             // If there WAS an index, the primary is now off by 1.
             final int idx = primaryIndex + (autoGpOpt.isDefined() ? 1 : 0);
 
-            if (guideGroupList.size() == 0) {
-                targetObsComp.setTargetEnvironment(env.setGuideEnvironment(env.getGuideEnvironment().setOptions(
-                        newGroups)));
-            } else {
-                targetObsComp.setTargetEnvironment(env.setGuideEnvironment(env.getGuideEnvironment().setOptions(
-                        newGroups).setPrimaryIndex(idx)));
-            }
+            final GuideEnvironment genv =
+                env.getGuideEnvironment().setOptions(newGroups);
+
+            targetObsComp.setTargetEnvironment(
+                env.setGuideEnvironment((guideGroupList.size() == 0) ? genv : genv.setPrimaryIndex(idx))
+            );
             ctx.targets().commit();
         }
     }
@@ -226,73 +243,90 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      *
      * @return catalog search results
      */
-    public List<GemsCatalogSearchResults> search(GemsGuideStarSearchOptions.CatalogChoice catalog, GemsTipTiltMode tipTiltMode,
-                                                 ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
-                                                 scala.Option<MagnitudeBand> nirBand,
-                                                 scala.concurrent.ExecutionContext ec) throws Exception {
+    public List<SiderealTarget> search(
+        GemsCatalogChoice                  catalog,
+        scala.Option<VoTableBackend>       backend,
+        ObsContext                         obsContext,
+        scala.concurrent.ExecutionContext  ec
+    ) {
         try {
             interrupted = false;
             startProgress();
 
-            final List<GemsCatalogSearchResults> results = searchUnchecked(catalog, tipTiltMode, obsContext, posAngles, nirBand, ec);
+            final List<SiderealTarget> candidates =
+                    searchUnchecked(catalog, backend, obsContext, ec);
             if (interrupted) {
                 throw new CancellationException("Canceled");
             }
 
-            checkResults(results);
-            return results;
+            checkResults(candidates);
+            return candidates;
         } finally {
             stopProgress();
             interrupted = false;
         }
     }
 
-    private static List<GemsCatalogSearchResults> searchUnchecked(GemsGuideStarSearchOptions.CatalogChoice catalog, GemsTipTiltMode tipTiltMode,
-                                                         ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
-                                                         scala.Option<MagnitudeBand> nirBand,
-                                                         scala.concurrent.ExecutionContext ec) throws Exception {
-        Coordinates basePos = obsContext.getBaseCoordinates().getOrNull();
-        Angle baseRA = new Angle(basePos.getRaDeg(), Angle.Unit.DEGREES);
-        Angle baseDec = new Angle(basePos.getDecDeg(), Angle.Unit.DEGREES);
-        SkyCoordinates base = new HmsDegCoordinates.Builder(baseRA, baseDec).build();
-
-        SPInstObsComp inst = obsContext.getInstrument();
-
-        GemsInstrument instrument = inst instanceof Flamingos2 ? GemsInstrument.flamingos2 : GemsInstrument.gsaoi;
-        GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles);
-
-        return new GemsVoTableCatalog(ConeSearchBackend.instance(), catalog.catalog()).search4Java(obsContext, ModelConverters.toCoordinates(base), options, nirBand, 30, ec);
+    private static List<SiderealTarget> searchUnchecked(
+        GemsCatalogChoice                  catalog,
+        scala.Option<VoTableBackend>       backend,
+        ObsContext                         obsContext,
+        scala.concurrent.ExecutionContext  ec
+    ) {
+        // Get the candidate guide stars for canopus.
+        return new GemsVoTableCatalog(catalog.catalog(), backend)
+                     .search4Java(
+                       obsContext,
+                       ProbeLimitsTable.loadOrThrow(),
+                       30,
+                       ec
+                     );
     }
 
 
     /**
      * Returns the set of Gems guide stars with the highest ranking using the default settings.
      */
-    private GemsGuideStars findGuideStars(scala.concurrent.ExecutionContext ec) throws Exception {
-        final WorldCoords basePos = tpe.getBasePos();
-        final ObsContext obsContext = getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
+    private Option<GemsGuideStars> findGuideStars(scala.concurrent.ExecutionContext ec) {
+        final WorldCoords                          basePos = tpe.getBasePos();
+        final ObsContext                        obsContext = getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
         final Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
-        final List<GemsCatalogSearchResults> results = search(GemsGuideStarSearchOptions.DEFAULT, GemsTipTiltMode.canopus, obsContext, posAngles,
-                scala.Option.empty(), ec);
-        return findGuideStars(obsContext, posAngles, results);
+        final List<SiderealTarget> candidates =
+            search(
+                GemsCatalogChoice.DEFAULT,
+                scala.Option.empty(),
+                obsContext,
+                ec
+            );
+        return findGuideStars(obsContext, posAngles, candidates);
     }
 
     /**
      * Returns the set of Gems guide stars with the highest ranking using the given settings
      */
-    private GemsGuideStars findGuideStars(ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
-                                         List<GemsCatalogSearchResults> results) throws Exception {
+    private Option<GemsGuideStars> findGuideStars(
+        final ObsContext                         obsContext,
+        final Set<edu.gemini.spModel.core.Angle> posAngles,
+        final List<SiderealTarget>               candidates
+    ) {
 
         interrupted = false;
         try {
-            startProgress();
-            List<GemsGuideStars> gemsResults = GemsResultsAnalyzer.instance().analyze(obsContext, posAngles, results, new scala.Some<>(this));
-            if (interrupted && gemsResults.size() == 0) {
-                throw new CancellationException("Canceled");
-            }
-            interrupted = false;
-            if (gemsResults.size() > 0) return gemsResults.get(0);
-            throw new NoStarsException("No guide stars were found");
+                startProgress();
+                final List<GemsGuideStars> gemsResults =
+                    GemsResultsAnalyzer.instance().analyzeForJava(
+                        obsContext,
+                        posAngles,
+                        candidates,
+                        ImOption.apply(this)
+                    );
+                if (interrupted && gemsResults.size() == 0) {
+                    throw new CancellationException("Canceled");
+                }
+                interrupted = false;
+
+                return ImOption.fromOptional(gemsResults.stream().findFirst());
+
         } finally {
             stopProgress();
             interrupted = false;
@@ -302,12 +336,21 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     /**
      * Returns a list of all possible Gems guide star sets.
      */
-    public List<GemsGuideStars> findAllGuideStars(ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
-                                                  List<GemsCatalogSearchResults> results) throws Exception {
+    public List<GemsGuideStars> findAllGuideStars(
+        ObsContext                         obsContext,
+        Set<edu.gemini.spModel.core.Angle> posAngles,
+        List<SiderealTarget>               candidates
+    ) {
         interrupted = false;
         try {
             startProgress();
-            List<GemsGuideStars> gemsResults = GemsResultsAnalyzer.instance().analyze(obsContext, posAngles, results, new scala.Some<>(this));
+            final List<GemsGuideStars> gemsResults =
+                GemsResultsAnalyzer.instance().analyzeForJava(
+                        obsContext,
+                        posAngles,
+                        candidates,
+                        ImOption.apply(this)
+                );
             if (interrupted && gemsResults.size() == 0) {
                 throw new CancellationException("Canceled");
             }
@@ -326,29 +369,15 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         }
         final edu.gemini.spModel.core.Angle positionAngle = gemsGuideStarsList.get(0).pa();
 
-        return gemsGuideStarsList.stream().collect(ArrayList<GemsGuideStars>::new, (alst, ggs) -> {
+        return gemsGuideStarsList.stream().collect(ArrayList::new, (alst, ggs) -> {
             if (positionAngle.equals(ggs.pa())) alst.add(ggs);
         }, ArrayList::addAll);
     }
 
-
-    // Checks that the results are valid: There must be at least 1 valid tiptilt and flexure star each
-    private static void checkResults(List<GemsCatalogSearchResults> results) {
-        final Map<String, Boolean> keyMap = new HashMap<>();
-        for (final GemsCatalogSearchResults searchResults : results) {
-            final String key = searchResults.criterion().key().group().getKey();
-            if (searchResults.results().size() != 0) {
-                keyMap.put(key, true);
-            } else if (!keyMap.containsKey(key)) {
-                keyMap.put(key, false);
-            }
-        }
-        for (final String key : keyMap.keySet()) {
-            if (!keyMap.get(key)) {
-                throw new NoStarsException("No "
-                        + key
-                        + " guide stars were found");
-            }
+    // Checks that we got something.
+    private static void checkResults(final List<SiderealTarget> candidates) {
+        if (candidates.isEmpty()) {
+            throw new NoStarsException(String.format("No guide stars were found"));
         }
     }
 

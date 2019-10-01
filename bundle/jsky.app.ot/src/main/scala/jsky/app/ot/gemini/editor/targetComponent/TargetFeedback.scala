@@ -3,6 +3,7 @@ package jsky.app.ot.gemini.editor.targetComponent
 import java.awt.Color
 import java.awt.Color._
 
+import javax.swing.border.Border
 import javax.swing.{BorderFactory, Icon}
 import edu.gemini.ags.api.AgsAnalysis.{NoGuideStarForGroup, NoGuideStarForProbe}
 import edu.gemini.ags.api.{AgsAnalysis, AgsRegistrar}
@@ -26,7 +27,8 @@ import scala.swing.GridBagPanel.Fill
 import scala.swing.{Alignment, GridBagPanel, Label}
 import scalaz._
 import Scalaz._
-import javax.swing.border.Border
+import edu.gemini.ags.impl.{Ngs2Strategy, SingleProbeStrategyParams}
+import jsky.app.ot.gemini.editor.targetComponent.TargetGuidingFeedback.ProbeLimits.{le, lim}
 
 
 object TargetFeedback {
@@ -62,7 +64,9 @@ object TargetGuidingFeedback {
       foreground = DARK_GRAY
       background = bg
       text       = probeLimits.map(_.searchRange).getOrElse("")
-      tooltip    = probeLimits.collect{case pl if pl.fast < pl.slow => pl.detailRange}.orNull
+      tooltip    = probeLimits.collect {
+        case pl@ProbeLimitsWithGuideSpeed(_, _, fast, _, faint) if fast < faint => pl.detailRange.orNull
+      }.orNull
       opaque     = true
       horizontalAlignment = Alignment.Right
     }
@@ -93,36 +97,50 @@ object TargetGuidingFeedback {
 
 
   object ProbeLimits {
-    def apply(probeBands: BandsList, ctx: ObsContext, mc: MagnitudeCalc): Option[ProbeLimits] = {
+
+    def fromCalc(probeBands: BandsList, ctx: ObsContext, mc: MagnitudeCalc): Option[ProbeLimits] = {
       val conditions = ctx.getConditions
       val fast = mc.apply(conditions, FAST)
 
       def faint(gs: GuideSpeed) = mc.apply(conditions, gs).faintnessConstraint.brightness
 
       fast.saturationConstraint.map { sat =>
-        ProbeLimits(probeBands, sat.brightness, faint(FAST), faint(MEDIUM), faint(SLOW))
+        ProbeLimitsWithGuideSpeed(probeBands, sat.brightness, faint(FAST), faint(MEDIUM), faint(SLOW))
       }
     }
 
     val le = '\u2264'
+    // TODO-NGS2: Perhaps we should change this to f"$d%.2f"? PWFS1 faintness limits have two decimal places.
     def lim(d: Double): String = f"$d%.1f"
   }
 
-  case class ProbeLimits(bands: BandsList, sat: Double, fast: Double, medium: Double, slow: Double) {
-    import ProbeLimits.{le, lim}
+  sealed trait ProbeLimits {
+    def bands: BandsList
+    def sat: Double
+    def faint: Double
 
     def searchRange: String =
-      s"${lim(sat)} $le ${bands.bands.map(_.name).mkString(", ")} $le ${lim(slow)}"
+      s"${lim(sat)} $le ${bands.bands.map(_.name).mkString(", ")} $le ${lim(faint)}"
 
-    def detailRange: String =
-      s"${lim(sat)} $le FAST $le ${lim(fast)} < MEDIUM $le ${lim(medium)} < SLOW $le ${lim(slow)}"
+    def detailRange: Option[String] = None
+  }
+
+  final case class ProbeLimitsWithGuideSpeed(bands: BandsList, sat: Double, fast: Double, medium: Double, faint: Double) extends ProbeLimits {
+    override def detailRange: Option[String] = {
+      val f = lim(fast)
+      val m = lim(medium)
+      val s = lim(faint)
+
+      !(f.equals(m) && m.equals(s)) option
+        s"${lim(sat)} $le FAST $le $f < MEDIUM $le $m < SLOW $le $s"
+    }
   }
 
   // GuidingFeedback.Rows corresponding to the observation as a whole.
   def obsAnalysis(ctx: ObsContext, mt: MagnitudeTable): List[AnalysisRow] = {
     AgsRegistrar.currentStrategy(ctx).map { strategy =>
       val (calcTable, analysis, probeBands) = (strategy.magnitudes(ctx, mt).toMap, strategy.analyze(ctx, mt), strategy.probeBands)
-      val probeLimitsMap = calcTable.mapValues(ProbeLimits(probeBands, ctx, _))
+      val probeLimitsMap = calcTable.mapValues(ProbeLimits.fromCalc(probeBands, ctx, _))
 
       analysis.map { a =>
         val plo = for {
@@ -170,10 +188,19 @@ object TargetGuidingFeedback {
 
   // GuidingFeedback.Row related to the given guide star itself.
   def guideStarAnalysis(ctx: ObsContext, mt: MagnitudeTable, gp: ValidatableGuideProbe, target: SPTarget): Option[AnalysisRow] =
-    AgsAnalysis.analysis(ctx, mt, gp, target.toSiderealTarget(ctx.getSchedulingBlockStart)).map { a =>
-      val plo = mt(ctx, gp).flatMap(ProbeLimits(gp.getBands(), ctx, _))
-      AnalysisRow(a, plo, includeProbeName = false)
-    }
+    AgsRegistrar
+      .currentStrategy(ctx)
+      .flatMap { strategy =>
+        strategy
+          .analyze(ctx, mt, gp, target.toSiderealTarget(ctx.getSchedulingBlockStart))
+          .map { a =>
+            val plo = strategy.magnitudes(ctx, mt).toMap.get(gp).flatMap { mc =>
+              ProbeLimits.fromCalc(gp.getBands, ctx, mc)
+            }
+            AnalysisRow(a, plo, includeProbeName = false)
+         }
+       }
+
 }
 
 
