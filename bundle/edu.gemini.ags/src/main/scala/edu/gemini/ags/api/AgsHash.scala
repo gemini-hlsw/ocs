@@ -124,7 +124,7 @@ object AgsHash {
           _.pwfs2VignettingClearance.getMagnitude.## +=: buf
         }
 
-      case GemsKey                       =>
+      case Ngs2Key                       =>
         // GeMS works differently depending upon whether GSAOI or F2 is in use.
         Option(ctx.getInstrument).map(_.getPhaseIResourceName).foreach { n =>
           M3.stringHash(n) +=: buf

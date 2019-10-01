@@ -2,8 +2,7 @@ package edu.gemini.catalog.api
 
 import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.core.{BandsList, Magnitude, MagnitudeBand}
-import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.MagnitudeAdjuster
-
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{Conditions, MagnitudeAdjuster}
 import scalaz._
 import Scalaz._
 
@@ -21,10 +20,10 @@ sealed trait MagConstraint {
 }
 
 /**
- * Constrain a target's if a magnitude is fainter than a threshold
+ * Constrain a target if a magnitude is fainter than a threshold
  */
 case class FaintnessConstraint(brightness: Double) extends MagConstraint {
-  override def contains(v: Double) = v <= brightness
+  override def contains(v: Double): Boolean = v <= brightness
 }
 
 object FaintnessConstraint {
@@ -37,7 +36,7 @@ object FaintnessConstraint {
  * Constrain a target's if a magnitude is brighter than a threshold
  */
 case class SaturationConstraint(brightness: Double) extends MagConstraint {
-  override def contains(v: Double) = v >= brightness
+  override def contains(v: Double): Boolean = v >= brightness
 }
 
 object SaturationConstraint {
@@ -62,9 +61,24 @@ trait ConstraintsAdjuster[T] {
 }
 
 object ConstraintsAdjuster {
+  /**
+    * This is a rigid magnitude constraint adjuster that can, for one magnitude adjuster (IQ, SB, CC)
+    * uniformly adjust faintness and saturation levels uniformly.
+    */
   def fromMagnitudeAdjuster[M <: MagnitudeAdjuster]: ConstraintsAdjuster[M] = new ConstraintsAdjuster[M] {
     override def adjust(t: M, mc: MagnitudeConstraints): MagnitudeConstraints =
       mc.adjust(_ + t.getAdjustment(mc.searchBands))
+  }
+
+  /**
+    * This is a flexible magnitude constraint adjuster that:
+    * 1. Allows interactions of magnitude adjusters to determine the adjustments to the faintness and saturation levels.
+    * 2. Does not require the faintness and saturation level to be adjusted uniformly.
+    */
+  def customConstraintsAdjuster(f: (Conditions, BandsList) => Double,
+                                s: (Conditions, BandsList) => Double): ConstraintsAdjuster[Conditions] = new ConstraintsAdjuster[Conditions] {
+    override def adjust(c: Conditions, mc: MagnitudeConstraints): MagnitudeConstraints =
+      mc.adjust(_ + f(c, mc.searchBands), _ + s(c, mc.searchBands))
   }
 }
 
@@ -79,7 +93,7 @@ case class MagnitudeConstraints(searchBands: BandsList, faintnessConstraint: Fai
    * Determines whether the magnitude limits include the given magnitude
    * value.
    */
-  def contains(m: Magnitude) = searchBands.bandSupported(m.band) && faintnessConstraint.contains(m.value) && saturationConstraint.forall(_.contains(m.value))
+  def contains(m: Magnitude): Boolean = searchBands.bandSupported(m.band) && faintnessConstraint.contains(m.value) && saturationConstraint.forall(_.contains(m.value))
 
   /**
    * Returns a combination of two MagnitudeConstraints(this and that) such that
@@ -97,9 +111,29 @@ case class MagnitudeConstraints(searchBands: BandsList, faintnessConstraint: Fai
       MagnitudeConstraints(searchBands, faintness, saturation)
     }
 
-  def adjust(f: Double => Double): MagnitudeConstraints = {
+  /**
+    * Adjust the faintness limit and the saturation limit uniformly by a common function.
+    */
+  def adjust(f: Double => Double): MagnitudeConstraints =
+    adjust(f, f)
+
+  /**
+    * Can adjust the faintness limit and the saturation limit independently.
+    */
+  def adjust(f: Double => Double, s: Double => Double): MagnitudeConstraints = {
     val fl = f(faintnessConstraint.brightness)
-    val sl = saturationConstraint.map(_.brightness).map(f)
+    val sl = saturationConstraint.map(_.brightness).map(s)
     MagnitudeConstraints(searchBands, FaintnessConstraint(fl), sl.map(SaturationConstraint.apply))
   }
+}
+
+object MagnitudeConstraints {
+
+  def unbounded(searchBands: BandsList): MagnitudeConstraints =
+    MagnitudeConstraints(
+      searchBands,
+      FaintnessConstraint(Double.MaxValue),
+      Some(SaturationConstraint(Double.MinValue))
+    )
+
 }

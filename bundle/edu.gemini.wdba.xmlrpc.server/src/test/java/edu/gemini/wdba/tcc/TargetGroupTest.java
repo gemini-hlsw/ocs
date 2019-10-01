@@ -6,7 +6,7 @@ import edu.gemini.spModel.ext.ObservationNode;
 import edu.gemini.spModel.ext.TargetNode;
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider;
 import edu.gemini.spModel.gemini.altair.InstAltair;
-import edu.gemini.spModel.gemini.gems.Canopus;
+import edu.gemini.spModel.gemini.gems.CanopusWfs;
 import edu.gemini.spModel.gemini.gems.Gems;
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe;
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
@@ -247,7 +247,7 @@ public final class TargetGroupTest extends TestBase {
         final SPTarget cwfsTarget = new SPTarget(); cwfsTarget.setName("");
 
         final ImList<SPTarget> targetList = ImCollections.singletonList(cwfsTarget);
-        final GuideProbeTargets gt = GuideProbeTargets.create(Canopus.Wfs.cwfs1, targetList);
+        final GuideProbeTargets gt = GuideProbeTargets.create(CanopusWfs.cwfs1, targetList);
 
         final TargetEnvironment env = TargetEnvironment.create(base).putPrimaryGuideProbeTargets(gt);
 

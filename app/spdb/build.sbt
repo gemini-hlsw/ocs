@@ -37,7 +37,7 @@ ocsAppManifest := {
             odbproduction(v),
               gsodb(v),
               gnodb(v),
-	      gnagsodb(v)
+      gnagsodb(v)
     )
   )
 }

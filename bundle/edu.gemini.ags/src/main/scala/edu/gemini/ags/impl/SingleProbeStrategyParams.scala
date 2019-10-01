@@ -2,6 +2,7 @@ package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.AgsMagnitude
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
+import edu.gemini.ags.conf.{FaintnessKey, ProbeLimitsCalc}
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.api.CatalogName.UCAC4
 import edu.gemini.pot.ModelConverters._
@@ -12,16 +13,21 @@ import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe
 import edu.gemini.spModel.gemini.gnirs.GnirsOiwfsGuideProbe
 import edu.gemini.spModel.gemini.nifs.NifsOiwfsGuideProbe
 import edu.gemini.spModel.gemini.niri.NiriOiwfsGuideProbe
-import edu.gemini.spModel.guide.{GuideStarValidator, PatrolField, ValidatableGuideProbe}
+import edu.gemini.spModel.guide.{GuideSpeed, GuideStarValidator, PatrolField, ValidatableGuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
 import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
+
+import scalaz._
+import Scalaz._
 
 sealed trait SingleProbeStrategyParams {
   def site: Site
   def guideProbe: ValidatableGuideProbe
   def stepSize: Angle                        = Angle.fromDegrees(10)
   def minDistance: Option[Angle]             = Some(Angle.fromArcsecs(20))
+  def catalogName: CatalogName               = UCAC4
 
   final def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): Option[CatalogQuery] =
     for {
@@ -29,7 +35,7 @@ sealed trait SingleProbeStrategyParams {
       mc   <- magnitudeCalc(ctx, mt)
       rc   <- radiusConstraint(ctx)
       ml   <- AgsMagnitude.manualSearchConstraints(mc)
-    } yield CatalogQuery(base.toNewModel, rc, ml, UCAC4)
+    } yield CatalogQuery.coneSearch(base.toNewModel, rc, ml, catalogName)
 
   def radiusConstraint(ctx: ObsContext): Option[RadiusConstraint] =
     RadiusLimitCalc.getAgsQueryRadiusLimits(guideProbe, ctx)
