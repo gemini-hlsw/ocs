@@ -5,6 +5,8 @@ package edu.gemini.skycalc;
 
 import java.text.ParseException;
 
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
 import static edu.gemini.skycalc.Angle.Unit.DEGREES;
 
 /**
@@ -19,6 +21,19 @@ public final class Coordinates {
         double ra = HHMMSS.parse(raStr).toDegrees().getMagnitude();
         double dec = DDMMSS.parse(decStr).toDegrees().getMagnitude();
         return new Coordinates(ra, dec);
+    }
+
+    public static Coordinates fromCoreCoordinates(edu.gemini.spModel.core.Coordinates c) {
+        return new Coordinates(c.ra().toDegrees(), c.dec().toDegrees());
+    }
+
+    public Option<edu.gemini.spModel.core.Coordinates> toCoreCoordinates() {
+        return ImOption.fromScalaOpt(
+            edu.gemini.spModel.core.Coordinates$.MODULE$.fromDegrees(
+                getRaDeg(),
+                getDecDeg()
+            )
+        );
     }
 
     public Coordinates(double ra, double dec) {

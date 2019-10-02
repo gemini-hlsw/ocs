@@ -24,7 +24,7 @@ import edu.gemini.spModel.data.config.ISysConfig;
 import edu.gemini.spModel.data.config.StringParameter;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
-import edu.gemini.spModel.gemini.gems.Canopus;
+import edu.gemini.spModel.gemini.gems.CanopusWfs;
 import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.gemini.init.ObservationNI;
 import edu.gemini.spModel.guide.GuideOption;
@@ -225,26 +225,25 @@ public final class Gsaoi extends SPInstObsComp
         private final double expTimeHalfWell;
         private final Option<BandsList> catalogBand;
 
-        Filter(String displayValue, String logValue, double wavelength, ReadMode readMode, double expTime5050,
-                       double expTimeHalfWell, BandsList catalogBand) {
+        private Filter(String displayValue, String logValue, double wavelength, ReadMode readMode, double expTime5050,
+               double expTimeHalfWell, Option<BandsList> catalogBand) {
             this.displayValue = displayValue;
             this.logValue = logValue;
             this.wavelength = wavelength;
             this.readMode = readMode;
             this.expTime5050 = expTime5050;
             this.expTimeHalfWell = expTimeHalfWell;
-            this.catalogBand = new Some<>(catalogBand);
+            this.catalogBand = catalogBand;
+        }
+
+        Filter(String displayValue, String logValue, double wavelength, ReadMode readMode, double expTime5050,
+                       double expTimeHalfWell, BandsList catalogBand) {
+            this(displayValue, logValue, wavelength, readMode, expTime5050, expTimeHalfWell, new Some<>(catalogBand));
         }
 
         Filter(String displayValue, String logValue, double wavelength, ReadMode readMode, double expTime5050,
                        double expTimeHalfWell) {
-            this.displayValue = displayValue;
-            this.logValue = logValue;
-            this.wavelength = wavelength;
-            this.readMode = readMode;
-            this.expTime5050 = expTime5050;
-            this.expTimeHalfWell = expTimeHalfWell;
-            this.catalogBand = None.instance();
+            this(displayValue, logValue, wavelength, readMode, expTime5050, expTimeHalfWell, None.instance());
         }
 
         public String displayValue() {
@@ -440,7 +439,7 @@ public final class Gsaoi extends SPInstObsComp
             SPComponentType.INSTRUMENT_GSAOI;
 
     public static final ISPNodeInitializer<ISPObsComponent, Gsaoi> NI =
-        new ComponentNodeInitializer<>(SP_TYPE, () -> new Gsaoi(), c -> new GsaoiCB(c));
+        new ComponentNodeInitializer<>(SP_TYPE, Gsaoi::new, GsaoiCB::new);
 
     public static final ISPNodeInitializer<ISPObservation, SPObservation> OBSERVATION_NI =
         new ObservationNI(Instrument.Gsaoi.some()) {
@@ -516,7 +515,7 @@ public final class Gsaoi extends SPInstObsComp
         PropertySupport.setWrappedType(ROI_PROP, Roi.class);
     }
 
-    private PosAngleConstraint _posAngleConstraint = PosAngleConstraint.UNBOUNDED;
+    private PosAngleConstraint _posAngleConstraint = PosAngleConstraint.FIXED;
 
     private Filter filter = Filter.DEFAULT;
     private ReadMode readMode;
@@ -737,7 +736,7 @@ public final class Gsaoi extends SPInstObsComp
         for (final GsaoiOdgw odgw : GsaoiOdgw.values()) {
             if (isActive(c, odgw.getSequenceProp())) return true;
         }
-        for (final Canopus.Wfs wfs : Canopus.Wfs.values()) {
+        for (final CanopusWfs wfs : CanopusWfs.values()) {
             if (isActive(c, wfs.getSequenceProp())) return true;
         }
         return false;

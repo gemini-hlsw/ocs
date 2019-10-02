@@ -37,7 +37,7 @@ package object conf {
 
   type FaintnessMap = Map[FaintnessKey, Double]
 
-  val AllFaintnessKeys =
+  val AllFaintnessKeys: Set[FaintnessKey] =
     (for {
       iq <- ImageQuality.values()
       sb <- SkyBackground.values()

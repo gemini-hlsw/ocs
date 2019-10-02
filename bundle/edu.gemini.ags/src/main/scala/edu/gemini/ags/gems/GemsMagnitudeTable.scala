@@ -4,17 +4,16 @@ import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.catalog.api._
 import edu.gemini.spModel.core._
-import edu.gemini.spModel.gemini.gems.{Canopus, GemsInstrument}
+import edu.gemini.spModel.gemini.gems.CanopusWfs
 import edu.gemini.spModel.gemini.gsaoi.{Gsaoi, GsaoiOdgw}
 import edu.gemini.spModel.gems.GemsGuideStarType
-import edu.gemini.spModel.guide.{GuideSpeed, GuideProbe}
+import edu.gemini.spModel.guide.{GuideProbe, GuideSpeed}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
-import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
-
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{Conditions, ImageQuality, SkyBackground}
 import edu.gemini.skycalc
-import scala.collection.JavaConverters._
 
+import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
 
@@ -23,9 +22,44 @@ import Scalaz._
  * (that is, with predefined magnitude limits).
  */
 object GemsMagnitudeTable extends MagnitudeTable {
+  /**
+    * Normally, each type of condition (CC, IQ, SB) affect magnitude limits:
+    * 1. independently (e.g. the CC's affect on mag limits does not depend on the SB); and
+    * 2. uniformly (e.g. if CC changed the faintness limit, it also changed the saturation limit by the same amount).
+    *
+    * In NGS2, however, this is no longer the case:
+    * 1. The value of one condition can affect another's effect on magnitude limits.
+    * 2. For a given set of conditions, they might affect faintness and saturation limits differently.
+    *
+    * Thus, to create the magnitude limits adjuster for NGS2, we need to use some customization as per the following
+    * functions:
+    */
+    val NGS2ConditionsAdjuster: ConstraintsAdjuster[Conditions] = {
+      def faintnessAdjuster(c: Conditions, bands: BandsList): Double = {
+        (c.iq, c.sb, bands) match {
+          case (ImageQuality.ANY,        SkyBackground.ANY,        RBandsList) => -0.3
+          case (ImageQuality.ANY,        SkyBackground.PERCENT_80, RBandsList) => -0.2
+          case (ImageQuality.ANY,        SkyBackground.PERCENT_50, RBandsList) => -0.5
+          case (ImageQuality.ANY,        SkyBackground.PERCENT_20, RBandsList) => -0.5
+          case (ImageQuality.PERCENT_85, SkyBackground.ANY,        RBandsList) => -0.5
+          case _                                                               =>  0.0
+        }
+      }
 
-  val CwfsAdjust: MagnitudeConstraints => Conditions => MagnitudeConstraints =
-    mc => conds => conds.cc.adjust(conds.iq.adjust(mc))
+      def brightnessAdjuster(c: Conditions, bands: BandsList): Double = {
+        (c.iq, c.sb, bands) match {
+          case (ImageQuality.ANY, SkyBackground.ANY,        RBandsList) => 0.2
+          case (ImageQuality.ANY, SkyBackground.PERCENT_80, RBandsList) => 0.3
+          case _                                                        => 0.0
+        }
+      }
+
+      ConstraintsAdjuster.customConstraintsAdjuster(faintnessAdjuster, brightnessAdjuster)
+    }
+
+  val CwfsAdjust: MagnitudeConstraints => Conditions => MagnitudeConstraints = {
+    mc => conds => NGS2ConditionsAdjuster.adjust(conds, conds.sb.adjust(conds.cc.adjust(conds.iq.adjust(mc))))
+  }
 
   val OtherAdjust: MagnitudeConstraints => Conditions => MagnitudeConstraints =
     mc => conds => conds.adjust(mc)
@@ -52,7 +86,7 @@ object GemsMagnitudeTable extends MagnitudeTable {
         case (Site.GS, odgw: GsaoiOdgw)  =>
           Some(odgwCalc(GsaoiOdgwMagnitudeLimitsCalculator.gemsMagnitudeConstraint(GemsGuideStarType.flexure, MagnitudeBand.H.some)))
 
-        case (Site.GS, can: Canopus.Wfs) =>
+        case (Site.GS, can: CanopusWfs) =>
           Some(cwfsCalc(CanopusWfsMagnitudeLimitsCalculator.gemsMagnitudeConstraint(GemsGuideStarType.tiptilt, MagnitudeBand.R.some)))
 
         case _                           =>
@@ -69,24 +103,7 @@ object GemsMagnitudeTable extends MagnitudeTable {
     def gemsMagnitudeConstraint(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]): MagnitudeConstraints
 
     def adjustGemsMagnitudeConstraintForJava(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand], conditions: Conditions): MagnitudeConstraints
-
-    def searchCriterionBuilder(name: String, radiusLimit: skycalc.Angle, instrument: GemsInstrument, magConstraint: MagnitudeConstraints, posAngles: java.util.Set[Angle]): CatalogSearchCriterion = {
-      val radiusConstraint = RadiusConstraint.between(Angle.zero, radiusLimit.toNewModel)
-      val searchOffset = instrument.getOffset.asScalaOpt.map(_.toNewModel)
-      val searchPA = posAngles.asScala.headOption
-      CatalogSearchCriterion(name, radiusConstraint, magConstraint, searchOffset, searchPA)
-    }
-
   }
-
-  /**
-   * Unfortunately, we need a lookup table for the Mascot algorithm to map GemsInstruments to GemsMagnitudeLimitsCalculators.
-   * We cannot include this in the GemsInstrument as this would cause dependency issues and we want to decouple these.
-   */
-  lazy val GemsInstrumentToMagnitudeLimitsCalculator = Map[GemsInstrument, LimitsCalculator](
-    GemsInstrument.gsaoi      -> GsaoiOdgwMagnitudeLimitsCalculator,
-    GemsInstrument.flamingos2 -> Flamingos2OiwfsMagnitudeLimitsCalculator
-  )
 
   lazy val GsaoiOdgwMagnitudeLimitsCalculator = new LimitsCalculator {
     /**
@@ -115,19 +132,31 @@ object GemsMagnitudeTable extends MagnitudeTable {
    * be used directly by Mascot, since it cannot be looked up through the GemsInstrumentToMagnitudeLimitsCalculator map.
    */
   trait CanopusWfsCalculator extends LimitsCalculator {
-    def getNominalMagnitudeConstraints(cwfs: Canopus.Wfs): MagnitudeConstraints
+    def getNominalMagnitudeConstraints(cwfs: CanopusWfs): MagnitudeConstraints
   }
 
-  lazy val CanopusWfsMagnitudeLimitsCalculator = new CanopusWfsCalculator {
+  // For commissioning we were asked to go 1.5 mag fainter.  Leaving this here
+  // to make it easy to remove or adjust when the actual magnitude limits are
+  // known.
+  val CommissioningAdj = 1.5
 
+  lazy val CanopusWfsMagnitudeLimitsCalculator = new CanopusWfsCalculator {
     override def adjustGemsMagnitudeConstraintForJava(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand], conditions: Conditions): MagnitudeConstraints =
       CwfsAdjust(gemsMagnitudeConstraint(starType, nirBand))(conditions)
 
-    override def gemsMagnitudeConstraint(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]) =
-      magLimits(RBandsList, 15.0, 7.5)
+    // These values correspond to:
+    // CC = 50, IQ = 70, SB = 50 or 20
+    // CC = 50, IQ = 20, SB = ANY
 
-    override def getNominalMagnitudeConstraints(cwfs: Canopus.Wfs): MagnitudeConstraints =
-      magLimits(RBandsList, 15.0, 7.5)
+    private val NominalFaintLimit = 16.5
+    private val FaintLimit        = NominalFaintLimit + CommissioningAdj
+    private val BrightLimit       = 10.0
+
+    override def gemsMagnitudeConstraint(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]): MagnitudeConstraints =
+      magLimits(RBandsList, FaintLimit, BrightLimit)
+
+    override def getNominalMagnitudeConstraints(cwfs: CanopusWfs): MagnitudeConstraints =
+      magLimits(RBandsList, FaintLimit, BrightLimit)
   }
 
   private lazy val Flamingos2OiwfsMagnitudeLimitsCalculator = new LimitsCalculator {

@@ -3,7 +3,7 @@ package edu.gemini.catalog.ui
 import javax.swing.JTable
 import javax.swing.table._
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
-import edu.gemini.ags.api.GuideInFOV.{Outside, Inside}
+import edu.gemini.ags.api.GuideInFOV.{Inside, Outside}
 import edu.gemini.ags.api._
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
@@ -11,11 +11,10 @@ import edu.gemini.catalog.api.CatalogName.UCAC4
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.{None => JNone}
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.ags.AgsStrategyKey.{ Pwfs1NorthKey, Pwfs2NorthKey, Pwfs1SouthKey, Pwfs2SouthKey, GemsKey }
+import edu.gemini.spModel.ags.AgsStrategyKey.{Ngs2Key, Pwfs1NorthKey, Pwfs1SouthKey, Pwfs2NorthKey, Pwfs2SouthKey}
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.altair.{AltairParams, InstAltair}
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
-import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.gemini.gmos.{InstGmosNorth, InstGmosSouth}
 import edu.gemini.spModel.gemini.gnirs.{GNIRSConstants, InstGNIRS}
 import edu.gemini.spModel.gemini.gpi.Gpi
@@ -42,6 +41,7 @@ import scala.swing.{Alignment, Component, Label}
 import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
+import edu.gemini.spModel.gemini.gems.CanopusWfs
 import edu.gemini.spModel.gemini.ghost.Ghost
 
 /**
@@ -80,7 +80,7 @@ case class ObservationInfo(ctx: Option[ObsContext],
   def guideProbe: Option[ValidatableGuideProbe] =
     strategy.map(_.strategy).flatMap { s =>
       s.key match {
-        case GemsKey => Some(Canopus.Wfs.cwfs3)
+        case Ngs2Key => Some(CanopusWfs.cwfs1)
         case _       => s.guideProbes.headOption.collect {
           case v: ValidatableGuideProbe => v
         }

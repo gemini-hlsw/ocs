@@ -9,6 +9,7 @@ import edu.gemini.mascot.gui.contour.ContourPlot;
 import edu.gemini.mascot.gui.contour.StrehlContourPlot;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.*;
+import edu.gemini.spModel.gemini.gems.CanopusWfs;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.guide.GuideProbe;
@@ -108,6 +109,31 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
         return props.getBoolean(PROP_SHOW_STREHL_MAP, true);
     }
 
+    // Offset position to the center of the CWFS probe range at all offset
+    // positions.
+    private Option<edu.gemini.skycalc.Offset> strehlOffset(TpeImageWidget iw) {
+        return
+            centerOfProbeRange(iw).flatMap(c ->
+                iw.getObsContext().flatMap(ctx ->
+                    ctx.getBaseCoordinates().map(b ->
+                        new edu.gemini.skycalc.CoordinateDiff(b, c).getOffset()
+                    )
+                )
+            );
+
+    }
+
+    // Offset in screen coordinates to the center of the CWFS probe range at all
+    // offset positions.
+    private Option<Point2D.Double> strehlBaseScreenPos(TpeImageWidget iw) {
+        return strehlOffset(iw).map(o ->
+            iw.offsetToScreenCoords(
+                o.p().toArcsecs().getMagnitude(),
+                o.q().toArcsecs().getMagnitude()
+            )
+        );
+    }
+
     @Override
     public void reinit(TpeImageWidget iw, TpeImageInfo tii) {
         super.reinit(iw, tii);
@@ -120,7 +146,10 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
         // arrange to be notified if telescope positions are added, removed, or selected
         _monitorPosList();
 
-        Point2D.Double base = tii.getBaseScreenPos();
+        final Option<Point2D.Double> baseO = strehlBaseScreenPos(iw);
+        if (baseO.isEmpty()) return;
+
+        final Point2D.Double base = baseO.getValue();
         int size = getContourPlotSize();
         int r = size / 2;
 
@@ -422,24 +451,31 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
         return starList;
     }
 
+    private Option<edu.gemini.skycalc.Coordinates> centerOfProbeRange(TpeImageWidget iw) {
+        return iw.getObsContext().flatMap(ctx -> CanopusWfs.centerOfProbeRange(ctx));
+    }
+
     // Returns a mascot Star object for the given target, if coordinates are known
     private Option<Star> targetToStar(SPTarget target) {
         final Option<Long> when = _iw.getContext().schedulingBlockStartJava();
         return
             target.getRaDegrees(when).flatMap(ra ->
-            target.getDecDegrees(when).map(dec -> {
-                String name = target.getName();
-                double baseX = _tii.getBasePos().getRaDeg();
-                double baseY = _tii.getBasePos().getDecDeg();
-                Magnitude undef =   new Magnitude(MascotConf.invalidMag(), MagnitudeBand.J$.MODULE$);
-                double bmag = target.getMagnitudeJava(MagnitudeBand.B$.MODULE$).getOrElse(undef).value();
-                double vmag = target.getMagnitudeJava(MagnitudeBand.V$.MODULE$).getOrElse(undef).value();
-                double rmag = target.getMagnitudeJava(MagnitudeBand.R$.MODULE$).getOrElse(undef).value();
-                double jmag = target.getMagnitudeJava(MagnitudeBand.J$.MODULE$).getOrElse(undef).value();
-                double hmag = target.getMagnitudeJava(MagnitudeBand.H$.MODULE$).getOrElse(undef).value();
-                double kmag = target.getMagnitudeJava(MagnitudeBand.K$.MODULE$).getOrElse(undef).value();
-                return Star.makeStar(name, baseX, baseY, bmag, vmag, rmag, jmag, hmag, kmag, ra, dec);
-            }));
+                target.getDecDegrees(when).flatMap(dec ->
+                    centerOfProbeRange(_iw).map(coords -> {
+                        final String name = target.getName();
+                        final double baseX = coords.getRaDeg();
+                        final double baseY = coords.getDecDeg();
+                        final Magnitude undef = new Magnitude(MascotConf.invalidMag(), MagnitudeBand.J$.MODULE$);
+                        final double bmag = target.getMagnitudeJava(MagnitudeBand.B$.MODULE$).getOrElse(undef).value();
+                        final double vmag = target.getMagnitudeJava(MagnitudeBand.V$.MODULE$).getOrElse(undef).value();
+                        final double rmag = target.getMagnitudeJava(MagnitudeBand.R$.MODULE$).getOrElse(undef).value();
+                        final double jmag = target.getMagnitudeJava(MagnitudeBand.J$.MODULE$).getOrElse(undef).value();
+                        final double hmag = target.getMagnitudeJava(MagnitudeBand.H$.MODULE$).getOrElse(undef).value();
+                        final double kmag = target.getMagnitudeJava(MagnitudeBand.K$.MODULE$).getOrElse(undef).value();
+                        return Star.makeStar(name, baseX, baseY, bmag, vmag, rmag, jmag, hmag, kmag, ra, dec);
+                    })
+                )
+            );
     }
 
     // Displays a message with the mean, rms, min and max Strehl values (and FWHM)

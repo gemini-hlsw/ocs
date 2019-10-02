@@ -1,6 +1,7 @@
 package jsky.app.ot.tpe.gems
 
 import edu.gemini.spModel.core.{MagnitudeBand, SiderealTarget}
+import edu.gemini.shared.util.immutable.ImList
 import jsky.coords.{DMS, HMS}
 import scala.collection.JavaConverters._
 
@@ -11,30 +12,39 @@ object CatalogUtils4Java {
   /**
    * Build a row of data items from a Sidereal Target from UCAC4 (Containing r' and UC)
    */
-  def makeUCAC4Row(siderealTarget: SiderealTarget, nirBand: String, unusedBands: Array[String]): java.util.Vector[AnyRef] = {
-    new java.util.Vector[AnyRef](Vector[AnyRef](
-      Boolean.box(x = true),
-      siderealTarget.name,
-      siderealTarget.magnitudeIn(MagnitudeBand._r).map(v => Double.box(v.value)).orNull,
-      siderealTarget.magnitudeIn(MagnitudeBand.UC).map(v => Double.box(v.value)).orNull,
-      MagnitudeBand.all.find(_.name == nirBand).flatMap(siderealTarget.magnitudeIn).map(v => Double.box(v.value)).orNull,
-      new HMS(siderealTarget.coordinates.ra.toAngle.formatHMS).toString,
-      new DMS(siderealTarget.coordinates.dec.formatDMS).toString,
-      MagnitudeBand.all.find(_.name == unusedBands(0)).flatMap(siderealTarget.magnitudeIn).map(v => Double.box(v.value)).orNull,
-      MagnitudeBand.all.find(_.name == unusedBands(1)).flatMap(siderealTarget.magnitudeIn).map(v => Double.box(v.value)).orNull).asJava)
-  }
+  def makeUCAC4Row(
+      siderealTarget: SiderealTarget,
+      unusedBands:    ImList[MagnitudeBand]
+  ): java.util.List[AnyRef] =
+    makeRow(siderealTarget, List(MagnitudeBand._r, MagnitudeBand.UC), unusedBands)
+
   /**
    * Build a row of data items from a Sidereal Target
    */
-  def makeRow(siderealTarget: SiderealTarget, nirBand: String, unusedBands: Array[String]): java.util.Vector[AnyRef] = {
-    new java.util.Vector[AnyRef](Vector[AnyRef](
-      Boolean.box(x = true),
-      siderealTarget.name,
-      siderealTarget.magnitudeIn(MagnitudeBand.R).map(v => Double.box(v.value)).orNull,
-      MagnitudeBand.all.find(_.name == nirBand).flatMap(siderealTarget.magnitudeIn).map(v => Double.box(v.value)).orNull,
-      new HMS(siderealTarget.coordinates.ra.toAngle.formatHMS).toString,
-      new DMS(siderealTarget.coordinates.dec.formatDMS).toString,
-      MagnitudeBand.all.find(_.name == unusedBands(0)).flatMap(siderealTarget.magnitudeIn).map(v => Double.box(v.value)).orNull,
-      MagnitudeBand.all.find(_.name == unusedBands(1)).flatMap(siderealTarget.magnitudeIn).map(v => Double.box(v.value)).orNull).asJava)
+  def makeRow(
+    siderealTarget: SiderealTarget,
+    unusedBands:    ImList[MagnitudeBand]
+  ): java.util.List[AnyRef] =
+    makeRow(siderealTarget, List(MagnitudeBand.R), unusedBands)
+
+  private def makeRow(
+    siderealTarget: SiderealTarget,
+    rBands:         List[MagnitudeBand],
+    unusedBands:    ImList[MagnitudeBand]
+  ): java.util.List[AnyRef] = {
+
+    def bandToValue(b: MagnitudeBand): java.lang.Double =
+      siderealTarget.magnitudeIn(b).map(v => Double.box(v.value)).orNull
+
+    val a = List[AnyRef](Boolean.box(true), siderealTarget.name)
+    val b = rBands.map(bandToValue)
+    val c = List(
+              siderealTarget.coordinates.ra.toAngle.formatHMS,
+              siderealTarget.coordinates.dec.formatDMS
+            )
+    val d = unusedBands.toList.asScala.toList.map(bandToValue)
+
+    (a ++ b ++ c ++ d).asJava
   }
+
 }

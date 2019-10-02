@@ -8,13 +8,29 @@ import edu.gemini.spModel.core.{Angle, BandsList, Coordinates, SiderealTarget}
 import edu.gemini.spModel.guide.{GuideProbe, GuideStarValidation, ValidatableGuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
-import edu.gemini.shared.util.immutable.{Option => JOption, Some => JSome}
+import edu.gemini.shared.util.immutable.{Option => JOption, Pair => JPair, Some => JSome}
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.collection.JavaConverters._
+import scala.concurrent.duration._
+
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scalaz._
 import Scalaz._
+
+/**
+ * Pairs a `GuideProbe` with candidate guide stars.
+ */
+final case class ProbeCandidates(
+  guideProbe: GuideProbe,
+  targets:    List[SiderealTarget]
+) {
+
+  def targetsAsJava: java.util.List[SiderealTarget] =
+    targets.asJava
+
+}
 
 trait AgsStrategy {
   def key: AgsStrategyKey
@@ -33,7 +49,10 @@ trait AgsStrategy {
 
   def analyzeMagnitude(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis]
 
-  def candidates(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[(GuideProbe, List[SiderealTarget])]]
+  def candidates(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[ProbeCandidates]]
+
+  def candidatesForJava(ctx: ObsContext, mt: MagnitudeTable, timeoutSec: Int, ec: ExecutionContext): java.util.List[ProbeCandidates] =
+    Await.result(candidates(ctx, mt)(ec), timeoutSec.seconds).asJava
 
   /**
    * Returns a list of catalog queries that would be used to search for guide stars with the given context
@@ -44,12 +63,19 @@ trait AgsStrategy {
 
   def select(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[Option[AgsStrategy.Selection]]
 
+  def selectForJava(ctx: ObsContext, mt: MagnitudeTable, timeoutSec: Int, ec: ExecutionContext): JOption[JPair[Angle, java.util.List[AgsStrategy.Assignment]]] =
+    Await.result(select(ctx, mt)(ec), timeoutSec.seconds).map { sel =>
+      new JPair(sel.posAngle, sel.assignments.asJava)
+    }.asGeminiOpt
+
+
   def guideProbes: List[GuideProbe]
 
   /**
    * Indicates the bands that will be used for a given probe
    */
   def probeBands: BandsList
+
 }
 
 object AgsStrategy {

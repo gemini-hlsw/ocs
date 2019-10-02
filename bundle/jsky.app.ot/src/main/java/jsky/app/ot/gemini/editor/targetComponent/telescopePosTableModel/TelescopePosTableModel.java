@@ -4,6 +4,7 @@ import edu.gemini.ags.api.AgsAnalysis;
 import edu.gemini.ags.api.AgsAnalysis$;
 import edu.gemini.ags.api.AgsGuideQuality;
 import edu.gemini.ags.api.AgsMagnitude;
+import edu.gemini.ags.api.AgsRegistrar;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.Coordinates;
@@ -474,14 +475,19 @@ final public class TelescopePosTableModel extends AbstractTableModel {
                 final ObsContext ctx = tup._1();
                 final AgsMagnitude.MagnitudeTable magTable = tup._2();
                 final ValidatableGuideProbe vgp = (ValidatableGuideProbe) guideProbe;
-                final Option<AgsAnalysis> agsAnalysis = new ScalaConverters.ScalaOptionOps<>(
-                        AgsAnalysis$.MODULE$.analysis(
-                                ctx,
-                                magTable,
-                                vgp,
-                                ModelConverters.toSideralTarget(guideStar, ctx.getSchedulingBlockStart())
-                        )
-                ).asGeminiOpt();
+
+                final Option<AgsAnalysis> agsAnalysis =
+                  AgsRegistrar
+                      .currentStrategyForJava(ctx)
+                      .flatMap(s ->
+                          s.analyzeForJava(
+                              ctx,
+                              magTable,
+                              vgp,
+                              ModelConverters.toSideralTarget(guideStar, ctx.getSchedulingBlockStart())
+                          )
+                      );
+
                 return agsAnalysis.map(AgsAnalysis::quality);
 
             } else {

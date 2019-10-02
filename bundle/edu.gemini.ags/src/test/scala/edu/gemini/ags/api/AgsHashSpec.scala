@@ -239,7 +239,7 @@ class AgsHashSpec extends Specification with ScalaCheck with edu.gemini.spModel.
         testPwfs(ctx0, n, camera2, AgsStrategyKey.Pwfs2NorthKey, _.pwfs2VignettingClearance)
       }
 
-    val GemsKey = agsKey(AgsStrategyKey.GemsKey)
+    val GemsKey = agsKey(AgsStrategyKey.Ngs2Key)
 
     "differ between GeMS GSAOI vs Flamingos2" in
       forAll { (ctx0: ObsContext) =>
