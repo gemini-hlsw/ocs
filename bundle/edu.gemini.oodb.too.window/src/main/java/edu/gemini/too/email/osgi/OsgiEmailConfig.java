@@ -70,10 +70,8 @@ final class OsgiEmailConfig implements TooEmailConfig {
     public URL getEmailConfig() {
         // If we are testing, use the testing email configurations.
         // If we are in production, use the production email configurations.
-        if (Version.current.isTest())
-            return getClass().getClassLoader().getResource("resources/emailConf-test.xml");
-        else
-            return getClass().getClassLoader().getResource("/resources/emailConf.xml");
+        final String test = Version.current.isTest() ? "-test" : "";
+        return getClass().getClassLoader().getResource("/resources/emailConf" + test + ".xml");
     }
 
     private String getProperty(BundleContext ctx, String key) {
