@@ -146,7 +146,7 @@ public final class TooEmailTest extends SpModelTestBase {
 
     private Set<String> getAddresses(Message m, Message.RecipientType type) throws Exception {
         InternetAddress[] addrs = (InternetAddress[]) m.getRecipients(type);
-        Set<String> actual = new HashSet<String>();
+        Set<String> actual = new HashSet<>();
         for (InternetAddress addr : addrs) actual.add(addr.getAddress());
         return actual;
     }
