@@ -1,10 +1,7 @@
-//
-// $
-//
-
 package edu.gemini.too.email.osgi;
 
 import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.core.Version;
 import edu.gemini.too.email.TooEmailConfig;
 import org.osgi.framework.BundleContext;
 
@@ -15,9 +12,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-/**
- *
- */
 final class OsgiEmailConfig implements TooEmailConfig {
     private static final Logger LOG = Logger.getLogger(OsgiEmailConfig.class.getName());
 
@@ -35,23 +29,23 @@ final class OsgiEmailConfig implements TooEmailConfig {
     OsgiEmailConfig(BundleContext ctx) {
         _smtpHost   = getProperty(ctx, SMTP_HOST_KEY);
 
-        String addr = getProperty(ctx, SENDER_ADDR_KEY);
-        String name = getProperty(ctx, SENDER_NAME_KEY);
+        final String addr = getProperty(ctx, SENDER_ADDR_KEY);
+        final String name = getProperty(ctx, SENDER_NAME_KEY);
 
         try {
             _sender = new InternetAddress(addr);
             _sender.setPersonal(name);
-        } catch (AddressException e) {
+        } catch (final AddressException e) {
             LOG.log(Level.SEVERE, e.getMessage(), e);
             throw new RuntimeException("Bad value for property '" +
                                SENDER_ADDR_KEY + "': " + addr);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             LOG.log(Level.SEVERE, e.getMessage(), e);
             throw new RuntimeException("Bad value for property '" +
                                SENDER_NAME_KEY + "': " + name);
         }
 
-        String siteStr = getProperty(ctx, SITE_KEY);
+        final String siteStr = getProperty(ctx, SITE_KEY);
         try {
             _site = Site.parse(siteStr);
         } catch (Exception ex) {
@@ -74,7 +68,10 @@ final class OsgiEmailConfig implements TooEmailConfig {
     }
 
     public URL getEmailConfig() {
-        return getClass().getClassLoader().getResource("/resources/emailConf.xml");
+        // If we are testing, use the testing email configurations.
+        // If we are in production, use the production email configurations.
+        final String test = Version.current.isTest() ? "-test" : "";
+        return getClass().getClassLoader().getResource("/resources/emailConf" + test + ".xml");
     }
 
     private String getProperty(BundleContext ctx, String key) {
