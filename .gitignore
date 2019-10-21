@@ -37,6 +37,8 @@ app/spdb/conf/gemKeystore
 bundle/edu.gemini.services.server/src/main/resources/edu/gemini/services/server/util/24408334e14c4c6ca38b20b445384c25e9c4a8a9-privatekey.p12
 bundle/edu.gemini.services.server/src/main/scala/edu/gemini/services/server/util/24408334e14c4c6ca38b20b445384c25e9c4a8a9-privatekey.p12
 project/OcsCredentials.scala
+bundle/edu.gemini.oodb.too.window/src/main/resources/resources/emailConf.xml
+bundle/edu.gemini.oodb.too.window/src/main/resources/resources/emailConf-test.xml
 
 # Reinclude packages named "target" and bundles that end in ".log"
 !/bundle/edu.gemini.pit/src/main/scala/edu/gemini/pit/ui/view/target
