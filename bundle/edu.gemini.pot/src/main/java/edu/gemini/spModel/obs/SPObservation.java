@@ -145,7 +145,9 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
     private ObsQaState _obsQaState  = ObsQaState.UNDEFINED;
     private boolean _overrideQaState = false;
 
-    // The next scheduling block for the observation. Begin with None.
+    // The next scheduling block for the observation. Begin at the current time.
+    // SW: I'm not sure why we pick the current time instead of, say, using
+    // DefaultSchedulingBlock.
     private Option<SchedulingBlock> _schedulingBlock =
             new Some<>(SchedulingBlock.apply(System.currentTimeMillis()));
 
