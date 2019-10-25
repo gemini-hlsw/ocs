@@ -46,12 +46,6 @@ object DefaultSchedulingBlock {
     center(new Semester(site, System.currentTimeMillis), site)
 
   private def center(sem: Semester, site: Site): Long =
-    center(sem.getStartDate(site), sem.getEndDate(site))
-
-  private def center(a: Date, b: Date): Long =
-    center(a.getTime, b.getTime)
-
-  private def center(a: Long, b: Long): Long =
-    a + (b - a) / 2
+    sem.getMidpointDate(site).getTime
 
 }
