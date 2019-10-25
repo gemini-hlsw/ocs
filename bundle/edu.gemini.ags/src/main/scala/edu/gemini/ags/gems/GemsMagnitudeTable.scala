@@ -10,7 +10,7 @@ import edu.gemini.spModel.gems.GemsGuideStarType
 import edu.gemini.spModel.guide.{GuideProbe, GuideSpeed}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
-import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{Conditions, ImageQuality, SkyBackground}
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{Conditions, CloudCover, ImageQuality, SkyBackground, WaterVapor}
 import edu.gemini.skycalc
 
 import scala.collection.JavaConverters._
@@ -22,43 +22,36 @@ import Scalaz._
  * (that is, with predefined magnitude limits).
  */
 object GemsMagnitudeTable extends MagnitudeTable {
-  /**
-    * Normally, each type of condition (CC, IQ, SB) affect magnitude limits:
-    * 1. independently (e.g. the CC's affect on mag limits does not depend on the SB); and
-    * 2. uniformly (e.g. if CC changed the faintness limit, it also changed the saturation limit by the same amount).
-    *
-    * In NGS2, however, this is no longer the case:
-    * 1. The value of one condition can affect another's effect on magnitude limits.
-    * 2. For a given set of conditions, they might affect faintness and saturation limits differently.
-    *
-    * Thus, to create the magnitude limits adjuster for NGS2, we need to use some customization as per the following
-    * functions:
-    */
-    val NGS2ConditionsAdjuster: ConstraintsAdjuster[Conditions] = {
-      def faintnessAdjuster(c: Conditions, bands: BandsList): Double = {
-        (c.iq, c.sb, bands) match {
-          case (ImageQuality.ANY,        SkyBackground.ANY,        RBandsList) => -0.3
-          case (ImageQuality.ANY,        SkyBackground.PERCENT_80, RBandsList) => -0.2
-          case (ImageQuality.ANY,        SkyBackground.PERCENT_50, RBandsList) => -0.5
-          case (ImageQuality.ANY,        SkyBackground.PERCENT_20, RBandsList) => -0.5
-          case (ImageQuality.PERCENT_85, SkyBackground.ANY,        RBandsList) => -0.5
-          case _                                                               =>  0.0
-        }
-      }
 
-      def brightnessAdjuster(c: Conditions, bands: BandsList): Double = {
-        (c.iq, c.sb, bands) match {
-          case (ImageQuality.ANY, SkyBackground.ANY,        RBandsList) => 0.2
-          case (ImageQuality.ANY, SkyBackground.PERCENT_80, RBandsList) => 0.3
-          case _                                                        => 0.0
-        }
-      }
+  import ImageQuality.{  PERCENT_20 => IQ20, PERCENT_70 => IQ70, PERCENT_85 => IQ85, ANY => IQAny }
+  import SkyBackground.{ PERCENT_20 => SB20, PERCENT_50 => SB50, PERCENT_80 => SB80, ANY => SBAny }
 
-      ConstraintsAdjuster.customConstraintsAdjuster(faintnessAdjuster, brightnessAdjuster)
-    }
+  private val cc50 = Map(
+    ((IQ20,  SB20 ), (18.0, 10.5)),
+    ((IQ20,  SB50 ), (17.9, 10.5)),
+    ((IQ20,  SB80 ), (17.8, 10.2)),
+    ((IQ20,  SBAny), (17.7, 10.0)),
+    ((IQ70,  SB20 ), (17.6, 10.0)),
+    ((IQ70,  SB50 ), (17.5, 10.0)),
+    ((IQ70,  SB80 ), (17.4,  9.7)),
+    ((IQ70,  SBAny), (17.3,  9.5)),
+    ((IQ85,  SB20 ), (17.2,  9.5)),
+    ((IQ85,  SB50 ), (17.1,  9.5)),
+    ((IQ85,  SB80 ), (17.0,  9.2)),
+    ((IQ85,  SBAny), (16.9,  9.0)),
+    ((IQAny, SB20 ), (16.2,  9.0)),
+    ((IQAny, SB50 ), (16.1,  9.0)),
+    ((IQAny, SB80 ), (16.0,  9.0)),
+    ((IQAny, SBAny), (15.9,  8.7))
+  )
 
-  val CwfsAdjust: MagnitudeConstraints => Conditions => MagnitudeConstraints = {
-    mc => conds => NGS2ConditionsAdjuster.adjust(conds, conds.sb.adjust(conds.cc.adjust(conds.iq.adjust(mc))))
+  def cwfsConstraintsForCc50(iq: ImageQuality, sb: SkyBackground): MagnitudeConstraints = {
+    val (f, b) = cc50((iq, sb))
+    MagnitudeConstraints(RBandsList, FaintnessConstraint(f), Some(SaturationConstraint(b)))
+  }
+
+  val CwfsConstraints: Conditions => MagnitudeConstraints = { c =>
+    c.cc.adjust(cwfsConstraintsForCc50(c.iq, c.sb))
   }
 
   val OtherAdjust: MagnitudeConstraints => Conditions => MagnitudeConstraints =
@@ -75,9 +68,6 @@ object GemsMagnitudeTable extends MagnitudeTable {
           f(conds)
       }
 
-    val cwfsCalc: MagnitudeConstraints => MagnitudeCalc = mc =>
-      magCalc(CwfsAdjust(mc))
-
     val odgwCalc: MagnitudeConstraints => MagnitudeCalc = mc =>
       magCalc(OtherAdjust(mc))
 
@@ -87,7 +77,7 @@ object GemsMagnitudeTable extends MagnitudeTable {
           Some(odgwCalc(GsaoiOdgwMagnitudeLimitsCalculator.gemsMagnitudeConstraint(GemsGuideStarType.flexure, MagnitudeBand.H.some)))
 
         case (Site.GS, can: CanopusWfs) =>
-          Some(cwfsCalc(CanopusWfsMagnitudeLimitsCalculator.gemsMagnitudeConstraint(GemsGuideStarType.tiptilt, MagnitudeBand.R.some)))
+          Some(magCalc(CwfsConstraints))
 
         case _                           =>
           None
@@ -135,28 +125,15 @@ object GemsMagnitudeTable extends MagnitudeTable {
     def getNominalMagnitudeConstraints(cwfs: CanopusWfs): MagnitudeConstraints
   }
 
-  // For commissioning we were asked to go 1.5 mag fainter.  Leaving this here
-  // to make it easy to remove or adjust when the actual magnitude limits are
-  // known.
-  val CommissioningAdj = 1.5
-
   lazy val CanopusWfsMagnitudeLimitsCalculator = new CanopusWfsCalculator {
     override def adjustGemsMagnitudeConstraintForJava(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand], conditions: Conditions): MagnitudeConstraints =
-      CwfsAdjust(gemsMagnitudeConstraint(starType, nirBand))(conditions)
-
-    // These values correspond to:
-    // CC = 50, IQ = 70, SB = 50 or 20
-    // CC = 50, IQ = 20, SB = ANY
-
-    private val NominalFaintLimit = 16.5
-    private val FaintLimit        = NominalFaintLimit + CommissioningAdj
-    private val BrightLimit       = 10.0
+      CwfsConstraints(conditions)
 
     override def gemsMagnitudeConstraint(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]): MagnitudeConstraints =
-      magLimits(RBandsList, FaintLimit, BrightLimit)
+      CwfsConstraints(Conditions.NOMINAL)
 
     override def getNominalMagnitudeConstraints(cwfs: CanopusWfs): MagnitudeConstraints =
-      magLimits(RBandsList, FaintLimit, BrightLimit)
+      CwfsConstraints(Conditions.NOMINAL)
   }
 
   private lazy val Flamingos2OiwfsMagnitudeLimitsCalculator = new LimitsCalculator {
