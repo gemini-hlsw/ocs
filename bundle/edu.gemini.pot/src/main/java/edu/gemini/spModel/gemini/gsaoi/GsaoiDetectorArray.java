@@ -39,35 +39,35 @@ public enum GsaoiDetectorArray {
     public static final double DETECTOR_SIZE_ARCSEC = DETECTOR_SIZE_MM * SCALE;
     public static final double DETECTOR_GAP_ARCSEC  = DETECTOR_GAP_MM * SCALE;
 
-    // OT-11: Account for ODGW hotspot offset (in arcsec)
-//    public static final double ODGW_HOTSPOT_OFFSET = 7.628622;
-    public static final double ODGW_HOTSPOT_OFFSET = 5.39; // See REL-152
+    // Account for ODGW hotspot offset (in arcsec)
+    public static final double ODGW_HOTSPOT_OFFSET_P = -5.0;
+    public static final double ODGW_HOTSPOT_OFFSET_Q =  8.0;
 
     private static final Rectangle2D TOP_LEFT_SHAPE;
     static {
-        double x = -1 * (DETECTOR_GAP_ARCSEC /2 + DETECTOR_SIZE_ARCSEC) + ODGW_HOTSPOT_OFFSET;
-        double y = -1 * (DETECTOR_GAP_ARCSEC /2 + DETECTOR_SIZE_ARCSEC) + ODGW_HOTSPOT_OFFSET;
+        double x = -1 * (DETECTOR_GAP_ARCSEC /2 + DETECTOR_SIZE_ARCSEC) + ODGW_HOTSPOT_OFFSET_P;
+        double y = -1 * (DETECTOR_GAP_ARCSEC /2 + DETECTOR_SIZE_ARCSEC) + ODGW_HOTSPOT_OFFSET_Q;
         TOP_LEFT_SHAPE = new Rectangle2D.Double(x, y, DETECTOR_SIZE_ARCSEC, DETECTOR_SIZE_ARCSEC);
     }
 
     private static final Rectangle2D TOP_RIGHT_SHAPE;
     static {
-        double x = DETECTOR_GAP_ARCSEC /2 + ODGW_HOTSPOT_OFFSET;
-        double y = -1 * (DETECTOR_GAP_ARCSEC /2 + DETECTOR_SIZE_ARCSEC) + ODGW_HOTSPOT_OFFSET;
+        double x = DETECTOR_GAP_ARCSEC /2 + ODGW_HOTSPOT_OFFSET_P;
+        double y = -1 * (DETECTOR_GAP_ARCSEC /2 + DETECTOR_SIZE_ARCSEC) + ODGW_HOTSPOT_OFFSET_Q;
         TOP_RIGHT_SHAPE = new Rectangle2D.Double(x, y, DETECTOR_SIZE_ARCSEC, DETECTOR_SIZE_ARCSEC);
     }
 
     private static final Rectangle2D BOTTOM_RIGHT_SHAPE;
     static {
-        double x = DETECTOR_GAP_ARCSEC /2 + ODGW_HOTSPOT_OFFSET;
-        double y = DETECTOR_GAP_ARCSEC /2 + ODGW_HOTSPOT_OFFSET;
+        double x = DETECTOR_GAP_ARCSEC /2 + ODGW_HOTSPOT_OFFSET_P;
+        double y = DETECTOR_GAP_ARCSEC /2 + ODGW_HOTSPOT_OFFSET_Q;
         BOTTOM_RIGHT_SHAPE = new Rectangle2D.Double(x, y, DETECTOR_SIZE_ARCSEC, DETECTOR_SIZE_ARCSEC);
     }
 
     private static final Rectangle2D BOTTOM_LEFT_SHAPE;
     static {
-        double x = -1 * (DETECTOR_GAP_ARCSEC /2 + DETECTOR_SIZE_ARCSEC) + ODGW_HOTSPOT_OFFSET;
-        double y = DETECTOR_GAP_ARCSEC /2 + ODGW_HOTSPOT_OFFSET;
+        double x = -1 * (DETECTOR_GAP_ARCSEC /2 + DETECTOR_SIZE_ARCSEC) + ODGW_HOTSPOT_OFFSET_P;
+        double y = DETECTOR_GAP_ARCSEC /2 + ODGW_HOTSPOT_OFFSET_Q;
         BOTTOM_LEFT_SHAPE = new Rectangle2D.Double(x, y, DETECTOR_SIZE_ARCSEC, DETECTOR_SIZE_ARCSEC);
     }
 

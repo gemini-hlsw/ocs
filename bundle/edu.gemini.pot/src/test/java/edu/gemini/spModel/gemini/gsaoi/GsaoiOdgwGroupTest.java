@@ -31,9 +31,10 @@ public class GsaoiOdgwGroupTest extends TestCase {
 
     protected void setUp() throws Exception{
         // (OT-8) Account for ODGW hotspot (and convert arcsec value to deg)
-        final double d = GsaoiDetectorArray.ODGW_HOTSPOT_OFFSET/3600.;
+        final double p = GsaoiDetectorArray.ODGW_HOTSPOT_OFFSET_P/3600.;
+        final double q = GsaoiDetectorArray.ODGW_HOTSPOT_OFFSET_Q/3600.;
 
-        final SPTarget base         = new SPTarget(d, d);
+        final SPTarget base         = new SPTarget(p, q);
         final TargetEnvironment env = TargetEnvironment.create(base);
 
         final Gsaoi inst = new Gsaoi();

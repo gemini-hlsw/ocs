@@ -29,7 +29,7 @@ public final class GsaoiDetectorArrayFeature extends SciAreaFeatureBase {
         Point2D.Double p;
         p = new Point2D.Double(0.0,
                 - (GsaoiDetectorArray.DETECTOR_GAP_ARCSEC + GsaoiDetectorArray.DETECTOR_SIZE_ARCSEC)
-                        + GsaoiDetectorArray.ODGW_HOTSPOT_OFFSET);
+                        + GsaoiDetectorArray.ODGW_HOTSPOT_OFFSET_Q);
         return (Point2D.Double) trans.transform(p, p);
     }
 
