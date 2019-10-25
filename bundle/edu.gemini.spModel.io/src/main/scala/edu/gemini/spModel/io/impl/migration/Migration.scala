@@ -1,6 +1,6 @@
 package edu.gemini.spModel.io.impl.migration
 
-import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.pot.sp.{SPComponentType, SPObservationID}
 import edu.gemini.spModel.core.{ProgramId, StandardProgramId, Site}
 import edu.gemini.spModel.io.PioSyntax
 import edu.gemini.spModel.io.impl.SpIOTags
@@ -9,6 +9,9 @@ import edu.gemini.spModel.pio.xml.PioXmlUtil
 import edu.gemini.spModel.pio.{Container, ParamSet, Document, Version}
 
 import java.io.StringWriter
+
+import scalaz._
+import Scalaz._
 
 /**
  * Base trait for all migrations.
@@ -116,5 +119,16 @@ trait Migration {
       pid  <- ProgramId.parseStandardId(cont.getName)
       site <- pid.site
     } yield site
+
+  /**
+   * Gets the observation id from an observation container, if present and
+   * valid.
+   */
+  protected def observationId(obs: Container): Either[String, SPObservationID] =
+    Option(obs.getName).toRight("Missing observation id.").right.flatMap { n =>
+      \/.fromTryCatchNonFatal(new SPObservationID(n))
+        .leftMap(_ => s"Bad observation id: '$n'")
+        .toEither
+    }
 
 }

@@ -3,7 +3,7 @@ package edu.gemini.spModel.util
 import java.util.Date
 
 import edu.gemini.pot.sp.ISPNode
-import edu.gemini.spModel.core.{Site, Semester, ProgramId}
+import edu.gemini.spModel.core.{Site, Semester, SPProgramID, ProgramId}
 import edu.gemini.spModel.obs.SchedulingBlock
 
 import scalaz._, Scalaz._
@@ -21,6 +21,11 @@ object DefaultSchedulingBlock {
   def forProgram(node: ISPNode): SchedulingBlock =
     getSchedulingBlock(node, Site.GS)
 
+  def forPid(pid: SPProgramID): SchedulingBlock =
+    SchedulingBlock(
+      getPidSemesterCenter(pid).foldLeft(getCurrentSemesterCenter(Site.GS))(_ max _)
+    )
+
   private def getSchedulingBlock(node: ISPNode, defaultSite: Site): SchedulingBlock =
     SchedulingBlock(getSchedulingBlockStart(node, defaultSite))
 
@@ -28,8 +33,10 @@ object DefaultSchedulingBlock {
     getProgramSemesterCenter(node).foldLeft(getCurrentSemesterCenter(defaultSite))(_ max _)
 
   private def getProgramSemesterCenter(node: ISPNode): Option[Long] =
+    Option(node.getProgramID).flatMap(getPidSemesterCenter)
+
+  private def getPidSemesterCenter(spid: SPProgramID): Option[Long] =
     for {
-      spid <- Option(node.getProgramID)
       pid  <- ProgramId.parseStandardId(spid.stringValue)
       sem  <- pid.semester
       site <- pid.site
