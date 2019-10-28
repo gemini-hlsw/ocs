@@ -40,9 +40,18 @@ case object TwoMassHId extends CatalogId {
 case object TwoMassKId extends CatalogId {
   val filePrefix = "2massK"
 }
+case object GeminiTwoMassJId extends CatalogId {
+  val filePrefix = "gemini2massJ"
+}
+case object GeminiTwoMassHId extends CatalogId {
+  val filePrefix = "gemini2massH"
+}
+case object GeminiTwoMassKId extends CatalogId {
+  val filePrefix = "gemini2massK"
+}
 
 object CatalogId {
-  val all: List[CatalogId] = List(DssGeminiId, DssGeminiSouthId, DssGeminiNorthId, DssEsoId, Dss2EsoId, Dss2IREsoId, TwoMassJId, TwoMassHId, TwoMassKId)
+  val all: List[CatalogId] = List(DssGeminiId, DssGeminiSouthId, DssGeminiNorthId, DssEsoId, Dss2EsoId, Dss2IREsoId, TwoMassJId, TwoMassHId, TwoMassKId, GeminiTwoMassJId, GeminiTwoMassHId, GeminiTwoMassKId)
 }
 
 /** Represents an end point that can load an image for a given set of coordinates */
@@ -83,13 +92,20 @@ abstract class AstroCatalog(id: CatalogId, displayName: String, shortName: Strin
 
   def imageSize: AngularSize = AngularSize(ImageCatalog.DefaultImageSize, ImageCatalog.DefaultImageSize)
 
-  private val size = imageSize.ra.max(imageSize.dec)
+  protected val size = imageSize.ra.max(imageSize.dec)
 
   def adjacentOverlap: Angle = Angle.zero
 
   override def queryUrl(c: Coordinates, site: Option[Site]): NonEmptyList[URL] =
     NonEmptyList(new URL(s" https://irsa.ipac.caltech.edu:443/cgi-bin/Oasis/2MASSImg/nph-2massimg?objstr=${c.ra.toAngle.formatHMS}%20${c.dec.formatDMS}&size=${size.toArcsecs.toInt}&band=${band.name}"))
 }
+
+/** Base class for 2MASSImg based image catalogs with mosaic tiling. */
+abstract class Gemini2Mass(id: CatalogId, displayName: String, shortName: String) extends AstroCatalog(id, displayName, shortName) {
+  override def queryUrl(c: Coordinates, site: Option[Site]): NonEmptyList[URL] =
+    NonEmptyList(new URL(f"http://gsp-montage.herokuapp.com/v1/mosaic?object=${c.ra.toAngle.formatHMS}%%20${c.dec.formatDMS}&radius=${size.toDegrees}%3.2f&band=${band.name}"))
+}
+
 
 // Concrete instances of image catalogs
 /**
@@ -127,7 +143,17 @@ object TwoMassH extends AstroCatalog(TwoMassHId, "2MASS Quick-Look Image Retriev
 object TwoMassK extends AstroCatalog(TwoMassKId, "2MASS Quick-Look Image Retrieval Service (K Band)", "2MASS-K") {
   override val band: MagnitudeBand = MagnitudeBand.K
 }
+object GeminiTwoMassJ extends Gemini2Mass(GeminiTwoMassJId, "2MASS Quick-Look Image Retrieval Service (J Band, Montage)", "2MASS-J (Montage)") {
+  override val band: MagnitudeBand = MagnitudeBand.J
+}
 
+object GeminiTwoMassH extends Gemini2Mass(GeminiTwoMassHId, "2MASS Quick-Look Image Retrieval Service (H Band, Montage)", "2MASS-H (Montage)") {
+  override val band: MagnitudeBand = MagnitudeBand.H
+}
+
+object GeminiTwoMassK extends Gemini2Mass(GeminiTwoMassKId, "2MASS Quick-Look Image Retrieval Service (K Band, Montage)", "2MASS-K (Montage)") {
+  override val band: MagnitudeBand = MagnitudeBand.K
+}
 /**
   * Contains definitions for ImageCatalogs including a list of all the available image servers
   */
@@ -144,7 +170,7 @@ object ImageCatalog {
   private val MassHCutoff = 1.9.microns
 
   /** List of all known public image server in preference order */
-  val all = List(DssGemini, DssESO, Dss2ESO, Dss2iESO, TwoMassJ, TwoMassH, TwoMassK)
+  val all = List(DssGemini, DssESO, Dss2ESO, Dss2iESO, TwoMassJ, TwoMassH, TwoMassK, GeminiTwoMassJ, GeminiTwoMassH, GeminiTwoMassK)
 
   private val catalogsById = all.map(c => c.id.filePrefix -> c).toMap
 

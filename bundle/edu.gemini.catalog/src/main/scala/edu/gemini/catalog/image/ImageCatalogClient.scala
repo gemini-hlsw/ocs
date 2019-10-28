@@ -179,6 +179,7 @@ object ImageCatalogClient {
     def openConnection: Task[ConnectionDescriptor] = Task.delay {
       Log.info(s"Downloading image at $url")
       val connection = url.openConnection()
+      connection.setReadTimeout(90 * 1000) // Montage can take a while
       ConnectionDescriptor(Option(connection.getContentType), Option(connection.getContentEncoding), connection.getInputStream)
     }
 
