@@ -237,13 +237,14 @@ object adapters {
     // Table QueryResult methods
     override def getCatalog: Catalog = catalog
 
-    override def getDataVector: java.util.Vector[java.util.Vector[AnyRef]] = new java.util.Vector(model.targets.map { t =>
-      val mags = MagnitudeBand.all.map(t.magnitudeIn).collect {
-        case Some(v) => Double.box(v.value)
-        case None => null // This is required for the Java side of plotting
-      }
-      new java.util.Vector[AnyRef]((List(t.name, t.coordinates.ra.toAngle.formatHMS, t.coordinates.dec.formatDMS, GuidingQualityColumn.target2Analysis(model.info, t).map(_.quality), GuidingQualityColumn.target2FOV(model.info, t)) ::: mags).asJavaCollection)
-    }.asJavaCollection)
+    override def getDataVector: java.util.Vector[java.util.Vector[AnyRef]] =
+      new java.util.Vector(model.probeCandidates.flatMap(pc => pc.targets.strengthL(pc.guideProbe)).map { case (gp, t) =>
+        val mags = MagnitudeBand.all.map(t.magnitudeIn).collect {
+          case Some(v) => Double.box(v.value)
+          case None    => null // This is required for the Java side of plotting
+        }
+        new java.util.Vector[AnyRef]((List(t.name, t.coordinates.ra.toAngle.formatHMS, t.coordinates.dec.formatDMS, GuidingQualityColumn.target2Analysis(model.info, Some(gp), t).map(_.quality), GuidingQualityColumn.target2FOV(model.info, Some(gp), t)) ::: mags).asJavaCollection)
+      }.asJavaCollection)
 
     override def getColumnDesc(i: Int): FieldDesc = ???
 

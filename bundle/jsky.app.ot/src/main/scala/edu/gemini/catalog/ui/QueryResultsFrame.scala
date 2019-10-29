@@ -151,7 +151,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
                 if (updated) {
                   val info = ObservationInfo(c, mt)
-                  val tm   = TargetsModel(info.some, q.base, q.radiusConstraint, m.targets)
+                  val tm   = TargetsModel(info.some, q.base, q.radiusConstraint, m.probeCandidates)
                   updateResultsModel(tm)
 
                   iw.repaint()
@@ -355,7 +355,11 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       case q: ConeSearchCatalogQuery =>
         unplotCurrent()
 
-        val model = TargetsModel(info, q.base, q.radiusConstraint, queryResult.result.targets.rows)
+        val pc = info.flatMap(_.guideProbe).fold(List.empty[ProbeCandidates]) { gp =>
+          List(ProbeCandidates(gp, queryResult.result.targets.rows))
+        }
+
+        val model = TargetsModel(info, q.base, q.radiusConstraint, pc)
         updateResultsModel(model)
 
         // Update the count of rows
