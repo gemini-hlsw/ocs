@@ -211,6 +211,7 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
         if (!instrument.getFpMask().equals(GmosNorthType.FPUnitNorth.FPU_NONE) && !instrument.getFpMask().equals(GmosSouthType.FPUnitSouth.FPU_NONE))
             s += "<LI> Focal Plane Mask: " + instrument.getFpMask().displayValue() + "\n";
         s += "\n";
+        s += "Region of Interest: " + config.builtinROI().displayValue() + "\n";
         if (p.observation().calculationMethod() instanceof Spectroscopy)
             s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelength());
         s += "Spatial Binning: " + instrument.getSpatialBinning() + "\n";
