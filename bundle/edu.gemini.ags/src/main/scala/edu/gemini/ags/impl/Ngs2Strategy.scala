@@ -14,6 +14,7 @@ import edu.gemini.spModel.core.{Angle, BandsList, RBandsList, SiderealTarget}
 import edu.gemini.spModel.gemini.gems.CanopusWfs
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.guide.{GuideSpeed, GuideProbe, ValidatableGuideProbe}
+import edu.gemini.spModel.guide.GuideStarValidation.VALID
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe.pwfs1
@@ -154,11 +155,26 @@ final case class Ngs2Strategy(
     GemsVoTableCatalog(catalogName, backend)
       .search(ctx, mt)(ec)
       .map { ts =>
-        val (cwfs, sfs) =
+
+        // REL-3745: here instead of using the actual valid range from
+        // GemsCandidates we'll need to make a new special-purpose validator
+        // with an increased range. So a PatrolField.fromRadiusLimits(0, 1.3')
+        // that is repositioned at each science offset and then the intersection
+        // of these will be the valid range.  For now though, we'll just use the
+        // candidates within the (0, 1') range from GemsCandidates.
+
+        val cwfs =
           GemsCandidates.groupAndValidate(ctx, posAngles(ctx), ts)
-            .foldLeft((List.empty[SiderealTarget], List.empty[SiderealTarget])) { case ((cwfs, sfs), gc) =>
-              (gc.cwfsCandidates ++ cwfs, gc.slowFocusSensor :: sfs)
+            .foldLeft(List.empty[SiderealTarget]) { case (cwfs, gc) =>
+              gc.cwfsCandidates ++ cwfs
             }
+
+        // REL-3747: here we use a special PWFS1 validator. GemsCandidates
+        // returns just the "best" SFS option but we need to display all the
+        // PWFS1 candidates.
+
+        val sfsValidator = GemsCandidates.pwfs1Validator(ctx)
+        val sfs          = ts.filter(t => sfsValidator.validate(new SPTarget(t), ctx) == VALID)
 
         ProbeCandidates(pwfs1, sfs) :: CanopusWfs.values.toList.map(ProbeCandidates(_, cwfs))
       }

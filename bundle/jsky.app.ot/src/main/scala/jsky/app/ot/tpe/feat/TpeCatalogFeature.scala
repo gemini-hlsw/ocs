@@ -82,13 +82,13 @@ final class TpeCatalogFeature extends TpeImageFeature("Catalog", "Show or hide c
       s <- AgsRegistrar.currentStrategy(c)
       m  = ProbeLimitsTable.loadOrThrow()
       q <- s.catalogQueries(c, m).headOption.collect { case cs: ConeSearchCatalogQuery => cs }
-    } s.candidates(c, m)(global).map(_.flatMap(_.targets)).onSuccess { case ts =>
+    } s.candidates(c, m)(global).onSuccess { case pc =>
       Swing.onEDT {
         // assuming the state of the world is the same after the candidate
         // search, plot the candidates
         if (state == plotState(w)) {
           val in = ObservationInfo(c, m)
-          val tm = TargetsModel(Some(in), q.base, q.radiusConstraint, ts)
+          val tm = TargetsModel(Some(in), q.base, q.radiusConstraint, pc)
           p.plot(TableQueryResultAdapter(tm))
         }
       }
