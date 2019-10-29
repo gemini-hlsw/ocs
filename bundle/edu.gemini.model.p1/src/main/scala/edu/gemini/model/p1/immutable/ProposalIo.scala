@@ -19,7 +19,7 @@ case class ProposalConversion(transformed: Boolean, from: Semester, changes: Seq
 object ProposalIo {
   private val LOG = Logger.getLogger(getClass.getName)
 
-  private def context: JAXBContext = {
+  private val context: JAXBContext = {
     val factory        = new M.ObjectFactory
     val contextPackage = factory.getClass.getName.reverse.dropWhile(_ != '.').drop(1).reverse
     JAXBContext.newInstance(contextPackage, ProposalIo.getClass.getClassLoader)
