@@ -263,7 +263,7 @@ public class OverheadTablePrinter {
         }
 
         long totalTime = PlannedTimeMath.totalTimeWithReacq(pta, numReacq);
-        buf.append("<tr><td><b>Total time</b></td><td align=\"right\"><b>").append(String.format("%s", TimeAmountFormatter.getDescriptiveFormat(totalTime))).append("</b></td></tr>");
+        buf.append("<tr><td><b>Program time</b></td><td align=\"right\"><b>").append(String.format("%s", TimeAmountFormatter.getDescriptiveFormat(totalTime))).append("</b></td></tr>");
         buf.append("</table>");
 
         buf.append("</body></html>");
