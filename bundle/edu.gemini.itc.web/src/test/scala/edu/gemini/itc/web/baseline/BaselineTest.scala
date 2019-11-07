@@ -25,7 +25,6 @@ import org.junit.{Ignore, Test}
  *
  */
 class BaselineTest {
-
   @Ignore
   @Test
   def create(): Unit = {
@@ -40,7 +39,6 @@ class BaselineTest {
     System.out.println(s"Writing new baseline with ${baseSeq.size} entries")
     Baseline.write(baseSeq)
   }
-
   @Ignore
   @Test
   def checkAll(): Unit =
