@@ -214,9 +214,9 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
         s += "Region of Interest: " + config.builtinROI().displayValue() + "\n";
         if (p.observation().calculationMethod() instanceof Spectroscopy)
             s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelength());
-        s += "Spatial Binning: " + instrument.getSpatialBinning() + "\n";
+        s += "Spatial Binning (imaging mode: same in x and y, spectroscopy mode: y-binning): " + instrument.getSpatialBinning() + "\n";
         if (p.observation().calculationMethod() instanceof Spectroscopy)
-            s += "Spectral Binning: " + instrument.getSpectralBinning() + "\n";
+            s += "Spectral Binning (x-binning): " + instrument.getSpectralBinning() + "\n";
         s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + "arcsec\n";
         if (p.observation().calculationMethod() instanceof Spectroscopy)
             s += "Pixel Size in Spectral Direction: " + instrument.getGratingDispersion() + "nm\n";
