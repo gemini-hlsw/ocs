@@ -105,7 +105,7 @@ object ConfigExtractor {
     } yield Flamingos2Parameters(filter, grism, mask, customSlit, readMode)
   }
 
-  // TODO: GHOSTITC
+  // TODO-GHOSTITC
   private def extractGhost(c: Config): String \/ GhostParameters = {
     for {
       _ <- Some(Unit)

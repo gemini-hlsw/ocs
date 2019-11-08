@@ -17,7 +17,7 @@ final class GhostPrinter(p: ItcParameters,
 
   override def createInstConfig(numberExposures: Int): ConfigCreator#ConfigCreatorResult = {
     val cc: ConfigCreator = new ConfigCreator(p)
-    return cc.createGhostConfig(instr, numberExposures)
+    cc.createGhostConfig(instr, numberExposures)
   }
 
   override def getInst: ItcOverheadProvider = ???
