@@ -31,6 +31,9 @@ final case class Flamingos2Parameters(
                      customSlitWidth:   Option[Flamingos2.CustomSlitWidth],
                      readMode:          Flamingos2.ReadMode) extends InstrumentDetails
 
+// TODO-GHOSTITC
+final case class GhostParameters() extends InstrumentDetails
+
 final case class GmosParameters(
                      filter:            GmosCommonType.Filter,
                      grating:           GmosCommonType.Disperser,
