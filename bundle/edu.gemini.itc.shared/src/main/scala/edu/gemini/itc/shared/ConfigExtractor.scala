@@ -107,12 +107,14 @@ object ConfigExtractor {
 
   // TODO-GHOSTITC
   private def extractGhost(c: Config): String \/ GhostParameters = {
-    for {
-      _ <- Some(Unit)
-    } yield {
-      GhostParameters()
-    }
+    GhostParameters().right[String]
   }
+//    for {
+//      _ <- Some(Unit)
+//    } yield {
+//      GhostParameters()
+//    }
+//  }
 
   private def extractGnirs(targetEnv: TargetEnvironment, probe: GuideProbe, when: GOption[java.lang.Long], c: Config): String \/ GnirsParameters = {
     import GNIRSParams._

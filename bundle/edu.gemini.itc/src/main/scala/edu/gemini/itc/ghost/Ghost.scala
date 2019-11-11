@@ -9,7 +9,7 @@ import edu.gemini.spModel.core.Site
  * GHOST specification class
  */
 // TODO-GHOSTITC
-final class Ghost(gp: GhostParameters) extends Instrument(Site.GS, Bands.NEAR_IR, GHOST.instr_dir, GHOST.filename) with SpectroscopyInstrument{
+final class Ghost(gp: GhostParameters) extends Instrument(Site.GS, Bands.NEAR_IR, Ghost.instr_dir, Ghost.filename) with SpectroscopyInstrument{
   /**
    * Returns the effective observing wavelength.
    * This is properly calculated as a flux-weighted averate of
@@ -32,7 +32,7 @@ final class Ghost(gp: GhostParameters) extends Instrument(Site.GS, Bands.NEAR_IR
   override def getSlitWidth: Double = ???
 }
 
-object GHOST {
+object Ghost {
   val filename: String = "ghost" + Instrument.getSuffix
   val instr_dir: String = "ghost"
 }
