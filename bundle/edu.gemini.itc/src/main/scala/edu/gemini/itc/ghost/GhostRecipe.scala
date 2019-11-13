@@ -4,7 +4,7 @@ import edu.gemini.itc.base.{SpectroscopyArrayRecipe, SpectroscopyResult}
 import edu.gemini.itc.shared.{ItcParameters, ItcSpectroscopyResult}
 
 /**
- * This class performs the calculations for Flamingos 2 used for imaging.
+ * This class performs the calculations for GHOST.
  */
 final class GhostRecipe(p: ItcParameters) extends SpectroscopyArrayRecipe {
   override def calculateSpectroscopy(): Array[SpectroscopyResult] = ???
