@@ -192,7 +192,7 @@ object RedshiftRepresentations {
 
   val repr: Map[RedshiftRepresentations, String] =
     Map(
-      RadialVelocity         -> "km/sec",
+      RadialVelocity         -> "km/s",
       RedshiftZ              -> "",
       ApparentRadialVelocity -> "km/s"
     )

@@ -8,7 +8,7 @@ import java.time.Instant
 import scala.math.{atan2, cos, hypot, sin}
 import scalaz._
 import Scalaz._
-import edu.gemini.spModel.core.{Angle, Coordinates, Epoch, Offset}
+import edu.gemini.spModel.core.{Angle, Coordinates, Epoch, Offset, Redshift}
 
 /**
  * Time-parameterized coordinates, based on an observed position at some point in time (called
@@ -25,12 +25,12 @@ import edu.gemini.spModel.core.{Angle, Coordinates, Epoch, Offset}
  * @param radialVelocity  radial velocity (km/y, positive if receding), if any
  * @param parallax        parallax, if any
  */
-final case class ProperMotion(
-  baseCoordinates: Coordinates,
-  epoch:           Epoch,
-  properVelocity:  Option[Offset],
-  radialVelocity:  Option[RadialVelocity],
-  parallax:        Option[Angle]
+final case class ProperMotionCalculator(
+                               baseCoordinates: Coordinates,
+                               epoch:           Epoch,
+                               properVelocity:  Option[Offset],
+                               radialVelocity:  Option[Redshift],
+                               parallax:        Option[Angle]
 ) {
 
   def at(i: Instant): ProperMotion =
@@ -42,9 +42,9 @@ final case class ProperMotion(
       ProperMotion.properMotion(
         baseCoordinates,
         epoch,
-        properVelocity.orEmpty,
+        properVelocity.getOrElse(Offset.zero),
         radialVelocity.getOrElse(RadialVelocity.Zero).toDoubleKilometersPerSecond,
-        parallax.orEmpty,
+        parallax.getOrElse(Angle.zero),
         elapsedYears
       ),
       epoch.plusYears(elapsedYears),
@@ -57,7 +57,11 @@ final case class ProperMotion(
 
 
 object ProperMotion extends ProperMotionOptics {
-  import PhysicalConstants.{ AstronomicalUnit, TwoPi }
+  /** One AU in meters. */
+  val AstronomicalUnit: Long = 149597870660L
+
+  /** 2π, to higher precision than what you get in stdlib. */
+  val TwoPi: Double = 6.283185307179586476925286766559
 
   def const(cs: Coordinates): ProperMotion =
     ProperMotion(cs, Epoch.J2000, None, None, None)
@@ -81,20 +85,22 @@ object ProperMotion extends ProperMotionOptics {
     elapsedYears:    Double
   ): Coordinates = {
     val (ra, dec) = properMotionʹ(
-      baseCoordinates.toRadians,
+      baseCoordinates,
       epoch.scheme.lengthOfYear,
-      properVelocity.toRadians,
+      properVelocity,
       radialVelocity,
-      parallax.toMicroarcseconds.toDouble / 1000000.0,
+      parallax.toArcsecs,
       elapsedYears
     )
-    Coordinates.unsafeFromRadians(ra, dec)
+    // TODO: What do we do if Declination returns an Option?
+    Coordinates(RightAscension.fromAngle(Angle.fromRadians(ra), Declination(Angle.fromRadians(dec)))
   }
 
   // Some constants we need
   private val secsPerDay  = 86400.0
   private val auPerKm     = 1000.0 / AstronomicalUnit.toDouble
-  private val radsPerAsec = Angle.arcseconds.reverseGet(1).toDoubleRadians
+  //private val radsPerAsec = Angle.arcseconds.reverseGet(1).toDoubleRadians
+  private val radsPerAsec = Angle.fromArcsecs(1).toArcsecs
 
   // We need to do things with little vectors of doubles
   private type Vec2 = (Double, Double)
@@ -108,9 +114,9 @@ object ProperMotion extends ProperMotionOptics {
 
   /**
    * Proper motion correction in base units.
-   * @param baseCoordinates base (ra, dec) in radians, [0 … 2π) and (-π/2 … π/2)
+   * @param baseCoordinates base (ra, dec) in degrees, which we convert to radians, [0 … 2π) and (-π/2 … π/2)
    * @param daysPerYear     length of epoch year in fractonal days
-   * @param properVelocity  proper velocity in (ra, dec) in radians per epoch year
+   * @param properVelocity  proper velocity in (ra, dec) , which we convert to in radians per epoch year
    * @param radialVelocity  radial velocity (km/sec, positive means away from earth)
    * @param parallax        parallax in arcseconds (!)
    * @param elapsedYears    elapsed time in epoch years
@@ -118,17 +124,17 @@ object ProperMotion extends ProperMotionOptics {
    */
   // scalastyle:off method.length
   private def properMotionʹ(
-    baseCoordinates: Vec2,
+    baseCoordinates: Coordinates,
     daysPerYear:     Double,
-    properVelocity:  Vec2,
+    properVelocity:  Offset,
     parallax:        Double,
     radialVelocity:  Double,
     elapsedYears:    Double
   ): Vec2 = {
 
     // Break out our components
-    val (ra,   dec) = baseCoordinates
-    val (dRa, dDec) = properVelocity
+    val (ra,   dec) = (baseCoordinates.ra.toAngle.toRadians, baseCoordinates.dec.toAngle.toRadians)
+    val (dRa, dDec) = (properVelocity.p.toAngle.toRadians,   properVelocity.q.toAngle.toRadians)
 
     // Convert to cartesian
     val pos: Vec3 = {
@@ -204,24 +210,19 @@ object ProperMotion extends ProperMotionOptics {
 
 trait ProperMotionOptics {
 
-  /** @group Optics */
-  val baseCoordinates: Lens[ProperMotion, Coordinates] =
-    Lens[ProperMotion](_.baseCoordinates)
+  val baseCoordinates: ProperMotion @> Coordinates =
+    Lens.lensu((a, b) => a.copy(baseCoordinates = b), _.baseCoordinates)
 
-  /** @group Optics */
-  val epoch: Lens[ProperMotion, Epoch] =
-    Lens[ProperMotion](_.epoch)
+  val epoch: ProperMotion @> Epoch =
+    Lens.lensu((a, b) => a.copy(epoch = b), _.epoch)
 
-  /** @group Optics */
-  val properVelocity: Lens[ProperMotion, Option[Offset]] =
-    Lens[ProperMotion](_.properVelocity)
+  val pv: ProperMotion @> Option[Offset] =
+    Lens.lensu((a, b) => a.copy(properVelocity = b), _.properVelocity)
 
-  /** @group Optics */
-  val radialVelocity: Lens[ProperMotion, Option[RadialVelocity]] =
-    Lens[ProperMotion](_.radialVelocity)
+  val properVelocity: ProperMotion @> Option[RedShift] =
+    Lens.lensu((a, b) => a.copy(redShift = b), _.redShift)
 
-  /** @group Optics */
-  val parallax: Lens[ProperMotion, Option[Angle]] =
-    Lens[ProperMotion](_.parallax)
+  val parallax ProperMotion @> Option[Angle] =
+    Lens.lensu((a, b) => a.copy(parallax = b), _.parallax)
 
 }
