@@ -1,14 +1,14 @@
 // Copyright (c) 2016-2019 Association of Universities for Research in Astronomy, Inc. (AURA)
 // For license information see LICENSE or https://opensource.org/licenses/BSD-3-Clause
 
-package edu.gemini.spModel.gemini.ghost
+package edu.gemini.spModel.core
 
 import java.time.Instant
 
-import scala.math.{atan2, cos, hypot, sin}
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
-import edu.gemini.spModel.core.{Angle, Coordinates, Epoch, Offset, Redshift}
+
+import scala.math.{atan2, cos, hypot, sin}
 
 /**
  * Time-parameterized coordinates, based on an observed position at some point in time (called
@@ -33,11 +33,11 @@ final case class ProperMotionCalculator(
                                parallax:        Option[Angle]
 ) {
 
-  def at(i: Instant): ProperMotion =
+  def at(i: Instant): ProperMotionCalculator =
     plusYears(epoch.untilInstant(i))
 
   /** Coordinates `elapsedYears` fractional epoch-years after `epoch`. */
-  def plusYears(elapsedYears: Double): ProperMotion =
+  def plusYears(elapsedYears: Double): ProperMotionCalculator =
     ProperMotion(
       ProperMotion.properMotion(
         baseCoordinates,
@@ -63,7 +63,7 @@ object ProperMotion extends ProperMotionOptics {
   /** 2π, to higher precision than what you get in stdlib. */
   val TwoPi: Double = 6.283185307179586476925286766559
 
-  def const(cs: Coordinates): ProperMotion =
+  def const(cs: Coordinates): ProperMotionCalculator =
     ProperMotion(cs, Epoch.J2000, None, None, None)
 
   /**
