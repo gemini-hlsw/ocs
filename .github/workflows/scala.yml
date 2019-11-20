@@ -1,0 +1,20 @@
+name: Scala CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - uses: olafurpg/setup-scala@v2
+      - name: Run tests
+        run: |
+          cp ./project/OcsCredentials.scala.template ./project/OcsCredentials.scala;
+          csbt -q -J-Djava.util.logging.config.file=logging.properties -J-Dedu.gemini.ocs.build.ping ++$TRAVIS_SCALA_VERSION test:compile test
+          csbt -q -J-Djava.util.logging.config.file=logging.properties -J-Dedu.gemini.ocs.build.ping ++2.12.10 bundle_edu_gemini_spModel_core/test bundle_edu_gemini_util_ssl/test bundle_edu_gemini_util_osgi/test bundle_edu_gemini_util_pdf/test bundle_edu_gemini_util_skycalc/test bundle_edu_gemini_util_javax_mail/test bundle_edu_gemini_util_security/test bundle_edu_gemini_util_trpc/test bundle_jsky_coords/test bundle_jsky_util/test bundle_jsky_util_gui/test bundle_edu_gemini_epics_acm/test bundle_edu_gemini_model_p1/test bundle_edu_gemini_model_p1_pdf/test bundle_edu_gemini_pot/test bundle_edu_gemini_seqexec_odb/test bundle_edu_gemini_shared_skyobject/test bundle_edu_gemini_shared_util/test bundle_edu_gemini_spModel_pio/test bundle_edu_gemini_wdba_session_client/test bundle_edu_gemini_wdba_shared/test bundle_edu_gemini_wdba_xmlrpc_api/test
