@@ -16,7 +16,7 @@ import Scalaz._
  * @param scheme This `Epoch`'s temporal scheme.
  * @see The Wikipedia [[https://en.wikipedia.org/wiki/Epoch_(astronomy) article]]
  */
-final class Epoch private(val scheme: Epoch.Scheme, private[math] val toMilliyears: Int) {
+final class Epoch private(val scheme: Epoch.Scheme, private val toMilliyears: Int) {
 
   /** This `Epoch`'s year. Note that this value is not very useful without the `Scheme`. */
   def epochYear: Double =
@@ -61,8 +61,7 @@ object Epoch {
   val J2000: Epoch = Julian.fromIntegralYears(2000)
 
   /**
-   * The scheme defines year zero and length of a year in terms of Julian days. There are two
-   * common schemes that we support here.
+   * The scheme defines year zero and length of a year in terms of Julian days.
    */
   sealed abstract class Scheme(
                                 val prefix: Char,
