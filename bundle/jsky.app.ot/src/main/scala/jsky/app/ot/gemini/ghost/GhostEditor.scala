@@ -103,6 +103,9 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         converter.foreach(convertAsterism)
     }
 
+    val tabPane: TabbedPane = new TabbedPane();
+
+
     /** Convert the asterism to the new type, and set the new target environment. */
     def convertAsterism(converter: AsterismConverter): Unit = Swing.onEDT {
       // Disable the combo box, and enable it only if conversion succeeds.
