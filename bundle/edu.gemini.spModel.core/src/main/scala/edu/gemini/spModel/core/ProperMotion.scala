@@ -35,7 +35,7 @@ case class ProperMotion(
     }
     val parallax = Parallax.mas.get(Target.parallax.get(t).flatten.getOrElse(Parallax.zero)) / 1000000.0
     ProperMotion.properMotionCalculator(baseCoordinates,
-                           365.25, // Julian length of year
+                                        Epoch.JulianLengthOfYear,
                                         properVelocity,
                                         radialVelocity,
                                         parallax,
@@ -55,6 +55,7 @@ object ProperMotion {
   private type Vec3 = (Double, Double, Double)
 
   // Scalar multiplication and addition for Vec3.
+  // TODO: Does scalaz must provide monoids for addition and multiplication?
   private implicit class Vec3Ops(a: Vec3) {
     def *(d: Double): Vec3 =
       (a._1 * d, a._2 * d, a._3 * d)
@@ -108,8 +109,7 @@ object ProperMotion {
                       dDec *           cos(dec)
     )
 
-    // Our new position (still in polar coordinates). `|+|` here is scalar addition provided by
-    // cats … unlike scalaz it does give you Semigroup[Double] even though it's not strictly lawful.
+    // Our new position (still in polar coordinates). `|+|` here is scalar addition.
     val pp = pos |+| ((dPos1 |+| dPos2) * elapsedYears)
 
     // Back to spherical

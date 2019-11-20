@@ -11,7 +11,7 @@ import Scalaz._
  * scheme (Julian, in this case) that determines year zero and the length of a year. The only
  * meaningful operation for an `Epoch` is to ask the elapsed epoch-years between it and some other
  * point in time. We need this for proper motion corrections because velocities are measured in
- * motion per epoch-year. The epoch year is stored internally as integral milliyears.
+ * motion per epoch-year.
  *
  * @see The Wikipedia [[https://en.wikipedia.org/wiki/Epoch_(astronomy) article]]
  */
@@ -34,12 +34,8 @@ final case class Epoch(year: Double) {
 }
 
 object Epoch {
-  // Julian constants
-
   /**
-   * Standard epoch.
-   *
-   * @group Constructors
+   * Standard J2000 epoch and Julian constants.
    */
   val JulianYearBasis: Double = 2000.0
   val JulianBasis: Double = 2451545.0
@@ -52,10 +48,8 @@ object Epoch {
   val year: Epoch @> Double = Lens.lensu((a, b) => a.copy(year = b), _.year)
 }
 
-sealed abstract case class JulianDate(
-                                       dayNumber: Int,
-                                       nanoAdjustment: Long
-                                     ) {
+sealed abstract case class JulianDate(dayNumber: Int,
+                                      nanoAdjustment: Long) {
 
   import JulianDate._
 
@@ -63,36 +57,11 @@ sealed abstract case class JulianDate(
   assert(dayNumber >= 0, s"dayNumber >= 0")
   assert(nanoAdjustment >= MinAdjustment, s"nanoAdjustment >= $MinAdjustment")
   assert(nanoAdjustment <= MaxAdjustment, s"nanoAdjustment <= $MaxAdjustment")
-
-
-  /** Julian date value as a Double, including Julian Day Number and fractional
-   * day since the preceding noon.
-   */
-  val toDouble: Double =
-    dayNumber + nanoAdjustment.toDouble / NanoPerDay.toDouble
-
-  /** Modified Julian Date (MJD) double.  This is logically the same as
-   * `toDouble - 2400000.5`. MJD was introduced to preserve a bit of floating
-   * point decimal precision in calculations that use Julian dates.  It also
-   * makes it easier to directly implement algorithms that work with MJD.
-   *
-   * @see http://tycho.usno.navy.mil/mjd.html
-   */
-  def toModifiedDouble: Double = {
-    val h = SecondsPerHalfDay.toLong * Billion.toLong
-    val d = dayNumber - 2400000
-    val n = nanoAdjustment - h
-
-    val (dʹ, nʹ) = if (n >= MinAdjustment) (d, n)
-    else (d - 1, n + SecondsPerDay.toLong * Billion.toLong)
-
-    dʹ + nʹ.toDouble / NanoPerDay.toDouble
-  }
 }
 
 object JulianDate {
 
-  /** Seconds per Julian day. */
+  /** JulianDate and related constants. */
   val SecondsPerDay: Int = // 86400
     24 * 60 * 60
 
@@ -143,10 +112,5 @@ object JulianDate {
 
     new JulianDate(jdn, adj) {}
   }
-
-  implicit val JulianDateOrder: Order[JulianDate] =
-    Order.orderBy(jd => (jd.dayNumber, jd.nanoAdjustment))
-
-  implicit val JulianDateShow: Show[JulianDate] =
-    Show.showFromToString
 }
+
