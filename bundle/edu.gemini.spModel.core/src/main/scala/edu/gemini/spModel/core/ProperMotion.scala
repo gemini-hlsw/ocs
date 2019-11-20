@@ -33,7 +33,7 @@ case class ProperMotion(
       val redshift: Option[Redshift] = Target.redshift.get(t).flatten
       redshift.getOrElse(Redshift.zero).toRadialVelocity.toKilometersPerSecond
     }
-    val parallax = Parallax.mas.get(Target.parallax.get(t).flatten.getOrElse(Parallax.zero)) / 1000000.0
+    val parallax = Parallax.mas.get(Target.parallax.get(t).flatten.getOrElse(Parallax.zero)) / ProperMotion.Million
     ProperMotion.properMotionCalculator(baseCoordinates,
                                         Epoch.JulianLengthOfYear,
                                         properVelocity,
@@ -48,8 +48,9 @@ object ProperMotion {
   val AstronomicalUnit:    Long   = 149597870660L
   private val secsPerDay:  Double = 86400.0
   private val auPerKm:     Double = 1000.0 / AstronomicalUnit.toDouble
-  private val radsPerAsec: Double = Angle.fromArcsecs(1).toArcsecs
+  private val radsPerAsec: Double = Angle.fromArcsecs(1).toRadians
   private val TwoPi:       Double = 6.283185307179586476925286766559
+  private val Million:     Double = 1000000.0
 
   private type Vec2 = (Double, Double)
   private type Vec3 = (Double, Double, Double)

@@ -68,7 +68,7 @@ object JulianDate {
   val SecondsPerHalfDay: Int = // 43200
     SecondsPerDay / 2
 
-  val Billion: Int = 1000000000
+  val Billion: Long = 1000000000
   val NanoPerDay: Long = SecondsPerDay.toLong * Billion.toLong
 
   val MinAdjustment: Long = -SecondsPerHalfDay.toLong * Billion.toLong
