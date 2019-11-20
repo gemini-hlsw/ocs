@@ -23,8 +23,8 @@ case class ProperMotion(
 
   /** Coordinates `elapsedYears` fractional epoch-years after `epoch`. */
   def plusYears(t: Target, elapsedYears: Double): Coordinates = {
-    // We want the observed coordinates at the epoch in radians: what to do if zero?
     val baseCoordinates = t.coords(None).getOrElse(Coordinates.zero)
+
     // TODO: Is this calculated correctly?
     val properVelocity: Offset = Offset(OffsetP(Angle.fromDegrees(deltaRA.velocity.toDegreesPerYear)),
                                         OffsetQ(Angle.fromDegrees(deltaDec.velocity.toDegreesPerYear)))
@@ -35,7 +35,7 @@ case class ProperMotion(
     }
     val parallax = Parallax.mas.get(Target.parallax.get(t).flatten.getOrElse(Parallax.zero)) / 1000000.0
     ProperMotion.properMotionCalculator(baseCoordinates,
-                                        epoch.scheme.lengthOfYear,
+                           365.25, // Julian length of year
                                         properVelocity,
                                         radialVelocity,
                                         parallax,

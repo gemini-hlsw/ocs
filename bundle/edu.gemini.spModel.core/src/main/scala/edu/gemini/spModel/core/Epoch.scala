@@ -13,106 +13,43 @@ import Scalaz._
  * point in time. We need this for proper motion corrections because velocities are measured in
  * motion per epoch-year. The epoch year is stored internally as integral milliyears.
  *
- * @param scheme This `Epoch`'s temporal scheme.
  * @see The Wikipedia [[https://en.wikipedia.org/wiki/Epoch_(astronomy) article]]
  */
-final class Epoch private(val scheme: Epoch.Scheme, private val toMilliyears: Int) {
-
-  /** This `Epoch`'s year. Note that this value is not very useful without the `Scheme`. */
-  def epochYear: Double =
-    toMilliyears.toDouble * 1000.0
-
+final case class Epoch(year: Double) {
   /** Offset in epoch-years from this `Epoch` to the given `Instant`. */
   def untilInstant(i: Instant): Double =
     untilLocalDateTime(LocalDateTime.ofInstant(i, ZoneOffset.UTC))
 
   /** Offset in epoch-years from this `Epoch` to the given `LocalDateTime`. */
   def untilLocalDateTime(ldt: LocalDateTime): Double =
-    untilJulianDay(Epoch.Scheme.toJulianDay(ldt))
+    untilJulianDay(Epoch.toJulianDay(ldt))
 
   /** Offset in epoch-years from this `Epoch` to the given fractional Julian day. */
   def untilJulianDay(jd: Double): Double =
-    untilEpochYear(scheme.fromJulianDay(jd).epochYear)
+    Epoch.JulianYearBasis + (jd - Epoch.JulianBasis) / Epoch.JulianLengthOfYear
 
   /** Offset in epoch-years from this `Epoch` to the given epoch year under the same scheme. */
   def untilEpochYear(epochYear: Double): Double =
-    epochYear - this.epochYear
-
-  def plusYears(y: Double): Epoch =
-    scheme.fromEpochYears(epochYear + y)
-
-  override def equals(a: Any): Boolean =
-    a match {
-      case e: Epoch => (scheme === e.scheme) && toMilliyears === e.toMilliyears
-      case _ => false
-    }
-
-  override def hashCode: Int =
-    scheme.hashCode ^ toMilliyears
+    epochYear - year
 }
 
 object Epoch {
+  // Julian constants
 
   /**
    * Standard epoch.
    *
    * @group Constructors
    */
-  val J2000: Epoch = Julian.fromIntegralYears(2000)
+  val JulianYearBasis: Double = 2000.0
+  val JulianBasis: Double = 2451545.0
+  val JulianLengthOfYear: Double = 365.25
+  val J2000: Epoch = Epoch(JulianYearBasis)
 
-  /**
-   * The scheme defines year zero and length of a year in terms of Julian days.
-   */
-  sealed abstract class Scheme(
-                                val prefix: Char,
-                                val yearBasis: Double,
-                                val julianBasis: Double,
-                                val lengthOfYear: Double
-                              ) {
+  def toJulianDay(dt: LocalDateTime): Double =
+    JulianDate.ofLocalDateTime(dt).dayNumber.toDouble
 
-    def fromIntegralYears(years: Int): Epoch =
-      fromMilliyears(years * 1000)
-
-    def fromMilliyears(mys: Int): Epoch =
-      new Epoch(this, mys)
-
-    def fromLocalDateTime(ldt: LocalDateTime): Epoch =
-      fromJulianDay(Scheme.toJulianDay(ldt))
-
-    def fromJulianDay(jd: Double): Epoch =
-      fromEpochYears(yearBasis + (jd - julianBasis) / lengthOfYear)
-
-    def fromEpochYears(epochYear: Double): Epoch =
-      fromMilliyears((epochYear * 1000.0).toInt)
-
-  }
-
-  object Scheme {
-
-    /**
-     * Convert a `LocalDateTime` to a fractional Julian day.
-     *
-     * @see The Wikipedia [[https://en.wikipedia.org/wiki/Julian_day article]]
-     */
-    def toJulianDay(dt: LocalDateTime): Double =
-      JulianDate.ofLocalDateTime(dt).dayNumber.toDouble
-
-    implicit val SchemeOrder: Order[Scheme] =
-      Order.orderBy(s => (s.prefix, s.yearBasis, s.julianBasis, s.lengthOfYear))
-
-    implicit val SchemeShow: Show[Scheme] =
-      Show.showFromToString
-
-  }
-
-  case object Julian extends Scheme('J', 2000.0, 2451545.0, 365.25)
-
-  implicit val EpochOrder: Order[Epoch] =
-    Order.orderBy(e => (e.scheme, e.toMilliyears))
-
-  implicit val EpochShow: Show[Epoch] =
-    Show.showFromToString
-
+  val year: Epoch @> Double = Lens.lensu((a, b) => a.copy(year = b), _.year)
 }
 
 sealed abstract case class JulianDate(
