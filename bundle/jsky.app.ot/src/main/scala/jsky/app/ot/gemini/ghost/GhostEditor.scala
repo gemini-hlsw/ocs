@@ -1,16 +1,17 @@
 package jsky.app.ot.gemini.ghost
 
 import java.beans.PropertyDescriptor
-import javax.swing.JPanel
 
+import javax.swing.JPanel
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.shared.gui.bean.TextFieldPropertyCtrl
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.gemini.ghost.Ghost
 import edu.gemini.spModel.gemini.ghost.AsterismConverters._
 import edu.gemini.spModel.rich.pot.sp._
-import edu.gemini.spModel.target.env.AsterismType
+import edu.gemini.spModel.target.env.{AsterismType, ResolutionMode}
 import edu.gemini.spModel.target.env.AsterismType._
+import edu.gemini.spModel.target.env.ResolutionMode._
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import jsky.app.ot.gemini.editor.ComponentEditor
 
@@ -63,13 +64,44 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       insets = new Insets(10, 0, 0, 0)
     }
 
-    val asterismLabel: Label = new Label("Select configuration:")
-    asterismLabel.horizontalAlignment = Alignment.Right
-    layout(asterismLabel) = new Constraints() {
+    /**
+     * RESOLUTION MODE
+     */
+    val resolutionModeLabel: Label = new Label("Resolution Mode:")
+    resolutionModeLabel.horizontalAlignment = Alignment.Right
+    layout(resolutionModeLabel) = new Constraints() {
       anchor = Anchor.East
       gridy = 2
       insets = new Insets(12, 10, 0, 20)
     }
+
+    /** A list of available resolution modes. */
+    val resolutionModes: List[ResolutionMode] = List(
+      GhostStandard,
+      GhostHigh,
+      GhostPRV
+    )
+
+    val resolutionModeComboBox: ComboBox[ResolutionMode] = new ComboBox[ResolutionMode](resolutionModes)
+    layout(resolutionModeComboBox) = new Constraints() {
+      anchor = Anchor.NorthWest
+      gridx = 1
+      gridwidth = 2
+      gridy = 2
+      insets = new Insets(10, 0, 0, 20)
+    }
+
+    /**
+     * TARGET MODE
+     */
+    val targetModeLabel: Label = new Label("Target Mode:")
+    targetModeLabel.horizontalAlignment = Alignment.Right
+    layout(targetModeLabel) = new Constraints() {
+      anchor = Anchor.East
+      gridy = 4
+      insets = new Insets(12, 10, 0, 20)
+    }
+
 
     /** A list of available asterism types. */
     val asterismList: List[AsterismType] = List(
@@ -96,6 +128,17 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       weighty = 1.0
     }
 
+    /**
+     * When the resolution mode changes, change the target modes.
+     * We try to change the target mode to the closest mode in the newly selected resolution.
+     */
+    listenTo(resolutionModeComboBox.selection)
+    reactions += {
+      case SelectionChanged(`resolutionModeComboBox`) =>
+         val asterismType = asterismComboBox.selection.item
+)
+
+    }
     listenTo(asterismComboBox.selection)
     reactions += {
       case SelectionChanged(`asterismComboBox`) =>
