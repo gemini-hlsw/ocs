@@ -113,7 +113,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       GhostHighResolutionTargetPlusSky
     )
 
-    val asterismComboBox: ComboBox[AsterismType] = new ComboBox[AsterismType](asterismList)
+    val asterismComboBox: ComboBox[AsterismType] = new ComboBox[AsterismType](resolutionModeComboBox.selection.item.asterismTypes)
     layout(asterismComboBox) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 1
@@ -135,6 +135,13 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     listenTo(resolutionModeComboBox.selection)
     reactions += {
       case SelectionChanged(`resolutionModeComboBox`) =>
+        // The old resolution mode.
+
+
+        // The new resolution mode.
+        val newResolutionMode = resolutionModeComboBox.selection.item
+
+        // The asterism type.
          val asterismType = asterismComboBox.selection.item
 )
 
