@@ -6,7 +6,7 @@ import javax.swing.JPanel
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.shared.gui.bean.TextFieldPropertyCtrl
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.gemini.ghost.Ghost
+import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost}
 import edu.gemini.spModel.gemini.ghost.AsterismConverters._
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.target.env.{AsterismType, ResolutionMode}
@@ -16,7 +16,6 @@ import edu.gemini.spModel.target.obsComp.TargetObsComp
 import jsky.app.ot.gemini.editor.ComponentEditor
 
 import scala.collection.JavaConverters._
-
 import scala.swing._
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing.event.SelectionChanged
@@ -100,7 +99,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     targetModeLabel.horizontalAlignment = Alignment.Right
     layout(targetModeLabel) = new Constraints() {
       anchor = Anchor.East
-      gridy = 4
+      gridy = 3
       insets = new Insets(12, 10, 0, 20)
     }
 
@@ -120,13 +119,13 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       anchor = Anchor.NorthWest
       gridx = 1
       gridwidth = 2
-      gridy = 4
+      gridy = 3
       insets = new Insets(10, 0, 0, 20)
     }
 
     layout(new Label) = new Constraints() {
       anchor = Anchor.North
-      gridy = 3
+      gridy = 4
       weighty = 1.0
     }
 
@@ -139,14 +138,33 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     reactions += {
       case SelectionChanged(`resolutionModeComboBox`) =>
         // The old resolution mode.
-        // How do we get this?
+        deafTo(resolutionModeComboBox.selection)
+        deafTo(asterismComboBox.selection)
 
+        // The old resolution mode.
+        val originalResolutionMode = resolutionMode
 
         // The new resolution mode.
         val newResolutionMode = resolutionModeComboBox.selection.item
 
         // The asterism type.
         val asterismType = asterismComboBox.selection.item
+
+        // If they are not the same, convert the asterism type from the old resolution mode
+        // to the new resolution mode and store.
+        if (originalResolutionMode != newResolutionMode) {
+          val newAsterismType = AsterismTypeConverters.asterismTypeConverters((originalResolutionMode, asterismType, newResolutionMode))
+          newAsterismType.converter.asScalaOpt.foreach(convertAsterism)
+
+          // Update the contents of the asterism combo box to only allow asterisms of this resolution mode
+          // and make sure we are at the selected mode.
+          asterismComboBox.peer.removeAllItems()
+          resolutionMode.asterismTypes.asScala.foreach(asterismComboBox.peer.addItem)
+          asterismComboBox.selection.item = newAsterismType
+        }
+
+        listenTo(asterismComboBox.selection)
+        listenTo(resolutionModeComboBox.selection)
     }
 
     /**
@@ -162,6 +180,8 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
 
     val tabPane: TabbedPane = new TabbedPane();
 
+    def resolutionMode: ResolutionMode =
+      getContextObservation.findTargetObsComp.map(_.getAsterism.resolutionMode).getOrElse(ResolutionMode.GhostStandard)
 
     /** Convert the asterism to the new type, and set the new target environment. */
     def convertAsterism(converter: AsterismConverter): Unit = Swing.onEDT {
@@ -183,19 +203,32 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     def initialize(): Unit = Swing.onEDT {
       // Set the combo box to the appropriate asterism type.
       // If there is no allowable type, disable it.
+      deafTo(resolutionModeComboBox.selection)
       deafTo(asterismComboBox.selection)
       ui.asterismComboBox.enabled = false
+      ui.resolutionModeComboBox.enabled = false
+
+      // We need the resolution mode to set the combo box.
+      ui.resolutionModeComboBox.selection.item = resolutionMode
 
       // We only allow asterism types in the asterism list populating the combo box.
       val selection = getContextObservation.findTargetObsComp
         .map(_.getAsterism.asterismType)
         .filter(asterismList.contains)
 
-      selection.foreach { at =>
-        ui.asterismComboBox.selection.item = at
-        ui.asterismComboBox.enabled = true
-      }
+      // Set the asterism types to match those available to the resolution mode.
+      asterismComboBox.peer.removeAllItems()
+      resolutionMode.asterismTypes.asScala.foreach(asterismComboBox.peer.addItem)
+      ui.asterismComboBox.selection.item = selection.getOrElse(resolutionMode.asterismTypes.asScala.head)
+
+//        selection.foreach { at =>
+//        ui.asterismComboBox.selection.item = at
+//        ui.asterismComboBox.enabled = true
+//      }
+      ui.resolutionModeComboBox.enabled = true
+      ui.asterismComboBox.enabled = true
       listenTo(asterismComboBox.selection)
+      listenTo(resolutionModeComboBox.selection)
     }
   }
 

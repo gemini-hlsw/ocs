@@ -3,7 +3,7 @@ package edu.gemini.spModel.gemini.ghost
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.CloudCover
 import edu.gemini.spModel.target.{SPCoordinates, SPTarget}
-import edu.gemini.spModel.target.env.{Asterism, AsterismType}
+import edu.gemini.spModel.target.env.{Asterism, AsterismType, ResolutionMode}
 import java.time.Instant
 
 import scalaz._
@@ -173,6 +173,8 @@ object GhostAsterism {
       case SkyPlusTarget(_,t,_) => t.coordinates(when)
     }
 
+    override def resolutionMode: ResolutionMode = ResolutionMode.GhostStandard
+
     override def asterismType: AsterismType = this match {
       case SingleTarget(_,_)    => AsterismType.GhostSingleTarget
       case DualTarget(_,_,_)    => AsterismType.GhostDualTarget
@@ -264,6 +266,8 @@ object GhostAsterism {
       case HighResolutionTarget(t,b) => HighResolutionTarget(t.copyWithClonedTarget, b.map(_.clone))
       case HighResolutionTargetPlusSky(t,s,b) => HighResolutionTargetPlusSky(t.copyWithClonedTarget, s.clone, b.map(_.clone))
     }
+
+    override def resolutionMode: ResolutionMode = ResolutionMode.GhostHigh
 
     override def asterismType: AsterismType = this match {
       case HighResolutionTarget(_,_)          => AsterismType.GhostHighResolutionTarget

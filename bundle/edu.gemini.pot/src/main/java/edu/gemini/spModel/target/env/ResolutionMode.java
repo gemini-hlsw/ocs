@@ -3,6 +3,10 @@ package edu.gemini.spModel.target.env;
 import java.util.*;
 
 public enum ResolutionMode {
+    // This will be used by every instrument other than GHOST and thus can be considered disjoint;
+    // the overlapping name should not make a difference.
+    Standard("standard", "Standard Resolution", Collections.emptyList()),
+
     GhostStandard("ghostStandard", "Standard Resolution",
             Arrays.asList(
                     AsterismType.GhostSingleTarget,
@@ -28,5 +32,10 @@ public enum ResolutionMode {
         this.tag = tag;
         this.name = name;
         this.asterismTypes = asterismTypes;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }
