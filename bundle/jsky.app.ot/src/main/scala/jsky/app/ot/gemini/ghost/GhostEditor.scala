@@ -15,6 +15,8 @@ import edu.gemini.spModel.target.env.ResolutionMode._
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import jsky.app.ot.gemini.editor.ComponentEditor
 
+import scala.collection.JavaConverters._
+
 import scala.swing._
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing.event.SelectionChanged
@@ -102,7 +104,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       insets = new Insets(12, 10, 0, 20)
     }
 
-
+    // TODO: We don't need this anymore.
     /** A list of available asterism types. */
     val asterismList: List[AsterismType] = List(
       GhostSingleTarget,
@@ -113,12 +115,12 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       GhostHighResolutionTargetPlusSky
     )
 
-    val asterismComboBox: ComboBox[AsterismType] = new ComboBox[AsterismType](resolutionModeComboBox.selection.item.asterismTypes)
+    val asterismComboBox: ComboBox[AsterismType] = new ComboBox[AsterismType](resolutionModeComboBox.selection.item.asterismTypes.asScala)
     layout(asterismComboBox) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 1
       gridwidth = 2
-      gridy = 2
+      gridy = 4
       insets = new Insets(10, 0, 0, 20)
     }
 
@@ -130,22 +132,27 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
 
     /**
      * When the resolution mode changes, change the target modes.
-     * We try to change the target mode to the closest mode in the newly selected resolution.
+     * We try to change the target mode to the closest mode in the newly selected resolution to maintain
+     * as much of the target version as possible.
      */
     listenTo(resolutionModeComboBox.selection)
     reactions += {
       case SelectionChanged(`resolutionModeComboBox`) =>
         // The old resolution mode.
+        // How do we get this?
 
 
         // The new resolution mode.
         val newResolutionMode = resolutionModeComboBox.selection.item
 
         // The asterism type.
-         val asterismType = asterismComboBox.selection.item
-)
-
+        val asterismType = asterismComboBox.selection.item
     }
+
+    /**
+     * Now when the asterism type changes, change the target environment, trying to maintain as
+     * much of the original target environment as we can.
+     */
     listenTo(asterismComboBox.selection)
     reactions += {
       case SelectionChanged(`asterismComboBox`) =>
