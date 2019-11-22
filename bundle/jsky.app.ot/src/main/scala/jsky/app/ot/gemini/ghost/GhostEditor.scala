@@ -2,7 +2,7 @@ package jsky.app.ot.gemini.ghost
 
 import java.beans.PropertyDescriptor
 
-import javax.swing.JPanel
+import javax.swing.{DefaultComboBoxModel, JPanel}
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.shared.gui.bean.TextFieldPropertyCtrl
 import edu.gemini.shared.util.immutable.ScalaConverters._
@@ -158,8 +158,9 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
 
           // Update the contents of the asterism combo box to only allow asterisms of this resolution mode
           // and make sure we are at the selected mode.
-          asterismComboBox.peer.removeAllItems()
-          resolutionMode.asterismTypes.asScala.foreach(asterismComboBox.peer.addItem)
+          // We need to set a new model: we cannot modify the model directly as per Scala Swing.
+          asterismComboBox.peer.setModel(new DefaultComboBoxModel[AsterismType]())
+          newResolutionMode.asterismTypes.asScala.foreach(asterismComboBox.peer.addItem)
           asterismComboBox.selection.item = newAsterismType
         }
 
@@ -217,14 +218,11 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         .filter(asterismList.contains)
 
       // Set the asterism types to match those available to the resolution mode.
-      asterismComboBox.peer.removeAllItems()
+      // We need to set a new model: we cannot modify the model directly as per Scala Swing.
+      asterismComboBox.peer.setModel(new DefaultComboBoxModel[AsterismType]())
       resolutionMode.asterismTypes.asScala.foreach(asterismComboBox.peer.addItem)
       ui.asterismComboBox.selection.item = selection.getOrElse(resolutionMode.asterismTypes.asScala.head)
 
-//        selection.foreach { at =>
-//        ui.asterismComboBox.selection.item = at
-//        ui.asterismComboBox.enabled = true
-//      }
       ui.resolutionModeComboBox.enabled = true
       ui.asterismComboBox.enabled = true
       listenTo(asterismComboBox.selection)
