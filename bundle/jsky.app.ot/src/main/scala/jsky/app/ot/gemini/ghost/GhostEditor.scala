@@ -89,6 +89,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       gridx = 1
       gridwidth = 2
       gridy = 2
+      fill = Fill.Horizontal
       insets = new Insets(10, 0, 0, 20)
     }
 
@@ -120,6 +121,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       gridx = 1
       gridwidth = 2
       gridy = 3
+      fill = Fill.Horizontal
       insets = new Insets(10, 0, 0, 20)
     }
 
