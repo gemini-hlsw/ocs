@@ -92,6 +92,9 @@ trait Asterism {
   /** Construct a copy of this Asterism with cloned SPTargets (necessary because they are mutable). */
   def copyWithClonedTargets: Asterism
 
+  // The mode of the resolultion: should be standard for everything but GHOST.
+  def resolutionMode: ResolutionMode
+
   // Get the type of this asterism as an AsterismType.
   def asterismType: AsterismType
 }
@@ -110,6 +113,7 @@ object Asterism {
     override def basePosition(time: Option[Instant]) = t.getCoordinates(time.map(_.toEpochMilli))
     override def copyWithClonedTargets() = Single(t.clone)
     override def basePositionProperMotion = Target.pm.get(t.getTarget)
+    override def resolutionMode: ResolutionMode = ResolutionMode.Standard
     override def asterismType: AsterismType = AsterismType.Single
   }
 

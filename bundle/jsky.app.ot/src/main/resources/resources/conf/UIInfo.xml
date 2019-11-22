@@ -390,7 +390,7 @@
 
     <UIInfo site="GS"
             dataObject="edu.gemini.spModel.gemini.ghost.Ghost"
-            name="GHOST instrument"
+            name="GHOST Instrument"
             type="instrument"
             imageKey="component.gif"
             shortDescription="The GHOST instrument is configured with this component."
