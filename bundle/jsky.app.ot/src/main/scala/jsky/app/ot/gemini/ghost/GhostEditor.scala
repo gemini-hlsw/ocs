@@ -179,8 +179,6 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         converter.foreach(convertAsterism)
     }
 
-    val tabPane: TabbedPane = new TabbedPane();
-
     def resolutionMode: ResolutionMode =
       getContextObservation.findTargetObsComp.map(_.getAsterism.resolutionMode).getOrElse(ResolutionMode.GhostStandard)
 
