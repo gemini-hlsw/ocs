@@ -24,6 +24,7 @@ import scala.swing.event.SelectionChanged
 final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
 
   private object ui extends GridBagPanel {
+    private var row = 0
     border = ComponentEditor.PANEL_BORDER
 
     /** Position angle components. */
@@ -39,31 +40,39 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     val tfComp: Component = Component.wrap(posAngleCtrl.getTextField)
     layout(posAngleLabel) = new Constraints() {
       anchor = Anchor.NorthEast
+      gridx = 0
+      gridy = row
       insets = new Insets(3, 10, 0, 20)
     }
     layout(tfComp) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 1
+      gridy = row
       insets = new Insets(0, 0, 0, 20)
     }
     layout(posAngleUnits) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 2
+      gridy = row
       insets = new Insets(3, 0, 0, 20)
     }
     layout(new Label) = new Constraints() {
       anchor = Anchor.West
       gridx = 3
+      gridy = row
       weightx = 1.0
     }
+    row += 1
 
     layout(new Separator()) = new Constraints() {
       anchor = Anchor.West
       fill = Fill.Horizontal
-      gridy = 1
+      gridx = 0
+      gridy = row
       gridwidth = 3
       insets = new Insets(10, 0, 0, 0)
     }
+    row += 1
 
     /**
      * RESOLUTION MODE
@@ -72,7 +81,8 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     resolutionModeLabel.horizontalAlignment = Alignment.Right
     layout(resolutionModeLabel) = new Constraints() {
       anchor = Anchor.East
-      gridy = 2
+      gridx = 0
+      gridy = row
       insets = new Insets(12, 10, 0, 20)
     }
 
@@ -87,11 +97,12 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     layout(resolutionModeComboBox) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 1
+      gridy = row
       gridwidth = 2
-      gridy = 2
       fill = Fill.Horizontal
       insets = new Insets(10, 0, 0, 20)
     }
+    row += 1
 
     /**
      * TARGET MODE
@@ -100,11 +111,11 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     targetModeLabel.horizontalAlignment = Alignment.Right
     layout(targetModeLabel) = new Constraints() {
       anchor = Anchor.East
-      gridy = 3
+      gridx = 0
+      gridy = row
       insets = new Insets(12, 10, 0, 20)
     }
 
-    // TODO: We don't need this anymore.
     /** A list of available asterism types. */
     val asterismList: List[AsterismType] = List(
       GhostSingleTarget,
@@ -120,14 +131,16 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       anchor = Anchor.NorthWest
       gridx = 1
       gridwidth = 2
-      gridy = 3
+      gridy = row
       fill = Fill.Horizontal
       insets = new Insets(10, 0, 0, 20)
     }
+    row += 1
 
     layout(new Label) = new Constraints() {
       anchor = Anchor.North
-      gridy = 4
+      gridx = 0
+      gridy = row
       weighty = 1.0
     }
 
