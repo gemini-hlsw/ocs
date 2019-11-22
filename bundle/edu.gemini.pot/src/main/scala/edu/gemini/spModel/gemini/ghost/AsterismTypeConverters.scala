@@ -11,10 +11,9 @@ object AsterismTypeConverters {
    * 1. An initial ResolutionMode RM1 amd an AsterismType AT1
    * 2. A desired ResolutionMode RM2
    * Find the AsterismType that best matches.
-   * This is in place so that when the resolution mode is changed, the target data is maintained.
+   * This is in place so that when the resolution mode is changed, a cponversion can be performed so that the target
+   * data is maintained.
    */
-    // TODO-GHOST: Are the PRV conversions correct?
-    // TODO-GHOST: Do we need to introduce anything other asterism types for them?
   val asterismTypeConverters: Map[(ResolutionMode, AsterismType, ResolutionMode), AsterismType] = Map(
       (GhostStandard, GhostSingleTarget, GhostHigh)  -> GhostHighResolutionTarget,
       (GhostStandard, GhostSingleTarget, GhostPRV)   -> GhostHighResolutionTarget,
