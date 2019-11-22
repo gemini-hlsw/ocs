@@ -67,7 +67,6 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
    * ISS Port
    */
   private var port: IssPort = IssPort.DEFAULT
-  println("***** ISSPORT: " + port.displayValue())
   override def getIssPort: IssPort = port
   override def setIssPort(newValue: IssPort): Unit = {
     val oldValue = getIssPort
