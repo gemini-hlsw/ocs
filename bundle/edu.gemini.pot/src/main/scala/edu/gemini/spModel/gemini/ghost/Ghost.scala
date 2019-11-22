@@ -11,10 +11,11 @@ import edu.gemini.spModel.data.property.{PropertyProvider, PropertySupport}
 import edu.gemini.spModel.gemini.init.{ComponentNodeInitializer, ObservationNI}
 import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.obscomp.{InstConfigInfo, InstConstants, SPInstObsComp}
-import edu.gemini.spModel.pio.{ParamSet, PioFactory}
+import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
 import edu.gemini.spModel.seqcomp.SeqConfigNames
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.obsComp.TargetObsComp
+import edu.gemini.spModel.telescope.{IssPort, IssPortProvider}
 
 import scala.collection.immutable.TreeMap
 import scala.collection.JavaConverters._
@@ -24,7 +25,7 @@ import scala.util.{Failure, Success, Try}
 /** The GHOST instrument SP model.
   * Note that we do not override clone since private variables are immutable.
   */
-final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvider with GhostMixin {
+final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvider with GhostMixin with IssPortProvider {
   override def getSite: JSet[Site] = {
     Site.SET_GS
   }
@@ -44,18 +45,36 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     * to add additional properties.
     */
   override def getParamSet(factory: PioFactory): ParamSet = {
-    super.getParamSet(factory)
+    val paramSet = super.getParamSet(factory)
+    Pio.addParam(factory, paramSet, Ghost.PORT_PROP, port.name())
+    paramSet
   }
 
   override def setParamSet(paramSet: ParamSet): Unit = {
     super.setParamSet(paramSet)
+    Option(Pio.getValue(paramSet, Ghost.PORT_PROP)).map(IssPort.valueOf).foreach(setIssPort)
   }
 
   override def getSysConfig: ISysConfig = {
     val sc = new DefaultSysConfig(SeqConfigNames.INSTRUMENT_CONFIG_NAME)
     sc.putParameter(StringParameter.getInstance(ISPDataObject.VERSION_PROP, getVersion))
     sc.putParameter(DefaultParameter.getInstance(Ghost.POS_ANGLE_PROP, getPosAngle))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.PORT_PROP, getIssPort))
     sc
+  }
+
+  /**
+   * ISS Port
+   */
+  private var port: IssPort = IssPort.DEFAULT
+  println("***** ISSPORT: " + port.displayValue())
+  override def getIssPort: IssPort = port
+  override def setIssPort(newValue: IssPort): Unit = {
+    val oldValue = getIssPort
+    if (oldValue != newValue) {
+      port = newValue
+      firePropertyChange(Ghost.PORT_PROP, oldValue, newValue)
+    }
   }
 }
 
@@ -146,6 +165,7 @@ object Ghost {
   private val iter_no   = false
 
   val POS_ANGLE_PROP: PropertyDescriptor = initProp(InstConstants.POS_ANGLE_PROP, query = query_no, iter = iter_no)
+  val PORT_PROP: PropertyDescriptor = initProp(IssPortProvider.PORT_PROPERTY_NAME, query_no, iter_no)
 
   // Use Java classes to be compatible with existing instruments.
   private val Properties: List[(String, PropertyDescriptor)] = List(
