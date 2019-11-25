@@ -238,3 +238,17 @@ trait ArbTime {
 }
 
 object ArbTime extends ArbTime
+
+trait ArbJulianDate {
+  import ArbTime._
+
+  implicit val arbJulianDate: Arbitrary[JulianDate] =
+    Arbitrary {
+      arbitrary[LocalDateTime].map(JulianDate.ofLocalDateTime)
+    }
+
+  implicit val cogJulianDate: Cogen[JulianDate] =
+    Cogen[(Int, Long)].contramap(jd => (jd.dayNumber, jd.nanoAdjustment))
+}
+
+object ArbJulianDate extends ArbJulianDate

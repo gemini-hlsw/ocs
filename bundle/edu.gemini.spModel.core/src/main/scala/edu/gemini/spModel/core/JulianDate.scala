@@ -3,6 +3,9 @@ package edu.gemini.spModel.core
 import java.time.{Instant, LocalDateTime}
 import java.time.ZoneOffset.UTC
 
+import scalaz._
+import Scalaz._
+
 sealed abstract case class JulianDate(dayNumber: Int,
                                       nanoAdjustment: Long) {
 
@@ -12,6 +15,30 @@ sealed abstract case class JulianDate(dayNumber: Int,
   assert(dayNumber >= 0, s"dayNumber >= 0")
   assert(nanoAdjustment >= MinAdjustment, s"nanoAdjustment >= $MinAdjustment")
   assert(nanoAdjustment <= MaxAdjustment, s"nanoAdjustment <= $MaxAdjustment")
+
+  /** Julian date value as a Double, including Julian Day Number and fractional
+   * day since the preceding noon.
+   */
+  val toDouble: Double =
+    dayNumber + nanoAdjustment.toDouble / NanoPerDay.toDouble
+
+  /** Modified Julian Date (MJD) double.  This is logically the same as
+   * `toDouble - 2400000.5`. MJD was introduced to preserve a bit of floating
+   * point decimal precision in calculations that use Julian dates.  It also
+   * makes it easier to directly implement algorithms that work with MJD.
+   *
+   * @see http://tycho.usno.navy.mil/mjd.html
+   */
+  def toModifiedDouble: Double = {
+    val h = SecondsPerHalfDay.toLong * Billion.toLong
+    val d = dayNumber      - 2400000
+    val n = nanoAdjustment - h
+
+    val (dʹ,nʹ) = if (n >= MinAdjustment) (d, n)
+    else (d - 1, n + SecondsPerDay.toLong * Billion.toLong)
+
+    dʹ + nʹ.toDouble / NanoPerDay.toDouble
+  }
 }
 
 object JulianDate {
@@ -67,4 +94,6 @@ object JulianDate {
 
     new JulianDate(jdn, adj) {}
   }
+
+  implicit val JulianDateEquals: Equal[JulianDate] = Equal.equalA
 }

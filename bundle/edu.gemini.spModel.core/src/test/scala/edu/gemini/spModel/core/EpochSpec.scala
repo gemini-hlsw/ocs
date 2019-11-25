@@ -9,7 +9,7 @@ import org.specs2.mutable.Specification
 final class EpochSpec extends Specification with ScalaCheck with Arbitraries {
   "Epoch" should {
     "give an offset of 0 to its own year" ! {
-      Epoch.J2000.untilEpochYear(Epoch.J2000.year) shouldEqual 0.0
+      math.abs(Epoch.J2000.untilEpochYear(Epoch.J2000.year)) < 1e-9
     }
   }
 
