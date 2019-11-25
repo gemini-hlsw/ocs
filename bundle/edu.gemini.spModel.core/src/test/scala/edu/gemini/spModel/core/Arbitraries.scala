@@ -238,23 +238,3 @@ trait ArbTime {
 }
 
 object ArbTime extends ArbTime
-
-trait ArbEpoch {
-  import ArbTime._
-
-  implicit val arbEpoch: Arbitrary[Epoch] =
-    Arbitrary {
-      for {
-        ldt <- arbitrary[LocalDateTime]
-      } yield {
-        val jd: Double = JulianDate.ofLocalDateTime(ldt).dayNumber.toDouble
-        val epochYears: Double = Epoch.JulianYearBasis + jd - Epoch.JulianBasis
-        new Epoch(epochYears)
-      }
-    }
-
-  implicit val cogEpoch: Cogen[Epoch] =
-    Cogen[String].contramap(Epoch.fromString.reverseGet)
-}
-
-object ArbEpoch extends ArbEpoch
