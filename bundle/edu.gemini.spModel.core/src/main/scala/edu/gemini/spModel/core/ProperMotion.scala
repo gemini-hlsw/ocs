@@ -56,7 +56,6 @@ object ProperMotion {
   private type Vec3 = (Double, Double, Double)
 
   // Scalar multiplication and addition for Vec3.
-  // TODO: Does scalaz must provide monoids for addition and multiplication?
   private implicit class Vec3Ops(a: Vec3) {
     def *(d: Double): Vec3 =
       (a._1 * d, a._2 * d, a._3 * d)
