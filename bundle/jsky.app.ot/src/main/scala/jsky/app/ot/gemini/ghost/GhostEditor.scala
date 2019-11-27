@@ -4,7 +4,7 @@ import java.beans.PropertyDescriptor
 
 import javax.swing.{DefaultComboBoxModel, JPanel}
 import edu.gemini.pot.sp.ISPObsComponent
-import edu.gemini.shared.gui.bean.{RadioPropertyCtrl, TextFieldPropertyCtrl}
+import edu.gemini.shared.gui.bean.{CheckboxPropertyCtrl, RadioPropertyCtrl, TextFieldPropertyCtrl}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost}
 import edu.gemini.spModel.gemini.ghost.AsterismConverters._
@@ -107,7 +107,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     row += 1
 
     /**
-     * TARGET MODE
+     * Target mode
      */
     val targetModeLabel: Label = new Label("Target Mode:")
     targetModeLabel.horizontalAlignment = Alignment.Right
@@ -139,12 +139,51 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     }
     row += 1
 
+
+    val tabPane = new TabbedPane
+
     /**
      * The tabbed pane containing:
-     * 1. Up / side looking selection.
+     * 1. Target / guiding / binning information.
      */
-    val tabPane = new TabbedPane
-    val portCtrl = new RadioPropertyCtrl[Ghost, IssPort](Ghost.PORT_PROP, true)
+    object targetPane extends GridBagPanel {
+      var row = 0
+      /**
+       * Enable fiber agitator
+       */
+      val enableFiberAgitatorCtrl: CheckboxPropertyCtrl[Ghost] = new CheckboxPropertyCtrl[Ghost](Ghost.ENABLE_FIBER_AGITATOR_PROP)
+      layout(Component.wrap(enableFiberAgitatorCtrl.getComponent)) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 0
+        gridy = row
+        insets = new Insets(10, 10, 0, 20)
+      }
+      row += 1
+
+      layout(new Separator()) = new Constraints() {
+        anchor = Anchor.West
+        fill = Fill.Horizontal
+        gridx = 0
+        gridy = row
+        gridwidth = 2
+        insets = new Insets(10, 10, 0, 0)
+      }
+      row += 1
+
+      layout(new Label) = new Constraints() {
+        anchor = Anchor.West
+        gridx = 1
+        gridy = row
+        weightx = 1.0
+      }
+    }
+    tabPane.pages += new Page("Read Mode", targetPane)
+
+    /**
+     * The tabbed pane containing:
+     * 2. Up / side looking selection.
+     */
+    val portCtrl: RadioPropertyCtrl[Ghost, IssPort] = new RadioPropertyCtrl[Ghost, IssPort](Ghost.PORT_PROP, true)
     tabPane.pages += new Page("ISS Port", makeTabPane(Component.wrap(portCtrl.getComponent)))
 
     layout(tabPane) = new Constraints() {
@@ -158,7 +197,6 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       fill = Fill.Horizontal
       insets = new Insets(10, 0, 0, 0)
     }
-
 
     /**
      * Eats up the blank space at the bottom of the form.
@@ -174,11 +212,12 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     /**
      * A panel to house one component in a tab.
      */
-    private def makeTabPane(component: Component): Panel = {
+    private def makeTabPane(component: Component, addGlue: Boolean = true): Panel = {
       var panel = new BoxPanel(Orientation.Vertical)
       panel.border = ComponentEditor.TAB_PANEL_BORDER
       panel.contents += component
-      panel.contents += Swing.VGlue
+      if (addGlue)
+        panel.contents += Swing.VGlue
       panel
     }
 
@@ -286,6 +325,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
   override def handlePostDataObjectUpdate(dataObj: Ghost): Unit = Swing.onEDT {
     ui.posAngleCtrl.setBean(dataObj)
     ui.portCtrl.setBean(dataObj)
+    ui.targetPane.enableFiberAgitatorCtrl.setBean(dataObj)
     ui.initialize()
   }
 }

@@ -59,6 +59,8 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     Pio.addParam(factory, paramSet, InstConstants.POS_ANGLE_PROP, getPosAngleDegreesStr)
     Pio.addParam(factory, paramSet, Ghost.EXPOSURE_TIME_RED_PROP, getRedExposureTimeAsString)
     Pio.addParam(factory, paramSet, Ghost.EXPOSURE_TIME_BLUE_PROP, getBlueExposureTimeAsString)
+    Pio.addParam(factory, paramSet, Ghost.PORT_PROP, port.name())
+    Pio.addBooleanParam(factory, paramSet, Ghost.ENABLE_FIBER_AGITATOR_PROP.getName, enableFiberAgitator)
     paramSet
   }
 
@@ -67,6 +69,7 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     Option(Pio.getValue(paramSet, ISPDataObject.TITLE_PROP)).foreach(setTitle)
     Option(Pio.getValue(paramSet, Ghost.EXPOSURE_TIME_RED_PROP)).foreach(setExposureTimeAsString)
     Option(Pio.getValue(paramSet, InstConstants.POS_ANGLE_PROP)).map(_.toDouble).foreach(setPosAngleDegrees)
+    setEnableFiberAgitator(Pio.getBooleanValue(paramSet, Ghost.ENABLE_FIBER_AGITATOR_PROP.getName,true))
   }
 
   override def getSysConfig: ISysConfig = {
@@ -76,6 +79,7 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     sc.putParameter(DefaultParameter.getInstance(Ghost.PORT_PROP, getIssPort))
     sc.putParameter(DefaultParameter.getInstance(Ghost.EXPOSURE_TIME_RED_PROP, getRedExposureTime))
     sc.putParameter(DefaultParameter.getInstance(Ghost.EXPOSURE_TIME_BLUE_PROP, getBlueExposureTime))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.ENABLE_FIBER_AGITATOR_PROP.getName, isEnableFiberAgitator))
     sc
   }
 
@@ -166,6 +170,20 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
   override def getCoaddsAsString: String = {
     Ghost.LOG.severe(Ghost.GhostCoaddsErrorMessage)
     throw new UnsupportedOperationException(Ghost.GhostCoaddsErrorMessage)
+  }
+
+  /**
+   * Fiber agitator.
+   * Default is enabled.
+   */
+  private var enableFiberAgitator: Boolean = true
+  def isEnableFiberAgitator: Boolean = enableFiberAgitator
+  def setEnableFiberAgitator(newValue: Boolean): Unit = {
+    val oldValue = isEnableFiberAgitator
+    if (oldValue != newValue) {
+      enableFiberAgitator = newValue
+      firePropertyChange(Ghost.ENABLE_FIBER_AGITATOR_PROP, oldValue, newValue)
+    }
   }
 }
 
@@ -266,7 +284,8 @@ object Ghost {
   private val iter_no   = false
 
   val POS_ANGLE_PROP: PropertyDescriptor = initProp(InstConstants.POS_ANGLE_PROP, query = query_no, iter = iter_no)
-  val PORT_PROP: PropertyDescriptor = initProp(IssPortProvider.PORT_PROPERTY_NAME, query_no, iter_no)
+  val PORT_PROP: PropertyDescriptor = initProp(IssPortProvider.PORT_PROPERTY_NAME, query = query_no, iter = iter_no)
+  val ENABLE_FIBER_AGITATOR_PROP: PropertyDescriptor = initProp("enableFiberAgitator", query = query_no, iter = iter_no)
 
   // Use Java classes to be compatible with existing instruments.
   private val Properties: List[(String, PropertyDescriptor)] = List(
