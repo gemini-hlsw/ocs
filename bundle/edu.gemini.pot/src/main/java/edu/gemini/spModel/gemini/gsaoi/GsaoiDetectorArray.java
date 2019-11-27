@@ -40,8 +40,8 @@ public enum GsaoiDetectorArray {
     public static final double DETECTOR_GAP_ARCSEC  = DETECTOR_GAP_MM * SCALE;
 
     // Account for ODGW hotspot offset (in arcsec)
-    public static final double ODGW_HOTSPOT_OFFSET_P = -5.0;
-    public static final double ODGW_HOTSPOT_OFFSET_Q =  8.0;
+    public static final double ODGW_HOTSPOT_OFFSET_P = -5.0 - DETECTOR_GAP_ARCSEC / 2.0;
+    public static final double ODGW_HOTSPOT_OFFSET_Q =  8.0 + DETECTOR_GAP_ARCSEC / 2.0;
 
     private static final Rectangle2D TOP_LEFT_SHAPE;
     static {
