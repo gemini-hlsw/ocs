@@ -4,7 +4,7 @@ import java.beans.PropertyDescriptor
 
 import javax.swing.{DefaultComboBoxModel, JPanel}
 import edu.gemini.pot.sp.ISPObsComponent
-import edu.gemini.shared.gui.bean.TextFieldPropertyCtrl
+import edu.gemini.shared.gui.bean.{RadioPropertyCtrl, TextFieldPropertyCtrl}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost}
 import edu.gemini.spModel.gemini.ghost.AsterismConverters._
@@ -13,11 +13,13 @@ import edu.gemini.spModel.target.env.{AsterismType, ResolutionMode}
 import edu.gemini.spModel.target.env.AsterismType._
 import edu.gemini.spModel.target.env.ResolutionMode._
 import edu.gemini.spModel.target.obsComp.TargetObsComp
+import edu.gemini.spModel.telescope.IssPort
 import jsky.app.ot.gemini.editor.ComponentEditor
 
 import scala.collection.JavaConverters._
 import scala.swing._
 import scala.swing.GridBagPanel.{Anchor, Fill}
+import scala.swing.TabbedPane.Page
 import scala.swing.event.SelectionChanged
 
 
@@ -137,11 +139,47 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     }
     row += 1
 
+    /**
+     * The tabbed pane containing:
+     * 1. Up / side looking selection.
+     */
+    val tabPane = new TabbedPane
+    val portCtrl = new RadioPropertyCtrl[Ghost, IssPort](Ghost.PORT_PROP, true)
+    tabPane.pages += new Page("ISS Port", makeTabPane(Component.wrap(portCtrl.getComponent)))
+
+    layout(tabPane) = new Constraints() {
+      anchor = Anchor.NorthWest
+      gridx = 0
+      gridy = row
+      gridwidth = 4
+      gridheight = 1
+      weightx = 1.0
+      weighty = 0
+      fill = Fill.Horizontal
+      insets = new Insets(10, 0, 0, 0)
+    }
+
+
+    /**
+     * Eats up the blank space at the bottom of the form.
+     */
+
     layout(new Label) = new Constraints() {
       anchor = Anchor.North
       gridx = 0
       gridy = row
       weighty = 1.0
+    }
+
+    /**
+     * A panel to house one component in a tab.
+     */
+    private def makeTabPane(component: Component): Panel = {
+      var panel = new BoxPanel(Orientation.Vertical)
+      panel.border = ComponentEditor.TAB_PANEL_BORDER
+      panel.contents += component
+      panel.contents += Swing.VGlue
+      panel
     }
 
     /**
@@ -247,6 +285,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
 
   override def handlePostDataObjectUpdate(dataObj: Ghost): Unit = Swing.onEDT {
     ui.posAngleCtrl.setBean(dataObj)
+    ui.portCtrl.setBean(dataObj)
     ui.initialize()
   }
 }
