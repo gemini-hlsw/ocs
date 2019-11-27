@@ -4,7 +4,7 @@ import java.beans.PropertyDescriptor
 
 import javax.swing.{DefaultComboBoxModel, JPanel}
 import edu.gemini.pot.sp.ISPObsComponent
-import edu.gemini.shared.gui.bean.{CheckboxPropertyCtrl, RadioPropertyCtrl, TextFieldPropertyCtrl}
+import edu.gemini.shared.gui.bean.{CheckboxPropertyCtrl, ComboPropertyCtrl, RadioPropertyCtrl, TextFieldPropertyCtrl}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost}
 import edu.gemini.spModel.gemini.ghost.AsterismConverters._
@@ -170,14 +170,96 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       }
       row += 1
 
+      /**
+       * IFU1 information.
+       */
+      val ifu1TargetName: Label = new Label("IFU1 Target")
+      val ifu2TargetName: Label = new Label("IFU2 Target")
+
+      //val ifu1SpectralBinning: ComboPropertyCtrl[Ghost, G]
+      def createIFUPane(ifuNum: Int, ifuTargetName: Label): Panel = {
+        val panel = new GridBagPanel
+        var row = 0
+        val ifuLabel: Label = new Label(f"IFU$ifuNum:")
+        panel.layout(ifuLabel) = new panel.Constraints() {
+          anchor = Anchor.NorthEast
+          gridx = 0
+          gridy = row
+          insets = new Insets(3, 0, 0, 20)
+        }
+
+        /** Placeholder for name for target. **/
+        panel.layout(ifuTargetName) = new panel.Constraints() {
+          anchor = Anchor.NorthWest
+          gridx = 1
+          gridy = row
+          insets = new Insets(3, 0, 0, 20)
+        }
+        row += 1
+
+        /** Spectral binning. **/
+        val spectralBinningLabel: Label = new Label("Spectral Binning:")
+        panel.layout(spectralBinningLabel) = new panel.Constraints() {
+          anchor = Anchor.NorthEast
+          gridx = 0
+          gridy = row
+          insets = new Insets(3, 0, 0, 20)
+        }
+
+        /** Spatial binning. **/
+        val spatialBinningLabel: Label = new Label("Spatial Binning:")
+        panel.layout(spatialBinningLabel) = new panel.Constraints() {
+          anchor = Anchor.NorthEast
+          gridx = 2
+          gridy = row
+          insets = new Insets(3, 0, 0, 20)
+        }
+        row += 1
+
+        /** Separator. */
+        panel.layout(new Separator()) = new panel.Constraints() {
+          anchor = Anchor.West
+          fill = Fill.Horizontal
+          gridx = 0
+          gridy = row
+          gridwidth = 4
+          insets = new Insets(10, 10, 0, 0)
+        }
+        panel
+      }
+      row += 1
+
+      val ifu1Pane = createIFUPane(1, ifu1TargetName)
+      layout(ifu1Pane) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 0
+        gridy = row
+        gridwidth = 4
+        //gridheight = 3
+        insets = new Insets(0, 10, 0, 0)
+      }
+      row += 1
+
+      val ifu2Pane = createIFUPane(2, ifu2TargetName)
+      layout(ifu2Pane) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 0
+        gridy = row
+        gridwidth = 4
+        //gridheight = 3
+        insets = new Insets(0, 10, 0, 0)
+      }
+
+      /** Eat up the remaining horizontal space. **/
       layout(new Label) = new Constraints() {
         anchor = Anchor.West
-        gridx = 1
+        gridx = 2
         gridy = row
         weightx = 1.0
       }
     }
     tabPane.pages += new Page("Read Mode", targetPane)
+
 
     /**
      * The tabbed pane containing:

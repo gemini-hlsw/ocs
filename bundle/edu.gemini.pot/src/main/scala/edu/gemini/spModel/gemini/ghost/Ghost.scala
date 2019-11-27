@@ -173,7 +173,7 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
   }
 
   /**
-   * Fiber agitator.
+   * Fiber agitator
    * Default is enabled.
    */
   private var enableFiberAgitator: Boolean = true
@@ -286,6 +286,8 @@ object Ghost {
   val POS_ANGLE_PROP: PropertyDescriptor = initProp(InstConstants.POS_ANGLE_PROP, query = query_no, iter = iter_no)
   val PORT_PROP: PropertyDescriptor = initProp(IssPortProvider.PORT_PROPERTY_NAME, query = query_no, iter = iter_no)
   val ENABLE_FIBER_AGITATOR_PROP: PropertyDescriptor = initProp("enableFiberAgitator", query = query_no, iter = iter_no)
+  //val ENABLE_IFU1_OIWFS_GUIDE_STATE: PropertyDescriptor = initProp("enableIfu1OiwfsGuideState", query = query_no, iter = iter_no)
+  //val ENABLE_IFU2_OIWFS_GUIDE_STATE: PropertyDescriptor = initProp("enableIfu2OiwfsGuideState", query = query_no, iter = iter_no)
 
   // Use Java classes to be compatible with existing instruments.
   private val Properties: List[(String, PropertyDescriptor)] = List(
