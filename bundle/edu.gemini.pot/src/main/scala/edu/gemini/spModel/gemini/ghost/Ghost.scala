@@ -185,6 +185,14 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
       firePropertyChange(Ghost.ENABLE_FIBER_AGITATOR_PROP, oldValue, newValue)
     }
   }
+
+  /**
+   * Binnning.
+   */
+//  private var ifu1SpectralBinning = ???
+//  private var ifu1SpatialBinning = ???
+//  private var ifu2SpectralBinning = ???
+//  private var ifu2SpatialBinning = ???
 }
 
 object Ghost {
@@ -288,6 +296,10 @@ object Ghost {
   val ENABLE_FIBER_AGITATOR_PROP: PropertyDescriptor = initProp("enableFiberAgitator", query = query_no, iter = iter_no)
   //val ENABLE_IFU1_OIWFS_GUIDE_STATE: PropertyDescriptor = initProp("enableIfu1OiwfsGuideState", query = query_no, iter = iter_no)
   //val ENABLE_IFU2_OIWFS_GUIDE_STATE: PropertyDescriptor = initProp("enableIfu2OiwfsGuideState", query = query_no, iter = iter_no)
+  val IFU1_SPECTRAL_BINNING_PROP: PropertyDescriptor = initProp("ifu1SpectralBinning", query = query_yes, iter = iter_yes)
+  val IFU1_SPATIAL_BINNING_PROP: PropertyDescriptor = initProp("ifu1SpatialBinning", query = query_yes, iter = iter_yes)
+  val IFU2_SPECTRAL_BINNING_PROP: PropertyDescriptor = initProp("ifu2SpectralBinning", query = query_yes, iter = iter_yes)
+  val IFU2_SPATIAL_BINNING_PROP: PropertyDescriptor = initProp("ifu2SpatialBinning", query = query_yes, iter = iter_yes)
 
   // Use Java classes to be compatible with existing instruments.
   private val Properties: List[(String, PropertyDescriptor)] = List(
