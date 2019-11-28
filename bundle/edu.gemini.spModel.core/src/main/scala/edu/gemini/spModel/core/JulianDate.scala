@@ -30,12 +30,12 @@ sealed abstract case class JulianDate(dayNumber: Int,
    * @see http://tycho.usno.navy.mil/mjd.html
    */
   def toModifiedDouble: Double = {
-    val h = SecondsPerHalfDay.toLong * Billion.toLong
+    val h = SecondsPerHalfDay.toLong * Billion
     val d = dayNumber      - 2400000
     val n = nanoAdjustment - h
 
     val (dʹ,nʹ) = if (n >= MinAdjustment) (d, n)
-    else (d - 1, n + SecondsPerDay.toLong * Billion.toLong)
+    else (d - 1, n + SecondsPerDay.toLong * Billion)
 
     dʹ + nʹ.toDouble / NanoPerDay.toDouble
   }
@@ -51,10 +51,10 @@ object JulianDate {
     SecondsPerDay / 2
 
   val Billion: Long = 1000000000
-  val NanoPerDay: Long = SecondsPerDay.toLong * Billion.toLong
+  val NanoPerDay: Long = SecondsPerDay.toLong * Billion
 
-  val MinAdjustment: Long = -SecondsPerHalfDay.toLong * Billion.toLong
-  val MaxAdjustment: Long = SecondsPerHalfDay.toLong * Billion.toLong - 1
+  val MinAdjustment: Long = -SecondsPerHalfDay.toLong * Billion
+  val MaxAdjustment: Long = SecondsPerHalfDay.toLong * Billion - 1
 
   /** J2000 reference epoch as Julian Date. */
   val J2000: JulianDate = // JulianDate(2451545,0)

@@ -25,7 +25,6 @@ case class ProperMotion(
   def plusYears(t: Target, elapsedYears: Double): Coordinates = {
     val baseCoordinates = t.coords(None).getOrElse(Coordinates.zero)
 
-    // TODO: Is this calculated correctly?
     val properVelocity: Offset = Offset(OffsetP(Angle.fromDegrees(deltaRA.velocity.toDegreesPerYear)),
                                         OffsetQ(Angle.fromDegrees(deltaDec.velocity.toDegreesPerYear)))
 
@@ -123,9 +122,9 @@ object ProperMotion {
       if (rem < 0.0) rem + TwoPi else rem
     }
 
-    // TODO: What to do if Declination is None?
     Coordinates(RA.fromAngle(Angle.fromRadians(rapp)),
-                Declination.fromAngle(Angle.fromRadians(decp)).getOrElse(Declination.zero))
+                Declination.fromAngle(Angle.fromRadians(decp))
+                  .getOrElse(sys.error(s"Invalid declination: $decp radians")))
   }
 
   val zero = ProperMotion(RightAscensionAngularVelocity.Zero, DeclinationAngularVelocity.Zero, Epoch.J2000)
