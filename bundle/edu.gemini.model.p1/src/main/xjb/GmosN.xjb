@@ -162,7 +162,7 @@
         <!-- GmosNFpuNs => GmosNorthType.FPUnitNorth -->
         <jxb:bindings node="./xsd:simpleType[@name='GmosNFpuNs']/xsd:restriction">
             <jxb:bindings node="./xsd:enumeration[@value='0.25 arcsec slit']">
-                <jxb:typesafeEnumMember name="NS_O"/>
+                <jxb:typesafeEnumMember name="NS_0"/>
             </jxb:bindings>
             <jxb:bindings node="./xsd:enumeration[@value='0.5 arcsec slit']">
                 <jxb:typesafeEnumMember name="NS_1"/>
