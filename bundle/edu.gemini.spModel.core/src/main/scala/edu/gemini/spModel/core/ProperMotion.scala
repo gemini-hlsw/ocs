@@ -83,8 +83,8 @@ object ProperMotion {
                              parallax: Double,
                              elapsedYears: Double): Coordinates = {
     // We want the baseCoordinates in radians.
-    val (ra,  dec)  = (baseCoordinates.ra.toAngle.toRadians, baseCoordinates.dec.toAngle.toRadians)
-    val (dRa, dDec) = (properVelocity.p.toAngle.toRadians,   properVelocity.q.toAngle.toRadians)
+    val (ra,  dec)  = (baseCoordinates.ra.toAngle.toSignedDegrees.toRadians, baseCoordinates.dec.toAngle.toSignedDegrees.toRadians)
+    val (dRa, dDec) = (properVelocity.p.toAngle.toSignedDegrees.toRadians,   properVelocity.q.toAngle.toSignedDegrees.toRadians)
 
     val pos: Vec3 = {
       val cd = cos(dec)
