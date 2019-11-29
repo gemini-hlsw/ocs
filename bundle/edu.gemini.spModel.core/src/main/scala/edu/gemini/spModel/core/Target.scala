@@ -111,6 +111,13 @@ trait TargetLenses {
       PLens.nil.run
     ))
 
+  val parallax: Target @?> Option[Parallax] =
+    PLens(_.fold(
+      PLens.nil.run,
+      pRunTarget(SiderealTarget.parallax.partial),
+      PLens.nil.run
+    ))
+
 }
 
 /**

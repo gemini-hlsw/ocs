@@ -1,15 +1,16 @@
 package edu.gemini.spModel.core
 
+import java.time.{LocalDate, LocalDateTime, LocalTime, Year, ZoneId}
+
 import edu.gemini.spModel.core.WavelengthConversions._
 import org.scalacheck._
 import org.scalacheck.Gen._
 import org.scalacheck.Arbitrary._
-
 import squants.motion.VelocityConversions._
 import squants.radio.IrradianceConversions._
 import squants.radio.SpectralIrradianceConversions._
-
-import scalaz.{ ==>>, Order }
+import scala.collection.JavaConverters._
+import scalaz.{==>>, Order}
 import scalaz.std.anyVal._
 
 trait Arbitraries {
@@ -101,7 +102,7 @@ trait Arbitraries {
       } yield Magnitude(value, band, error, system)
     }
 
-  implicit val arbDistribution = Arbitrary[SpectralDistribution] {
+  implicit val arbDistribution: Arbitrary[SpectralDistribution] = Arbitrary[SpectralDistribution] {
     Gen.oneOf(
       BlackBody(8000),
       BlackBody(10000),
@@ -115,7 +116,7 @@ trait Arbitraries {
       LibraryNonStar.GammaDra
     )
   }
-  implicit val arbProfile = Arbitrary[SpatialProfile] {
+  implicit val arbProfile: Arbitrary[SpatialProfile] = Arbitrary[SpatialProfile] {
     Gen.oneOf(
       PointSource,
       UniformSource,
@@ -192,3 +193,62 @@ trait Arbitraries {
       case _       => sys.error("generated empty list!?")
     })
 }
+
+// Arbitrary but reasonable dates and times.
+trait ArbTime {
+
+  implicit val arbZoneId: Arbitrary[ZoneId] =
+    Arbitrary {
+      oneOf(ZoneId.getAvailableZoneIds.asScala.toSeq).map(ZoneId.of)
+    }
+
+  implicit val arbYear: Arbitrary[Year] =
+    Arbitrary {
+      choose(2000, 2020).map(Year.of)
+    }
+
+  implicit val arbLocalDate: Arbitrary[LocalDate] =
+    Arbitrary {
+      for {
+        y <- arbitrary[Year]
+        d <- choose(1, y.length)
+      } yield LocalDate.ofYearDay(y.getValue, d)
+    }
+
+  implicit val arbLocalTime: Arbitrary[LocalTime] =
+    Arbitrary {
+      for {
+        h <- choose(0, 23)
+        m <- choose(0, 59)
+        s <- choose(0, 59)
+        n <- choose(0, 999999999)
+      } yield LocalTime.of(h, m, s, n)
+    }
+
+  implicit val arbLocalDateTime: Arbitrary[LocalDateTime] =
+    Arbitrary {
+      for {
+        d <- arbitrary[LocalDate]
+        t <- arbitrary[LocalTime]
+      } yield LocalDateTime.of(d, t)
+    }
+
+  implicit val cogLocalDate: Cogen[LocalDate] =
+    Cogen[(Int, Int)].contramap(d => (d.getYear, d.getDayOfYear))
+}
+
+object ArbTime extends ArbTime
+
+trait ArbJulianDate {
+  import ArbTime._
+
+  implicit val arbJulianDate: Arbitrary[JulianDate] =
+    Arbitrary {
+      arbitrary[LocalDateTime].map(JulianDate.ofLocalDateTime)
+    }
+
+  implicit val cogJulianDate: Cogen[JulianDate] =
+    Cogen[(Int, Long)].contramap(jd => (jd.dayNumber, jd.nanoAdjustment))
+}
+
+object ArbJulianDate extends ArbJulianDate
