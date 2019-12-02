@@ -29,9 +29,6 @@ import scala.util.{Failure, Success, Try}
   * Note that we do not override clone since private variables are immutable.
   */
 final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvider with GhostMixin with IssPortProvider {
-  private var redExposureTime: Double = Ghost.DEF_EXPOSURE_TIME_RED
-  private var blueExposureTime: Double = Ghost.DEF_EXPOSURE_TIME_BLUE
-
   override def getSite: JSet[Site] = {
     Site.SET_GS
   }
@@ -61,6 +58,12 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     Pio.addParam(factory, paramSet, Ghost.EXPOSURE_TIME_BLUE_PROP, getBlueExposureTimeAsString)
     Pio.addParam(factory, paramSet, Ghost.PORT_PROP, port.name())
     Pio.addBooleanParam(factory, paramSet, Ghost.ENABLE_FIBER_AGITATOR_PROP.getName, enableFiberAgitator)
+    Pio.addDoubleParam(factory, paramSet, Ghost.RED_EXPOSURE_TIME_PROP.getName, getRedExposureTime)
+    Pio.addParam(factory, paramSet, Ghost.RED_SPECTRAL_BINNING_PROP, redSpectralBinning.name)
+    Pio.addParam(factory, paramSet, Ghost.RED_SPECTRAL_BINNING_PROP, redSpatialBinning.name)
+    Pio.addDoubleParam(factory, paramSet, Ghost.BLUE_EXPOSURE_TIME_PROP.getName, getBlueExposureTime)
+    Pio.addParam(factory, paramSet, Ghost.BLUE_SPECTRAL_BINNING_PROP, blueSpectralBinning.name)
+    Pio.addParam(factory, paramSet, Ghost.BLUE_SPECTRAL_BINNING_PROP, blueSpatialBinning.name)
     paramSet
   }
 
@@ -70,6 +73,12 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     Option(Pio.getValue(paramSet, Ghost.EXPOSURE_TIME_RED_PROP)).foreach(setExposureTimeAsString)
     Option(Pio.getValue(paramSet, InstConstants.POS_ANGLE_PROP)).map(_.toDouble).foreach(setPosAngleDegrees)
     setEnableFiberAgitator(Pio.getBooleanValue(paramSet, Ghost.ENABLE_FIBER_AGITATOR_PROP.getName,true))
+    setRedExposureTime(Pio.getDoubleValue(paramSet, Ghost.RED_EXPOSURE_TIME_PROP.getName, InstConstants.DEF_EXPOSURE_TIME))
+    Option(Pio.getValue(paramSet, Ghost.RED_SPECTRAL_BINNING_PROP)).map(GhostSpectralBinning.valueOf).foreach(setRedSpectralBinning)
+    Option(Pio.getValue(paramSet, Ghost.RED_SPATIAL_BINNING_PROP)).map(GhostSpatialBinning.valueOf).foreach(setRedSpatialBinning)
+    setBlueExposureTime(Pio.getDoubleValue(paramSet, Ghost.BLUE_EXPOSURE_TIME_PROP.getName, InstConstants.DEF_EXPOSURE_TIME))
+    Option(Pio.getValue(paramSet, Ghost.BLUE_SPECTRAL_BINNING_PROP)).map(GhostSpectralBinning.valueOf).foreach(setBlueSpectralBinning)
+    Option(Pio.getValue(paramSet, Ghost.BLUE_SPATIAL_BINNING_PROP)).map(GhostSpatialBinning.valueOf).foreach(setBlueSpatialBinning)
   }
 
   override def getSysConfig: ISysConfig = {
@@ -80,6 +89,12 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     sc.putParameter(DefaultParameter.getInstance(Ghost.EXPOSURE_TIME_RED_PROP, getRedExposureTime))
     sc.putParameter(DefaultParameter.getInstance(Ghost.EXPOSURE_TIME_BLUE_PROP, getBlueExposureTime))
     sc.putParameter(DefaultParameter.getInstance(Ghost.ENABLE_FIBER_AGITATOR_PROP.getName, isEnableFiberAgitator))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.RED_EXPOSURE_TIME_PROP.getName, getRedExposureTime))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.RED_SPECTRAL_BINNING_PROP.getName, getRedSpectralBinning))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.RED_SPATIAL_BINNING_PROP.getName, getRedSpatialBinning))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.BLUE_EXPOSURE_TIME_PROP.getName, getBlueExposureTime))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.BLUE_SPECTRAL_BINNING_PROP.getName, getBlueSpectralBinning))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.BLUE_SPATIAL_BINNING_PROP.getName, getBlueSpatialBinning))
     sc
   }
 
@@ -95,34 +110,6 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
       firePropertyChange(Ghost.PORT_PROP, oldValue, newValue)
     }
   }
-
-  def getRedExposureTime: Double = redExposureTime
-  def getRedExposureTimeAsString: String = redExposureTime.toString
-  def getBlueExposureTime: Double = blueExposureTime
-  def getBlueExposureTimeAsString: String = blueExposureTime.toString
-
-  def setRedExposureTime(newValue: Double): Unit = {
-    val oldValue = getRedExposureTime
-    if (oldValue != newValue) {
-      redExposureTime = newValue
-      firePropertyChange(Ghost.EXPOSURE_TIME_RED_PROP, oldValue, newValue)
-    }
-  }
-
-  def setRedExposureTimeAsString(newValue: String): Unit =
-    setRedExposureTime(newValue.toDouble)
-
-  def setBlueExposureTime(newValue: Double): Unit = {
-    val oldValue = getBlueExposureTime
-    if (oldValue != newValue) {
-      blueExposureTime = newValue
-      firePropertyChange(Ghost.EXPOSURE_TIME_BLUE_PROP, oldValue, newValue)
-    }
-  }
-
-  def setBlueExposureTimeAsString(newValue: String): Unit =
-    setBlueExposureTime(newValue.toDouble)
-
   /**
    * Unsupported operations: GHOST has two exposure times, red and blue, and not a single exposure time like other
    * instruments do.
@@ -173,8 +160,7 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
   }
 
   /**
-   * Fiber agitator
-   * Default is enabled.
+   * Fiber agitator Default is enabled.
    */
   private var enableFiberAgitator: Boolean = true
   def isEnableFiberAgitator: Boolean = enableFiberAgitator
@@ -187,12 +173,79 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
   }
 
   /**
-   * Binnning.
+   * Detectors.
    */
-//  private var ifu1SpectralBinning = ???
-//  private var ifu1SpatialBinning = ???
-//  private var ifu2SpectralBinning = ???
-//  private var ifu2SpatialBinning = ???
+  private var redExposureTime: Double = InstConstants.DEF_EXPOSURE_TIME
+  def getRedExposureTime: Double = redExposureTime
+  def setRedExposureTime(newValue: Double): Unit = {
+    val oldValue = getRedExposureTime
+    if (oldValue != newValue) {
+      redExposureTime = newValue
+      firePropertyChange(Ghost.RED_EXPOSURE_TIME_PROP, oldValue, newValue)
+    }
+  }
+
+  def getRedExposureTimeAsString(): String =
+    getRedExposureTime.toString
+
+  def setRedExposureTimeAsString(newValue: String): Unit =
+    setRedExposureTime(newValue.toDouble)
+
+  private var redSpectralBinning: GhostSpectralBinning = GhostSpectralBinning.DEFAULT
+  def getRedSpectralBinning: GhostSpectralBinning = redSpectralBinning
+  def setRedSpectralBinning(newValue: GhostSpectralBinning): Unit = {
+    val oldValue = getRedSpectralBinning
+    if (oldValue != newValue) {
+      redSpectralBinning = newValue
+      firePropertyChange(Ghost.RED_SPECTRAL_BINNING_PROP, oldValue, newValue)
+    }
+  }
+  
+  private var redSpatialBinning: GhostSpatialBinning = GhostSpatialBinning.DEFAULT
+  def getRedSpatialBinning: GhostSpatialBinning = redSpatialBinning
+  def setRedSpatialBinning(newValue: GhostSpatialBinning): Unit = {
+    val oldValue = getRedSpatialBinning
+    if (oldValue != newValue) {
+      redSpatialBinning = newValue
+      firePropertyChange(Ghost.RED_SPATIAL_BINNING_PROP, oldValue, newValue)
+    }
+  }
+
+  private var blueExposureTime: Double = InstConstants.DEF_EXPOSURE_TIME
+  def getBlueExposureTime: Double = blueExposureTime
+  def setBlueExposureTime(newValue: Double): Unit = {
+    val oldValue = getBlueExposureTime
+    if (oldValue != newValue) {
+      blueExposureTime = newValue
+      firePropertyChange(Ghost.BLUE_EXPOSURE_TIME_PROP, oldValue, newValue)
+    }
+  }
+
+  def getBlueExposureTimeAsString(): String =
+    getBlueExposureTime.toString
+
+  def setBlueExposureTimeAsString(newValue: String): Unit =
+    setBlueExposureTime(newValue.toDouble)
+
+  private var blueSpectralBinning: GhostSpectralBinning = GhostSpectralBinning.DEFAULT
+  def getBlueSpectralBinning: GhostSpectralBinning = blueSpectralBinning
+  def setBlueSpectralBinning(newValue: GhostSpectralBinning): Unit = {
+    val oldValue = getBlueSpectralBinning
+    if (oldValue != newValue) {
+      blueSpectralBinning = newValue
+      firePropertyChange(Ghost.BLUE_SPECTRAL_BINNING_PROP, oldValue, newValue)
+    }
+  }
+
+  private var blueSpatialBinning: GhostSpatialBinning = GhostSpatialBinning.DEFAULT
+  def getBlueSpatialBinning: GhostSpatialBinning = blueSpatialBinning
+  def setBlueSpatialBinning(newValue: GhostSpatialBinning): Unit = {
+    val oldValue = getBlueSpatialBinning
+    if (oldValue != newValue) {
+      blueSpatialBinning = newValue
+      firePropertyChange(Ghost.BLUE_SPATIAL_BINNING_PROP, oldValue, newValue)
+    }
+  }
 }
 
 object Ghost {
@@ -294,17 +347,28 @@ object Ghost {
   val POS_ANGLE_PROP: PropertyDescriptor = initProp(InstConstants.POS_ANGLE_PROP, query = query_no, iter = iter_no)
   val PORT_PROP: PropertyDescriptor = initProp(IssPortProvider.PORT_PROPERTY_NAME, query = query_no, iter = iter_no)
   val ENABLE_FIBER_AGITATOR_PROP: PropertyDescriptor = initProp("enableFiberAgitator", query = query_no, iter = iter_no)
-  //val ENABLE_IFU1_OIWFS_GUIDE_STATE: PropertyDescriptor = initProp("enableIfu1OiwfsGuideState", query = query_no, iter = iter_no)
-  //val ENABLE_IFU2_OIWFS_GUIDE_STATE: PropertyDescriptor = initProp("enableIfu2OiwfsGuideState", query = query_no, iter = iter_no)
-  val IFU1_SPECTRAL_BINNING_PROP: PropertyDescriptor = initProp("ifu1SpectralBinning", query = query_yes, iter = iter_yes)
-  val IFU1_SPATIAL_BINNING_PROP: PropertyDescriptor = initProp("ifu1SpatialBinning", query = query_yes, iter = iter_yes)
-  val IFU2_SPECTRAL_BINNING_PROP: PropertyDescriptor = initProp("ifu2SpectralBinning", query = query_yes, iter = iter_yes)
-  val IFU2_SPATIAL_BINNING_PROP: PropertyDescriptor = initProp("ifu2SpatialBinning", query = query_yes, iter = iter_yes)
+  val ENABLE_IFU1_OIWFS_GUIDE_STAR: PropertyDescriptor = initProp("enableIfu1OiwfsGuideStar", query = query_no, iter = iter_no)
+  val ENABLE_IFU2_OIWFS_GUIDE_STAR: PropertyDescriptor = initProp("enableIfu2OiwfsGuideStar", query = query_no, iter = iter_no)
+  val RED_EXPOSURE_TIME_PROP: PropertyDescriptor = initProp("redExposureTime", query = query_no, iter = iter_no)
+  val RED_SPECTRAL_BINNING_PROP: PropertyDescriptor = initProp("redSpectralBinning", query = query_yes, iter = iter_yes)
+  val RED_SPATIAL_BINNING_PROP: PropertyDescriptor = initProp("redSpatialBinning", query = query_yes, iter = iter_yes)
+  val BLUE_EXPOSURE_TIME_PROP: PropertyDescriptor = initProp("blueExposureTime", query = query_no, iter = iter_no)
+  val BLUE_SPECTRAL_BINNING_PROP: PropertyDescriptor = initProp("redSpectralBinning", query = query_yes, iter = iter_yes)
+  val BLUE_SPATIAL_BINNING_PROP: PropertyDescriptor = initProp("redSpatialBinning", query = query_yes, iter = iter_yes)
 
-  // Use Java classes to be compatible with existing instruments.
   private val Properties: List[(String, PropertyDescriptor)] = List(
-    POS_ANGLE_PROP.getName -> POS_ANGLE_PROP
-  )
+    POS_ANGLE_PROP,
+    PORT_PROP,
+    ENABLE_FIBER_AGITATOR_PROP,
+    ENABLE_IFU1_OIWFS_GUIDE_STAR,
+    ENABLE_IFU2_OIWFS_GUIDE_STAR,
+    RED_EXPOSURE_TIME_PROP,
+    RED_SPATIAL_BINNING_PROP,
+    RED_SPATIAL_BINNING_PROP,
+    BLUE_EXPOSURE_TIME_PROP,
+    BLUE_SPECTRAL_BINNING_PROP,
+    BLUE_SPATIAL_BINNING_PROP
+  ).map(p => (p.getName, p))
 
   private[ghost] val PropertyMap: JMap[String, PropertyDescriptor] = {
     Collections.unmodifiableMap(TreeMap(Properties: _*).asJava)

@@ -107,7 +107,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     row += 1
 
     /**
-     * Target mode
+     * Target mode.
      */
     val targetModeLabel: Label = new Label("Target Mode:")
     targetModeLabel.horizontalAlignment = Alignment.Right
@@ -138,6 +138,21 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       insets = new Insets(10, 0, 0, 20)
     }
     row += 1
+
+
+    /**
+     * Detectors.
+     */
+    val redExposureTimeLabel = new Label("Red Exposure Time:")
+    redExposureTimeLabel.horizontalAlignment = Alignment.Right
+    layout(redExposureTimeLabel) = new Constraints() {
+      anchor = Anchor.East
+      gridx = 0
+      gridy = row
+      insets = new Insets(12, 10, 0, 20)
+    }
+
+    val redExposureTimeText = new TextField()
 
 
     val tabPane = new TabbedPane
