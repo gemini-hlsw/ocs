@@ -1,12 +1,11 @@
 package jsky.app.ot.gemini.ghost
 
-import java.beans.PropertyDescriptor
-
+import com.jgoodies.forms.factories.DefaultComponentFactory
 import javax.swing.{DefaultComboBoxModel, JPanel}
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.shared.gui.bean.{CheckboxPropertyCtrl, ComboPropertyCtrl, RadioPropertyCtrl, TextFieldPropertyCtrl}
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost}
+import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost, GhostSpectralBinning}
 import edu.gemini.spModel.gemini.ghost.AsterismConverters._
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.target.env.{AsterismType, ResolutionMode}
@@ -29,29 +28,29 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     private var row = 0
     border = ComponentEditor.PANEL_BORDER
 
-    /** Position angle components. */
-    val posAngleProp: PropertyDescriptor = Ghost.POS_ANGLE_PROP
-    val posAngleLabel: Label = new Label(posAngleProp.getDisplayName)
+    /**
+     * Position angle components.
+     **/
+    val posAngleLabel: Label = new Label(Ghost.POS_ANGLE_PROP.getDisplayName)
     posAngleLabel.horizontalAlignment = Alignment.Right
-    val posAngleUnits: Label = new Label("deg E of N")
-    posAngleUnits.horizontalAlignment = Alignment.Left
-    val posAngleCtrl: TextFieldPropertyCtrl[Ghost, java.lang.Double] = TextFieldPropertyCtrl.createDoubleInstance(posAngleProp, 1)
-    posAngleCtrl.setColumns(10)
-
-
-    val tfComp: Component = Component.wrap(posAngleCtrl.getTextField)
     layout(posAngleLabel) = new Constraints() {
       anchor = Anchor.NorthEast
       gridx = 0
       gridy = row
       insets = new Insets(3, 10, 0, 20)
     }
-    layout(tfComp) = new Constraints() {
+
+    val posAngleCtrl: TextFieldPropertyCtrl[Ghost, java.lang.Double] = TextFieldPropertyCtrl.createDoubleInstance(Ghost.POS_ANGLE_PROP, 1)
+    posAngleCtrl.setColumns(10)
+    layout(Component.wrap(posAngleCtrl.getTextField)) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 1
       gridy = row
       insets = new Insets(0, 0, 0, 20)
     }
+
+    val posAngleUnits: Label = new Label("deg E of N")
+    posAngleUnits.horizontalAlignment = Alignment.Left
     layout(posAngleUnits) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 2
@@ -77,7 +76,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     row += 1
 
     /**
-     * RESOLUTION MODE
+     * Resolution Mode.
      */
     val resolutionModeLabel: Label = new Label("Resolution Mode:")
     resolutionModeLabel.horizontalAlignment = Alignment.Right
@@ -143,18 +142,160 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     /**
      * Detectors.
      */
-    val redExposureTimeLabel = new Label("Red Exposure Time:")
-    redExposureTimeLabel.horizontalAlignment = Alignment.Right
-    layout(redExposureTimeLabel) = new Constraints() {
-      anchor = Anchor.East
-      gridx = 0
-      gridy = row
-      insets = new Insets(12, 10, 0, 20)
+    object detectorUI extends GridBagPanel {
+      row = 0
+      layout(Component.wrap(DefaultComponentFactory.getInstance.createSeparator("Detectors"))) = new Constraints() {
+        gridx = 0
+        gridy = row
+        gridwidth = 7
+        anchor = Anchor.West
+        fill = Fill.Horizontal
+        insets = new Insets(10, 0, 0, 0)
+      }
+      row += 1
+
+      /** Red detector.  */
+      val redExpTimeLabel = new Label("Red Exposure Time:")
+      redExpTimeLabel.horizontalAlignment = Alignment.Right
+      layout(redExpTimeLabel) = new Constraints() {
+        anchor = Anchor.East
+        gridx = 0
+        gridy = row
+        insets = new Insets(3, 10, 0, 20)
+      }
+
+      val redExpTimeCtrl: TextFieldPropertyCtrl[Ghost, java.lang.Double] = TextFieldPropertyCtrl.createDoubleInstance(Ghost.RED_EXPOSURE_TIME_PROP, 1)
+      redExpTimeCtrl.setColumns(10)
+      layout(Component.wrap(redExpTimeCtrl.getTextField)) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 1
+        gridy = row
+        insets = new Insets(0, 0, 0, 20)
+      }
+
+      val redExpTimeUnits = new Label("s")
+      redExpTimeUnits.horizontalAlignment = Alignment.Left
+      layout(redExpTimeUnits) = new Constraints() {
+        anchor = Anchor.West
+        gridx = 2
+        gridy = row
+        insets = new Insets(3, 0, 0, 20)
+      }
+
+      val redSpectralBinningLabel = new Label("Spectral Binning:")
+      redSpectralBinningLabel.horizontalAlignment = Alignment.Right
+      layout(redSpectralBinningLabel) = new Constraints() {
+        anchor = Anchor.East
+        gridx = 3
+        gridy = row
+        insets = new Insets(3, 10, 0, 20)
+      }
+
+      val redSpectralBinning = ComboPropertyCtrl.enumInstance(Ghost.RED_SPECTRAL_BINNING_PROP)
+      layout(Component.wrap(redSpectralBinning.getComponent)) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 4
+        gridy = row
+        fill = Fill.Horizontal
+        insets = new Insets(0, 0, 0, 20)
+      }
+
+      val redSpatialBinningLabel = new Label("Spatial Binning:")
+      redSpatialBinningLabel.horizontalAlignment = Alignment.Right
+      layout(redSpatialBinningLabel) = new Constraints() {
+        anchor = Anchor.East
+        gridx = 5
+        gridy = row
+        insets = new Insets(3, 10, 0, 20)
+      }
+
+      val redSpatialBinning = ComboPropertyCtrl.enumInstance(Ghost.RED_SPATIAL_BINNING_PROP)
+      layout(Component.wrap(redSpatialBinning.getComponent)) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 6
+        gridy = row
+        fill = Fill.Horizontal
+        insets = new Insets(0, 0, 0, 20)
+      }
+      row += 1
+
+      /** Blue detector. */
+      val blueExpTimeLabel = new Label("Blue Exposure Time:")
+      blueExpTimeLabel.horizontalAlignment = Alignment.Right
+      layout(blueExpTimeLabel) = new Constraints() {
+        anchor = Anchor.East
+        gridx = 0
+        gridy = row
+        insets = new Insets(3, 10, 0, 20)
+      }
+      val blueExpTimeCtrl: TextFieldPropertyCtrl[Ghost, java.lang.Double] = TextFieldPropertyCtrl.createDoubleInstance(Ghost.BLUE_EXPOSURE_TIME_PROP, 1)
+      blueExpTimeCtrl.setColumns(10)
+      layout(Component.wrap(blueExpTimeCtrl.getTextField)) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 1
+        gridy = row
+        insets = new Insets(10, 0, 0, 20)
+      }
+      val blueExpTimeUnits = new Label("s")
+      blueExpTimeUnits.horizontalAlignment = Alignment.Left
+      layout(blueExpTimeUnits) = new Constraints() {
+        anchor = Anchor.West
+        gridx = 2
+        gridy = row
+        insets = new Insets(3, 0, 0, 20)
+      }
+
+      val blueSpectralBinningLabel = new Label("Spectral Binning:")
+      blueSpectralBinningLabel.horizontalAlignment = Alignment.Right
+      layout(blueSpectralBinningLabel) = new Constraints() {
+        anchor = Anchor.East
+        gridx = 3
+        gridy = row
+        insets = new Insets(12, 10, 0, 20)
+      }
+
+      val blueSpectralBinning = ComboPropertyCtrl.enumInstance(Ghost.BLUE_SPECTRAL_BINNING_PROP)
+      layout(Component.wrap(blueSpectralBinning.getComponent)) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 4
+        gridy = row
+        fill = Fill.Horizontal
+        insets = new Insets(10, 0, 0, 20)
+      }
+
+      val blueSpatialBinningLabel = new Label("Spatial Binning:")
+      blueSpatialBinningLabel.horizontalAlignment = Alignment.Right
+      layout(blueSpatialBinningLabel) = new Constraints() {
+        anchor = Anchor.East
+        gridx = 5
+        gridy = row
+        insets = new Insets(12, 10, 0, 20)
+      }
+
+      val blueSpatialBinning = ComboPropertyCtrl.enumInstance(Ghost.BLUE_SPATIAL_BINNING_PROP)
+      layout(Component.wrap(blueSpatialBinning.getComponent)) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 6
+        gridy = row
+        fill = Fill.Horizontal
+        insets = new Insets(10, 0, 0, 20)
+      }
+      row += 1
     }
 
-    val redExposureTimeText = new TextField()
 
+    /** Eat all vertical space */
+    layout(detectorUI) = new Constraints() {
+      anchor = Anchor.NorthWest
+      gridx = 0
+      gridy = 7
+      insets = new Insets(10, 0, 0, 20)
+    }
+    row +=1
 
+    /**
+     * TABS.
+     */
     val tabPane = new TabbedPane
 
     /**
@@ -207,25 +348,6 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         panel.layout(ifuTargetName) = new panel.Constraints() {
           anchor = Anchor.NorthWest
           gridx = 1
-          gridy = row
-          insets = new Insets(3, 0, 0, 20)
-        }
-        row += 1
-
-        /** Spectral binning. **/
-        val spectralBinningLabel: Label = new Label("Spectral Binning:")
-        panel.layout(spectralBinningLabel) = new panel.Constraints() {
-          anchor = Anchor.NorthEast
-          gridx = 0
-          gridy = row
-          insets = new Insets(3, 0, 0, 20)
-        }
-
-        /** Spatial binning. **/
-        val spatialBinningLabel: Label = new Label("Spatial Binning:")
-        panel.layout(spatialBinningLabel) = new panel.Constraints() {
-          anchor = Anchor.NorthEast
-          gridx = 2
           gridy = row
           insets = new Insets(3, 0, 0, 20)
         }
