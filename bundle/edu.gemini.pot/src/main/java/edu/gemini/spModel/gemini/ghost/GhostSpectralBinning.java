@@ -49,4 +49,21 @@ public enum GhostSpectralBinning implements DisplayableSpType, LoggableSpType, S
     public static GhostSpectralBinning getBinning(String name, GhostSpectralBinning nvalue) {
         return SpTypeUtil.oldValueOf(GhostSpectralBinning.class, name, nvalue);
     }
+
+    public static GhostSpectralBinning getBinning(String name) {
+        return getBinning(name, GhostSpectralBinning.DEFAULT);
+    }
+
+    public static GhostSpectralBinning getBinningByValue(int value) {
+        for (final GhostSpectralBinning constant: GhostSpectralBinning.class.getEnumConstants()) {
+            if (constant.getValue() == value)
+                return constant;
+        }
+        return DEFAULT;
+    }
+
+    @Override
+    public String toString() {
+        return displayValue();
+    }
 }

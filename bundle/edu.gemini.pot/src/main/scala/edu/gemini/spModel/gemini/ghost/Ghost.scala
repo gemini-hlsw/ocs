@@ -60,10 +60,10 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     Pio.addBooleanParam(factory, paramSet, Ghost.ENABLE_FIBER_AGITATOR_PROP.getName, enableFiberAgitator)
     Pio.addDoubleParam(factory, paramSet, Ghost.RED_EXPOSURE_TIME_PROP.getName, getRedExposureTime)
     Pio.addParam(factory, paramSet, Ghost.RED_SPECTRAL_BINNING_PROP, redSpectralBinning.name)
-    Pio.addParam(factory, paramSet, Ghost.RED_SPECTRAL_BINNING_PROP, redSpatialBinning.name)
-    Pio.addDoubleParam(factory, paramSet, Ghost.BLUE_EXPOSURE_TIME_PROP.getName, getBlueExposureTime)
+    Pio.addParam(factory, paramSet, Ghost.RED_SPATIAL_BINNING_PROP, redSpatialBinning.name)
+    Pio.addDoubleParam(factory, paramSet, Ghost.BLUE_EXPOSURE_TIME_PROP.getName, blueExposureTime)
     Pio.addParam(factory, paramSet, Ghost.BLUE_SPECTRAL_BINNING_PROP, blueSpectralBinning.name)
-    Pio.addParam(factory, paramSet, Ghost.BLUE_SPECTRAL_BINNING_PROP, blueSpatialBinning.name)
+    Pio.addParam(factory, paramSet, Ghost.BLUE_SPATIAL_BINNING_PROP, blueSpatialBinning.name)
     paramSet
   }
 
@@ -124,12 +124,12 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     throw new UnsupportedOperationException(Ghost.GhostExposureTimeErrorMessage)
   }
 
-  override def getTotalExposureTime(): Double = {
+  override def getTotalExposureTime: Double = {
     Ghost.LOG.severe(Ghost.GhostExposureTimeErrorMessage)
     throw new UnsupportedOperationException(Ghost.GhostExposureTimeErrorMessage)
   }
 
-  override def getTotalExposureTimeAsString(): String = {
+  override def getTotalExposureTimeAsString: String = {
     Ghost.LOG.severe(Ghost.GhostExposureTimeErrorMessage)
     throw new UnsupportedOperationException(Ghost.GhostExposureTimeErrorMessage)
   }
@@ -185,7 +185,7 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     }
   }
 
-  def getRedExposureTimeAsString(): String =
+  def getRedExposureTimeAsString: String =
     getRedExposureTime.toString
 
   def setRedExposureTimeAsString(newValue: String): Unit =
@@ -221,7 +221,7 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     }
   }
 
-  def getBlueExposureTimeAsString(): String =
+  def getBlueExposureTimeAsString: String =
     getBlueExposureTime.toString
 
   def setBlueExposureTimeAsString(newValue: String): Unit =
@@ -353,8 +353,8 @@ object Ghost {
   val RED_SPECTRAL_BINNING_PROP: PropertyDescriptor = initProp("redSpectralBinning", query = query_yes, iter = iter_yes)
   val RED_SPATIAL_BINNING_PROP: PropertyDescriptor = initProp("redSpatialBinning", query = query_yes, iter = iter_yes)
   val BLUE_EXPOSURE_TIME_PROP: PropertyDescriptor = initProp("blueExposureTime", query = query_no, iter = iter_no)
-  val BLUE_SPECTRAL_BINNING_PROP: PropertyDescriptor = initProp("redSpectralBinning", query = query_yes, iter = iter_yes)
-  val BLUE_SPATIAL_BINNING_PROP: PropertyDescriptor = initProp("redSpatialBinning", query = query_yes, iter = iter_yes)
+  val BLUE_SPECTRAL_BINNING_PROP: PropertyDescriptor = initProp("blueSpectralBinning", query = query_yes, iter = iter_yes)
+  val BLUE_SPATIAL_BINNING_PROP: PropertyDescriptor = initProp("blueSpatialBinning", query = query_yes, iter = iter_yes)
 
   private val Properties: List[(String, PropertyDescriptor)] = List(
     POS_ANGLE_PROP,
@@ -363,7 +363,7 @@ object Ghost {
     //ENABLE_IFU1_OIWFS_GUIDE_STAR,
     //ENABLE_IFU2_OIWFS_GUIDE_STAR,
     RED_EXPOSURE_TIME_PROP,
-    RED_SPATIAL_BINNING_PROP,
+    RED_SPECTRAL_BINNING_PROP,
     RED_SPATIAL_BINNING_PROP,
     BLUE_EXPOSURE_TIME_PROP,
     BLUE_SPECTRAL_BINNING_PROP,

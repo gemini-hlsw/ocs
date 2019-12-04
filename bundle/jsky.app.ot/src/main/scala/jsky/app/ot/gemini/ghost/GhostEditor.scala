@@ -5,7 +5,7 @@ import javax.swing.{DefaultComboBoxModel, JPanel}
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.shared.gui.bean.{CheckboxPropertyCtrl, ComboPropertyCtrl, RadioPropertyCtrl, TextFieldPropertyCtrl}
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost, GhostSpectralBinning}
+import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost, GhostSpatialBinning, GhostSpectralBinning}
 import edu.gemini.spModel.gemini.ghost.AsterismConverters._
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.target.env.{AsterismType, ResolutionMode}
@@ -191,7 +191,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         insets = new Insets(3, 10, 0, 20)
       }
 
-      val redSpectralBinning = ComboPropertyCtrl.enumInstance(Ghost.RED_SPECTRAL_BINNING_PROP)
+      val redSpectralBinning: ComboPropertyCtrl[Ghost, GhostSpectralBinning] = ComboPropertyCtrl.enumInstance(Ghost.RED_SPECTRAL_BINNING_PROP)
       layout(Component.wrap(redSpectralBinning.getComponent)) = new Constraints() {
         anchor = Anchor.NorthWest
         gridx = 4
@@ -209,7 +209,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         insets = new Insets(3, 10, 0, 20)
       }
 
-      val redSpatialBinning = ComboPropertyCtrl.enumInstance(Ghost.RED_SPATIAL_BINNING_PROP)
+      val redSpatialBinning: ComboPropertyCtrl[Ghost, GhostSpatialBinning] = ComboPropertyCtrl.enumInstance(Ghost.RED_SPATIAL_BINNING_PROP)
       layout(Component.wrap(redSpatialBinning.getComponent)) = new Constraints() {
         anchor = Anchor.NorthWest
         gridx = 6
@@ -254,7 +254,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         insets = new Insets(12, 10, 0, 20)
       }
 
-      val blueSpectralBinning = ComboPropertyCtrl.enumInstance(Ghost.BLUE_SPECTRAL_BINNING_PROP)
+      val blueSpectralBinning: ComboPropertyCtrl[Ghost, GhostSpectralBinning] = ComboPropertyCtrl.enumInstance(Ghost.BLUE_SPECTRAL_BINNING_PROP)
       layout(Component.wrap(blueSpectralBinning.getComponent)) = new Constraints() {
         anchor = Anchor.NorthWest
         gridx = 4
@@ -272,7 +272,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         insets = new Insets(12, 10, 0, 20)
       }
 
-      val blueSpatialBinning = ComboPropertyCtrl.enumInstance(Ghost.BLUE_SPATIAL_BINNING_PROP)
+      val blueSpatialBinning: ComboPropertyCtrl[Ghost, GhostSpatialBinning] = ComboPropertyCtrl.enumInstance(Ghost.BLUE_SPATIAL_BINNING_PROP)
       layout(Component.wrap(blueSpatialBinning.getComponent)) = new Constraints() {
         anchor = Anchor.NorthWest
         gridx = 6
@@ -510,6 +510,10 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       }
     }
 
+    /**
+     * When the binning changes, set the binning
+     */
+
     def initialize(): Unit = Swing.onEDT {
       // Set the combo box to the appropriate asterism type.
       // If there is no allowable type, disable it.
@@ -544,6 +548,12 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
   override def handlePostDataObjectUpdate(dataObj: Ghost): Unit = Swing.onEDT {
     ui.posAngleCtrl.setBean(dataObj)
     ui.portCtrl.setBean(dataObj)
+    ui.detectorUI.redExpTimeCtrl.setBean(dataObj)
+    ui.detectorUI.redSpectralBinning.setBean(dataObj)
+    ui.detectorUI.redSpatialBinning.setBean(dataObj)
+    ui.detectorUI.blueExpTimeCtrl.setBean(dataObj)
+    ui.detectorUI.blueSpectralBinning.setBean(dataObj)
+    ui.detectorUI.blueSpatialBinning.setBean(dataObj)
     ui.targetPane.enableFiberAgitatorCtrl.setBean(dataObj)
     ui.initialize()
   }

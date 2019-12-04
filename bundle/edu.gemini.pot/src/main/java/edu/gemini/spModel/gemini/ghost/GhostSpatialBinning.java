@@ -53,4 +53,17 @@ public enum GhostSpatialBinning implements DisplayableSpType, LoggableSpType, Se
     public static GhostSpectralBinning getBinning(String name, GhostSpectralBinning nvalue) {
         return SpTypeUtil.oldValueOf(GhostSpectralBinning.class, name, nvalue);
     }
+
+    public static GhostSpatialBinning getBinningByValue(int value) {
+        for (final GhostSpatialBinning constant: GhostSpatialBinning.class.getEnumConstants()) {
+            if (constant.getValue() == value)
+                return constant;
+        }
+        return DEFAULT;
+    }
+
+    @Override
+    public String toString() {
+        return displayValue();
+    }
 }
