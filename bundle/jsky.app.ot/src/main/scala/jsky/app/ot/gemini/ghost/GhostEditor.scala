@@ -382,7 +382,6 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       val ifu1TargetName: Label = new Label("IFU1 Target")
       val ifu2TargetName: Label = new Label("IFU2 Target")
 
-      //val ifu1SpectralBinning: ComboPropertyCtrl[Ghost, G]
       def createIFUPane(ifuNum: Int, ifuTargetName: Label): Panel = {
         val panel = new GridBagPanel
         var row = 0
@@ -421,8 +420,8 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         anchor = Anchor.NorthWest
         gridx = 0
         gridy = row
-        gridwidth = 4
-        //gridheight = 3
+        gridwidth = 2
+        weightx = 1.0
         insets = new Insets(0, 10, 0, 0)
       }
       row += 1
@@ -432,8 +431,8 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         anchor = Anchor.NorthWest
         gridx = 0
         gridy = row
-        gridwidth = 4
-        //gridheight = 3
+        gridwidth = 2
+        weightx = 1.0
         insets = new Insets(0, 10, 0, 0)
       }
 

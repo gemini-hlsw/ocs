@@ -5,26 +5,20 @@ import edu.gemini.spModel.type.LoggableSpType;
 import edu.gemini.spModel.type.SequenceableSpType;
 import edu.gemini.spModel.type.SpTypeUtil;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 public enum GhostSpatialBinning implements DisplayableSpType, LoggableSpType, SequenceableSpType {
     /** We disallow 1x2 spectral / spatial binning. **/
-    ONE(1, Arrays.asList(GhostSpectralBinning.ONE, GhostSpectralBinning.TWO)),
-    TWO(2, Collections.singletonList(GhostSpectralBinning.ONE)),
-    FOUR(4, Arrays.asList(GhostSpectralBinning.ONE, GhostSpectralBinning.TWO)),
-    EIGHT(8, Arrays.asList(GhostSpectralBinning.ONE, GhostSpectralBinning.TWO))
+    ONE(1),
+    TWO(2),
+    FOUR(4),
+    EIGHT(8)
     ;
 
     public static final GhostSpatialBinning DEFAULT = GhostSpatialBinning.ONE;
 
     private final int value;
-    private final List<GhostSpectralBinning> compatibleSpectralBinning;
 
-    GhostSpatialBinning(final int value, final List<GhostSpectralBinning> compatibleSpectralBinning) {
+    GhostSpatialBinning(final int value) {
         this.value = value;
-        this.compatibleSpectralBinning = Collections.unmodifiableList(compatibleSpectralBinning);
     }
 
     @Override
@@ -46,10 +40,6 @@ public enum GhostSpatialBinning implements DisplayableSpType, LoggableSpType, Se
         return value;
     }
 
-    public List<GhostSpectralBinning> getCompatibleSpectralBinning() {
-        return compatibleSpectralBinning;
-    }
-
     public static GhostSpatialBinning getBinning(String name, GhostSpatialBinning nvalue) {
         return SpTypeUtil.oldValueOf(GhostSpatialBinning.class, name, nvalue);
     }
@@ -66,8 +56,8 @@ public enum GhostSpatialBinning implements DisplayableSpType, LoggableSpType, Se
         return DEFAULT;
     }
 
-//    @Override
-//    public String toString() {
-//        return displayValue();
-//    }
+    @Override
+    public String toString() {
+        return displayValue();
+    }
 }
