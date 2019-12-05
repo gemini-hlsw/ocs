@@ -1,7 +1,9 @@
 package jsky.app.ot.gemini.ghost
 
+import java.awt.event.{ActionEvent, ActionListener}
+
 import com.jgoodies.forms.factories.DefaultComponentFactory
-import javax.swing.{DefaultComboBoxModel, JPanel}
+import javax.swing.{DefaultComboBoxModel, JComboBox, JPanel}
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.shared.gui.bean.{CheckboxPropertyCtrl, ComboPropertyCtrl, RadioPropertyCtrl, TextFieldPropertyCtrl}
 import edu.gemini.shared.util.immutable.ScalaConverters._
@@ -281,6 +283,48 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         insets = new Insets(10, 0, 0, 20)
       }
       row += 1
+
+      /**
+       * When the binning changes, set the binning restrictions.
+       * We have to do this through swing since we're using wrapped Java swing components.
+       */
+      val redSpectralBinningJava: JComboBox[GhostSpectralBinning] = redSpectralBinning.getComponent.asInstanceOf[JComboBox[GhostSpectralBinning]]
+      val redSpatialBinningJava: JComboBox[GhostSpatialBinning] = redSpatialBinning.getComponent.asInstanceOf[JComboBox[GhostSpatialBinning]]
+
+      val redBinningActionListener: ActionListener  = new ActionListener {
+        override def actionPerformed(e: ActionEvent): Unit = initBinning()
+      }
+      initBinning()
+
+      /**
+       * This is to disallow 2x1.
+       */
+      def initBinning(): Unit = {
+        val redSpectralBinningChoice = redSpectralBinningJava.getSelectedItem.asInstanceOf[GhostSpectralBinning]
+        val redSpatialBinningChoice = redSpatialBinningJava.getSelectedItem.asInstanceOf[GhostSpatialBinning]
+        redSpectralBinningJava.removeActionListener(redBinningActionListener)
+        redSpatialBinningJava.removeActionListener(redBinningActionListener)
+
+        redSpectralBinningJava.removeAllItems()
+        redSpectralBinningJava.addItem(GhostSpectralBinning.ONE)
+        if (redSpatialBinningChoice != GhostSpatialBinning.ONE)
+          redSpectralBinningJava.addItem(GhostSpectralBinning.TWO)
+        redSpectralBinningJava.setSelectedItem(redSpectralBinningChoice)
+
+        redSpatialBinningJava.removeAllItems()
+        if (redSpectralBinningChoice != GhostSpectralBinning.TWO)
+          redSpatialBinningJava.addItem(GhostSpatialBinning.ONE)
+        redSpatialBinningJava.addItem(GhostSpatialBinning.TWO)
+        redSpatialBinningJava.addItem(GhostSpatialBinning.FOUR)
+        redSpatialBinningJava.addItem(GhostSpatialBinning.EIGHT)
+        redSpatialBinningJava.setSelectedItem(redSpatialBinningChoice)
+
+        redSpectralBinningJava.addActionListener(redBinningActionListener)
+        redSpatialBinningJava.addActionListener(redBinningActionListener)
+      }
+
+      redSpectralBinningJava.addActionListener(redBinningActionListener)
+      redSpatialBinningJava.addActionListener(redBinningActionListener)
     }
 
 
@@ -509,10 +553,6 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         asterismComboBox.enabled = true
       }
     }
-
-    /**
-     * When the binning changes, set the binning
-     */
 
     def initialize(): Unit = Swing.onEDT {
       // Set the combo box to the appropriate asterism type.

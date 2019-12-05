@@ -11,7 +11,8 @@ import java.util.List;
 
 public enum GhostSpectralBinning implements DisplayableSpType, LoggableSpType, SequenceableSpType {
     ONE(1, Arrays.asList(GhostSpatialBinning.ONE, GhostSpatialBinning.TWO, GhostSpatialBinning.FOUR, GhostSpatialBinning.EIGHT)),
-    TWO(2, Arrays.asList(GhostSpatialBinning.TWO, GhostSpatialBinning.FOUR, GhostSpatialBinning.EIGHT));
+    TWO(2, Arrays.asList(GhostSpatialBinning.TWO, GhostSpatialBinning.FOUR, GhostSpatialBinning.EIGHT))
+    ;
 
     public static final GhostSpectralBinning DEFAULT = GhostSpectralBinning.ONE;
 
@@ -62,8 +63,8 @@ public enum GhostSpectralBinning implements DisplayableSpType, LoggableSpType, S
         return DEFAULT;
     }
 
-    @Override
-    public String toString() {
-        return displayValue();
-    }
+//    @Override
+//    public String toString() {
+//        return displayValue();
+//    }
 }
