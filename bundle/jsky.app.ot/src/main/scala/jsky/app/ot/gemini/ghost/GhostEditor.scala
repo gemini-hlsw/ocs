@@ -7,10 +7,11 @@ import javax.swing.{DefaultComboBoxModel, JComboBox, JPanel}
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.shared.gui.bean.{CheckboxPropertyCtrl, ComboPropertyCtrl, RadioPropertyCtrl, TextFieldPropertyCtrl}
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost, GhostSpatialBinning, GhostSpectralBinning}
+import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost, GhostAsterism, GhostSpatialBinning, GhostSpectralBinning}
 import edu.gemini.spModel.gemini.ghost.AsterismConverters._
 import edu.gemini.spModel.rich.pot.sp._
-import edu.gemini.spModel.target.env.{AsterismType, ResolutionMode}
+import edu.gemini.spModel.target.SPCoordinates
+import edu.gemini.spModel.target.env.{Asterism, AsterismType, ResolutionMode}
 import edu.gemini.spModel.target.env.AsterismType._
 import edu.gemini.spModel.target.env.ResolutionMode._
 import edu.gemini.spModel.target.obsComp.TargetObsComp
@@ -33,7 +34,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     /**
      * Position angle components.
      **/
-    val posAngleLabel: Label = new Label(Ghost.POS_ANGLE_PROP.getDisplayName)
+    val posAngleLabel: Label = new Label("Position Angle:")
     posAngleLabel.horizontalAlignment = Alignment.Right
     layout(posAngleLabel) = new Constraints() {
       anchor = Anchor.NorthEast
@@ -230,7 +231,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         anchor = Anchor.East
         gridx = 0
         gridy = row
-        insets = new Insets(3, 10, 0, 20)
+        insets = new Insets(3, 10, 0, 10)
       }
       val blueExpTimeCtrl: TextFieldPropertyCtrl[Ghost, java.lang.Double] = TextFieldPropertyCtrl.createDoubleInstance(Ghost.BLUE_EXPOSURE_TIME_PROP, 1)
       blueExpTimeCtrl.setColumns(10)
@@ -238,7 +239,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         anchor = Anchor.NorthWest
         gridx = 1
         gridy = row
-        insets = new Insets(10, 0, 0, 20)
+        insets = new Insets(10, 0, 0, 10)
       }
       val blueExpTimeUnits = new Label("s")
       blueExpTimeUnits.horizontalAlignment = Alignment.Left
@@ -371,7 +372,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         fill = Fill.Horizontal
         gridx = 0
         gridy = row
-        gridwidth = 2
+        weightx = 1.0
         insets = new Insets(10, 10, 0, 0)
       }
       row += 1
@@ -381,8 +382,10 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
        */
       val ifu1TargetName: Label = new Label("IFU1 Target")
       val ifu2TargetName: Label = new Label("IFU2 Target")
+      val ifu1OiwfsGuideStar: CheckBox = new CheckBox()
+      val ifu2OiwfsGuideStar: CheckBox = new CheckBox()
 
-      def createIFUPane(ifuNum: Int, ifuTargetName: Label): Panel = {
+      def createIFUPane(ifuNum: Int, ifuTargetName: Label, ifuGuideStarCheckBox: CheckBox): Panel = {
         val panel = new GridBagPanel
         var row = 0
         val ifuLabel: Label = new Label(f"IFU$ifuNum:")
@@ -400,6 +403,31 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
           gridy = row
           insets = new Insets(3, 0, 0, 20)
         }
+
+        /** Eat up all remaining horizontal space in the form. **/
+        layout(new Label) = new Constraints() {
+          fill = Fill.Horizontal
+          anchor = Anchor.West
+          gridx = 2
+          gridy = row
+          weightx = 1.0
+        }
+        row += 1
+
+        /** OIWFS guide star. */
+        panel.layout(new Label("Enable OIWFS guide star:")) = new panel.Constraints() {
+          anchor = Anchor.NorthEast
+          gridx = 0
+          gridy = row
+          insets = new Insets(3, 0, 0, 20)
+        }
+
+        panel.layout(ifuGuideStarCheckBox) = new panel.Constraints() {
+          anchor = Anchor.West
+          gridx = 1
+          gridy = row
+          insets = new Insets(3, 0, 0, 0)
+        }
         row += 1
 
         /** Separator. */
@@ -408,30 +436,33 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
           fill = Fill.Horizontal
           gridx = 0
           gridy = row
-          gridwidth = 4
+          gridwidth = 3
+          weightx = 1.0
           insets = new Insets(10, 10, 0, 0)
         }
         panel
       }
       row += 1
 
-      val ifu1Pane = createIFUPane(1, ifu1TargetName)
+      val ifu1Pane = createIFUPane(1, ifu1TargetName, ifu1OiwfsGuideStar)
       layout(ifu1Pane) = new Constraints() {
+        fill = Fill.Horizontal
         anchor = Anchor.NorthWest
         gridx = 0
         gridy = row
-        gridwidth = 2
+        gridwidth = 1
         weightx = 1.0
         insets = new Insets(0, 10, 0, 0)
       }
       row += 1
 
-      val ifu2Pane = createIFUPane(2, ifu2TargetName)
+      val ifu2Pane = createIFUPane(2, ifu2TargetName, ifu2OiwfsGuideStar)
       layout(ifu2Pane) = new Constraints() {
+        fill = Fill.Horizontal
         anchor = Anchor.NorthWest
         gridx = 0
         gridy = row
-        gridwidth = 2
+        gridwidth = 1
         weightx = 1.0
         insets = new Insets(0, 10, 0, 0)
       }
@@ -445,7 +476,6 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       }
     }
     tabPane.pages += new Page("Read Mode", targetPane)
-
 
     /**
      * The tabbed pane containing:
@@ -585,6 +615,27 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       listenTo(asterismComboBox.selection)
       listenTo(resolutionModeComboBox.selection)
     }
+
+    def initIFUs(): Unit = {
+      val Sky = SPCoordinates.Name
+      Option(getContextTargetEnv).foreach(env => {
+        val asterism = env.getAsterism
+        val (name1: String, name2Opt: Option[String]) = asterism match {
+          case GhostAsterism.SingleTarget(gt, _)                   => (gt.spTarget.getName, None)
+          case GhostAsterism.DualTarget(gt1, gt2, _)               => (gt1.spTarget.getName, Some(gt2.spTarget.getName))
+          case GhostAsterism.TargetPlusSky(gt, _, _)               => (gt.spTarget.getName, Some(Sky))
+          case GhostAsterism.SkyPlusTarget(_, gt2, _)              => (Sky, Some(gt2.spTarget.getName))
+          case GhostAsterism.HighResolutionTarget(gt, _)           => (gt.spTarget.getName, None)
+          case GhostAsterism.HighResolutionTargetPlusSky(gt, _, _) => (gt.spTarget.getName, Some(Sky))
+          case _                                                   => sys.error("illegal asterism type")
+        }
+        targetPane.ifu1TargetName.text = name1
+        name2Opt.foreach(name2 => {
+          targetPane.ifu2TargetName.text = name2
+        })
+        targetPane.ifu2Pane.visible = name2Opt.isDefined
+      })
+    }
   }
 
   override def getWindow: JPanel = ui.peer
@@ -600,5 +651,6 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     ui.detectorUI.blueSpatialBinning.setBean(dataObj)
     ui.targetPane.enableFiberAgitatorCtrl.setBean(dataObj)
     ui.initialize()
+    ui.initIFUs()
   }
 }
