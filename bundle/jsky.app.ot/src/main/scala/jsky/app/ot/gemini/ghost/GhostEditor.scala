@@ -59,6 +59,8 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       gridy = row
       insets = new Insets(3, 0, 0, 20)
     }
+
+    /** Eat up all remaining horizontal space in the form. **/
     layout(new Label) = new Constraints() {
       anchor = Anchor.West
       gridx = 3
@@ -133,8 +135,8 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     layout(asterismComboBox) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 1
-      gridwidth = 2
       gridy = row
+      gridwidth = 2
       fill = Fill.Horizontal
       insets = new Insets(10, 0, 0, 20)
     }
@@ -145,7 +147,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
      *** Detectors ***
      *****************/
     object detectorUI extends GridBagPanel {
-      row = 0
+      var row = 0
       layout(Component.wrap(DefaultComponentFactory.getInstance.createSeparator("Detectors"))) = new Constraints() {
         gridx = 0
         gridy = row
@@ -332,14 +334,14 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       }
     }
 
-    /** Eat all vertical space */
     layout(detectorUI) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 0
-      gridy = 7
+      gridy = row
+      gridwidth = 4
       insets = new Insets(10, 0, 0, 20)
     }
-    row +=1
+    row += 1
 
     /**
      * TABS.
@@ -438,7 +440,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       /** Eat up the remaining horizontal space. **/
       layout(new Label) = new Constraints() {
         anchor = Anchor.West
-        gridx = 2
+        gridx = 0
         gridy = row
         weightx = 1.0
       }
@@ -460,15 +462,14 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       gridwidth = 4
       gridheight = 1
       weightx = 1.0
-      weighty = 0
       fill = Fill.Horizontal
       insets = new Insets(10, 0, 0, 0)
     }
+    row += 1
 
     /**
      * Eats up the blank space at the bottom of the form.
      */
-
     layout(new Label) = new Constraints() {
       anchor = Anchor.North
       gridx = 0
