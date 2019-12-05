@@ -141,9 +141,9 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     row += 1
 
 
-    /**
-     * Detectors.
-     */
+    /*****************
+     *** Detectors ***
+     *****************/
     object detectorUI extends GridBagPanel {
       row = 0
       layout(Component.wrap(DefaultComponentFactory.getInstance.createSeparator("Detectors"))) = new Constraints() {
@@ -286,47 +286,51 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
 
       /**
        * When the binning changes, set the binning restrictions.
-       * We have to do this through swing since we're using wrapped Java swing components.
+       * We have to do this through Java Swing since we're using wrapped Java Swing components, and cannot change
+       * combo box contents through Scala Swing.
        */
-      val redSpectralBinningJava: JComboBox[GhostSpectralBinning] = redSpectralBinning.getComponent.asInstanceOf[JComboBox[GhostSpectralBinning]]
-      val redSpatialBinningJava: JComboBox[GhostSpatialBinning] = redSpatialBinning.getComponent.asInstanceOf[JComboBox[GhostSpatialBinning]]
-
-      val redBinningActionListener: ActionListener  = new ActionListener {
+      val binningActionListener: ActionListener = new ActionListener {
         override def actionPerformed(e: ActionEvent): Unit = initBinning()
       }
+      val redSpectralBinningJava: JComboBox[GhostSpectralBinning] = redSpectralBinning.getComponent.asInstanceOf[JComboBox[GhostSpectralBinning]]
+      val redSpatialBinningJava: JComboBox[GhostSpatialBinning] = redSpatialBinning.getComponent.asInstanceOf[JComboBox[GhostSpatialBinning]]
+      val blueSpectralBinningJava: JComboBox[GhostSpectralBinning] = blueSpectralBinning.getComponent.asInstanceOf[JComboBox[GhostSpectralBinning]]
+      val blueSpatialBinningJava: JComboBox[GhostSpatialBinning] = blueSpatialBinning.getComponent.asInstanceOf[JComboBox[GhostSpatialBinning]]
       initBinning()
 
       /**
        * This is to disallow 2x1.
        */
       def initBinning(): Unit = {
-        val redSpectralBinningChoice = redSpectralBinningJava.getSelectedItem.asInstanceOf[GhostSpectralBinning]
-        val redSpatialBinningChoice = redSpatialBinningJava.getSelectedItem.asInstanceOf[GhostSpatialBinning]
-        redSpectralBinningJava.removeActionListener(redBinningActionListener)
-        redSpatialBinningJava.removeActionListener(redBinningActionListener)
+        def handleBinning(spectralBinningJava: JComboBox[GhostSpectralBinning], spatialBinningJava: JComboBox[GhostSpatialBinning]): Unit = {
+          spectralBinningJava.removeActionListener(binningActionListener)
+          spatialBinningJava.removeActionListener(binningActionListener)
 
-        redSpectralBinningJava.removeAllItems()
-        redSpectralBinningJava.addItem(GhostSpectralBinning.ONE)
-        if (redSpatialBinningChoice != GhostSpatialBinning.ONE)
-          redSpectralBinningJava.addItem(GhostSpectralBinning.TWO)
-        redSpectralBinningJava.setSelectedItem(redSpectralBinningChoice)
+          val spectralBinningChoice = spectralBinningJava.getSelectedItem.asInstanceOf[GhostSpectralBinning]
+          val spatialBinningChoice = spatialBinningJava.getSelectedItem.asInstanceOf[GhostSpatialBinning]
 
-        redSpatialBinningJava.removeAllItems()
-        if (redSpectralBinningChoice != GhostSpectralBinning.TWO)
-          redSpatialBinningJava.addItem(GhostSpatialBinning.ONE)
-        redSpatialBinningJava.addItem(GhostSpatialBinning.TWO)
-        redSpatialBinningJava.addItem(GhostSpatialBinning.FOUR)
-        redSpatialBinningJava.addItem(GhostSpatialBinning.EIGHT)
-        redSpatialBinningJava.setSelectedItem(redSpatialBinningChoice)
+          spectralBinningJava.removeAllItems()
+          spectralBinningJava.addItem(GhostSpectralBinning.ONE)
+          if (spatialBinningChoice != GhostSpatialBinning.ONE)
+            spectralBinningJava.addItem(GhostSpectralBinning.TWO)
+          spectralBinningJava.setSelectedItem(spectralBinningChoice)
 
-        redSpectralBinningJava.addActionListener(redBinningActionListener)
-        redSpatialBinningJava.addActionListener(redBinningActionListener)
+          spatialBinningJava.removeAllItems()
+          if (spectralBinningChoice != GhostSpectralBinning.TWO)
+            spatialBinningJava.addItem(GhostSpatialBinning.ONE)
+          spatialBinningJava.addItem(GhostSpatialBinning.TWO)
+          spatialBinningJava.addItem(GhostSpatialBinning.FOUR)
+          spatialBinningJava.addItem(GhostSpatialBinning.EIGHT)
+          spatialBinningJava.setSelectedItem(spatialBinningChoice)
+
+          spectralBinningJava.addActionListener(binningActionListener)
+          spatialBinningJava.addActionListener(binningActionListener)
+        }
+
+        handleBinning(redSpectralBinningJava, redSpatialBinningJava)
+        handleBinning(blueSpectralBinningJava, blueSpatialBinningJava)
       }
-
-      redSpectralBinningJava.addActionListener(redBinningActionListener)
-      redSpatialBinningJava.addActionListener(redBinningActionListener)
     }
-
 
     /** Eat all vertical space */
     layout(detectorUI) = new Constraints() {
