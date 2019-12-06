@@ -585,6 +585,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         toc.setTargetEnvironment(env)
         oc.setDataObject(toc)
         asterismComboBox.enabled = true
+        initIFUs()
       }
     }
 
@@ -617,6 +618,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     }
 
     def initIFUs(): Unit = {
+      println("*** initIFUs")
       val Sky = SPCoordinates.Name
       Option(getContextTargetEnv).foreach(env => {
         val asterism = env.getAsterism
@@ -634,6 +636,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
           targetPane.ifu2TargetName.text = name2
         })
         targetPane.ifu2Pane.visible = name2Opt.isDefined
+        println(s"${name1}, ${name2Opt}")
       })
     }
   }
