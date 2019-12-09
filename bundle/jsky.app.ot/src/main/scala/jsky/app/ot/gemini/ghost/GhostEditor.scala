@@ -7,7 +7,7 @@ import javax.swing.{DefaultComboBoxModel, JComboBox, JPanel}
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.shared.gui.bean.{CheckboxPropertyCtrl, ComboPropertyCtrl, RadioPropertyCtrl, TextFieldPropertyCtrl}
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost, GhostAsterism, GhostSpatialBinning, GhostSpectralBinning}
+import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost, GhostAsterism, GhostReadNoiseGain, GhostSpatialBinning, GhostSpectralBinning}
 import edu.gemini.spModel.gemini.ghost.AsterismConverters._
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.target.SPCoordinates
@@ -284,6 +284,16 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         gridy = row
         fill = Fill.Horizontal
         insets = new Insets(10, 0, 0, 20)
+      }
+      row += 1
+
+      val blueReadNoiseGain: RadioPropertyCtrl[Ghost, GhostReadNoiseGain] = new RadioPropertyCtrl[Ghost, GhostReadNoiseGain](Ghost.BLUE_READ_NOISE_GAIN_PROP)
+      layout(Component.wrap(blueReadNoiseGain.getComponent)) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 0
+        gridy = row
+        fill = Fill.Horizontal
+        insets = new Insets(10, 0, 0, 0)
       }
       row += 1
 
@@ -645,14 +655,15 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
 
   override def handlePostDataObjectUpdate(dataObj: Ghost): Unit = Swing.onEDT {
     ui.posAngleCtrl.setBean(dataObj)
-    ui.portCtrl.setBean(dataObj)
+    ui.targetPane.enableFiberAgitatorCtrl.setBean(dataObj)
     ui.detectorUI.redExpTimeCtrl.setBean(dataObj)
     ui.detectorUI.redSpectralBinning.setBean(dataObj)
     ui.detectorUI.redSpatialBinning.setBean(dataObj)
     ui.detectorUI.blueExpTimeCtrl.setBean(dataObj)
     ui.detectorUI.blueSpectralBinning.setBean(dataObj)
     ui.detectorUI.blueSpatialBinning.setBean(dataObj)
-    ui.targetPane.enableFiberAgitatorCtrl.setBean(dataObj)
+    ui.detectorUI.blueReadNoiseGain.setBean(dataObj)
+    ui.portCtrl.setBean(dataObj)
     ui.initialize()
     ui.initIFUs()
   }
