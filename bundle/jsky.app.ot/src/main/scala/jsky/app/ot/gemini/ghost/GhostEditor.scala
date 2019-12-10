@@ -162,7 +162,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       val redExpTimeLabel = new Label("Red Exposure Time:")
       redExpTimeLabel.horizontalAlignment = Alignment.Right
       layout(redExpTimeLabel) = new Constraints() {
-        anchor = Anchor.East
+        anchor = Anchor.NorthEast
         gridx = 0
         gridy = row
         insets = new Insets(3, 10, 0, 20)
@@ -180,7 +180,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       val redExpTimeUnits = new Label("s")
       redExpTimeUnits.horizontalAlignment = Alignment.Left
       layout(redExpTimeUnits) = new Constraints() {
-        anchor = Anchor.West
+        anchor = Anchor.NorthWest
         gridx = 2
         gridy = row
         insets = new Insets(3, 0, 0, 20)
@@ -189,7 +189,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       val redSpectralBinningLabel = new Label("Spectral Binning:")
       redSpectralBinningLabel.horizontalAlignment = Alignment.Right
       layout(redSpectralBinningLabel) = new Constraints() {
-        anchor = Anchor.East
+        anchor = Anchor.NorthEast
         gridx = 3
         gridy = row
         insets = new Insets(3, 10, 0, 20)
@@ -207,7 +207,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       val redSpatialBinningLabel = new Label("Spatial Binning:")
       redSpatialBinningLabel.horizontalAlignment = Alignment.Right
       layout(redSpatialBinningLabel) = new Constraints() {
-        anchor = Anchor.East
+        anchor = Anchor.NorthEast
         gridx = 5
         gridy = row
         insets = new Insets(3, 10, 0, 20)
@@ -230,7 +230,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         gridy = row
         gridwidth = 7
         fill = Fill.Horizontal
-        insets = new Insets(10, 0, 0, 0)
+        insets = new Insets(20, 0, 0, 0)
       }
       row += 1
 
@@ -247,10 +247,10 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       val blueExpTimeLabel = new Label("Blue Exposure Time:")
       blueExpTimeLabel.horizontalAlignment = Alignment.Right
       layout(blueExpTimeLabel) = new Constraints() {
-        anchor = Anchor.East
+        anchor = Anchor.NorthEast
         gridx = 0
         gridy = row
-        insets = new Insets(3, 10, 0, 10)
+        insets = new Insets(3, 10, 0, 20)
       }
       val blueExpTimeCtrl: TextFieldPropertyCtrl[Ghost, java.lang.Double] = TextFieldPropertyCtrl.createDoubleInstance(Ghost.BLUE_EXPOSURE_TIME_PROP, 1)
       blueExpTimeCtrl.setColumns(10)
@@ -258,12 +258,12 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         anchor = Anchor.NorthWest
         gridx = 1
         gridy = row
-        insets = new Insets(10, 0, 0, 10)
+        insets = new Insets(0, 0, 0, 20)
       }
       val blueExpTimeUnits = new Label("s")
       blueExpTimeUnits.horizontalAlignment = Alignment.Left
       layout(blueExpTimeUnits) = new Constraints() {
-        anchor = Anchor.West
+        anchor = Anchor.NorthWest
         gridx = 2
         gridy = row
         insets = new Insets(3, 0, 0, 20)
@@ -272,10 +272,10 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       val blueSpectralBinningLabel = new Label("Spectral Binning:")
       blueSpectralBinningLabel.horizontalAlignment = Alignment.Right
       layout(blueSpectralBinningLabel) = new Constraints() {
-        anchor = Anchor.East
+        anchor = Anchor.NorthEast
         gridx = 3
         gridy = row
-        insets = new Insets(12, 10, 0, 20)
+        insets = new Insets(3, 10, 0, 20)
       }
 
       val blueSpectralBinning: ComboPropertyCtrl[Ghost, GhostSpectralBinning] = ComboPropertyCtrl.enumInstance(Ghost.BLUE_SPECTRAL_BINNING_PROP)
@@ -284,16 +284,16 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         gridx = 4
         gridy = row
         fill = Fill.Horizontal
-        insets = new Insets(10, 0, 0, 20)
+        insets = new Insets(2, 0, 0, 20)
       }
 
       val blueSpatialBinningLabel = new Label("Spatial Binning:")
       blueSpatialBinningLabel.horizontalAlignment = Alignment.Right
       layout(blueSpatialBinningLabel) = new Constraints() {
-        anchor = Anchor.East
+        anchor = Anchor.NorthEast
         gridx = 5
         gridy = row
-        insets = new Insets(12, 10, 0, 20)
+        insets = new Insets(3, 10, 0, 20)
       }
 
       val blueSpatialBinning: ComboPropertyCtrl[Ghost, GhostSpatialBinning] = ComboPropertyCtrl.enumInstance(Ghost.BLUE_SPATIAL_BINNING_PROP)
@@ -302,7 +302,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         gridx = 6
         gridy = row
         fill = Fill.Horizontal
-        insets = new Insets(10, 0, 0, 20)
+        insets = new Insets(2, 0, 0, 20)
       }
       row += 1
 
@@ -313,7 +313,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         gridy = row
         gridwidth = 7
         fill = Fill.Horizontal
-        insets = new Insets(10, 0, 0, 0)
+        insets = new Insets(20, 0, 0, 0)
       }
       row += 1
 
