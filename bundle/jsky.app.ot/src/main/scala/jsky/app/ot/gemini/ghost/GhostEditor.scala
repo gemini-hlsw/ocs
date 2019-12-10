@@ -11,7 +11,7 @@ import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost, GhostAste
 import edu.gemini.spModel.gemini.ghost.AsterismConverters._
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.target.SPCoordinates
-import edu.gemini.spModel.target.env.{Asterism, AsterismType, ResolutionMode}
+import edu.gemini.spModel.target.env.{AsterismType, ResolutionMode}
 import edu.gemini.spModel.target.env.AsterismType._
 import edu.gemini.spModel.target.env.ResolutionMode._
 import edu.gemini.spModel.target.obsComp.TargetObsComp
@@ -149,17 +149,16 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
      *****************/
     object detectorUI extends GridBagPanel {
       var row = 0
-      layout(Component.wrap(DefaultComponentFactory.getInstance.createSeparator("Detectors"))) = new Constraints() {
+      layout(Component.wrap(DefaultComponentFactory.getInstance.createSeparator("Red Camera Detector"))) = new Constraints() {
         gridx = 0
         gridy = row
         gridwidth = 7
         anchor = Anchor.West
         fill = Fill.Horizontal
-        insets = new Insets(10, 0, 0, 0)
+        insets = new Insets(20, 0, 10, 0)
       }
       row += 1
 
-      /** Red detector.  */
       val redExpTimeLabel = new Label("Red Exposure Time:")
       redExpTimeLabel.horizontalAlignment = Alignment.Right
       layout(redExpTimeLabel) = new Constraints() {
@@ -224,7 +223,27 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       }
       row += 1
 
-      /** Blue detector. */
+      val redReadNoiseGain: RadioPropertyCtrl[Ghost, GhostReadNoiseGain] = new RadioPropertyCtrl[Ghost, GhostReadNoiseGain](Ghost.RED_READ_NOISE_GAIN_PROP)
+      layout(Component.wrap(redReadNoiseGain.getComponent)) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 0
+        gridy = row
+        gridwidth = 7
+        fill = Fill.Horizontal
+        insets = new Insets(10, 0, 0, 0)
+      }
+      row += 1
+
+      layout(Component.wrap(DefaultComponentFactory.getInstance.createSeparator("Blue Camera Detector"))) = new Constraints() {
+        gridx = 0
+        gridy = row
+        gridwidth = 7
+        anchor = Anchor.West
+        fill = Fill.Horizontal
+        insets = new Insets(20, 0, 10, 0)
+      }
+      row += 1
+
       val blueExpTimeLabel = new Label("Blue Exposure Time:")
       blueExpTimeLabel.horizontalAlignment = Alignment.Right
       layout(blueExpTimeLabel) = new Constraints() {
@@ -292,6 +311,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         anchor = Anchor.NorthWest
         gridx = 0
         gridy = row
+        gridwidth = 7
         fill = Fill.Horizontal
         insets = new Insets(10, 0, 0, 0)
       }
@@ -502,7 +522,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       gridheight = 1
       weightx = 1.0
       fill = Fill.Horizontal
-      insets = new Insets(10, 0, 0, 0)
+      insets = new Insets(30, 0, 0, 0)
     }
     row += 1
 
@@ -659,6 +679,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     ui.detectorUI.redExpTimeCtrl.setBean(dataObj)
     ui.detectorUI.redSpectralBinning.setBean(dataObj)
     ui.detectorUI.redSpatialBinning.setBean(dataObj)
+    ui.detectorUI.redReadNoiseGain.setBean(dataObj)
     ui.detectorUI.blueExpTimeCtrl.setBean(dataObj)
     ui.detectorUI.blueSpectralBinning.setBean(dataObj)
     ui.detectorUI.blueSpatialBinning.setBean(dataObj)

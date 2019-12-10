@@ -46,7 +46,7 @@ public enum GhostReadNoiseGain implements StandardSpType {
 
     @Override
     public String toString() {
-        return displayValue;
+        return description;
     }
 
     public static final GhostReadNoiseGain DEFAULT = SLOW_LOW;
