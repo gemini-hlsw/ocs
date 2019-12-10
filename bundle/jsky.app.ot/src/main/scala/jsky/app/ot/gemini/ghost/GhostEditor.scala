@@ -165,7 +165,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         anchor = Anchor.NorthEast
         gridx = 0
         gridy = row
-        insets = new Insets(3, 10, 0, 20)
+        insets = new Insets(3, 30, 0, 20)
       }
 
       val redExpTimeCtrl: TextFieldPropertyCtrl[Ghost, java.lang.Double] = TextFieldPropertyCtrl.createDoubleInstance(Ghost.RED_EXPOSURE_TIME_PROP, 1)
@@ -174,7 +174,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         anchor = Anchor.NorthWest
         gridx = 1
         gridy = row
-        insets = new Insets(0, 0, 0, 20)
+        insets = new Insets(0, 0, 0, 10)
       }
 
       val redExpTimeUnits = new Label("s")
@@ -230,7 +230,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         gridy = row
         gridwidth = 7
         fill = Fill.Horizontal
-        insets = new Insets(20, 0, 0, 0)
+        insets = new Insets(20, 30, 0, 0)
       }
       row += 1
 
@@ -250,7 +250,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         anchor = Anchor.NorthEast
         gridx = 0
         gridy = row
-        insets = new Insets(3, 10, 0, 20)
+        insets = new Insets(3, 30, 0, 20)
       }
       val blueExpTimeCtrl: TextFieldPropertyCtrl[Ghost, java.lang.Double] = TextFieldPropertyCtrl.createDoubleInstance(Ghost.BLUE_EXPOSURE_TIME_PROP, 1)
       blueExpTimeCtrl.setColumns(10)
@@ -258,7 +258,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         anchor = Anchor.NorthWest
         gridx = 1
         gridy = row
-        insets = new Insets(0, 0, 0, 20)
+        insets = new Insets(0, 0, 0, 10)
       }
       val blueExpTimeUnits = new Label("s")
       blueExpTimeUnits.horizontalAlignment = Alignment.Left
@@ -313,7 +313,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         gridy = row
         gridwidth = 7
         fill = Fill.Horizontal
-        insets = new Insets(20, 0, 0, 0)
+        insets = new Insets(20, 30, 0, 0)
       }
       row += 1
 
