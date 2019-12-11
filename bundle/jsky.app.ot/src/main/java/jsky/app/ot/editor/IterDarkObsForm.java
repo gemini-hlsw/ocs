@@ -1,9 +1,9 @@
 package jsky.app.ot.editor;
 
-import javax.swing.*;
-import com.jgoodies.forms.factories.*;
-import com.jgoodies.forms.layout.*;
-import jsky.util.gui.*;
+		import javax.swing.*;
+		import com.jgoodies.forms.factories.*;
+		import com.jgoodies.forms.layout.*;
+		import jsky.util.gui.*;
 /*
  * Created by JFormDesigner on Mon May 30 06:51:41 CEST 2005
  */
@@ -36,36 +36,36 @@ public class IterDarkObsForm extends JPanel {
 
 		//======== this ========
 		setLayout(new FormLayout(
-			new ColumnSpec[] {
-				new ColumnSpec(ColumnSpec.FILL, Sizes.DLUX11, FormSpec.DEFAULT_GROW),
-				FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-				new ColumnSpec(ColumnSpec.RIGHT, Sizes.DEFAULT, FormSpec.NO_GROW),
-				FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-				ColumnSpec.decode("max(default;40dlu)"),
-				FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-				new ColumnSpec(ColumnSpec.FILL, Sizes.DEFAULT, FormSpec.DEFAULT_GROW),
-				FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,
-				FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-				FormFactory.DEFAULT_COLSPEC,
-				FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-				FormFactory.UNRELATED_GAP_COLSPEC
-			},
-			new RowSpec[] {
-				FormFactory.PARAGRAPH_GAP_ROWSPEC,
-				FormFactory.LINE_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				new RowSpec(RowSpec.TOP, Sizes.DLUY9, FormSpec.DEFAULT_GROW),
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.LINE_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.LINE_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.LINE_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.LINE_GAP_ROWSPEC,
-				new RowSpec(RowSpec.FILL, Sizes.DEFAULT, FormSpec.DEFAULT_GROW)
-			}));
+				new ColumnSpec[] {
+						new ColumnSpec(ColumnSpec.FILL, Sizes.DLUX11, FormSpec.DEFAULT_GROW),
+						FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+						new ColumnSpec(ColumnSpec.RIGHT, Sizes.DEFAULT, FormSpec.NO_GROW),
+						FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+						ColumnSpec.decode("max(default;40dlu)"),
+						FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+						new ColumnSpec(ColumnSpec.FILL, Sizes.DEFAULT, FormSpec.DEFAULT_GROW),
+						FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+						FormFactory.DEFAULT_COLSPEC,
+						FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+						FormFactory.DEFAULT_COLSPEC,
+						FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+						FormFactory.UNRELATED_GAP_COLSPEC
+				},
+				new RowSpec[] {
+						FormFactory.PARAGRAPH_GAP_ROWSPEC,
+						FormFactory.LINE_GAP_ROWSPEC,
+						FormFactory.DEFAULT_ROWSPEC,
+						new RowSpec(RowSpec.TOP, Sizes.DLUY9, FormSpec.DEFAULT_GROW),
+						FormFactory.DEFAULT_ROWSPEC,
+						FormFactory.LINE_GAP_ROWSPEC,
+						FormFactory.DEFAULT_ROWSPEC,
+						FormFactory.LINE_GAP_ROWSPEC,
+						FormFactory.DEFAULT_ROWSPEC,
+						FormFactory.LINE_GAP_ROWSPEC,
+						FormFactory.DEFAULT_ROWSPEC,
+						FormFactory.LINE_GAP_ROWSPEC,
+						new RowSpec(RowSpec.FILL, Sizes.DEFAULT, FormSpec.DEFAULT_GROW)
+				}));
 
 		//---- label4 ----
 		label4.setText("Class");

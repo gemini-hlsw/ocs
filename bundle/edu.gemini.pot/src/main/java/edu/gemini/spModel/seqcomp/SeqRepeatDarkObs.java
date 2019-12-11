@@ -29,7 +29,7 @@ public class SeqRepeatDarkObs extends SeqRepeatCoaddExp
             SPComponentType.OBSERVER_DARK;
 
     public static final ISPNodeInitializer<ISPSeqComponent, SeqRepeatDarkObs> NI =
-        new ComponentNodeInitializer<>(SP_TYPE, () -> new SeqRepeatDarkObs(), c -> new SeqRepeatCoaddExpCB(c));
+        new ComponentNodeInitializer<>(SP_TYPE, SeqRepeatDarkObs::new, SeqRepeatCoaddExpCB::new);
 
     public static final String OBSERVE_TYPE = InstConstants.DARK_OBSERVE_TYPE;
 
