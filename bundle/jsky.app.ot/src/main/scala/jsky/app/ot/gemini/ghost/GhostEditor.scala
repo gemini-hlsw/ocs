@@ -1,13 +1,13 @@
 package jsky.app.ot.gemini.ghost
 
-import java.awt.event.{ActionEvent, ActionListener}
+import java.awt.Font
 
 import com.jgoodies.forms.factories.DefaultComponentFactory
-import javax.swing.{DefaultComboBoxModel, JComboBox, JPanel}
+import javax.swing.{DefaultComboBoxModel, JPanel}
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.shared.gui.bean.{CheckboxPropertyCtrl, ComboPropertyCtrl, RadioPropertyCtrl, TextFieldPropertyCtrl}
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost, GhostAsterism, GhostReadNoiseGain, GhostSpatialBinning, GhostSpectralBinning}
+import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost, GhostAsterism, GhostBinning, GhostReadNoiseGain}
 import edu.gemini.spModel.gemini.ghost.AsterismConverters._
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.target.SPCoordinates
@@ -28,6 +28,8 @@ import scala.swing.event.SelectionChanged
 final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
 
   private object ui extends GridBagPanel {
+    import GhostEditor._
+
     private var row = 0
     border = ComponentEditor.PANEL_BORDER
 
@@ -40,7 +42,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       anchor = Anchor.NorthEast
       gridx = 0
       gridy = row
-      insets = new Insets(3, 10, 0, 20)
+      insets = new Insets(3, 10, 0, LabelPadding)
     }
 
     val posAngleCtrl: TextFieldPropertyCtrl[Ghost, java.lang.Double] = TextFieldPropertyCtrl.createDoubleInstance(Ghost.POS_ANGLE_PROP, 1)
@@ -49,7 +51,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       anchor = Anchor.NorthWest
       gridx = 1
       gridy = row
-      insets = new Insets(0, 0, 0, 20)
+      insets = new Insets(0, 0, 0, LabelPadding)
     }
 
     val posAngleUnits: Label = new Label("deg E of N")
@@ -58,7 +60,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       anchor = Anchor.NorthWest
       gridx = 2
       gridy = row
-      insets = new Insets(3, 0, 0, 20)
+      insets = new Insets(3, 0, 0, 0)
     }
 
     /** Eat up all remaining horizontal space in the form. **/
@@ -89,7 +91,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       anchor = Anchor.East
       gridx = 0
       gridy = row
-      insets = new Insets(12, 10, 0, 20)
+      insets = new Insets(12, 10, 0, LabelPadding)
     }
 
     /** A list of available resolution modes. */
@@ -106,7 +108,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       gridy = row
       gridwidth = 2
       fill = Fill.Horizontal
-      insets = new Insets(10, 0, 0, 20)
+      insets = new Insets(10, 0, 0, 0)
     }
     row += 1
 
@@ -119,7 +121,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       anchor = Anchor.East
       gridx = 0
       gridy = row
-      insets = new Insets(12, 10, 0, 20)
+      insets = new Insets(12, 10, 0, LabelPadding)
     }
 
     /** A list of available asterism types. */
@@ -139,7 +141,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       gridy = row
       gridwidth = 2
       fill = Fill.Horizontal
-      insets = new Insets(10, 0, 0, 20)
+      insets = new Insets(10, 0, 0, 0)
     }
     row += 1
 
@@ -155,7 +157,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         gridwidth = 7
         anchor = Anchor.West
         fill = Fill.Horizontal
-        insets = new Insets(20, 0, 10, 0)
+        insets = new Insets(15, 0, 10, 0)
       }
       row += 1
 
@@ -165,7 +167,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         anchor = Anchor.NorthEast
         gridx = 0
         gridy = row
-        insets = new Insets(3, 30, 0, 20)
+        insets = new Insets(3, 30, 0, LabelPadding)
       }
 
       val redExpTimeCtrl: TextFieldPropertyCtrl[Ghost, java.lang.Double] = TextFieldPropertyCtrl.createDoubleInstance(Ghost.RED_EXPOSURE_TIME_PROP, 1)
@@ -174,10 +176,10 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         anchor = Anchor.NorthWest
         gridx = 1
         gridy = row
-        insets = new Insets(0, 0, 0, 10)
+        insets = new Insets(0, 0, 0, LabelPadding)
       }
 
-      val redExpTimeUnits = new Label("s")
+      val redExpTimeUnits = new Label("sec")
       redExpTimeUnits.horizontalAlignment = Alignment.Left
       layout(redExpTimeUnits) = new Constraints() {
         anchor = Anchor.NorthWest
@@ -186,40 +188,22 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         insets = new Insets(3, 0, 0, 20)
       }
 
-      val redSpectralBinningLabel = new Label("Spectral Binning:")
-      redSpectralBinningLabel.horizontalAlignment = Alignment.Right
-      layout(redSpectralBinningLabel) = new Constraints() {
+      val redBinningLabel = new Label("Spectral / Spatial Binning:")
+      redBinningLabel.horizontalAlignment = Alignment.Right
+      layout(redBinningLabel) = new Constraints() {
         anchor = Anchor.NorthEast
         gridx = 3
         gridy = row
-        insets = new Insets(3, 10, 0, 20)
+        insets = new Insets(3, 10, 0, LabelPadding)
       }
 
-      val redSpectralBinning: ComboPropertyCtrl[Ghost, GhostSpectralBinning] = ComboPropertyCtrl.enumInstance(Ghost.RED_SPECTRAL_BINNING_PROP)
-      layout(Component.wrap(redSpectralBinning.getComponent)) = new Constraints() {
+      val redBinning: ComboPropertyCtrl[Ghost, GhostBinning] = ComboPropertyCtrl.enumInstance(Ghost.RED_BINNING_PROP)
+      layout(Component.wrap(redBinning.getComponent)) = new Constraints() {
         anchor = Anchor.NorthWest
         gridx = 4
         gridy = row
         fill = Fill.Horizontal
-        insets = new Insets(0, 0, 0, 20)
-      }
-
-      val redSpatialBinningLabel = new Label("Spatial Binning:")
-      redSpatialBinningLabel.horizontalAlignment = Alignment.Right
-      layout(redSpatialBinningLabel) = new Constraints() {
-        anchor = Anchor.NorthEast
-        gridx = 5
-        gridy = row
-        insets = new Insets(3, 10, 0, 20)
-      }
-
-      val redSpatialBinning: ComboPropertyCtrl[Ghost, GhostSpatialBinning] = ComboPropertyCtrl.enumInstance(Ghost.RED_SPATIAL_BINNING_PROP)
-      layout(Component.wrap(redSpatialBinning.getComponent)) = new Constraints() {
-        anchor = Anchor.NorthWest
-        gridx = 6
-        gridy = row
-        fill = Fill.Horizontal
-        insets = new Insets(0, 0, 0, 20)
+        insets = new Insets(0, 0, 0, 0)
       }
       row += 1
 
@@ -230,7 +214,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         gridy = row
         gridwidth = 7
         fill = Fill.Horizontal
-        insets = new Insets(20, 30, 0, 0)
+        insets = new Insets(15, 30, 0, 0)
       }
       row += 1
 
@@ -240,7 +224,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         gridwidth = 7
         anchor = Anchor.West
         fill = Fill.Horizontal
-        insets = new Insets(20, 0, 10, 0)
+        insets = new Insets(15, 0, 10, 0)
       }
       row += 1
 
@@ -250,7 +234,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         anchor = Anchor.NorthEast
         gridx = 0
         gridy = row
-        insets = new Insets(3, 30, 0, 20)
+        insets = new Insets(3, 30, 0, LabelPadding)
       }
       val blueExpTimeCtrl: TextFieldPropertyCtrl[Ghost, java.lang.Double] = TextFieldPropertyCtrl.createDoubleInstance(Ghost.BLUE_EXPOSURE_TIME_PROP, 1)
       blueExpTimeCtrl.setColumns(10)
@@ -258,9 +242,9 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         anchor = Anchor.NorthWest
         gridx = 1
         gridy = row
-        insets = new Insets(0, 0, 0, 10)
+        insets = new Insets(0, 0, 0, LabelPadding)
       }
-      val blueExpTimeUnits = new Label("s")
+      val blueExpTimeUnits = new Label("sec")
       blueExpTimeUnits.horizontalAlignment = Alignment.Left
       layout(blueExpTimeUnits) = new Constraints() {
         anchor = Anchor.NorthWest
@@ -269,40 +253,22 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         insets = new Insets(3, 0, 0, 20)
       }
 
-      val blueSpectralBinningLabel = new Label("Spectral Binning:")
-      blueSpectralBinningLabel.horizontalAlignment = Alignment.Right
-      layout(blueSpectralBinningLabel) = new Constraints() {
+      val blueBinningLabel = new Label("Spectral / Spatial Binning:")
+      blueBinningLabel.horizontalAlignment = Alignment.Right
+      layout(blueBinningLabel) = new Constraints() {
         anchor = Anchor.NorthEast
         gridx = 3
         gridy = row
-        insets = new Insets(3, 10, 0, 20)
+        insets = new Insets(3, 10, 0, LabelPadding)
       }
 
-      val blueSpectralBinning: ComboPropertyCtrl[Ghost, GhostSpectralBinning] = ComboPropertyCtrl.enumInstance(Ghost.BLUE_SPECTRAL_BINNING_PROP)
-      layout(Component.wrap(blueSpectralBinning.getComponent)) = new Constraints() {
+      val blueBinning: ComboPropertyCtrl[Ghost, GhostBinning] = ComboPropertyCtrl.enumInstance(Ghost.BLUE_BINNING_PROP)
+      layout(Component.wrap(blueBinning.getComponent)) = new Constraints() {
         anchor = Anchor.NorthWest
         gridx = 4
         gridy = row
         fill = Fill.Horizontal
-        insets = new Insets(2, 0, 0, 20)
-      }
-
-      val blueSpatialBinningLabel = new Label("Spatial Binning:")
-      blueSpatialBinningLabel.horizontalAlignment = Alignment.Right
-      layout(blueSpatialBinningLabel) = new Constraints() {
-        anchor = Anchor.NorthEast
-        gridx = 5
-        gridy = row
-        insets = new Insets(3, 10, 0, 20)
-      }
-
-      val blueSpatialBinning: ComboPropertyCtrl[Ghost, GhostSpatialBinning] = ComboPropertyCtrl.enumInstance(Ghost.BLUE_SPATIAL_BINNING_PROP)
-      layout(Component.wrap(blueSpatialBinning.getComponent)) = new Constraints() {
-        anchor = Anchor.NorthWest
-        gridx = 6
-        gridy = row
-        fill = Fill.Horizontal
-        insets = new Insets(2, 0, 0, 20)
+        insets = new Insets(2, 0, 0, 0)
       }
       row += 1
 
@@ -313,56 +279,9 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         gridy = row
         gridwidth = 7
         fill = Fill.Horizontal
-        insets = new Insets(20, 30, 0, 0)
+        insets = new Insets(15, 30, 0, 0)
       }
       row += 1
-
-      /**
-       * When the binning changes, set the binning restrictions.
-       * We have to do this through Java Swing since we're using wrapped Java Swing components, and cannot change
-       * combo box contents through Scala Swing.
-       */
-      val binningActionListener: ActionListener = new ActionListener {
-        override def actionPerformed(e: ActionEvent): Unit = initBinning()
-      }
-      val redSpectralBinningJava: JComboBox[GhostSpectralBinning] = redSpectralBinning.getComponent.asInstanceOf[JComboBox[GhostSpectralBinning]]
-      val redSpatialBinningJava: JComboBox[GhostSpatialBinning] = redSpatialBinning.getComponent.asInstanceOf[JComboBox[GhostSpatialBinning]]
-      val blueSpectralBinningJava: JComboBox[GhostSpectralBinning] = blueSpectralBinning.getComponent.asInstanceOf[JComboBox[GhostSpectralBinning]]
-      val blueSpatialBinningJava: JComboBox[GhostSpatialBinning] = blueSpatialBinning.getComponent.asInstanceOf[JComboBox[GhostSpatialBinning]]
-      initBinning()
-
-      /**
-       * This is to disallow 2x1.
-       */
-      def initBinning(): Unit = {
-        def handleBinning(spectralBinningJava: JComboBox[GhostSpectralBinning], spatialBinningJava: JComboBox[GhostSpatialBinning]): Unit = {
-          spectralBinningJava.removeActionListener(binningActionListener)
-          spatialBinningJava.removeActionListener(binningActionListener)
-
-          val spectralBinningChoice = spectralBinningJava.getSelectedItem.asInstanceOf[GhostSpectralBinning]
-          val spatialBinningChoice = spatialBinningJava.getSelectedItem.asInstanceOf[GhostSpatialBinning]
-
-          spectralBinningJava.removeAllItems()
-          spectralBinningJava.addItem(GhostSpectralBinning.ONE)
-          if (spatialBinningChoice != GhostSpatialBinning.ONE)
-            spectralBinningJava.addItem(GhostSpectralBinning.TWO)
-          spectralBinningJava.setSelectedItem(spectralBinningChoice)
-
-          spatialBinningJava.removeAllItems()
-          if (spectralBinningChoice != GhostSpectralBinning.TWO)
-            spatialBinningJava.addItem(GhostSpatialBinning.ONE)
-          spatialBinningJava.addItem(GhostSpatialBinning.TWO)
-          spatialBinningJava.addItem(GhostSpatialBinning.FOUR)
-          spatialBinningJava.addItem(GhostSpatialBinning.EIGHT)
-          spatialBinningJava.setSelectedItem(spatialBinningChoice)
-
-          spectralBinningJava.addActionListener(binningActionListener)
-          spatialBinningJava.addActionListener(binningActionListener)
-        }
-
-        handleBinning(redSpectralBinningJava, redSpatialBinningJava)
-        handleBinning(blueSpectralBinningJava, blueSpatialBinningJava)
-      }
     }
 
     layout(detectorUI) = new Constraints() {
@@ -393,16 +312,6 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         anchor = Anchor.NorthWest
         gridx = 0
         gridy = row
-        insets = new Insets(10, 10, 0, 20)
-      }
-      row += 1
-
-      layout(new Separator()) = new Constraints() {
-        anchor = Anchor.West
-        fill = Fill.Horizontal
-        gridx = 0
-        gridy = row
-        weightx = 1.0
         insets = new Insets(10, 10, 0, 0)
       }
       row += 1
@@ -418,12 +327,28 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       def createIFUPane(ifuNum: Int, ifuTargetName: Label, ifuGuideStarCheckBox: CheckBox): Panel = {
         val panel = new GridBagPanel
         var row = 0
-        val ifuLabel: Label = new Label(f"IFU$ifuNum:")
+
+        /** Separator. */
+        panel.layout(new Separator()) = new panel.Constraints() {
+          anchor = Anchor.West
+          fill = Fill.Horizontal
+          gridx = 0
+          gridy = row
+          gridwidth = 3
+          weightx = 1.0
+          insets = new Insets(10, 10, 0, 0)
+        }
+        row += 1
+
+        val ifuLabel: Label = new Label(f"IFU$ifuNum Target:")
+        val font: Font = ifuLabel.font
+        ifuLabel.font = font.deriveFont(font.getStyle | Font.BOLD)
+
         panel.layout(ifuLabel) = new panel.Constraints() {
           anchor = Anchor.NorthEast
           gridx = 0
           gridy = row
-          insets = new Insets(3, 0, 0, 20)
+          insets = new Insets(3, 0, 0, LabelPadding)
         }
 
         /** Placeholder for name for target. **/
@@ -431,7 +356,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
           anchor = Anchor.NorthWest
           gridx = 1
           gridy = row
-          insets = new Insets(3, 0, 0, 20)
+          insets = new Insets(3, 0, 0, 0)
         }
 
         /** Eat up all remaining horizontal space in the form. **/
@@ -445,11 +370,11 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         row += 1
 
         /** OIWFS guide star. */
-        panel.layout(new Label("Enable OIWFS guide star:")) = new panel.Constraints() {
+        panel.layout(new Label("Enable Guide Fibers:")) = new panel.Constraints() {
           anchor = Anchor.NorthEast
           gridx = 0
           gridy = row
-          insets = new Insets(3, 0, 0, 20)
+          insets = new Insets(3, 0, 0, LabelPadding)
         }
 
         panel.layout(ifuGuideStarCheckBox) = new panel.Constraints() {
@@ -459,17 +384,6 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
           insets = new Insets(3, 0, 0, 0)
         }
         row += 1
-
-        /** Separator. */
-        panel.layout(new Separator()) = new panel.Constraints() {
-          anchor = Anchor.West
-          fill = Fill.Horizontal
-          gridx = 0
-          gridy = row
-          gridwidth = 3
-          weightx = 1.0
-          insets = new Insets(10, 10, 0, 0)
-        }
         panel
       }
       row += 1
@@ -505,7 +419,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         weightx = 1.0
       }
     }
-    tabPane.pages += new Page("Read Mode", targetPane)
+    tabPane.pages += new Page("IFUs", targetPane)
 
     /**
      * The tabbed pane containing:
@@ -648,7 +562,6 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     }
 
     def initIFUs(): Unit = {
-      println("*** initIFUs")
       val Sky = SPCoordinates.Name
       Option(getContextTargetEnv).foreach(env => {
         val asterism = env.getAsterism
@@ -666,7 +579,6 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
           targetPane.ifu2TargetName.text = name2
         })
         targetPane.ifu2Pane.visible = name2Opt.isDefined
-        println(s"${name1}, ${name2Opt}")
       })
     }
   }
@@ -677,15 +589,17 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     ui.posAngleCtrl.setBean(dataObj)
     ui.targetPane.enableFiberAgitatorCtrl.setBean(dataObj)
     ui.detectorUI.redExpTimeCtrl.setBean(dataObj)
-    ui.detectorUI.redSpectralBinning.setBean(dataObj)
-    ui.detectorUI.redSpatialBinning.setBean(dataObj)
+    ui.detectorUI.redBinning.setBean(dataObj)
     ui.detectorUI.redReadNoiseGain.setBean(dataObj)
     ui.detectorUI.blueExpTimeCtrl.setBean(dataObj)
-    ui.detectorUI.blueSpectralBinning.setBean(dataObj)
-    ui.detectorUI.blueSpatialBinning.setBean(dataObj)
+    ui.detectorUI.blueBinning.setBean(dataObj)
     ui.detectorUI.blueReadNoiseGain.setBean(dataObj)
     ui.portCtrl.setBean(dataObj)
     ui.initialize()
     ui.initIFUs()
   }
+}
+
+object GhostEditor {
+  val LabelPadding = 15
 }
