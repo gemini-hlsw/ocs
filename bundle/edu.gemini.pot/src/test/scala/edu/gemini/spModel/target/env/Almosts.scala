@@ -132,7 +132,7 @@ trait Almosts {
   implicit val GhostTargetAlmostEqual: AlmostEqual[GhostAsterism.GhostTarget] =
     new AlmostEqual[GhostAsterism.GhostTarget] {
       override def almostEqual(a: GhostAsterism.GhostTarget, b: GhostAsterism.GhostTarget): Boolean =
-        (a.spTarget ~= b.spTarget) && (a.explicitGuideFiberState === b.explicitGuideFiberState)
+        (a.spTarget ~= b.spTarget) && (a.guideFiberState === b.guideFiberState)
     }
 
   implicit val GhostSingleTargetAlmostEqual: AlmostEqual[GhostAsterism.SingleTarget] =

@@ -9,6 +9,10 @@ import edu.gemini.shared.gui.bean.{CheckboxPropertyCtrl, ComboPropertyCtrl, Radi
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost, GhostAsterism, GhostBinning, GhostReadNoiseGain}
 import edu.gemini.spModel.gemini.ghost.AsterismConverters._
+import edu.gemini.spModel.gemini.ghost._
+import edu.gemini.spModel.gemini.ghost.GhostAsterism._
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.HighResolution._
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.StandardResolution._
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.target.SPCoordinates
 import edu.gemini.spModel.target.env.{AsterismType, ResolutionMode}
@@ -22,7 +26,10 @@ import scala.collection.JavaConverters._
 import scala.swing._
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing.TabbedPane.Page
-import scala.swing.event.SelectionChanged
+import scala.swing.event.{ButtonClicked, SelectionChanged}
+import scalaz._
+import Scalaz._
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.GuideFiberState.Enabled
 
 
 final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
@@ -321,10 +328,10 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
        */
       val ifu1TargetName: Label = new Label("IFU1 Target")
       val ifu2TargetName: Label = new Label("IFU2 Target")
-      val ifu1OiwfsGuideStar: CheckBox = new CheckBox()
-      val ifu2OiwfsGuideStar: CheckBox = new CheckBox()
+      val ifu1GuideFiberCheckBox: CheckBox = new CheckBox()
+      val ifu2GuideFiberCheckBox: CheckBox = new CheckBox()
 
-      def createIFUPane(ifuNum: Int, ifuTargetName: Label, ifuGuideStarCheckBox: CheckBox): Panel = {
+      def createIFUPane(ifuNum: Int, ifuTargetName: Label, ifuGuideFiberCheckBox: CheckBox): Panel = {
         val panel = new GridBagPanel
         var row = 0
 
@@ -377,7 +384,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
           insets = new Insets(3, 0, 0, LabelPadding)
         }
 
-        panel.layout(ifuGuideStarCheckBox) = new panel.Constraints() {
+        panel.layout(ifuGuideFiberCheckBox) = new panel.Constraints() {
           anchor = Anchor.West
           gridx = 1
           gridy = row
@@ -388,7 +395,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       }
       row += 1
 
-      val ifu1Pane = createIFUPane(1, ifu1TargetName, ifu1OiwfsGuideStar)
+      val ifu1Pane: Panel = createIFUPane(1, ifu1TargetName, ifu1GuideFiberCheckBox)
       layout(ifu1Pane) = new Constraints() {
         fill = Fill.Horizontal
         anchor = Anchor.NorthWest
@@ -400,7 +407,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       }
       row += 1
 
-      val ifu2Pane = createIFUPane(2, ifu2TargetName, ifu2OiwfsGuideStar)
+      val ifu2Pane: Panel = createIFUPane(2, ifu2TargetName, ifu2GuideFiberCheckBox)
       layout(ifu2Pane) = new Constraints() {
         fill = Fill.Horizontal
         anchor = Anchor.NorthWest
@@ -533,6 +540,56 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       }
     }
 
+    /**
+     * When the guide fiber state changes, we must change the asterism type to reflect this.
+     */
+    // Get the state from the checkbox.
+    def gfs(box: CheckBox): GuideFiberState =
+      //box.selected ? GuideFiberState.Enabled | GuideFiberState.Disabled
+      if (box.selected) GuideFiberState.Enabled
+      else GuideFiberState.Disabled
+
+    /**
+     * Change the guide fiber type of the IFU1s.
+     */
+    def changeIFU1GuideFiberState(state: GuideFiberState): Unit =
+      for {
+        oc  <- Option(getContextTargetObsComp)
+        toc <- Option(oc.getDataObject).collect { case t: TargetObsComp => t }
+      } {
+        println("*** changeIFU1GuideFiberState")
+        val env = toc.getTargetEnvironment
+        toc.getTargetEnvironment.getAsterism match {
+          case a: SingleTarget                => toc.setTargetEnvironment(env.setAsterism((SingleTargetIFU1 >=> GhostTarget.guideFiberState).set(a, state)))
+          case a: DualTarget                  => toc.setTargetEnvironment(env.setAsterism((DualTargetIFU1 >=> GhostTarget.guideFiberState).set(a, state)))
+          case a: TargetPlusSky               => toc.setTargetEnvironment(env.setAsterism((TargetPlusSkyIFU1 >=> GhostTarget.guideFiberState).set(a, state)))
+          case a: HighResolutionTarget        => toc.setTargetEnvironment(env.setAsterism((HRTargetIFU1 >=> GhostTarget.guideFiberState).set(a, state)))
+          case a: HighResolutionTargetPlusSky => toc.setTargetEnvironment(env.setAsterism((HRTargetPlusSkyIFU1 >=> GhostTarget.guideFiberState).set(a, state)))
+        }
+        oc.setDataObject(toc)
+      }
+
+    def changeIFU2GuideFiberState(state: GuideFiberState): Unit =
+      for {
+        oc  <- Option(getContextTargetObsComp)
+        toc <- Option(oc.getDataObject).collect { case t: TargetObsComp => t }
+      } {
+        println("*** changeIFU2GuideFiberState")
+        val env = toc.getTargetEnvironment
+        toc.getTargetEnvironment.getAsterism match {
+          case a: DualTarget                  => toc.setTargetEnvironment(env.setAsterism((DualTargetIFU2 >=> GhostTarget.guideFiberState).set(a, state)))
+          case a: SkyPlusTarget               => toc.setTargetEnvironment(env.setAsterism((SkyPlusTargetIFU2 >=> GhostTarget.guideFiberState).set(a, state)))
+        }
+        oc.setDataObject(toc)
+      }
+
+    reactions += {
+      case ButtonClicked(targetPane.ifu1GuideFiberCheckBox) =>
+        changeIFU1GuideFiberState(gfs(targetPane.ifu1GuideFiberCheckBox))
+      case ButtonClicked(targetPane.ifu2GuideFiberCheckBox) =>
+        changeIFU2GuideFiberState(gfs(targetPane.ifu2GuideFiberCheckBox))
+    }
+
     def initialize(): Unit = Swing.onEDT {
       // Set the combo box to the appropriate asterism type.
       // If there is no allowable type, disable it.
@@ -568,7 +625,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         val (name1: String, name2Opt: Option[String]) = asterism match {
           case GhostAsterism.SingleTarget(gt, _)                   => (gt.spTarget.getName, None)
           case GhostAsterism.DualTarget(gt1, gt2, _)               => (gt1.spTarget.getName, Some(gt2.spTarget.getName))
-          case GhostAsterism.TargetPlusSky(gt, _, _)               => (gt.spTarget.getName, Some(Sky))
+          case GhostAsterism.TargetPlusSky(gt1, _, _)              => (gt1.spTarget.getName, Some(Sky))
           case GhostAsterism.SkyPlusTarget(_, gt2, _)              => (Sky, Some(gt2.spTarget.getName))
           case GhostAsterism.HighResolutionTarget(gt, _)           => (gt.spTarget.getName, None)
           case GhostAsterism.HighResolutionTargetPlusSky(gt, _, _) => (gt.spTarget.getName, Some(Sky))
@@ -579,6 +636,26 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
           targetPane.ifu2TargetName.text = name2
         })
         targetPane.ifu2Pane.visible = name2Opt.isDefined
+
+        val (guideFibers1: Boolean, editableGuideFibers1: Boolean, guideFibers2: Boolean, editableGuideFibers2: Boolean) = asterism match {
+          case SingleTarget(gt, _)                   => (gt.guideFiberState === Enabled, true, false, false)
+          case GhostAsterism.DualTarget(gt1, gt2, _)               => (gt1.guideFiberState == Enabled, true, gt2.guideFiberState == Enabled, true)
+          case GhostAsterism.TargetPlusSky(gt, _, _)               => (gt.guideFiberState === Enabled, true, false, false)
+          case GhostAsterism.SkyPlusTarget(_, gt2, _)              => (false, false, gt2.guideFiberState === Enabled, true)
+          case GhostAsterism.HighResolutionTarget(gt, _)           => (gt.guideFiberState === Enabled, true, false, false)
+          case GhostAsterism.HighResolutionTargetPlusSky(gt, _, _) => (gt.guideFiberState === Enabled, true, false, false)
+          case _                                                   => sys.error("illegal asterism type")
+        }
+
+        deafTo(targetPane.ifu1GuideFiberCheckBox)
+        deafTo(targetPane.ifu2GuideFiberCheckBox)
+        println(f"${guideFibers1} ${editableGuideFibers1} ${guideFibers2} ${editableGuideFibers2}")
+        targetPane.ifu1GuideFiberCheckBox.selected = guideFibers1
+        targetPane.ifu1GuideFiberCheckBox.enabled = editableGuideFibers1
+        targetPane.ifu2GuideFiberCheckBox.selected = guideFibers2
+        targetPane.ifu2GuideFiberCheckBox.enabled = editableGuideFibers2
+        listenTo(targetPane.ifu1GuideFiberCheckBox)
+        listenTo(targetPane.ifu2GuideFiberCheckBox)
       })
     }
   }
