@@ -133,6 +133,16 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     throw new UnsupportedOperationException(Ghost.GhostExposureTimeErrorMessage)
   }
 
+  override def getTotalExposureTime(): Double = {
+    Ghost.LOG.severe(Ghost.GhostExposureTimeErrorMessage)
+    throw new UnsupportedOperationException(Ghost.GhostExposureTimeErrorMessage)
+  }
+
+  override def getTotalExposureTimeAsString(): String = {
+    Ghost.LOG.severe(Ghost.GhostExposureTimeErrorMessage)
+    throw new UnsupportedOperationException(Ghost.GhostExposureTimeErrorMessage)
+  }
+
   override def setExposureTime(newValue: Double): Unit = {
     Ghost.LOG.severe(Ghost.GhostExposureTimeErrorMessage)
     throw new UnsupportedOperationException(Ghost.GhostExposureTimeErrorMessage)
@@ -141,6 +151,21 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
   override def setExposureTimeAsString(newValue: String): Unit = {
     Ghost.LOG.severe(Ghost.GhostExposureTimeErrorMessage)
     throw new UnsupportedOperationException(Ghost.GhostExposureTimeErrorMessage)
+  }
+
+  override def setCoadds(newValue: Int): Unit = {
+    Ghost.LOG.severe(Ghost.GhostCoaddsErrorMessage)
+    throw new UnsupportedOperationException(Ghost.GhostCoaddsErrorMessage)
+  }
+
+  override def getCoadds: Int = {
+    Ghost.LOG.severe(Ghost.GhostCoaddsErrorMessage)
+    throw new UnsupportedOperationException(Ghost.GhostCoaddsErrorMessage)
+  }
+
+  override def getCoaddsAsString: String = {
+    Ghost.LOG.severe(Ghost.GhostCoaddsErrorMessage)
+    throw new UnsupportedOperationException(Ghost.GhostCoaddsErrorMessage)
   }
 }
 
@@ -256,4 +281,5 @@ object Ghost {
   val getInstConfigInfo: JList[InstConfigInfo] = List.empty[InstConfigInfo].asJava
 
   val GhostExposureTimeErrorMessage: String = "Error: tried to access single exposure time for GHOST."
+  val GhostCoaddsErrorMessage: String = "Error: GHOST does not support coadds."
 }
