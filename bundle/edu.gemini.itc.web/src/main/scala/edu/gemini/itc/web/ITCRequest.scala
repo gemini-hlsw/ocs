@@ -124,6 +124,7 @@ object ITCRequest {
     val i = instrumentName(r)
     if      (i == INSTRUMENT_ACQCAM.readableStr)     acqCamParameters(r)
     else if (i == INSTRUMENT_FLAMINGOS2.readableStr) flamingos2Parameters(r)
+    else if (i == INSTRUMENT_GHOST.readableStr)      ghostParameters(r)
     else if (i == INSTRUMENT_GMOS.readableStr)       gmosParameters(r)
     else if (i == INSTRUMENT_GMOSSOUTH.readableStr)  gmosParameters(r)
     else if (i == INSTRUMENT_GNIRS.readableStr)      gnirsParameters(r)
@@ -147,6 +148,11 @@ object ITCRequest {
     val readMode    = r.enumParameter(classOf[Flamingos2.ReadMode])
     val fpMask      = r.enumParameter(classOf[Flamingos2.FPUnit])
     Flamingos2Parameters(filter, grism, fpMask, None, readMode)
+  }
+
+  // TODO-GHOSTITC
+  def ghostParameters(r: ITCRequest): GhostParameters = {
+    GhostParameters()
   }
 
   def gmosParameters(r: ITCRequest): GmosParameters = {

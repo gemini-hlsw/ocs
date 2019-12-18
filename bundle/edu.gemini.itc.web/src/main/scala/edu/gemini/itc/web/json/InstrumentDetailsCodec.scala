@@ -21,6 +21,7 @@ trait InstrumentDetailsCodec {
   import wavelength._
 
   // All our enum types must be declared explicitly
+  // TODO-GHOSTITC: Add GHOST params here
   private implicit val AcqCamParamsColorFilterCodec = enumCodec[AcqCamParams.ColorFilter]
   private implicit val AcqCamParamsNDFilterCodec = enumCodec[AcqCamParams.NDFilter]
   private implicit val Flamingos2CustomSlitWidthCodec = enumCodec[Flamingos2.CustomSlitWidth]
