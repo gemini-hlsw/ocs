@@ -1,9 +1,11 @@
 package edu.gemini.spModel.gemini.ghost
 
 import java.beans.PropertyDescriptor
+import java.util.logging.Logger
 import java.util.{Collections, List => JList, Map => JMap, Set => JSet}
 
 import edu.gemini.pot.sp._
+import edu.gemini.spModel.config2.ItemKey
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.data.config.{DefaultParameter, DefaultSysConfig, ISysConfig, StringParameter}
@@ -13,6 +15,7 @@ import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.obscomp.{InstConfigInfo, InstConstants, SPInstObsComp}
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
 import edu.gemini.spModel.seqcomp.SeqConfigNames
+import edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.spModel.telescope.{IssPort, IssPortProvider}
@@ -26,6 +29,9 @@ import scala.util.{Failure, Success, Try}
   * Note that we do not override clone since private variables are immutable.
   */
 final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvider with GhostMixin with IssPortProvider {
+  private var redExposureTime: Double = Ghost.DEF_EXPOSURE_TIME_RED
+  private var blueExposureTime: Double = Ghost.DEF_EXPOSURE_TIME_BLUE
+
   override def getSite: JSet[Site] = {
     Site.SET_GS
   }
@@ -38,21 +44,29 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     Ghost.PropertyMap
   }
 
-  /** ParamSet methods.
-    *
-    * We don't have to override these, as SPInstObsComp handles our only property
-    * right now, i.e. POS_ANGLE_PROP, but we do so anyway as we will eventually need
-    * to add additional properties.
-    */
+  /**
+   * Paramset methods.
+   * Note that we do not call the method on the superclass, SpInstObsComp, because unlike other instruments, GHOST
+   * does not have a single exposure time: it instead has two exposure times, red and blue.
+   */
   override def getParamSet(factory: PioFactory): ParamSet = {
-    val paramSet = super.getParamSet(factory)
-    Pio.addParam(factory, paramSet, Ghost.PORT_PROP, port.name())
+    val paramSet = factory.createParamSet(getType.readableStr)
+    paramSet.setKind(ISPDataObject.PARAM_SET_KIND)
+
+    // Only write the title as a property if it has been changed.
+    if (isValidTitle) Pio.addParam(factory, paramSet, ISPDataObject.TITLE_PROP, getTitle)
+
+    Pio.addParam(factory, paramSet, InstConstants.POS_ANGLE_PROP, getPosAngleDegreesStr)
+    Pio.addParam(factory, paramSet, Ghost.EXPOSURE_TIME_RED_PROP, getRedExposureTimeAsString)
+    Pio.addParam(factory, paramSet, Ghost.EXPOSURE_TIME_BLUE_PROP, getBlueExposureTimeAsString)
     paramSet
   }
 
   override def setParamSet(paramSet: ParamSet): Unit = {
-    super.setParamSet(paramSet)
     Option(Pio.getValue(paramSet, Ghost.PORT_PROP)).map(IssPort.valueOf).foreach(setIssPort)
+    Option(Pio.getValue(paramSet, ISPDataObject.TITLE_PROP)).foreach(setTitle)
+    Option(Pio.getValue(paramSet, Ghost.EXPOSURE_TIME_RED_PROP)).foreach(setExposureTimeAsString)
+    Option(Pio.getValue(paramSet, InstConstants.POS_ANGLE_PROP)).map(_.toDouble).foreach(setPosAngleDegrees)
   }
 
   override def getSysConfig: ISysConfig = {
@@ -60,6 +74,8 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     sc.putParameter(StringParameter.getInstance(ISPDataObject.VERSION_PROP, getVersion))
     sc.putParameter(DefaultParameter.getInstance(Ghost.POS_ANGLE_PROP, getPosAngle))
     sc.putParameter(DefaultParameter.getInstance(Ghost.PORT_PROP, getIssPort))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.EXPOSURE_TIME_RED_PROP, getRedExposureTime))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.EXPOSURE_TIME_BLUE_PROP, getBlueExposureTime))
     sc
   }
 
@@ -75,9 +91,86 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
       firePropertyChange(Ghost.PORT_PROP, oldValue, newValue)
     }
   }
+
+  def getRedExposureTime: Double = redExposureTime
+  def getRedExposureTimeAsString: String = redExposureTime.toString
+  def getBlueExposureTime: Double = blueExposureTime
+  def getBlueExposureTimeAsString: String = blueExposureTime.toString
+
+  def setRedExposureTime(newValue: Double): Unit = {
+    val oldValue = getRedExposureTime
+    if (oldValue != newValue) {
+      redExposureTime = newValue
+      firePropertyChange(Ghost.EXPOSURE_TIME_RED_PROP, oldValue, newValue)
+    }
+  }
+
+  def setRedExposureTimeAsString(newValue: String): Unit =
+    setRedExposureTime(newValue.toDouble)
+
+  def setBlueExposureTime(newValue: Double): Unit = {
+    val oldValue = getBlueExposureTime
+    if (oldValue != newValue) {
+      blueExposureTime = newValue
+      firePropertyChange(Ghost.EXPOSURE_TIME_BLUE_PROP, oldValue, newValue)
+    }
+  }
+
+  def setBlueExposureTimeAsString(newValue: String): Unit =
+    setBlueExposureTime(newValue.toDouble)
+
+  /**
+   * Unsupported operations: GHOST has two exposure times, red and blue, and not a single exposure time like other
+   * instruments do.
+   */
+  override def getExposureTime: Double = {
+    Ghost.LOG.severe(Ghost.GhostExposureTimeErrorMessage)
+    throw new UnsupportedOperationException(Ghost.GhostExposureTimeErrorMessage)
+  }
+
+  override def getExposureTimeAsString: String = {
+    Ghost.LOG.severe(Ghost.GhostExposureTimeErrorMessage)
+    throw new UnsupportedOperationException(Ghost.GhostExposureTimeErrorMessage)
+  }
+
+  override def getTotalExposureTime(): Double = {
+    Ghost.LOG.severe(Ghost.GhostExposureTimeErrorMessage)
+    throw new UnsupportedOperationException(Ghost.GhostExposureTimeErrorMessage)
+  }
+
+  override def getTotalExposureTimeAsString(): String = {
+    Ghost.LOG.severe(Ghost.GhostExposureTimeErrorMessage)
+    throw new UnsupportedOperationException(Ghost.GhostExposureTimeErrorMessage)
+  }
+
+  override def setExposureTime(newValue: Double): Unit = {
+    Ghost.LOG.severe(Ghost.GhostExposureTimeErrorMessage)
+    throw new UnsupportedOperationException(Ghost.GhostExposureTimeErrorMessage)
+  }
+
+  override def setExposureTimeAsString(newValue: String): Unit = {
+    Ghost.LOG.severe(Ghost.GhostExposureTimeErrorMessage)
+    throw new UnsupportedOperationException(Ghost.GhostExposureTimeErrorMessage)
+  }
+
+  override def setCoadds(newValue: Int): Unit = {
+    Ghost.LOG.severe(Ghost.GhostCoaddsErrorMessage)
+    throw new UnsupportedOperationException(Ghost.GhostCoaddsErrorMessage)
+  }
+
+  override def getCoadds: Int = {
+    Ghost.LOG.severe(Ghost.GhostCoaddsErrorMessage)
+    throw new UnsupportedOperationException(Ghost.GhostCoaddsErrorMessage)
+  }
+
+  override def getCoaddsAsString: String = {
+    Ghost.LOG.severe(Ghost.GhostCoaddsErrorMessage)
+    throw new UnsupportedOperationException(Ghost.GhostCoaddsErrorMessage)
+  }
 }
 
 object Ghost {
+  val LOG: Logger = Logger.getLogger(classOf[Ghost].getName)
 
   // Unfortunately we need a Java "Supplier" and "Function" which makes it
   // awkward to create the NodeInitializer via ComponentNodeInitializer.
@@ -122,6 +215,15 @@ object Ghost {
 
   // The name of the Ghost instrument configuration.
   val INSTRUMENT_NAME_PROP: String = "GHOST"
+
+  // GHOST-specific exposure times.
+  val EXPOSURE_TIME_RED_PROP = "exposureTimeRed"
+  val DEF_EXPOSURE_TIME_RED = 10.0
+  val EXPOSURE_TIME_RED_KEY = new ItemKey(INSTRUMENT_KEY, EXPOSURE_TIME_RED_PROP)
+
+  val EXPOSURE_TIME_BLUE_PROP = "exposureTimeBlue"
+  val DEF_EXPOSURE_TIME_BLUE = 10.0
+  val EXPOSURE_TIME_BLUE_KEY = new ItemKey(INSTRUMENT_KEY, EXPOSURE_TIME_BLUE_PROP)
 
   // The names of the base position / IFUs.
   val BaseRADegrees: String  = "baseRADeg"
@@ -177,4 +279,7 @@ object Ghost {
 
   /** Currently, the instrument has no queryable configuration parameters. */
   val getInstConfigInfo: JList[InstConfigInfo] = List.empty[InstConfigInfo].asJava
+
+  val GhostExposureTimeErrorMessage: String = "Error: tried to access single exposure time for GHOST."
+  val GhostCoaddsErrorMessage: String = "Error: GHOST does not support coadds."
 }
