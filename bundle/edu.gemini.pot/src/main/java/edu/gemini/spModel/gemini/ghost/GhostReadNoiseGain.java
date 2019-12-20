@@ -55,7 +55,7 @@ public enum GhostReadNoiseGain implements StandardSpType {
         return SpTypeUtil.optionValueOf(GhostReadNoiseGain.class, tag).orElse(def);
     }
 
-    public static Option<GhostReadNoiseGain> byName(String name) {
+    public static Option<GhostReadNoiseGain> findByDisplayValue(String name) {
         for (final GhostReadNoiseGain m: values()) {
             if (m.displayValue().equals(name)) {
                 return new Some<>(m);
