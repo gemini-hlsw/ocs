@@ -11,7 +11,7 @@ object GhostParamSetCodecs {
   private val IFU1 = "ifu1"
   private val IFU2 = "ifu2"
   private val Target = "target"
-  private val ExplicitGuideFiberState = "explicitGuideFiberState"
+  private val GFState = "guideFiberState"
   private val Base = "base"
   
   implicit val GuideFiberStateParamCodec: ParamCodec[GuideFiberState] =
@@ -20,7 +20,7 @@ object GhostParamSetCodecs {
   implicit val GhostTargetParamSetCodec: ParamSetCodec[GhostTarget] =
     ParamSetCodec.initial(GhostTarget.empty)
       .withParamSet(Target, GhostTarget.target)
-      .withOptionalParam(ExplicitGuideFiberState, GhostTarget.explicitGuideFiberState)
+      .withParam(GFState, GhostTarget.guideFiberState)
 
   implicit val SingleTargetParamSetCodec: ParamSetCodec[SingleTarget] =
     ParamSetCodec.initial(emptySingleTarget)

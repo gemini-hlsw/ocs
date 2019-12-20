@@ -29,5 +29,8 @@ object AsterismTypeConverters {
       (GhostHigh, GhostHighResolutionTargetPlusSky, GhostStandard) -> GhostTargetPlusSky,
       (GhostHigh, GhostHighResolutionTargetPlusSky, GhostPRV) -> GhostHighResolutionTarget,
 
-      (GhostPRV, GhostHighResolutionTarget, GhostStandard) -> GhostSingleTarget)
+      (GhostPRV, GhostHighResolutionTarget, GhostStandard) -> GhostSingleTarget,
+
+      // This oddly happens sometimes?
+      (GhostStandard, GhostHighResolutionTarget, GhostHigh) -> GhostHighResolutionTarget)
 }

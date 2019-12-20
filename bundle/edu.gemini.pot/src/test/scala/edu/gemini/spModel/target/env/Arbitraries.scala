@@ -192,7 +192,7 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
     def ghostTargetWithCoords(c: Coordinates): Gen[GhostAsterism.GhostTarget] =
       for {
         t <- arbitrary[SiderealTarget].map(_.copy(coordinates = c)).map(new SPTarget(_))
-        f <- arbitrary[Option[GhostAsterism.GuideFiberState]]
+        f <- arbitrary[GhostAsterism.GuideFiberState]
       } yield GhostTarget(t, f)
 
     // SINGLE TARGET GENERATORS
@@ -275,7 +275,7 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
     Arbitrary {
       for {
         t <- arbitrary[SPTarget]
-        f <- arbitrary[Option[GhostAsterism.GuideFiberState]]
+        f <- arbitrary[GhostAsterism.GuideFiberState]
       } yield GhostAsterism.GhostTarget(t, f)
     }
 

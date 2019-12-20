@@ -1,14 +1,20 @@
 package jsky.app.ot.gemini.ghost
 
-import java.beans.PropertyDescriptor
+import java.awt.Font
 
+import com.jgoodies.forms.factories.DefaultComponentFactory
 import javax.swing.{DefaultComboBoxModel, JPanel}
 import edu.gemini.pot.sp.ISPObsComponent
-import edu.gemini.shared.gui.bean.{RadioPropertyCtrl, TextFieldPropertyCtrl}
+import edu.gemini.shared.gui.bean.{CheckboxPropertyCtrl, ComboPropertyCtrl, RadioPropertyCtrl, TextFieldPropertyCtrl}
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost}
+import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost, GhostAsterism, GhostBinning, GhostReadNoiseGain}
 import edu.gemini.spModel.gemini.ghost.AsterismConverters._
+import edu.gemini.spModel.gemini.ghost._
+import edu.gemini.spModel.gemini.ghost.GhostAsterism._
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.HighResolution._
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.StandardResolution._
 import edu.gemini.spModel.rich.pot.sp._
+import edu.gemini.spModel.target.SPCoordinates
 import edu.gemini.spModel.target.env.{AsterismType, ResolutionMode}
 import edu.gemini.spModel.target.env.AsterismType._
 import edu.gemini.spModel.target.env.ResolutionMode._
@@ -20,44 +26,51 @@ import scala.collection.JavaConverters._
 import scala.swing._
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing.TabbedPane.Page
-import scala.swing.event.SelectionChanged
+import scala.swing.event.{ButtonClicked, SelectionChanged}
+import scalaz._
+import Scalaz._
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.GuideFiberState.Enabled
 
 
 final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
 
   private object ui extends GridBagPanel {
+    import GhostEditor._
+
     private var row = 0
     border = ComponentEditor.PANEL_BORDER
 
-    /** Position angle components. */
-    val posAngleProp: PropertyDescriptor = Ghost.POS_ANGLE_PROP
-    val posAngleLabel: Label = new Label(posAngleProp.getDisplayName)
+    /**
+     * Position angle components.
+     **/
+    val posAngleLabel: Label = new Label("Position Angle:")
     posAngleLabel.horizontalAlignment = Alignment.Right
-    val posAngleUnits: Label = new Label("deg E of N")
-    posAngleUnits.horizontalAlignment = Alignment.Left
-    val posAngleCtrl: TextFieldPropertyCtrl[Ghost, java.lang.Double] = TextFieldPropertyCtrl.createDoubleInstance(posAngleProp, 1)
-    posAngleCtrl.setColumns(10)
-
-
-    val tfComp: Component = Component.wrap(posAngleCtrl.getTextField)
     layout(posAngleLabel) = new Constraints() {
       anchor = Anchor.NorthEast
       gridx = 0
       gridy = row
-      insets = new Insets(3, 10, 0, 20)
+      insets = new Insets(3, 10, 0, LabelPadding)
     }
-    layout(tfComp) = new Constraints() {
+
+    val posAngleCtrl: TextFieldPropertyCtrl[Ghost, java.lang.Double] = TextFieldPropertyCtrl.createDoubleInstance(Ghost.POS_ANGLE_PROP, 1)
+    posAngleCtrl.setColumns(10)
+    layout(Component.wrap(posAngleCtrl.getTextField)) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 1
       gridy = row
-      insets = new Insets(0, 0, 0, 20)
+      insets = new Insets(0, 0, 0, LabelPadding)
     }
+
+    val posAngleUnits: Label = new Label("deg E of N")
+    posAngleUnits.horizontalAlignment = Alignment.Left
     layout(posAngleUnits) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 2
       gridy = row
-      insets = new Insets(3, 0, 0, 20)
+      insets = new Insets(3, 0, 0, 0)
     }
+
+    /** Eat up all remaining horizontal space in the form. **/
     layout(new Label) = new Constraints() {
       anchor = Anchor.West
       gridx = 3
@@ -77,7 +90,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     row += 1
 
     /**
-     * RESOLUTION MODE
+     * Resolution Mode.
      */
     val resolutionModeLabel: Label = new Label("Resolution Mode:")
     resolutionModeLabel.horizontalAlignment = Alignment.Right
@@ -85,7 +98,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       anchor = Anchor.East
       gridx = 0
       gridy = row
-      insets = new Insets(12, 10, 0, 20)
+      insets = new Insets(12, 10, 0, LabelPadding)
     }
 
     /** A list of available resolution modes. */
@@ -102,12 +115,12 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       gridy = row
       gridwidth = 2
       fill = Fill.Horizontal
-      insets = new Insets(10, 0, 0, 20)
+      insets = new Insets(10, 0, 0, 0)
     }
     row += 1
 
     /**
-     * TARGET MODE
+     * Target mode.
      */
     val targetModeLabel: Label = new Label("Target Mode:")
     targetModeLabel.horizontalAlignment = Alignment.Right
@@ -115,7 +128,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       anchor = Anchor.East
       gridx = 0
       gridy = row
-      insets = new Insets(12, 10, 0, 20)
+      insets = new Insets(12, 10, 0, LabelPadding)
     }
 
     /** A list of available asterism types. */
@@ -132,19 +145,294 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     layout(asterismComboBox) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 1
-      gridwidth = 2
       gridy = row
+      gridwidth = 2
       fill = Fill.Horizontal
+      insets = new Insets(10, 0, 0, 0)
+    }
+    row += 1
+
+
+    /*****************
+     *** Detectors ***
+     *****************/
+    object detectorUI extends GridBagPanel {
+      var row = 0
+      layout(Component.wrap(DefaultComponentFactory.getInstance.createSeparator("Red Camera Detector"))) = new Constraints() {
+        gridx = 0
+        gridy = row
+        gridwidth = 7
+        anchor = Anchor.West
+        fill = Fill.Horizontal
+        insets = new Insets(15, 0, 10, 0)
+      }
+      row += 1
+
+      val redExpTimeLabel = new Label("Red Exposure Time:")
+      redExpTimeLabel.horizontalAlignment = Alignment.Right
+      layout(redExpTimeLabel) = new Constraints() {
+        anchor = Anchor.NorthEast
+        gridx = 0
+        gridy = row
+        insets = new Insets(3, 30, 0, LabelPadding)
+      }
+
+      val redExpTimeCtrl: TextFieldPropertyCtrl[Ghost, java.lang.Double] = TextFieldPropertyCtrl.createDoubleInstance(Ghost.RED_EXPOSURE_TIME_PROP, 1)
+      redExpTimeCtrl.setColumns(10)
+      layout(Component.wrap(redExpTimeCtrl.getTextField)) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 1
+        gridy = row
+        insets = new Insets(0, 0, 0, LabelPadding)
+      }
+
+      val redExpTimeUnits = new Label("sec")
+      redExpTimeUnits.horizontalAlignment = Alignment.Left
+      layout(redExpTimeUnits) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 2
+        gridy = row
+        insets = new Insets(3, 0, 0, 20)
+      }
+
+      val redBinningLabel = new Label("Spectral / Spatial Binning:")
+      redBinningLabel.horizontalAlignment = Alignment.Right
+      layout(redBinningLabel) = new Constraints() {
+        anchor = Anchor.NorthEast
+        gridx = 3
+        gridy = row
+        insets = new Insets(3, 10, 0, LabelPadding)
+      }
+
+      val redBinning: ComboPropertyCtrl[Ghost, GhostBinning] = ComboPropertyCtrl.enumInstance(Ghost.RED_BINNING_PROP)
+      layout(Component.wrap(redBinning.getComponent)) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 4
+        gridy = row
+        fill = Fill.Horizontal
+        insets = new Insets(0, 0, 0, 0)
+      }
+      row += 1
+
+      val redReadNoiseGain: RadioPropertyCtrl[Ghost, GhostReadNoiseGain] = new RadioPropertyCtrl[Ghost, GhostReadNoiseGain](Ghost.RED_READ_NOISE_GAIN_PROP)
+      layout(Component.wrap(redReadNoiseGain.getComponent)) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 0
+        gridy = row
+        gridwidth = 7
+        fill = Fill.Horizontal
+        insets = new Insets(15, 30, 0, 0)
+      }
+      row += 1
+
+      layout(Component.wrap(DefaultComponentFactory.getInstance.createSeparator("Blue Camera Detector"))) = new Constraints() {
+        gridx = 0
+        gridy = row
+        gridwidth = 7
+        anchor = Anchor.West
+        fill = Fill.Horizontal
+        insets = new Insets(15, 0, 10, 0)
+      }
+      row += 1
+
+      val blueExpTimeLabel = new Label("Blue Exposure Time:")
+      blueExpTimeLabel.horizontalAlignment = Alignment.Right
+      layout(blueExpTimeLabel) = new Constraints() {
+        anchor = Anchor.NorthEast
+        gridx = 0
+        gridy = row
+        insets = new Insets(3, 30, 0, LabelPadding)
+      }
+      val blueExpTimeCtrl: TextFieldPropertyCtrl[Ghost, java.lang.Double] = TextFieldPropertyCtrl.createDoubleInstance(Ghost.BLUE_EXPOSURE_TIME_PROP, 1)
+      blueExpTimeCtrl.setColumns(10)
+      layout(Component.wrap(blueExpTimeCtrl.getTextField)) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 1
+        gridy = row
+        insets = new Insets(0, 0, 0, LabelPadding)
+      }
+      val blueExpTimeUnits = new Label("sec")
+      blueExpTimeUnits.horizontalAlignment = Alignment.Left
+      layout(blueExpTimeUnits) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 2
+        gridy = row
+        insets = new Insets(3, 0, 0, 20)
+      }
+
+      val blueBinningLabel = new Label("Spectral / Spatial Binning:")
+      blueBinningLabel.horizontalAlignment = Alignment.Right
+      layout(blueBinningLabel) = new Constraints() {
+        anchor = Anchor.NorthEast
+        gridx = 3
+        gridy = row
+        insets = new Insets(3, 10, 0, LabelPadding)
+      }
+
+      val blueBinning: ComboPropertyCtrl[Ghost, GhostBinning] = ComboPropertyCtrl.enumInstance(Ghost.BLUE_BINNING_PROP)
+      layout(Component.wrap(blueBinning.getComponent)) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 4
+        gridy = row
+        fill = Fill.Horizontal
+        insets = new Insets(2, 0, 0, 0)
+      }
+      row += 1
+
+      val blueReadNoiseGain: RadioPropertyCtrl[Ghost, GhostReadNoiseGain] = new RadioPropertyCtrl[Ghost, GhostReadNoiseGain](Ghost.BLUE_READ_NOISE_GAIN_PROP)
+      layout(Component.wrap(blueReadNoiseGain.getComponent)) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 0
+        gridy = row
+        gridwidth = 7
+        fill = Fill.Horizontal
+        insets = new Insets(15, 30, 0, 0)
+      }
+      row += 1
+    }
+
+    layout(detectorUI) = new Constraints() {
+      anchor = Anchor.NorthWest
+      gridx = 0
+      gridy = row
+      gridwidth = 4
       insets = new Insets(10, 0, 0, 20)
     }
     row += 1
 
     /**
-     * The tabbed pane containing:
-     * 1. Up / side looking selection.
+     * TABS.
      */
     val tabPane = new TabbedPane
-    val portCtrl = new RadioPropertyCtrl[Ghost, IssPort](Ghost.PORT_PROP, true)
+
+    /**
+     * The tabbed pane containing:
+     * 1. Target / guiding / binning information.
+     */
+    object targetPane extends GridBagPanel {
+      var row = 0
+      /**
+       * Enable fiber agitator
+       */
+      val enableFiberAgitatorCtrl: CheckboxPropertyCtrl[Ghost] = new CheckboxPropertyCtrl[Ghost](Ghost.ENABLE_FIBER_AGITATOR_PROP)
+      layout(Component.wrap(enableFiberAgitatorCtrl.getComponent)) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 0
+        gridy = row
+        insets = new Insets(10, 10, 0, 0)
+      }
+      row += 1
+
+      /**
+       * IFU1 information.
+       */
+      val ifu1TargetName: Label = new Label("IFU1 Target")
+      val ifu2TargetName: Label = new Label("IFU2 Target")
+      val ifu1GuideFiberCheckBox: CheckBox = new CheckBox()
+      val ifu2GuideFiberCheckBox: CheckBox = new CheckBox()
+
+      def createIFUPane(ifuNum: Int, ifuTargetName: Label, ifuGuideFiberCheckBox: CheckBox): Panel = {
+        val panel = new GridBagPanel
+        var row = 0
+
+        /** Separator. */
+        panel.layout(new Separator()) = new panel.Constraints() {
+          anchor = Anchor.West
+          fill = Fill.Horizontal
+          gridx = 0
+          gridy = row
+          gridwidth = 3
+          weightx = 1.0
+          insets = new Insets(10, 10, 0, 0)
+        }
+        row += 1
+
+        val ifuLabel: Label = new Label(f"IFU$ifuNum Target:")
+        val font: Font = ifuLabel.font
+        ifuLabel.font = font.deriveFont(font.getStyle | Font.BOLD)
+
+        panel.layout(ifuLabel) = new panel.Constraints() {
+          anchor = Anchor.NorthEast
+          gridx = 0
+          gridy = row
+          insets = new Insets(3, 0, 0, LabelPadding)
+        }
+
+        /** Placeholder for name for target. **/
+        panel.layout(ifuTargetName) = new panel.Constraints() {
+          anchor = Anchor.NorthWest
+          gridx = 1
+          gridy = row
+          insets = new Insets(3, 0, 0, 0)
+        }
+
+        /** Eat up all remaining horizontal space in the form. **/
+        layout(new Label) = new Constraints() {
+          fill = Fill.Horizontal
+          anchor = Anchor.West
+          gridx = 2
+          gridy = row
+          weightx = 1.0
+        }
+        row += 1
+
+        /** OIWFS guide star. */
+        panel.layout(new Label("Enable Guide Fibers:")) = new panel.Constraints() {
+          anchor = Anchor.NorthEast
+          gridx = 0
+          gridy = row
+          insets = new Insets(3, 0, 0, LabelPadding)
+        }
+
+        panel.layout(ifuGuideFiberCheckBox) = new panel.Constraints() {
+          anchor = Anchor.West
+          gridx = 1
+          gridy = row
+          insets = new Insets(3, 0, 0, 0)
+        }
+        row += 1
+        panel
+      }
+      row += 1
+
+      val ifu1Pane: Panel = createIFUPane(1, ifu1TargetName, ifu1GuideFiberCheckBox)
+      layout(ifu1Pane) = new Constraints() {
+        fill = Fill.Horizontal
+        anchor = Anchor.NorthWest
+        gridx = 0
+        gridy = row
+        gridwidth = 1
+        weightx = 1.0
+        insets = new Insets(0, 10, 0, 0)
+      }
+      row += 1
+
+      val ifu2Pane: Panel = createIFUPane(2, ifu2TargetName, ifu2GuideFiberCheckBox)
+      layout(ifu2Pane) = new Constraints() {
+        fill = Fill.Horizontal
+        anchor = Anchor.NorthWest
+        gridx = 0
+        gridy = row
+        gridwidth = 1
+        weightx = 1.0
+        insets = new Insets(0, 10, 0, 0)
+      }
+
+      /** Eat up the remaining horizontal space. **/
+      layout(new Label) = new Constraints() {
+        anchor = Anchor.West
+        gridx = 0
+        gridy = row
+        weightx = 1.0
+      }
+    }
+    tabPane.pages += new Page("IFUs", targetPane)
+
+    /**
+     * The tabbed pane containing:
+     * 2. Up / side looking selection.
+     */
+    val portCtrl: RadioPropertyCtrl[Ghost, IssPort] = new RadioPropertyCtrl[Ghost, IssPort](Ghost.PORT_PROP, true)
     tabPane.pages += new Page("ISS Port", makeTabPane(Component.wrap(portCtrl.getComponent)))
 
     layout(tabPane) = new Constraints() {
@@ -154,16 +442,14 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       gridwidth = 4
       gridheight = 1
       weightx = 1.0
-      weighty = 0
       fill = Fill.Horizontal
-      insets = new Insets(10, 0, 0, 0)
+      insets = new Insets(30, 0, 0, 0)
     }
-
+    row += 1
 
     /**
      * Eats up the blank space at the bottom of the form.
      */
-
     layout(new Label) = new Constraints() {
       anchor = Anchor.North
       gridx = 0
@@ -174,11 +460,12 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     /**
      * A panel to house one component in a tab.
      */
-    private def makeTabPane(component: Component): Panel = {
+    private def makeTabPane(component: Component, addGlue: Boolean = true): Panel = {
       var panel = new BoxPanel(Orientation.Vertical)
       panel.border = ComponentEditor.TAB_PANEL_BORDER
       panel.contents += component
-      panel.contents += Swing.VGlue
+      if (addGlue)
+        panel.contents += Swing.VGlue
       panel
     }
 
@@ -189,7 +476,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
      */
     listenTo(resolutionModeComboBox.selection)
     reactions += {
-      case SelectionChanged(`resolutionModeComboBox`) =>
+      case SelectionChanged(`resolutionModeComboBox`) => Swing.onEDT {
         // The old resolution mode.
         deafTo(resolutionModeComboBox.selection)
         deafTo(asterismComboBox.selection)
@@ -219,6 +506,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
 
         listenTo(asterismComboBox.selection)
         listenTo(resolutionModeComboBox.selection)
+      }
     }
 
     /**
@@ -227,9 +515,10 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
      */
     listenTo(asterismComboBox.selection)
     reactions += {
-      case SelectionChanged(`asterismComboBox`) =>
+      case SelectionChanged(`asterismComboBox`) => Swing.onEDT {
         val converter = asterismComboBox.selection.item.converter.asScalaOpt
         converter.foreach(convertAsterism)
+      }
     }
 
     def resolutionMode: ResolutionMode =
@@ -249,7 +538,58 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         toc.setTargetEnvironment(env)
         oc.setDataObject(toc)
         asterismComboBox.enabled = true
+        initIFUs()
       }
+    }
+
+    /**
+     * When the guide fiber state changes, we must change the asterism type to reflect this.
+     */
+    // Get the state from the checkbox.
+    def gfs(box: CheckBox): GuideFiberState =
+      //box.selected ? GuideFiberState.Enabled | GuideFiberState.Disabled
+      if (box.selected) GuideFiberState.Enabled
+      else GuideFiberState.Disabled
+
+    /**
+     * Change the guide fiber type of the IFU1s.
+     */
+    def changeIFU1GuideFiberState(state: GuideFiberState): Unit = Swing.onEDT {
+      for {
+        oc <- Option(getContextTargetObsComp)
+        toc <- Option(oc.getDataObject).collect { case t: TargetObsComp => t }
+      } {
+        val env = toc.getTargetEnvironment
+        toc.getTargetEnvironment.getAsterism match {
+          case a: SingleTarget => toc.setTargetEnvironment(env.setAsterism((SingleTargetIFU1 >=> GhostTarget.guideFiberState).set(a, state)))
+          case a: DualTarget => toc.setTargetEnvironment(env.setAsterism((DualTargetIFU1 >=> GhostTarget.guideFiberState).set(a, state)))
+          case a: TargetPlusSky => toc.setTargetEnvironment(env.setAsterism((TargetPlusSkyIFU1 >=> GhostTarget.guideFiberState).set(a, state)))
+          case a: HighResolutionTarget => toc.setTargetEnvironment(env.setAsterism((HRTargetIFU1 >=> GhostTarget.guideFiberState).set(a, state)))
+          case a: HighResolutionTargetPlusSky => toc.setTargetEnvironment(env.setAsterism((HRTargetPlusSkyIFU1 >=> GhostTarget.guideFiberState).set(a, state)))
+        }
+        oc.setDataObject(toc)
+      }
+    }
+
+    def changeIFU2GuideFiberState(state: GuideFiberState): Unit = Swing.onEDT {
+      for {
+        oc <- Option(getContextTargetObsComp)
+        toc <- Option(oc.getDataObject).collect { case t: TargetObsComp => t }
+      } {
+        val env = toc.getTargetEnvironment
+        toc.getTargetEnvironment.getAsterism match {
+          case a: DualTarget => toc.setTargetEnvironment(env.setAsterism((DualTargetIFU2 >=> GhostTarget.guideFiberState).set(a, state)))
+          case a: SkyPlusTarget => toc.setTargetEnvironment(env.setAsterism((SkyPlusTargetIFU2 >=> GhostTarget.guideFiberState).set(a, state)))
+        }
+        oc.setDataObject(toc)
+      }
+    }
+
+    reactions += {
+      case ButtonClicked(targetPane.ifu1GuideFiberCheckBox) =>
+        changeIFU1GuideFiberState(gfs(targetPane.ifu1GuideFiberCheckBox))
+      case ButtonClicked(targetPane.ifu2GuideFiberCheckBox) =>
+        changeIFU2GuideFiberState(gfs(targetPane.ifu2GuideFiberCheckBox))
     }
 
     def initialize(): Unit = Swing.onEDT {
@@ -279,13 +619,65 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       listenTo(asterismComboBox.selection)
       listenTo(resolutionModeComboBox.selection)
     }
+
+    def initIFUs(): Unit = Swing.onEDT {
+      val Sky = SPCoordinates.Name
+      Option(getContextTargetEnv).foreach(env => {
+        val asterism = env.getAsterism
+        val (name1: String, name2Opt: Option[String]) = asterism match {
+          case GhostAsterism.SingleTarget(gt, _)                   => (gt.spTarget.getName, None)
+          case GhostAsterism.DualTarget(gt1, gt2, _)               => (gt1.spTarget.getName, Some(gt2.spTarget.getName))
+          case GhostAsterism.TargetPlusSky(gt1, _, _)              => (gt1.spTarget.getName, Some(Sky))
+          case GhostAsterism.SkyPlusTarget(_, gt2, _)              => (Sky, Some(gt2.spTarget.getName))
+          case GhostAsterism.HighResolutionTarget(gt, _)           => (gt.spTarget.getName, None)
+          case GhostAsterism.HighResolutionTargetPlusSky(gt, _, _) => (gt.spTarget.getName, Some(Sky))
+          case _                                                   => sys.error("illegal asterism type")
+        }
+        targetPane.ifu1TargetName.text = name1
+        name2Opt.foreach(name2 => {
+          targetPane.ifu2TargetName.text = name2
+        })
+        targetPane.ifu2Pane.visible = name2Opt.isDefined
+
+        val (guideFibers1: Boolean, editableGuideFibers1: Boolean, guideFibers2: Boolean, editableGuideFibers2: Boolean) = asterism match {
+          case SingleTarget(gt, _)                   => (gt.guideFiberState === Enabled, true, false, false)
+          case GhostAsterism.DualTarget(gt1, gt2, _)               => (gt1.guideFiberState == Enabled, true, gt2.guideFiberState == Enabled, true)
+          case GhostAsterism.TargetPlusSky(gt, _, _)               => (gt.guideFiberState === Enabled, true, false, false)
+          case GhostAsterism.SkyPlusTarget(_, gt2, _)              => (false, false, gt2.guideFiberState === Enabled, true)
+          case GhostAsterism.HighResolutionTarget(gt, _)           => (gt.guideFiberState === Enabled, true, false, false)
+          case GhostAsterism.HighResolutionTargetPlusSky(gt, _, _) => (gt.guideFiberState === Enabled, true, false, false)
+          case _                                                   => sys.error("illegal asterism type")
+        }
+
+        deafTo(targetPane.ifu1GuideFiberCheckBox)
+        deafTo(targetPane.ifu2GuideFiberCheckBox)
+        targetPane.ifu1GuideFiberCheckBox.selected = guideFibers1
+        targetPane.ifu1GuideFiberCheckBox.enabled = editableGuideFibers1
+        targetPane.ifu2GuideFiberCheckBox.selected = guideFibers2
+        targetPane.ifu2GuideFiberCheckBox.enabled = editableGuideFibers2
+        listenTo(targetPane.ifu1GuideFiberCheckBox)
+        listenTo(targetPane.ifu2GuideFiberCheckBox)
+      })
+    }
   }
 
   override def getWindow: JPanel = ui.peer
 
   override def handlePostDataObjectUpdate(dataObj: Ghost): Unit = Swing.onEDT {
     ui.posAngleCtrl.setBean(dataObj)
+    ui.targetPane.enableFiberAgitatorCtrl.setBean(dataObj)
+    ui.detectorUI.redExpTimeCtrl.setBean(dataObj)
+    ui.detectorUI.redBinning.setBean(dataObj)
+    ui.detectorUI.redReadNoiseGain.setBean(dataObj)
+    ui.detectorUI.blueExpTimeCtrl.setBean(dataObj)
+    ui.detectorUI.blueBinning.setBean(dataObj)
+    ui.detectorUI.blueReadNoiseGain.setBean(dataObj)
     ui.portCtrl.setBean(dataObj)
     ui.initialize()
+    ui.initIFUs()
   }
+}
+
+object GhostEditor {
+  val LabelPadding = 15
 }

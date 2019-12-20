@@ -1,13 +1,13 @@
 package edu.gemini.spModel.gemini.ghost
 
 import edu.gemini.spModel.core._
-import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.CloudCover
 import edu.gemini.spModel.target.{SPCoordinates, SPTarget}
 import edu.gemini.spModel.target.env.{Asterism, AsterismType, ResolutionMode}
 import java.time.Instant
 
 import scalaz._
 import Scalaz._
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.GuideFiberState.Enabled
 
 /** Base trait for the three GHOST asterism types: two target, beam switching,
   * and high resolution.
@@ -39,7 +39,7 @@ object GhostAsterism {
     val enabled:  GuideFiberState = Enabled
     val disabled: GuideFiberState = Disabled
 
-    val All = NonEmptyList(enabled, disabled)
+    val All: NonEmptyList[GuideFiberState] = NonEmptyList(enabled, disabled)
 
     implicit val EqualGuideFiberState: Equal[GuideFiberState] =
       Equal.equalA[GuideFiberState]
@@ -54,12 +54,10 @@ object GhostAsterism {
 
   /** GHOST targets are associated with a guiding state (enabled or disabled), referring to
     * whether the dedicated guide fibers surrounding the science target should be used.
-    *
-    * There is a default guiding state based on magnitude, but this can be
-    * explicitly overridden.
+    * The default is enabled.
     */
   final case class GhostTarget(spTarget: SPTarget,
-                               explicitGuideFiberState: Option[GuideFiberState]) {
+                               guideFiberState: GuideFiberState) {
 
     def coordinates(when: Option[Instant]): Option[Coordinates] =
       spTarget.getCoordinates(when.map(_.toEpochMilli))
@@ -69,42 +67,12 @@ object GhostAsterism {
   }
 
   object GhostTarget {
-    val empty: GhostTarget = GhostTarget(new SPTarget, None)
+    val empty: GhostTarget = GhostTarget(new SPTarget, Enabled)
 
     val target: GhostTarget @> SPTarget =
       Lens.lensu((a, b) => a.copy(spTarget = b), _.spTarget)
-    val explicitGuideFiberState: GhostTarget @> Option[GuideFiberState] =
-      Lens.lensu((a,b) => a.copy(explicitGuideFiberState = b), _.explicitGuideFiberState)
-
-    /** The magnitude at which guide state is disabled by default at standard
-      * resolution.
-      */
-    val StandardResCutoff: Magnitude =
-      Magnitude(18.0, MagnitudeBand.B, None, MagnitudeSystem.Vega)
-
-    /** The magnitude at which guide state is disabled by default at high
-      * resolution.
-      */
-    val HighResCutoff: Magnitude =
-      Magnitude(17.0, MagnitudeBand.B, None, MagnitudeSystem.Vega)
-
-    private def defaultGuideFiberState(t: GhostTarget, cutoff: Magnitude): GuideFiberState =
-      t.spTarget.getMagnitude(MagnitudeBand.B).forall(_.value < cutoff.value) ? GuideFiberState.enabled | GuideFiberState.disabled
-
-    private def guideFiberState(t: GhostTarget, cutoff: Magnitude): GuideFiberState =
-      t.explicitGuideFiberState | defaultGuideFiberState(t, cutoff)
-
-    /** Computes the GuideFiberState for the given target and cloud cover in
-      * standard resolution mode.
-      */
-    def standardResGuideFiberState(t: GhostTarget, cc: CloudCover): GuideFiberState =
-      guideFiberState(t, cc.adjustMagnitude(StandardResCutoff))
-
-    /** Computes the GuideFiberState for the given target and cloud cover in
-      * high resolution mode.
-      */
-    def highResGuideFiberState(t: GhostTarget, cc: CloudCover): GuideFiberState =
-      guideFiberState(t, cc.adjustMagnitude(HighResCutoff))
+    val guideFiberState: GhostTarget @> GuideFiberState =
+      Lens.lensu((a, b) => a.copy(guideFiberState = b), _.guideFiberState)
   }
 
   /** GHOST standard resolution asterism type.  In this mode, one or two targets (one of which may be
@@ -135,13 +103,6 @@ object GhostAsterism {
 
     override def basePositionProperMotion: Option[ProperMotion] =
       allTargets.map(Target.pm.get).fold
-
-    def ifu1GuideFiberState(cc: CloudCover): GuideFiberState =
-      StandardResolution.guideFiberState(srifu1, cc)
-
-    def ifu2GuideFiberState(cc: CloudCover): GuideFiberState = {
-      srifu2.map(t => StandardResolution.guideFiberState(t, cc)).getOrElse(GuideFiberState.Disabled)
-    }
 
     def srifu1: Either[SPCoordinates, GhostTarget] = this match {
       case SingleTarget(t,_)    => Right(t)
@@ -189,9 +150,6 @@ object GhostAsterism {
   case class SkyPlusTarget(sky: SPCoordinates, target: GhostTarget, override val overriddenBase: Option[SPCoordinates]) extends StandardResolution
 
   object StandardResolution {
-    def guideFiberState(e: Either[SPCoordinates, GhostTarget], cc: CloudCover): GuideFiberState =
-      e.rightMap(t => GhostTarget.standardResGuideFiberState(t, cc)).right.getOrElse(GuideFiberState.Disabled)
-
     private[ghost] def interpolateCoords(c1Opt: Option[Coordinates], c2Opt: Option[Coordinates]): Option[Coordinates] = for {
       c1 <- c1Opt
       c2 <- c2Opt
@@ -255,12 +213,6 @@ object GhostAsterism {
 
     override def basePositionProperMotion: Option[ProperMotion] =
       Target.pm.get(target.spTarget.getTarget)
-
-    /** Deterimines the guide fiber state for the HRIFU1.  Typically this will
-      * be enabled since the target is bright but may be explicitly turned off.
-      */
-    def guideFiberState(cc: CloudCover): GuideFiberState =
-      GhostTarget.highResGuideFiberState(target, cc)
 
     override def copyWithClonedTargets: Asterism = this match {
       case HighResolutionTarget(t,b) => HighResolutionTarget(t.copyWithClonedTarget, b.map(_.clone))

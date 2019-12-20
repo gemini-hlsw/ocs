@@ -29,9 +29,6 @@ import scala.util.{Failure, Success, Try}
   * Note that we do not override clone since private variables are immutable.
   */
 final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvider with GhostMixin with IssPortProvider {
-  private var redExposureTime: Double = Ghost.DEF_EXPOSURE_TIME_RED
-  private var blueExposureTime: Double = Ghost.DEF_EXPOSURE_TIME_BLUE
-
   override def getSite: JSet[Site] = {
     Site.SET_GS
   }
@@ -57,8 +54,14 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     if (isValidTitle) Pio.addParam(factory, paramSet, ISPDataObject.TITLE_PROP, getTitle)
 
     Pio.addParam(factory, paramSet, InstConstants.POS_ANGLE_PROP, getPosAngleDegreesStr)
-    Pio.addParam(factory, paramSet, Ghost.EXPOSURE_TIME_RED_PROP, getRedExposureTimeAsString)
-    Pio.addParam(factory, paramSet, Ghost.EXPOSURE_TIME_BLUE_PROP, getBlueExposureTimeAsString)
+    Pio.addParam(factory, paramSet, Ghost.PORT_PROP, port.name())
+    Pio.addBooleanParam(factory, paramSet, Ghost.ENABLE_FIBER_AGITATOR_PROP.getName, enableFiberAgitator)
+    Pio.addDoubleParam(factory, paramSet, Ghost.RED_EXPOSURE_TIME_PROP.getName, redExposureTime)
+    Pio.addParam(factory, paramSet, Ghost.RED_BINNING_PROP, redBinning.name)
+    Pio.addParam(factory, paramSet, Ghost.RED_READ_NOISE_GAIN_PROP, redReadNoiseGain.name)
+    Pio.addDoubleParam(factory, paramSet, Ghost.BLUE_EXPOSURE_TIME_PROP.getName, blueExposureTime)
+    Pio.addParam(factory, paramSet, Ghost.BLUE_BINNING_PROP, blueBinning.name)
+    Pio.addParam(factory, paramSet, Ghost.BLUE_READ_NOISE_GAIN_PROP, blueReadNoiseGain.name)
     paramSet
   }
 
@@ -67,6 +70,13 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     Option(Pio.getValue(paramSet, ISPDataObject.TITLE_PROP)).foreach(setTitle)
     Option(Pio.getValue(paramSet, Ghost.EXPOSURE_TIME_RED_PROP)).foreach(setExposureTimeAsString)
     Option(Pio.getValue(paramSet, InstConstants.POS_ANGLE_PROP)).map(_.toDouble).foreach(setPosAngleDegrees)
+    setEnableFiberAgitator(Pio.getBooleanValue(paramSet, Ghost.ENABLE_FIBER_AGITATOR_PROP.getName,true))
+    setRedExposureTime(Pio.getDoubleValue(paramSet, Ghost.RED_EXPOSURE_TIME_PROP.getName, InstConstants.DEF_EXPOSURE_TIME))
+    Option(Pio.getValue(paramSet, Ghost.RED_BINNING_PROP)).map(GhostBinning.valueOf).foreach(setRedBinning)
+    Option(Pio.getValue(paramSet, Ghost.RED_READ_NOISE_GAIN_PROP)).map(GhostReadNoiseGain.valueOf).foreach(setRedReadNoiseGain)
+    setBlueExposureTime(Pio.getDoubleValue(paramSet, Ghost.BLUE_EXPOSURE_TIME_PROP.getName, InstConstants.DEF_EXPOSURE_TIME))
+    Option(Pio.getValue(paramSet, Ghost.BLUE_BINNING_PROP)).map(GhostBinning.valueOf).foreach(setBlueBinning)
+    Option(Pio.getValue(paramSet, Ghost.BLUE_READ_NOISE_GAIN_PROP)).map(GhostReadNoiseGain.valueOf).foreach(setBlueReadNoiseGain)
   }
 
   override def getSysConfig: ISysConfig = {
@@ -76,6 +86,13 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     sc.putParameter(DefaultParameter.getInstance(Ghost.PORT_PROP, getIssPort))
     sc.putParameter(DefaultParameter.getInstance(Ghost.EXPOSURE_TIME_RED_PROP, getRedExposureTime))
     sc.putParameter(DefaultParameter.getInstance(Ghost.EXPOSURE_TIME_BLUE_PROP, getBlueExposureTime))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.ENABLE_FIBER_AGITATOR_PROP.getName, isEnableFiberAgitator))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.RED_EXPOSURE_TIME_PROP.getName, getRedExposureTime))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.RED_BINNING_PROP.getName, getRedBinning))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.RED_READ_NOISE_GAIN_PROP, getRedReadNoiseGain))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.BLUE_EXPOSURE_TIME_PROP.getName, getBlueExposureTime))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.BLUE_BINNING_PROP.getName, getBlueBinning))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.BLUE_READ_NOISE_GAIN_PROP, getBlueReadNoiseGain))
     sc
   }
 
@@ -91,34 +108,6 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
       firePropertyChange(Ghost.PORT_PROP, oldValue, newValue)
     }
   }
-
-  def getRedExposureTime: Double = redExposureTime
-  def getRedExposureTimeAsString: String = redExposureTime.toString
-  def getBlueExposureTime: Double = blueExposureTime
-  def getBlueExposureTimeAsString: String = blueExposureTime.toString
-
-  def setRedExposureTime(newValue: Double): Unit = {
-    val oldValue = getRedExposureTime
-    if (oldValue != newValue) {
-      redExposureTime = newValue
-      firePropertyChange(Ghost.EXPOSURE_TIME_RED_PROP, oldValue, newValue)
-    }
-  }
-
-  def setRedExposureTimeAsString(newValue: String): Unit =
-    setRedExposureTime(newValue.toDouble)
-
-  def setBlueExposureTime(newValue: Double): Unit = {
-    val oldValue = getBlueExposureTime
-    if (oldValue != newValue) {
-      blueExposureTime = newValue
-      firePropertyChange(Ghost.EXPOSURE_TIME_BLUE_PROP, oldValue, newValue)
-    }
-  }
-
-  def setBlueExposureTimeAsString(newValue: String): Unit =
-    setBlueExposureTime(newValue.toDouble)
-
   /**
    * Unsupported operations: GHOST has two exposure times, red and blue, and not a single exposure time like other
    * instruments do.
@@ -133,12 +122,12 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     throw new UnsupportedOperationException(Ghost.GhostExposureTimeErrorMessage)
   }
 
-  override def getTotalExposureTime(): Double = {
+  override def getTotalExposureTime: Double = {
     Ghost.LOG.severe(Ghost.GhostExposureTimeErrorMessage)
     throw new UnsupportedOperationException(Ghost.GhostExposureTimeErrorMessage)
   }
 
-  override def getTotalExposureTimeAsString(): String = {
+  override def getTotalExposureTimeAsString: String = {
     Ghost.LOG.severe(Ghost.GhostExposureTimeErrorMessage)
     throw new UnsupportedOperationException(Ghost.GhostExposureTimeErrorMessage)
   }
@@ -166,6 +155,94 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
   override def getCoaddsAsString: String = {
     Ghost.LOG.severe(Ghost.GhostCoaddsErrorMessage)
     throw new UnsupportedOperationException(Ghost.GhostCoaddsErrorMessage)
+  }
+
+  /**
+   * Fiber agitator Default is enabled.
+   */
+  private var enableFiberAgitator: Boolean = true
+  def isEnableFiberAgitator: Boolean = enableFiberAgitator
+  def setEnableFiberAgitator(newValue: Boolean): Unit = {
+    val oldValue = isEnableFiberAgitator
+    if (oldValue != newValue) {
+      enableFiberAgitator = newValue
+      firePropertyChange(Ghost.ENABLE_FIBER_AGITATOR_PROP, oldValue, newValue)
+    }
+  }
+
+  /**
+   * Detectors.
+   */
+  private var redExposureTime: Double = InstConstants.DEF_EXPOSURE_TIME
+  def getRedExposureTime: Double = redExposureTime
+  def setRedExposureTime(newValue: Double): Unit = {
+    val oldValue = getRedExposureTime
+    if (oldValue != newValue) {
+      redExposureTime = newValue
+      firePropertyChange(Ghost.RED_EXPOSURE_TIME_PROP, oldValue, newValue)
+    }
+  }
+
+  def getRedExposureTimeAsString: String =
+    getRedExposureTime.toString
+
+  def setRedExposureTimeAsString(newValue: String): Unit =
+    setRedExposureTime(newValue.toDouble)
+
+  private var redBinning: GhostBinning = GhostBinning.DEFAULT
+  def getRedBinning: GhostBinning = redBinning
+  def setRedBinning(newValue: GhostBinning): Unit = {
+    val oldValue = getRedBinning
+    if (oldValue != newValue) {
+      redBinning = newValue
+      firePropertyChange(Ghost.RED_BINNING_PROP, oldValue, newValue)
+    }
+  }
+
+  private var redReadNoiseGain: GhostReadNoiseGain = GhostReadNoiseGain.DEFAULT
+  def getRedReadNoiseGain: GhostReadNoiseGain = redReadNoiseGain
+  def setRedReadNoiseGain(newValue: GhostReadNoiseGain): Unit = {
+    val oldValue = getRedReadNoiseGain
+    if (oldValue != newValue) {
+      redReadNoiseGain = newValue
+      firePropertyChange(Ghost.RED_READ_NOISE_GAIN_PROP, oldValue, newValue)
+    }
+  }
+
+  private var blueExposureTime: Double = InstConstants.DEF_EXPOSURE_TIME
+  def getBlueExposureTime: Double = blueExposureTime
+  def setBlueExposureTime(newValue: Double): Unit = {
+    val oldValue = getBlueExposureTime
+    if (oldValue != newValue) {
+      blueExposureTime = newValue
+      firePropertyChange(Ghost.BLUE_EXPOSURE_TIME_PROP, oldValue, newValue)
+    }
+  }
+
+  def getBlueExposureTimeAsString: String =
+    getBlueExposureTime.toString
+
+  def setBlueExposureTimeAsString(newValue: String): Unit =
+    setBlueExposureTime(newValue.toDouble)
+
+  private var blueBinning: GhostBinning = GhostBinning.DEFAULT
+  def getBlueBinning: GhostBinning = blueBinning
+  def setBlueBinning(newValue: GhostBinning): Unit = {
+    val oldValue = getBlueBinning
+    if (oldValue != newValue) {
+      blueBinning = newValue
+      firePropertyChange(Ghost.BLUE_BINNING_PROP, oldValue, newValue)
+    }
+  }
+
+  private var blueReadNoiseGain: GhostReadNoiseGain = GhostReadNoiseGain.DEFAULT
+  def getBlueReadNoiseGain: GhostReadNoiseGain = blueReadNoiseGain
+  def setBlueReadNoiseGain(newValue: GhostReadNoiseGain): Unit = {
+    val oldValue = getBlueReadNoiseGain
+    if (oldValue != newValue) {
+      blueReadNoiseGain = newValue
+      firePropertyChange(Ghost.BLUE_READ_NOISE_GAIN_PROP, oldValue, newValue)
+    }
   }
 }
 
@@ -266,12 +343,26 @@ object Ghost {
   private val iter_no   = false
 
   val POS_ANGLE_PROP: PropertyDescriptor = initProp(InstConstants.POS_ANGLE_PROP, query = query_no, iter = iter_no)
-  val PORT_PROP: PropertyDescriptor = initProp(IssPortProvider.PORT_PROPERTY_NAME, query_no, iter_no)
+  val PORT_PROP: PropertyDescriptor = initProp(IssPortProvider.PORT_PROPERTY_NAME, query = query_no, iter = iter_no)
+  val ENABLE_FIBER_AGITATOR_PROP: PropertyDescriptor = initProp("enableFiberAgitator", query = query_no, iter = iter_no)
+  val RED_EXPOSURE_TIME_PROP: PropertyDescriptor = initProp("redExposureTime", query = query_no, iter = iter_no)
+  val RED_BINNING_PROP: PropertyDescriptor = initProp("redBinning", query = query_yes, iter = iter_yes)
+  val RED_READ_NOISE_GAIN_PROP: PropertyDescriptor = initProp("redReadNoiseGain", query = query_no, iter = iter_no)
+  val BLUE_EXPOSURE_TIME_PROP: PropertyDescriptor = initProp("blueExposureTime", query = query_no, iter = iter_no)
+  val BLUE_BINNING_PROP: PropertyDescriptor = initProp("blueBinning", query = query_yes, iter = iter_yes)
+  val BLUE_READ_NOISE_GAIN_PROP: PropertyDescriptor = initProp("blueReadNoiseGain", query = query_no, iter = iter_no)
 
-  // Use Java classes to be compatible with existing instruments.
   private val Properties: List[(String, PropertyDescriptor)] = List(
-    POS_ANGLE_PROP.getName -> POS_ANGLE_PROP
-  )
+    POS_ANGLE_PROP,
+    PORT_PROP,
+    ENABLE_FIBER_AGITATOR_PROP,
+    RED_EXPOSURE_TIME_PROP,
+    RED_BINNING_PROP,
+    RED_READ_NOISE_GAIN_PROP,
+    BLUE_EXPOSURE_TIME_PROP,
+    BLUE_BINNING_PROP,
+    BLUE_READ_NOISE_GAIN_PROP
+  ).map(p => (p.getName, p))
 
   private[ghost] val PropertyMap: JMap[String, PropertyDescriptor] = {
     Collections.unmodifiableMap(TreeMap(Properties: _*).asJava)

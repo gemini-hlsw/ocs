@@ -387,6 +387,7 @@
     <!--
       uiClassName="jsky.app.ot.gemini.flamingos2.EdCompInstFlamingos2"/>
     -->
+
     <UIInfo site="GS"
             dataObject="edu.gemini.spModel.gemini.ghost.Ghost"
             name="GHOST Instrument"
@@ -394,6 +395,7 @@
             imageKey="component.gif"
             shortDescription="The GHOST instrument is configured with this component."
             uiClassName="jsky.app.ot.gemini.ghost.GhostEditor"/>
+
     <UIInfo
             site="GS"
             dataObject="edu.gemini.spModel.gemini.flamingos2.SeqConfigFlamingos2"
