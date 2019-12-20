@@ -345,10 +345,10 @@ object Ghost {
   val POS_ANGLE_PROP: PropertyDescriptor = initProp(InstConstants.POS_ANGLE_PROP, query = query_no, iter = iter_no)
   val PORT_PROP: PropertyDescriptor = initProp(IssPortProvider.PORT_PROPERTY_NAME, query = query_no, iter = iter_no)
   val ENABLE_FIBER_AGITATOR_PROP: PropertyDescriptor = initProp("enableFiberAgitator", query = query_no, iter = iter_no)
-  val RED_EXPOSURE_TIME_PROP: PropertyDescriptor = initProp("redExposureTime", query = query_no, iter = iter_no)
+  val RED_EXPOSURE_TIME_PROP: PropertyDescriptor = initProp(InstConstants.GHOST_RED_EXPOSURE_TIME, query = query_no, iter = iter_no)
   val RED_BINNING_PROP: PropertyDescriptor = initProp("redBinning", query = query_yes, iter = iter_yes)
   val RED_READ_NOISE_GAIN_PROP: PropertyDescriptor = initProp("redReadNoiseGain", query = query_no, iter = iter_no)
-  val BLUE_EXPOSURE_TIME_PROP: PropertyDescriptor = initProp("blueExposureTime", query = query_no, iter = iter_no)
+  val BLUE_EXPOSURE_TIME_PROP: PropertyDescriptor = initProp(InstConstants.GHOST_BLUE_EXPOSURE_TIME, query = query_no, iter = iter_no)
   val BLUE_BINNING_PROP: PropertyDescriptor = initProp("blueBinning", query = query_yes, iter = iter_yes)
   val BLUE_READ_NOISE_GAIN_PROP: PropertyDescriptor = initProp("blueReadNoiseGain", query = query_no, iter = iter_no)
 
