@@ -12,7 +12,9 @@ final public class GhostIterDarkObsForm extends JPanel {
     final DropDownListBoxWidget<ObsClass> obsClass = new DropDownListBoxWidget<>();
     final JSpinner repeatSpinner = new JSpinner();
     final NumberBoxWidget redExposureTime = new NumberBoxWidget();
+    final JSpinner redExposureCount = new JSpinner();
     final NumberBoxWidget blueExposureTime = new NumberBoxWidget();
+    final JSpinner blueExposureCount = new JSpinner();
 
     public GhostIterDarkObsForm() {
         final CellConstraints cc = new CellConstraints();
@@ -46,6 +48,10 @@ final public class GhostIterDarkObsForm extends JPanel {
                         FormFactory.LINE_GAP_ROWSPEC,
                         FormFactory.DEFAULT_ROWSPEC,
                         FormFactory.LINE_GAP_ROWSPEC,
+                        FormFactory.DEFAULT_ROWSPEC,
+                        FormFactory.LINE_GAP_ROWSPEC,
+                        FormFactory.DEFAULT_ROWSPEC,
+                        FormFactory.LINE_GAP_ROWSPEC,
                         new RowSpec(RowSpec.FILL, Sizes.DEFAULT, FormSpec.DEFAULT_GROW)
                 }));
 
@@ -62,8 +68,19 @@ final public class GhostIterDarkObsForm extends JPanel {
         add(redExposureTime, cc.xy(5, 7));
         add(new JLabel("(sec)"), cc.xy(7, 7));
 
+        add(new JLabel("Red Exposure Count"), cc.xy(3, 9));
+        redExposureCount.setModel(new SpinnerNumberModel(1, 1, null, 1));
+        add(redExposureCount, cc.xy(5, 9));
+        add(new JLabel("X"), cc.xy(7, 9));
+
+        add(new JLabel("Blue Exposure Time"), cc.xy(3, 11));
         blueExposureTime.setToolTipText("The blue exposure time in seconds");
-        add(blueExposureTime, cc.xy(5, 8));
-        add(new JLabel("(sec)"), cc.xy(7, 8));
+        add(blueExposureTime, cc.xy(5, 11));
+        add(new JLabel("(sec)"), cc.xy(7, 11));
+
+        add(new JLabel("Blue Exposure Count"), cc.xy(3, 13));
+        blueExposureCount.setModel(new SpinnerNumberModel(1, 1, null, 1));
+        add(blueExposureCount, cc.xy(5, 13));
+        add(new JLabel("X"), cc.xy(7, 13));
     }
 }

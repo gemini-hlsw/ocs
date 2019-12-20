@@ -15,6 +15,7 @@ public class GhostEdIterDarkObs extends OtItemEditor<ISPSeqComponent, GhostSeqRe
     public GhostEdIterDarkObs() {
         form = new GhostIterDarkObsForm();
 
+        form.obsClass.setChoices(ObsClass.values());
         form.obsClass.addWatcher((ddlbw, index, val) -> getDataObject().setObsClass(ObsClass.values()[index]));
 
         sped = new SpinnerEditor(form.repeatSpinner, new SpinnerEditor.Functions() {
@@ -40,6 +41,14 @@ public class GhostEdIterDarkObs extends OtItemEditor<ISPSeqComponent, GhostSeqRe
     @Override
     public JPanel getWindow() {
         return form;
+    }
+
+    @Override
+    public void init() {
+        form.redExposureTime.setValue(getDataObject().getRedExposureTime());
+        form.blueExposureTime.setValue(getDataObject().getBlueExposureTime());
+        form.obsClass.setValue(getDataObject().getObsClass());
+        sped.init();
     }
 
     @Override

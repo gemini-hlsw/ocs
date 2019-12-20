@@ -73,4 +73,10 @@ public class InstConstants {
     public static final String SCI_BAND = "sciBand";
 
     public static final ItemKey INST_INSTRUMENT_KEY = new ItemKey(INSTRUMENT_KEY, INSTRUMENT_NAME_PROP);
+
+    // GHOST properties.
+    public static final String GHOST_RED_EXPOSURE_TIME = "redExposureTime";
+    public static final String GHOST_BLUE_EXPOSURE_TIME = "blueExposureTime";
+    public static final String GHOST_RED_EXPOSURE_COUNT = "redExposureCount";
+    public static final String GHOST_BLUE_EXPOSURE_COUNT = "blueExposureCount";
 }

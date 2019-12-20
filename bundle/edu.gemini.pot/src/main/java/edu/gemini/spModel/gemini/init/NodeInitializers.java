@@ -59,11 +59,7 @@ import edu.gemini.spModel.obscomp.SchedNote;
 import edu.gemini.spModel.obscomp.SPDataOnly;
 import edu.gemini.spModel.obscomp.SPGroup;
 import edu.gemini.spModel.obscomp.SPNote;
-import edu.gemini.spModel.seqcomp.SeqBase;
-import edu.gemini.spModel.seqcomp.SeqRepeat;
-import edu.gemini.spModel.seqcomp.SeqRepeatBiasObs;
-import edu.gemini.spModel.seqcomp.SeqRepeatDarkObs;
-import edu.gemini.spModel.seqcomp.SeqRepeatObserve;
+import edu.gemini.spModel.seqcomp.*;
 import edu.gemini.spModel.obslog.ObsExecLog;
 import edu.gemini.spModel.obslog.ObsQaLog;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
@@ -194,6 +190,7 @@ public enum NodeInitializers {
                     SeqConfigTReCS.NI,
                     SeqRepeat.NI,
                     SeqRepeatBiasObs.NI,
+                    GhostSeqRepeatDarkObs.NI,
                     SeqRepeatDarkObs.NI,
                     SeqRepeatFlatObs.NI,
                     SeqRepeatObserve.NI,

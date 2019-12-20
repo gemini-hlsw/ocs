@@ -537,6 +537,14 @@
             uiClassName="jsky.app.ot.editor.EdIterDarkObs"/>
 
     <UIInfo
+            dataObject="edu.gemini.spModel.seqcomp.GhostSeqRepeatDarkObs"
+            name="GHOST Dark Sequence Component"
+            type="iterObs"
+            imageKey="seqobs.gif"
+            shortDescription="Configure this component to generate GHOST dark exposures."
+            uiClassName="jsky.app.ot.editor.GhostEdIterDarkObs"/>
+
+    <UIInfo
             dataObject="edu.gemini.spModel.gemini.seqcomp.SeqRepeatFlatObs"
             name="Cal Unit Flat/Arc Sequence Component"
             type="iterObs"
