@@ -1,0 +1,23 @@
+name: build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - uses: olafurpg/setup-scala@v2
+      - name: Run tests
+        run: |
+          cp ./project/OcsCredentials.scala.template ./project/OcsCredentials.scala
+          csbt -q -J-Djava.util.logging.config.file=logging.properties -J-Dedu.gemini.ocs.build.ping test:compile test
+      - name: Build on 2.13
+        run: |
+          cp ./project/OcsCredentials.scala.template ./project/OcsCredentials.scala
+          csbt -q -J-Djava.util.logging.config.file=logging.properties -J-Dedu.gemini.ocs.build.ping ++2.13.1 bundle_edu_gemini_model_p1_pdf/publishLocal bundle_edu_gemini_model_p1_targetio/publishLocal bundle_edu_gemini_model_p1/publishLocal bundle_edu_gemini_pot/publishLocal bundle_edu_gemini_seqexec_odb/publishLocal bundle_edu_gemini_shared_skyobject/publishLocal bundle_edu_gemini_shared_util/publishLocal bundle_edu_gemini_spModel_core/publishLocal bundle_edu_gemini_spModel_io/publishLocal bundle_edu_gemini_spModel_pio/publishLocal bundle_edu_gemini_spModel_smartgcal/publishLocal bundle_edu_gemini_util_javax_mail/publishLocal bundle_edu_gemini_util_osgi/publishLocal bundle_edu_gemini_util_pdf/publishLocal bundle_edu_gemini_util_skycalc/publishLocal bundle_edu_gemini_util_ssl/publishLocal bundle_edu_gemini_util_ssl_apache/publishLocal bundle_edu_gemini_wdba_session_client/publishLocal bundle_edu_gemini_wdba_shared/publishLocal bundle_edu_gemini_wdba_xmlrpc_api/publishLocal bundle_jsky_coords/publishLocal bundle_jsky_util/publishLocal bundle_jsky_util_gui/publishLocal bundle_edu_gemini_epics_acm/publishLocal
