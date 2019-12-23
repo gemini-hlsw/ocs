@@ -81,14 +81,14 @@ case class MacDistHandler(jre: Option[String], jreName: String) extends DistHand
       Files.walkFileTree(new File(appDir.getPath).toPath, new SimpleFileVisitor[Path]() {
         override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult = {
           if (MacDistHandler.jarMatcher.matches(file) || MacDistHandler.dylibMatcher.matches(file)) {
-            Seq("codesign", "-f", "--options", "runtime", "-v", "-s", MacDistHandler.certificateHash, file.toFile.getAbsolutePath).!
+            Seq("codesign", "-f", "--options", "runtime", "--timestamp", "-v", "-s", MacDistHandler.certificateHash, file.toFile.getAbsolutePath).!
           }
           FileVisitResult.CONTINUE
         }
       })
 
       // Now sign the jre
-      if (Seq("codesign", "-f", "--options", "runtime", "-v", "-s", MacDistHandler.certificateHash, new File(jrePluginDir, jreName).getAbsolutePath).! != 0) {
+      if (Seq("codesign", "-f", "--options", "runtime", "--timestamp", "-v", "-s", MacDistHandler.certificateHash, new File(jrePluginDir, jreName).getAbsolutePath).! != 0) {
         log.error("*** Codesign error ")
       }
 
@@ -101,7 +101,7 @@ case class MacDistHandler(jre: Option[String], jreName: String) extends DistHand
       })
 
       // Finally sign the app
-      if (Seq("codesign", "-f", "--options", "runtime", "-v", "-s", MacDistHandler.certificateHash, appDir.getPath).! != 0) {
+      if (Seq("codesign", "-f", "--options", "runtime", "--timestamp", "-v", "-s", MacDistHandler.certificateHash, appDir.getPath).! != 0) {
         log.error("*** Codesign error")
       }
     }
