@@ -4,7 +4,7 @@ name := "ocs"
 
 organization in Global := "edu.gemini.ocs"
 
-ocsVersion in ThisBuild := OcsVersion("2020A", true, 1, 3, 1)
+ocsVersion in ThisBuild := OcsVersion("2020A", true, 1, 1, 1)
 
 pitVersion in ThisBuild := OcsVersion("2020A", false, 1, 1, 0)
 
