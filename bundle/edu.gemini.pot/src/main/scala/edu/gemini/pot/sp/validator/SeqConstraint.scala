@@ -8,9 +8,14 @@ import scala.Some
 object SeqConstraint {
 
   // These types can occur in any sequence
-  val genericTypes = Types.initial
+  val genericTypes: Types = Types.initial
     .addBroad[ISPSeqComponent](OBSERVER)
     .addNarrow[ISPSeqComponent](ITERATOR_CALUNIT, ITERATOR_REPEAT)
+
+  def initialTypesForInstrument(ct: SPComponentType): Types = ct match {
+    case INSTRUMENT_GHOST => genericTypes - OBSERVER_DARK
+    case _                => genericTypes - OBSERVER_GHOST_DARK
+  }
 
   // Almost all instruments have their own iterator type
   def iteratorFor(ct:SPComponentType):Option[SPComponentType] = Some(ct) collect {
@@ -44,7 +49,7 @@ object SeqConstraint {
   // If the instrument has been specified, we can narrow the constraint on the sequence.
   // Otherwise anything is allowed (initially).
   def forInstrument(ct:Option[SPComponentType]):SeqConstraint = new SeqConstraint(ct.map { ct =>
-    genericTypes.addNarrow[ISPSeqComponent](offsetIteratorFor(ct) ++ iteratorFor(ct).toList : _*)
+    initialTypesForInstrument(ct).addNarrow[ISPSeqComponent](offsetIteratorFor(ct) ++ iteratorFor(ct).toList : _*)
   }.getOrElse {
     genericTypes.addBroad[ISPSeqComponent](ITERATOR)
   })
