@@ -32,7 +32,7 @@ public class GhostSeqRepeatExp extends SeqRepeat implements Serializable {
         final double oldValue = redExposureTime;
         if (oldValue != newValue) {
             redExposureTime = newValue;
-            firePropertyChange(InstConstants.GHOST_RED_EXPOSURE_TIME, oldValue, newValue);
+            firePropertyChange(Ghost$.MODULE$.RED_EXPOSURE_TIME_PROP().getName(), oldValue, newValue);
         }
     }
 
@@ -55,7 +55,7 @@ public class GhostSeqRepeatExp extends SeqRepeat implements Serializable {
         final double oldValue = blueExposureTime;
         if (oldValue != newValue) {
             blueExposureTime = newValue;
-            firePropertyChange(InstConstants.GHOST_BLUE_EXPOSURE_TIME, oldValue, newValue);
+            firePropertyChange(Ghost$.MODULE$.BLUE_EXPOSURE_TIME_PROP().getName(), oldValue, newValue);
         }
     }
 
@@ -74,9 +74,9 @@ public class GhostSeqRepeatExp extends SeqRepeat implements Serializable {
     public ParamSet getParamSet(final PioFactory factory) {
         final ParamSet paramSet = super.getParamSet(factory);
 
-        Pio.addDoubleParam(factory, paramSet, InstConstants.GHOST_RED_EXPOSURE_TIME, redExposureTime);
+        Pio.addDoubleParam(factory, paramSet, Ghost$.MODULE$.RED_EXPOSURE_TIME_PROP().getName(), redExposureTime);
         Pio.addIntParam(factory, paramSet, InstConstants.GHOST_RED_EXPOSURE_COUNT, redExposureCount);
-        Pio.addDoubleParam(factory, paramSet, InstConstants.GHOST_BLUE_EXPOSURE_TIME, blueExposureTime);
+        Pio.addDoubleParam(factory, paramSet, Ghost$.MODULE$.BLUE_EXPOSURE_TIME_PROP().getName(), blueExposureTime);
         Pio.addIntParam(factory, paramSet, InstConstants.GHOST_BLUE_EXPOSURE_COUNT, blueExposureCount);
 
         return paramSet;
@@ -86,9 +86,9 @@ public class GhostSeqRepeatExp extends SeqRepeat implements Serializable {
     public void setParamSet(final ParamSet paramSet) {
         super.setParamSet(paramSet);
 
-        setRedExposureTime(Pio.getDoubleValue(paramSet, InstConstants.GHOST_RED_EXPOSURE_TIME, InstConstants.DEF_EXPOSURE_TIME));
+        setRedExposureTime(Pio.getDoubleValue(paramSet, Ghost$.MODULE$.RED_EXPOSURE_TIME_PROP().getName(), InstConstants.DEF_EXPOSURE_TIME));
         setRedExposureCount(Pio.getIntValue(paramSet, InstConstants.GHOST_RED_EXPOSURE_COUNT, InstConstants.DEF_REPEAT_COUNT));
-        setBlueExposureTime(Pio.getDoubleValue(paramSet, InstConstants.GHOST_BLUE_EXPOSURE_TIME, InstConstants.DEF_EXPOSURE_TIME));
+        setBlueExposureTime(Pio.getDoubleValue(paramSet, Ghost$.MODULE$.BLUE_EXPOSURE_TIME_PROP().getName(), InstConstants.DEF_EXPOSURE_TIME));
         setBlueExposureCount(Pio.getIntValue(paramSet, InstConstants.GHOST_BLUE_EXPOSURE_COUNT, InstConstants.DEF_REPEAT_COUNT));
     }
 }
