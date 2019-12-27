@@ -59,6 +59,8 @@ public class GhostEdIterDarkObs extends OtItemEditor<ISPSeqComponent, GhostSeqRe
         form.blueExposureTime.setValue(getDataObject().getBlueExposureTime());
         form.obsClass.setValue(getDataObject().getObsClass());
         sped.init();
+        rcSped.init();
+        bcSped.init();
     }
 
     @Override

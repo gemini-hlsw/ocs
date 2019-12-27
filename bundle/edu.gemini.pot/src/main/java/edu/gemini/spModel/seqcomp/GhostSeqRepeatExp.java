@@ -52,7 +52,6 @@ public class GhostSeqRepeatExp extends SeqRepeat implements Serializable {
     public double getBlueExposureTime() {
         return blueExposureTime;
     }
-
     public void setBlueExposureTime(double newValue) {
         final double oldValue = blueExposureTime;
         if (oldValue != newValue) {
