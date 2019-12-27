@@ -68,7 +68,6 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
   override def setParamSet(paramSet: ParamSet): Unit = {
     Option(Pio.getValue(paramSet, Ghost.PORT_PROP)).map(IssPort.valueOf).foreach(setIssPort)
     Option(Pio.getValue(paramSet, ISPDataObject.TITLE_PROP)).foreach(setTitle)
-    Option(Pio.getValue(paramSet, Ghost.EXPOSURE_TIME_RED_PROP)).foreach(setExposureTimeAsString)
     Option(Pio.getValue(paramSet, InstConstants.POS_ANGLE_PROP)).map(_.toDouble).foreach(setPosAngleDegrees)
     setEnableFiberAgitator(Pio.getBooleanValue(paramSet, Ghost.ENABLE_FIBER_AGITATOR_PROP.getName,true))
     setRedExposureTime(Pio.getDoubleValue(paramSet, Ghost.RED_EXPOSURE_TIME_PROP.getName, InstConstants.DEF_EXPOSURE_TIME))
@@ -84,8 +83,6 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     sc.putParameter(StringParameter.getInstance(ISPDataObject.VERSION_PROP, getVersion))
     sc.putParameter(DefaultParameter.getInstance(Ghost.POS_ANGLE_PROP, getPosAngle))
     sc.putParameter(DefaultParameter.getInstance(Ghost.PORT_PROP, getIssPort))
-    sc.putParameter(DefaultParameter.getInstance(Ghost.EXPOSURE_TIME_RED_PROP, getRedExposureTime))
-    sc.putParameter(DefaultParameter.getInstance(Ghost.EXPOSURE_TIME_BLUE_PROP, getBlueExposureTime))
     sc.putParameter(DefaultParameter.getInstance(Ghost.ENABLE_FIBER_AGITATOR_PROP.getName, isEnableFiberAgitator))
     sc.putParameter(DefaultParameter.getInstance(Ghost.RED_EXPOSURE_TIME_PROP.getName, getRedExposureTime))
     sc.putParameter(DefaultParameter.getInstance(Ghost.RED_BINNING_PROP.getName, getRedBinning))
@@ -294,11 +291,11 @@ object Ghost {
   val INSTRUMENT_NAME_PROP: String = "GHOST"
 
   // GHOST-specific exposure times.
-  val EXPOSURE_TIME_RED_PROP = "exposureTimeRed"
+  val EXPOSURE_TIME_RED_PROP = "redExposureTime"
   val DEF_EXPOSURE_TIME_RED = 10.0
   val EXPOSURE_TIME_RED_KEY = new ItemKey(INSTRUMENT_KEY, EXPOSURE_TIME_RED_PROP)
 
-  val EXPOSURE_TIME_BLUE_PROP = "exposureTimeBlue"
+  val EXPOSURE_TIME_BLUE_PROP = "blueexposureTime"
   val DEF_EXPOSURE_TIME_BLUE = 10.0
   val EXPOSURE_TIME_BLUE_KEY = new ItemKey(INSTRUMENT_KEY, EXPOSURE_TIME_BLUE_PROP)
 
