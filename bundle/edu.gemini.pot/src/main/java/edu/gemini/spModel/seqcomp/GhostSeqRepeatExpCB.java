@@ -42,7 +42,7 @@ public class GhostSeqRepeatExpCB extends AbstractSeqComponentCB {
     @Override
     protected void thisReset(Map<String, Object> options) {
         _curCount = 0;
-        final GhostIExpSeqComponent c = (GhostIExpSeqComponent) getDataObject();
+        final GhostExpTimeSeqComponent c = (GhostExpTimeSeqComponent) getDataObject();
         _max = c.getStepCount();
         _limit = SeqRepeatCbOptions.getCollapseRepeat(options) ? 1 : _max;
         _objectName = c.getType().readableStr;
@@ -55,7 +55,7 @@ public class GhostSeqRepeatExpCB extends AbstractSeqComponentCB {
 
     protected void thisApplyNext(IConfig config, IConfig prevFull) {
         ++_curCount;
-        final GhostIExpSeqComponent c = (GhostIExpSeqComponent) getDataObject();
+        final GhostExpSeqComponent c = (GhostExpSeqComponent) getDataObject();
         config.putParameter(SYSTEM_NAME,
                 StringParameter.getInstance(InstConstants.OBSERVE_TYPE_PROP,
                         c.getObserveType()));
