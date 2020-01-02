@@ -549,7 +549,7 @@ def gsodbtest(version: Version) = AppConfig(
     "edu.gemini.dataman.gsa.summit.host" -> "cpofits-lv1.cl.gemini.edu",
     "edu.gemini.oodb.mail.smtpHost"      -> "smtp.cl.gemini.edu",
     "edu.gemini.util.trpc.name"          -> "Gemini South ODB (Test)",
-    "osgi.shell.telnet.ip"               -> "172.17.55.77"
+    "osgi.shell.telnet.ip"               -> "172.16.76.31"
   )
 ) extending List(odbtest(version), gsodbtest_credentials(version))
 
