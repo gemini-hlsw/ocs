@@ -29,13 +29,13 @@ public class SeqRepeatFlatObs extends SeqRepeatCoaddExp
     public static final SPComponentType SP_TYPE = SPComponentType.OBSERVER_GEMFLAT;
 
     public static final ISPNodeInitializer<ISPSeqComponent, SeqRepeatFlatObs> NI =
-        new ComponentNodeInitializer<>(SP_TYPE, () -> new SeqRepeatFlatObs(), c -> new SeqRepeatFlatObsCB(c));
+        new ComponentNodeInitializer<>(SP_TYPE, SeqRepeatFlatObs::new, SeqRepeatFlatObsCB::new);
 
     public static final String OBSERVE_TYPE = InstConstants.DARK_OBSERVE_TYPE;
 
     // -- Private variables --
 
-    private Set<Lamp> _lamps = new TreeSet<Lamp>();
+    private Set<Lamp> _lamps = new TreeSet<>();
     private Shutter _shutter = Shutter.DEFAULT;
     private Filter _filter = Filter.DEFAULT;
     private Diffuser _diffuser = Diffuser.DEFAULT;
@@ -50,7 +50,7 @@ public class SeqRepeatFlatObs extends SeqRepeatCoaddExp
 
     public Object clone() {
         SeqRepeatFlatObs copy = (SeqRepeatFlatObs)super.clone();
-        copy._lamps = new TreeSet<Lamp>(_lamps);
+        copy._lamps = new TreeSet<>(_lamps);
         return copy;
     }
 
@@ -81,7 +81,7 @@ public class SeqRepeatFlatObs extends SeqRepeatCoaddExp
      * Return the selected lamps (one lamp or one or more arcs)
      */
     public Set<Lamp> getLamps() {
-        return new TreeSet<Lamp>(_lamps);
+        return new TreeSet<>(_lamps);
     }
 
     /**
@@ -89,7 +89,7 @@ public class SeqRepeatFlatObs extends SeqRepeatCoaddExp
      */
     public void setLamp(Lamp newValue) {
         Set<Lamp> oldValue = _lamps;
-        _lamps = new TreeSet<Lamp>();
+        _lamps = new TreeSet<>();
         _lamps.add(newValue);
         if (!_lamps.equals(oldValue)) {
             firePropertyChange(CalUnitConstants.LAMP_PROP, oldValue, _lamps);
@@ -102,7 +102,7 @@ public class SeqRepeatFlatObs extends SeqRepeatCoaddExp
     public void setLamps(Collection<Lamp> newValue) {
         Set<Lamp> oldValue = _lamps;
         if (!newValue.equals(oldValue)) {
-            _lamps = new TreeSet<Lamp>(newValue);
+            _lamps = new TreeSet<>(newValue);
             firePropertyChange(CalUnitConstants.LAMP_PROP, oldValue, newValue);
         }
     }

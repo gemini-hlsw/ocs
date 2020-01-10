@@ -17,6 +17,8 @@ case class Types(nodeTypes: Set[NodeType[_]]) {
 
   def -(b: SPComponentType): Types = new Types(nodeTypes.filterNot(_.ct == b))
 
+  def +(b: SPComponentType): Types = new Types(nodeTypes + NodeType(b))
+
   def addNarrow[N <: ISPNode : Manifest](cts: SPComponentType *): Types =
     (this /: cts)((ts, ct) => new Types(ts.nodeTypes + NodeType(ct)))
 

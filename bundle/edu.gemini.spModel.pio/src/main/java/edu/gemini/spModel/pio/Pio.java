@@ -127,6 +127,17 @@ public final class Pio {
     	}
     }
 
+    public static <E extends Enum<E>> E getEnumValue(PioNodeParent context, String path, Class<E> enumType) {
+        final String name = getValue(context, path);
+        if (name == null) return null;
+
+        try {
+            return Enum.valueOf(enumType, name);
+        } catch (final IllegalArgumentException iae) {
+            return null;
+        }
+    }
+
     // UX-1505.  An anonymous subclass of an enum value can't be used with
     // Enum.valueOf so we have to get its enclosing enum class in this case.
     private static <E extends Enum<E>> Class<E> getEnumClass(Class<E> c) {

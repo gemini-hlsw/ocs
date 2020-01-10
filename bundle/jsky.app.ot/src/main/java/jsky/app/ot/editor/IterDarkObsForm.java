@@ -1,18 +1,10 @@
 package jsky.app.ot.editor;
 
-		import javax.swing.*;
-		import com.jgoodies.forms.factories.*;
-		import com.jgoodies.forms.layout.*;
-		import jsky.util.gui.*;
-/*
- * Created by JFormDesigner on Mon May 30 06:51:41 CEST 2005
- */
+import javax.swing.*;
+import com.jgoodies.forms.factories.*;
+import com.jgoodies.forms.layout.*;
+import jsky.util.gui.*;
 
-
-
-/**
- * @author Allan Brighton
- */
 public class IterDarkObsForm extends JPanel {
 	public IterDarkObsForm() {
 		initComponents();

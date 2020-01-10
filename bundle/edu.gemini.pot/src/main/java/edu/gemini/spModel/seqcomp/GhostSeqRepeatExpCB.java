@@ -67,13 +67,13 @@ public class GhostSeqRepeatExpCB extends AbstractSeqComponentCB {
                 DefaultParameter.getInstance(Ghost$.MODULE$.RED_EXPOSURE_TIME_PROP(), c.getRedExposureTime()));
 
         config.putParameter(SYSTEM_NAME,
-                DefaultParameter.getInstance(GhostSeqRepeatExp.GHOST_RED_EXPOSURE_COUNT, c.getRedExposureCount()));
+                DefaultParameter.getInstance(Ghost$.MODULE$.RED_EXPOSURE_COUNT_PROP(), c.getRedExposureCount()));
 
         config.putParameter(SYSTEM_NAME,
                 DefaultParameter.getInstance(Ghost$.MODULE$.BLUE_EXPOSURE_TIME_PROP(), c.getBlueExposureTime()));
 
         config.putParameter(SYSTEM_NAME,
-                DefaultParameter.getInstance(GhostSeqRepeatExp.GHOST_BLUE_EXPOSURE_COUNT, c.getBlueExposureCount()));
+                DefaultParameter.getInstance(Ghost$.MODULE$.BLUE_EXPOSURE_COUNT_PROP(), c.getBlueExposureCount()));
 
         config.putParameter(SYSTEM_NAME,
                 StringParameter.getInstance(InstConstants.OBS_CLASS_PROP,
