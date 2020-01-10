@@ -3,13 +3,12 @@ package jsky.app.ot.gemini.ghost
 import java.awt.Font
 
 import com.jgoodies.forms.factories.DefaultComponentFactory
-import javax.swing.{DefaultComboBoxModel, JPanel}
+import javax.swing.{DefaultComboBoxModel, JPanel, JSpinner}
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.shared.gui.bean.{CheckboxPropertyCtrl, ComboPropertyCtrl, RadioPropertyCtrl, TextFieldPropertyCtrl}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost, GhostAsterism, GhostBinning, GhostReadNoiseGain}
 import edu.gemini.spModel.gemini.ghost.AsterismConverters._
-import edu.gemini.spModel.gemini.ghost._
 import edu.gemini.spModel.gemini.ghost.GhostAsterism._
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.HighResolution._
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.StandardResolution._
@@ -30,6 +29,7 @@ import scala.swing.event.{ButtonClicked, SelectionChanged}
 import scalaz._
 import Scalaz._
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.GuideFiberState.Enabled
+import jsky.app.ot.editor.SpinnerEditor
 
 
 final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
@@ -214,6 +214,40 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       }
       row += 1
 
+      val redCountLabel = new Label("Red Exposure Count:")
+      redCountLabel.horizontalAlignment = Alignment.Right
+      layout(redCountLabel) = new Constraints() {
+        anchor = Anchor.NorthEast
+        gridx = 0
+        gridy = row
+        fill = Fill.Horizontal
+        insets = new Insets(3, 30, 0, LabelPadding)
+      }
+      val redCountSpinner: JSpinner = new JSpinner()
+      layout(Component.wrap(redCountSpinner)) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 1
+        gridy = row
+        insets = new Insets(0, 0, 0, LabelPadding)
+      }
+      redCountSpinner.setPreferredSize(redExpTimeCtrl.getComponent.getPreferredSize)
+      redCountSpinner.setMinimumSize(redExpTimeCtrl.getComponent.getMinimumSize)
+      val redCountSpinnerEditor: SpinnerEditor = new SpinnerEditor(redCountSpinner, new SpinnerEditor.Functions() {
+        override def getValue: Int = getDataObject.getRedExposureCount
+        override def setValue(newValue: Int): Unit = {
+          getDataObject.setRedExposureCount(newValue)
+        }
+      })
+      val redCountUnits = new Label("X")
+      redCountUnits.horizontalAlignment = Alignment.Left
+      layout(redCountUnits) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 2
+        gridy = row
+        insets = new Insets(3, 0, 0, 20)
+      }
+      row += 1
+
       val redReadNoiseGain: RadioPropertyCtrl[Ghost, GhostReadNoiseGain] = new RadioPropertyCtrl[Ghost, GhostReadNoiseGain](Ghost.RED_READ_NOISE_GAIN_PROP)
       layout(Component.wrap(redReadNoiseGain.getComponent)) = new Constraints() {
         anchor = Anchor.NorthWest
@@ -276,6 +310,40 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         gridy = row
         fill = Fill.Horizontal
         insets = new Insets(2, 0, 0, 0)
+      }
+      row += 1
+
+      val blueCountLabel = new Label("Blue Exposure Count:")
+      blueCountLabel.horizontalAlignment = Alignment.Right
+      layout(blueCountLabel) = new Constraints() {
+        anchor = Anchor.NorthEast
+        gridx = 0
+        gridy = row
+        fill = Fill.Horizontal
+        insets = new Insets(3, 30, 0, LabelPadding)
+      }
+      val blueCountSpinner: JSpinner = new JSpinner()
+      layout(Component.wrap(blueCountSpinner)) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 1
+        gridy = row
+        insets = new Insets(0, 0, 0, LabelPadding)
+      }
+      blueCountSpinner.setPreferredSize(blueExpTimeCtrl.getComponent.getPreferredSize)
+      blueCountSpinner.setMinimumSize(blueExpTimeCtrl.getComponent.getMinimumSize)
+      val blueCountSpinnerEditor: SpinnerEditor = new SpinnerEditor(blueCountSpinner, new SpinnerEditor.Functions() {
+        override def getValue: Int = getDataObject.getBlueExposureCount
+        override def setValue(newValue: Int): Unit = {
+          getDataObject.setBlueExposureCount(newValue)
+        }
+      })
+      val blueCountUnits = new Label("X")
+      blueCountUnits.horizontalAlignment = Alignment.Left
+      layout(blueCountUnits) = new Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 2
+        gridy = row
+        insets = new Insets(3, 0, 0, 20)
       }
       row += 1
 
@@ -490,20 +558,19 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         // The asterism type.
         val asterismType = asterismComboBox.selection.item
 
+        // Update the contents of the asterism combo box to only allow asterisms of this resolution mode
+        // and make sure we are at the selected mode.
+        // We need to set a new model: we cannot modify the model directly as per Scala Swing.
+        asterismComboBox.peer.setModel(new DefaultComboBoxModel[AsterismType]())
+        newResolutionMode.asterismTypes.asScala.foreach(asterismComboBox.peer.addItem)
+
         // If they are not the same, convert the asterism type from the old resolution mode
         // to the new resolution mode and store.
         if (originalResolutionMode != newResolutionMode) {
           val newAsterismType = AsterismTypeConverters.asterismTypeConverters((originalResolutionMode, asterismType, newResolutionMode))
           newAsterismType.converter.asScalaOpt.foreach(convertAsterism)
-
-          // Update the contents of the asterism combo box to only allow asterisms of this resolution mode
-          // and make sure we are at the selected mode.
-          // We need to set a new model: we cannot modify the model directly as per Scala Swing.
-          asterismComboBox.peer.setModel(new DefaultComboBoxModel[AsterismType]())
-          newResolutionMode.asterismTypes.asScala.foreach(asterismComboBox.peer.addItem)
           asterismComboBox.selection.item = newAsterismType
         }
-
         listenTo(asterismComboBox.selection)
         listenTo(resolutionModeComboBox.selection)
       }
@@ -673,14 +740,22 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     ui.posAngleCtrl.setBean(dataObj)
     ui.targetPane.enableFiberAgitatorCtrl.setBean(dataObj)
     ui.detectorUI.redExpTimeCtrl.setBean(dataObj)
+    ui.detectorUI.redCountSpinnerEditor.init()
     ui.detectorUI.redBinning.setBean(dataObj)
     ui.detectorUI.redReadNoiseGain.setBean(dataObj)
     ui.detectorUI.blueExpTimeCtrl.setBean(dataObj)
+    ui.detectorUI.blueCountSpinnerEditor.init()
     ui.detectorUI.blueBinning.setBean(dataObj)
     ui.detectorUI.blueReadNoiseGain.setBean(dataObj)
     ui.portCtrl.setBean(dataObj)
     ui.initialize()
     ui.initIFUs()
+  }
+
+  override def cleanup(): Unit = {
+    super.cleanup()
+    ui.detectorUI.redCountSpinnerEditor.cleanup()
+    ui.detectorUI.blueCountSpinnerEditor.cleanup()
   }
 }
 

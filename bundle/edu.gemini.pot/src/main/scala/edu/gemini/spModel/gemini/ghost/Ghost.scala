@@ -14,7 +14,7 @@ import edu.gemini.spModel.gemini.init.{ComponentNodeInitializer, ObservationNI}
 import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.obscomp.{InstConfigInfo, InstConstants, SPInstObsComp}
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
-import edu.gemini.spModel.seqcomp.SeqConfigNames
+import edu.gemini.spModel.seqcomp.{GhostSeqRepeatExp, SeqConfigNames}
 import edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.obsComp.TargetObsComp
@@ -68,7 +68,6 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
   override def setParamSet(paramSet: ParamSet): Unit = {
     Option(Pio.getValue(paramSet, Ghost.PORT_PROP)).map(IssPort.valueOf).foreach(setIssPort)
     Option(Pio.getValue(paramSet, ISPDataObject.TITLE_PROP)).foreach(setTitle)
-    Option(Pio.getValue(paramSet, Ghost.EXPOSURE_TIME_RED_PROP)).foreach(setExposureTimeAsString)
     Option(Pio.getValue(paramSet, InstConstants.POS_ANGLE_PROP)).map(_.toDouble).foreach(setPosAngleDegrees)
     setEnableFiberAgitator(Pio.getBooleanValue(paramSet, Ghost.ENABLE_FIBER_AGITATOR_PROP.getName,true))
     setRedExposureTime(Pio.getDoubleValue(paramSet, Ghost.RED_EXPOSURE_TIME_PROP.getName, InstConstants.DEF_EXPOSURE_TIME))
@@ -84,8 +83,6 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     sc.putParameter(StringParameter.getInstance(ISPDataObject.VERSION_PROP, getVersion))
     sc.putParameter(DefaultParameter.getInstance(Ghost.POS_ANGLE_PROP, getPosAngle))
     sc.putParameter(DefaultParameter.getInstance(Ghost.PORT_PROP, getIssPort))
-    sc.putParameter(DefaultParameter.getInstance(Ghost.EXPOSURE_TIME_RED_PROP, getRedExposureTime))
-    sc.putParameter(DefaultParameter.getInstance(Ghost.EXPOSURE_TIME_BLUE_PROP, getBlueExposureTime))
     sc.putParameter(DefaultParameter.getInstance(Ghost.ENABLE_FIBER_AGITATOR_PROP.getName, isEnableFiberAgitator))
     sc.putParameter(DefaultParameter.getInstance(Ghost.RED_EXPOSURE_TIME_PROP.getName, getRedExposureTime))
     sc.putParameter(DefaultParameter.getInstance(Ghost.RED_BINNING_PROP.getName, getRedBinning))
@@ -183,11 +180,15 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     }
   }
 
-  def getRedExposureTimeAsString: String =
-    getRedExposureTime.toString
-
-  def setRedExposureTimeAsString(newValue: String): Unit =
-    setRedExposureTime(newValue.toDouble)
+  private var redExposureCount: Int = InstConstants.DEF_REPEAT_COUNT
+  def getRedExposureCount: Int = redExposureCount
+  def setRedExposureCount(newValue: Int): Unit = {
+    val oldValue = getRedExposureCount
+    if (oldValue != newValue) {
+      redExposureCount = newValue
+      firePropertyChange(Ghost.RED_EXPOSURE_COUNT_PROP, oldValue, newValue)
+    }
+  }
 
   private var redBinning: GhostBinning = GhostBinning.DEFAULT
   def getRedBinning: GhostBinning = redBinning
@@ -219,11 +220,16 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     }
   }
 
-  def getBlueExposureTimeAsString: String =
-    getBlueExposureTime.toString
 
-  def setBlueExposureTimeAsString(newValue: String): Unit =
-    setBlueExposureTime(newValue.toDouble)
+  private var blueExposureCount: Int = InstConstants.DEF_REPEAT_COUNT
+  def getBlueExposureCount: Int = blueExposureCount
+  def setBlueExposureCount(newValue: Int): Unit = {
+    val oldValue = getBlueExposureCount
+    if (oldValue != newValue) {
+      blueExposureCount = newValue
+      firePropertyChange(Ghost.BLUE_EXPOSURE_COUNT_PROP, oldValue, newValue)
+    }
+  }
 
   private var blueBinning: GhostBinning = GhostBinning.DEFAULT
   def getBlueBinning: GhostBinning = blueBinning
@@ -294,11 +300,11 @@ object Ghost {
   val INSTRUMENT_NAME_PROP: String = "GHOST"
 
   // GHOST-specific exposure times.
-  val EXPOSURE_TIME_RED_PROP = "exposureTimeRed"
+  val EXPOSURE_TIME_RED_PROP = "redExposureTime"
   val DEF_EXPOSURE_TIME_RED = 10.0
   val EXPOSURE_TIME_RED_KEY = new ItemKey(INSTRUMENT_KEY, EXPOSURE_TIME_RED_PROP)
 
-  val EXPOSURE_TIME_BLUE_PROP = "exposureTimeBlue"
+  val EXPOSURE_TIME_BLUE_PROP = "blueExposureTime"
   val DEF_EXPOSURE_TIME_BLUE = 10.0
   val EXPOSURE_TIME_BLUE_KEY = new ItemKey(INSTRUMENT_KEY, EXPOSURE_TIME_BLUE_PROP)
 
@@ -345,11 +351,13 @@ object Ghost {
   val POS_ANGLE_PROP: PropertyDescriptor = initProp(InstConstants.POS_ANGLE_PROP, query = query_no, iter = iter_no)
   val PORT_PROP: PropertyDescriptor = initProp(IssPortProvider.PORT_PROPERTY_NAME, query = query_no, iter = iter_no)
   val ENABLE_FIBER_AGITATOR_PROP: PropertyDescriptor = initProp("enableFiberAgitator", query = query_no, iter = iter_no)
-  val RED_EXPOSURE_TIME_PROP: PropertyDescriptor = initProp("redExposureTime", query = query_no, iter = iter_no)
-  val RED_BINNING_PROP: PropertyDescriptor = initProp("redBinning", query = query_yes, iter = iter_yes)
+  val RED_EXPOSURE_TIME_PROP: PropertyDescriptor = initProp("redExposureTime", query = query_no, iter = iter_yes)
+  val RED_EXPOSURE_COUNT_PROP: PropertyDescriptor = initProp("redExposureCount", query_no, iter_yes);
+  val RED_BINNING_PROP: PropertyDescriptor = initProp("redBinning", query = query_yes, iter = iter_no)
   val RED_READ_NOISE_GAIN_PROP: PropertyDescriptor = initProp("redReadNoiseGain", query = query_no, iter = iter_no)
-  val BLUE_EXPOSURE_TIME_PROP: PropertyDescriptor = initProp("blueExposureTime", query = query_no, iter = iter_no)
-  val BLUE_BINNING_PROP: PropertyDescriptor = initProp("blueBinning", query = query_yes, iter = iter_yes)
+  val BLUE_EXPOSURE_TIME_PROP: PropertyDescriptor = initProp("blueExposureTime", query = query_no, iter = iter_yes)
+  val BLUE_EXPOSURE_COUNT_PROP: PropertyDescriptor = initProp("blueExposureCount", query_no, iter_yes);
+  val BLUE_BINNING_PROP: PropertyDescriptor = initProp("blueBinning", query = query_yes, iter = iter_no)
   val BLUE_READ_NOISE_GAIN_PROP: PropertyDescriptor = initProp("blueReadNoiseGain", query = query_no, iter = iter_no)
 
   private val Properties: List[(String, PropertyDescriptor)] = List(
@@ -357,9 +365,11 @@ object Ghost {
     PORT_PROP,
     ENABLE_FIBER_AGITATOR_PROP,
     RED_EXPOSURE_TIME_PROP,
+    RED_EXPOSURE_COUNT_PROP,
     RED_BINNING_PROP,
     RED_READ_NOISE_GAIN_PROP,
     BLUE_EXPOSURE_TIME_PROP,
+    BLUE_EXPOSURE_COUNT_PROP,
     BLUE_BINNING_PROP,
     BLUE_READ_NOISE_GAIN_PROP
   ).map(p => (p.getName, p))

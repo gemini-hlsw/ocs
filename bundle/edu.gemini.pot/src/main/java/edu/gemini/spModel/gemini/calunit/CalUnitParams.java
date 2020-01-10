@@ -9,6 +9,7 @@ import edu.gemini.spModel.type.SpTypeUtil;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class CalUnitParams {
@@ -123,6 +124,10 @@ public final class CalUnitParams {
         public static List<Lamp> read(String formattedList) {
             String[] ar = formattedList.split(",");
             return Arrays.stream(ar).map(Lamp::getLamp).collect(Collectors.toList());
+        }
+
+        public static String write(final Set<Lamp> lamps) {
+            return show(lamps, Lamp::name);
         }
     }
 

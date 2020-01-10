@@ -34,7 +34,7 @@ public class InstGmosSouth extends
             SPComponentType.INSTRUMENT_GMOSSOUTH;
 
     public static final ISPNodeInitializer<ISPObsComponent, InstGmosSouth> NI =
-        new ComponentNodeInitializer<>(SP_TYPE, () -> new InstGmosSouth(), c -> new InstGMOSCB(c));
+        new ComponentNodeInitializer<>(SP_TYPE, InstGmosSouth::new, InstGMOSCB::new);
 
     public static final String INSTRUMENT_NAME_PROP = "GMOS-S";
 
