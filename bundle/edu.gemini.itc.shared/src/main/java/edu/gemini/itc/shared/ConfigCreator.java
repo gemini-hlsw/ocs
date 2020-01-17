@@ -145,6 +145,12 @@ public final class ConfigCreator {
     /**
      * Instrument-specific configs
      */
+    // TODO-GHOSTITC
+    public final ConfigCreatorResult createGhostConfig(final GhostParameters ghostParameters, final int numExp) {
+        final ConfigCreatorResult result = createCommonConfig(numExp);
+        return result;
+    }
+
     public final ConfigCreatorResult createGnirsConfig(final GnirsParameters gnirsParams, final int numExp) {
         final ConfigCreatorResult result = createCommonConfig(numExp);
 

@@ -29,7 +29,7 @@ public class SeqConfigFlamingos2 extends SeqConfigObsBase implements PropertyPro
             SPComponentType.ITERATOR_FLAMINGOS2;
 
     public static final ISPNodeInitializer<ISPSeqComponent, SeqConfigFlamingos2> NI =
-        new ComponentNodeInitializer<>(SP_TYPE, () -> new SeqConfigFlamingos2(), c -> new SeqConfigFlamingos2CB(c));
+        new ComponentNodeInitializer<>(SP_TYPE, SeqConfigFlamingos2::new, SeqConfigFlamingos2CB::new);
 
     public static final String SYSTEM_NAME = SeqConfigNames.INSTRUMENT_CONFIG_NAME;
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP =

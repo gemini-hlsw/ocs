@@ -123,27 +123,5 @@ public class DropDownListBoxWidget<T> extends JComboBox<T>  {
         removeAllItems();
         actionsEnabled = true;
     }
-
-    /**
-     * test main
-     */
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("DropDownListBoxWidget");
-
-        DropDownListBoxWidget<String> ddlbwe = new DropDownListBoxWidget<>();
-        ddlbwe.setChoices(new String[]{
-            "One", "Two", "Three", "Four", "Five", "Six"
-        });
-        ddlbwe.setChoices(new String[]{
-            "XOne", "XTwo", "XThree", "XFour", "XFive", "XSix"
-        });
-
-        ddlbwe.addWatcher((ddlbwe1, index, val) -> System.out.println("dropDownListBoxAction: " + ddlbwe1.getValue()));
-
-        frame.getContentPane().add(ddlbwe, BorderLayout.CENTER);
-        frame.pack();
-        frame.setVisible(true);
-        frame.addWindowListener(new BasicWindowMonitor());
-    }
 }
 

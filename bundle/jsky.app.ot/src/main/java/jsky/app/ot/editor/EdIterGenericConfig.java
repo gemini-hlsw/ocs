@@ -700,10 +700,11 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
     private void _initAvailableItems() {
         Vector<PropertyDescriptor> v = new Vector<>(getEditablePropertySet(_allPropertyMap));
 
-        Collections.sort(v, new Comparator<PropertyDescriptor>() {
+        v.sort(new Comparator<PropertyDescriptor>() {
             private boolean isEngineering(PropertyDescriptor pd) {
                 return pd.isExpert() || PropertySupport.isEngineering(pd);
             }
+
             public int compare(PropertyDescriptor pd1, PropertyDescriptor pd2) {
                 // Sort engineering items to the bottom.
                 boolean e1 = isEngineering(pd1);
@@ -1255,7 +1256,6 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
     // OT-50: If the OT is not running on-site, remove any expert/engineering options from the returned array
     private <A extends Enum<A>> List<A> engineeringFilter(List<A> list) {
         if (OTOptions.isStaff(getProgram().getProgramID())) {
-            // noinspection unchecked
             return list;
         }
         List<A> result = new ArrayList<>(list.size());

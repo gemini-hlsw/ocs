@@ -387,7 +387,16 @@
     <!--
       uiClassName="jsky.app.ot.gemini.flamingos2.EdCompInstFlamingos2"/>
     -->
-    <!--
+
+    <UIInfo
+            site="GS"
+            dataObject="edu.gemini.spModel.gemini.ghost.SeqConfigGhost"
+            name="GHOST Sequence Component"
+            type="iterComp"
+            imageKey="seqcomp.gif"
+            shortDescription="Iterate over GHOST configurations with this component."
+            uiClassName="jsky.app.ot.editor.EdIterGenericConfig"/>
+
     <UIInfo site="GS"
             dataObject="edu.gemini.spModel.gemini.ghost.Ghost"
             name="GHOST Instrument"
@@ -395,7 +404,7 @@
             imageKey="component.gif"
             shortDescription="The GHOST instrument is configured with this component."
             uiClassName="jsky.app.ot.gemini.ghost.GhostEditor"/>
-    -->
+
     <UIInfo
             site="GS"
             dataObject="edu.gemini.spModel.gemini.flamingos2.SeqConfigFlamingos2"
@@ -537,12 +546,28 @@
             uiClassName="jsky.app.ot.editor.EdIterDarkObs"/>
 
     <UIInfo
+            dataObject="edu.gemini.spModel.seqcomp.GhostSeqRepeatDarkObs"
+            name="GHOST Dark Sequence Component"
+            type="iterObs"
+            imageKey="seqobs.gif"
+            shortDescription="Configure this component to generate GHOST dark exposures."
+            uiClassName="jsky.app.ot.editor.GhostEdIterDarkObs"/>
+
+    <UIInfo
             dataObject="edu.gemini.spModel.gemini.seqcomp.SeqRepeatFlatObs"
             name="Cal Unit Flat/Arc Sequence Component"
             type="iterObs"
             imageKey="seqobs.gif"
             shortDescription="Configure the Calibration Unit with this component."
             uiClassName="jsky.app.ot.gemini.editor.EdIterFlatObs"/>
+
+    <UIInfo
+            dataObject="edu.gemini.spModel.gemini.seqcomp.GhostSeqRepeatFlatObs"
+            name="GHOST Cal Unit Flat/Arc Sequence Component"
+            type="iterObs"
+            imageKey="seqobs.gif"
+            shortDescription="Configure the GHOST Calibration Unit with this component."
+            uiClassName="jsky.app.ot.gemini.editor.GhostEdIterFlatObs"/>
 
     <UIInfo
             dataObject="edu.gemini.spModel.gemini.seqcomp.SeqRepeatOffset"

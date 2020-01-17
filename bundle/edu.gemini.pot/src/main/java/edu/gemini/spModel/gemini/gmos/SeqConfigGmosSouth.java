@@ -32,7 +32,7 @@ public class SeqConfigGmosSouth extends SeqConfigObsBase implements PropertyProv
             SPComponentType.ITERATOR_GMOSSOUTH;
 
     public static final ISPNodeInitializer<ISPSeqComponent, SeqConfigGmosSouth> NI =
-        new ComponentNodeInitializer<>(SP_TYPE, () -> new SeqConfigGmosSouth(), c -> new SeqConfigGmosSouthCB(c));
+        new ComponentNodeInitializer<>(SP_TYPE, SeqConfigGmosSouth::new, SeqConfigGmosSouthCB::new);
 
     // The instrument name
     public static final String SYSTEM_NAME = SeqConfigNames.INSTRUMENT_CONFIG_NAME;

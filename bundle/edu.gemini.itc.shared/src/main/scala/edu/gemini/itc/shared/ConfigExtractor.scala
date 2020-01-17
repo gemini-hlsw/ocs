@@ -65,6 +65,7 @@ object ConfigExtractor {
     instrument.getType match {
       case INSTRUMENT_ACQCAM                      => extractAcqCam(c)
       case INSTRUMENT_FLAMINGOS2                  => extractF2(c)
+      case INSTRUMENT_GHOST                       => extractGhost(c) // TODO-GHOSTITC: may need more here?
       case INSTRUMENT_GNIRS                       => extractGnirs(targetEnv, probe, when, c)
       case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => extractGmos(c)
       case INSTRUMENT_GSAOI                       => extractGsaoi(c, cond)
@@ -103,6 +104,17 @@ object ConfigExtractor {
       readMode    <- extract[ReadMode]      (c, ReadModeKey)
     } yield Flamingos2Parameters(filter, grism, mask, customSlit, readMode)
   }
+
+  // TODO-GHOSTITC
+  private def extractGhost(c: Config): String \/ GhostParameters = {
+    GhostParameters().right[String]
+  }
+//    for {
+//      _ <- Some(Unit)
+//    } yield {
+//      GhostParameters()
+//    }
+//  }
 
   private def extractGnirs(targetEnv: TargetEnvironment, probe: GuideProbe, when: GOption[java.lang.Long], c: Config): String \/ GnirsParameters = {
     import GNIRSParams._

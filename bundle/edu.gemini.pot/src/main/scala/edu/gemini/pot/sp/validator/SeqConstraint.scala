@@ -8,15 +8,21 @@ import scala.Some
 object SeqConstraint {
 
   // These types can occur in any sequence
-  val genericTypes = Types.initial
+  val genericTypes: Types = Types.initial
     .addBroad[ISPSeqComponent](OBSERVER)
     .addNarrow[ISPSeqComponent](ITERATOR_CALUNIT, ITERATOR_REPEAT)
+
+  def initialTypesForInstrument(ct: SPComponentType): Types = ct match {
+    case INSTRUMENT_GHOST => genericTypes - OBSERVER_DARK - OBSERVER_GEMFLAT
+    case _                => genericTypes - OBSERVER_GHOST_DARK - OBSERVER_GHOST_GEMFLAT
+  }
 
   // Almost all instruments have their own iterator type
   def iteratorFor(ct:SPComponentType):Option[SPComponentType] = Some(ct) collect {
     case INSTRUMENT_ACQCAM     => ITERATOR_ACQCAM
     case INSTRUMENT_BHROS      => ITERATOR_BHROS
     case INSTRUMENT_FLAMINGOS2 => ITERATOR_FLAMINGOS2
+    case INSTRUMENT_GHOST      => ITERATOR_GHOST
     case INSTRUMENT_GMOS       => ITERATOR_GMOS
     case INSTRUMENT_GMOSSOUTH  => ITERATOR_GMOSSOUTH
     case INSTRUMENT_GNIRS      => ITERATOR_GNIRS
@@ -44,7 +50,7 @@ object SeqConstraint {
   // If the instrument has been specified, we can narrow the constraint on the sequence.
   // Otherwise anything is allowed (initially).
   def forInstrument(ct:Option[SPComponentType]):SeqConstraint = new SeqConstraint(ct.map { ct =>
-    genericTypes.addNarrow[ISPSeqComponent](offsetIteratorFor(ct) ++ iteratorFor(ct).toList : _*)
+    initialTypesForInstrument(ct).addNarrow[ISPSeqComponent](offsetIteratorFor(ct) ++ iteratorFor(ct).toList : _*)
   }.getOrElse {
     genericTypes.addBroad[ISPSeqComponent](ITERATOR)
   })
@@ -79,6 +85,7 @@ case class SeqConstraint private(val types: Types) extends Constraint {
       case ITERATOR_ACQCAM     => forInstrument(INSTRUMENT_ACQCAM)
       case ITERATOR_BHROS      => forInstrument(INSTRUMENT_BHROS)
       case ITERATOR_FLAMINGOS2 => forInstrument(INSTRUMENT_FLAMINGOS2)
+      case ITERATOR_GHOST      => forInstrument(INSTRUMENT_GHOST)
       case ITERATOR_GMOS       => forInstrument(INSTRUMENT_GMOS)
       case ITERATOR_GMOSSOUTH  => forInstrument(INSTRUMENT_GMOSSOUTH)
       case ITERATOR_GNIRS      => forInstrument(INSTRUMENT_GNIRS)

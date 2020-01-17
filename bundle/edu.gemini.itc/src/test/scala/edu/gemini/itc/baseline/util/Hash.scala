@@ -9,6 +9,7 @@ import org.apache.ecs.xhtml.b
 // For now we need a workaround for missing hash functions on the existing Java objects.
 object Hash {
 
+  // TODO-GHOSTITC: Fill this in. Note this may not be necessary as we may consider eliminating this.
   def calc(ip: InstrumentDetails): Int = ip match {
     case p: AcquisitionCamParameters  => calc(p)
     case p: Flamingos2Parameters      => calc(p)

@@ -28,12 +28,12 @@ public class SeqRepeat extends AbstractDataObject implements ISPSeqObject {
     public static final SPComponentType SP_TYPE = SPComponentType.ITERATOR_REPEAT;
 
     public static final ISPNodeInitializer<ISPSeqComponent, SeqRepeat> NI =
-        new ComponentNodeInitializer<>(SP_TYPE, () -> new SeqRepeat(), c -> new SeqRepeatCB(c));
+        new ComponentNodeInitializer<>(SP_TYPE, SeqRepeat::new, SeqRepeatCB::new);
 
     // for serialization
     private static final long serialVersionUID = 3L;
 
-    private int _repeatCount = 1;
+    private int _repeatCount = InstConstants.DEF_REPEAT_COUNT;
 
     // Observe/charging class
     private ObsClass _obsClass;
