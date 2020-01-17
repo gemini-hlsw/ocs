@@ -11,7 +11,9 @@ import edu.gemini.spModel.pio.PioFactory;
 import java.io.Serializable;
 
 /**
- * A SeqRepeat specifically for GHOST: no coadds, two exposures.
+ * A SeqRepeat specifically for GHOST.
+ * The difference here is that GHOST does not have a single exposure time, but due to having two detectors - a red
+ * and a blue - exposure times and exposure counts for each. Additionally, GHOST does not have coadds.
  */
 public class GhostSeqRepeatExp extends SeqRepeat implements Serializable {
     private static final long serialVersionUID = 1L;

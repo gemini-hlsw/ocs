@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * A configuration builder for the Gemini CalUnit sequence component for GHOST.
  */
-public class GhostSeqRepeatFlatObsCB extends AbstractSeqComponentCB {
+final public class GhostSeqRepeatFlatObsCB extends AbstractSeqComponentCB {
     private static final long serialVersionUID = 1L;
 
     private transient int curCount;
@@ -32,6 +32,7 @@ public class GhostSeqRepeatFlatObsCB extends AbstractSeqComponentCB {
         super(seqComp);
     }
 
+    @Override
     public Object clone() {
         final GhostSeqRepeatFlatObsCB result = (GhostSeqRepeatFlatObsCB) super.clone();
         result.curCount = 0;
@@ -53,10 +54,12 @@ public class GhostSeqRepeatFlatObsCB extends AbstractSeqComponentCB {
         this.options = options;
     }
 
+    @Override
     protected boolean thisHasNext() {
         return curCount < limit;
     }
 
+    @Override
     protected void thisApplyNext(IConfig config, IConfig prevFull) {
         ++curCount;
 

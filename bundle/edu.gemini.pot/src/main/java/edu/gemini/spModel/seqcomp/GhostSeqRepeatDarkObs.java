@@ -7,7 +7,7 @@ import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
 
-public class GhostSeqRepeatDarkObs extends GhostSeqRepeatExp implements GhostExpSeqComponent {
+final public class GhostSeqRepeatDarkObs extends GhostSeqRepeatExp implements GhostExpSeqComponent {
     public static final SPComponentType SP_TYPE = SPComponentType.OBSERVER_GHOST_DARK;
 
     public static final ISPNodeInitializer<ISPSeqComponent, GhostSeqRepeatDarkObs> NI =

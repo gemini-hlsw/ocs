@@ -20,6 +20,8 @@ import java.util.*;
 
 /**
  * The GHOST flat iterator, and equivalent of SeqRepeatFlatObs.
+ * The difference here is that GHOST does not have a single exposure time, but due to having two detectors - a red
+ * and a blue - exposure times and exposure counts for each. Additionally, GHOST does not have coadds.
  */
 final public class GhostSeqRepeatFlatObs extends GhostSeqRepeatExp
     implements GhostExpSeqComponent {
@@ -65,7 +67,7 @@ final public class GhostSeqRepeatFlatObs extends GhostSeqRepeatExp
         return lamps.size();
     }
 
-    public Set<Lamp> getLamps() {
+    public TreeSet<Lamp> getLamps() {
         return new TreeSet<>(lamps);
     }
     public void setLamp(Lamp newValue) {
@@ -127,6 +129,7 @@ final public class GhostSeqRepeatFlatObs extends GhostSeqRepeatExp
         return ObsClass.PARTNER_CAL;
     }
 
+    @Override
     public ParamSet getParamSet(PioFactory factory) {
         ParamSet paramSet = super.getParamSet(factory);
 
@@ -138,6 +141,7 @@ final public class GhostSeqRepeatFlatObs extends GhostSeqRepeatExp
         return paramSet;
     }
 
+    @Override
     public void setParamSet(ParamSet paramSet) {
         super.setParamSet(paramSet);
 
