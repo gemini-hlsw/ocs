@@ -1,17 +1,21 @@
 package edu.gemini.spModel.gemini.ghost
 
 import java.beans.PropertyDescriptor
+import java.util.{ArrayList, Collection}
 import java.util.logging.Logger
 import java.util.{Collections, List => JList, Map => JMap, Set => JSet}
 
 import edu.gemini.pot.sp._
-import edu.gemini.spModel.config2.ItemKey
+import edu.gemini.shared.util.immutable.{Option => JOption}
+import edu.gemini.spModel.config2.{Config, ItemKey}
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.data.config.{DefaultParameter, DefaultSysConfig, ISysConfig, StringParameter}
 import edu.gemini.spModel.data.property.{PropertyProvider, PropertySupport}
 import edu.gemini.spModel.gemini.init.{ComponentNodeInitializer, ObservationNI}
 import edu.gemini.spModel.obs.SPObservation
+import edu.gemini.spModel.obs.plannedtime.{CommonStepCalculator, PlannedTime}
+import edu.gemini.spModel.obs.plannedtime.PlannedTime.{CategorizedTime, CategorizedTimeGroup, Category}
 import edu.gemini.spModel.obscomp.{InstConfigInfo, InstConstants, SPInstObsComp}
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
 import edu.gemini.spModel.seqcomp.SeqConfigNames
@@ -28,7 +32,8 @@ import scala.util.{Failure, Success, Try}
 /** The GHOST instrument SP model.
   * Note that we do not override clone since private variables are immutable.
   */
-final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvider with GhostMixin with IssPortProvider {
+final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvider
+  with GhostMixin with IssPortProvider with PlannedTime.StepCalculator {
   override def getSite: JSet[Site] = {
     Site.SET_GS
   }
@@ -249,6 +254,17 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
       blueReadNoiseGain = newValue
       firePropertyChange(Ghost.BLUE_READ_NOISE_GAIN_PROP, oldValue, newValue)
     }
+  }
+
+  override def calc(cur: Config, prev: JOption[Config]): CategorizedTimeGroup = {
+    val times: Collection[CategorizedTime] = new ArrayList[CategorizedTime]()
+    
+    // TODO-GHOST: Default values
+    times.add(CategorizedTime.fromSeconds(Category.READOUT, 60))
+
+    // TODO-GHOST: Have to handle exposure times differently. Max of exposure times?
+    times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, Math.max(redExposureTime * redExposureCount, blueExposureTime * blueExposureCount)))
+    CommonStepCalculator.instance.calc(cur, prev).addAll(times)
   }
 }
 
