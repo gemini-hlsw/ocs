@@ -123,7 +123,7 @@ public final class CalUnitParams {
             return Arrays.stream(ar).map(Lamp::getLamp).collect(Collectors.toList());
         }
 
-        public static String write(final TreeSet<Lamp> lamps) {
+        public static String write(final SortedSet<Lamp> lamps) {
             return show(lamps, Lamp::name);
         }
     }

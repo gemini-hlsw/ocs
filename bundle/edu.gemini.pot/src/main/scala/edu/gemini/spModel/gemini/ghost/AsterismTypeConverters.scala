@@ -14,7 +14,7 @@ object AsterismTypeConverters {
    * This is in place so that when the resolution mode is changed, a conversion can be performed so that the target
    * data is maintained.
    */
-  val asterismTypeConverters: Map[(ResolutionMode, AsterismType, ResolutionMode), AsterismType] = Map(
+  val asterismTypeConverters: ((ResolutionMode, AsterismType, ResolutionMode)) => Option[AsterismType] = Map(
       (GhostStandard, GhostSingleTarget, GhostHigh)  -> GhostHighResolutionTarget,
       (GhostStandard, GhostSingleTarget, GhostPRV)   -> GhostHighResolutionTarget,
       (GhostStandard, GhostDualTarget, GhostHigh)    -> GhostHighResolutionTargetPlusSky,
@@ -29,5 +29,5 @@ object AsterismTypeConverters {
       (GhostHigh, GhostHighResolutionTargetPlusSky, GhostStandard) -> GhostTargetPlusSky,
       (GhostHigh, GhostHighResolutionTargetPlusSky, GhostPRV) -> GhostHighResolutionTarget,
 
-      (GhostPRV, GhostHighResolutionTarget, GhostStandard) -> GhostSingleTarget)
+      (GhostPRV, GhostHighResolutionTarget, GhostStandard) -> GhostSingleTarget).lift
 }
