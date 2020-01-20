@@ -1,6 +1,7 @@
 package jsky.app.ot.gemini.ghost
 
 import java.awt.Font
+import java.util.logging.Logger
 
 import com.jgoodies.forms.factories.DefaultComponentFactory
 import javax.swing.{DefaultComboBoxModel, JPanel, JSpinner}
@@ -33,6 +34,7 @@ import jsky.app.ot.editor.SpinnerEditor
 
 
 final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
+  val LOG = Logger.getLogger(getClass.getName)
 
   private object ui extends GridBagPanel {
     import GhostEditor._
@@ -568,8 +570,17 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         // to the new resolution mode and store.
         if (originalResolutionMode != newResolutionMode) {
           val newAsterismType = AsterismTypeConverters.asterismTypeConverters((originalResolutionMode, asterismType, newResolutionMode))
-          newAsterismType.converter.asScalaOpt.foreach(convertAsterism)
-          asterismComboBox.selection.item = newAsterismType
+
+          // If we find ourselves in an inconsistent state with regards to resolution mode and asterism type, default back to standard mode, ghost single
+          // target to try to preserve as much information as possible and log a severe error message.
+          if (newAsterismType.isEmpty) {
+            LOG.severe(s"GHOST observation has incompatible resolution type ${originalResolutionMode.name} and asterism type ${asterismType.name}." +
+              "\n\tResetting to standard mode with single target.")
+            resolutionModeComboBox.selection.item = GhostStandard
+          }
+          val nat = newAsterismType.getOrElse(GhostSingleTarget)
+          nat.converter.asScalaOpt.foreach(convertAsterism)
+          asterismComboBox.selection.item = nat
         }
         listenTo(asterismComboBox.selection)
         listenTo(resolutionModeComboBox.selection)

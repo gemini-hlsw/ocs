@@ -11,10 +11,10 @@ object AsterismTypeConverters {
    * 1. An initial ResolutionMode RM1 amd an AsterismType AT1
    * 2. A desired ResolutionMode RM2
    * Find the AsterismType that best matches.
-   * This is in place so that when the resolution mode is changed, a cponversion can be performed so that the target
+   * This is in place so that when the resolution mode is changed, a conversion can be performed so that the target
    * data is maintained.
    */
-  val asterismTypeConverters: Map[(ResolutionMode, AsterismType, ResolutionMode), AsterismType] = Map(
+  val asterismTypeConverters: ((ResolutionMode, AsterismType, ResolutionMode)) => Option[AsterismType] = Map(
       (GhostStandard, GhostSingleTarget, GhostHigh)  -> GhostHighResolutionTarget,
       (GhostStandard, GhostSingleTarget, GhostPRV)   -> GhostHighResolutionTarget,
       (GhostStandard, GhostDualTarget, GhostHigh)    -> GhostHighResolutionTargetPlusSky,
@@ -29,8 +29,5 @@ object AsterismTypeConverters {
       (GhostHigh, GhostHighResolutionTargetPlusSky, GhostStandard) -> GhostTargetPlusSky,
       (GhostHigh, GhostHighResolutionTargetPlusSky, GhostPRV) -> GhostHighResolutionTarget,
 
-      (GhostPRV, GhostHighResolutionTarget, GhostStandard) -> GhostSingleTarget,
-
-      // This oddly happens sometimes?
-      (GhostStandard, GhostHighResolutionTarget, GhostHigh) -> GhostHighResolutionTarget)
+      (GhostPRV, GhostHighResolutionTarget, GhostStandard) -> GhostSingleTarget).lift
 }

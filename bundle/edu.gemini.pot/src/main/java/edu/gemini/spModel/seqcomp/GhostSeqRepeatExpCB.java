@@ -13,9 +13,9 @@ import java.util.Map;
 
 /**
  * A configuration builder for GHOST science object observe sequence component that
- * includes red and blue exposure times.
+ * includes red and blue exposure times and counts.
  */
-public class GhostSeqRepeatExpCB extends AbstractSeqComponentCB {
+final public class GhostSeqRepeatExpCB extends AbstractSeqComponentCB {
     private static final String SYSTEM_NAME = SeqConfigNames.OBSERVE_CONFIG_NAME;
     private static final long serialVersionUID = 1L;
 
