@@ -571,14 +571,16 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         if (originalResolutionMode != newResolutionMode) {
           val newAsterismType = AsterismTypeConverters.asterismTypeConverters((originalResolutionMode, asterismType, newResolutionMode))
 
+          // If we find ourselves in an inconsistent state with regards to resolution mode and asterism type, default back to standard mode, ghost single
+          // target to try to preserve as much information as possible and log a severe error message.
           if (newAsterismType.isEmpty) {
-            LOG.severe(s"GHOST observation has incompatible resolution type ${originalResolutionMode.name} and asterism type ${asterismType.name}.")
-            sys.exit()
+            LOG.severe(s"GHOST observation has incompatible resolution type ${originalResolutionMode.name} and asterism type ${asterismType.name}." +
+              "\n\tResetting to standard mode with single target.")
+            resolutionModeComboBox.selection.item = GhostStandard
           }
-          newAsterismType.foreach { nat =>
-            nat.converter.asScalaOpt.foreach(convertAsterism)
-            asterismComboBox.selection.item = nat
-          }
+          val nat = newAsterismType.getOrElse(GhostSingleTarget)
+          nat.converter.asScalaOpt.foreach(convertAsterism)
+          asterismComboBox.selection.item = nat
         }
         listenTo(asterismComboBox.selection)
         listenTo(resolutionModeComboBox.selection)
