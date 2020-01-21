@@ -44,7 +44,7 @@ def common(pv: Version) = AppConfig(
     // line out for PIT production releases.
     // (I think it seems to work if you quit sbt, change it, restart sbt,
     // clean, compile, and then build the PIT.)
-    "edu.gemini.pit.test"                     -> "false",
+    "edu.gemini.pit.test"                     -> "true",
 
     "edu.gemini.ags.host"                     -> "gnauxodb.gemini.edu",
     "edu.gemini.ags.port"                     -> "8443"
