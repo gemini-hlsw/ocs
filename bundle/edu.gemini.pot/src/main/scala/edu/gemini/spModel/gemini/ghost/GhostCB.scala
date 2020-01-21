@@ -11,9 +11,9 @@ import edu.gemini.spModel.target.{SPCoordinates, SPSkyObject, SPTarget}
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 
 import scala.collection.JavaConverters._
-
 import scalaz._
 import Scalaz._
+import edu.gemini.spModel.core.Angle
 
 /**
   * Configuration builder for GHOST.
@@ -59,10 +59,10 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
         }
         coords.foreach { c =>
           name.foreach(n => config.putParameter(systemName, StringParameter.getInstance(n, so.getName)))
-          config.putParameter(systemName, StringParameter.getInstance(raDeg, c.ra.formatDegrees))
-          config.putParameter(systemName, StringParameter.getInstance(decDeg, c.dec.formatDegrees))
-          config.putParameter(systemName, StringParameter.getInstance(raHMS, c.ra.formatHMS))
-          config.putParameter(systemName, StringParameter.getInstance(decDMS, c.dec.formatDMS))
+          config.putParameter(systemName, DefaultParameter.getInstance(raDeg, c.ra.toDegrees))
+          config.putParameter(systemName, DefaultParameter.getInstance(decDeg, c.dec.toDegrees))
+          config.putParameter(systemName, DefaultParameter.getInstance(raHMS, c.ra.formatHMS))
+          config.putParameter(systemName, DefaultParameter.getInstance(decDMS, c.dec.formatDMS))
         }
       }
 
