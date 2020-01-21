@@ -1,19 +1,22 @@
 package edu.gemini.spModel.gemini.ghost
 
+import java.time.Instant
 import java.util.{Map => JMap}
 
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.spModel.config.AbstractObsComponentCB
 import edu.gemini.spModel.data.config._
 import edu.gemini.spModel.obscomp.InstConstants
-import edu.gemini.spModel.target.SPSkyObject
+import edu.gemini.spModel.target.{SPCoordinates, SPSkyObject, SPTarget}
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 
 import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
+import edu.gemini.spModel.core.Angle
 
-/** Configuration builder for GHOST.
+/**
+  * Configuration builder for GHOST.
   */
 final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obsComp) {
   @transient private var sysConfig: Option[ISysConfig] = None
@@ -49,12 +52,18 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
       // must operate on an SPSkyObject.
       def coordParam(so: SPSkyObject, name: Option[String],
                      raDeg: String, decDeg: String,
-                     raHMS: String, decDMS: String) : Unit = so.getCoordinates(None).foreach { c =>
-        name.foreach(n => config.putParameter(systemName, StringParameter.getInstance(n, so.getName)))
-        config.putParameter(systemName, StringParameter.getInstance(raDeg,  c.ra.formatDegrees))
-        config.putParameter(systemName, StringParameter.getInstance(decDeg, c.dec.formatDegrees))
-        config.putParameter(systemName, StringParameter.getInstance(raHMS,  c.ra.formatHMS))
-        config.putParameter(systemName, StringParameter.getInstance(decDMS, c.dec.formatDMS))
+                     raHMS: String, decDMS: String) : Unit = {
+        val coords = so match {
+          case c: SPCoordinates => c.getCoordinates.some
+          case t: SPTarget => t.getProperMotion.map(_.calculateAt(t.getTarget, Instant.now())).orElse(t.getCoordinates(None))
+        }
+        coords.foreach { c =>
+          name.foreach(n => config.putParameter(systemName, StringParameter.getInstance(n, so.getName)))
+          config.putParameter(systemName, DefaultParameter.getInstance(raDeg, c.ra.toDegrees))
+          config.putParameter(systemName, DefaultParameter.getInstance(decDeg, c.dec.toDegrees))
+          config.putParameter(systemName, DefaultParameter.getInstance(raHMS, c.ra.formatHMS))
+          config.putParameter(systemName, DefaultParameter.getInstance(decDMS, c.dec.formatDMS))
+        }
       }
 
       /** Add the target information for the observation for GHOST to the
