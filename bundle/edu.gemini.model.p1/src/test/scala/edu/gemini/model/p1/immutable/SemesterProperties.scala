@@ -1,5 +1,5 @@
 package edu.gemini.model.p1.immutable
 
 trait SemesterProperties {
-  System.setProperty("edu.gemini.model.p1.schemaVersion", "2020.1.1")
+  System.setProperty("edu.gemini.model.p1.schemaVersion", "2020.2.1")
 }
