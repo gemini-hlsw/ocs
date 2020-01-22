@@ -81,7 +81,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           TimeProblems.noCFHClassical(p, s) ++
           TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
-          Semester2020AProblems(p, s).all ++
+          Semester2020AProblems(p, s).all ++ // Still apply to 2020B.
+          Semester2020BProblems(p, s).all ++
           List(incompleteInvestigator, missingObsElementCheck, emptyTargetCheck,
             emptyEphemerisCheck, singlePointEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
             badGuiding, cwfsCorrectionsIssue, badVisibility, iffyVisibility, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsIQ70Check, lgsGemsIQ85Check,
@@ -718,24 +719,38 @@ object TimeProblems {
   }
 }
 
+object ResourceIssues {
+  def resourceNotOfferedCheck[B <: BlueprintBase](p: Proposal, s: ShellAdvisor, sem: Semester, name: Option[String] = None): List[Problem] = for {
+    o <- p.observations
+    b <- o.blueprint
+    if b.isInstanceOf[B]
+    if p.semester == sem
+  } yield new Problem(Severity.Error, s"${name.getOrElse(b.name)} not offered for ${sem.display}.",
+                      "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
+}
+
+case class Semester2020BProblems(p: Proposal, s: ShellAdvisor) {
+  private val sem = Semester(2020, SemesterOption.B)
+
+  private val subaruResourcesNotOfferedCheck = for {
+    o <- p.observations
+    b <- o.blueprint
+    if b.isInstanceOf[SubaruBlueprint]
+    if p.semester == sem
+    i = b.asInstanceOf[SubaruBlueprint].instrument
+    if i == SubaruInstrument.FMOS && i != SubaruInstrument.SUPRIME_CAM && i != SubaruInstrument.COMICS
+  } yield new Problem(Severity.Error, s"Subaru ${i.value} not offered for 2020B.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
+
+  def all: List[Problem] = List(
+    subaruResourcesNotOfferedCheck,
+    ResourceIssues.resourceNotOfferedCheck[GpiBlueprint](p, s, sem, "GPI".some)).flatten
+}
+
 case class Semester2020AProblems(p: Proposal, s: ShellAdvisor) {
-  private val semester2020A = Semester(2020, SemesterOption.A)
-
-  private val texesNotOfferedCheck = for {
-    o <- p.observations
-    b <- o.blueprint
-    if b.isInstanceOf[TexesBlueprint]
-    if p.semester == semester2020A
-  } yield new Problem(Severity.Error, "Texes is not offered for 2020A.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
-
-  private val phoenixNotOfferedCheck = for {
-    o <- p.observations
-    b <- o.blueprint
-    if b.isInstanceOf[PhoenixBlueprint]
-    if p.semester == semester2020A
-  } yield new Problem(Severity.Error, "Phoenix is not offered for 2020A.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
-
-  def all: List[Problem] = List(texesNotOfferedCheck, phoenixNotOfferedCheck).flatten
+  private val sem = Semester(2020, SemesterOption.A)
+  def all: List[Problem] = List(
+    ResourceIssues.resourceNotOfferedCheck[TexesBlueprint](p, s, sem),
+    ResourceIssues.resourceNotOfferedCheck[PhoenixBlueprint](p, s, sem)).flatten
 }
 
 case class TimeProblems(p: Proposal, s: ShellAdvisor) {
