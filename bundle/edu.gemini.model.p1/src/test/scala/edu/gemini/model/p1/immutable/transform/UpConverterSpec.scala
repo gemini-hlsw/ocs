@@ -393,6 +393,16 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
 
       proposal must beSuccessful
     }
+    "proposal with Subaru COMICS and FMOS must remove them, REL-3769" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("subaru_multiple.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, _) =>
+          changes must contain(SemesterConverter2020ATo2020B.subaruComicsMessage)
+          changes must contain(SemesterConverter2020ATo2020B.subaruFmosMessage)
+      }
+    }
     "proposal with trecs blueprints must remove them, REL-1112" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_trecs.xml")))
 

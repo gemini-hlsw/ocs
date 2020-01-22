@@ -156,14 +156,14 @@ case object SemesterConverter2020ATo2020B extends SemesterConverter {
   // REL-3769 will be here when the requirements are finalized.
   val gpiRemover: TransformFunction = removeBlueprint("gpi", "GPI")._1
 
-  lazy val subaruComicsMessage: String = "Subaru proposal with COMICS has been removed."
+  val subaruComicsMessage: String = "Subaru proposal with COMICS has been removed."
   val subaruComicsTransform: TransformFunction = {
   case p @ <blueprints>{ns @ _*}</blueprints> if (p \\ "instrument").exists(_.text == "COMICS") =>
     val filtered = ns.filter{n => !(n \\ "subaru" \\ "instrument").exists(_.text == "COMICS")}
     StepResult(subaruComicsMessage, <blueprints>{filtered}</blueprints>).successNel
   }
 
-  lazy val subaruFmosMessage: String = "Subaru proposal with FMOS has been removed."
+  val subaruFmosMessage: String = "Subaru proposal with FMOS has been removed."
   val subaruFmosTransform: TransformFunction = {
     case p @ <blueprints>{ns @ _*}</blueprints> if (p \\ "instrument").exists(_.text == "FMOS") =>
       val filtered = ns.filter{n => !(n \\ "subaru" \\ "instrument").exists(_.text == "FMOS")}
