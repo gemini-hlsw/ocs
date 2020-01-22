@@ -489,6 +489,7 @@ package object immutable {
 
   type SubaruInstrument = M.SubaruInstrument
   object SubaruInstrument extends EnumObject[M.SubaruInstrument] {
+    val SUPRIME_CAM = M.SubaruInstrument.SUPRIME_CAM
     val COMICS = M.SubaruInstrument.COMICS
     val FMOS   = M.SubaruInstrument.FMOS
     val IRCS   = M.SubaruInstrument.IRCS

@@ -10,7 +10,9 @@ object Subaru {
   class InstrumentNode extends SingleSelectNode[Unit, SubaruInstrument, SubaruBlueprint](()) {
     val title       = "Subaru Instrument"
     val description = "Select the Subaru instrument."
-    def choices     = SubaruInstrument.values.toList.filterNot(_ == M.SubaruInstrument.SUPRIME_CAM)
+    // REL-3769 2020B: Subaru COMICS and FMOS not offered.
+    def choices: List[SubaruInstrument] = SubaruInstrument.values.toList
+      .filter(i => i != SubaruInstrument.FMOS && i != SubaruInstrument.SUPRIME_CAM && i != SubaruInstrument.COMICS)
 
     def apply(i: SubaruInstrument) = i match {
       case ins if ins == SubaruInstrument.forName("VISITOR") => Left(CustomNameNode(SubaruBlueprint(ins, None)))

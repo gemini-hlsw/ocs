@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2019.1.2">
+    <meta band3optionChosen="false" overrideAffiliate="false"/>
+    <semester year="2019" half="A"/>
+    <title></title>
+    <abstract></abstract>
+    <scheduling></scheduling>
+    <keywords/>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets>
+        <sidereal epoch="J2000" id="target-0">
+            <name>M  32</name>
+            <degDeg>
+                <ra>10.6742709999999760839273221790790557861328125</ra>
+                <dec>40.86516899999998031489667482674121856689453125</dec>
+            </degDeg>
+            <properMotion deltaRA="-17.0" deltaDec="-5.0"/>
+            <magnitudes>
+                <magnitude band="U" system="Vega">9.510000228881836</magnitude>
+                <magnitude band="B" system="Vega">9.029999732971191</magnitude>
+                <magnitude band="V" system="Vega">8.079999923706055</magnitude>
+                <magnitude band="J" system="Vega">6.2769999504089355</magnitude>
+                <magnitude band="H" system="Vega">5.366000175476074</magnitude>
+                <magnitude band="K" system="Vega">5.09499979019165</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-1">
+            <name>M  64</name>
+            <degDeg>
+                <ra>194.182066999999960899003781378269195556640625</ra>
+                <dec>21.68265800000000353975337930023670196533203125</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude band="B" system="Vega">9.359999656677246</magnitude>
+                <magnitude band="V" system="Vega">8.520000457763672</magnitude>
+                <magnitude band="J" system="Vega">6.267000198364258</magnitude>
+                <magnitude band="H" system="Vega">5.581999778747559</magnitude>
+                <magnitude band="K" system="Vega">5.329999923706055</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-2">
+            <name>M  64</name>
+            <degDeg>
+                <ra>194.182066999999960899003781378269195556640625</ra>
+                <dec>21.68265800000000353975337930023670196533203125</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude band="B" system="Vega">9.359999656677246</magnitude>
+                <magnitude band="V" system="Vega">8.520000457763672</magnitude>
+                <magnitude band="J" system="Vega">6.267000198364258</magnitude>
+                <magnitude band="H" system="Vega">5.581999778747559</magnitude>
+                <magnitude band="K" system="Vega">5.329999923706055</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-3">
+            <name>M  32</name>
+            <degDeg>
+                <ra>10.6742709999999760839273221790790557861328125</ra>
+                <dec>40.86516899999998031489667482674121856689453125</dec>
+            </degDeg>
+            <properMotion deltaRA="-17.0" deltaDec="-5.0"/>
+            <magnitudes>
+                <magnitude band="U" system="Vega">9.510000228881836</magnitude>
+                <magnitude band="B" system="Vega">9.029999732971191</magnitude>
+                <magnitude band="V" system="Vega">8.079999923706055</magnitude>
+                <magnitude band="J" system="Vega">6.2769999504089355</magnitude>
+                <magnitude band="H" system="Vega">5.366000175476074</magnitude>
+                <magnitude band="K" system="Vega">5.09499979019165</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-4">
+            <name>M  32</name>
+            <degDeg>
+                <ra>10.6742709999999760839273221790790557861328125</ra>
+                <dec>40.86516899999998031489667482674121856689453125</dec>
+            </degDeg>
+            <properMotion deltaRA="-17.0" deltaDec="-5.0"/>
+            <magnitudes>
+                <magnitude band="U" system="Vega">9.510000228881836</magnitude>
+                <magnitude band="B" system="Vega">9.029999732971191</magnitude>
+                <magnitude band="V" system="Vega">8.079999923706055</magnitude>
+                <magnitude band="J" system="Vega">6.2769999504089355</magnitude>
+                <magnitude band="H" system="Vega">5.366000175476074</magnitude>
+                <magnitude band="K" system="Vega">5.09499979019165</magnitude>
+            </magnitudes>
+        </sidereal>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC 50%/Clear, IQ 20%/Best, SB 20%/Darkest, WV Any</name>
+            <cc>50%/Clear</cc>
+            <iq>20%/Best</iq>
+            <sb>20%/Darkest</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <subaru id="blueprint-0">
+            <name>Subaru (Suprime Cam)</name>
+            <visitor>false</visitor>
+            <instrument>Suprime Cam</instrument>
+        </subaru>
+        <subaru id="blueprint-1">
+            <name>Subaru (FOCAS)</name>
+            <visitor>false</visitor>
+            <instrument>FOCAS</instrument>
+        </subaru>
+        <subaru id="blueprint-2">
+            <name>Subaru (MOIRCS)</name>
+            <visitor>false</visitor>
+            <instrument>MOIRCS</instrument>
+        </subaru>
+        <subaru id="blueprint-3">
+            <name>Subaru (COMICS)</name>
+            <visitor>false</visitor>
+            <instrument>COMICS</instrument>
+        </subaru>
+        <subaru id="blueprint-4">
+            <name>Subaru (FMOS)</name>
+            <visitor>false</visitor>
+            <instrument>FMOS</instrument>
+        </subaru>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" target="target-0" condition="condition-0" blueprint="blueprint-0">
+            <progTime units="hr">5.0</progTime>
+            <partTime units="hr">0.0</partTime>
+            <time units="hr">5.0</time>
+            <meta ck="">
+                <visibility>Limited</visibility>
+            </meta>
+        </observation>
+        <observation band="Band 1/2" enabled="true" target="target-2" condition="condition-0" blueprint="blueprint-1">
+            <progTime units="hr">3.0</progTime>
+            <partTime units="hr">0.0</partTime>
+            <time units="hr">3.0</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+            </meta>
+        </observation>
+        <observation band="Band 1/2" enabled="true" target="target-1" condition="condition-0" blueprint="blueprint-2">
+            <progTime units="hr">4.0</progTime>
+            <partTime units="hr">0.0</partTime>
+            <time units="hr">4.0</time>
+            <meta ck="">
+                <visibility>Good</visibility>
+            </meta>
+        </observation>
+        <observation band="Band 1/2" enabled="true" target="target-4" condition="condition-0" blueprint="blueprint-3">
+            <progTime units="hr">1.0</progTime>
+            <partTime units="hr">0.0</partTime>
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <visibility>Limited</visibility>
+            </meta>
+        </observation>
+        <observation band="Band 1/2" enabled="true" target="target-3" condition="condition-0" blueprint="blueprint-4">
+            <progTime units="hr">2.0</progTime>
+            <partTime units="hr">0.0</partTime>
+            <time units="hr">2.0</time>
+            <meta ck="">
+                <visibility>Limited</visibility>
+            </meta>
+        </observation>
+    </observations>
+    <proposalClass>
+        <sip tooOption="None">
+            <submission>
+                <request>
+                    <time units="hr">0.0</time>
+                    <minTime units="hr">0.0</minTime>
+                </request>
+            </submission>
+        </sip>
+    </proposalClass>
+</proposal>

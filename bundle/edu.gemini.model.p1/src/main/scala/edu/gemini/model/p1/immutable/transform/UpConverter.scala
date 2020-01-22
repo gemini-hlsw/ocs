@@ -154,14 +154,30 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
   */
 case object SemesterConverter2020ATo2020B extends SemesterConverter {
   // REL-3769 will be here when the requirements are finalized.
-  override val transformers: List[TransformFunction] = Nil
+  val gpiRemover: TransformFunction = removeBlueprint("gpi", "GPI")._1
+
+  val subaruComicsMessage: String = "Subaru proposal with COMICS has been removed."
+  val subaruComicsTransform: TransformFunction = {
+  case p @ <blueprints>{ns @ _*}</blueprints> if (p \\ "instrument").exists(_.text == "COMICS") =>
+    val filtered = ns.filter{n => !(n \\ "subaru" \\ "instrument").exists(_.text == "COMICS")}
+    StepResult(subaruComicsMessage, <blueprints>{filtered}</blueprints>).successNel
+  }
+
+  val subaruFmosMessage: String = "Subaru proposal with FMOS has been removed."
+  val subaruFmosTransform: TransformFunction = {
+    case p @ <blueprints>{ns @ _*}</blueprints> if (p \\ "instrument").exists(_.text == "FMOS") =>
+      val filtered = ns.filter{n => !(n \\ "subaru" \\ "instrument").exists(_.text == "FMOS")}
+      StepResult(subaruFmosMessage, <blueprints>{filtered}</blueprints>).successNel
+  }
+
+  override val transformers: List[TransformFunction] = List(gpiRemover, subaruComicsTransform, subaruFmosTransform)
 }
 
 /**
   *  This Converter will support migrating to 2020A
   */
 case object SemesterConverter2019BTo2020A extends SemesterConverter {
-  lazy val subaruSuprimeMessage: String = "Subaru proposal with Suprime Cam has been migrated to Hyper Suprime Cam"
+  val subaruSuprimeMessage: String = "Subaru proposal with Suprime Cam has been migrated to Hyper Suprime Cam."
   val subaruSuprimeTransform: TransformFunction = {
     case p @ <subaru>{ns @ _*}</subaru> if (p \\ "instrument").exists(_.text == "Suprime Cam") =>
       object SuprimeTransform extends BasicTransformer {

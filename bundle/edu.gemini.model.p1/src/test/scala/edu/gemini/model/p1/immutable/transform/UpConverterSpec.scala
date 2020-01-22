@@ -393,6 +393,16 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
 
       proposal must beSuccessful
     }
+    "proposal with Subaru COMICS and FMOS must remove them, REL-3769" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("subaru_multiple.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, _) =>
+          changes must contain(SemesterConverter2020ATo2020B.subaruComicsMessage)
+          changes must contain(SemesterConverter2020ATo2020B.subaruFmosMessage)
+      }
+    }
     "proposal with trecs blueprints must remove them, REL-1112" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_trecs.xml")))
 
@@ -710,14 +720,17 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       }
     }
     "proposal with GPI and HStar and HLiwa modes should become H direct, REL-2671" in {
-      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_gpi_hstar.xml")))
+      skipped {
+        // GPI is not offered in 2020B.
+        val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_gpi_hstar.xml")))
 
-      val converted = UpConverter.convert(xml)
-      converted must beSuccessful.like {
-        case StepResult(changes, result) =>
-          changes must have length 6
-          result \\ "gpi" must \\("observingMode") \>~ "H.direct"
-          result \\ "gpi" must \\("name") \> "GPI H direct Prism"
+        val converted = UpConverter.convert(xml)
+        converted must beSuccessful.like {
+          case StepResult(changes, result) =>
+            changes must have length 6
+            result \\ "gpi" must \\("observingMode") \>~ "H.direct"
+            result \\ "gpi" must \\("name") \> "GPI H direct Prism"
+        }
       }
     }
     "proposal with observation time attribute should be transformed to progTime attribute, REL-2985" in {
@@ -754,14 +767,14 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           result \\ "flamingos2" must not(\\("name") \>~ ".*J-lo (1.122 um).*")
       }
     }
-    "Subaru prposal with Surprime Cam, REL-3638" in {
+    "Subaru proposal with Surprime Cam, REL-3638" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("subaru_suprime.xml")))
 
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
           changes must have length 5
-          changes must contain("Subaru proposal with Suprime Cam has been migrated to Hyper Suprime Cam")
+          changes must contain(SemesterConverter2019BTo2020A.subaruSuprimeMessage)
           result \\ "subaru" must \\("name") \> "Subaru (Hyper Suprime Cam)"
           result \\ "subaru" must \\("instrument") \> "Hyper Suprime Cam"
       }
