@@ -3,9 +3,11 @@ package edu.gemini.p1monitor.config
 import edu.gemini.model.p1.pdf.P1PDF
 import org.osgi.framework.BundleContext
 import java.io.File
+
 import javax.mail.internet.InternetAddress
+
 import collection.immutable
-import xml.{XML, Node}
+import xml.{Elem, Node, XML}
 import java.util.logging.Logger
 
 case class MonitoredDirectory(name: String,
@@ -18,7 +20,7 @@ case class MonitoredDirectory(name: String,
                               template: P1PDF.Template)
 
 class P1MonitorConfig(ctx: BundleContext) {
-  val LOG = Logger.getLogger(this.getClass.getName)
+  val LOG: Logger = Logger.getLogger(this.getClass.getName)
   private val CONF_FILE: String = "p1monitor.config"
   private val SMTP_TAG: String = "smtp"
   private val PORT_TAG: String = "org.osgi.service.http.port"
@@ -33,7 +35,7 @@ class P1MonitorConfig(ctx: BundleContext) {
   private val USERNAME_TAG: String = "username"
   private val GROUP_TAG: String = "group"
 
-  val xmlConf = {
+  val xmlConf: Elem = {
     val filename = getProp(CONF_FILE)
     LOG.info(s"P1 Monitor configuration: $filename")
     XML.load(this.getClass.getResourceAsStream(filename))
@@ -52,7 +54,7 @@ class P1MonitorConfig(ctx: BundleContext) {
       (x \ "from").text -> (x \ "to").text
     }.toMap
 
-  private def getProp(propName: String) = {
+  private def getProp(propName: String): String = {
     val prop = ctx.getProperty(propName)
     if (prop == null || prop.equals("")) {
       throw new IllegalArgumentException(s"Property $propName not defined in bundle config")
@@ -60,7 +62,7 @@ class P1MonitorConfig(ctx: BundleContext) {
     prop
   }
 
-  private def getXmlProp(tag: String) = {
+  private def getXmlProp(tag: String): String = {
     val tags = elementContent(xmlConf, tag)
     if (tags.isEmpty) {
       throw new IllegalArgumentException("Xml file doesn't contain an <" + tag + "> element")
@@ -101,18 +103,18 @@ class P1MonitorConfig(ctx: BundleContext) {
   }
 
   private def toTemplate(s: String): P1PDF.Template = s match {
-    case "ar" | "br" | "kr" | "uh" => P1PDF.GeminiDefault
-    case "cfh" | "subaru" | "keck" => P1PDF.GeminiDefault
-    case "dt" | "pw"               => P1PDF.GeminiDefault
-    case "au"                      => P1PDF.AU
-    case "cl"                      => P1PDF.CL
-    case "us"                      => P1PDF.NOAOListAtTheEnd
-    case "ca"                      => P1PDF.GeminiDefaultListAtTheEnd
-    case _                         => P1PDF.GeminiDefaultListAtTheEnd
-  }
+      case "ar" | "br" | "kr" | "uh" => P1PDF.GeminiDefault
+      case "cfh" | "subaru" | "keck" => P1PDF.GeminiDefault
+      case "dt" | "pw"               => P1PDF.GeminiDefault
+      case "au"                      => P1PDF.AU
+      case "cl"                      => P1PDF.CL
+      case "us"                      => P1PDF.NOAOListAtTheEnd
+      case "ca"                      => P1PDF.GeminiDefaultListAtTheEnd
+      case _                         => P1PDF.GeminiDefaultListAtTheEnd
+    }
 
   def getDirectories: Traversable[MonitoredDirectory] = map.values
 
-  def getDirectory(name: String) = map(name)
+  def getDirectory(name: String): MonitoredDirectory = map(name)
 
 }

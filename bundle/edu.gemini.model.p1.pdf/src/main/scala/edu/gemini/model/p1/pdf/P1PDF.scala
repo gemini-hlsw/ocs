@@ -3,9 +3,11 @@ package edu.gemini.model.p1.pdf
 import scala.util.Try
 import xml.{Node, XML}
 import java.io._
+
 import javax.xml.transform.URIResolver
 import javax.xml.transform.stream.StreamSource
 import edu.gemini.util.pdf.PDF
+
 import io.Source
 
 /**
@@ -84,7 +86,7 @@ object P1PDF {
   /** Gets a list with all templates that are currently available. */
   def templates = List(GeminiDefault, GeminiDefaultNoInvestigatorsList, GeminiDefaultListAtTheEnd, AU, CL, NOAO, NOAOListAtTheEnd, NOAONoInvestigatorsList)
 
-  def templatesMap = templatesList.toMap
+  def templatesMap: Map[String, Template] = templatesList.toMap
 
   def templatesList = List(
     "ar"     -> GeminiDefault,
@@ -106,7 +108,12 @@ object P1PDF {
    * This method also merges the attached pdf file to the end of the resulting pdf.
    */
   def createFromFile (xmlFile: File, template: Template, pdfFile: File) {
-    Try(createFromNode(XML.loadFile(xmlFile), template, pdfFile, Option(xmlFile.getParentFile))).getOrElse(createFromNode(XML.loadString(Source.fromFile(xmlFile, "latin1").mkString), template, pdfFile, Option(xmlFile.getParentFile)))
+    Try(createFromNode(XML.loadFile(xmlFile), template, pdfFile, Option(xmlFile.getParentFile)))
+      .getOrElse {
+        val source = Source.fromFile(xmlFile, "latin1")
+        createFromNode(XML.loadString(source.mkString), template, pdfFile, Option(xmlFile.getParentFile))
+        source.close()
+      }
   }
 
   /**
@@ -114,11 +121,16 @@ object P1PDF {
    * This method also merges the attached pdf file to the end of the resulting pdf.
    */
   def createFromNode (xml: Node, template: Template, pdfFile: File, workingDir:Option[File] = None) {
+    // REL-3772: Do not display PI information for FT proposals.
+    val workingTemplate = {
+      val isFT: Boolean = (xml \ "proposalClass" \\ "fastTurnaround").theSeq.nonEmpty
+      if (isFT) template.copy(investigatorsList = InvestigatorsListOption.NoList) else template
+    }
     val attachment = {
       val f = new File((xml \ "meta" \ "attachment").text)
       if (f.isAbsolute) f else workingDir.map(new File(_, f.getPath)).getOrElse(f)
     }
-    createFromNode(xml, attachment, template, pdfFile, workingDir)
+    createFromNode(xml, attachment, workingTemplate, pdfFile, workingDir)
   }
 
 
@@ -133,7 +145,7 @@ object P1PDF {
             cleanup(r)
         }
       } catch {
-        case e: Exception => None
+        case _: Exception => None
       }
     }
 
@@ -172,7 +184,7 @@ object P1PDF {
    * access to the resources in this bundle.
    */
   case object P1PdfUriResolver extends URIResolver {
-    override def resolve(href: String,  base: String) = {
+    override def resolve(href: String,  base: String): StreamSource = {
       val r = Option(getClass.getResourceAsStream(href))
       // try to resolve as a normal resource (assuming that caller closes stream?)
       r.map(new StreamSource(_)).getOrElse {
