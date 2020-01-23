@@ -720,10 +720,10 @@ object TimeProblems {
 }
 
 object ResourceIssues {
-  def resourceNotOfferedCheck[B <: BlueprintBase](p: Proposal, s: ShellAdvisor, sem: Semester, name: Option[String] = None): List[Problem] = for {
+  def resourceNotOfferedCheck[B <: BlueprintBase : Manifest](p: Proposal, s: ShellAdvisor, sem: Semester, name: Option[String] = None): List[Problem] = for {
     o <- p.observations
     b <- o.blueprint
-    if b.isInstanceOf[B]
+    if manifest[B].runtimeClass.isInstance(b)
     if p.semester == sem
   } yield new Problem(Severity.Error, s"${name.getOrElse(b.name)} not offered for ${sem.display}.",
                       "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
