@@ -7,11 +7,11 @@ unmanagedJars in Compile ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
-  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
+  "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
+  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
   "org.scalaz" %% "scalaz-core" % ScalaZVersion,
   "org.scalaz" %% "scalaz-effect" % ScalaZVersion,
-  "org.typelevel"  %% "squants"  % "1.5.0"
+  "org.typelevel"  %% "squants"  % "1.6.0"
   )
 
 osgiSettings

@@ -3,14 +3,14 @@ package edu.gemini.catalog.image
 import java.io.File
 
 import edu.gemini.spModel.core.{Angle, Coordinates, Declination, RightAscension}
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import org.scalatest.{FlatSpec, Matchers, OptionValues}
 
 import scala.math._
 import scalaz._
 import Scalaz._
 
-class ImageInFileSpec extends FlatSpec with Matchers with PropertyChecks with ImageCatalogArbitraries with OptionValues {
+class ImageInFileSpec extends FlatSpec with Matchers with ScalaCheckPropertyChecks with ImageCatalogArbitraries with OptionValues {
   // Do more tests to uncover edge cases
   implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSize = 10000, minSuccessful = 10000)
 

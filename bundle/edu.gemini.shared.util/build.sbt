@@ -7,9 +7,9 @@ name := "edu.gemini.shared.util"
 // version set in ThisBuild
 
 libraryDependencies ++= Seq(
-  "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
+  "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
   "org.scalaz" %% "scalaz-core" % ScalaZVersion,
-  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4")
+  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2")
 
 osgiSettings
 
@@ -28,4 +28,3 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.shared.util.exec",
   "edu.gemini.shared.util.test",
   "edu.gemini.shared.util.immutable")
-

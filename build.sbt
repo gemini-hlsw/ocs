@@ -18,6 +18,8 @@ updateOptions := updateOptions.value.withCachedResolution(true)
 
 cancelable in Global := true
 
+fork in Test := true
+
 // Note that this is not a standard setting; it's used for building IDEA modules.
 javaVersion in ThisBuild := {
   val expected = "1.8"
@@ -59,17 +61,17 @@ javacOptions in ThisBuild ++= Seq(
   "-Xlint:all,-serial,-path,-deprecation,-unchecked,-fallthrough" // TOOD: turn all on except maybe -serial and -path
 )
 
-val specs2Version = "3.8.9"
+val specs2Version = "4.8.3"
 
 // Use managed dependencies for tests; everyone gets JUnit, ScalaCheck, and Specs2
 libraryDependencies in ThisBuild ++= Seq(
   "junit"           % "junit"                % "4.12"        % "test",
   "com.novocode"    % "junit-interface"      % "0.11"        % "test",
-  "org.scalacheck" %% "scalacheck"           % "1.12.6"      % "test",
+  "org.scalacheck" %% "scalacheck"           % "1.14.3"      % "test",
   "org.specs2"     %% "specs2-core"          % specs2Version % "test",
   "org.specs2"     %% "specs2-scalacheck"    % specs2Version % "test",
   "org.specs2"     %% "specs2-matcher-extra" % specs2Version % "test",
-  "org.scalatest"  %% "scalatest"            % "3.0.1"       % "test"
+  "org.scalatest"  %% "scalatest"            % "3.0.8"       % "test"
 )
 
 // Required for specs2

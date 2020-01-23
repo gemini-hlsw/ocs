@@ -3,14 +3,14 @@ package edu.gemini.catalog.image
 import java.util.concurrent.{ExecutorService, Executors, ThreadFactory, TimeUnit}
 
 import org.scalatest.{FlatSpec, Matchers}
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 import scalaz._
 import Scalaz._
 import scalaz.NonEmptyList._
 import scalaz.concurrent.Task
 
-class TaskHelperSpec extends FlatSpec with Matchers with PropertyChecks with ImageCatalogArbitraries {
+class TaskHelperSpec extends FlatSpec with Matchers with ScalaCheckPropertyChecks with ImageCatalogArbitraries {
   private val DaemonThreadFactory = new ThreadFactory {
     private val defaultThreadFactory = Executors.defaultThreadFactory()
 

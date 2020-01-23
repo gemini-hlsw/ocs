@@ -7,8 +7,8 @@ name := "edu.gemini.model.p1.pdf"
 version := pitVersion.value.toOsgiVersion
 
 libraryDependencies ++= Seq(
-  "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
-  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
+  "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
+  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2"
   )
 
 osgiSettings

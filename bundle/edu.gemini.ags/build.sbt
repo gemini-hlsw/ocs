@@ -25,6 +25,8 @@ osgiSettings
 
 ocsBundleSettings
 
+fork in Test := true
+
 OsgiKeys.bundleActivator := None
 
 OsgiKeys.bundleSymbolicName := name.value
