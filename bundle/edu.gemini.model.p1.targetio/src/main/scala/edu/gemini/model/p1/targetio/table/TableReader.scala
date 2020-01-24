@@ -26,7 +26,7 @@ class TableReader(table: StarTable) {
   }
 
   def rows: List[Row] =
-    ((0l until table.getRowCount) map { i => new Row(table.getRow(i).toSeq) }).toList
+    ((0L until table.getRowCount) map { i => new Row(table.getRow(i).toSeq) }).toList
 
   def has(col: Column[_,_]): Boolean = colIndex.get(col.name).isDefined
 }

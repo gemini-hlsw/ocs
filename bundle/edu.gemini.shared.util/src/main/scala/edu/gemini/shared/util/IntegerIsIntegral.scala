@@ -26,6 +26,12 @@ trait IntegerIsIntegral extends Integral[JInt] with Ordering[JInt] {
   def toDouble(x: JInt)        = x.intValue().toDouble
   def quot(x: JInt, y: JInt)   = x.intValue() / y.intValue()
   def rem(x: JInt, y: JInt)    = x.intValue() % y.intValue()
+  def parseString(str: String): Option[JInt] =
+    try {
+      Some(JInt.parseInt(str))
+    } catch {
+      case _: Exception => None
+    }
 }
 
 object IntegerIsIntegral {

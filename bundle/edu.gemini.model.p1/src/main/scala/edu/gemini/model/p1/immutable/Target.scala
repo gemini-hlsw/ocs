@@ -2,10 +2,10 @@ package edu.gemini.model.p1.immutable
 
 import edu.gemini.model.p1.mutable.{HmsDmsCoordinates, DegDegCoordinates}
 import edu.gemini.model.p1.{ mutable => M }
-import edu.gemini.spModel.core._
+import edu.gemini.spModel.core.{ProperMotion => _, _}
 
 import scala.collection.JavaConverters._
-import scalaz._
+import scalaz.{Band => SBand, _}
 import Scalaz._
 import java.util.UUID
 
@@ -181,4 +181,3 @@ case class NonSiderealTarget(
   def withUuid(uuid:UUID):Target = copy(uuid = uuid)
 
 }
-

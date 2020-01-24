@@ -48,8 +48,8 @@ scalacOptions in ThisBuild ++= Seq(
   "-target:jvm-1.8",
   "-unchecked",
   // "-Xfatal-warnings",
-  "-Xlint:-stars-align",
-  "-Yno-adapted-args"
+  "-Xlint:-stars-align"
+  // "-Yno-adapted-args"
   // "-Ywarn-dead-code"        // N.B. doesn't work well with bottom
   // "-Ywarn-numeric-widen",
   // "-Ywarn-value-discard"

@@ -23,7 +23,7 @@ trait OcsBundleSettings { this: OcsKey =>
     //   val s   = state.value
     //   val out = (resourceManaged in Compile).value
     //   val ff = FileFunction.cached(target.value / "blowup-cache", FilesInfo.lastModified, FilesInfo.exists) { (fs: Set[File]) =>
-    //     fs.filter(_.getName.endsWith(".jar")).flatMap { j => 
+    //     fs.filter(_.getName.endsWith(".jar")).flatMap { j =>
     //       s.log.info(s"$n: exploding ${j.getName}")
     //       IO.unzip(j, out, (_: String) != "META-INF/MANIFEST.MF")
     //     }
@@ -36,18 +36,18 @@ trait OcsBundleSettings { this: OcsKey =>
       Option(unmanagedBase.value.listFiles).map(_.toList.filter(_.getName.endsWith(".jar"))).getOrElse(Nil)
     },
 
-    ocsProjectDependencies := thisProject.value.dependencies.collect { 
-      case ResolvedClasspathDependency(r @ ProjectRef(_, _), _) => r  
+    ocsProjectDependencies := thisProject.value.dependencies.collect {
+      case ResolvedClasspathDependency(r @ ProjectRef(_, _), _) => r
     },
 
     ocsUsers := {
       val s = state.value
-      val extracted = Project.extract(s)    
+      val extracted = Project.extract(s)
       val ref = thisProjectRef.value
       ocsAllBundleProjects.value.filter(p => extracted.get(ocsDependencies in p).contains(ref))
     },
 
-    ocsProjectAggregate := thisProject.value.aggregate,    
+    ocsProjectAggregate := thisProject.value.aggregate,
 
     ocsDependencies := ocsProjectDependencies.value ++ ocsProjectAggregate.value,
 
@@ -59,9 +59,9 @@ trait OcsBundleSettings { this: OcsKey =>
       val iml = ocsBundleIdeaModuleAbstractPath.value
       val modules: Seq[String] = {
         val s = state.value
-        val extracted = Project.extract(s)      
+        val extracted = Project.extract(s)
         ocsDependencies.value.map(p => extracted.get(ocsBundleIdeaModuleName in p))
-      }      
+      }
       val classpath = ((managedClasspath in Compile).value ++ (unmanagedJars in Compile).value).map(_.data)
       val testClasspath= ((managedClasspath in Test).value ++ (unmanagedJars in Test).value).map(_.data) filterNot (classpath.contains)
       IO.createDirectory(iml.getParentFile)
@@ -73,14 +73,14 @@ trait OcsBundleSettings { this: OcsKey =>
 
     ocsClosure := computeOnce(baseDirectory.value + " closure") {
       val s = state.value
-      val extracted = Project.extract(s)    
+      val extracted = Project.extract(s)
       val ds = ocsDependencies.value
       (ds ++ ds.flatMap(p => extracted.runTask(ocsClosure in p, s)._2)).distinct
     },
 
     ocsBundleDependencies := {
       val extracted = Project.extract(state.value)
-      val tree = Tree.unfoldTree(thisProjectRef.value) { p => 
+      val tree = Tree.unfoldTree(thisProjectRef.value) { p =>
         (extracted.get(name in p), () => extracted.get(ocsDependencies in p).toStream)
       }
       printTree(tree)
@@ -88,8 +88,8 @@ trait OcsBundleSettings { this: OcsKey =>
 
     ocsBundleDependencies0 := {
       val extracted = Project.extract(state.value)
-      val tree = Tree.node(name.value, ocsDependencies.value.toStream.map { p => 
-        Tree.node(extracted.get(name in p), Stream.empty)
+      val tree = Tree.Node(name.value, ocsDependencies.value.toStream.map { p =>
+        Tree.Node(extracted.get(name in p), Stream.empty)
       })
       printTree(tree)
     },
@@ -97,7 +97,7 @@ trait OcsBundleSettings { this: OcsKey =>
     ocsBundleUsers := {
       val s = state.value
       val extracted = Project.extract(s)
-      val tree = Tree.unfoldTree(thisProjectRef.value) { p => 
+      val tree = Tree.unfoldTree(thisProjectRef.value) { p =>
         (extracted.get(name in p), () => extracted.runTask(ocsUsers in p, s)._2.toStream)
       }
       printTree(tree)
@@ -105,13 +105,13 @@ trait OcsBundleSettings { this: OcsKey =>
 
     ocsBundleUsers0 := {
       val extracted = Project.extract(state.value)
-      val tree = Tree.node(name.value, ocsUsers.value.toStream.map { p => 
-        Tree.node(extracted.get(name in p), Stream.empty)
+      val tree = Tree.Node(name.value, ocsUsers.value.toStream.map { p =>
+        Tree.Node(extracted.get(name in p), Stream.empty)
       })
       printTree(tree)
     },
 
-    ocsBundleInfo <<= mkBundleInfo //,
+    ocsBundleInfo := {mkBundleInfo.value} //,
 
     // incOptions := incOptions.value.withNameHashing(true)
 
@@ -120,7 +120,7 @@ trait OcsBundleSettings { this: OcsKey =>
   // A terrible thing, but necessary for some statically-computable properties like the dependency
   // closure that cannot be computed as settings because sbt is terrible
   protected var computeOnceCache: Map[String, Any] = Map.empty // sigh
-  protected def computeOnce[A](key: String)(a: => A): A = 
+  protected def computeOnce[A](key: String)(a: => A): A =
     computeOnceCache.get(key) match {
       case Some(x) => x.asInstanceOf[A]
       case None    =>
@@ -131,7 +131,7 @@ trait OcsBundleSettings { this: OcsKey =>
 
 
   case class OcsBundleInfo(
-    embeddedJars: List[File], 
+    embeddedJars: List[File],
     libraryBundleJars: List[File],
     unmooredJars: List[File], // the presence of anything here means the bundle can't be packaged
     bundleProjectRefs: List[ProjectRef])
@@ -153,7 +153,7 @@ trait OcsBundleSettings { this: OcsKey =>
           Option(new java.util.jar.JarFile(jar).getManifest.getMainAttributes.getValue("Bundle-SymbolicName"))
 
         // All class dirs and jars in classpath
-        val full: List[File] = 
+        val full: List[File] =
           ((managedClasspath in Compile).value ++ (externalDependencyClasspath in Compile).value).toList.map(_.data.getCanonicalFile).distinct.sortBy(_.toString)
           // (fullClasspath in Compile).value.toList.map(_.data.getCanonicalFile).distinct.sortBy(_.toString)
 
@@ -188,7 +188,7 @@ trait OcsBundleSettings { this: OcsKey =>
   //       Option(new java.util.jar.JarFile(jar).getManifest.getMainAttributes.getValue("Bundle-SymbolicName"))
 
   //     // All class dirs and jars in classpath
-  //     val full: List[File] = 
+  //     val full: List[File] =
   //       (fullClasspath in Compile).value.toList.map(_.data.getCanonicalFile).distinct.sortBy(_.toString)
 
   //     // All class dirs and embedded jars from dependent projects
@@ -240,11 +240,10 @@ trait OcsBundleSettings { this: OcsKey =>
 
   // Tree from a closure, given a root.
   def treeFrom[A](a: A, m: Map[A, Stream[A]], full: Boolean): Tree[A] =
-    Tree.node(a, unfoldForest(~m.get(a))(p => (p, () => if (full) ~m.get(p) else Stream.empty)))
+    Tree.Node(a, unfoldForest(~m.get(a))(p => (p, () => if (full) ~m.get(p) else Stream.empty)))
 
   // Print a tree in a slighly prettier form than default, using toString for elements
-  def printTree[A](t: Tree[A]): Unit = 
+  def printTree[A](t: Tree[A]): Unit =
     t.drawTree(Show.showA).zipWithIndex.filter(_._2 % 2 == 0).map(_._1).foreach(println)
 
 }
-

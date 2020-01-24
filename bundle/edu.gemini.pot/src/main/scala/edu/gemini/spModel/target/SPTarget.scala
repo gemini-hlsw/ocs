@@ -189,7 +189,7 @@ final class SPTarget(private var target: Target) extends SPSkyObject {
     Target.magnitudes.get(target).orZero.asImList
 
   def getMagnitudeBands: Set[MagnitudeBand] =
-    getMagnitudes.map(_.band)(collection.breakOut)
+    getMagnitudes.map(_.band).toSet
 
   def getMagnitudeBandsJava: java.util.Set[MagnitudeBand] =
     new java.util.HashSet(getMagnitudeBands.asJavaCollection)

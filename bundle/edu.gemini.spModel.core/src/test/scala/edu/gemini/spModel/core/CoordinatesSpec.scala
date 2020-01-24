@@ -21,7 +21,7 @@ object CoordinatesSpec extends Specification with ScalaCheck with Arbitraries wi
       }
 
     "flip the RA when Dec overflows" !
-      forAll { (a: Coordinates, dDec: Angle) => 
+      forAll { (a: Coordinates, dDec: Angle) =>
         val ra0 = a.ra.toAngle
         val ra1 = a.offset(Angle.zero, dDec).ra.toAngle
         if (a.dec.offset(dDec)._2) ra1 ~= ra0.flip
@@ -48,7 +48,7 @@ object CoordinatesSpec extends Specification with ScalaCheck with Arbitraries wi
 
   "Coordinates Serialization" should {
 
-    "Support Java Binary" ! 
+    "Support Java Binary" !
       forAll { (coords: Coordinates) =>
         canSerialize(coords)
       }
@@ -82,14 +82,14 @@ object CoordinatesSpec extends Specification with ScalaCheck with Arbitraries wi
       forAll { (ra: RA, da: Angle) =>
         val a = Coordinates(ra, Dec.zero)
         val b = a.offset(da, Angle.zero)
-        val d = a.angularDistance(b) 
+        val d = a.angularDistance(b)
         d.toDegrees ~= da.toSignedDegrees.abs
       }
 
-    "be consistent with Dec offsetting (includes polar discontinuity)" ! 
+    "be consistent with Dec offsetting (includes polar discontinuity)" !
       forAll { (a: Coordinates, da: Angle) =>
         val b = a.offset(Angle.zero, da)
-        val d = a.angularDistance(b) 
+        val d = a.angularDistance(b)
         d.toDegrees ~= da.toSignedDegrees.abs
       }
 
@@ -97,17 +97,15 @@ object CoordinatesSpec extends Specification with ScalaCheck with Arbitraries wi
 
   "Coordinates Interpolation" should {
 
-    "be consistent with fractional angular separation" ! 
+    "be consistent with fractional angular separation" !
       forAll { (c1: Coordinates, c2: Coordinates) =>
         val sep = c1.angularDistance(c2)
-        (-1.0 to 2.0 by 0.1).forall { f =>
-          val stepSep = c1.interpolate(c2, f).angularDistance(c1)
-          stepSep.toDegrees ~= (sep * f).toSignedDegrees.abs
+        (-10 to 20 by 1).forall { f =>
+          val stepSep = c1.interpolate(c2, f / 10.0).angularDistance(c1)
+          stepSep.toDegrees ~= (sep * (f / 10.0)).toSignedDegrees.abs
         }
       }
 
   }
 
 }
-
-

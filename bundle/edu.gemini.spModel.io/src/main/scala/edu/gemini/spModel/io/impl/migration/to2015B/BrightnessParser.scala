@@ -32,7 +32,7 @@ object BrightnessParser extends RegexParsers {
   }
 
   private case class Sys(s: MagnitudeSystem, scale: BigDecimal = BigDecimal(1, 0)) {
-    def toMag(b: MagnitudeBand, m: BigDecimal): Magnitude = new Magnitude((m * scale).doubleValue(), b, s)
+    def toMag(b: MagnitudeBand, m: BigDecimal): Magnitude = new Magnitude((m * scale).doubleValue, b, s)
   }
 
   private val Jy     = Sys(MagnitudeSystem.Jy)

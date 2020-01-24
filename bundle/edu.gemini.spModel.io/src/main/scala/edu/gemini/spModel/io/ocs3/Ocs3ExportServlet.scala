@@ -8,6 +8,7 @@ import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.util.DBProgramListFunctor
 
 import java.util.logging.{Level, Logger}
+import java.util.Collections
 import java.security.Principal
 
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
@@ -37,6 +38,8 @@ import Ocs3ExportServlet._
   *   http://hostname:8442/ocs3/fetch/pio/OBSERVATION_ID
   */
 final class Ocs3ExportServlet(db: IDBDatabaseService) extends HttpServlet {
+  override def getInitParameterNames() =
+    Collections.enumeration(Collections.emptyList())
 
   private def doCommand(cmd: Command): Result[String] =
     cmd match {

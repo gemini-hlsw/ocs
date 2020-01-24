@@ -1,6 +1,8 @@
 package edu.gemini.model.p1.targetio.table
 
 import edu.gemini.spModel.core._
+import scalaz._
+import Scalaz._
 
 object Readers {
   def readNone[T]: PartialFunction[Any, Option[T]] = {
@@ -23,7 +25,7 @@ object Readers {
 
   val WholeNumber = """([-+]?\d+)""".r
   val readInt: PartialFunction[Any, Int] = {
-    case WholeNumber(s)  => s.toInt
+    case s: String if WholeNumber.findFirstIn(s).isDefined  =>  s.parseInt.getOrElse(sys.error(s"Not an int $s"))
     case b: Byte   => b.toInt
     case s: Short  => s.toInt
     case i: Int    => i
@@ -31,7 +33,7 @@ object Readers {
 
   val DecimalNumber = """([-+]?\d+(?:\.\d*)?)""".r
   val readFloating: PartialFunction[Any, Double] = {
-    case DecimalNumber(s) => s.toDouble
+    case s: String if DecimalNumber.findFirstIn(s).isDefined  =>  s.parseDouble.getOrElse(sys.error(s"Not a double $s"))
     case d: Double        => d
     case f: Float         => f.toDouble
   }
@@ -66,7 +68,3 @@ object Readers {
   def readOptionalSystem(band: MagnitudeBand): PartialFunction[Any, Option[MagnitudeSystem]] =
     readNone orElse (readSystem andThen { s => Some(s) })
 }
-
-
-
-

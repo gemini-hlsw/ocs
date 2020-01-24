@@ -33,7 +33,7 @@ object SbtOsgi extends Plugin {
   def defaultOsgiSettings: Seq[Setting[_]] = {
     import OsgiKeys._
     Seq(
-      bundle <<= (
+      bundle := {(
         manifestHeaders,
         additionalHeaders,
         fullClasspath in Compile,
@@ -42,8 +42,8 @@ object SbtOsgi extends Plugin {
         embeddedJars,
         explodedJars,
         streams
-      ) map Osgi.bundleTask,
-      manifestHeaders <<= (
+      ) map Osgi.bundleTask}.value,
+      manifestHeaders := {(
         bundleActivator,
         bundleSymbolicName,
         bundleVersion,
@@ -53,15 +53,15 @@ object SbtOsgi extends Plugin {
         fragmentHost,
         privatePackage,
         requireBundle
-      )(OsgiManifestHeaders),
+      )(OsgiManifestHeaders).value},
       bundleActivator := None,
-      bundleSymbolicName <<= (organization, name)(Osgi.defaultBundleSymbolicName),
-      bundleVersion <<= version,
+      bundleSymbolicName := {(organization, name)(Osgi.defaultBundleSymbolicName)}.value,
+      bundleVersion := {version.value},
       dynamicImportPackage := Nil,
       exportPackage := Nil,
       importPackage := List("*"),
       fragmentHost := None,
-      privatePackage <<= bundleSymbolicName(name => List(name + ".*")),
+      privatePackage := {bundleSymbolicName(name => List(name + ".*")).value},
       requireBundle := Nil,
       additionalHeaders := Map.empty,
       embeddedJars := Nil,
