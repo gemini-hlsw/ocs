@@ -121,16 +121,11 @@ object P1PDF {
    * This method also merges the attached pdf file to the end of the resulting pdf.
    */
   def createFromNode (xml: Node, template: Template, pdfFile: File, workingDir:Option[File] = None) {
-    // REL-3772: Do not display PI information for FT proposals.
-    val workingTemplate = {
-      val isFT: Boolean = (xml \ "proposalClass" \\ "fastTurnaround").theSeq.nonEmpty
-      if (isFT) template.copy(investigatorsList = InvestigatorsListOption.NoList) else template
-    }
     val attachment = {
       val f = new File((xml \ "meta" \ "attachment").text)
       if (f.isAbsolute) f else workingDir.map(new File(_, f.getPath)).getOrElse(f)
     }
-    createFromNode(xml, attachment, workingTemplate, pdfFile, workingDir)
+    createFromNode(xml, attachment, template, pdfFile, workingDir)
   }
 
 
