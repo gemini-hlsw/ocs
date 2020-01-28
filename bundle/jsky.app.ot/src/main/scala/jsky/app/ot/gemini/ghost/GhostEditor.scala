@@ -724,7 +724,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         targetPane.ifu2Pane.visible = name2Opt.isDefined
 
         val (guideFibers1: Boolean, editableGuideFibers1: Boolean, guideFibers2: Boolean, editableGuideFibers2: Boolean) = asterism match {
-          case SingleTarget(gt, _)                   => (gt.guideFiberState === Enabled, true, false, false)
+          case SingleTarget(gt, _)                                 => (gt.guideFiberState === Enabled, true, false, false)
           case GhostAsterism.DualTarget(gt1, gt2, _)               => (gt1.guideFiberState == Enabled, true, gt2.guideFiberState == Enabled, true)
           case GhostAsterism.TargetPlusSky(gt, _, _)               => (gt.guideFiberState === Enabled, true, false, false)
           case GhostAsterism.SkyPlusTarget(_, gt2, _)              => (false, false, gt2.guideFiberState === Enabled, true)

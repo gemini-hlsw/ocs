@@ -6,14 +6,15 @@ import java.util.{Map => JMap}
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.spModel.config.AbstractObsComponentCB
 import edu.gemini.spModel.data.config._
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostTarget
 import edu.gemini.spModel.obscomp.InstConstants
-import edu.gemini.spModel.target.{SPCoordinates, SPSkyObject, SPTarget}
 import edu.gemini.spModel.target.obsComp.TargetObsComp
+import edu.gemini.spModel.target.{SPCoordinates, SPSkyObject, SPTarget}
 
 import scala.collection.JavaConverters._
+
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
-import edu.gemini.spModel.core.Angle
 
 /**
   * Configuration builder for GHOST.
@@ -48,6 +49,12 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
         StringParameter.getInstance(InstConstants.INSTRUMENT_NAME_PROP, Ghost.INSTRUMENT_NAME_PROP)
       )
 
+      /**
+       * Put the information for a coordinate parameter, i.e. either SPSkyCoordinates or SPTarget.
+       * We put in:
+       * 1. RA in degrees (as a Double) and HMS;
+       * 2. Dec in degrees (as a Double) and DMS.
+       */
       // Put a coordinate parameter. Coordinates are not available here so we
       // must operate on an SPSkyObject.
       def coordParam(so: SPSkyObject, name: Option[String],
@@ -66,6 +73,12 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
         }
       }
 
+      /**
+       * Add the guiding information for an SRIFU or HRIFU pointing at a target.
+       */
+      def guiding(name: String, t: GhostTarget): Unit =
+        config.putParameter(systemName, DefaultParameter.getInstance(name, t.guideFiberState))
+
       /** Add the target information for the observation for GHOST to the
         * sequence.
         *
@@ -77,30 +90,56 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
         find(_.getType.broadType === TargetObsComp.SP_TYPE.broadType).
         map(_.getDataObject.asInstanceOf[TargetObsComp]).
         foreach{_.getAsterism match {
+
+          /** STANDARD RESOLUTION
+           * 1. If the base is overridden, add it to the parameters.
+           * 2. If SRIFU1 is pointing to a sky position, write sky position coordinates.
+           *    Otherwise, write target coordinates and indicate if guiding is turned on for SRIFU1.
+           * 3. If SRIFU2 is set, it can be a sky position or target: repeat the previous step. for SRIFU2 data.
+           */
           case gsr: GhostAsterism.StandardResolution =>
             gsr.overriddenBase.foreach(b => coordParam(b, None,
               Ghost.BaseRADegrees, Ghost.BaseDecDegrees,
               Ghost.BaseRAHMS, Ghost.BaseDecDMS))
+
             gsr.srifu1.fold(c => coordParam(c, Some(Ghost.SRIFU1Name),
               Ghost.SRIFU1RADeg, Ghost.SRIFU1DecDeg,
               Ghost.SRIFU1RAHMS, Ghost.SRIFU1DecDMS),
-              t => coordParam(t.spTarget, Some(Ghost.SRIFU1Name),
-                Ghost.SRIFU1RADeg, Ghost.SRIFU1DecDeg,
-                Ghost.SRIFU1RAHMS, Ghost.SRIFU1DecDMS))
+              t => {
+                coordParam(t.spTarget, Some(Ghost.SRIFU1Name),
+                  Ghost.SRIFU1RADeg, Ghost.SRIFU1DecDeg,
+                  Ghost.SRIFU1RAHMS, Ghost.SRIFU1DecDMS)
+                guiding(Ghost.SRIFU1Guiding, t)
+              })
+
             gsr.srifu2.foreach(_.fold(c => coordParam(c, Some(Ghost.SRIFU2Name),
               Ghost.SRIFU2RADeg, Ghost.SRIFU2DecDeg,
               Ghost.SRIFU2RAHMS, Ghost.SRIFU2DecDMS),
-              t => coordParam(t.spTarget, Some(Ghost.SRIFU2Name),
-                Ghost.SRIFU2RADeg, Ghost.SRIFU2DecDeg,
-                Ghost.SRIFU2RAHMS, Ghost.SRIFU2DecDMS)))
+              t => {
+                coordParam(t.spTarget, Some(Ghost.SRIFU2Name),
+                  Ghost.SRIFU2RADeg, Ghost.SRIFU2DecDeg,
+                  Ghost.SRIFU2RAHMS, Ghost.SRIFU2DecDMS)
 
+                guiding(Ghost.SRIFU2Guiding, t)
+              }))
+
+            /** HIGH RESOLUTION
+             * 1. If the base is overridden, add it to the parameters.
+             * 2. HRIFU1 is always pointing to a target: include the info.
+             * 3. Indicate if guiding is turned on for HRIFU1,
+             * 4. If we have a sky position for HRIFU2, add it to the parameters.
+             */
           case ghr: GhostAsterism.HighResolution =>
             ghr.overriddenBase.foreach(b => coordParam(b, None,
               Ghost.BaseRADegrees, Ghost.BaseDecDegrees,
               Ghost.BaseRAHMS, Ghost.BaseDecDMS))
+
             coordParam(ghr.hrifu1.spTarget, Some(Ghost.HRIFU1Name),
               Ghost.HRIFU1RADeg, Ghost.HRIFU1DecDeg,
               Ghost.HRIFU1RAHMS, Ghost.HRIFU1DecDMS)
+
+            guiding(Ghost.HRIFU1Guiding, ghr.hrifu1)
+
             ghr.hrifu2.foreach(c => coordParam(c, Some(Ghost.HRIFU2Name),
               Ghost.HRIFU2RADeg, Ghost.HRIFU2DecDeg,
               Ghost.HRIFU2RAHMS, Ghost.HRIFU2DecDMS))

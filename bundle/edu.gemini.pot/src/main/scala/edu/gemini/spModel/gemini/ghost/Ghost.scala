@@ -334,18 +334,21 @@ object Ghost {
   val SRIFU1DecDeg: String   = "srifu1CoordsDecDeg"
   val SRIFU1RAHMS: String    = "srifu1CoordsRAHMS"
   val SRIFU1DecDMS: String   = "srifu1CoordsDecDMS"
+  val SRIFU1Guiding: String  = "srifu1Guiding"
 
   val SRIFU2Name: String     = "srifu2Name"
   val SRIFU2RADeg: String    = "srifu2CoordsRADeg"
   val SRIFU2DecDeg: String   = "srifu2CoordsDecDeg"
   val SRIFU2RAHMS: String    = "srifu2CoordsRAHMS"
   val SRIFU2DecDMS: String   = "srifu2CoordsDecDMS"
+  val SRIFU2Guiding: String  = "srifu2Guiding"
 
   val HRIFU1Name: String     = "hrifu1Name"
   val HRIFU1RADeg: String    = "hrifu1CoordsRADeg"
   val HRIFU1DecDeg: String   = "hrifu1CoordsDecDeg"
   val HRIFU1RAHMS: String    = "hrifu1CoordsRAHMS"
   val HRIFU1DecDMS: String   = "hrifu1CoordsDecDMS"
+  val HRIFU1Guiding: String  = "hrifu1Guiding"
 
   val HRIFU2Name: String     = "hrifu2Name"
   val HRIFU2RADeg: String    = "hrifu2CoordsRADeg"
