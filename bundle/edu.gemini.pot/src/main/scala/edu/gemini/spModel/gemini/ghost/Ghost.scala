@@ -13,6 +13,7 @@ import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.data.config.{DefaultParameter, DefaultSysConfig, ISysConfig, StringParameter}
 import edu.gemini.spModel.data.property.{PropertyProvider, PropertySupport}
 import edu.gemini.spModel.gemini.init.{ComponentNodeInitializer, ObservationNI}
+import edu.gemini.spModel.inst.{ScienceAreaGeometry, VignettableScienceAreaInstrument}
 import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.obs.plannedtime.{CommonStepCalculator, PlannedTime}
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.{CategorizedTime, CategorizedTimeGroup, Category}
@@ -33,7 +34,7 @@ import scala.util.{Failure, Success, Try}
   * Note that we do not override clone since private variables are immutable.
   */
 final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvider
-  with GhostMixin with IssPortProvider with PlannedTime.StepCalculator {
+  with GhostMixin with IssPortProvider with PlannedTime.StepCalculator with VignettableScienceAreaInstrument {
   override def getSite: JSet[Site] = {
     Site.SET_GS
   }
@@ -266,6 +267,8 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, Math.max(redExposureTime * redExposureCount, blueExposureTime * blueExposureCount)))
     CommonStepCalculator.instance.calc(cur, prev).addAll(times)
   }
+
+  override def getVignettableScienceArea: ScienceAreaGeometry = GhostScienceAreaGeometry
 }
 
 object Ghost {

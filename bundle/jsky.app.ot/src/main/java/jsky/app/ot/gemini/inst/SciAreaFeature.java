@@ -7,6 +7,8 @@ import edu.gemini.spModel.gemini.acqcam.InstAcqCam;
 import edu.gemini.spModel.gemini.bhros.InstBHROS;
 import edu.gemini.spModel.gemini.flamingos2.F2ScienceAreaGeometry$;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
+import edu.gemini.spModel.gemini.ghost.Ghost;
+import edu.gemini.spModel.gemini.ghost.GhostScienceAreaGeometry$;
 import edu.gemini.spModel.gemini.gmos.InstGmosCommon;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
 import edu.gemini.spModel.gemini.gpi.Gpi;
@@ -61,6 +63,7 @@ public class SciAreaFeature extends TpeImageFeature
     private TReCS_SciAreaFeature _trecsFeat;
     private Michelle_SciAreaFeature _michelleFeat;
     private GNIRS_SciAreaFeature _gnirsFeat;
+    private SciAreaPlotFeature _ghost2Feat;
     private SciAreaPlotFeature _flamingos2Feat;
     private NICI_SciAreaFeature _niciFeat;
     private Texes_SciAreaFeature _texesFeat;
@@ -240,6 +243,11 @@ public class SciAreaFeature extends TpeImageFeature
                 _gnirsFeat = new GNIRS_SciAreaFeature();
             }
             _feat = _gnirsFeat;
+        } else if (inst instanceof Ghost) {
+            if (_ghost2Feat == null) {
+                _ghost2Feat = new SciAreaPlotFeature(GhostScienceAreaGeometry$.MODULE$);
+            }
+            _feat = _ghost2Feat;
         } else if (inst instanceof Flamingos2) {
             if (_flamingos2Feat == null) {
                 _flamingos2Feat = new SciAreaPlotFeature(F2ScienceAreaGeometry$.MODULE$);
