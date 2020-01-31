@@ -1,10 +1,12 @@
 package edu.gemini.p1monitor
 
 import config.P1MonitorConfig
-import java.io.{FileInputStream, FileOutputStream, File}
+import java.io.{File, FileInputStream, FileOutputStream}
 import java.util.logging.{Level, Logger}
+
 import edu.gemini.model.p1.pdf.P1PDF
-import edu.gemini.model.p1.immutable.{Proposal, ProposalIo}
+import edu.gemini.model.p1.immutable.{FastTurnaroundProgramClass, Proposal, ProposalIo}
+import edu.gemini.model.p1.pdf.P1PDF.InvestigatorsListOption
 
 class P1MonitorDirMonitor(cfg: P1MonitorConfig) extends DirListener {
   val LOG = Logger.getLogger(this.getClass.getName)
@@ -71,14 +73,17 @@ class P1MonitorDirMonitor(cfg: P1MonitorConfig) extends DirListener {
         val fg:Option[ProposalFileGroup] = newXMLFile.flatMap {
           case f:File =>
             val proposal = updateAttachmentLink(newPDFile, f)
+            val isFT: Boolean = proposal.exists(_.proposalClass.isInstanceOf[FastTurnaroundProgramClass])
 
             val r:Option[ProposalFileGroup] = try {
               val summaryFile = new File(f.getAbsolutePath.substring(0, f.getAbsolutePath.length - 4) + "_summary.pdf")
               // Find the template to use
               val template = cfg.map.find(_._2.dir == f.getParentFile.getAbsoluteFile).map(_._2.template).getOrElse(P1PDF.GeminiDefault)
-              P1PDF.createFromFile(f, template, summaryFile)
+              // REL-3772: Do not display PI information for FT proposals.
+              val workingTemplate = if (isFT) template.copy(investigatorsList = InvestigatorsListOption.NoList) else template
+              P1PDF.createFromFile(f, workingTemplate, summaryFile)
               LOG.info(s"Build summary report of $f at $summaryFile with template $template")
-              Some(new ProposalFileGroup(Some(f), newPDFile, Some(summaryFile)))
+              Some(ProposalFileGroup(Some(f), newPDFile, Some(summaryFile)))
             } catch {
               case ex: Exception =>
                 LOG.log(Level.SEVERE, "Problem processing file " + xml.getName, ex)
