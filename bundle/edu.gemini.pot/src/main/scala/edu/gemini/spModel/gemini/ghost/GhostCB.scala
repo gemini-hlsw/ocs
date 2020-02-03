@@ -99,28 +99,28 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
            */
           case gsr: GhostAsterism.StandardResolution =>
             gsr.overriddenBase.foreach(b => coordParam(b, None,
-              Ghost.BaseRADegrees, Ghost.BaseDecDegrees,
-              Ghost.BaseRAHMS, Ghost.BaseDecDMS))
+              Ghost.BASE_RA_DEGREES, Ghost.BASE_DEC_DEGREES,
+              Ghost.BASE_RA_HMS, Ghost.BASE_DEC_DMS))
 
-            gsr.srifu1.fold(c => coordParam(c, Some(Ghost.SRIFU1Name),
-              Ghost.SRIFU1RADeg, Ghost.SRIFU1DecDeg,
-              Ghost.SRIFU1RAHMS, Ghost.SRIFU1DecDMS),
+            gsr.srifu1.fold(c => coordParam(c, Some(Ghost.SRIFU1_NAME),
+              Ghost.SRIFU1_RA_DEG, Ghost.SRIFU1_DEC_DEG,
+              Ghost.SRIFU1_RA_HMS, Ghost.SRIFU1_DEC_DMS),
               t => {
-                coordParam(t.spTarget, Some(Ghost.SRIFU1Name),
-                  Ghost.SRIFU1RADeg, Ghost.SRIFU1DecDeg,
-                  Ghost.SRIFU1RAHMS, Ghost.SRIFU1DecDMS)
-                guiding(Ghost.SRIFU1Guiding, t)
+                coordParam(t.spTarget, Some(Ghost.SRIFU1_NAME),
+                  Ghost.SRIFU1_RA_DEG, Ghost.SRIFU1_DEC_DEG,
+                  Ghost.SRIFU1_RA_HMS, Ghost.SRIFU1_DEC_DMS)
+                guiding(Ghost.SRIFU1_GUIDING, t)
               })
 
-            gsr.srifu2.foreach(_.fold(c => coordParam(c, Some(Ghost.SRIFU2Name),
-              Ghost.SRIFU2RADeg, Ghost.SRIFU2DecDeg,
-              Ghost.SRIFU2RAHMS, Ghost.SRIFU2DecDMS),
+            gsr.srifu2.foreach(_.fold(c => coordParam(c, Some(Ghost.SRIFU2_NAME),
+              Ghost.SRIFU2_RA_DEG, Ghost.SRIFU2_DEC_DEG,
+              Ghost.SRIFU2_RA_HMS, Ghost.SRIFU2_DEC_DMS),
               t => {
-                coordParam(t.spTarget, Some(Ghost.SRIFU2Name),
-                  Ghost.SRIFU2RADeg, Ghost.SRIFU2DecDeg,
-                  Ghost.SRIFU2RAHMS, Ghost.SRIFU2DecDMS)
+                coordParam(t.spTarget, Some(Ghost.SRIFU2_NAME),
+                  Ghost.SRIFU2_RA_DEG, Ghost.SRIFU2_DEC_DEG,
+                  Ghost.SRIFU2_RA_HMS, Ghost.SRIFU2_DEC_DMS)
 
-                guiding(Ghost.SRIFU2Guiding, t)
+                guiding(Ghost.SRIFU2_GUIDING, t)
               }))
 
             /** HIGH RESOLUTION
@@ -131,18 +131,14 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
              */
           case ghr: GhostAsterism.HighResolution =>
             ghr.overriddenBase.foreach(b => coordParam(b, None,
-              Ghost.BaseRADegrees, Ghost.BaseDecDegrees,
-              Ghost.BaseRAHMS, Ghost.BaseDecDMS))
-
-            coordParam(ghr.hrifu1.spTarget, Some(Ghost.HRIFU1Name),
-              Ghost.HRIFU1RADeg, Ghost.HRIFU1DecDeg,
-              Ghost.HRIFU1RAHMS, Ghost.HRIFU1DecDMS)
-
-            guiding(Ghost.HRIFU1Guiding, ghr.hrifu1)
-
-            ghr.hrifu2.foreach(c => coordParam(c, Some(Ghost.HRIFU2Name),
-              Ghost.HRIFU2RADeg, Ghost.HRIFU2DecDeg,
-              Ghost.HRIFU2RAHMS, Ghost.HRIFU2DecDMS))
+              Ghost.BASE_RA_DEGREES, Ghost.BASE_DEC_DEGREES,
+              Ghost.BASE_RA_HMS, Ghost.BASE_DEC_DMS))
+            coordParam(ghr.hrifu1.spTarget, Some(Ghost.HRIFU1_NAME),
+              Ghost.HRIFU1_RA_DEG, Ghost.HRIFU1_DEC_DEG,
+              Ghost.HRIFU1_RA_HMS, Ghost.HRIFU1_DEC_DMS)
+            ghr.hrifu2.foreach(c => coordParam(c, Some(Ghost.HRIFU2_NAME),
+              Ghost.HRIFU2_RA_DEG, Ghost.HRIFU2_DEC_DEG,
+              Ghost.HRIFU2_RA_HMS, Ghost.HRIFU2_DEC_DMS))
 
           case _ =>
             // The asterism may not have been configured by this point.

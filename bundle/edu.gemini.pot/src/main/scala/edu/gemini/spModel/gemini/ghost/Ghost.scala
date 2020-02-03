@@ -320,44 +320,52 @@ object Ghost {
 
   // GHOST-specific exposure times.
   val EXPOSURE_TIME_RED_PROP = "redExposureTime"
+  val COUNT_RED = "redExposureCount"
+  val BINNING_RED = "redBinning"
+  val NOISE_GAIN_RED = "redReadNoiseGain"
   val DEF_EXPOSURE_TIME_RED = 10.0
   val EXPOSURE_TIME_RED_KEY = new ItemKey(INSTRUMENT_KEY, EXPOSURE_TIME_RED_PROP)
   val EXPOSURE_TIME_BLUE_PROP = "blueExposureTime"
+  val COUNT_BLUE = "blueExposureCount"
+  val BINNING_BLUE = "blueBinning"
+  val NOISE_GAIN_BLUE = "blueReadNoiseGain"
   val DEF_EXPOSURE_TIME_BLUE = 10.0
   val EXPOSURE_TIME_BLUE_KEY = new ItemKey(INSTRUMENT_KEY, EXPOSURE_TIME_BLUE_PROP)
 
   // The names of the base position / IFUs.
-  val BaseRADegrees: String  = "baseRADeg"
-  val BaseRAHMS: String      = "baseRAHMS"
-  val BaseDecDegrees: String = "baseDecDeg"
-  val BaseDecDMS: String     = "baseDecDMS"
+  val BASE_RA_DEGREES: String  = "baseRADeg"
+  val BASE_RA_HMS: String      = "baseRAHMS"
+  val BASE_DEC_DEGREES: String = "baseDecDeg"
+  val BASE_DEC_DMS: String     = "baseDecDMS"
 
-  val SRIFU1Name: String     = "srifu1Name"
-  val SRIFU1RADeg: String    = "srifu1CoordsRADeg"
-  val SRIFU1DecDeg: String   = "srifu1CoordsDecDeg"
-  val SRIFU1RAHMS: String    = "srifu1CoordsRAHMS"
-  val SRIFU1DecDMS: String   = "srifu1CoordsDecDMS"
-  val SRIFU1Guiding: String  = "srifu1Guiding"
+  val FIBER_AGITATOR: String   = "enableFiberAgitator"
 
-  val SRIFU2Name: String     = "srifu2Name"
-  val SRIFU2RADeg: String    = "srifu2CoordsRADeg"
-  val SRIFU2DecDeg: String   = "srifu2CoordsDecDeg"
-  val SRIFU2RAHMS: String    = "srifu2CoordsRAHMS"
-  val SRIFU2DecDMS: String   = "srifu2CoordsDecDMS"
-  val SRIFU2Guiding: String  = "srifu2Guiding"
+  val SRIFU1_NAME: String      = "srifu1Name"
+  val SRIFU1_RA_DEG: String    = "srifu1CoordsRADeg"
+  val SRIFU1_DEC_DEG: String   = "srifu1CoordsDecDeg"
+  val SRIFU1_RA_HMS: String    = "srifu1CoordsRAHMS"
+  val SRIFU1_DEC_DMS: String   = "srifu1CoordsDecDMS"
+  val SRIFU1_GUIDING: String   = "srifu1Guiding"
 
-  val HRIFU1Name: String     = "hrifu1Name"
-  val HRIFU1RADeg: String    = "hrifu1CoordsRADeg"
-  val HRIFU1DecDeg: String   = "hrifu1CoordsDecDeg"
-  val HRIFU1RAHMS: String    = "hrifu1CoordsRAHMS"
-  val HRIFU1DecDMS: String   = "hrifu1CoordsDecDMS"
-  val HRIFU1Guiding: String  = "hrifu1Guiding"
+  val SRIFU2_NAME: String      = "srifu2Name"
+  val SRIFU2_RA_DEG: String    = "srifu2CoordsRADeg"
+  val SRIFU2_DEC_DEG: String   = "srifu2CoordsDecDeg"
+  val SRIFU2_RA_HMS: String    = "srifu2CoordsRAHMS"
+  val SRIFU2_DEC_DMS: String   = "srifu2CoordsDecDMS"
+  val SRIFU2_GUIDING: String   = "srifu2Guiding"
 
-  val HRIFU2Name: String     = "hrifu2Name"
-  val HRIFU2RADeg: String    = "hrifu2CoordsRADeg"
-  val HRIFU2DecDeg: String   = "hrifu2CoordsDecDeg"
-  val HRIFU2RAHMS: String    = "hrifu2CoordsRAHMS"
-  val HRIFU2DecDMS: String   = "hrifu2CoordsDecDMS"
+  val HRIFU1_NAME: String      = "hrifu1Name"
+  val HRIFU1_RA_DEG: String    = "hrifu1CoordsRADeg"
+  val HRIFU1_DEC_DEG: String   = "hrifu1CoordsDecDeg"
+  val HRIFU1_RA_HMS: String    = "hrifu1CoordsRAHMS"
+  val HRIFU1_DEC_DMS: String   = "hrifu1CoordsDecDMS"
+  val HRIFU1_GUIDING: String   = "hrifu1Guiding"
+
+  val HRIFU2_NAME: String      = "hrifu2Name"
+  val HRIFU2_RA_DEG: String    = "hrifu2CoordsRADeg"
+  val HRIFU2_DEC_DEG: String   = "hrifu2CoordsDecDeg"
+  val HRIFU2_RA_HMS: String    = "hrifu2CoordsRAHMS"
+  val HRIFU2_DEC_DMS: String   = "hrifu2CoordsDecDMS"
 
   /** The properties supported by this class. */
   private def initProp(propName: String, query: Boolean, iter: Boolean): PropertyDescriptor = {
@@ -371,15 +379,15 @@ object Ghost {
 
   val POS_ANGLE_PROP: PropertyDescriptor = initProp(InstConstants.POS_ANGLE_PROP, query = query_no, iter = iter_no)
   val PORT_PROP: PropertyDescriptor = initProp(IssPortProvider.PORT_PROPERTY_NAME, query = query_no, iter = iter_no)
-  val ENABLE_FIBER_AGITATOR_PROP: PropertyDescriptor = initProp("enableFiberAgitator", query = query_no, iter = iter_no)
-  val RED_EXPOSURE_TIME_PROP: PropertyDescriptor = initProp("redExposureTime", query = query_no, iter = iter_yes)
-  val RED_EXPOSURE_COUNT_PROP: PropertyDescriptor = initProp("redExposureCount", query_no, iter_yes)
-  val RED_BINNING_PROP: PropertyDescriptor = initProp("redBinning", query = query_yes, iter = iter_no)
-  val RED_READ_NOISE_GAIN_PROP: PropertyDescriptor = initProp("redReadNoiseGain", query = query_no, iter = iter_no)
-  val BLUE_EXPOSURE_TIME_PROP: PropertyDescriptor = initProp("blueExposureTime", query = query_no, iter = iter_yes)
-  val BLUE_EXPOSURE_COUNT_PROP: PropertyDescriptor = initProp("blueExposureCount", query_no, iter_yes)
-  val BLUE_BINNING_PROP: PropertyDescriptor = initProp("blueBinning", query = query_yes, iter = iter_no)
-  val BLUE_READ_NOISE_GAIN_PROP: PropertyDescriptor = initProp("blueReadNoiseGain", query = query_no, iter = iter_no)
+  val ENABLE_FIBER_AGITATOR_PROP: PropertyDescriptor = initProp(FIBER_AGITATOR, query = query_no, iter = iter_no)
+  val RED_EXPOSURE_TIME_PROP: PropertyDescriptor = initProp(EXPOSURE_TIME_RED_PROP, query = query_no, iter = iter_yes)
+  val RED_EXPOSURE_COUNT_PROP: PropertyDescriptor = initProp(COUNT_RED, query_no, iter_yes)
+  val RED_BINNING_PROP: PropertyDescriptor = initProp(BINNING_RED, query = query_yes, iter = iter_no)
+  val RED_READ_NOISE_GAIN_PROP: PropertyDescriptor = initProp(NOISE_GAIN_RED, query = query_no, iter = iter_no)
+  val BLUE_EXPOSURE_TIME_PROP: PropertyDescriptor = initProp(EXPOSURE_TIME_BLUE_PROP, query = query_no, iter = iter_yes)
+  val BLUE_EXPOSURE_COUNT_PROP: PropertyDescriptor = initProp(COUNT_BLUE, query_no, iter_yes)
+  val BLUE_BINNING_PROP: PropertyDescriptor = initProp(BINNING_BLUE, query = query_yes, iter = iter_no)
+  val BLUE_READ_NOISE_GAIN_PROP: PropertyDescriptor = initProp(NOISE_GAIN_BLUE, query = query_no, iter = iter_no)
 
   private val Properties: List[(String, PropertyDescriptor)] = List(
     POS_ANGLE_PROP,
