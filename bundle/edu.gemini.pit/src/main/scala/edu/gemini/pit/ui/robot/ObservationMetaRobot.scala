@@ -1,11 +1,15 @@
 package edu.gemini.pit.ui.robot
 
 import edu.gemini.model.p1.immutable._
-import scala.actors.Actor.actor
+
 import scalaz.Lens
-import java.util.{TimerTask, Timer}
+import java.util.{Timer, TimerTask}
+
 import scala.swing.Swing
 import edu.gemini.pit.model.Model
+
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  * Base trait for handlers of observation meta data.
@@ -181,7 +185,7 @@ trait ObservationMetaRobot[K, V] extends Robot {
         if (cachedValue.isEmpty) state = state + (k -> Result.Pending)
 
         // Do an asynchronous query to update the value
-        actor {
+        Future {
           callback(k, query(o))
         }
     }
