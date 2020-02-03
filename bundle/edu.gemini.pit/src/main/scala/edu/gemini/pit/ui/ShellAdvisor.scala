@@ -60,13 +60,13 @@ class ShellAdvisor(
   var context: RichShellContext[Model] = null
 
   // Our shell
-  lazy val shell = context.shell
+  lazy val shell: RichShell[Model] = context.shell
 
   // Some robots
   lazy val problemHandler = new ProblemRobot(this)
 
   // Our submit client depends on a system property
-  val submitClient = if (AppMode.isTest) SubmitClient.test else SubmitClient.production
+  val submitClient: SubmitClient = if (AppMode.isTest) SubmitClient.test else SubmitClient.production
   LOGGER.info("Submit client is " + submitClient)
 
   // Provide access to the UI for robotic stuff like quick fixes
@@ -348,7 +348,8 @@ class ShellAdvisor(
           }))
       LOGGER.log(Level.INFO, "Hooked Quit action for Mac.")
     } catch {
-      case e:Exception => LOGGER.log(Level.WARNING, "Trouble installing Quit hook for Mac.", e)
+      case e:Exception if System.getProperty("java.version").startsWith("1.8") => LOGGER.log(Level.WARNING, "Trouble installing Quit hook for Mac.", e)
+      case _ => // Newer JVMs don't need this hack
     }
   }
 

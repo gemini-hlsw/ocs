@@ -1,18 +1,18 @@
 package edu.gemini.pit.ui.util
 
- import scala.swing._
- import scala.swing.event._
- import scala.swing.Swing._
- import java.awt
- import awt.geom.Rectangle2D
- import awt.image.BufferedImage
- import awt.{Color, TexturePaint}
- import java.awt.datatransfer.DataFlavor
- import java.awt.dnd._
- import java.awt.dnd.DragSource.{getDefaultDragSource => ds}
+import scala.swing._
+import scala.swing.event._
+import scala.swing.Swing._
+import java.awt
+import awt.geom.Rectangle2D
+import awt.image.BufferedImage
+import awt.{Color, TexturePaint}
+import java.awt.datatransfer.DataFlavor
+import java.awt.dnd._
+import java.awt.dnd.DragSource.{getDefaultDragSource => ds}
 
- import javax.swing.border.Border
- import edu.gemini.ui.gface.GSelection
+import javax.swing.border.Border
+import edu.gemini.ui.gface.GSelection
 
 object Test extends App {
 
@@ -280,7 +280,7 @@ class ReorderBar[A](val as:A*)(helpMessage:String = "Drag items to rearrange.") 
     def destination: Point = _dest
     def destination_=(p:Point) {
       _dest = p
-       animator ! 'Go
+       new Thread(animator).start()
     }
 
     // Mutator for state
@@ -298,22 +298,17 @@ class ReorderBar[A](val as:A*)(helpMessage:String = "Drag items to rearrange.") 
       peer.setLocation(p)
     }
 
-    // The animator is very simple; whenever we receive a 'Go command we start looping
+    // The animator is very simple; we start looping
     // until we have moved location to its destination. When they're the same, we stop.
     // This allows us to change locations in mid-stride without ill effects.
-     private val animator = actor {
-       loop {
-         react {
-           case 'Go =>
-             location = location + (destination - location).signum
-             reactWithin(2) {
-               case TIMEOUT if (destination != location) => actorSelf ! 'Go
-               case x                                    => actorSelf ! x
-             }
-         }
-       }
-     }
-  //
+     private val animator = new Runnable {
+      override def run(): Unit = {
+        while (location != destination) {
+          location = location + (destination - location).signum
+          Thread.sleep(2)
+        }
+      }
+    }
   }
 
 }
