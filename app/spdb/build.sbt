@@ -233,32 +233,6 @@ def swalker(version: Version) = AppConfig(
   )
 ) extending List(with_gogo(version), swalker_credentials(version))
 
-// FNUSSBER
-def fnussber(version: Version) = AppConfig(
-  id = "fnussber",
-  distribution = List(TestDistro),
-  vmargs = List(
-    "-Xmx2000M",
-    "-Dedu.gemini.site=north",
-    "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
-    "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/fnussberg/.spdb/sftp",
-    "-Dcron.reports.edu.gemini.spdb.reports.public.host=localhost",
-    "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/Users/fnussberg/.spdb/cron",
-    "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=localhost",
-    "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/fnussberg/.spdb/cron"
-  ),
-  props = Map(
-    "edu.gemini.smartgcal.host"          -> "localhost",
-    "edu.gemini.spdb.dir"                -> "/Users/fnussberg/.spdb/",
-    "edu.gemini.auxfile.root"            -> "/Users/fnussberg/.auxfile",
-    "edu.gemini.dataman.gsa.summit.host" -> "mkofits-lv1new.hi.gemini.edu",
-    "edu.gemini.util.trpc.name"          -> "Florian's ODB (Test)",
-    "edu.gemini.auxfile.fits.dest"       -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
-    "edu.gemini.auxfile.other.dest"      -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
-    "edu.gemini.auxfile.fits.host"       -> "gsconfig.gemini.edu"
-  )
-) extending List(with_gogo(version), fnussber_credentials(version))
-
 // SRAAPHORST
 def sraaphorst(version: Version) = AppConfig(
   id = "sraaphorst",

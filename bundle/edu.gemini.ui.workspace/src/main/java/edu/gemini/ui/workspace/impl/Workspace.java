@@ -58,7 +58,6 @@ public class Workspace extends WindowAdapter implements IWorkspace {
             if (PopupFactory.getSharedInstance().getClass().getName().equals("apple.laf.ScreenPopupFactory"))
                 PopupFactory.setSharedInstance(new PopupFactory());
 
-//            PlasticLookAndFeel.setTabStyle(PlasticLookAndFeel.TAB_STYLE_METAL_VALUE);
             UIManager.setLookAndFeel(new PlasticLookAndFeel());
 
 

@@ -129,7 +129,7 @@ public final class GSelection<E> implements Iterable<E>, Transferable {
      * Returns a copy of this GSelection with the contents of toAdd appended to the end.
      */
     public GSelection<E> plus(GSelection<E> toAdd) {
-        List<E> accum = new ArrayList();
+        List<E> accum = new ArrayList<>();
         for (E o: this) accum.add(o);
         for (E o: toAdd) accum.add(o);
         return new GSelection<>(accum.toArray((E[]) Array.newInstance(store.getClass().getComponentType(), accum.size())));
@@ -141,7 +141,7 @@ public final class GSelection<E> implements Iterable<E>, Transferable {
     public GSelection<E> minus(GSelection<E> toRemove) {
         Set<E> set = new HashSet<>();
         for (E o: toRemove) set.add(o);
-        ArrayList<E> accum = new ArrayList();
+        ArrayList<E> accum = new ArrayList<>();
         for (E o: this) {
             if (!set.contains(o))
                 accum.add(o);

@@ -1,15 +1,13 @@
 package edu.gemini.pit.ui.util
 
-import scala.actors._
-import scala.actors.Actor.{actor, loop, react, reactWithin, self => actorSelf}
 import scala.swing._
 import scala.swing.event._
 import scala.swing.Swing._
-
 import java.awt
 import awt.geom.Rectangle2D
 import awt.image.BufferedImage
-import awt.{TexturePaint, Color}
+import awt.{Color, TexturePaint}
+import java.awt.datatransfer.DataFlavor
 import java.awt.dnd._
 import java.awt.dnd.DragSource.{getDefaultDragSource => ds}
 
@@ -66,7 +64,7 @@ object ReorderBar {
     def signum:Point = (a.x.signum, a.y.signum)
   }
 
-  // Item state 
+  // Item state
   object ItemState extends Enumeration {
     val Dropped, Dragging, Dropping = Value
     type ItemState = Value
@@ -85,7 +83,7 @@ object ReorderBar {
       setRGB(2, 2, 0xFFFFFFFF)
     }, new Rectangle2D.Double(2, 2, 3, 3))
 
-    def getBorderInsets(c:awt.Component) = insets
+    def getBorderInsets(c:awt.Component): Insets = insets
 
     def paintBorder(c:awt.Component, _g:awt.Graphics, x:Int, y:Int, w:Int, h:Int) {
       val g:awt.Graphics2D = _g.asInstanceOf[Graphics2D]
@@ -111,11 +109,11 @@ class ReorderBar[A](val as:A*)(helpMessage:String = "Drag items to rearrange.") 
   import ReorderBar._
   import ReorderBar.ItemState._
 
-  val Flavor = GSelection.flavorForSelectionOf(classOf[ReorderBar[A]#Item])
+  val Flavor: DataFlavor = GSelection.flavorForSelectionOf(classOf[ReorderBar[A]#Item])
 
   // Create and add our items. We use this list if we don't care about their order.
   private val items = {
-    val is = as.map(Item(_))
+    val is = as.map(Item)
     is.map(_.peer).foreach(peer.add)
     is
   }
@@ -125,7 +123,7 @@ class ReorderBar[A](val as:A*)(helpMessage:String = "Drag items to rearrange.") 
   layout(true)
 
   // Our data elements, sorted left to right.
-  def elems = orderedItems.map(_.a).toList
+  def elems: List[A] = orderedItems.map(_.a).toList
 
   // Sync this bar with another one
   def copyStateFrom(other:ReorderBar[A]) {
@@ -141,10 +139,10 @@ class ReorderBar[A](val as:A*)(helpMessage:String = "Drag items to rearrange.") 
   }
 
   // Our items, sorted left to right.
-  private def orderedItems = items.sortBy(_.location.x)
+  private def orderedItems: Seq[Item] = items.sortBy(_.location.x)
 
   // Our visible items
-  private def layoutItems = orderedItems.filter(_.state != Dragging)
+  private def layoutItems: Seq[Item] = orderedItems.filter(_.state != Dragging)
 
   // Calculate the x-offsets of space-occupying items based on their state
   private def offsets = {
@@ -156,9 +154,10 @@ class ReorderBar[A](val as:A*)(helpMessage:String = "Drag items to rearrange.") 
   private def layout(initial:Boolean = false) {
     layoutItems.zip(offsets).foreach {
       case (i, x) =>
-        initial match {
-          case true  => i.location = (x, 0)
-          case false => i.destination = (x, 0)
+        if (initial) {
+          i.location = (x, 0)
+        } else {
+          i.destination = (x, 0)
         }
     }
   }
@@ -168,14 +167,15 @@ class ReorderBar[A](val as:A*)(helpMessage:String = "Drag items to rearrange.") 
   ///
 
   // We need to unmap items from their peers and toStrings (sigh)
-  private def fromPeer(c:awt.Component) = items.find(_.peer == c)
+  private def fromPeer(c:awt.Component): Option[Item] = items.find(_.peer == c)
 
   // Our DragSourceListener, common to all items
   object dsl extends DragSourceAdapter {
     override def dragDropEnd(dsde:DragSourceDropEvent) {
-      dsde.getDropSuccess match {
-        case false => fromPeer(dsde.getDragSourceContext.getComponent).foreach(_.state = Dropped)
-        case true  => ReorderBar.this.publish(Reorder(elems))
+      if (dsde.getDropSuccess) {
+        ReorderBar.this.publish(Reorder(elems))
+      } else {
+        fromPeer(dsde.getDragSourceContext.getComponent).foreach(_.state = Dropped)
       }
     }
   }
@@ -205,7 +205,7 @@ class ReorderBar[A](val as:A*)(helpMessage:String = "Drag items to rearrange.") 
       dragOver(e)
     }
 
-    // On dragover, 
+    // On dragover,
     override def dragOver(e:DropTargetDragEvent) {
       if (droppable(e.getLocation)) {
         e.acceptDrag(DnDConstants.ACTION_MOVE)
@@ -239,7 +239,7 @@ class ReorderBar[A](val as:A*)(helpMessage:String = "Drag items to rearrange.") 
       }
     }
 
-    private def droppable(p:awt.Point) = {
+    private def droppable(p:awt.Point): Boolean = {
       val over = peer.getComponentAt(p)
       over == peer || !over.isVisible
     }
@@ -277,14 +277,14 @@ class ReorderBar[A](val as:A*)(helpMessage:String = "Drag items to rearrange.") 
     }
 
     // Mutator for destination.
-    def destination = _dest
+    def destination: Point = _dest
     def destination_=(p:Point) {
       _dest = p
-      animator ! 'Go
+       new Thread(animator).start()
     }
 
     // Mutator for state
-    def state = _state
+    def state: ItemState = _state
     def state_=(s:ItemState) {
       if (s != _state) {
         _state = s
@@ -298,24 +298,17 @@ class ReorderBar[A](val as:A*)(helpMessage:String = "Drag items to rearrange.") 
       peer.setLocation(p)
     }
 
-    // The animator is very simple; whenever we receive a 'Go command we start looping
+    // The animator is very simple; we start looping
     // until we have moved location to its destination. When they're the same, we stop.
     // This allows us to change locations in mid-stride without ill effects.
-    private val animator = actor {
-      loop {
-        react {
-          case 'Go =>
-            location = location + (destination - location).signum
-            reactWithin(2) {
-              case TIMEOUT if (destination != location) => actorSelf ! 'Go
-              case x                                    => actorSelf ! x
-            }
+     private val animator = new Runnable {
+      override def run(): Unit = {
+        while (location != destination) {
+          location = location + (destination - location).signum
+          Thread.sleep(2)
         }
       }
     }
-
   }
 
 }
-
-
