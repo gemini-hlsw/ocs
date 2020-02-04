@@ -144,7 +144,7 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
             ghr.hrifu2.foreach(c => coordParam(c, Some(Ghost.HRIFU2_NAME),
               Ghost.HRIFU2_RA_DEG, Ghost.HRIFU2_DEC_DEG,
               Ghost.HRIFU2_RA_HMS, Ghost.HRIFU2_DEC_DMS))
-            
+
           case _ =>
             // The asterism may not have been configured by this point.
         }}
