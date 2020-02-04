@@ -133,9 +133,14 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
             ghr.overriddenBase.foreach(b => coordParam(b, None,
               Ghost.BASE_RA_DEGREES, Ghost.BASE_DEC_DEGREES,
               Ghost.BASE_RA_HMS, Ghost.BASE_DEC_DMS))
+
+            // Always target.
             coordParam(ghr.hrifu1.spTarget, Some(Ghost.HRIFU1_NAME),
               Ghost.HRIFU1_RA_DEG, Ghost.HRIFU1_DEC_DEG,
               Ghost.HRIFU1_RA_HMS, Ghost.HRIFU1_DEC_DMS)
+            guiding(Ghost.HRIFU1_GUIDING, ghr.hrifu1)
+
+            // Always sky, if it exists.
             ghr.hrifu2.foreach(c => coordParam(c, Some(Ghost.HRIFU2_NAME),
               Ghost.HRIFU2_RA_DEG, Ghost.HRIFU2_DEC_DEG,
               Ghost.HRIFU2_RA_HMS, Ghost.HRIFU2_DEC_DMS))
