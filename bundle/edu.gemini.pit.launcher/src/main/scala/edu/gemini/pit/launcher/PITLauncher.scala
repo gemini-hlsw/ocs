@@ -17,8 +17,11 @@ object PITLauncher extends App {
   val locale = Locale.getDefault
   Locale.setDefault(Locale.ENGLISH)
 
-  // We normally want to be in test mode in development
-  System.setProperty("edu.gemini.pit.test", "true")
+  // Check first on the env or else default to true
+  Option(System.getProperty("edu.gemini.pit.test")) match {
+    case None => System.setProperty("edu.gemini.pit.test", "true")
+    case _ => ()
+  }
   // Need to set this manually, as we are not inside OSGi
   val version = s"${Semester.current.year}.2.1"
   System.setProperty("edu.gemini.model.p1.schemaVersion", version)
