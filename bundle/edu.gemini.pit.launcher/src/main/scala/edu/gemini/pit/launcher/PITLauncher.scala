@@ -17,10 +17,10 @@ object PITLauncher extends App {
   val locale = Locale.getDefault
   Locale.setDefault(Locale.ENGLISH)
 
-  // Check first on the env or else default to true
+  // Check first on the env or else default to false
   Option(System.getProperty("edu.gemini.pit.test")) match {
-    case None => System.setProperty("edu.gemini.pit.test", "true")
-    case _ => ()
+    case None => System.setProperty("edu.gemini.pit.test", "false")
+    case _    => ()
   }
   // Need to set this manually, as we are not inside OSGi
   val version = s"${Semester.current.year}.2.1"
