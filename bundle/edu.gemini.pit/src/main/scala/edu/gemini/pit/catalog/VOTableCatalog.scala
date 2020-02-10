@@ -5,7 +5,8 @@ import edu.gemini.model.p1.immutable.Target
 import java.io.IOException
 import java.net.URL
 import java.util.logging.Level
-import scala.actors.Actor._
+import scala.concurrent.Future
+import scala.concurrent.{blocking, ExecutionContext}
 import votable._
 
 // Type of catalogs that fetch a VOTable
@@ -15,28 +16,28 @@ trait VOTableCatalog extends Catalog {
   def host: String
   def decode(vot: VOTable): Seq[Target]
 
-  def find(id: String)(callback: Result => Unit) {
-    actor {
-      val f = callback.safe
-      try {
-
+  override def find(id: String)(implicit ex: ExecutionContext): Future[Result] =
+    Future {
+      blocking {
         val conn = url(id).openConnection
         conn.setReadTimeout(1000 * 10) // 10 secs?
 
         // Parse the URL data into a VOTable
         val vot = VOTable(conn.getInputStream)
-        val ts = decode(vot)
-        if (ts.nonEmpty) f(Success(ts.toList, Nil)) else f(NotFound(id))
-
-      } catch {
-        case e:IOException =>
-          Log.warning("%s: %s(%s)".format(host, e.getClass.getSimpleName, e.getMessage))
-          f(Offline)
-        case t:Throwable =>
-          Log.log(Level.WARNING, "Unexpected trouble looking up %s on %s.".format(id, host), t)
-          f(Error(t))
+        decode(vot)
       }
+
+    }.map {
+      case ts if ts.nonEmpty => Success(ts.toList, Nil)
+      case _                 => NotFound(id)
+
+    }.recover {
+      case e: IOException =>
+        Log.warning("%s: %s(%s)".format(host, e.getClass.getSimpleName, e.getMessage))
+        Offline
+      case t              =>
+        Log.log(Level.WARNING, "Unexpected trouble looking up %s on %s.".format(id, host), t)
+        Error(t)
     }
-  }
 
 }
