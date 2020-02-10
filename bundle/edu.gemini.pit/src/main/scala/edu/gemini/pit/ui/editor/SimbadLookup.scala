@@ -8,6 +8,7 @@ import java.awt.Component
 import java.util.logging.Logger
 import javax.swing.JOptionPane
 import jsky.util.gui.DialogUtil
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing.Swing
 import scalaz._, Scalaz._, scalaz.concurrent.Task
 
@@ -39,7 +40,10 @@ final class SimbadLookup(editor: TargetEditor) {
 
   private def search(query: String): Task[Unit] =
     show("Searching...") *> Task.async[SimbadResult] { k =>
-      Simbad.find(query)(r => k(r.right))
+      Simbad.find(query).onComplete {
+        case scala.util.Success(result) => k(result.right)
+        case scala.util.Failure(ex)     => k(ex.left)
+      }
     } >>= {
 
       // Failure cases

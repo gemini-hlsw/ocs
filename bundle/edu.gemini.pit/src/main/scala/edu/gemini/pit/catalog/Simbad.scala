@@ -9,21 +9,19 @@ import edu.gemini.spModel.core._
 import votable._
 import java.util.UUID
 
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext
+
+
 object Simbad extends Catalog with App {
 
   private lazy val hosts = Array("simbad.u-strasbg.fr", "simbad.cfa.harvard.edu")
   private lazy val simbad = hosts.map(apply).reduceLeft(_ || _)
 
-  def find(id:String)(callback:Result => Unit) {
-    simbad.find(id)(callback)
-  }
+  override def find(id:String)(implicit ex: ExecutionContext): Future[Result] =
+    simbad.find(id)(ex)
 
   def apply(host:String):Catalog = new Simbad(host)
-
-  find("sirius") {
-    case Success(t, cs) => println((t, cs))
-    case x              => println(x)
-  }
 
 }
 
