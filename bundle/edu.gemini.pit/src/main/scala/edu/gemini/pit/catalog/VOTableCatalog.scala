@@ -6,7 +6,7 @@ import java.io.IOException
 import java.net.URL
 import java.util.logging.Level
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{blocking, ExecutionContext}
 import votable._
 
 // Type of catalogs that fetch a VOTable
@@ -18,12 +18,14 @@ trait VOTableCatalog extends Catalog {
 
   override def find(id: String)(implicit ex: ExecutionContext): Future[Result] =
     Future {
-      val conn = url(id).openConnection
-      conn.setReadTimeout(1000 * 10) // 10 secs?
+      blocking {
+        val conn = url(id).openConnection
+        conn.setReadTimeout(1000 * 10) // 10 secs?
 
-      // Parse the URL data into a VOTable
-      val vot = VOTable(conn.getInputStream)
-      decode(vot)
+        // Parse the URL data into a VOTable
+        val vot = VOTable(conn.getInputStream)
+        decode(vot)
+      }
 
     }.map {
       case ts if ts.nonEmpty => Success(ts.toList, Nil)
