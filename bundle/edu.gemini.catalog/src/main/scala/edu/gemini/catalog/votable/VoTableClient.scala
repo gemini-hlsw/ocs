@@ -277,7 +277,7 @@ case object GaiaBackend extends CachedBackend with RemoteCallBackend {
 
 
   override val catalogUrls: NonEmptyList[URL] =
-    NonEmptyList(new URL("http://gea.esac.esa.int/tap-server/tap/sync"))
+    NonEmptyList(new URL("https://gea.esac.esa.int/tap-server/tap/sync"))
 
   override def queryUrl(e: SearchKey): String =
     e.url.toExternalForm
