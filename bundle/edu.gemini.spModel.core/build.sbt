@@ -33,7 +33,7 @@ sourceGenerators in Compile += Def.task {
   val outDir = (sourceManaged in Compile).value / "edu" / "gemini" / "spModel" / "core"
   val outFile = new File(outDir, ocsVer.sourceFileName)
   outDir.mkdirs
-  IO.write(outFile, ocsVer.toClass) // UTF-8 is default
+  IO.write(outFile, ocsVer.toClass("edu.gemini.spModel.core")) // UTF-8 is default
   Seq(outFile)
 }.taskValue
 

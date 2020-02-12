@@ -28,10 +28,10 @@ class Activator extends BundleActivator {
 
     // Turn this bundle property into the system property.
     // TODO: Not sure if this is used anymore.
-    \/.fromTryCatchNonFatal(context.getProperty(AppMode.TestProperty).toBoolean).fold(
-      _ => Log.warning(s"Context property ${AppMode.TestProperty} should be defined and have a boolean value."),
-      v => System.setProperty(AppMode.TestProperty, v.toString)
-    )
+//    \/.fromTryCatchNonFatal(context.getProperty(AppMode.TestProperty).toBoolean).fold(
+//      _ => Log.warning(s"Context property ${AppMode.TestProperty} should be defined and have a boolean value."),
+//      v => System.setProperty(AppMode.TestProperty, v.toString)
+//    )
 
     // The way Workspace works is that you create an IShellAdvisor and register it as a service. Workspace sees this and
     // pops up a corresponding top-level window (an IShell). Because our shell advisor needs the ability to open new
