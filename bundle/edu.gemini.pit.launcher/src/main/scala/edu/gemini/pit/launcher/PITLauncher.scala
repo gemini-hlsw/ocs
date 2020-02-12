@@ -18,18 +18,10 @@ object PITLauncher extends App {
   val locale = Locale.getDefault
   Locale.setDefault(Locale.ENGLISH)
 
-  // We normally want to be in test mode in development
-  //System.setProperty("edu.gemini.pit.test", "true")
   // Need to set this manually, as we are not inside OSGi
   val version = s"${Semester.current.year}.2.1"
   System.setProperty("edu.gemini.model.p1.schemaVersion", version)
   System.setProperty(classOf[Workspace].getName + ".fonts.shrunk", "true")
-
-  // Check version. This should be PIT version, and not OCS version.
-  //val version: Version = CurrentVersion.get()
-  System.out.println("***********************************")
-  System.out.println(s"******* VERSION: ${CurrentVersion.get()}")
-  System.out.println("***********************************")
 
   // Set manually AGS
   AgsRobot.ags = Some(AgsHttpClient("gsodb.gemini.edu", 8443))

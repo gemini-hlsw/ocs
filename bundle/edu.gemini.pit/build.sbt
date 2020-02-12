@@ -40,14 +40,6 @@ sourceGenerators in Compile += Def.task {
   Seq(outFile)
 }.taskValue
 
-initialCommands := "import edu.gemini.pit._, scalaz._, Scalaz._"
-
-scalacOptions in (Compile, doc) ++= Seq(
-  "-groups",
-  "-sourcepath", (baseDirectory in LocalRootProject).value.getAbsolutePath,
-  "-doc-source-url", "https://github.com/gemini-hlws/ocs/master€{FILE_PATH}.scala"
-)
-
 publishArtifact in (ThisBuild, packageSrc) := true
 
 publishMavenStyle in ThisBuild := true

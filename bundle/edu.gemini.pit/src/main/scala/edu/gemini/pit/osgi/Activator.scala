@@ -2,7 +2,7 @@ package edu.gemini.pit.osgi
 
 import edu.gemini.ui.workspace.IShellAdvisor
 import edu.gemini.pit.ui.ShellAdvisor
-import edu.gemini.pit.model.{AppMode, Model}
+import edu.gemini.pit.model.Model
 import org.osgi.util.tracker.ServiceTracker
 import edu.gemini.ags.client.api.AgsClient
 import org.osgi.framework.{BundleActivator, BundleContext, ServiceReference}
@@ -10,8 +10,6 @@ import edu.gemini.pit.ui.robot.AgsRobot
 import java.io.File
 import java.util.Locale
 import java.util.logging.Logger
-
-import scalaz.\/
 
 class Activator extends BundleActivator {
   private val Log = Logger.getLogger(Activator.this.getClass.getName)
@@ -25,13 +23,6 @@ class Activator extends BundleActivator {
     // Since we haven't really handled i18n ...
     val locale = Locale.getDefault
     Locale.setDefault(Locale.ENGLISH)
-
-    // Turn this bundle property into the system property.
-    // TODO: Not sure if this is used anymore.
-//    \/.fromTryCatchNonFatal(context.getProperty(AppMode.TestProperty).toBoolean).fold(
-//      _ => Log.warning(s"Context property ${AppMode.TestProperty} should be defined and have a boolean value."),
-//      v => System.setProperty(AppMode.TestProperty, v.toString)
-//    )
 
     // The way Workspace works is that you create an IShellAdvisor and register it as a service. Workspace sees this and
     // pops up a corresponding top-level window (an IShell). Because our shell advisor needs the ability to open new
