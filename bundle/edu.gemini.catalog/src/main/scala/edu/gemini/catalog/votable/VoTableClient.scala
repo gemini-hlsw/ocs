@@ -1,13 +1,17 @@
 package edu.gemini.catalog.votable
 
-import java.net.{URL, UnknownHostException}
+import java.net.{URL, UnknownHostException, URLEncoder}
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Logger
 
 import edu.gemini.catalog.api.{CatalogName, RadiusConstraint, MagnitudeConstraints, NameCatalogQuery, ConeSearchCatalogQuery, CatalogQuery}
 import edu.gemini.spModel.core.{Angle, Magnitude, MagnitudeBand, MagnitudeSystem, NiciBandsList, NoBands, RBandsList, SiderealTarget, SingleBand}
-import org.apache.commons.httpclient.{NameValuePair, HttpClient}
-import org.apache.commons.httpclient.methods.GetMethod
+
+import org.apache.http.HttpResponse
+import org.apache.http.client.HttpClient
+import org.apache.http.client.config.RequestConfig
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.impl.client.HttpClients
 
 import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, Promise, Future}
@@ -146,27 +150,40 @@ trait CachedBackend extends VoTableBackend {
 trait RemoteCallBackend { this: CachedBackend =>
   private val timeout = 30 * 1000 // Max time to wait
 
-  protected [votable] def queryParams(q: CatalogQuery): Array[NameValuePair]
+  protected [votable] def queryParams(q: CatalogQuery): Array[(String, String)]
   protected [votable] def queryUrl(e: SearchKey): String
 
   override protected def query(e: SearchKey): QueryResult = {
-    val method = new GetMethod(queryUrl(e))
     val widerQuery = widen(e.query)
-    val qs = queryParams(widerQuery)
-    method.setQueryString(qs)
-    Log.info(s"Catalog query to ${method.getURI}")
+    val qs         = queryParams(widerQuery)
+                       .map { case (n, v) => s"$n=${URLEncoder.encode(v, "UTF-8")}"}
+                       .mkString("&")
+    val get        = new HttpGet(s"${queryUrl(e)}?$qs")
 
-    val client = new HttpClient
-    client.setConnectionTimeout(timeout)
+    Log.info(s"Catalog query to ${get.getURI}")
 
+    val client    = HttpClients.createDefault
+    val reqConfig = RequestConfig.custom.setConnectTimeout(timeout).build
+    get.setConfig(reqConfig)
+
+    def problemResult(p: CatalogProblem): QueryResult =
+      QueryResult(widerQuery, CatalogQueryResult(TargetsTable.Zero, List(p)))
+
+    def noEntity(response: HttpResponse): QueryResult = {
+      val statusLine = response.getStatusLine
+      problemResult(GenericError(s"Catalog response has no content: ${statusLine.getStatusCode} ${statusLine.getReasonPhrase}"))
+    }
+
+    val response = client.execute(get)
     try {
-      client.executeMethod(method)
-      VoTableParser.parse(e.query.catalog, method.getResponseBodyAsStream) match {
-        case -\/(p) => QueryResult(widerQuery, CatalogQueryResult(TargetsTable.Zero, List(p)))
-        case \/-(y) => QueryResult(widerQuery, CatalogQueryResult(y))
+      Option(response.getEntity).fold(noEntity(response)) { ent =>
+        VoTableParser.parse(e.query.catalog, ent.getContent) match {
+          case -\/(p) => problemResult(p)
+          case \/-(y) => QueryResult(widerQuery, CatalogQueryResult(y))
+        }
       }
     } finally {
-      method.releaseConnection()
+      response.close()
     }
   }
 }
@@ -177,12 +194,13 @@ case object ConeSearchBackend extends CachedBackend with RemoteCallBackend {
 
   private def format(a: Angle)= f"${a.toDegrees}%4.03f"
 
-  protected [votable] def queryParams(q: CatalogQuery): Array[NameValuePair] = q match {
+  protected [votable] def queryParams(q: CatalogQuery): Array[(String, String)] = q match {
     case qs: ConeSearchCatalogQuery => Array(
-      new NameValuePair("CATALOG", qs.catalog.id),
-      new NameValuePair("RA", format(qs.base.ra.toAngle)),
-      new NameValuePair("DEC", f"${qs.base.dec.toDegrees}%4.03f"),
-      new NameValuePair("SR", format(qs.radiusConstraint.maxLimit)))
+      ("CATALOG", qs.catalog.id),
+      ("RA",      format(qs.base.ra.toAngle)),
+      ("DEC",     f"${qs.base.dec.toDegrees}%4.03f"),
+      ("SR",      format(qs.radiusConstraint.maxLimit))
+    )
     case _                          => Array.empty
   }
 
@@ -260,15 +278,15 @@ case object GaiaBackend extends CachedBackend with RemoteCallBackend {
       """.stripMargin
   }
 
-  override protected [votable] def queryParams(q: CatalogQuery): Array[NameValuePair] =
+  override protected [votable] def queryParams(q: CatalogQuery): Array[(String, String)] =
     q match {
 
       case cs: ConeSearchCatalogQuery =>
         Array(
-          new NameValuePair("REQUEST", "doQuery"      ),
-          new NameValuePair("LANG",    "ADQL"         ),
-          new NameValuePair("FORMAT",  "votable_plain"),
-          new NameValuePair("QUERY",   adql(cs)       )
+          ("REQUEST", "doQuery"      ),
+          ("LANG",    "ADQL"         ),
+          ("FORMAT",  "votable_plain"),
+          ("QUERY",   adql(cs)       )
         )
 
       case _                          =>
@@ -286,10 +304,11 @@ case object GaiaBackend extends CachedBackend with RemoteCallBackend {
 case object SimbadNameBackend extends CachedBackend with RemoteCallBackend {
   override val catalogUrls = NonEmptyList(new URL("http://simbad.cfa.harvard.edu/simbad"), new URL("http://simbad.u-strasbg.fr/simbad"))
 
-  protected [votable] def queryParams(q: CatalogQuery): Array[NameValuePair] = q match {
+  protected [votable] def queryParams(q: CatalogQuery): Array[(String, String)] = q match {
     case qs: NameCatalogQuery => Array(
-      new NameValuePair("output.format", "VOTable"),
-      new NameValuePair("Ident", qs.search))
+      ("output.format", "VOTable"),
+      ("Ident",         qs.search)
+    )
     case _                    => Array.empty
   }
 

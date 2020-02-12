@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.api.CatalogName._
 import edu.gemini.spModel.core._
-import org.apache.commons.httpclient.NameValuePair
 import org.specs2.mutable.Specification
 
 import scala.concurrent._
@@ -34,10 +33,10 @@ class VoTableClientSpec extends Specification with VoTableClient {
     }
 
     "produce query params" in {
-      ConeSearchBackend.queryParams(query) should beEqualTo(Array(new NameValuePair("CATALOG", "ucac4"), new NameValuePair("RA", "10.000"), new NameValuePair("DEC", "20.000"), new NameValuePair("SR", "0.100")))
+      ConeSearchBackend.queryParams(query) should beEqualTo(Array(("CATALOG", "ucac4"), ("RA", "10.000"), ("DEC", "20.000"), ("SR", "0.100")))
     }
     "make a query to a bad site" in {
-      Await.result(doQuery(query, new URL("http://unknown site"), ConeSearchBackend)(implicitly), 30.seconds) should throwA[UnknownHostException]
+      Await.result(doQuery(query, new URL("http://unknown.site.6BD3435D-F573-4760-8233-8ADF7D6137AA"), ConeSearchBackend)(implicitly), 30.seconds) should throwA[UnknownHostException]
     }
     "be able to select the first successful of several futures" in {
       def f1 = Future { Thread.sleep(1000); throw new RuntimeException("oops") }
