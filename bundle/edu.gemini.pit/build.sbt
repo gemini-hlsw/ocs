@@ -30,3 +30,16 @@ OsgiKeys.bundleSymbolicName := name.value
 OsgiKeys.dynamicImportPackage := Seq("")
 
 OsgiKeys.exportPackage := Seq()
+
+sourceGenerators in Compile += Def.task {
+  val pitVer = pitVersion.value
+  val outDir = (sourceManaged in Compile).value / "edu" / "gemini" / "pit" / "model"
+  val outFile = new File(outDir, pitVer.sourceFileName)
+  outDir.mkdirs
+  IO.write(outFile, pitVer.toClass("edu.gemini.pit.model")) // UTF-8 is default
+  Seq(outFile)
+}.taskValue
+
+publishArtifact in (ThisBuild, packageSrc) := true
+
+publishMavenStyle in ThisBuild := true

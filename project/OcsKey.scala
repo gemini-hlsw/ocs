@@ -59,10 +59,12 @@ case class OcsVersion(semester: String, test: Boolean, xmlCompatibility: Int, se
 
   def sourceFileName = "CurrentVersion.java"
 
-  def toClass = s"""
-    |package edu.gemini.spModel.core;
+  def toClass(pkg: String): String = s"""
+    |package $pkg;
     |
     |import java.text.ParseException;
+    |import edu.gemini.spModel.core.Version;
+    |import edu.gemini.spModel.core.Semester;
     |
     |// AUTO-GENERATED; DO NOT MODIFY
     |
@@ -73,14 +75,14 @@ case class OcsVersion(semester: String, test: Boolean, xmlCompatibility: Int, se
     |    try {
     |      return new Version(Semester.parse("$semester"), $test, $xmlCompatibility, $serialCompatibility, $minor);
     |    } catch (ParseException pe) {
-    |      throw new Error("Bogus OCS Version; check the build.", pe);
+    |      throw new Error("Bogus Version; check the build.", pe);
     |    }
     |  }
     |
     |}
     """.trim.stripMargin
 
-  override def toString = {
+  override def toString: String = {
     val testString = if (test) "-test" else ""
     s"${semester}${testString}.$xmlCompatibility.$serialCompatibility.$minor"
   }
