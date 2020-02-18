@@ -24,7 +24,7 @@ object PITLauncher extends App {
   System.setProperty(classOf[Workspace].getName + ".fonts.shrunk", "true")
 
   // Set manually AGS
-  AgsRobot.ags = Some(AgsHttpClient("gsodb.gemini.edu", 8443))
+  AgsRobot.ags = Some(AgsHttpClient("gnauxodb.gemini.edu", 8443))
 
   // Create workspace with a null bundle context, it internally checks if it is null
   val workspace = new Workspace(null)
