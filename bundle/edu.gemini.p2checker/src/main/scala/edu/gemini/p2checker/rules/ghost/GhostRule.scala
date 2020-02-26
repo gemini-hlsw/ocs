@@ -1,5 +1,6 @@
 package edu.gemini.p2checker.rules.ghost
 
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.p2checker.api.{IP2Problems, IRule, ObservationElements, P2Problems}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core.Coordinates
@@ -15,9 +16,9 @@ object GhostRule extends IRule {
         toc <- elems.getTargetObsComponentNode.asScalaOpt
         ctx <- elems.getObsContext.asScalaOpt
         env <- Option(ctx.getTargets)
-        base <- env.getAsterism.basePosition(None)
+        base <- ctx.getBaseCoordinates.asScalaOpt
         c <- env.getCoordinates.asScalaList
-        if Coordinates.difference(base, c.coordinates).distance.toArcsecs > GhostScienceAreaGeometry.radius.toArcsecs
+        if Coordinates.difference(base.toNewModel, c.coordinates).distance.toArcsecs > GhostScienceAreaGeometry.radius.toArcsecs
       } problems.addError(GhostRule.Prefix + "CoordinatesOutOfRange", String.format(GhostRule.CoordinatesOutOfRange, c.getName), toc)
 
       // TARGETS
@@ -27,7 +28,7 @@ object GhostRule extends IRule {
         env <- Option(ctx.getTargets)
         base <- env.getAsterism.basePosition(None) //ctx.getBaseCoordinates.asScalaOpt
         t <- env.getAsterism.allTargets
-        c <- t.coords(None)
+        c <- t.coords(ctx.getSchedulingBlockStart.asScalaOpt.map(Long2long))
         if Coordinates.difference(base, c).distance.toArcsecs > GhostScienceAreaGeometry.radius.toArcsecs
       } problems.addError(GhostRule.Prefix + "CoordinatesOutOfRange", String.format(GhostRule.CoordinatesOutOfRange, t.name), toc)
 
@@ -42,5 +43,5 @@ object GhostRule extends IRule {
   }
 
   val Prefix: String = "GhostRule_"
-  val CoordinatesOutOfRange: String = "The coordinates for %s are out of range of the base position."
+  val CoordinatesOutOfRange: String = "The coordinates for %s are out of range at the base position."
 }
