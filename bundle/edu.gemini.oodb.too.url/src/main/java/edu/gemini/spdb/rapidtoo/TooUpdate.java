@@ -42,12 +42,15 @@ public interface TooUpdate extends Serializable {
     Option<Duration> getExposureTime();
 
     /**
-     * Gets the text of the note that will be added to the observation.  For
-     * example, it could contain a link to the finding chart to use.
-     *
-     * @return note text, or <code>null</code> if not specified
+     * Gets the text of the note that will be added to the observation, if any.
+     * For example, it could contain a link to the finding chart to use.
      */
-    String getNote();
+    Option<String> getNote();
+
+    /**
+     * Gets the title of the note that will be added to the observation, if any.
+     */
+    Option<String> getNoteTitle();
 
     /**
      * Gets the elevation constraints that should apply to this TOO trigger,

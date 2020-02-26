@@ -52,5 +52,21 @@ object HttpUpdateSpec extends Specification with ScalaCheck with Arbitraries wit
     "exptime: succeed if not specified" in {
       (new HttpTooUpdate(req.without("exptime"))).getExposureTime() must_== ImOption.empty()
     }
+
+    "missing note is ok" in {
+      (new HttpTooUpdate(req.without("note"))).getNote() must_== ImOption.empty()
+    }
+
+    "specified note is ok" in {
+      (new HttpTooUpdate(req)).getNote() must_== ImOption.apply("hello")
+    }
+
+    "missing noteTitle is ok" in {
+      (new HttpTooUpdate(req)).getNoteTitle() must_== ImOption.empty()
+    }
+
+    "specified noteTitle is ok" in {
+      (new HttpTooUpdate(req.modifiedWith("noteTitle" -> "title"))).getNoteTitle() must_== ImOption.apply("title")
+    }
   }
 }
