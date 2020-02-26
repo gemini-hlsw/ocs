@@ -27,6 +27,7 @@ public final class HttpTooUpdate implements TooUpdate {
     public static final String EXPOSURE_TIME_PARAM  = "exptime";
     public static final String POSITION_ANGLE_PARAM = "posangle";
     public static final String NOTE_PARAM           = "note";
+    public static final String NOTE_TITLE_PARAM     = "noteTitle";
     public static final String GROUP_PARAM          = "group";
     public static final String READY_PARAM          = "ready";
 
@@ -38,7 +39,8 @@ public final class HttpTooUpdate implements TooUpdate {
     private final Option<TooGuideTarget> _guide;
     private final Double _posAngle;
     private final Option<Duration> _exposureTime;
-    private final String _note;
+    private final Option<String> _note;
+    private final Option<String> _noteTitle;
     private final TooElevationConstraint _elevation;
     private final TooTimingWindow _timingWindow;
     private final String _group;
@@ -89,7 +91,8 @@ public final class HttpTooUpdate implements TooUpdate {
         }
         _exposureTime = ImOption.apply(expTime);
 
-        _note  = req.getParameter(NOTE_PARAM);
+        _note         = ImOption.apply(req.getParameter(NOTE_PARAM));
+        _noteTitle    = ImOption.apply(req.getParameter(NOTE_TITLE_PARAM));
         _elevation    = HttpTooElevationConstraint.parse(req);
         _timingWindow = HttpTooTimingWindow.parse(req);
 
@@ -128,8 +131,14 @@ public final class HttpTooUpdate implements TooUpdate {
         return _exposureTime;
     }
 
-    public String getNote() {
+    @Override
+    public Option<String> getNote() {
         return _note;
+    }
+
+    @Override
+    public Option<String> getNoteTitle() {
+        return _noteTitle;
     }
 
     public TooElevationConstraint getElevationConstraint() {

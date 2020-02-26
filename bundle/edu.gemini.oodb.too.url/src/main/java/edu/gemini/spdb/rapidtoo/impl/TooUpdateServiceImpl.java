@@ -4,6 +4,7 @@ import edu.gemini.pot.sp.*;
 import static edu.gemini.pot.sp.SPComponentBroadType.INSTRUMENT;
 import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SPBadIDException;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider;
@@ -157,18 +158,19 @@ final class TooUpdateServiceImpl implements TooUpdateService {
     private void _addNote(final ISPObservation obs, final ISPFactory factory, final TooUpdate update)
             throws SPException {
 
-        final String noteText = update.getNote();
-        if (noteText == null) return;
+        final Option<String> noteText  = update.getNote();
+        final Option<String> noteTitle = update.getNoteTitle();
+        if (noteText.isDefined() || noteTitle.isDefined()) {
+            final ISPObsComponent obsComp;
+            obsComp = factory.createObsComponent(obs.getProgram(), SPNote.SP_TYPE, null);
 
-        final ISPObsComponent obsComp;
-        obsComp = factory.createObsComponent(obs.getProgram(), SPNote.SP_TYPE, null);
+            final SPNote note = (SPNote) obsComp.getDataObject();
+            note.setTitle(noteTitle.getOrElse("Finding Chart"));
+            note.setNote(noteText.getOrElse(""));
 
-        final SPNote note = (SPNote) obsComp.getDataObject();
-        note.setTitle("Finding Chart");
-        note.setNote(noteText);
-
-        obsComp.setDataObject(note);
-        obs.addObsComponent(0, obsComp);
+            obsComp.setDataObject(note);
+            obs.addObsComponent(0, obsComp);
+        }
     }
 
     private void _addTimingWindow(final ISPObservation obs, final ISPFactory factory, final TooUpdate update)
