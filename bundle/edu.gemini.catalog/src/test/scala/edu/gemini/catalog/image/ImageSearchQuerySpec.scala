@@ -4,13 +4,13 @@ import edu.gemini.spModel.core.{Angle, Coordinates, Declination, RightAscension}
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen._
 import org.scalacheck.{Arbitrary, Shrink}
-import org.scalatest.enablers.CheckerAsserting
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.CheckerAsserting
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import org.scalatest.{Assertion, FlatSpec, Matchers}
 
 import scalaz._
 
-class ImageSearchQuerySpec extends FlatSpec with Matchers with PropertyChecks with ImageCatalogArbitraries {
+class ImageSearchQuerySpec extends FlatSpec with Matchers with ScalaCheckPropertyChecks with ImageCatalogArbitraries {
   // Do more tests to uncover edge cases
   implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSize = 5000, minSuccessful = 5000)
 

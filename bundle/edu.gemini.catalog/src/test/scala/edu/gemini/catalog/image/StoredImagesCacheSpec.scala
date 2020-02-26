@@ -4,7 +4,7 @@ import java.io.File
 
 import edu.gemini.spModel.core.{Angle, Coordinates, Declination, RightAscension}
 import org.scalatest.{BeforeAndAfterEach, FlatSpec, Matchers, OptionValues}
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import edu.gemini.spModel.core.AlmostEqual
 import edu.gemini.spModel.core.AlmostEqual._
 
@@ -12,7 +12,7 @@ import scala.math._
 import scalaz._
 import Scalaz._
 
-class StoredImagesCacheSpec extends FlatSpec with Matchers with PropertyChecks
+class StoredImagesCacheSpec extends FlatSpec with Matchers with ScalaCheckPropertyChecks
   with ImageCatalogArbitraries with OptionValues with BeforeAndAfterEach {
 
   // Do more tests to uncover edge cases

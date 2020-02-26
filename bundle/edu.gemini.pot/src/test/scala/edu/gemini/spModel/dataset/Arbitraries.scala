@@ -88,6 +88,4 @@ trait Arbitraries {
     }
   }
 
-  implicit val arbUuid: Arbitrary[UUID] =
-    Arbitrary { Gen.wrap(UUID.randomUUID()) }
 }

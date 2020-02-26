@@ -19,6 +19,8 @@ osgiSettings
 
 ocsBundleSettings
 
+fork in Test := true
+
 OsgiKeys.bundleActivator := Some("edu.gemini.spModel.io.osgi.Activator")
 
 OsgiKeys.bundleSymbolicName := name.value

@@ -22,6 +22,8 @@ osgiSettings
 
 ocsBundleSettings
 
+fork in Test := true
+
 OsgiKeys.bundleActivator := Some("edu.gemini.spdb.cron.osgi.Activator")
 
 OsgiKeys.bundleSymbolicName := name.value
@@ -33,7 +35,7 @@ OsgiKeys.exportPackage := Seq(
 )
 
 OsgiKeys.privatePackage := Seq(
-  "edu.gemini.spdb.reports.*", 
+  "edu.gemini.spdb.reports.*",
   "edu.gemini.spdb.cron.*",
   "edu.gemini.dbTools.*",
   "edu.gemini.weather.*",

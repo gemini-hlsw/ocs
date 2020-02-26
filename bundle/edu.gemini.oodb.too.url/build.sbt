@@ -18,9 +18,10 @@ osgiSettings
 
 ocsBundleSettings
 
+fork in Test := true
+
 OsgiKeys.bundleActivator := Some("edu.gemini.spdb.rapidtoo.osgi.Activator")
 
 OsgiKeys.bundleSymbolicName := name.value
 
 OsgiKeys.privatePackage := Seq("edu.gemini.spdb.rapidtoo.*")
-

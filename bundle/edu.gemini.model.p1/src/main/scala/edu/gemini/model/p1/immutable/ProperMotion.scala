@@ -7,12 +7,12 @@ object ProperMotion {
 }
 
 case class ProperMotion(deltaRA:Double, deltaDec:Double) {
-  
+
   def mutable = {
     val m = Factory.createProperMotion()
     m.setDeltaRA(BigDecimal(deltaRA).bigDecimal)
     m.setDeltaDec(BigDecimal(deltaDec).bigDecimal)
     m
   }
-  
+
 }

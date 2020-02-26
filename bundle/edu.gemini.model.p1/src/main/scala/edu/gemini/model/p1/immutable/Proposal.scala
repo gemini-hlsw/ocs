@@ -7,7 +7,7 @@ import scala.collection.JavaConverters._
 import java.util.logging.{Logger, Level}
 import org.xml.sax.SAXException
 
-import scalaz._
+import scalaz.{Band => SBand, _}
 import Scalaz._
 
 object Proposal {
@@ -194,4 +194,3 @@ case class Proposal(meta:Meta,
   }
 
 }
-

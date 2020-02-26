@@ -9,51 +9,51 @@ class RootSpec extends Specification {
   "The Root Spec" should {
     "include Gsaoi" in {
       val root = new Root(Semester(2016, A))
-      root.choices must contain(Instrument.Gsaoi)
+      root.choices.contains(Instrument.Gsaoi) must beTrue
     }
     "not includes Texes" in {
       val root = new Root(Semester(2020, A))
-      root.choices must not contain Instrument.Texes
+      root.choices.contains(Instrument.Texes) must beFalse
     }
     "DSSI has been removed in 2019B" in {
       val root = new Root(Semester(2019, B))
-      root.choices must not contain Instrument.Dssi
+      root.choices.contains(Instrument.Dssi) must beFalse
     }
     "include Visitor" in {
       val root = new Root(Semester(2016, B))
-      root.choices must contain(Instrument.Visitor)
+      root.choices.contains(Instrument.Visitor) must beTrue
     }
     "GPI is not available in 2020B" in {
       val root = new Root(Semester(2016, B))
-      root.choices must not contain Instrument.Gpi
+      root.choices.contains(Instrument.Gpi) must beFalse
     }
     "include Graces" in {
       val root = new Root(Semester(2016, A))
-      root.choices must contain(Instrument.Graces)
+      root.choices.contains(Instrument.Graces) must beTrue
     }
     "not include Phoenix" in {
       val root = new Root(Semester(2020, A))
-      root.choices must not contain Instrument.Phoenix
+      root.choices.contains(Instrument.Phoenix) must beFalse
     }
     "Michelle has been removed in 2016A" in {
       val root = new Root(Semester(2016, A))
-      root.choices must not contain Instrument.Michelle
+      root.choices.contains(Instrument.Michelle) must beFalse
     }
     "T-ReCS has been removed in 2016A" in {
       val root = new Root(Semester(2016, A))
-      root.choices must not contain Instrument.Trecs
+      root.choices.contains(Instrument.Trecs) must beFalse
     }
     "include Alopeke" in {
       val root = new Root(Semester(2018, B))
-      root.choices must contain (Instrument.Alopeke)
+      root.choices.contains(Instrument.Alopeke) must beTrue
     }
     "include Zorro" in {
       val root = new Root(Semester(2019, B))
-      root.choices must contain (Instrument.Zorro)
+      root.choices.contains(Instrument.Zorro) must beTrue
     }
     "include IGRINS" in {
       val root = new Root(Semester(2020, A))
-      root.choices must contain (Instrument.Igrins)
+      root.choices.contains(Instrument.Igrins) must beTrue
     }
   }
 }

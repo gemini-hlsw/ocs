@@ -18,7 +18,6 @@ import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.obslog.ObsLog
 
 import scala.collection.JavaConverters._
-import scala.collection.breakOut
 
 case class ExecutedDataset(timestamp: Instant, filename: String)
 case class SeqexecSequence(title: String, datasets: Map[Int, ExecutedDataset], config: ConfigSequence)
@@ -100,7 +99,7 @@ object SeqExecService {
       Option(ObsLog.getIfExists(obs)) match {
         case Some(obsLog) => obsLog.getAllDatasetRecords.asScala.map(_.exec.dataset).map { d =>
           d.getIndex -> ExecutedDataset(Instant.ofEpochMilli(d.getTimestamp), d.getDhsFilename)
-        }(breakOut)
+        }.toMap
         case None         => throw new RuntimeException(s"Observation ${obs.getObservationID} not found")
       }
     }

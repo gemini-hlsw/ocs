@@ -3,7 +3,7 @@ package edu.gemini.model.p1.immutable
 import edu.gemini.model.p1.overheads.Overheads
 import edu.gemini.model.p1.{mutable => M}
 
-import scalaz._
+import scalaz.{Band => SBand, _}
 import Scalaz._
 
 object Observation {

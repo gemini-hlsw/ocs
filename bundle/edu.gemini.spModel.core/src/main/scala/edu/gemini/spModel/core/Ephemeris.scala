@@ -31,7 +31,7 @@ final class Ephemeris(val site: Site, val compressedData: Deflated[List[(Long, F
     _task = new TimerTask {
       def run(): Unit = {
         logger.fine("Discarding inflated ephemeris.")
-        Ephemeris.this.synchronized(_data = null)
+        Ephemeris.this.synchronized {_data = null}
       }
     }
     timer.schedule(_task, 3000)

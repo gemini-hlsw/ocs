@@ -7,14 +7,14 @@ name := "edu.gemini.model.p1"
 version := pitVersion.value.toOsgiVersion
 
 libraryDependencies ++= Seq(
-  "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
-  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
+  "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
+  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
   "org.scalaz"             %% "scalaz-core" % ScalaZVersion
   )
 
 osgiSettings
 
-ocsBundleSettings 
+ocsBundleSettings
 
 OsgiKeys.bundleActivator := Some("edu.gemini.model.p1.osgi.Activator")
 
@@ -34,8 +34,8 @@ sourceGenerators in Compile += Def.task {
   val out = (gen /: pkg.split("\\."))(_ / _)
   val xjb = sourceDirectory.value / "main" / "xjb"
   val xsd = sourceDirectory.value / "main" / "xsd" / "Proposal.xsd"
-  val cmd = List("xjc", 
-    "-d", gen.getAbsolutePath, 
+  val cmd = List("xjc",
+    "-d", gen.getAbsolutePath,
     "-p", pkg,
     "-b", xjb.getAbsolutePath,
     xsd.getAbsolutePath)
@@ -49,7 +49,7 @@ sourceGenerators in Compile += Def.task {
   out.listFiles.toSeq
 }.taskValue
 
-unmanagedResourceDirectories in Compile += 
+unmanagedResourceDirectories in Compile +=
   sourceDirectory.value / "main" / "xsd"
 
 // > modelDist
@@ -68,4 +68,3 @@ commands += {
 publishArtifact in (ThisBuild, packageSrc) := true
 
 publishMavenStyle in ThisBuild := true
-

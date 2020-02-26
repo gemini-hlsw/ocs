@@ -149,7 +149,8 @@ private[obsrecord] object VisitCalculator {
         dsets.groupBy { case (label, interval) =>
           if (datasetQa(label).isChargeable) datasetOc(label).getDefaultChargeClass else NONCHARGED
         }.mapValues(v => new Union(v.map(_._2).asJava) ∩ chargeable)
-         .withDefaultValue(new Union())
+        .toMap
+        .withDefaultValue(new Union())
 
       visitTimes(
         total,
@@ -161,7 +162,6 @@ private[obsrecord] object VisitCalculator {
 
     def when(f: Conditions.type => Boolean): VisitTimes =
       if (f(Conditions)) always else VisitTimes.noncharged(total.sum)
-
 
     // Converts a collection of categorized Union[Interval] into VisitTimes.
     private def visitTimes(
