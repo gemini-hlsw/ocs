@@ -110,7 +110,7 @@ case class MacDistHandler(jre: Option[String], jreName: String) extends DistHand
     val volname = "%s_%s".format(meta.executableName(version), d.toString.toLowerCase)
     val dmgname = volname + ".dmg"
     val dest = new File(outDir, dmgname).getPath
-    val args = Array("hdiutil", "create", "-size", "500m", "-srcfolder", appDir.getPath, "-volname", volname, dest)
+    val args = Array("hdiutil", "create", "-fs", "HFS+", "-size", "500m", "-srcfolder", appDir.getPath, "-volname", volname, dest)
     val result = Runtime.getRuntime.exec(args).waitFor()
     if (result != 0) {
       log.error("*** " + args.mkString(" "))
