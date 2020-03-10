@@ -13,7 +13,8 @@ unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/nom-tam-fits_2.10-0.99.3.jar"),
   new File(baseDirectory.value, "../../lib/bundle/org.apache.commons.codec-1.11.0.jar"),
   new File(baseDirectory.value, "../../lib/bundle/org.apache.httpcomponents.httpclient-4.5.11.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/org.apache.httpcomponents.httpcore-4.4.13.jar")
+  new File(baseDirectory.value, "../../lib/bundle/org.apache.httpcomponents.httpcore-4.4.13.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/org-apache-commons-logging_2.10-1.1.0.jar")
 )
 
 libraryDependencies ++= Seq(

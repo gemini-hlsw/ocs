@@ -31,11 +31,11 @@ object HS2Spec extends Specification with ScalaCheck {
 
     "handle multiple results" in {
       runSearch(Search.Comet("hu")).map(_.take(5)) must_== \/-(List(
-        Row(HD.Comet("67P"), "Churyumov-Gerasimenko"),
-        Row(HD.Comet("106P"), "Schuster"),
-        Row(HD.Comet("130P"), "McNaught-Hughes"),
-        Row(HD.Comet("178P"), "Hug-Bell"),
-        Row(HD.Comet("C/1880 Y1"), "Pechule")
+        Row(HD.Comet("7P"), "Churyumov-Gerasimenko"),
+        Row(HD.Comet("06P"), "Schuster"),
+        Row(HD.Comet("30P"), "McNaught-Hughes"),
+        Row(HD.Comet("78P"), "Hug-Bell"),
+        Row(HD.Comet("/1880 Y1"), "Pechule")
       ))
     }
 
