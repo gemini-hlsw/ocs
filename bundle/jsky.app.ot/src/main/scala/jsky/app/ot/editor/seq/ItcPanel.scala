@@ -176,7 +176,7 @@ class ItcImagingPanel(val owner: EdIteratorFolder) extends ItcPanel {
   def visibleFor(t: SPComponentType): Boolean = t match {
     case SPComponentType.INSTRUMENT_ACQCAM      => true
     case SPComponentType.INSTRUMENT_FLAMINGOS2  => true
-    case SPComponentType.INSTRUMENT_GHOST       => true
+    case SPComponentType.INSTRUMENT_GHOST       => false
     case SPComponentType.INSTRUMENT_GMOS        => true
     case SPComponentType.INSTRUMENT_GMOSSOUTH   => true
     case SPComponentType.INSTRUMENT_GSAOI       => true

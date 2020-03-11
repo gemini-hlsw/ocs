@@ -105,16 +105,20 @@ public final class TargetSelection {
                     final GhostAsterism.SingleTarget gsa = (GhostAsterism.SingleTarget) a;
                     if (gsa.overriddenBase().isDefined())
                         res.add(new CoordinatesSelection(idx++, gsa.overriddenBase().get()));
-                    else
-                        res.add(new CoordinatesSelection(idx++, gsa.basePosition(ImOption.scalaNone()).get()));
+                    else {
+                        final scala.Option<Coordinates> c = gsa.basePosition(ImOption.scalaNone());
+                        res.add(new CoordinatesSelection(idx++, c.isDefined() ? c.get() : Coordinates.zero()));
+                    }
                     res.add(new NormalTargetSelection(idx++, gsa.target().spTarget()));
                     break;
                 case GhostDualTarget:
                     final GhostAsterism.DualTarget gda = (GhostAsterism.DualTarget) a;
                     if (gda.overriddenBase().isDefined())
                         res.add(new CoordinatesSelection(idx++, gda.overriddenBase().get()));
-                    else
-                        res.add(new CoordinatesSelection(idx++, gda.basePosition(ImOption.scalaNone()).get()));
+                    else {
+                        final scala.Option<Coordinates> c = gda.basePosition(ImOption.scalaNone());
+                        res.add(new CoordinatesSelection(idx++, c.isDefined() ? c.get() : Coordinates.zero()));
+                    }
                     res.add(new NormalTargetSelection(idx++, gda.target1().spTarget()));
                     res.add(new NormalTargetSelection(idx++, gda.target2().spTarget()));
                     break;
@@ -122,8 +126,10 @@ public final class TargetSelection {
                     final GhostAsterism.TargetPlusSky gtsa = (GhostAsterism.TargetPlusSky) a;
                     if (gtsa.overriddenBase().isDefined())
                         res.add(new CoordinatesSelection(idx++, gtsa.overriddenBase().get()));
-                    else
-                        res.add(new CoordinatesSelection(idx++, gtsa.basePosition(ImOption.scalaNone()).get()));
+                    else {
+                        final scala.Option<Coordinates> c = gtsa.basePosition(ImOption.scalaNone());
+                        res.add(new CoordinatesSelection(idx++, c.isDefined() ? c.get() : Coordinates.zero()));
+                    }
                     res.add(new NormalTargetSelection(idx++, gtsa.target().spTarget()));
                     res.add(new CoordinatesSelection(idx++, gtsa.sky()));
                     break;
@@ -131,8 +137,10 @@ public final class TargetSelection {
                     final GhostAsterism.SkyPlusTarget gsta = (GhostAsterism.SkyPlusTarget) a;
                     if (gsta.overriddenBase().isDefined())
                         res.add(new CoordinatesSelection(idx++, gsta.overriddenBase().get()));
-                    else
-                        res.add(new CoordinatesSelection(idx++, gsta.basePosition(ImOption.scalaNone()).get()));
+                    else {
+                        final scala.Option<Coordinates> c = gsta.basePosition(ImOption.scalaNone());
+                        res.add(new CoordinatesSelection(idx++, c.isDefined() ? c.get() : Coordinates.zero()));
+                    }
                     res.add(new CoordinatesSelection(idx++, gsta.sky()));
                     res.add(new NormalTargetSelection(idx++, gsta.target().spTarget()));
                     break;
@@ -140,16 +148,20 @@ public final class TargetSelection {
                     final GhostAsterism.HighResolutionTarget ghta = (GhostAsterism.HighResolutionTarget) a;
                     if (ghta.overriddenBase().isDefined())
                         res.add(new CoordinatesSelection(idx++, ghta.overriddenBase().get()));
-                    else
-                        res.add(new CoordinatesSelection(idx++, ghta.basePosition(ImOption.scalaNone()).get()));
+                    else {
+                        final scala.Option<Coordinates> c = ghta.basePosition(ImOption.scalaNone());
+                        res.add(new CoordinatesSelection(idx++, c.isDefined() ? c.get() : Coordinates.zero()));
+                    }
                     res.add(new NormalTargetSelection(idx++, ghta.target().spTarget()));
                     break;
                 case GhostHighResolutionTargetPlusSky:
                     final GhostAsterism.HighResolutionTargetPlusSky ghtsa = (GhostAsterism.HighResolutionTargetPlusSky) a;
                     if (ghtsa.overriddenBase().isDefined())
                         res.add(new CoordinatesSelection(idx++, ghtsa.overriddenBase().get()));
-                    else
-                        res.add(new CoordinatesSelection(idx++, ghtsa.basePosition(ImOption.scalaNone()).get()));
+                    else {
+                        final scala.Option<Coordinates> c = ghtsa.basePosition(ImOption.scalaNone());
+                        res.add(new CoordinatesSelection(idx++, c.isDefined() ? c.get() : Coordinates.zero()));
+                    }
                     res.add(new NormalTargetSelection(idx++, ghtsa.target().spTarget()));
                     res.add(new CoordinatesSelection(idx++, ghtsa.sky()));
                     break;
