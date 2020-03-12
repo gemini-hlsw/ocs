@@ -4,8 +4,9 @@ import edu.gemini.itc.shared.ConfigExtractor
 import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
 import edu.gemini.spModel.gemini.acqcam.InstAcqCam
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
-import edu.gemini.spModel.gemini.gmos.{FullExposureTime => GmosExposureTime, GmosNorthType, GmosSouthType, InstGmosNorth, InstGmosSouth}
-import edu.gemini.spModel.gemini.gnirs.{GNIRSParams, GNIRSConstants}
+import edu.gemini.spModel.gemini.ghost.Ghost
+import edu.gemini.spModel.gemini.gmos.{GmosNorthType, GmosSouthType, InstGmosNorth, InstGmosSouth, FullExposureTime => GmosExposureTime}
+import edu.gemini.spModel.gemini.gnirs.{GNIRSConstants, GNIRSParams}
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.michelle.{InstMichelle, MichelleParams}
 import edu.gemini.spModel.gemini.nifs.InstNIFS
@@ -13,7 +14,6 @@ import edu.gemini.spModel.gemini.niri.{InstNIRI, Niri}
 import edu.gemini.spModel.gemini.trecs.{InstTReCS, TReCSParams}
 import edu.gemini.spModel.obscomp.InstConstants
 import jsky.app.ot.editor.seq.Keys._
-
 import scalaz._
 import Scalaz._
 
@@ -80,17 +80,20 @@ object ItcUniqueConfig {
   private def isSpectroscopy(c: Config): Boolean = !isImaging(c)
 
   // Decides if a configuration is for imaging or spectroscopy (in most cases based on the presence of a disperser element).
-  private def isImaging(c: Config): Boolean = c.getItemValue(INST_INSTRUMENT_KEY) match {
-    case InstAcqCam.INSTRUMENT_NAME_PROP    => true  // Acq cam is imaging only
-    case Flamingos2.INSTRUMENT_NAME_PROP    => c.getItemValue(INST_DISPERSER_KEY).equals(Flamingos2.Disperser.NONE)
-    case InstGmosNorth.INSTRUMENT_NAME_PROP => c.getItemValue(INST_DISPERSER_KEY).equals(GmosNorthType.DisperserNorth.MIRROR)
-    case InstGmosSouth.INSTRUMENT_NAME_PROP => c.getItemValue(INST_DISPERSER_KEY).equals(GmosSouthType.DisperserSouth.MIRROR)
-    case GNIRSConstants.INSTRUMENT_NAME_PROP=> c.getItemValue(INST_ACQ_MIRROR).equals(GNIRSParams.AcquisitionMirror.IN)
-    case Gsaoi.INSTRUMENT_NAME_PROP         => true  // Gsaoi is imaging only
-    case InstMichelle.INSTRUMENT_NAME_PROP  => c.getItemValue(INST_DISPERSER_KEY).equals(MichelleParams.Disperser.MIRROR)
-    case InstNIFS.INSTRUMENT_NAME_PROP      => false // NIFS is spectroscopy only
-    case InstNIRI.INSTRUMENT_NAME_PROP      => c.getItemValue(INST_DISPERSER_KEY).equals(Niri.Disperser.NONE)
-    case InstTReCS.INSTRUMENT_NAME_PROP     => c.getItemValue(INST_DISPERSER_KEY).equals(TReCSParams.Disperser.MIRROR)
+  private def isImaging(c: Config): Boolean = {
+    c.getItemValue(INST_INSTRUMENT_KEY) match {
+      case InstAcqCam.INSTRUMENT_NAME_PROP => true // Acq cam is imaging only
+      case Flamingos2.INSTRUMENT_NAME_PROP => c.getItemValue(INST_DISPERSER_KEY).equals(Flamingos2.Disperser.NONE)
+      case InstGmosNorth.INSTRUMENT_NAME_PROP => c.getItemValue(INST_DISPERSER_KEY).equals(GmosNorthType.DisperserNorth.MIRROR)
+      case InstGmosSouth.INSTRUMENT_NAME_PROP => c.getItemValue(INST_DISPERSER_KEY).equals(GmosSouthType.DisperserSouth.MIRROR)
+      case Ghost.INSTRUMENT_NAME_PROP => false // GHOST is spectroscopy only
+      case GNIRSConstants.INSTRUMENT_NAME_PROP => c.getItemValue(INST_ACQ_MIRROR).equals(GNIRSParams.AcquisitionMirror.IN)
+      case Gsaoi.INSTRUMENT_NAME_PROP => true // Gsaoi is imaging only
+      case InstMichelle.INSTRUMENT_NAME_PROP => c.getItemValue(INST_DISPERSER_KEY).equals(MichelleParams.Disperser.MIRROR)
+      case InstNIFS.INSTRUMENT_NAME_PROP => false // NIFS is spectroscopy only
+      case InstNIRI.INSTRUMENT_NAME_PROP => c.getItemValue(INST_DISPERSER_KEY).equals(Niri.Disperser.NONE)
+      case InstTReCS.INSTRUMENT_NAME_PROP => c.getItemValue(INST_DISPERSER_KEY).equals(TReCSParams.Disperser.MIRROR)
+    }
   }
 
   private def instrumentName(c: Config): Option[String] =
