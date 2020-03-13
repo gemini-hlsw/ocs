@@ -313,7 +313,16 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
         _w.firstNameBox.setEnabled(enabled);
         _w.lastNameBox.setEnabled(enabled);
 
-        _w.emailBox.setEnabled(OTOptions.isStaff(getProgram().getProgramID()));
+        // REL-3458
+        //
+        // Previously this widget was protected so that only staff can edit it.
+        // The following now allows the PI email to be edited by anybody who
+        // otherwise has permission to edit the program in the current situation.
+        // The downside is that "user" keys are tied to the email address and
+        // will stop working if the address is edited. OTOH, nobody has a user
+        // key.
+        _w.emailBox.setEnabled(enabled);
+
         _w.phoneBox.setEnabled(enabled);
         _w.affiliationBox.setEnabled(enabled);
         _w.additionalSupportBox.setEnabled(OTOptions.isStaff(getProgram().getProgramID()));
