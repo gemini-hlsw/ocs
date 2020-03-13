@@ -61,7 +61,8 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
 
     Pio.addParam(factory, paramSet, InstConstants.POS_ANGLE_PROP, getPosAngleDegreesStr)
     Pio.addParam(factory, paramSet, Ghost.PORT_PROP, port.name())
-    Pio.addBooleanParam(factory, paramSet, Ghost.ENABLE_FIBER_AGITATOR_PROP.getName, enableFiberAgitator)
+    Pio.addBooleanParam(factory, paramSet, Ghost.ENABLE_FIBER_AGITATOR_1_PROP.getName, enableFiberAgitator1)
+    Pio.addBooleanParam(factory, paramSet, Ghost.ENABLE_FIBER_AGITATOR_2_PROP.getName, enableFiberAgitator2)
     Pio.addDoubleParam(factory, paramSet, Ghost.RED_EXPOSURE_TIME_PROP.getName, redExposureTime)
     Pio.addParam(factory, paramSet, Ghost.RED_BINNING_PROP, redBinning.name)
     Pio.addParam(factory, paramSet, Ghost.RED_READ_NOISE_GAIN_PROP, redReadNoiseGain.name)
@@ -75,7 +76,8 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     Option(Pio.getValue(paramSet, Ghost.PORT_PROP)).map(IssPort.valueOf).foreach(setIssPort)
     Option(Pio.getValue(paramSet, ISPDataObject.TITLE_PROP)).foreach(setTitle)
     Option(Pio.getValue(paramSet, InstConstants.POS_ANGLE_PROP)).map(_.toDouble).foreach(setPosAngleDegrees)
-    setEnableFiberAgitator(Pio.getBooleanValue(paramSet, Ghost.ENABLE_FIBER_AGITATOR_PROP.getName,true))
+    setEnableFiberAgitator1(Pio.getBooleanValue(paramSet, Ghost.ENABLE_FIBER_AGITATOR_1_PROP.getName,true))
+    setEnableFiberAgitator2(Pio.getBooleanValue(paramSet, Ghost.ENABLE_FIBER_AGITATOR_2_PROP.getName,true))
     setRedExposureTime(Pio.getDoubleValue(paramSet, Ghost.RED_EXPOSURE_TIME_PROP.getName, InstConstants.DEF_EXPOSURE_TIME))
     Option(Pio.getValue(paramSet, Ghost.RED_BINNING_PROP)).map(GhostBinning.valueOf).foreach(setRedBinning)
     Option(Pio.getValue(paramSet, Ghost.RED_READ_NOISE_GAIN_PROP)).map(GhostReadNoiseGain.valueOf).foreach(setRedReadNoiseGain)
@@ -89,7 +91,8 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     sc.putParameter(StringParameter.getInstance(ISPDataObject.VERSION_PROP, getVersion))
     sc.putParameter(DefaultParameter.getInstance(Ghost.POS_ANGLE_PROP, getPosAngle))
     sc.putParameter(DefaultParameter.getInstance(Ghost.PORT_PROP, getIssPort))
-    sc.putParameter(DefaultParameter.getInstance(Ghost.ENABLE_FIBER_AGITATOR_PROP.getName, isEnableFiberAgitator))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.ENABLE_FIBER_AGITATOR_1_PROP.getName, isEnableFiberAgitator1))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.ENABLE_FIBER_AGITATOR_2_PROP.getName, isEnableFiberAgitator2))
     sc.putParameter(DefaultParameter.getInstance(Ghost.RED_EXPOSURE_TIME_PROP.getName, getRedExposureTime))
     sc.putParameter(DefaultParameter.getInstance(Ghost.RED_BINNING_PROP.getName, getRedBinning))
     sc.putParameter(DefaultParameter.getInstance(Ghost.RED_READ_NOISE_GAIN_PROP, getRedReadNoiseGain))
@@ -161,15 +164,28 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
   }
 
   /**
-   * Fiber agitator Default is enabled.
+   * Fiber agitator 1: default is enabled.
    */
-  private var enableFiberAgitator: Boolean = true
-  def isEnableFiberAgitator: Boolean = enableFiberAgitator
-  def setEnableFiberAgitator(newValue: Boolean): Unit = {
-    val oldValue = isEnableFiberAgitator
+  private var enableFiberAgitator1: Boolean = true
+  def isEnableFiberAgitator1: Boolean = enableFiberAgitator1
+  def setEnableFiberAgitator1(newValue: Boolean): Unit = {
+    val oldValue = isEnableFiberAgitator1
     if (oldValue != newValue) {
-      enableFiberAgitator = newValue
-      firePropertyChange(Ghost.ENABLE_FIBER_AGITATOR_PROP, oldValue, newValue)
+      enableFiberAgitator1 = newValue
+      firePropertyChange(Ghost.ENABLE_FIBER_AGITATOR_1_PROP, oldValue, newValue)
+    }
+  }
+
+  /**
+   * Fiber agitator 2: default is enabled.
+   */
+  private var enableFiberAgitator2: Boolean = true
+  def isEnableFiberAgitator2: Boolean = enableFiberAgitator2
+  def setEnableFiberAgitator2(newValue: Boolean): Unit = {
+    val oldValue = isEnableFiberAgitator2
+    if (oldValue != newValue) {
+      enableFiberAgitator2 = newValue
+      firePropertyChange(Ghost.ENABLE_FIBER_AGITATOR_2_PROP, oldValue, newValue)
     }
   }
 
@@ -338,7 +354,8 @@ object Ghost {
   val BASE_DEC_DEGREES: String = "baseDecDeg"
   val BASE_DEC_DMS: String     = "baseDecDMS"
 
-  val FIBER_AGITATOR: String   = "enableFiberAgitator"
+  val FIBER_AGITATOR_1: String = "enableFiberAgitator1"
+  val FIBER_AGITATOR_2: String = "enableFiberAgitator2"
 
   val SRIFU1_NAME: String      = "srifu1Name"
   val SRIFU1_RA_DEG: String    = "srifu1CoordsRADeg"
@@ -379,7 +396,8 @@ object Ghost {
 
   val POS_ANGLE_PROP: PropertyDescriptor = initProp(InstConstants.POS_ANGLE_PROP, query = query_no, iter = iter_no)
   val PORT_PROP: PropertyDescriptor = initProp(IssPortProvider.PORT_PROPERTY_NAME, query = query_no, iter = iter_no)
-  val ENABLE_FIBER_AGITATOR_PROP: PropertyDescriptor = initProp(FIBER_AGITATOR, query = query_no, iter = iter_no)
+  val ENABLE_FIBER_AGITATOR_1_PROP: PropertyDescriptor = initProp(FIBER_AGITATOR_1, query = query_no, iter = iter_no)
+  val ENABLE_FIBER_AGITATOR_2_PROP: PropertyDescriptor = initProp(FIBER_AGITATOR_2, query = query_no, iter = iter_no)
   val RED_EXPOSURE_TIME_PROP: PropertyDescriptor = initProp(EXPOSURE_TIME_RED_PROP, query = query_no, iter = iter_yes)
   val RED_EXPOSURE_COUNT_PROP: PropertyDescriptor = initProp(COUNT_RED, query_no, iter_yes)
   val RED_BINNING_PROP: PropertyDescriptor = initProp(BINNING_RED, query = query_yes, iter = iter_no)
@@ -392,7 +410,8 @@ object Ghost {
   private val Properties: List[(String, PropertyDescriptor)] = List(
     POS_ANGLE_PROP,
     PORT_PROP,
-    ENABLE_FIBER_AGITATOR_PROP,
+    ENABLE_FIBER_AGITATOR_1_PROP,
+    ENABLE_FIBER_AGITATOR_2_PROP,
     RED_EXPOSURE_TIME_PROP,
     RED_EXPOSURE_COUNT_PROP,
     RED_BINNING_PROP,
