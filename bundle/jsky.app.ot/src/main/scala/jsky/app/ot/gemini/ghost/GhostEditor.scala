@@ -34,7 +34,7 @@ import jsky.app.ot.editor.SpinnerEditor
 
 
 final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
-  val LOG = Logger.getLogger(getClass.getName)
+  val LOG: Logger = Logger.getLogger(getClass.getName)
 
   private object ui extends GridBagPanel {
     import GhostEditor._
@@ -382,14 +382,38 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     object targetPane extends GridBagPanel {
       var row = 0
       /**
-       * Enable fiber agitator
+       * Enable fiber agitators
        */
-      val enableFiberAgitatorCtrl: CheckboxPropertyCtrl[Ghost] = new CheckboxPropertyCtrl[Ghost](Ghost.ENABLE_FIBER_AGITATOR_PROP)
-      layout(Component.wrap(enableFiberAgitatorCtrl.getComponent)) = new Constraints() {
+      val fiberAgitatorPanel = new GridBagPanel
+      val enableFiberAgitator1Ctrl: CheckboxPropertyCtrl[Ghost] = new CheckboxPropertyCtrl[Ghost](Ghost.ENABLE_FIBER_AGITATOR_1_PROP)
+      fiberAgitatorPanel.layout(Component.wrap(enableFiberAgitator1Ctrl.getComponent)) = new fiberAgitatorPanel.Constraints() {
         anchor = Anchor.NorthWest
         gridx = 0
         gridy = row
         insets = new Insets(10, 10, 0, 0)
+      }
+      val enableFiberAgitator2Ctrl: CheckboxPropertyCtrl[Ghost] = new CheckboxPropertyCtrl[Ghost](Ghost.ENABLE_FIBER_AGITATOR_2_PROP)
+      fiberAgitatorPanel.layout(Component.wrap(enableFiberAgitator2Ctrl.getComponent)) = new fiberAgitatorPanel.Constraints() {
+        anchor = Anchor.NorthWest
+        gridx = 1
+        gridy = row
+        insets = new Insets(10, 40, 0, 0)
+      }
+      fiberAgitatorPanel.layout(new Label) = new fiberAgitatorPanel.Constraints() {
+        fill = Fill.Horizontal
+        anchor = Anchor.West
+        gridx = 2
+        gridy = row
+        weightx = 1.0
+      }
+      layout(fiberAgitatorPanel) = new Constraints() {
+        fill = Fill.Horizontal
+        anchor = Anchor.NorthWest
+        gridx = 0
+        gridy = row
+        gridwidth = 3
+        weightx = 1.0
+        insets = new Insets(0, 10, 0, 0)
       }
       row += 1
 
@@ -471,7 +495,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         anchor = Anchor.NorthWest
         gridx = 0
         gridy = row
-        gridwidth = 1
+        gridwidth = 3
         weightx = 1.0
         insets = new Insets(0, 10, 0, 0)
       }
@@ -483,7 +507,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         anchor = Anchor.NorthWest
         gridx = 0
         gridy = row
-        gridwidth = 1
+        gridwidth = 3
         weightx = 1.0
         insets = new Insets(0, 10, 0, 0)
       }
@@ -749,7 +773,8 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
 
   override def handlePostDataObjectUpdate(dataObj: Ghost): Unit = Swing.onEDT {
     ui.posAngleCtrl.setBean(dataObj)
-    ui.targetPane.enableFiberAgitatorCtrl.setBean(dataObj)
+    ui.targetPane.enableFiberAgitator1Ctrl.setBean(dataObj)
+    ui.targetPane.enableFiberAgitator2Ctrl.setBean(dataObj)
     ui.detectorUI.redExpTimeCtrl.setBean(dataObj)
     ui.detectorUI.redCountSpinnerEditor.init()
     ui.detectorUI.redBinning.setBean(dataObj)
