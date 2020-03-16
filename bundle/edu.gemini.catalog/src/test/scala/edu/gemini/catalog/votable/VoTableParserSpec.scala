@@ -395,7 +395,7 @@ class VoTableParserSpec extends Specification with VoTableParser {
               <TD>0.031294621220519486</TD>
               <TD>2015.5</TD>
               <TD>13.91764</TD>
-              <TD>2.68324375</TD> <!-- Out of range for r and g conversion -->
+              <TD>2.68324375</TD>
               <TD></TD>
             </TR>
             <TR>
@@ -693,9 +693,8 @@ class VoTableParserSpec extends Specification with VoTableParser {
       a.magnitudes shouldEqual Nil
       b.magnitudes shouldEqual Nil
 
-      // Third target has bp-rp out of range for r and g bands.
       import MagnitudeBand._
-      c.magnitudes.map(_.band).toSet shouldEqual Set(V, R, I, _i, K, H, J)
+      c.magnitudes.map(_.band).toSet shouldEqual Set(_g, _r, V, R, I, _i, K, H, J)
 
       // Final target has everything.
       d.magnitudes.map(_.band).toSet shouldEqual CatalogName.Gaia.supportedBands.toSet
