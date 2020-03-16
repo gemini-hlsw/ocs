@@ -267,7 +267,7 @@ public final class ObsContext {
 
     public Option<Coordinates> getBaseCoordinates() {
         final Option<Long> when = getSchedulingBlockStart();
-        Asterism target = targets.getAsterism();
+        final Asterism target = targets.getAsterism();
         return
             target.getRaDegrees(when).flatMap(raDeg ->
             target.getDecDegrees(when).map(decDeg ->
