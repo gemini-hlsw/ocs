@@ -27,22 +27,22 @@ object GemsMagnitudeTable extends MagnitudeTable {
   import SkyBackground.{ PERCENT_20 => SB20, PERCENT_50 => SB50, PERCENT_80 => SB80, ANY => SBAny }
 
   private val cc50 = Map(
-    ((IQ20,  SB20 ), (18.0, 10.5)),
-    ((IQ20,  SB50 ), (17.9, 10.5)),
-    ((IQ20,  SB80 ), (17.8, 10.2)),
-    ((IQ20,  SBAny), (17.7, 10.0)),
-    ((IQ70,  SB20 ), (17.6, 10.0)),
-    ((IQ70,  SB50 ), (17.5, 10.0)),
-    ((IQ70,  SB80 ), (17.4,  9.7)),
-    ((IQ70,  SBAny), (17.3,  9.5)),
-    ((IQ85,  SB20 ), (17.2,  9.5)),
-    ((IQ85,  SB50 ), (17.1,  9.5)),
-    ((IQ85,  SB80 ), (17.0,  9.2)),
-    ((IQ85,  SBAny), (16.9,  9.0)),
-    ((IQAny, SB20 ), (16.2,  9.0)),
-    ((IQAny, SB50 ), (16.1,  9.0)),
-    ((IQAny, SB80 ), (16.0,  9.0)),
-    ((IQAny, SBAny), (15.9,  8.7))
+    ((IQ20,  SB20 ), (18.5, 10.5)),
+    ((IQ20,  SB50 ), (18.5, 10.5)),
+    ((IQ20,  SB80 ), (18.4, 10.2)),
+    ((IQ20,  SBAny), (18.3, 10.0)),
+    ((IQ70,  SB20 ), (18.2, 10.0)),
+    ((IQ70,  SB50 ), (18.2, 10.0)),
+    ((IQ70,  SB80 ), (18.1,  9.7)),
+    ((IQ70,  SBAny), (18.0,  9.5)),
+    ((IQ85,  SB20 ), (17.9,  9.5)),
+    ((IQ85,  SB50 ), (17.9,  9.5)),
+    ((IQ85,  SB80 ), (17.8,  9.2)),
+    ((IQ85,  SBAny), (17.7,  9.0)),
+    ((IQAny, SB20 ), (17.6,  9.0)),
+    ((IQAny, SB50 ), (17.3,  9.0)),
+    ((IQAny, SB80 ), (17.0,  9.0)),
+    ((IQAny, SBAny), (16.7,  8.7))
   )
 
   def cwfsConstraintsForCc50(iq: ImageQuality, sb: SkyBackground): MagnitudeConstraints = {
