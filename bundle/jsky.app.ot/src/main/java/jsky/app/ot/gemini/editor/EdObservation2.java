@@ -863,9 +863,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
         } else {
             // must be a PI
 
-            // Don't allow changing priorities when status is not phase1 (not even when on-hold).
-            // This is to avoid getting to an un-editable state.
-            final boolean b = (current == ObsPhase2Status.PI_TO_COMPLETE);
+            final boolean b = (current == ObsPhase2Status.PI_TO_COMPLETE) || (current == ObsPhase2Status.ON_HOLD);
             _editorPanel.priorityHigh.setEnabled(b);
             _editorPanel.priorityMedium.setEnabled(b);
             _editorPanel.priorityLow.setEnabled(b);
