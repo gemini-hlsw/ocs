@@ -1,9 +1,9 @@
 package edu.gemini.spModel.target.env
 
-import edu.gemini.spModel.core.AlmostEqual.AlmostEqualOps
-
 import edu.gemini.shared.util.immutable.{ImList, ImOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
+
+import edu.gemini.spModel.core.AlmostEqual.AlmostEqualOps
 import edu.gemini.spModel.core.{Angle, Helpers}
 import edu.gemini.spModel.guide.{GuideProbeMap, GuideProbe}
 import edu.gemini.spModel.pio.xml.PioXmlFactory
