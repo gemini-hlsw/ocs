@@ -1,7 +1,7 @@
 package jsky.app.ot.tpe.feat
 
 import java.awt.{AlphaComposite, Color, Component, Composite, Graphics, Graphics2D, GridBagConstraints, GridBagLayout, Insets, Paint, TexturePaint, Transparency}
-import java.awt.geom.{AffineTransform, Area, Point2D, Rectangle2D}
+import java.awt.geom.{AffineTransform, Arc2D, Area, Point2D, Rectangle2D}
 import java.awt.image.BufferedImage
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import java.util.Collections
@@ -9,12 +9,11 @@ import java.util.Collections
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption, Some => JSome}
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.gemini.ghost.Ghost
+import edu.gemini.spModel.gemini.ghost.{Ghost, GhostAsterism, GhostScienceAreaGeometry}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.SPInstObsComp
-import edu.gemini.spModel.target.WatchablePos
-import edu.gemini.spModel.target.env.AsterismType._
-import edu.gemini.spModel.target.env.TargetEnvironmentDiff
+import edu.gemini.spModel.target.{SPSkyObject, WatchablePos}
+import edu.gemini.spModel.target.env.{TargetEnvironment, TargetEnvironmentDiff}
 import javax.swing.{Icon, JLabel, JPanel, SwingConstants}
 import jsky.app.ot.tpe._
 import jsky.app.ot.util.{BasicPropertyList, OtColor, PropertyWatcher}
@@ -31,7 +30,13 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
   private var isEmpty: Boolean = false
 
   /**
-   * If _flipRA is -1, flip the TA axis of the area.
+   * Determine which IFUs are active, e.g. when targets / sky positions are being dragged.
+   * This should be set by the handle methods.
+   */
+  private var displayMode: TpeGhostIfuFeature.IFUDisplayMode = TpeGhostIfuFeature.IFUDisplayModeBoth
+
+  /**
+   * If _flipRA is -1, flip the RA axis of the area.
    */
   private def flipArea(a: Area): Area =
     if (_flipRA == -1) a.createTransformedArea(AffineTransform.getScaleInstance(_flipRA, 1.0))
@@ -43,37 +48,40 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
   override def draw(g: Graphics, tii: TpeImageInfo): Unit = {
     if (!isEnabled(_iw.getContext))
       return
-    if (transform == null)
-      return
 
-    final case class IFURanges(srifu1range: Boolean, srifu2range: Boolean, hrifu1range: Boolean, hrifu2range: Boolean)
     for {
+      trans <- transform
       ctx <- _iw.getObsContext.asScalaOpt
     } {
-      // Store the old color.
+      // Store the old color and paint.
       val g2d: Graphics2D = g.asInstanceOf[Graphics2D]
       val originalColor = g2d.getColor
+      val originalPaint = g2d.getPaint
 
-      // The science FOV for GHOST is handled by GHOST itself, so we draw the IFU1 patrol fields depending
-      // on what asterism types are selected.
-      val ranges: IFURanges = ctx.getTargets.getAsterism.asterismType match {
-        case Single => IFURanges(false, false, false, false)
-        case GhostSingleTarget => IFURanges(true, false, false, false)
-        case GhostDualTarget | GhostTargetPlusSky | GhostSkyPlusTarget => IFURanges(true, true, false, false)
-        case GhostTargetPlusSky => IFURanges(true, false)
-        case GhostSkyPlusTarget => IFURanges(true, true)
-        case GhostHighResolutionTarget => IFURanges(true, false)
-        case GhostHighResolutionTargetPlusSky => IFURanges(true, true)
-        case _ => sys.error("Illegal asterism type")
+      if (drawPatrolFields) {
+        val ifu1PatrolField: Area = new Area(flipArea(TpeGhostIfuFeature.IfuArc)).createTransformedArea(trans)
+
+        // ifu2 is flipped along RA, so we flip twice to get the desired result.
+        val ifu2PatrolField: Area = new Area(flipArea(flipArea(TpeGhostIfuFeature.IfuArc))).createTransformedArea(trans)
+
+        g2d.setColor(TpeGhostIfuFeature.PatrolFieldBorderColor)
+
+        if (displayMode.show1) {
+          g2d.draw(ifu1PatrolField)
+          g2d.setPaint(TpeGhostIfuFeature.createPatrolFieldPaint(g2d, TpeGhostIfuFeature.NorthEast))
+          g2d.fill(ifu1PatrolField)
+        }
+        if (displayMode.show2) {
+          g2d.draw(ifu2PatrolField)
+          g2d.setPaint(TpeGhostIfuFeature.createPatrolFieldPaint(g2d, TpeGhostIfuFeature.SouthEast))
+          g2d.fill(ifu2PatrolField)
+        }
+
+        // Restore the paint.
+        g2d.setPaint(originalPaint)
       }
 
-      // TODO: Draw the IFU1 patrol field and IFU2 patrol field ranges.
-
-      // TODO: These should be open Arc2D.
-      if (ranges.srifu1range || ranges.hrifu1range) g2d.draw(ifu1)
-      if (ranges.srifu2range || ranges.hrifu2range) g2d.draw(ifu2)
-
-      val paint: Paint = gr
+      // Draw the hexagons representing the IFUs themselves.
 
       // Reset the color.
       g2d.setColor(originalColor)
@@ -86,22 +94,38 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
    */
   override def getCategory: TpeImageFeatureCategory = TpeImageFeatureCategory.fieldOfView
 
-  /**
-   * Called when an item is dragged in the TPE.
-   *
-   * @param dragObject object being dragged
-   * @param context    observation context
-   */
-  override def handleDragStarted(dragObject: Any, context: ObsContext): Unit = ???
 
   /**
-   * Called when the user stops dragging an item in them TPE.
-   *
-   * @param context observation context
+   * Called when an item is dragged in the TPE: select the IFU to display.
    */
-  override def handleDragStopped(context: ObsContext): Unit = ???
+  override def handleDragStarted(dragObject: Any, context: ObsContext): Unit = {
+    val a: TpeGhostIfuFeature.IFUDisplayMode = TpeGhostIfuFeature.IFUDisplayMode2
+    dragObject match {
+      case o: SPSkyObject =>
+        val env: TargetEnvironment = context.getTargets
+        if (env != null) {
+          if (TpeGhostIfuFeature.objectInIFU1(env, o))
+            displayMode = TpeGhostIfuFeature.IFUDisplayMode1
+          else if (TpeGhostIfuFeature.objectInIFU2(env, o))
+            displayMode = TpeGhostIfuFeature.IFUDisplayMode2
+          else
+            displayMode = TpeGhostIfuFeature.IFUDisplayModeBoth
+        } else
+          displayMode = TpeGhostIfuFeature.IFUDisplayModeBoth
+    }
+  }
+
+
+  /**
+   * Called when dragging is stopped in the TPE: display both IFUs.
+   */
+  override def handleDragStopped(context: ObsContext): Unit = {
+      displayMode = TpeGhostIfuFeature.IFUDisplayModeBoth
+  }
+
 
   override def isEnabled(ctx: TpeContext): Boolean = super.isEnabled(ctx) && ctx.instrument.is(SPComponentType.INSTRUMENT_GHOST)
+
 
   // A property has changed.
   override def propertyChange(propName: String): Unit = _iw.repaint()
@@ -110,13 +134,14 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
   // The properties supported by this feature.
   override def getProperties: BasicPropertyList = TpeGhostIfuFeature.properties
 
-  // TODO: Use set or _=
+
   // Turn on / off the drawing of the IFU patrol field.
   def drawPatrolFields_=(draw: Boolean): Unit =
     TpeGhostIfuFeature.properties.setBoolean(TpeGhostIfuFeature.PropShowRanges, draw)
 
-  def drawPatrolFields_=(): Boolean =
+  def drawPatrolFields: Boolean =
     TpeGhostIfuFeature.properties.getBoolean(TpeGhostIfuFeature.PropShowRanges, true)
+
 
   /**
    * Reinitialize (recalculate the positions and redraw).
@@ -125,9 +150,11 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
     override def propertyChange(evt: PropertyChangeEvent): Unit = _redraw()
   }
 
+
   // Get the drawing of probe ranges.
   def drawProbeRanges(): Boolean =
     TpeGhostIfuFeature.properties.getBoolean(TpeGhostIfuFeature.PropShowRanges, true)
+
 
   // Reinitialize (recalculate the positions and redraw).
   override def reinit(iw: TpeImageWidget, tii: TpeImageInfo): Unit = {
@@ -138,11 +165,9 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
     val inst: SPInstObsComp = _iw.getInstObsComp
     if (inst == null) return
 
-    // TODO: We might want to remove this since we are not adding or removing telescope positions.
     // Arrange to be notified if telescope positions are added, removed, or selected.
     _monitorPosList()
 
-    // TODO: Not sure what exactly this does.
     // Monitor the selections of offset positions, since that affects the positions drawn
     _monitorOffsetSelections(selListener)
 
@@ -165,7 +190,6 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
   }
 
 
-  // TODO: What about telescope coords? Do we need to do something separate for this?
   // Implements the TelescopePosWatcher interface.
   def telescopePosLocationUpdate(tp: WatchablePos): Unit =
     _redraw()
@@ -231,9 +255,25 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
 
 
 object TpeGhostIfuFeature {
+  // The Arc2D representing the IFUs.
+  val IfuArc: Area = {
+    val arc = new Arc2D.Double(Arc2D.OPEN)
+    val radius = GhostScienceAreaGeometry.radius
+    val size = GhostScienceAreaGeometry.size
+    arc.setFrame(-radius.toArcsecs, -radius.toArcsecs, size.toArcsecs, size.toArcsecs)
+
+    // Angles must be in degrees.
+    arc.setAngleStart(90)
+    arc.setAngleExtent(180.84653223829957369)
+    new Area(arc)
+  }
+
   // Color for IFU limts.
   private val IfuFovColor: Color = Color.RED
   private val PatrolRangeColor: Color = OtColor.SALMON
+
+  // The color to draw the patrol fields.
+  private[feat] val PatrolFieldBorderColor: Color = OtColor.makeTransparent(IfuFovColor, 0.3)
 
   // Alpha Composite used for drawing items that block the view.
   private val Blocked: Composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f)
@@ -246,18 +286,22 @@ object TpeGhostIfuFeature {
 
 
   /**
-   * Determine the ranges of the IFU display modes: there are two, and they overlap.
+   * Determine which IFU display modes are to be drawn at a given time.
+   * Note: They overlap slightly.
    */
-  // TODO: Do for we need SRIFU and HRIFU since they have different IFU?
-  private sealed trait IFUDisplayMode {
+  private[feat] sealed trait IFUDisplayMode {
     def show1: Boolean = false
     def show2: Boolean = false
   }
-  private case object IFUDisplayMode1 extends IFUDisplayMode {
+  private[feat] object IFUDisplayMode1 extends IFUDisplayMode {
     override def show1 = true
   }
-  private case object IFUDisplayMode2 extends IFUDisplayMode {
+  private[feat] object IFUDisplayMode2 extends IFUDisplayMode {
     override def show2 = true
+  }
+  private[feat] object IFUDisplayModeBoth extends IFUDisplayMode {
+    override def show1: Boolean = true
+    override def show2: Boolean = true
   }
 
   // Creates the Paint that is used for filling the IFU1 and IFU2 patrol fields.
@@ -305,6 +349,19 @@ object TpeGhostIfuFeature {
   sealed trait Orientation
   case object NorthEast extends Orientation
   case object SouthEast extends Orientation
+
+  // Determine which IFU a sky object belongs to.
+  private[feat] def objectInIFU1(env: TargetEnvironment, skyObject: SPSkyObject): Boolean = env.getAsterism match {
+    case a: GhostAsterism.StandardResolution => a.srifu1.fold(skyObject == _, skyObject == _.spTarget)
+    case a: GhostAsterism.HighResolution => skyObject == a.hrifu1.spTarget
+    case _ => false
+  }
+
+  private[feat] def objectInIFU2(env: TargetEnvironment, skyObject: SPSkyObject): Boolean = env.getAsterism match {
+    case a: GhostAsterism.StandardResolution => a.srifu2.exists(_.fold(skyObject == _, skyObject == _.spTarget))
+    case a: GhostAsterism.HighResolution => a.hrifu2.contains(skyObject)
+    case _ => false
+  }
 
   val Warning: TpeMessage = TpeMessage.warningMessage("No valid region for IFU positions.")
 }
