@@ -221,6 +221,20 @@ public abstract class TpeImageFeature implements TelescopePosWatcher {
     }
 
     /**
+     * Gets the key, or legend, associated with this image feature.  For
+     * example to explain the meaning of one or more elements that it draws.
+     * This method returns {@link None} by default.  A subclass must override
+     * to return a specific legend.
+     *
+     * @return {@link None}; override to provide a component that contains the
+     * legend
+     */
+    public Option<Component> getKey() {
+        // hook for subclasses
+        return None.instance();
+    }
+
+    /**
      * Gets this feature's category, which is used for separating the categories
      * in the tool button display.
      */
