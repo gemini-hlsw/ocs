@@ -24,7 +24,9 @@ import scala.swing.{Color, Graphics2D}
  * Draws the GHOST IFU patrol fiels and IFUS.
  */
 final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol fields of the GHOST IFUs") with PropertyWatcher with TpeDragSensitive {
-  private var transform: Option[AffineTransform] = None
+  // Transformations for the GHOST IFU patrol fields.
+  private var transform1: Option[AffineTransform] = None
+  private var transform2: Option[AffineTransform] = None
 
   // Determine if there are no TPE messages.
   private var isEmpty: Boolean = false
@@ -50,7 +52,8 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       return
 
     for {
-      trans <- transform
+      trans1 <- transform1
+      trans2 <- transform2
       ctx <- _iw.getObsContext.asScalaOpt
     } {
       // Store the old color and paint.
@@ -59,13 +62,12 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       val originalPaint = g2d.getPaint
 
       if (drawPatrolFields) {
-        val ifu1PatrolField: Area = new Area(flipArea(TpeGhostIfuFeature.IfuArc)).createTransformedArea(trans)
-
-        // ifu2 is flipped along RA, so we flip twice to get the desired result.
-        val ifu2PatrolField: Area = new Area(flipArea(flipArea(TpeGhostIfuFeature.IfuArc))).createTransformedArea(trans)
+        val ifu1PatrolField: Area = new Area(flipArea(TpeGhostIfuFeature.IfuArc)).createTransformedArea(trans1)
+        val ifu2PatrolField: Area = new Area(flipArea(TpeGhostIfuFeature.IfuArc)).createTransformedArea(trans2)
 
         g2d.setColor(TpeGhostIfuFeature.PatrolFieldBorderColor)
 
+        println(s"displayMode1: ${displayMode.show1}, displayMode2: ${displayMode.show2}")
         if (displayMode.show1) {
           g2d.draw(ifu1PatrolField)
           g2d.setPaint(TpeGhostIfuFeature.createPatrolFieldPaint(g2d, TpeGhostIfuFeature.NorthEast))
@@ -100,17 +102,21 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
    * Called when an item is dragged in the TPE: select the IFU to display.
    */
   override def handleDragStarted(dragObject: Any, context: ObsContext): Unit = {
-    val a: TpeGhostIfuFeature.IFUDisplayMode = TpeGhostIfuFeature.IFUDisplayMode2
     dragObject match {
       case o: SPSkyObject =>
         val env: TargetEnvironment = context.getTargets
         if (env != null) {
-          if (TpeGhostIfuFeature.objectInIFU1(env, o))
+          println("*** Handling drag")
+          if (TpeGhostIfuFeature.objectInIFU1(env, o)) {
+            println("--- Object in IFU1")
             displayMode = TpeGhostIfuFeature.IFUDisplayMode1
-          else if (TpeGhostIfuFeature.objectInIFU2(env, o))
+          } else if (TpeGhostIfuFeature.objectInIFU2(env, o)) {
+            println("--- Object in IFU2")
             displayMode = TpeGhostIfuFeature.IFUDisplayMode2
-          else
+          } else {
+            println("--- Otherwise")
             displayMode = TpeGhostIfuFeature.IFUDisplayModeBoth
+          }
         } else
           displayMode = TpeGhostIfuFeature.IFUDisplayModeBoth
     }
@@ -175,10 +181,19 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
     val base: Point2D.Double = tii.getBaseScreenPos
     val ppa: Double = tii.getPixelsPerArcsec
 
-    transform = Some {
+    transform1 = Some {
       val t = new AffineTransform
       t.translate(base.x, base.y)
       t.rotate(-tii.getTheta)
+      t.scale(ppa, ppa)
+      t
+    }
+
+    transform2 = Some {
+      val t = new AffineTransform
+      t.translate(base.x, base.y)
+      t.rotate(-tii.getTheta)
+      t.rotate(Math.PI)
       t.scale(ppa, ppa)
       t
     }
@@ -246,15 +261,6 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
 }
 
 
-
-
-
-
-
-
-
-
-
 object TpeGhostIfuFeature {
   // The Arc2D representing the IFUs.
   val IfuArc: Area = {
@@ -308,11 +314,11 @@ object TpeGhostIfuFeature {
   // Creates the Paint that is used for filling the IFU1 and IFU2 patrol fields.
   private case class PaintParameters(skip: Int, alphaBg: Double, alphaLine: Double)
 
-  private case object PatrolFieldPaintParameters extends PaintParameters(16, 0.16, 0.4)
+  private object PatrolFieldPaintParameters extends PaintParameters(16, 0.16, 0.4)
   private def createPatrolFieldPaint(g2d: Graphics2D, orientation: Orientation): Paint =
     createPatrolFieldPaint(g2d, orientation: Orientation, PatrolFieldPaintParameters)
 
-  private case object PatrolFieldKeyPaintParameters extends PaintParameters(skip = 8, alphaBg = 0.32, alphaLine = 0.8)
+  private object PatrolFieldKeyPaintParameters extends PaintParameters(skip = 8, alphaBg = 0.32, alphaLine = 0.8)
   private[feat] def createPatrolFieldKeyPaint(g2d: Graphics2D, orientation: Orientation): Paint =
     createPatrolFieldPaint(g2d, orientation, PatrolFieldKeyPaintParameters)
 

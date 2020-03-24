@@ -205,6 +205,7 @@ public final class OT {
                 jsky.app.ot.tpe.feat.TpeGuidePosFeature.class,
                 jsky.app.ot.tpe.feat.TpeTargetPosFeature.class,
                 jsky.app.ot.tpe.feat.TpeCatalogFeature.class,
+                jsky.app.ot.tpe.feat.TpeGhostIfuFeature.class,
                 jsky.app.ot.gemini.tpe.EdIterOffsetFeature.class,
                 jsky.app.ot.gemini.acqcam.TpeAcqCameraFeature.class,
                 jsky.app.ot.gemini.altair.Altair_WFS_Feature.class,
