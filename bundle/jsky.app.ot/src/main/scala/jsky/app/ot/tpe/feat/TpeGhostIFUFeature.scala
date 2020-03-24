@@ -88,6 +88,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
     }
   }
 
+
   /**
    * Gets this feature's category, which is used for separating the categories
    * in the tool button display.
@@ -147,7 +148,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
    * Reinitialize (recalculate the positions and redraw).
    */
   private val selListener: PropertyChangeListener = new PropertyChangeListener {
-    override def propertyChange(evt: PropertyChangeEvent): Unit = _redraw()
+    override def propertyChange(evt: PropertyChangeEvent): Unit = redraw()
   }
 
 
@@ -192,19 +193,19 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
 
   // Implements the TelescopePosWatcher interface.
   def telescopePosLocationUpdate(tp: WatchablePos): Unit =
-    _redraw()
+    redraw()
 
 
   def telescopePosGenericUpdate(tp: WatchablePos): Unit =
-    _redraw()
+    redraw()
 
 
   override protected def handleTargetEnvironmentUpdate(diff: TargetEnvironmentDiff): Unit =
-    _redraw()
+    redraw()
 
 
   // Schedule a redraw of the image feature.
-  private def _redraw(): Unit =
+  private def redraw(): Unit =
     if (_iw != null) _iw.repaint()
 
 
