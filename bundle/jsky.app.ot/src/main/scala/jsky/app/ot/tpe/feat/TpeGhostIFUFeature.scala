@@ -18,7 +18,11 @@ import javax.swing.{Icon, JLabel, JPanel, SwingConstants}
 import jsky.app.ot.tpe._
 import jsky.app.ot.util.{BasicPropertyList, OtColor, PropertyWatcher}
 
+import scala.math.Pi
 import scala.swing.{Color, Graphics2D}
+
+import scalaz._
+import Scalaz._
 
 /**
  * Draws the GHOST IFU patrol fiels and IFUS.
@@ -316,11 +320,7 @@ object TpeGhostIfuFeature {
 
   private object PatrolFieldPaintParameters extends PaintParameters(16, 0.16, 0.4)
   private def createPatrolFieldPaint(g2d: Graphics2D, orientation: Orientation): Paint =
-    createPatrolFieldPaint(g2d, orientation: Orientation, PatrolFieldPaintParameters)
-
-  private object PatrolFieldKeyPaintParameters extends PaintParameters(skip = 8, alphaBg = 0.32, alphaLine = 0.8)
-  private[feat] def createPatrolFieldKeyPaint(g2d: Graphics2D, orientation: Orientation): Paint =
-    createPatrolFieldPaint(g2d, orientation, PatrolFieldKeyPaintParameters)
+    createPatrolFieldPaint(g2d, orientation, PatrolFieldPaintParameters)
 
   private def createPatrolFieldPaint(g2d: Graphics2D, orientation: Orientation, paintParameters: PaintParameters): Paint = {
     val size = 2 * paintParameters.skip
@@ -330,7 +330,7 @@ object TpeGhostIfuFeature {
     val bufferedImage: BufferedImage = g2d.getDeviceConfiguration.createCompatibleImage(size, size, Transparency.TRANSLUCENT)
     val bufferedImageG2D: Graphics2D = bufferedImage.createGraphics()
 
-    // TODO: Replace this with an Arc2D.Double
+    // TODO: Replace this with an Arc2D.Double?
     // Shade it with a light red color that is almost completely transparent.
     bufferedImageG2D.setColor(OtColor.makeTransparent(PatrolRangeColor, paintParameters.alphaBg))
     bufferedImageG2D.setComposite(AlphaComposite.Src)
@@ -340,17 +340,40 @@ object TpeGhostIfuFeature {
     bufferedImageG2D.setClip(0, 0, size, size)
     bufferedImageG2D.setColor(OtColor.makeTransparent(PatrolRangeColor, paintParameters.alphaLine))
 
+    /**
+     * VERTICAL + HORIZONTAL
+     */
+    //    var oldTrans = bufferedImageG2D.getTransform
+//    val newTransform = AffineTransform.getRotateInstance((orientation == SouthEast) ? (Pi / 3) | (- Pi / 3))
+//    bufferedImageG2D.setTransform(newTransform)
+//    (0 until size by paintParameters.skip).foreach { v =>
+//      orientation match {
+//        case NorthEast =>
+//          bufferedImageG2D.drawLine(v, 0, v, size)
+//        case SouthEast =>
+//          bufferedImageG2D.drawLine(0, v, size, v)
+//      }
+//    }
+    /**
+     * HORIZONAL ALL ONE WAY
+     */
     (0 until size by paintParameters.skip).foreach { v =>
       orientation match {
         case NorthEast =>
-          bufferedImageG2D.drawLine(0, v, size, v)
+          bufferedImageG2D.drawLine(0, v, size - v, size)
+          bufferedImageG2D.drawLine(v, 0, size, size - v)
         case SouthEast =>
-          bufferedImageG2D.drawLine(v, 0, size, v)
+          bufferedImageG2D.drawLine(0, v, size, v + size)
       }
     }
+//    bufferedImageG2D.setTransform(oldTrans)
     bufferedImageG2D.dispose()
     new TexturePaint(bufferedImage, rectangle)
   }
+
+  private object PatrolFieldKeyPaintParameters extends PaintParameters(skip = 8, alphaBg = 0.32, alphaLine = 0.8)
+  private[feat] def createPatrolFieldKeyPaint(g2d: Graphics2D, orientation: Orientation): Paint =
+    createPatrolFieldPaint(g2d, orientation, PatrolFieldKeyPaintParameters)
 
   // The slant of the lines drawn for the IFU1 and IFU2 patrol fields.
   sealed trait Orientation
