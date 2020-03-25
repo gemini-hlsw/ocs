@@ -355,7 +355,7 @@ object TpeGhostIfuFeature {
 //      }
 //    }
     /**
-     * HORIZONAL ALL ONE WAY
+     * HORIZONTALS
      */
     (0 until size by paintParameters.skip).foreach { v =>
       orientation match {
@@ -363,7 +363,8 @@ object TpeGhostIfuFeature {
           bufferedImageG2D.drawLine(0, v, size - v, size)
           bufferedImageG2D.drawLine(v, 0, size, size - v)
         case SouthEast =>
-          bufferedImageG2D.drawLine(0, v, size, v + size)
+          bufferedImageG2D.drawLine(v, size, size, v)
+          bufferedImageG2D.drawLine(0, v, v, 0)
       }
     }
 //    bufferedImageG2D.setTransform(oldTrans)
