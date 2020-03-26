@@ -1,7 +1,7 @@
 package jsky.app.ot.tpe.feat
 
 import java.awt.{AlphaComposite, Color, Component, Composite, Graphics, Graphics2D, GridBagConstraints, GridBagLayout, Insets, Paint, TexturePaint, Transparency}
-import java.awt.geom.{AffineTransform, Arc2D, Area, Point2D, Rectangle2D}
+import java.awt.geom.{AffineTransform, Arc2D, Area, Ellipse2D, Point2D, Rectangle2D}
 import java.awt.image.BufferedImage
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import java.util.Collections
@@ -13,16 +13,15 @@ import edu.gemini.spModel.gemini.ghost.{Ghost, GhostAsterism, GhostScienceAreaGe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.target.{SPSkyObject, WatchablePos}
-import edu.gemini.spModel.target.env.{TargetEnvironment, TargetEnvironmentDiff}
+import edu.gemini.spModel.target.env.{AsterismType, TargetEnvironment, TargetEnvironmentDiff}
 import javax.swing.{Icon, JLabel, JPanel, SwingConstants}
 import jsky.app.ot.tpe._
 import jsky.app.ot.util.{BasicPropertyList, OtColor, PropertyWatcher}
 
-import scala.math.Pi
 import scala.swing.{Color, Graphics2D}
-
 import scalaz._
 import Scalaz._
+import edu.gemini.spModel.core.Angle
 
 /**
  * Draws the GHOST IFU patrol fiels and IFUS.
@@ -37,7 +36,8 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
 
   /**
    * Determine which IFUs are active, e.g. when targets / sky positions are being dragged.
-   * This should be set by the handle methods.
+   * This should be set by the handle methods. This does not determine if both the IFU patrol fields are drawn
+   * in and of itself alone, as we only draw the IFU2 elements if it is in use.
    */
   private var displayMode: TpeGhostIfuFeature.IFUDisplayMode = TpeGhostIfuFeature.IFUDisplayModeBoth
 
@@ -77,7 +77,9 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
           g2d.setPaint(TpeGhostIfuFeature.createPatrolFieldPaint(g2d, TpeGhostIfuFeature.NorthEast))
           g2d.fill(ifu1PatrolField)
         }
-        if (displayMode.show2) {
+
+        // We only show the IFU2 elements if the asterism type applies to them.
+        if (displayMode.show2 && usingIFU2(ctx.getTargets)) {
           g2d.draw(ifu2PatrolField)
           g2d.setPaint(TpeGhostIfuFeature.createPatrolFieldPaint(g2d, TpeGhostIfuFeature.SouthEast))
           g2d.fill(ifu2PatrolField)
@@ -124,6 +126,15 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
         } else
           displayMode = TpeGhostIfuFeature.IFUDisplayModeBoth
     }
+  }
+
+  /**
+   * Determine if IFU2 is in use.
+   */
+  private def usingIFU2(env: TargetEnvironment): Boolean = env.getAsterism.asterismType match {
+    case AsterismType.GhostDualTarget | AsterismType.GhostTargetPlusSky | AsterismType.GhostSkyPlusTarget | AsterismType.GhostHighResolutionTargetPlusSky => true
+    case AsterismType.GhostSingleTarget | AsterismType.GhostHighResolutionTarget => false
+    case AsterismType.Single => sys.error("Invalid asterism type for GHOST")
   }
 
 
@@ -266,17 +277,28 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
 
 
 object TpeGhostIfuFeature {
+  // Leaving this here for now because calculating the angle extent was not simple.
   // The Arc2D representing the IFUs.
-  val IfuArc: Area = {
-    val arc = new Arc2D.Double(Arc2D.OPEN)
-    val radius = GhostScienceAreaGeometry.radius
-    val size = GhostScienceAreaGeometry.size
-    arc.setFrame(-radius.toArcsecs, -radius.toArcsecs, size.toArcsecs, size.toArcsecs)
+//  val IfuArc: Area = {
+//    val arc = new Arc2D.Double(Arc2D.OPEN)
+//    val radius = GhostScienceAreaGeometry.radius
+//    val size = GhostScienceAreaGeometry.size
+//    arc.setFrame(-radius.toArcsecs, -radius.toArcsecs, size.toArcsecs, size.toArcsecs)
+//
+//    // Angles must be in degrees.
+//    arc.setAngleStart(90)
+//    arc.setAngleExtent(180.84653223829957369)
+//    new Area(arc)
+//  }
 
-    // Angles must be in degrees.
-    arc.setAngleStart(90)
-    arc.setAngleExtent(180.84653223829957369)
-    new Area(arc)
+  // We represent the IFURects as rectangles intersecting with the science area of GHOST.
+  val IfuArc: Area = {
+    val radius: Angle = GhostScienceAreaGeometry.radius
+    val height: Angle = GhostScienceAreaGeometry.size
+    val width: Angle = GhostScienceAreaGeometry.radius + Angle.fromArcsecs(3.68)
+    val area = new Area(new Rectangle2D.Double(-radius.toArcsecs, -radius.toArcsecs, width.toArcsecs, height.toArcsecs))
+    area.intersect(new Area(GhostScienceAreaGeometry.Ellipse))
+    area
   }
 
   // Color for IFU limts.
