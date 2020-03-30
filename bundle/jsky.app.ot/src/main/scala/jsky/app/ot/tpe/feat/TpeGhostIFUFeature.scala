@@ -9,6 +9,7 @@ import java.util.Collections
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption, Some => JSome}
 import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.gemini.ghost.{Ghost, GhostAsterism, GhostScienceAreaGeometry}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.SPInstObsComp
@@ -19,9 +20,10 @@ import jsky.app.ot.tpe._
 import jsky.app.ot.util.{BasicPropertyList, OtColor, PropertyWatcher}
 
 import scala.swing.{Color, Graphics2D}
+
 import scalaz._
 import Scalaz._
-import edu.gemini.spModel.core.Angle
+
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostTarget
 
 /**
@@ -103,18 +105,20 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
               }
 
               // Now draw the hexagon at the appropriate place.
-              val c = g2d.getColor
               val psrIfu1: Point2D.Double = pm.getLocationFromTag(pos1)
 
+              // Draw first IFU.
               drawIFU(g2d, psrIfu1)
 
-              // Draw the sky fiber
+              // TODO: Draw the sky fibers.
+              // TODO: This requires the calculations and setting the size.
+              // TODO: Easy, but requires info from Steve.
 
               // If SRIFU2 is in use, draw it as well.
-              a.srifu2.map { _  match {
+              a.srifu2.map {
                 case Left(sPCoordinates) => sPCoordinates
                 case Right(GhostTarget(spTarget, guideFiberState)) => spTarget
-              }}.map(_iw.taggedPosToScreenCoords).foreach(p => drawIFU(g2d, p))
+              }.map(_iw.taggedPosToScreenCoords).foreach(p => drawIFU(g2d, p))
 
             case a: GhostAsterism.HighResolution =>
               val (pos1, guideFiberState) = (a.hrifu1.spTarget, a.hrifu1.guideFiberState)
@@ -138,23 +142,16 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
    * Draw an IFU.
    */
   private def drawIFU(g2d: Graphics2D, p: Point2D): Unit = {
-//    g2d.setColor(Color.cyan)
-//    g2d.fill(new Area(new Rectangle2D.Double(p.getX, p.getY, 20, 20)))
-
     // Transform the hexagon to the appropriate place.
     val trans: AffineTransform = {
       val t = new AffineTransform
       t.translate(p.getX, p.getY)
-      t.scale(1.18, 1.18)
+      t.scale(TpeGhostIfuFeature.HexPlateScale.toArcsecs, TpeGhostIfuFeature.HexPlateScale.toArcsecs)
       ifuTransform.foreach(t.concatenate)
       t
     }
-//    val hex: Area = new Area(new RegularHexagon).createTransformedArea(trans)
-//    val color = g2d.getColor
-//    g2d.setColor(Color.red)
-//    g2d.fill(hex)
-//    g2d.setColor(color)
-    g2d.setColor(Color.red)
+
+    g2d.setColor(TpeGhostIfuFeature.IfuColor)
     g2d.fill(new Area(new RegularHexagon()).createTransformedArea(trans))
   }
 
@@ -340,20 +337,6 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
 
 
 object TpeGhostIfuFeature {
-  // Leaving this here for now because calculating the angle extent was not simple.
-  // The Arc2D representing the IFUs.
-//  val IfuArc: Area = {
-//    val arc = new Arc2D.Double(Arc2D.OPEN)
-//    val radius = GhostScienceAreaGeometry.radius
-//    val size = GhostScienceAreaGeometry.size
-//    arc.setFrame(-radius.toArcsecs, -radius.toArcsecs, size.toArcsecs, size.toArcsecs)
-//
-//    // Angles must be in degrees.
-//    arc.setAngleStart(90)
-//    arc.setAngleExtent(180.84653223829957369)
-//    new Area(arc)
-//  }
-
   // We represent the IFURects as rectangles intersecting with the science area of GHOST.
   val IfuArc: Area = {
     val radius: Angle = GhostScienceAreaGeometry.radius
@@ -415,8 +398,6 @@ object TpeGhostIfuFeature {
     val bufferedImage: BufferedImage = g2d.getDeviceConfiguration.createCompatibleImage(size, size, Transparency.TRANSLUCENT)
     val bufferedImageG2D: Graphics2D = bufferedImage.createGraphics()
 
-    // TODO: Replace this with an Arc2D.Double?
-    // Shade it with a light red color that is almost completely transparent.
     bufferedImageG2D.setColor(OtColor.makeTransparent(PatrolRangeColor, paintParameters.alphaBg))
     bufferedImageG2D.setComposite(AlphaComposite.Src)
     bufferedImageG2D.fill(rectangle)
@@ -428,20 +409,6 @@ object TpeGhostIfuFeature {
     /**
      * VERTICAL + HORIZONTAL
      */
-    //    var oldTrans = bufferedImageG2D.getTransform
-//    val newTransform = AffineTransform.getRotateInstance((orientation == SouthEast) ? (Pi / 3) | (- Pi / 3))
-//    bufferedImageG2D.setTransform(newTransform)
-//    (0 until size by paintParameters.skip).foreach { v =>
-//      orientation match {
-//        case NorthEast =>
-//          bufferedImageG2D.drawLine(v, 0, v, size)
-//        case SouthEast =>
-//          bufferedImageG2D.drawLine(0, v, size, v)
-//      }
-//    }
-    /**
-     * HORIZONTALS
-     */
     (0 until size by paintParameters.skip).foreach { v =>
       orientation match {
         case NorthEast =>
@@ -452,7 +419,6 @@ object TpeGhostIfuFeature {
           bufferedImageG2D.drawLine(0, v, v, 0)
       }
     }
-//    bufferedImageG2D.setTransform(oldTrans)
     bufferedImageG2D.dispose()
     new TexturePaint(bufferedImage, rectangle)
   }
@@ -480,6 +446,11 @@ object TpeGhostIfuFeature {
   }
 
   val Warning: TpeMessage = TpeMessage.warningMessage("No valid region for IFU positions.")
+
+  // 610 microns per arcsec. All dimensions in mm.
+  // 0.240 face width per hexagon: three hexagons.
+  val IfuColor: Color = OtColor.makeSlightlyDarker(Color.green)
+  val HexPlateScale: Angle = Angle.fromArcsecs(0.720 / 0.61)
 }
 
 private[feat] class ProbeRangeIcon(val slants: Array[TpeGhostIfuFeature.Orientation]) extends Icon {
