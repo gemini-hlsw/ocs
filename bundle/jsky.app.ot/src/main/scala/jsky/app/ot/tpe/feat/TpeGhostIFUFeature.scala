@@ -1,6 +1,6 @@
 package jsky.app.ot.tpe.feat
 
-import java.awt.{AlphaComposite, Color, Component, Composite, Graphics, Graphics2D, GridBagConstraints, GridBagLayout, Insets, Paint, TexturePaint, Transparency}
+import java.awt.{AlphaComposite, Color, Component, Composite, Graphics, Graphics2D, GridBagConstraints, GridBagLayout, Insets, Paint, Shape, TexturePaint, Transparency}
 import java.awt.geom.{AffineTransform, Arc2D, Area, Ellipse2D, Point2D, Rectangle2D}
 import java.awt.image.BufferedImage
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
@@ -13,7 +13,7 @@ import edu.gemini.spModel.gemini.ghost.{Ghost, GhostAsterism, GhostScienceAreaGe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.target.{SPSkyObject, WatchablePos}
-import edu.gemini.spModel.target.env.{AsterismType, TargetEnvironment, TargetEnvironmentDiff}
+import edu.gemini.spModel.target.env.{Asterism, AsterismType, TargetEnvironment, TargetEnvironmentDiff}
 import javax.swing.{Icon, JLabel, JPanel, SwingConstants}
 import jsky.app.ot.tpe._
 import jsky.app.ot.util.{BasicPropertyList, OtColor, PropertyWatcher}
@@ -22,6 +22,7 @@ import scala.swing.{Color, Graphics2D}
 import scalaz._
 import Scalaz._
 import edu.gemini.spModel.core.Angle
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostTarget
 
 /**
  * Draws the GHOST IFU patrol fiels and IFUS.
@@ -65,6 +66,10 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       val originalColor = g2d.getColor
       val originalPaint = g2d.getPaint
 
+      val env: TargetEnvironment = ctx.getTargets
+      if (env == null)
+        return
+
       if (drawPatrolFields) {
         val ifu1PatrolField: Area = new Area(flipArea(TpeGhostIfuFeature.IfuArc)).createTransformedArea(trans1)
         val ifu2PatrolField: Area = new Area(flipArea(TpeGhostIfuFeature.IfuArc)).createTransformedArea(trans2)
@@ -79,23 +84,75 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
         }
 
         // We only show the IFU2 elements if the asterism type applies to them.
-        if (displayMode.show2 && usingIFU2(ctx.getTargets)) {
+        if (displayMode.show2 && usingIFU2(env)) {
           g2d.draw(ifu2PatrolField)
           g2d.setPaint(TpeGhostIfuFeature.createPatrolFieldPaint(g2d, TpeGhostIfuFeature.SouthEast))
           g2d.fill(ifu2PatrolField)
+        }
+
+        // Draw the IFUs.
+        val pm: TpePositionMap = TpePositionMap.getMap(_iw)
+        val asterism: Asterism = env.getAsterism
+        if (displayMode.show1) {
+          asterism match {
+            case a: GhostAsterism.StandardResolution =>
+              val pos1 = a.srifu1 match {
+                case Left(spCoordinates) => spCoordinates
+                case Right(GhostTarget(spTarget, guideFiberState)) => spTarget
+              }
+
+              // Now draw the hexagon at the appropriate place.
+              val c = g2d.getColor
+              val psrIfu1: Point2D.Double = pm.getLocationFromTag(pos1)
+
+              drawIFU(g2d, psrIfu1)
+
+              g2d.setColor(Color.cyan)
+              g2d.fill(new Area(new Rectangle2D.Double(psrIfu1.getX, psrIfu1.getY, 20, 20)))
+
+              // Draw the sky fiber
+
+              // If SRIFU2 is in use, draw it as well.
+              a.srifu2.map { _  match {
+                case Left(sPCoordinates) => sPCoordinates
+                case Right(GhostTarget(spTarget, guideFiberState)) => spTarget
+              }}.map(_iw.taggedPosToScreenCoords).foreach(p => drawIFU(g2d, p))
+
+            case a: GhostAsterism.HighResolution =>
+              val (pos1, guideFiberState) = (a.hrifu1.spTarget, a.hrifu1.guideFiberState)
+
+              // Now draw the hexagon at the appropriate place.
+              val p: Point2D.Double = _iw.taggedPosToScreenCoords(pos1)
+              drawIFU(g2d, p)
+          }
         }
 
         // Restore the paint.
         g2d.setPaint(originalPaint)
       }
 
-      // Draw the hexagons representing the IFUs themselves.
-
       // Reset the color.
       g2d.setColor(originalColor)
     }
   }
 
+  /**
+   * Draw an IFU.
+   */
+  private def drawIFU(g: Graphics2D, p: Point2D): Unit = {
+    // Transform the hexagon to the appropriate place.
+    val trans: AffineTransform = {
+      val t = new AffineTransform
+      t.translate(p.getX, p.getY)
+      t.scale(1.4, 1.4)
+      t
+    }
+    val hex: Area = new Area(new RegularHexagon).createTransformedArea(trans)
+    val color = g.getColor
+    g.setColor(Color.lightGray)
+    g.fill(hex)
+    g.setColor(color)
+  }
 
   /**
    * Gets this feature's category, which is used for separating the categories
@@ -295,7 +352,7 @@ object TpeGhostIfuFeature {
   val IfuArc: Area = {
     val radius: Angle = GhostScienceAreaGeometry.radius
     val height: Angle = GhostScienceAreaGeometry.size
-    val width: Angle = GhostScienceAreaGeometry.radius + Angle.fromArcsecs(3.68)
+    val width: Angle = GhostScienceAreaGeometry.radius + Angle.fromArcsecs(3.28)
     val area = new Area(new Rectangle2D.Double(-radius.toArcsecs, -radius.toArcsecs, width.toArcsecs, height.toArcsecs))
     area.intersect(new Area(GhostScienceAreaGeometry.Ellipse))
     area
