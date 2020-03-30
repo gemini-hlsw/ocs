@@ -107,9 +107,6 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
 
               drawIFU(g2d, psrIfu1)
 
-              g2d.setColor(Color.cyan)
-              g2d.fill(new Area(new Rectangle2D.Double(psrIfu1.getX, psrIfu1.getY, 20, 20)))
-
               // Draw the sky fiber
 
               // If SRIFU2 is in use, draw it as well.
@@ -139,19 +136,24 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
   /**
    * Draw an IFU.
    */
-  private def drawIFU(g: Graphics2D, p: Point2D): Unit = {
+  private def drawIFU(g2d: Graphics2D, p: Point2D): Unit = {
+    g2d.setColor(Color.cyan)
+    g2d.fill(new Area(new Rectangle2D.Double(p.getX, p.getY, 20, 20)))
+
     // Transform the hexagon to the appropriate place.
     val trans: AffineTransform = {
       val t = new AffineTransform
       t.translate(p.getX, p.getY)
-      t.scale(1.4, 1.4)
+      t.scale(100, 100)
       t
     }
-    val hex: Area = new Area(new RegularHexagon).createTransformedArea(trans)
-    val color = g.getColor
-    g.setColor(Color.lightGray)
-    g.fill(hex)
-    g.setColor(color)
+//    val hex: Area = new Area(new RegularHexagon).createTransformedArea(trans)
+//    val color = g2d.getColor
+//    g2d.setColor(Color.red)
+//    g2d.fill(hex)
+//    g2d.setColor(color)
+    g2d.setColor(Color.red)
+    g2d.fill(new Area(new RegularHexagon()).createTransformedArea(trans))
   }
 
   /**
