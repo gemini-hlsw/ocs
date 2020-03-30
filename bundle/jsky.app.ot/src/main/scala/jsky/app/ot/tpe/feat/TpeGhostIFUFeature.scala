@@ -31,6 +31,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
   // Transformations for the GHOST IFU patrol fields.
   private var transform1: Option[AffineTransform] = None
   private var transform2: Option[AffineTransform] = None
+  private var ifuTransform: Option[AffineTransform] = None
 
   // Determine if there are no TPE messages.
   private var isEmpty: Boolean = false
@@ -137,14 +138,15 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
    * Draw an IFU.
    */
   private def drawIFU(g2d: Graphics2D, p: Point2D): Unit = {
-    g2d.setColor(Color.cyan)
-    g2d.fill(new Area(new Rectangle2D.Double(p.getX, p.getY, 20, 20)))
+//    g2d.setColor(Color.cyan)
+//    g2d.fill(new Area(new Rectangle2D.Double(p.getX, p.getY, 20, 20)))
 
     // Transform the hexagon to the appropriate place.
     val trans: AffineTransform = {
       val t = new AffineTransform
       t.translate(p.getX, p.getY)
-      t.scale(100, 100)
+      t.scale(1.18, 1.18)
+      ifuTransform.foreach(t.concatenate)
       t
     }
 //    val hex: Area = new Area(new RegularHexagon).createTransformedArea(trans)
@@ -261,7 +263,9 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       t.rotate(-tii.getTheta)
       t.scale(ppa, ppa)
       t
+
     }
+    ifuTransform = Some(AffineTransform.getScaleInstance(ppa, ppa))
 
     transform2 = Some {
       val t = new AffineTransform
