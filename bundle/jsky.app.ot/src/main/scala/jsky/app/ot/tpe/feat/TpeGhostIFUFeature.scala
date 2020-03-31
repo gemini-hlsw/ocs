@@ -1,7 +1,7 @@
 package jsky.app.ot.tpe.feat
 
-import java.awt.{AlphaComposite, Color, Component, Composite, Graphics, Graphics2D, GridBagConstraints, GridBagLayout, Insets, Paint, Shape, TexturePaint, Transparency}
-import java.awt.geom.{AffineTransform, Arc2D, Area, Ellipse2D, Point2D, Rectangle2D}
+import java.awt.{AlphaComposite, Color, Component, Composite, Graphics, Graphics2D, GridBagConstraints, GridBagLayout, Insets, Paint, TexturePaint, Transparency}
+import java.awt.geom.{AffineTransform, Area, Point2D, Rectangle2D}
 import java.awt.image.BufferedImage
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import java.util.Collections
