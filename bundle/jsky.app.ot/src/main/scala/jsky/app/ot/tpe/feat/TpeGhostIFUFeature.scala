@@ -78,8 +78,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
         val ifu2PatrolField: Area = new Area(flipArea(TpeGhostIfuFeature.IfuArc)).createTransformedArea(trans2)
 
         g2d.setColor(TpeGhostIfuFeature.PatrolFieldBorderColor)
-
-        println(s"displayMode1: ${displayMode.show1}, displayMode2: ${displayMode.show2}")
+        
         if (displayMode.show1) {
           g2d.draw(ifu1PatrolField)
           g2d.setPaint(TpeGhostIfuFeature.createPatrolFieldPaint(g2d, TpeGhostIfuFeature.NorthEast))
@@ -164,27 +163,23 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
 
   /**
    * Called when an item is dragged in the TPE: select the IFU to display.
+   * We should only be able to drag sky objects (targets and coordinates).
    */
-  override def handleDragStarted(dragObject: Any, context: ObsContext): Unit = {
-    dragObject match {
+  override def handleDragStarted(dragObject: Any, context: ObsContext): Unit = dragObject match {
       case o: SPSkyObject =>
         val env: TargetEnvironment = context.getTargets
         if (env != null) {
-          println("*** Handling drag")
           if (TpeGhostIfuFeature.objectInIFU1(env, o)) {
-            println("--- Object in IFU1")
             displayMode = TpeGhostIfuFeature.IFUDisplayMode1
           } else if (TpeGhostIfuFeature.objectInIFU2(env, o)) {
-            println("--- Object in IFU2")
             displayMode = TpeGhostIfuFeature.IFUDisplayMode2
           } else {
-            println("--- Otherwise")
             displayMode = TpeGhostIfuFeature.IFUDisplayModeBoth
           }
         } else
           displayMode = TpeGhostIfuFeature.IFUDisplayModeBoth
+      case _ =>
     }
-  }
 
   /**
    * Determine if IFU2 is in use.
