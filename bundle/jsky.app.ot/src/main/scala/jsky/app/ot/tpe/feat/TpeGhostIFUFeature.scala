@@ -259,6 +259,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       t.translate(base.x, base.y)
       t.rotate(-tii.getTheta)
       t.scale(ppa, ppa)
+      t.rotate(-tii.getCorrectedPosAngleRadians)
       t
 
     }
@@ -270,6 +271,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       t.rotate(-tii.getTheta)
       t.rotate(Math.PI)
       t.scale(ppa, ppa)
+      t.rotate(-tii.getCorrectedPosAngleRadians);
       t
     }
   }
