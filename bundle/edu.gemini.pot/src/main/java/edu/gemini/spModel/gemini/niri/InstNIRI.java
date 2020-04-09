@@ -34,6 +34,7 @@ import edu.gemini.spModel.gemini.niri.Niri.*;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
 import edu.gemini.spModel.guide.GuideProbeUtil;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
@@ -823,23 +824,23 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
         return new CalibrationKeyImpl(config);
     }
 
-    @Override public Angle pwfs1VignettingClearance() {
+    @Override public Angle pwfs1VignettingClearance(ObsContext ctx) {
         switch (getCamera()) {
             case F6:     return Angle.arcmins(5.7);
             case F14:    return Angle.arcmins(5.3);
             case F32 :   return Angle.arcmins(4.8);
             case F32_PV: return Angle.arcmins(4.8);
-            default:     return super.pwfs1VignettingClearance();
+            default:     return super.pwfs1VignettingClearance(ctx);
         }
     }
 
-    @Override public Angle pwfs2VignettingClearance() {
+    @Override public Angle pwfs2VignettingClearance(ObsContext ctx) {
         switch (getCamera()) {
             case F6:     return Angle.arcmins(5.2);
             case F14:    return Angle.arcmins(4.8);
             case F32 :   return Angle.arcmins(4.3);
             case F32_PV: return Angle.arcmins(4.3);
-            default:     return super.pwfs2VignettingClearance();
+            default:     return super.pwfs2VignettingClearance(ctx);
         }
     }
 

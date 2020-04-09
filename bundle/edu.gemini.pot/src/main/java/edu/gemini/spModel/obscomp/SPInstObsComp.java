@@ -8,6 +8,7 @@ import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.data.config.IConfig;
 import edu.gemini.spModel.data.config.IParameter;
 import edu.gemini.spModel.data.config.ISysConfig;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
@@ -385,11 +386,11 @@ public abstract class SPInstObsComp extends AbstractDataObject {
         return wavelength;
     }
 
-    public edu.gemini.skycalc.Angle pwfs1VignettingClearance() {
+    public edu.gemini.skycalc.Angle pwfs1VignettingClearance(ObsContext ctx) {
         return edu.gemini.skycalc.Angle.ANGLE_0DEGREES;
     }
 
-    public edu.gemini.skycalc.Angle pwfs2VignettingClearance() {
+    public edu.gemini.skycalc.Angle pwfs2VignettingClearance(ObsContext ctx) {
         return edu.gemini.skycalc.Angle.ANGLE_0DEGREES;
     }
 

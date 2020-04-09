@@ -231,12 +231,12 @@ class AgsHashSpec extends Specification with ScalaCheck with edu.gemini.spModel.
 
     "differ if PWFS1 vignetting clearance changes" in
       forAll { (ctx0: ObsContext, n: InstNIRI, camera2: Niri.Camera) =>
-        testPwfs(ctx0, n, camera2, AgsStrategyKey.Pwfs1NorthKey, _.pwfs1VignettingClearance)
+        testPwfs(ctx0, n, camera2, AgsStrategyKey.Pwfs1NorthKey, _.pwfs1VignettingClearance(ctx0))
       }
 
     "differ if PWFS2 vignetting clearance changes" in
       forAll { (ctx0: ObsContext, n: InstNIRI, camera2: Niri.Camera) =>
-        testPwfs(ctx0, n, camera2, AgsStrategyKey.Pwfs2NorthKey, _.pwfs2VignettingClearance)
+        testPwfs(ctx0, n, camera2, AgsStrategyKey.Pwfs2NorthKey, _.pwfs2VignettingClearance(ctx0))
       }
 
     val GemsKey = agsKey(AgsStrategyKey.Ngs2Key)

@@ -32,6 +32,7 @@ import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.obs.SPObservation;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
 import edu.gemini.spModel.obs.plannedtime.OffsetOverheadCalculator;
@@ -920,7 +921,7 @@ public final class Gsaoi extends SPInstObsComp
     );
 
     private static final Angle PWFS1_VIG = Angle.arcmins(5.8);
-    @Override public Angle pwfs1VignettingClearance() { return PWFS1_VIG; }
+    @Override public Angle pwfs1VignettingClearance(ObsContext ctx) { return PWFS1_VIG; }
 
     @Override
     public PosAngleConstraint getPosAngleConstraint() {
