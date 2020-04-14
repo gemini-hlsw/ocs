@@ -20,10 +20,9 @@ import jsky.app.ot.tpe._
 import jsky.app.ot.util.{BasicPropertyList, OtColor, PropertyWatcher}
 
 import scala.swing.{Color, Graphics2D}
-
 import scalaz._
 import Scalaz._
-
+import edu.gemini.skycalc.Offset
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostTarget
 
 /**
@@ -254,6 +253,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       t.translate(base.x, base.y)
       t.rotate(-tii.getTheta)
       t.scale(ppa, ppa)
+      // TODO-GHOST: This is different than in CanopusFeature.
       t.rotate(-tii.getCorrectedPosAngleRadians)
       t
 
@@ -266,6 +266,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       t.rotate(-tii.getTheta)
       t.rotate(Math.PI)
       t.scale(ppa, ppa)
+      // TODO-GHOST: This is different than in CanopusFeature.
       t.rotate(-tii.getCorrectedPosAngleRadians);
       t
     }
@@ -329,6 +330,24 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
   override def getMessages: JOption[java.util.Collection[TpeMessage]] = {
     if (!isEmpty) JNone.instance()
     else new JSome(Collections.singletonList(TpeGhostIfuFeature.Warning))
+  }
+
+  // Get the offset intersection.
+  def offsetIntersection(ctx: ObsContext, offsets: Set[Offset]): Option[Area] = {
+    val t: Double = ctx.getPositionAngle.toRadians
+
+    offsets.foldLeft(Option.empty[Area]){ (area, offset) =>
+      val cur = new Area(GhostScienceAreaGeometry.Ellipse)
+      val p: Double = offset.p().toArcsecs.getMagnitude
+      val q: Double = offset.q().toArcsecs.getMagnitude
+
+      val trans = new AffineTransform()
+      if (t != 0.0) trans.rotate(-t)
+      trans.translate(-p, -q)
+      cur.transform(trans)
+      area.foreach(_.intersect(cur))
+      area.orElse(cur.some)
+    }
   }
 }
 
