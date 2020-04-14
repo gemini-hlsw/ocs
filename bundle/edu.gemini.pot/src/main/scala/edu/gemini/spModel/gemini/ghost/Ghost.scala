@@ -6,7 +6,8 @@ import java.util.logging.Logger
 import java.util.{Collections, List => JList, Map => JMap, Set => JSet}
 
 import edu.gemini.pot.sp._
-import edu.gemini.shared.util.immutable.{Option => JOption}
+import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption}
+import edu.gemini.skycalc.{Angle, CoordinateDiff, Coordinates}
 import edu.gemini.spModel.config2.{Config, ItemKey}
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.data.ISPDataObject
@@ -15,10 +16,12 @@ import edu.gemini.spModel.data.property.{PropertyProvider, PropertySupport}
 import edu.gemini.spModel.gemini.init.{ComponentNodeInitializer, ObservationNI}
 import edu.gemini.spModel.inst.{ScienceAreaGeometry, VignettableScienceAreaInstrument}
 import edu.gemini.spModel.obs.SPObservation
+import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obs.plannedtime.{CommonStepCalculator, PlannedTime}
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.{CategorizedTime, CategorizedTimeGroup, Category}
 import edu.gemini.spModel.obscomp.{InstConfigInfo, InstConstants, SPInstObsComp}
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
+import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.seqcomp.SeqConfigNames
 import edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY
 import edu.gemini.spModel.target.env.TargetEnvironment
@@ -28,6 +31,9 @@ import edu.gemini.spModel.telescope.{IssPort, IssPortProvider}
 import scala.collection.immutable.TreeMap
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
+import scalaz._
+import Scalaz._
+import edu.gemini.spModel.target.SPSkyObject
 
 
 /** The GHOST instrument SP model.
@@ -76,8 +82,8 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     Option(Pio.getValue(paramSet, Ghost.PORT_PROP)).map(IssPort.valueOf).foreach(setIssPort)
     Option(Pio.getValue(paramSet, ISPDataObject.TITLE_PROP)).foreach(setTitle)
     Option(Pio.getValue(paramSet, InstConstants.POS_ANGLE_PROP)).map(_.toDouble).foreach(setPosAngleDegrees)
-    setEnableFiberAgitator1(Pio.getBooleanValue(paramSet, Ghost.ENABLE_FIBER_AGITATOR_1_PROP.getName,true))
-    setEnableFiberAgitator2(Pio.getBooleanValue(paramSet, Ghost.ENABLE_FIBER_AGITATOR_2_PROP.getName,true))
+    setEnableFiberAgitator1(Pio.getBooleanValue(paramSet, Ghost.ENABLE_FIBER_AGITATOR_1_PROP.getName, true))
+    setEnableFiberAgitator2(Pio.getBooleanValue(paramSet, Ghost.ENABLE_FIBER_AGITATOR_2_PROP.getName, true))
     setRedExposureTime(Pio.getDoubleValue(paramSet, Ghost.RED_EXPOSURE_TIME_PROP.getName, InstConstants.DEF_EXPOSURE_TIME))
     Option(Pio.getValue(paramSet, Ghost.RED_BINNING_PROP)).map(GhostBinning.valueOf).foreach(setRedBinning)
     Option(Pio.getValue(paramSet, Ghost.RED_READ_NOISE_GAIN_PROP)).map(GhostReadNoiseGain.valueOf).foreach(setRedReadNoiseGain)
@@ -106,7 +112,9 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
    * ISS Port
    */
   private var port: IssPort = IssPort.UP_LOOKING
+
   override def getIssPort: IssPort = port
+
   override def setIssPort(newValue: IssPort): Unit = {
     val oldValue = getIssPort
     if (oldValue != newValue) {
@@ -114,6 +122,7 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
       firePropertyChange(Ghost.PORT_PROP, oldValue, newValue)
     }
   }
+
   /**
    * Unsupported operations: GHOST has two exposure times, red and blue, and not a single exposure time like other
    * instruments do.
@@ -167,7 +176,9 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
    * Fiber agitator 1: default is enabled.
    */
   private var enableFiberAgitator1: Boolean = true
+
   def isEnableFiberAgitator1: Boolean = enableFiberAgitator1
+
   def setEnableFiberAgitator1(newValue: Boolean): Unit = {
     val oldValue = isEnableFiberAgitator1
     if (oldValue != newValue) {
@@ -180,7 +191,9 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
    * Fiber agitator 2: default is enabled.
    */
   private var enableFiberAgitator2: Boolean = true
+
   def isEnableFiberAgitator2: Boolean = enableFiberAgitator2
+
   def setEnableFiberAgitator2(newValue: Boolean): Unit = {
     val oldValue = isEnableFiberAgitator2
     if (oldValue != newValue) {
@@ -193,7 +206,9 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
    * Detectors.
    */
   private var redExposureTime: Double = InstConstants.DEF_EXPOSURE_TIME
+
   def getRedExposureTime: Double = redExposureTime
+
   def setRedExposureTime(newValue: Double): Unit = {
     val oldValue = getRedExposureTime
     if (oldValue != newValue) {
@@ -203,7 +218,9 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
   }
 
   private var redExposureCount: Int = InstConstants.DEF_REPEAT_COUNT
+
   def getRedExposureCount: Int = redExposureCount
+
   def setRedExposureCount(newValue: Int): Unit = {
     val oldValue = getRedExposureCount
     if (oldValue != newValue) {
@@ -213,7 +230,9 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
   }
 
   private var redBinning: GhostBinning = GhostBinning.DEFAULT
+
   def getRedBinning: GhostBinning = redBinning
+
   def setRedBinning(newValue: GhostBinning): Unit = {
     val oldValue = getRedBinning
     if (oldValue != newValue) {
@@ -223,7 +242,9 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
   }
 
   private var redReadNoiseGain: GhostReadNoiseGain = GhostReadNoiseGain.DEFAULT
+
   def getRedReadNoiseGain: GhostReadNoiseGain = redReadNoiseGain
+
   def setRedReadNoiseGain(newValue: GhostReadNoiseGain): Unit = {
     val oldValue = getRedReadNoiseGain
     if (oldValue != newValue) {
@@ -233,7 +254,9 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
   }
 
   private var blueExposureTime: Double = InstConstants.DEF_EXPOSURE_TIME
+
   def getBlueExposureTime: Double = blueExposureTime
+
   def setBlueExposureTime(newValue: Double): Unit = {
     val oldValue = getBlueExposureTime
     if (oldValue != newValue) {
@@ -244,7 +267,9 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
 
 
   private var blueExposureCount: Int = InstConstants.DEF_REPEAT_COUNT
+
   def getBlueExposureCount: Int = blueExposureCount
+
   def setBlueExposureCount(newValue: Int): Unit = {
     val oldValue = getBlueExposureCount
     if (oldValue != newValue) {
@@ -254,7 +279,9 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
   }
 
   private var blueBinning: GhostBinning = GhostBinning.DEFAULT
+
   def getBlueBinning: GhostBinning = blueBinning
+
   def setBlueBinning(newValue: GhostBinning): Unit = {
     val oldValue = getBlueBinning
     if (oldValue != newValue) {
@@ -264,7 +291,9 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
   }
 
   private var blueReadNoiseGain: GhostReadNoiseGain = GhostReadNoiseGain.DEFAULT
+
   def getBlueReadNoiseGain: GhostReadNoiseGain = blueReadNoiseGain
+
   def setBlueReadNoiseGain(newValue: GhostReadNoiseGain): Unit = {
     val oldValue = getBlueReadNoiseGain
     if (oldValue != newValue) {
@@ -275,7 +304,7 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
 
   override def calc(cur: Config, prev: JOption[Config]): CategorizedTimeGroup = {
     val times: util.Collection[CategorizedTime] = new util.ArrayList[CategorizedTime]()
-    
+
     // TODO-GHOST: Default values
     times.add(CategorizedTime.fromSeconds(Category.READOUT, 60))
 
@@ -285,10 +314,42 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
   }
 
   override def getVignettableScienceArea: ScienceAreaGeometry = GhostScienceAreaGeometry
+
+  override def pwfs2VignettingClearance(ctx: ObsContext): Angle = {
+    val distance = if (ctx.getTargets == null)
+      Angle.ANGLE_0DEGREES
+    else {
+      // TODO-GHOST: It seems that there should be an easier way to do this but I had difficulty getting other
+      // TODO-GHOST: implementations to compile.
+      // List of all coordinates of science and sky positions.
+      val coordsList: List[Coordinates] = {
+        val asterism = ctx.getTargets.getAsterism
+        (asterism.allSpTargets.toList ++ asterism.allSpCoordinates).flatMap(_.getSkycalcCoordinates(ctx.getSchedulingBlockStart).asScalaOpt)
+      }
+
+      // Find all the coordinate differences from the base, if it is set.
+      val diffs = for {
+        base <- ctx.getBaseCoordinates.asScalaOpt.toList
+        coord <- coordsList
+      } yield new CoordinateDiff(base, coord).getDistance
+
+      // Get the maximum.
+      diffs.foldLeft(Angle.ANGLE_0DEGREES) { (a1, a2) => if (a1.compareToAngle(a2) > 0) a1 else a2 }
+    }
+
+    // Add the boundary distance as defined below in the companion object.
+    distance.add(Ghost.Pwfs2Boundary)
+  }
 }
 
 object Ghost {
   val LOG: Logger = Logger.getLogger(classOf[Ghost].getName)
+
+  // TODO-GHOST: Due to the size of the PWFS probe (which is given in mm), we need to figure out a boundary to add
+  // TODO-GHOST: to the pwfs2VignettingClearance algorithm code to assure that there is no vignetting of any of the
+  // TODO-GHOST: science targets and sky positions, which is the goal. Using the traditional per-instrument strategy
+  // TODO-GHOST: will cause issues because, e.g., in dual mode, the annulus will be too small.
+  val Pwfs2Boundary: Angle = Angle.arcsecs(222)
 
   // Unfortunately we need a Java "Supplier" and "Function" which makes it
   // awkward to create the NodeInitializer via ComponentNodeInitializer.
