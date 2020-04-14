@@ -108,9 +108,9 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
               // Draw first IFU.
               drawIFU(g2d, psrIfu1)
 
-              // TODO: Draw the sky fibers.
-              // TODO: This requires the calculations and setting the size.
-              // TODO: Easy, but requires info from Steve.
+              // TODO-GHOST: TEST THIS: Draw the standard resolution sky fibers.
+              // TODO GHOST: As per page 3 in https://docs.google.com/document/d/1aN2ZPgaRMD52Rf4YG7ahwLnvQ8bpTRudc7MTBn-Lt2Y/edit#heading=h.8r9z8pinlp8i
+              drawSRSkyFibers(g2d, psrIfu1)
 
               // If SRIFU2 is in use, draw it as well.
               a.srifu2.map {
@@ -150,6 +150,23 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
     }
 
     g2d.setColor(TpeGhostIfuFeature.IfuColor)
+    g2d.fill(new Area(new RegularHexagon()).createTransformedArea(trans))
+  }
+
+  /**
+   * Draw the SR sky fibers relative to the center of SRIFU1.
+   */
+  private def drawSRSkyFibers(g2d: Graphics2D, p: Point2D): Unit = {
+    val trans: AffineTransform = {
+      val t = new AffineTransform
+      t.translate(p.getX, p.getY)
+      t.scale(TpeGhostIfuFeature.HexPlateScale.toArcsecs, TpeGhostIfuFeature.HexPlateScale.toArcsecs)
+
+      // TODO-GHOST: Is this right? I can't find them. Extra translation in arcsecs to central point of sky fibers.
+      t.translate(3.41, 0.12)
+      t
+    }
+    g2d.setColor(TpeGhostIfuFeature.SkyFiberColor)
     g2d.fill(new Area(new RegularHexagon()).createTransformedArea(trans))
   }
 
@@ -467,6 +484,9 @@ object TpeGhostIfuFeature {
   // 0.240 face width per hexagon: three hexagons.
   val IfuColor: Color = OtColor.makeSlightlyDarker(Color.green)
   val HexPlateScale: Angle = Angle.fromArcsecs(0.720 / 0.61)
+
+  // The colors of the sky fibers.
+  val SkyFiberColor: Color = OtColor.makeSlightlyDarker(Color.cyan)
 }
 
 private[feat] class ProbeRangeIcon(val slants: Array[TpeGhostIfuFeature.Orientation]) extends Icon {
