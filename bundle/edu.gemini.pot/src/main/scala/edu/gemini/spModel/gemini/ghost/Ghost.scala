@@ -348,7 +348,7 @@ object Ghost {
   // TODO-GHOST: Due to the size of the PWFS probe (which is given in mm), we need to figure out a boundary to add
   // TODO-GHOST: to the pwfs2VignettingClearance algorithm code to assure that there is no vignetting of any of the
   // TODO-GHOST: science targets and sky positions, which is the goal. Using the traditional per-instrument strategy
-  // TODO-GHOST: will cause issues because, e.g., in dual mode, the annulus will be too small.
+  // TODO-GHOST: will cause issues because, e.g., in dual mode, the annulus will be too small. Thus, this is a placeholder.
   val Pwfs2Boundary: Angle = Angle.arcsecs(222)
 
   // Unfortunately we need a Java "Supplier" and "Function" which makes it
