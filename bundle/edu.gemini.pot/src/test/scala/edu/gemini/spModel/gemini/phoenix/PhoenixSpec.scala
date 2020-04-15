@@ -16,8 +16,8 @@ class PhoenixSpec extends Specification {
     }
     "Use the same vignetting parameters as Visitor, REL-2436" in {
       val phoenix = new InstPhoenix()
-      phoenix.pwfs1VignettingClearance(null).toNewModel should beGreaterThan(Angle.zero)
-      phoenix.pwfs2VignettingClearance(null).toNewModel should beGreaterThan(Angle.zero)
+      phoenix.pwfs1VignettingClearance().toNewModel should beGreaterThan(Angle.zero)
+      phoenix.pwfs2VignettingClearance().toNewModel should beGreaterThan(Angle.zero)
     }
   }
 }

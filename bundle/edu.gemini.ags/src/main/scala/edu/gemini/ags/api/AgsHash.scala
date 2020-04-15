@@ -116,12 +116,12 @@ object AgsHash {
     strategyKey.foreach {
       case Pwfs1NorthKey | Pwfs1SouthKey =>
         Option(ctx.getInstrument).foreach {
-          _.pwfs1VignettingClearance(ctx).getMagnitude.## +=: buf
+          _.pwfs1VignettingClearance().getMagnitude.## +=: buf
         }
 
       case Pwfs2NorthKey | Pwfs2SouthKey =>
         Option(ctx.getInstrument).foreach {
-          _.pwfs2VignettingClearance(ctx).getMagnitude.## +=: buf
+          _.pwfs2VignettingClearance().getMagnitude.## +=: buf
         }
 
       case Ngs2Key                       =>

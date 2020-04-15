@@ -236,7 +236,7 @@ public class VisitorInstrument extends SPInstObsComp
     public static final Angle PWFS1_VIG = Angle.arcmins(5.7);
     public static final Angle PWFS2_VIG = Angle.arcmins(5.2);
 
-    @Override public Angle pwfs1VignettingClearance(ObsContext ctx) { return PWFS1_VIG; }
-    @Override public Angle pwfs2VignettingClearance(ObsContext ctx) { return PWFS2_VIG; }
+    @Override public Angle pwfs1VignettingClearance() { return PWFS1_VIG; }
+    @Override public Angle pwfs2VignettingClearance() { return PWFS2_VIG; }
 
 }

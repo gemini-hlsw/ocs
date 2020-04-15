@@ -921,7 +921,7 @@ public final class Gsaoi extends SPInstObsComp
     );
 
     private static final Angle PWFS1_VIG = Angle.arcmins(5.8);
-    @Override public Angle pwfs1VignettingClearance(ObsContext ctx) { return PWFS1_VIG; }
+    @Override public Angle pwfs1VignettingClearance() { return PWFS1_VIG; }
 
     @Override
     public PosAngleConstraint getPosAngleConstraint() {

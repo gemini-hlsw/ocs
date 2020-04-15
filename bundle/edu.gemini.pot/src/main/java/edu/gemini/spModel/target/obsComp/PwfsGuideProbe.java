@@ -33,7 +33,7 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
 
         @Override public Angle getVignettingClearance(ObsContext ctx) {
             final SPInstObsComp oc = ctx.getInstrument();
-            return (oc == null) ? Angle.ANGLE_0DEGREES : oc.pwfs1VignettingClearance(ctx);
+            return (oc == null) ? Angle.ANGLE_0DEGREES : oc.pwfs1VignettingClearance();
         }
     },
 
@@ -44,7 +44,7 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
 
         @Override public Angle getVignettingClearance(ObsContext ctx) {
             final SPInstObsComp oc = ctx.getInstrument();
-            return (oc == null) ? Angle.ANGLE_0DEGREES : oc.pwfs2VignettingClearance(ctx);
+            return (oc == null) ? Angle.ANGLE_0DEGREES : oc.pwfs2VignettingClearance();
         }
     };
 

@@ -571,6 +571,6 @@ public final class InstNIFS extends SPInstObsComp implements PropertyProvider, G
     private static final Angle PWFS1_VIG = Angle.arcmins(4.8);
     private static final Angle PWFS2_VIG = Angle.arcmins(4.0);
 
-    @Override public Angle pwfs1VignettingClearance(ObsContext ctx) { return PWFS1_VIG; }
-    @Override public Angle pwfs2VignettingClearance(ObsContext ctx) { return PWFS2_VIG; }
+    @Override public Angle pwfs1VignettingClearance() { return PWFS1_VIG; }
+    @Override public Angle pwfs2VignettingClearance() { return PWFS2_VIG; }
 }

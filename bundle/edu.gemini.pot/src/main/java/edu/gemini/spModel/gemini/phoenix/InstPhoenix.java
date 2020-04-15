@@ -341,7 +341,7 @@ public final class InstPhoenix extends SPInstObsComp implements PropertyProvider
     }
 
     // REL-2346 Use the same Vignetting clearance as Visitors
-    @Override public Angle pwfs1VignettingClearance(ObsContext ctx) { return VisitorInstrument.PWFS1_VIG; }
-    @Override public Angle pwfs2VignettingClearance(ObsContext ctx) { return VisitorInstrument.PWFS2_VIG; }
+    @Override public Angle pwfs1VignettingClearance() { return VisitorInstrument.PWFS1_VIG; }
+    @Override public Angle pwfs2VignettingClearance() { return VisitorInstrument.PWFS2_VIG; }
 
 }

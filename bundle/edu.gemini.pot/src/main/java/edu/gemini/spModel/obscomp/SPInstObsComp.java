@@ -386,11 +386,11 @@ public abstract class SPInstObsComp extends AbstractDataObject {
         return wavelength;
     }
 
-    public edu.gemini.skycalc.Angle pwfs1VignettingClearance(ObsContext ctx) {
+    public edu.gemini.skycalc.Angle pwfs1VignettingClearance() {
         return edu.gemini.skycalc.Angle.ANGLE_0DEGREES;
     }
 
-    public edu.gemini.skycalc.Angle pwfs2VignettingClearance(ObsContext ctx) {
+    public edu.gemini.skycalc.Angle pwfs2VignettingClearance() {
         return edu.gemini.skycalc.Angle.ANGLE_0DEGREES;
     }
 

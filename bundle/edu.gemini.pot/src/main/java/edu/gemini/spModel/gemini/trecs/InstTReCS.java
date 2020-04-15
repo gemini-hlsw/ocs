@@ -904,7 +904,7 @@ public final class InstTReCS extends SPInstObsComp implements PropertyProvider, 
     private static final edu.gemini.skycalc.Angle PWFS1_VIG = edu.gemini.skycalc.Angle.arcmins(5.3);
     private static final edu.gemini.skycalc.Angle PWFS2_VIG = edu.gemini.skycalc.Angle.arcmins(4.8);
 
-    @Override public edu.gemini.skycalc.Angle pwfs1VignettingClearance(ObsContext ctx) { return PWFS1_VIG; }
-    @Override public edu.gemini.skycalc.Angle pwfs2VignettingClearance(ObsContext ctx) { return PWFS2_VIG; }
+    @Override public edu.gemini.skycalc.Angle pwfs1VignettingClearance() { return PWFS1_VIG; }
+    @Override public edu.gemini.skycalc.Angle pwfs2VignettingClearance() { return PWFS2_VIG; }
 
 }
