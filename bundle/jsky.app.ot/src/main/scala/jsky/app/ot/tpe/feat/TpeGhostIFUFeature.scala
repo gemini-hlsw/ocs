@@ -26,7 +26,7 @@ import edu.gemini.skycalc.Offset
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostTarget
 
 /**
- * Draws the GHOST IFU patrol fiels and IFUS.
+ * Draws the GHOST IFU patrol fields and IFUS.
  */
 final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol fields of the GHOST IFUs") with PropertyWatcher with TpeDragSensitive {
   // Transformations for the GHOST IFU patrol fields.
