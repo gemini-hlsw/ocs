@@ -314,42 +314,10 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
   }
 
   override def getVignettableScienceArea: ScienceAreaGeometry = GhostScienceAreaGeometry
-
-//  override def pwfs2VignettingClearance(ctx: ObsContext): Angle = {
-//    val distance = if (ctx.getTargets == null)
-//      Angle.ANGLE_0DEGREES
-//    else {
-//      // TODO-GHOST: It seems that there should be an easier way to do this but I had difficulty getting other
-//      // TODO-GHOST: implementations to compile.
-//      // List of all coordinates of science and sky positions.
-//      val coordsList: List[Coordinates] = {
-//        val asterism = ctx.getTargets.getAsterism
-//        (asterism.allSpTargets.toList ++ asterism.allSpCoordinates).flatMap(_.getSkycalcCoordinates(ctx.getSchedulingBlockStart).asScalaOpt)
-//      }
-//
-//      // Find all the coordinate differences from the base, if it is set.
-//      val diffs = for {
-//        base <- ctx.getBaseCoordinates.asScalaOpt.toList
-//        coord <- coordsList
-//      } yield new CoordinateDiff(base, coord).getDistance
-//
-//      // Get the maximum.
-//      diffs.foldLeft(Angle.ANGLE_0DEGREES) { (a1, a2) => if (a1.compareToAngle(a2) > 0) a1 else a2 }
-//    }
-//
-//    // Add the boundary distance as defined below in the companion object.
-//    distance.add(Ghost.Pwfs2Boundary)
-//  }
 }
 
 object Ghost {
   val LOG: Logger = Logger.getLogger(classOf[Ghost].getName)
-
-  // TODO-GHOST: Due to the size of the PWFS probe (which is given in mm), we need to figure out a boundary to add
-  // TODO-GHOST: to the pwfs2VignettingClearance algorithm code to assure that there is no vignetting of any of the
-  // TODO-GHOST: science targets and sky positions, which is the goal. Using the traditional per-instrument strategy
-  // TODO-GHOST: will cause issues because, e.g., in dual mode, the annulus will be too small. Thus, this is a placeholder.
-  val Pwfs2Boundary: Angle = Angle.arcsecs(222)
 
   // Unfortunately we need a Java "Supplier" and "Function" which makes it
   // awkward to create the NodeInitializer via ComponentNodeInitializer.

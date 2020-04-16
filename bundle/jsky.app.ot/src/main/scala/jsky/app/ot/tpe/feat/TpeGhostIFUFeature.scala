@@ -150,7 +150,9 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
     }
 
     g2d.setColor(TpeGhostIfuFeature.IfuColor)
-    g2d.fill(new Area(new RegularHexagon()).createTransformedArea(trans))
+    val hex: Area = new Area(new RegularHexagon()).createTransformedArea(trans)
+    println(s"IFU bounding box: ${hex.getBounds2D}")
+    g2d.fill(hex)
   }
 
   /**
@@ -167,7 +169,10 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       t
     }
     g2d.setColor(TpeGhostIfuFeature.SkyFiberColor)
-    g2d.fill(new Area(new RegularHexagon()).createTransformedArea(trans))
+    val hex: Area = new Area(new RegularHexagon()).createTransformedArea(trans)
+    println(hex.getBounds2D)
+    println(s"Sky fibers: ${hex.getBounds2D}")
+    g2d.fill(hex)
   }
 
   /**
