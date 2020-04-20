@@ -9,8 +9,11 @@ import java.util.Collections
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption, Some => JSome}
 import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.skycalc.Offset
 import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.gemini.ghost.{Ghost, GhostAsterism, GhostScienceAreaGeometry}
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostTarget
+import edu.gemini.spModel.telescope.IssPort
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.target.{SPSkyObject, WatchablePos}
@@ -19,16 +22,12 @@ import javax.swing.{Icon, JLabel, JPanel, SwingConstants}
 import jsky.app.ot.tpe._
 import jsky.app.ot.util.{BasicPropertyList, OtColor, PropertyWatcher}
 
-import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-
 import scala.swing.{Color, Graphics2D}
+
 import scalaz._
 import Scalaz._
-import edu.gemini.skycalc.Offset
-import edu.gemini.spModel.gemini.bhros.BHROSParams.ISSPort
-import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostTarget
-import edu.gemini.spModel.telescope.IssPort
+
 
 /**
  * Draws the GHOST IFU patrol fields and IFUS.
@@ -68,8 +67,9 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       trans2 <- transform2
       ctx <- _iw.getObsContext.asScalaOpt
     } {
-      // Store the old color and paint.
       val g2d: Graphics2D = g.asInstanceOf[Graphics2D]
+
+      // Store the old color and paint to restore.
       val originalColor = g2d.getColor
       val originalPaint = g2d.getPaint
 
@@ -77,17 +77,15 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       if (env == null)
         return
 
-      // The IFUs are |_) in the NE corner.
-      // ALWAYS DRAWS A ) in the NW corner, indicating coordinates are wrong?
       val ppp = TpeGhostIfuFeature.offsetIntersection(ctx, ctx.getSciencePositions.asScala.toSet)
-      //ppp.foreach(p => g2d.draw(p))
+      ppp.foreach(p => g2d.draw(p))
 
       if (drawPatrolFields) {
         val ifu1PatrolField: Area = new Area(flipArea(TpeGhostIfuFeature.ifu1Arc(ctx))).createTransformedArea(trans1)
         val ifu2PatrolField: Area = new Area(flipArea(TpeGhostIfuFeature.ifu2Arc(ctx))).createTransformedArea(trans2)
 
         g2d.setColor(TpeGhostIfuFeature.PatrolFieldBorderColor)
-        
+
         if (displayMode.show1) {
           g2d.draw(ifu1PatrolField)
           g2d.setPaint(TpeGhostIfuFeature.createPatrolFieldPaint(g2d, TpeGhostIfuFeature.NorthEast))
@@ -150,7 +148,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
    * Draw an IFU.
    */
   private def drawIFU(g2d: Graphics2D, p: Point2D): Unit = {
-    // Transform the hexagon to the appropriate place.
+    // Transform the hexagon at the appropriate place.
     val trans: AffineTransform = {
       val t = new AffineTransform
       t.translate(p.getX, p.getY)
@@ -161,7 +159,6 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
 
     g2d.setColor(TpeGhostIfuFeature.IfuColor)
     val hex: Area = new Area(new RegularHexagon()).createTransformedArea(trans)
-    println(s"IFU bounding box: ${hex.getBounds2D}")
     g2d.fill(hex)
   }
 
@@ -174,14 +171,12 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       t.translate(p.getX, p.getY)
       t.scale(TpeGhostIfuFeature.HexPlateScale.toArcsecs, TpeGhostIfuFeature.HexPlateScale.toArcsecs)
 
-      // TODO-GHOST: Is this right? I can't find them. Extra translation in arcsecs to central point of sky fibers.
+      // TODO-GHOST: Is this right? I can't find them. Extra translation in arcsecs to central point of sky fibers as per Steve's doagram.
       t.translate(3.41, 0.12)
       t
     }
     g2d.setColor(TpeGhostIfuFeature.SkyFiberColor)
     val hex: Area = new Area(new RegularHexagon()).createTransformedArea(trans)
-    println(hex.getBounds2D)
-    println(s"Sky fibers: ${hex.getBounds2D}")
     g2d.fill(hex)
   }
 
@@ -241,7 +236,9 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
   override def getProperties: BasicPropertyList = TpeGhostIfuFeature.properties
 
 
-  // Turn on / off the drawing of the IFU patrol field.
+  /**
+   * Turn on / off the drawing of the IFU patrol field.
+   */
   def drawPatrolFields_=(draw: Boolean): Unit =
     TpeGhostIfuFeature.properties.setBoolean(TpeGhostIfuFeature.PropShowRanges, draw)
 
@@ -257,12 +254,16 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
   }
 
 
-  // Get the drawing of probe ranges.
+  /**
+   * Determine if we should be drawing the IFU patrol fields.
+   */
   def drawProbeRanges(): Boolean =
     TpeGhostIfuFeature.properties.getBoolean(TpeGhostIfuFeature.PropShowRanges, true)
 
 
-  // Reinitialize (recalculate the positions and redraw).
+  /**
+   * Reinitialize (recalculate the positions and redraw).
+   */
   override def reinit(iw: TpeImageWidget, tii: TpeImageInfo): Unit = {
     _stopMonitorOffsetSelections(selListener)
     super.reinit(iw, tii)
@@ -286,8 +287,8 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       t.rotate(-tii.getTheta)
       t.scale(ppa, ppa)
       t
-
     }
+
     ifuTransform = Some(AffineTransform.getScaleInstance(ppa, ppa))
 
     transform2 = Some {
@@ -363,69 +364,35 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
 
 
 object TpeGhostIfuFeature {
-  // We represent the IFURects as rectangles intersecting with the science area of GHOST.
-//  val IfuArc: Area = {
-//    val radius: Angle = GhostScienceAreaGeometry.radius
-//    val height: Angle = GhostScienceAreaGeometry.size
-//    val width: Angle = GhostScienceAreaGeometry.radius + Angle.fromArcsecs(3.28)
-//    val area = new Area(new Rectangle2D.Double(-radius.toArcsecs, -radius.toArcsecs, width.toArcsecs, height.toArcsecs))
-//    area.intersect(new Area(GhostScienceAreaGeometry.Ellipse))
-//    area
-//  }
-  // TODO-GHOST: Not sure if these are right.
-
-
-//  private val Ifu1Center: Point2D.Double = new Point2D.Double((-222 + 3.28) / 2, 0)
-//  private val Ifu2Center: Point2D.Double = new Point2D.Double((222 -3.28) / 2, 0)
-//  private val IfuDim = (222 + 3.28, 444.0)
-
+  // We represent the IFU patrol fields as rectangles intersecting with the science area of GHOST.
   private val Ifu1Center: Point2D.Double = new Point2D.Double((-222 + 3.28) / 2, 0)
   private val Ifu2Center: Point2D.Double = new Point2D.Double(-(222 -3.28) / 2, 0)
   private val IfuDim = (222 + 3.28, 444.0)
 
   // Get the offset intersection.
-//  def offsetIntersection(ctx: ObsContext, offsets: Set[Offset]): Option[Area] = {
-//    val t: Double = ctx.getPositionAngle.toRadians
-//
-//    offsets.foldLeft(Option.empty[Area]){ (area, offset) =>
-//      val cur = new Area(GhostScienceAreaGeometry.Ellipse)
-//      val p: Double = offset.p().toArcsecs.getMagnitude
-//      val q: Double = offset.q().toArcsecs.getMagnitude
-//
-//      val trans = new AffineTransform()
-//      if (t != 0.0) trans.rotate(-t)
-//      trans.translate(-p, -q)
-//      cur.transform(trans)
-//      area.foreach(_.intersect(cur))
-//      area.orElse(cur.some)
-//    }
-//  }
-
-  def offsetIntersection(ctx: ObsContext, offsets: Set[Offset]): Area = {
-    var res: Area = null
+  def offsetIntersection(ctx: ObsContext, offsets: Set[Offset]): Option[Area] = {
     val t: Double = ctx.getPositionAngle.toRadians
 
-    for (pos <- offsets) {
+    offsets.foldLeft(Option.empty[Area]){ (area, offset) =>
       val cur = new Area(GhostScienceAreaGeometry.Ellipse)
-      val p = pos.p.toArcsecs.getMagnitude
-      val q = pos.q.toArcsecs.getMagnitude
-      val xform = new AffineTransform
-      if (t != 0.0) xform.rotate(-t)
-      xform.translate(-p, -q)
-      cur.transform(xform)
-      if (res == null) res = cur
-      else res.intersect(cur)
+      val p: Double = offset.p().toArcsecs.getMagnitude
+      val q: Double = offset.q().toArcsecs.getMagnitude
+
+      val trans = new AffineTransform()
+      if (t != 0.0) trans.rotate(-t)
+      trans.translate(-p, -q)
+      cur.transform(trans)
+      area.foreach(_.intersect(cur))
+      area.orElse(cur.some)
     }
-    res
   }
 
   // Returns the probe range given the context, midpoint, and dimensions in arcsec.
   // Gets a rectangle that covers the whole FOV port size in width and height.
-  // TODO-GHOST: Not sure if these are right.
+  // TODO-GHOST: Check this: not sure if these are right.
   private def ifuDependentRange(ctx: ObsContext, mid: Point2D.Double, dim: (Double, Double)): Area = {
-    val r = new Rectangle2D.Double(mid.x - dim._1 / 2, -mid.y - dim._2 / 2, dim._1, dim._2)
     val rect: Area = new Area(new Rectangle2D.Double(mid.x - dim._1 / 2, -mid.y - dim._2 / 2, dim._1, dim._2))
-    println(s"Rect: $r")
+
     // Get the position angle and a transform that rotates in the direction
     // of the position angle, and one in the opposite direction.  Recall
     // that positive y is down and a positive rotation rotates the positive
@@ -434,9 +401,8 @@ object TpeGhostIfuFeature {
     val rot = if (ctx.getIssPort == IssPort.SIDE_LOOKING) Angle.fromDegrees(90) else Angle.fromDegrees(0)
     val t: Double = ctx.getPositionAngle.toRadians + rot.toRadians
     val rotWithPosAngle: AffineTransform = AffineTransform.getRotateInstance(-t)
-    val rotAgainstPosAngle: AffineTransform = AffineTransform.getRotateInstance(t)
 
-    val range: Area = new Area(offsetIntersection(ctx, ctx.getSciencePositions.asScala.toSet))
+    val range: Area = new Area(offsetIntersection(ctx, ctx.getSciencePositions.asScala.toSet).orNull)
     val rectBound: Rectangle2D = range.getBounds2D
     val center: Point2D = new Point2D.Double(rectBound.getCenterX, rectBound.getCenterY)
     val xlat: Point2D = new Point2D.Double(center.getX, center.getY)
@@ -444,7 +410,6 @@ object TpeGhostIfuFeature {
     rect.transform(rotWithPosAngle)
     rect.transform(AffineTransform.getTranslateInstance(xlat.getX, xlat.getY))
     rect.intersect(range)
-    println(s"Post-Rect: $rect\n")
     rect
   }
 
@@ -457,10 +422,6 @@ object TpeGhostIfuFeature {
 
   // The color to draw the patrol fields.
   private[feat] val PatrolFieldBorderColor: Color = OtColor.makeTransparent(IfuFovColor, 0.3)
-
-  // Alpha Composite used for drawing items that block the view.
-  private val Blocked: Composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f)
-
 
   // Property used to control drawing of the probes ranges.
   val properties: BasicPropertyList = new BasicPropertyList(Ghost.getClass.getName)
