@@ -78,7 +78,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
         return
 
       val ppp = TpeGhostIfuFeature.offsetIntersection(ctx, ctx.getSciencePositions.asScala.toSet)
-      ppp.foreach(p => g2d.draw(p))
+      //ppp.foreach(p => g2d.draw(p))
 
       if (drawPatrolFields) {
         val ifu1PatrolField: Area = new Area(flipArea(TpeGhostIfuFeature.ifu1Arc(ctx))).createTransformedArea(trans1)
@@ -369,24 +369,25 @@ object TpeGhostIfuFeature {
   private val Ifu2Center: Point2D.Double = new Point2D.Double(-(222 -3.28) / 2, 0)
   private val IfuDim = (222 + 3.28, 444.0)
 
-  // Get the offset intersection.
-  def offsetIntersection(ctx: ObsContext, offsets: Set[Offset]): Option[Area] = {
+  def offsetIntersection(ctx: ObsContext, offsets: Set[Offset]): Area = {
+    var res: Area = null
     val t: Double = ctx.getPositionAngle.toRadians
 
-    offsets.foldLeft(Option.empty[Area]){ (area, offset) =>
+    for (pos <- offsets) {
       val cur = new Area(GhostScienceAreaGeometry.Ellipse)
-      val p: Double = offset.p().toArcsecs.getMagnitude
-      val q: Double = offset.q().toArcsecs.getMagnitude
-
-      val trans = new AffineTransform()
-      if (t != 0.0) trans.rotate(-t)
-      trans.translate(-p, -q)
-      cur.transform(trans)
-      area.foreach(_.intersect(cur))
-      area.orElse(cur.some)
+      val p = pos.p.toArcsecs.getMagnitude
+      val q = pos.q.toArcsecs.getMagnitude
+      val xform = new AffineTransform
+      if (t != 0.0) xform.rotate(-t)
+      xform.translate(-p, -q)
+      cur.transform(xform)
+      if (res == null) res = cur
+      else res.intersect(cur)
     }
+    res
   }
 
+  
   // Returns the probe range given the context, midpoint, and dimensions in arcsec.
   // Gets a rectangle that covers the whole FOV port size in width and height.
   // TODO-GHOST: Check this: not sure if these are right.
@@ -402,7 +403,7 @@ object TpeGhostIfuFeature {
     val t: Double = ctx.getPositionAngle.toRadians + rot.toRadians
     val rotWithPosAngle: AffineTransform = AffineTransform.getRotateInstance(-t)
 
-    val range: Area = new Area(offsetIntersection(ctx, ctx.getSciencePositions.asScala.toSet).orNull)
+    val range: Area = new Area(offsetIntersection(ctx, ctx.getSciencePositions.asScala.toSet))
     val rectBound: Rectangle2D = range.getBounds2D
     val center: Point2D = new Point2D.Double(rectBound.getCenterX, rectBound.getCenterY)
     val xlat: Point2D = new Point2D.Double(center.getX, center.getY)
