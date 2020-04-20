@@ -7,14 +7,6 @@ import edu.gemini.spModel.target.offset.OffsetUtil
 
 import scala.collection.JavaConverters._
 
-/**
- * Created with IntelliJ IDEA.
- * User: sraaphor
- * Date: 4/11/14
- * Time: 11:59 AM
- * To change this template use File | Settings | File Templates.
- */
-
 object PositionOffsetChecker {
   val PROBLEM_CODE    = "LGS_MAX_DIST"
   val PROBLEM_MESSAGE = "The maximum offset when using LGS is 5 arcminutes. Please reduce the size of the offset or make a separate observation."

@@ -1,6 +1,6 @@
 package jsky.app.ot.tpe.feat
 
-import java.awt.{AlphaComposite, Color, Component, Composite, Graphics, Graphics2D, GridBagConstraints, GridBagLayout, Insets, Paint, TexturePaint, Transparency}
+import java.awt.{AlphaComposite, Color, Component, Graphics, GridBagConstraints, GridBagLayout, Insets, Paint, TexturePaint, Transparency}
 import java.awt.geom.{AffineTransform, Area, Point2D, Rectangle2D}
 import java.awt.image.BufferedImage
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
@@ -30,7 +30,7 @@ import Scalaz._
 
 
 /**
- * Draws the GHOST IFU patrol fields and IFUS.
+ * Draws the GHOST IFU patrol fields and IFUs.
  */
 final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol fields of the GHOST IFUs") with PropertyWatcher with TpeDragSensitive {
   // Transformations for the GHOST IFU patrol fields.
@@ -77,8 +77,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       if (env == null)
         return
 
-      val ppp = TpeGhostIfuFeature.offsetIntersection(ctx, ctx.getSciencePositions.asScala.toSet)
-      //ppp.foreach(p => g2d.draw(p))
+      g2d.draw(TpeGhostIfuFeature.offsetIntersection(ctx, ctx.getSciencePositions.asScala.toSet))
 
       if (drawPatrolFields) {
         val ifu1PatrolField: Area = new Area(flipArea(TpeGhostIfuFeature.ifu1Arc(ctx))).createTransformedArea(trans1)
@@ -171,7 +170,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       t.translate(p.getX, p.getY)
       t.scale(TpeGhostIfuFeature.HexPlateScale.toArcsecs, TpeGhostIfuFeature.HexPlateScale.toArcsecs)
 
-      // TODO-GHOST: Is this right? I can't find them. Extra translation in arcsecs to central point of sky fibers as per Steve's doagram.
+      // TODO-GHOST: Is this right? I can't find them. Extra translation in arcsecs to central point of sky fibers as per Steve's diagram.
       t.translate(3.41, 0.12)
       t
     }
@@ -369,6 +368,8 @@ object TpeGhostIfuFeature {
   private val Ifu2Center: Point2D.Double = new Point2D.Double(-(222 -3.28) / 2, 0)
   private val IfuDim = (222 + 3.28, 444.0)
 
+  // GHOST only supports one offset in standard mode with a single target, but we implement the code anyway and
+  // issue P2 errors in GhostRule if this is violated.
   def offsetIntersection(ctx: ObsContext, offsets: Set[Offset]): Area = {
     var res: Area = null
     val t: Double = ctx.getPositionAngle.toRadians
@@ -387,10 +388,9 @@ object TpeGhostIfuFeature {
     res
   }
 
-  
+
   // Returns the probe range given the context, midpoint, and dimensions in arcsec.
   // Gets a rectangle that covers the whole FOV port size in width and height.
-  // TODO-GHOST: Check this: not sure if these are right.
   private def ifuDependentRange(ctx: ObsContext, mid: Point2D.Double, dim: (Double, Double)): Area = {
     val rect: Area = new Area(new Rectangle2D.Double(mid.x - dim._1 / 2, -mid.y - dim._2 / 2, dim._1, dim._2))
 
@@ -414,8 +414,8 @@ object TpeGhostIfuFeature {
     rect
   }
 
-  def ifu1Arc(ctx: ObsContext): Area = ifuDependentRange(ctx, Ifu1Center, IfuDim)
-  def ifu2Arc(ctx: ObsContext): Area = ifuDependentRange(ctx, Ifu2Center, IfuDim)
+  private def ifu1Arc(ctx: ObsContext): Area = ifuDependentRange(ctx, Ifu1Center, IfuDim)
+  private def ifu2Arc(ctx: ObsContext): Area = ifuDependentRange(ctx, Ifu2Center, IfuDim)
 
   // Color for IFU limts.
   private val IfuFovColor: Color = Color.RED
