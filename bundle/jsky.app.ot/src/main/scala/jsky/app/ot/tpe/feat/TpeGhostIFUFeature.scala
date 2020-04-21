@@ -353,26 +353,28 @@ object TpeGhostIfuFeature {
    * Calculates the current patrol field for an IFU as specified by its default patrol field.
    */
   private def ifuPatrolField(ctx: ObsContext, patrol: Rectangle2D.Double): Area = {
-    val rect: Area = new Area(patrol)
-
     val rot = if (ctx.getIssPort == IssPort.SIDE_LOOKING) Angle.fromDegrees(90) else Angle.fromDegrees(0)
     val t: Double = ctx.getPositionAngle.toRadians + rot.toRadians
-    val rotWithPosAngle: AffineTransform = AffineTransform.getRotateInstance(-t)
-    rect.transform(rotWithPosAngle)
 
-    ctx.getSciencePositions.asScala.toSet.foreach { pos: Offset =>
-      val cur = new Area(GhostScienceAreaGeometry.Ellipse)
+    val rects = ctx.getSciencePositions.asScala.toSet.map { pos: Offset =>
+      val fov = new Area(GhostScienceAreaGeometry.Ellipse)
+      val offsetPatrol = new Area(patrol)
+
       val p = pos.p.toArcsecs.getMagnitude
       val q = pos.q.toArcsecs.getMagnitude
       val xform = new AffineTransform
       if (t != 0.0) xform.rotate(-t)
       xform.translate(-p, -q)
-      cur.transform(xform)
 
-      rect.intersect(cur)
+      fov.transform(xform)
+      offsetPatrol.transform(xform)
+      offsetPatrol.intersect(fov)
+      offsetPatrol
     }
 
-    rect
+    rects.foldLeft(rects.head) { (acc, curr) =>
+      acc.intersect(curr)
+      acc }
   }
 
   // The patrol fields for IFU1 and IFU2 relative to the base position.
@@ -381,7 +383,7 @@ object TpeGhostIfuFeature {
   private def ifu1Arc(ctx: ObsContext): Area = ifuPatrolField(ctx, ifu1PatrolField)
   private def ifu2Arc(ctx: ObsContext): Area = ifuPatrolField(ctx, ifu2PatrolField)
 
-  
+
   // Color for IFU limts.
   private val IfuFovColor: Color = Color.RED
   private val PatrolRangeColor: Color = OtColor.SALMON
