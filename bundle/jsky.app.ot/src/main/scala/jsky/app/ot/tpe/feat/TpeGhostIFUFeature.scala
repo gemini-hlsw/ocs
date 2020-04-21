@@ -31,12 +31,13 @@ import Scalaz._
 
 /**
  * Draws the GHOST IFU patrol fields and IFUs.
+ * GHOST only supports one offset in standard mode with a single target, but we implement the code anyway and
+ * issue P2 errors in GhostRule if this is violated.
  */
 final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol fields of the GHOST IFUs") with PropertyWatcher with TpeDragSensitive {
   // Transformations for the GHOST IFU patrol fields.
-  private var transform1: Option[AffineTransform] = None
-  private var transform2: Option[AffineTransform] = None
-  private var ifuTransform: Option[AffineTransform] = None
+  private var ifuTransform = new AffineTransform()
+  private var scaleTransform = new AffineTransform()
 
   // Determine if there are no TPE messages.
   private var isEmpty: Boolean = false
@@ -62,26 +63,20 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
     if (!isEnabled(_iw.getContext))
       return
 
-    for {
-      trans1 <- transform1
-      trans2 <- transform2
-      ctx <- _iw.getObsContext.asScalaOpt
-    } {
+    _iw.getObsContext.asScalaOpt.foreach { ctx =>
       val g2d: Graphics2D = g.asInstanceOf[Graphics2D]
 
       // Store the old color and paint to restore.
-      val originalColor = g2d.getColor
-      val originalPaint = g2d.getPaint
+      val originalColor: Color = g2d.getColor
+      val originalPaint: Paint = g2d.getPaint
 
       val env: TargetEnvironment = ctx.getTargets
       if (env == null)
         return
 
-      g2d.draw(TpeGhostIfuFeature.offsetIntersection(ctx, ctx.getSciencePositions.asScala.toSet))
-
       if (drawPatrolFields) {
-        val ifu1PatrolField: Area = new Area(flipArea(TpeGhostIfuFeature.ifu1Arc(ctx))).createTransformedArea(trans1)
-        val ifu2PatrolField: Area = new Area(flipArea(TpeGhostIfuFeature.ifu2Arc(ctx))).createTransformedArea(trans2)
+        val ifu1PatrolField: Area = new Area(flipArea(TpeGhostIfuFeature.ifu1Arc(ctx))).createTransformedArea(ifuTransform)
+        val ifu2PatrolField: Area = new Area(flipArea(TpeGhostIfuFeature.ifu2Arc(ctx))).createTransformedArea(ifuTransform)
 
         g2d.setColor(TpeGhostIfuFeature.PatrolFieldBorderColor)
 
@@ -152,7 +147,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       val t = new AffineTransform
       t.translate(p.getX, p.getY)
       t.scale(TpeGhostIfuFeature.HexPlateScale.toArcsecs, TpeGhostIfuFeature.HexPlateScale.toArcsecs)
-      ifuTransform.foreach(t.concatenate)
+      t.concatenate(scaleTransform)
       t
     }
 
@@ -280,7 +275,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
     val base: Point2D.Double = tii.getBaseScreenPos
     val ppa: Double = tii.getPixelsPerArcsec
 
-    transform1 = Some {
+    ifuTransform = {
       val t = new AffineTransform
       t.translate(base.x, base.y)
       t.rotate(-tii.getTheta)
@@ -288,16 +283,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       t
     }
 
-    ifuTransform = Some(AffineTransform.getScaleInstance(ppa, ppa))
-
-    transform2 = Some {
-      val t = new AffineTransform
-      t.translate(base.x, base.y)
-      t.rotate(-tii.getTheta)
-      t.rotate(Math.PI)
-      t.scale(ppa, ppa)
-      t
-    }
+    scaleTransform = AffineTransform.getScaleInstance(ppa, ppa)
   }
 
 
@@ -363,18 +349,18 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
 
 
 object TpeGhostIfuFeature {
-  // We represent the IFU patrol fields as rectangles intersecting with the science area of GHOST.
-  private val Ifu1Center: Point2D.Double = new Point2D.Double((-222 + 3.28) / 2, 0)
-  private val Ifu2Center: Point2D.Double = new Point2D.Double(-(222 -3.28) / 2, 0)
-  private val IfuDim = (222 + 3.28, 444.0)
+  /**
+   * Calculates the current patrol field for an IFU as specified by its default patrol field.
+   */
+  private def ifuPatrolField(ctx: ObsContext, patrol: Rectangle2D.Double): Area = {
+    val rect: Area = new Area(patrol)
 
-  // GHOST only supports one offset in standard mode with a single target, but we implement the code anyway and
-  // issue P2 errors in GhostRule if this is violated.
-  def offsetIntersection(ctx: ObsContext, offsets: Set[Offset]): Area = {
-    var res: Area = null
-    val t: Double = ctx.getPositionAngle.toRadians
+    val rot = if (ctx.getIssPort == IssPort.SIDE_LOOKING) Angle.fromDegrees(90) else Angle.fromDegrees(0)
+    val t: Double = ctx.getPositionAngle.toRadians + rot.toRadians
+    val rotWithPosAngle: AffineTransform = AffineTransform.getRotateInstance(-t)
+    rect.transform(rotWithPosAngle)
 
-    for (pos <- offsets) {
+    ctx.getSciencePositions.asScala.toSet.foreach { pos: Offset =>
       val cur = new Area(GhostScienceAreaGeometry.Ellipse)
       val p = pos.p.toArcsecs.getMagnitude
       val q = pos.q.toArcsecs.getMagnitude
@@ -382,41 +368,20 @@ object TpeGhostIfuFeature {
       if (t != 0.0) xform.rotate(-t)
       xform.translate(-p, -q)
       cur.transform(xform)
-      if (res == null) res = cur
-      else res.intersect(cur)
+
+      rect.intersect(cur)
     }
-    res
-  }
 
-
-  // Returns the probe range given the context, midpoint, and dimensions in arcsec.
-  // Gets a rectangle that covers the whole FOV port size in width and height.
-  private def ifuDependentRange(ctx: ObsContext, mid: Point2D.Double, dim: (Double, Double)): Area = {
-    val rect: Area = new Area(new Rectangle2D.Double(mid.x - dim._1 / 2, -mid.y - dim._2 / 2, dim._1, dim._2))
-
-    // Get the position angle and a transform that rotates in the direction
-    // of the position angle, and one in the opposite direction.  Recall
-    // that positive y is down and a positive rotation rotates the positive
-    // x axis toward the positive y axis.  Position angle is expressed as
-    // an angle east of north.
-    val rot = if (ctx.getIssPort == IssPort.SIDE_LOOKING) Angle.fromDegrees(90) else Angle.fromDegrees(0)
-    val t: Double = ctx.getPositionAngle.toRadians + rot.toRadians
-    val rotWithPosAngle: AffineTransform = AffineTransform.getRotateInstance(-t)
-
-    val range: Area = new Area(offsetIntersection(ctx, ctx.getSciencePositions.asScala.toSet))
-    val rectBound: Rectangle2D = range.getBounds2D
-    val center: Point2D = new Point2D.Double(rectBound.getCenterX, rectBound.getCenterY)
-    val xlat: Point2D = new Point2D.Double(center.getX, center.getY)
-
-    rect.transform(rotWithPosAngle)
-    rect.transform(AffineTransform.getTranslateInstance(xlat.getX, xlat.getY))
-    rect.intersect(range)
     rect
   }
 
-  private def ifu1Arc(ctx: ObsContext): Area = ifuDependentRange(ctx, Ifu1Center, IfuDim)
-  private def ifu2Arc(ctx: ObsContext): Area = ifuDependentRange(ctx, Ifu2Center, IfuDim)
+  // The patrol fields for IFU1 and IFU2 relative to the base position.
+  private val ifu1PatrolField = new Rectangle2D.Double(-222, -222, 222 + 3.28, 444)
+  private val ifu2PatrolField = new Rectangle2D.Double(-3.28, -222, 222 + 3.28, 444)
+  private def ifu1Arc(ctx: ObsContext): Area = ifuPatrolField(ctx, ifu1PatrolField)
+  private def ifu2Arc(ctx: ObsContext): Area = ifuPatrolField(ctx, ifu2PatrolField)
 
+  
   // Color for IFU limts.
   private val IfuFovColor: Color = Color.RED
   private val PatrolRangeColor: Color = OtColor.SALMON
@@ -472,9 +437,6 @@ object TpeGhostIfuFeature {
     bufferedImageG2D.setClip(0, 0, size, size)
     bufferedImageG2D.setColor(OtColor.makeTransparent(PatrolRangeColor, paintParameters.alphaLine))
 
-    /**
-     * VERTICAL + HORIZONTAL
-     */
     (0 until size by paintParameters.skip).foreach { v =>
       orientation match {
         case NorthEast =>
