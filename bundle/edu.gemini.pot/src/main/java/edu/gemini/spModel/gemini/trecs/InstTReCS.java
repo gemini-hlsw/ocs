@@ -26,7 +26,6 @@ import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
 import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.gemini.trecs.TReCSParams.*;
-import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTime;

@@ -1,7 +1,7 @@
 package jsky.app.ot.tpe.feat
 
 import java.awt.{AlphaComposite, Color, Component, Graphics, GridBagConstraints, GridBagLayout, Insets, Paint, TexturePaint, Transparency}
-import java.awt.geom.{AffineTransform, Area, Point2D, Rectangle2D}
+import java.awt.geom.{AffineTransform, Area, Path2D, Point2D, Rectangle2D}
 import java.awt.image.BufferedImage
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import java.util.Collections
@@ -24,7 +24,6 @@ import jsky.app.ot.util.{BasicPropertyList, OtColor, PropertyWatcher}
 
 import scala.collection.JavaConverters._
 import scala.swing.{Color, Graphics2D}
-
 import scalaz._
 import Scalaz._
 
@@ -110,8 +109,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
               // Draw first IFU.
               drawIFU(g2d, psrIfu1)
 
-              // TODO-GHOST: TEST THIS: Draw the standard resolution sky fibers.
-              // TODO GHOST: As per page 3 in https://docs.google.com/document/d/1aN2ZPgaRMD52Rf4YG7ahwLnvQ8bpTRudc7MTBn-Lt2Y/edit#heading=h.8r9z8pinlp8i
+              // Draw the sky fibers. These are barely visible.
               drawSRSkyFibers(g2d, psrIfu1)
 
               // If SRIFU2 is in use, draw it as well.
@@ -152,25 +150,25 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
     }
 
     g2d.setColor(TpeGhostIfuFeature.IfuColor)
-    val hex: Area = new Area(new RegularHexagon()).createTransformedArea(trans)
+    val hex: Area = TpeGhostIfuFeature.regularHexagon().createTransformedArea(trans)
     g2d.fill(hex)
   }
 
   /**
-   * Draw the SR sky fibers relative to the center of SRIFU1.
+   * Draw the SR sky fibers relative to the center of SRIFU1. Thery are extremely small.
    */
   private def drawSRSkyFibers(g2d: Graphics2D, p: Point2D): Unit = {
     val trans: AffineTransform = {
       val t = new AffineTransform
-      t.translate(p.getX, p.getY)
-      t.scale(TpeGhostIfuFeature.HexPlateScale.toArcsecs, TpeGhostIfuFeature.HexPlateScale.toArcsecs)
-
-      // TODO-GHOST: Is this right? I can't find them. Extra translation in arcsecs to central point of sky fibers as per Steve's diagram.
-      t.translate(3.41, 0.12)
+      t.translate(p.getX, p.getY + 0.12)
+      // No HexPlateScale here because everything given in arcsecs.
+      t.concatenate(scaleTransform)
+      t.translate(3.41 + 0.12, 0.2)
+      t.scale(0.456, 0.456)
       t
     }
     g2d.setColor(TpeGhostIfuFeature.SkyFiberColor)
-    val hex: Area = new Area(new RegularHexagon()).createTransformedArea(trans)
+    val hex: Area = TpeGhostIfuFeature.regularHexagon().createTransformedArea(trans)
     g2d.fill(hex)
   }
 
@@ -350,6 +348,26 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
 
 object TpeGhostIfuFeature {
   /**
+   * Create a regular hexagon of side 1 at (0,0).
+   */
+  private[feat] def regularHexagon(): Area = {
+    // The rotation to create the edges of the hexagon.
+    val path = new Path2D.Double(Path2D.WIND_EVEN_ODD)
+    val rot: AffineTransform = AffineTransform.getRotateInstance(Math.PI / 3.0)
+    val x = 1
+    val y = 0
+    path.moveTo(x, y)
+    path.lineTo(x, y)
+    val p = new Point2D.Double(x, 0)
+    for (i <- 0 until 6) {
+      rot.transform(p, p)
+      path.lineTo(p.getX, p.getY)
+    }
+    path.closePath()
+    new Area(path)
+  }
+
+  /**
    * Calculates the current patrol field for an IFU as specified by its default patrol field.
    */
   private def ifuPatrolField(ctx: ObsContext, patrol: Rectangle2D.Double): Area = {
@@ -372,9 +390,11 @@ object TpeGhostIfuFeature {
       offsetPatrol
     }
 
-    rects.foldLeft(rects.head) { (acc, curr) =>
-      acc.intersect(curr)
-      acc }
+    rects.reduceOption { (a, b) =>
+      val c = new Area(a)
+      c.intersect(b)
+      c
+    }.getOrElse(new Area)
   }
 
   // The patrol fields for IFU1 and IFU2 relative to the base position.

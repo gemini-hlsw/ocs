@@ -24,7 +24,6 @@ import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
 import edu.gemini.spModel.inst.ScienceAreaGeometry;
 import edu.gemini.spModel.inst.VignettableScienceAreaInstrument;
-import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;

@@ -6,6 +6,7 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core.Coordinates
 import edu.gemini.spModel.gemini.ghost.GhostScienceAreaGeometry
 import edu.gemini.spModel.target.env.AsterismType
+import edu.gemini.spModel.target.offset.OffsetUtil
 
 object GhostRule extends IRule {
   object CoordinatesOutOfFOVRule extends IRule {
@@ -39,33 +40,17 @@ object GhostRule extends IRule {
     private val CoordinatesOutOfRange: String = "The coordinates for %s are out of range at the base position."
   }
 
-  object OffsetsAllowedRule extends IRule {
+  object OffsetsRule extends IRule {
     override def check(elements: ObservationElements): IP2Problems = {
       val problems = new P2Problems()
 
       for {
         ctx <- elements.getObsContext.asScalaOpt
         env <- Option(ctx.getTargets)
-        if env.getAsterism.asterismType != AsterismType.GhostSingleTarget
-        if !ctx.getSciencePositions.isEmpty
+        if (env.getAsterism.asterismType == AsterismType.GhostSingleTarget && ctx.getSciencePositions.size > 1) ||
+          (env.getAsterism.asterismType != AsterismType.GhostSingleTarget && !OffsetUtil.allOffsetPosLists(elements.getObservationNode).isEmpty)
       } problems.addError(GhostRule.Prefix + "AsterismDoesNotSupportOffsets",
-        "GHOST only supports offsets in standard resolution single target mode.", elements.getSeqComponentNode)
-
-      problems
-    }
-  }
-
-  object OffsetLimitRule extends IRule {
-    override def check(elements: ObservationElements): IP2Problems = {
-      val problems = new P2Problems()
-
-      for {
-        ctx <- elements.getObsContext.asScalaOpt
-        env <- Option(ctx.getTargets)
-        if env.getAsterism.asterismType == AsterismType.GhostSingleTarget
-        if ctx.getSciencePositions.size > 1
-      } problems.addError(GhostRule.Prefix + "AsterismDoesNotSupportOffsets",
-        "GHOST only supports one offset in standard resolution single target mode..", elements.getSeqComponentNode)
+        "GHOST only supports offsets in single target mode, and only a single offset.", elements.getSeqComponentNode)
 
       problems
     }
@@ -74,8 +59,7 @@ object GhostRule extends IRule {
   override def check(elems: ObservationElements): IP2Problems = {
     val probs: P2Problems = new P2Problems()
     probs.append(CoordinatesOutOfFOVRule.check(elems))
-    probs.append(OffsetsAllowedRule.check(elems))
-    probs.append(OffsetLimitRule.check(elems))
+    probs.append(OffsetsRule.check(elems))
     probs
   }
 

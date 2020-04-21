@@ -34,7 +34,6 @@ import edu.gemini.spModel.ictd.*;
 import edu.gemini.spModel.inst.ElectronicOffsetProvider;
 import edu.gemini.spModel.inst.ScienceAreaGeometry;
 import edu.gemini.spModel.inst.VignettableScienceAreaInstrument;
-import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;

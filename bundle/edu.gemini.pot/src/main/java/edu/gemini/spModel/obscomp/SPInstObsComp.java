@@ -8,7 +8,6 @@ import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.data.config.IConfig;
 import edu.gemini.spModel.data.config.IParameter;
 import edu.gemini.spModel.data.config.ISysConfig;
-import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;

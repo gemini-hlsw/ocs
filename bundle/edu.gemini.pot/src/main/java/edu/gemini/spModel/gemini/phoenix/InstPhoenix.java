@@ -18,7 +18,6 @@ import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.gemini.phoenix.PhoenixParams.Filter;
 import edu.gemini.spModel.gemini.phoenix.PhoenixParams.Mask;
 import edu.gemini.spModel.gemini.visitor.VisitorInstrument;
-import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obs.plannedtime.DefaultStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.*;
 import edu.gemini.spModel.obscomp.InstConfigInfo;

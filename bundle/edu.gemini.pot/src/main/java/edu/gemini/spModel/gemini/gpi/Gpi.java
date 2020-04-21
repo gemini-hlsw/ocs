@@ -26,7 +26,6 @@ import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeConsumer;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.guide.StandardGuideOptions;
-import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;

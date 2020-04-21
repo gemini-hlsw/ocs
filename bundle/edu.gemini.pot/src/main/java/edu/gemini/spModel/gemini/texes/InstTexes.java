@@ -5,7 +5,6 @@ import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
-import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.pio.ParamSet;
