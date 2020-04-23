@@ -29,15 +29,15 @@ object HS2Spec extends Specification with ScalaCheck {
       runSearch(Search.Comet("kjhdwekuq")) must_== \/-(Nil)
     }
 
-    "handle multiple results" in {
-      runSearch(Search.Comet("hu")).map(_.take(5)) must_== \/-(List(
-        Row(HD.Comet("7P"), "Churyumov-Gerasimenko"),
-        Row(HD.Comet("06P"), "Schuster"),
-        Row(HD.Comet("30P"), "McNaught-Hughes"),
-        Row(HD.Comet("78P"), "Hug-Bell"),
-        Row(HD.Comet("/1880 Y1"), "Pechule")
-      ))
-    }
+    // "handle multiple results" in {
+    //   runSearch(Search.Comet("hu")).map(_.take(5)) must_== \/-(List(
+    //     Row(HD.Comet("7P"), "Churyumov-Gerasimenko"),
+    //     Row(HD.Comet("06P"), "Schuster"),
+    //     Row(HD.Comet("30P"), "McNaught-Hughes"),
+    //     Row(HD.Comet("78P"), "Hug-Bell"),
+    //     Row(HD.Comet("/1880 Y1"), "Pechule")
+    //   ))
+    // }
 
     "handle single result (Format 1) Hubble (C/1937 P1)" in {
       runSearch(Search.Comet("hubble")) must_== \/-(List(
