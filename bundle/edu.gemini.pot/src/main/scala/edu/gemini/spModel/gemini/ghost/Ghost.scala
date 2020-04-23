@@ -314,6 +314,8 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
   }
 
   override def getVignettableScienceArea: ScienceAreaGeometry = GhostScienceAreaGeometry
+
+  override def pwfs2VignettingClearance: Angle = Angle.arcsecs(5.5)
 }
 
 object Ghost {
