@@ -90,6 +90,8 @@ public final class Validation {
                             "Please use a model line width > %.2f nm (or %.2f km/s) " +
                             "to avoid undersampling of the line profile when convolved " +
                             "with the transmission response", 1.0*resolution, maxWidth));
+
+
             }
         }
     }
