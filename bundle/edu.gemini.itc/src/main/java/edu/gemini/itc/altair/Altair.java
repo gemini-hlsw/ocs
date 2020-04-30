@@ -112,6 +112,8 @@ public class Altair implements AOSystem {
     public double getWavelength() {
         return wavelength;
     }
+    
+    public AltairParams.FieldLens getfieldlens() { return altair.fieldLens(); }
 
     // Calculates StrehlFit which is used to calc the strehl
     public double getStrehlFit() {
