@@ -135,6 +135,8 @@ public final class HtmlPrinter {
             sb.append(altair.getGuideStarMagnitude());
         }
 
+        sb.append("<LI>Altair Field Lens position: ");
+        sb.append(altair.getfieldlens());
         sb.append("<BR>");
         return sb.toString();
     }
