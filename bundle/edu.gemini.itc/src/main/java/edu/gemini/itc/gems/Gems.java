@@ -105,6 +105,15 @@ public class Gems implements AOSystem {
         return Math.sqrt(6.817E-10 * Math.pow(wavelength, 2) + 6.25E-4); //Phil simplified the above equation
     }
 
+    public double getEE50() {
+        return (6.420E-11 * wavelength * 206265);
+    }
+
+    public double getEE70() {
+        return (8.642E-11 * wavelength * 206265);
+    }
+
+
     // See REL-1352:
     // Instead of the current calculation based on first-principles for normal AO systems,
     // the ITC must use the following lookup table to determine the FWHM of the AO-corrected core for

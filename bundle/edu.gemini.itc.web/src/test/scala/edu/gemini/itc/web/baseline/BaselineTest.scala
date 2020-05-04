@@ -39,7 +39,7 @@ class BaselineTest {
     System.out.println(s"Writing new baseline with ${baseSeq.size} entries")
     Baseline.write(baseSeq)
   }
-  @Ignore
+  //@Ignore
   @Test
   def checkAll(): Unit =
     baselines().foreach { b => assertTrue(Baseline.checkAgainstBaseline(b)) }
