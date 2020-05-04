@@ -115,7 +115,7 @@ public final class CalculatablePrinter {
     }
 
     public static Option<String> ReadNoiseLimitedWarning(final ImagingS2NCalculatable s2n) {
-    return (Math.sqrt(s2n.getVarSource() + s2n.getVarDark() + s2n.getVarReadout()) > Math.sqrt(s2n.getVarBackground())) ?
+    return ( s2n.getVarReadout() > s2n.getVarSource() + s2n.getVarBackground() + s2n.getVarDark() ) ?
         ImOption.apply("Warning: observation is read noise limited; consider using a longer exposure time or a lower noise read mode.\n") :
         ImOption.<String>empty();
     }
