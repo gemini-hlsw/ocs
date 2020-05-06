@@ -116,10 +116,8 @@ public final class HtmlPrinter {
         return String.format(
                 "r0(%.0fnm) = %.3f m\n" +
                         "Strehl = %.3f\n"+
-                        "FWHM of an AO-corrected core = %.3f arcsec\n"+
-                        "Radius of 50 percent encircled energy (EE50, assuming Airy pattern) = %.3f%% arcsec\n"+
-                        "Radius of 70 percent encircled energy (EE70, assuming Airy pattern) = %.3f%% arcsec\n",
-                altair.getWavelength(), altair.getr0(), altair.getStrehl(), altair.getAOCorrectedFWHM(), altair.getWavelength() * 1.324E-5, altair.getWavelength() * 1.783E-5);
+                        "FWHM of an AO-corrected core = %.3f arcsec\n",
+                altair.getWavelength(), altair.getr0(), altair.getStrehl(), altair.getAOCorrectedFWHM());
     }
 
     public static String printParameterSummary(final Altair altair) {
@@ -137,6 +135,8 @@ public final class HtmlPrinter {
             sb.append(altair.getGuideStarMagnitude());
         }
 
+        sb.append("<LI>Altair Field Lens position: ");
+        sb.append(altair.getfieldlens());
         sb.append("<BR>");
         return sb.toString();
     }
@@ -150,9 +150,6 @@ public final class HtmlPrinter {
         } catch (IllegalArgumentException ex) {
             s += "<span style=\"color:red; font-style:italic;\">Error: " + ex.getMessage() + "</span>\n";
         }
-        s += String.format("Radius of 50 percent encircled energy (EE50, assuming Airy pattern) = %.3f arcsec (%.1f pixels)\n", gems.getEE50(), gems.getEE50() / 0.02);
-        s += String.format("Radius of 70 percent encircled energy (EE70, assuming Airy pattern) = %.3f arcsec (%.1f pixels)\n", gems.getEE70(), gems.getEE70() / 0.02);
-
 
         return s;
     }
