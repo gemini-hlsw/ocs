@@ -44,9 +44,9 @@ public final class HtmlPrinter {
 
         sb.append(String.format("<b>Likelihood of execution:</b> %.2f%%<BR>",
                 (ocp.iq().getPercentage()/100.0) *
-                (ocp.cc().getPercentage()/100.0) *
-                (ocp.wv().getPercentage()/100.0) *
-                (ocp.sb().getPercentage()/100.0) * 100));
+                        (ocp.cc().getPercentage()/100.0) *
+                        (ocp.wv().getPercentage()/100.0) *
+                        (ocp.sb().getPercentage()/100.0) * 100));
 
         return sb.toString();
     }
@@ -107,21 +107,19 @@ public final class HtmlPrinter {
 
     public static String printParameterSummary(final TelescopeDetails pdp, final String wfs) {
         return "Telescope configuration: \n" +
-            "<LI>" + pdp.getMirrorCoating().displayValue() + " mirror coating.\n" +
-            "<LI>" + portToString(pdp.getInstrumentPort()) + " looking port.\n" +
-            "<LI>wavefront sensor: " + wfs + "\n";
+                "<LI>" + pdp.getMirrorCoating().displayValue() + " mirror coating.\n" +
+                "<LI>" + portToString(pdp.getInstrumentPort()) + " looking port.\n" +
+                "<LI>wavefront sensor: " + wfs + "\n";
     }
 
     public static String printSummary(final Altair altair) {
         return String.format(
-            "r0(%.0fnm) = %.3f m\n" +
-            "Strehl = %.3f\n"+
-            "FWHM of an AO-corrected core = %.3f arcsec\n"+
-            "Radius of 50 percent encircled energy (EE50, assuming Airy pattern) = %.3f%% arcsec\n"+
-            "Radius of 70 percent encircled energy (EE70, assuming Airy pattern) = %.3f%% arcsec\n",
-            altair.getWavelength(), altair.getr0(), altair.getStrehl(), altair.getAOCorrectedFWHM(),
-            altair.getWavelength() * 1.324E-5,
-            altair.getWavelength() * 1.783E-5);
+                "r0(%.0fnm) = %.3f m\n" +
+                        "Strehl = %.3f\n"+
+                        "FWHM of an AO-corrected core = %.3f arcsec\n"+
+                        "Radius of 50 percent encircled energy (EE50, assuming Airy pattern) = %.3f%% arcsec\n"+
+                        "Radius of 70 percent encircled energy (EE70, assuming Airy pattern) = %.3f%% arcsec\n",
+                altair.getWavelength(), altair.getr0(), altair.getStrehl(), altair.getAOCorrectedFWHM(), altair.getWavelength() * 1.324E-5, altair.getWavelength() * 1.783E-5);
     }
 
     public static String printParameterSummary(final Altair altair) {
@@ -150,17 +148,19 @@ public final class HtmlPrinter {
         try {
             s += String.format("%.3f arcsec\n", gems.getAOCorrectedFWHM(true));
         } catch (IllegalArgumentException ex) {
-            s += String.format("Radius of 50 percent encircled energy (EE50, assuming Airy pattern) = %.3f arcsec (%.1f pixels)\n", gems.getEE50(), gems.getEE50() / 0.02);
-            s += String.format("Radius of 70 percent encircled energy (EE70, assuming Airy pattern) = %.3f arcsec (%.1f pixels)\n", gems.getEE70(), gems.getEE70() / 0.02);
+            s += "<span style=\"color:red; font-style:italic;\">Error: " + ex.getMessage() + "</span>\n";
         }
+        s += String.format("Radius of 50 percent encircled energy (EE50, assuming Airy pattern) = %.3f arcsec (%.1f pixels)\n", gems.getEE50(), gems.getEE50() / 0.02);
+        s += String.format("Radius of 70 percent encircled energy (EE70, assuming Airy pattern) = %.3f arcsec (%.1f pixels)\n", gems.getEE70(), gems.getEE70() / 0.02);
+
 
         return s;
     }
 
     public static String printParameterSummary(final Gems gems) {
         return
-            "Average Strehl:\t" + gems.getAvgStrehl() + "\n" +
-            "Strehl Band:\t" + gems.getStrehlBand() + "\n\n";
+                "Average Strehl:\t" + gems.getAvgStrehl() + "\n" +
+                        "Strehl Band:\t" + gems.getStrehlBand() + "\n\n";
     }
 
     public static String opticalComponentsToString(final Instrument instrument) {

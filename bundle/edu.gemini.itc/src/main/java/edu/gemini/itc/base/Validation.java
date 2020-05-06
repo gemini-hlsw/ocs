@@ -55,9 +55,9 @@ public final class Validation {
 
         if (Math.abs(diff) > epsilon) {
             throw new IllegalArgumentException(
-                String.format(
-                        "Fraction with source value produces non-integral number of " +
-                        "source exposures with source (%.2f vs. %d).", number_source_exposures, iNumExposures));
+                    String.format(
+                            "Fraction with source value produces non-integral number of " +
+                                    "source exposures with source (%.2f vs. %d).", number_source_exposures, iNumExposures));
         }
     }
 
@@ -86,10 +86,12 @@ public final class Validation {
 
             if (eLine.width().toKilometersPerSecond() < maxWidth) {
                 throw new IllegalArgumentException(
-                    String.format(
-                            "Please use a model line width > %.2f nm (or %.2f km/s) " +
-                            "to avoid undersampling of the line profile when convolved " +
-                            "with the transmission response", 1.0*resolution, maxWidth));
+                        String.format(
+                                "Please use a model line width > %.2f nm (or %.2f km/s) " +
+                                        "to avoid undersampling of the line profile when convolved " +
+                                        "with the transmission response", 1.0*resolution, maxWidth));
+
+
             }
         }
     }

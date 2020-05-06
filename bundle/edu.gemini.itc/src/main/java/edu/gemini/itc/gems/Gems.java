@@ -113,7 +113,6 @@ public class Gems implements AOSystem {
         return (8.642E-11 * wavelength * 206265);
     }
 
-
     // See REL-1352:
     // Instead of the current calculation based on first-principles for normal AO systems,
     // the ITC must use the following lookup table to determine the FWHM of the AO-corrected core for
@@ -173,7 +172,7 @@ public class Gems implements AOSystem {
             return ((GaussianSource) source.profile()).fwhm();
 
         } else {
-                return 0.0;
+            return 0.0;
         }
 
         // The web page always selects one of J, H or K, so if we get here, the IQ must be wrong
