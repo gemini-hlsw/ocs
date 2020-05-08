@@ -142,4 +142,3 @@ IF CROSS-DISPERSED == SXD OR CROSS-DISPERSED == LXD:
 # change mean parallactic angle as the default set up for XD mode
 IF CROSS-DISPERSED == SXD OR CROSS-DISPERSED == LXD:
           Change the Position Angle to "Average Parallactic"
-          
