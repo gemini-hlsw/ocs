@@ -138,3 +138,8 @@ IF CROSS-DISPERSED == SXD OR CROSS-DISPERSED == LXD:
           ADD NOTE "NOTE2: Bad pixels in XD mode" in target Scheduling Group
           ADD NOTE "NOTE3: Differential refraction and XD mode" in target Scheduling Group
 
+###### requests 2020.04.08 Siyi #####
+# change mean parallactic angle as the default set up for XD mode
+IF CROSS-DISPERSED == SXD OR CROSS-DISPERSED == LXD:
+          Change the Position Angle to "Average Parallactic"
+          
