@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2018A-1" subtype="basic" key="da89e5f9-49f6-4b31-a85a-62b4d7e84990" name="GNIRS-BP">
+  <container kind="program" type="Program" version="2020A-1" subtype="basic" key="da89e5f9-49f6-4b31-a85a-62b4d7e84990" name="GNIRS-BP">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="GNIRS PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -24,6 +24,7 @@
       <param name="fetched" value="yes"/>
       <param name="completed" value="false"/>
       <param name="notifyPi" value="NO"/>
+      <param name="timingWindowNotification" value="true"/>
     </paramset>
     <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="409c710a-5c4d-49c1-a7e4-950ae0eb22af" name="Note">
       <paramset name="Note" kind="dataObj">
@@ -54,8 +55,15 @@ The semicircular portion of the field is below the rectangle. The template scien
           <param name="priority" value="MEDIUM"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="a951d873-7a05-4b6f-969e-ed484d8564ea" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
@@ -75,6 +83,8 @@ The semicircular portion of the field is below the rectangle. The template scien
             <param name="decker" value="ACQUISITION"/>
             <param name="filter" value="J"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
             <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
@@ -181,8 +191,15 @@ The semicircular portion of the field is below the rectangle. The template scien
           <param name="priority" value="MEDIUM"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="e13ed8dd-e0c3-4678-97db-24f5128ca9ab" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
@@ -202,6 +219,8 @@ The semicircular portion of the field is below the rectangle. The template scien
             <param name="decker" value="ACQUISITION"/>
             <param name="filter" value="J"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
             <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
@@ -288,8 +307,15 @@ The semicircular portion of the field is below the rectangle. The template scien
           <param name="priority" value="MEDIUM"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="f39e584a-cf26-46ec-8251-db7fa554de5d" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
@@ -309,6 +335,8 @@ The semicircular portion of the field is below the rectangle. The template scien
             <param name="decker" value="ACQUISITION"/>
             <param name="filter" value="J"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
             <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
@@ -384,8 +412,15 @@ The semicircular portion of the field is below the rectangle. The template scien
           <param name="priority" value="MEDIUM"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="b2a82781-e06a-4616-8ad3-7ea5b88c5000" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -413,6 +448,8 @@ The semicircular portion of the field is below the rectangle. The template scien
             <param name="decker" value="ACQUISITION"/>
             <param name="filter" value="J"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
             <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
@@ -520,8 +557,15 @@ The semicircular portion of the field is below the rectangle. The template scien
           <param name="priority" value="MEDIUM"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="4f4ffc89-a97c-4213-814f-7cbc80b9c065" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
@@ -541,6 +585,8 @@ The semicircular portion of the field is below the rectangle. The template scien
             <param name="decker" value="ACQUISITION"/>
             <param name="filter" value="J"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
             <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
@@ -647,8 +693,15 @@ The semicircular portion of the field is below the rectangle. The template scien
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="81f7d9f9-5ac8-4122-ada3-cfcb44d48738" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
@@ -668,6 +721,8 @@ The semicircular portion of the field is below the rectangle. The template scien
             <param name="decker" value="ACQUISITION"/>
             <param name="filter" value="J"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
             <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
@@ -851,8 +906,15 @@ Because of the large wavelength coverage of the XD modes, differential refractio
           <param name="priority" value="MEDIUM"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="1cccbf9f-ec92-4935-8248-bdcdb70fb1e1" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
@@ -873,6 +935,8 @@ Because of the large wavelength coverage of the XD modes, differential refractio
             <param name="decker" value="SHORT_CAM_X_DISP"/>
             <param name="filter" value="ORDER_4"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
             <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
@@ -1001,8 +1065,15 @@ The initial slit image is taken in the H band filter as exposure times in the na
           <param name="priority" value="MEDIUM"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="3ea00bc4-7182-4c96-a305-62be56e68968" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
@@ -1022,6 +1093,8 @@ The initial slit image is taken in the H band filter as exposure times in the na
             <param name="decker" value="ACQUISITION"/>
             <param name="filter" value="ORDER_5"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
             <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
@@ -1095,8 +1168,15 @@ The initial slit image is taken in the H band filter as exposure times in the na
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="aef023cf-cd4c-4853-918c-c4845cff8f98" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
@@ -1117,6 +1197,8 @@ The initial slit image is taken in the H band filter as exposure times in the na
             <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
             <param name="filter" value="ORDER_4"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
             <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
@@ -1246,8 +1328,15 @@ The initial slit image is taken in the H band filter as exposure times in the na
           <param name="priority" value="MEDIUM"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="5f605ffc-018d-4e23-8f50-18ebb58b8a4a" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
@@ -1268,6 +1357,8 @@ The initial slit image is taken in the H band filter as exposure times in the na
             <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
             <param name="filter" value="ORDER_4"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
             <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
@@ -1396,8 +1487,15 @@ The initial slit image is taken in the H band filter as exposure times in the na
           <param name="priority" value="MEDIUM"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="217d0d42-12a1-4530-9e03-b6ebeadeb667" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
@@ -1418,6 +1516,8 @@ The initial slit image is taken in the H band filter as exposure times in the na
             <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
             <param name="filter" value="ORDER_4"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
             <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
@@ -1537,8 +1637,15 @@ The initial slit image is taken in the H band filter as exposure times in the na
           <param name="priority" value="MEDIUM"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="ec7386b0-ad5c-4689-8341-ff0d4ab42785" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
@@ -1559,6 +1666,8 @@ The initial slit image is taken in the H band filter as exposure times in the na
             <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
             <param name="filter" value="ORDER_4"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
             <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
@@ -1714,8 +1823,15 @@ The initial slit image is taken in the H band filter as exposure times in the na
           <param name="priority" value="MEDIUM"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="f98c5901-8b9b-421a-8cc8-d188d0028c37" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
@@ -1736,6 +1852,8 @@ The initial slit image is taken in the H band filter as exposure times in the na
             <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
             <param name="filter" value="ORDER_4"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
             <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
@@ -1868,8 +1986,15 @@ Note that the target component in the associated spectroscopy observation must b
           <param name="priority" value="MEDIUM"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="97367ff0-8238-45a9-b33b-87e14e804ebe" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -1899,6 +2024,8 @@ This template might be used for placing a long slit along the long axis of a gal
             <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
             <param name="filter" value="ORDER_4"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
             <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
@@ -2054,8 +2181,15 @@ This template might be used for placing a long slit along the long axis of a gal
           <param name="priority" value="MEDIUM"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="aa333b9d-9b33-4300-b84e-6b271267c0cc" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
@@ -2076,6 +2210,8 @@ This template might be used for placing a long slit along the long axis of a gal
             <param name="decker" value="SHORT_CAM_LONG_SLIT"/>
             <param name="filter" value="ORDER_4"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
             <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
@@ -2120,7 +2256,7 @@ Update the exposure time to match the acquisition observation.
             </paramset>
             <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="cd218f6e-8b61-418e-9db9-72319a000a90" name="Offset">
               <paramset name="Offset" kind="dataObj">
-                <param name="title" value="sky"/>
+                <param name="title" value="slit and sky"/>
                 <paramset name="offsets">
                   <paramset name="Offset0" sequence="0">
                     <param name="p" value="10.0"/>
@@ -2164,8 +2300,15 @@ Update the exposure time to match the acquisition observation.
           <param name="priority" value="MEDIUM"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="b76cba48-91f3-4911-9d0c-1c4b84c43e99" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
@@ -2185,6 +2328,8 @@ Update the exposure time to match the acquisition observation.
             <param name="decker" value="ACQUISITION"/>
             <param name="filter" value="ORDER_5"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
             <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
@@ -2277,8 +2422,15 @@ Update the exposure time to match the acquisition observation.
           <param name="priority" value="MEDIUM"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="d4c0383f-7b1c-4c3d-83d8-634dd99bceb1" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
@@ -2299,6 +2451,8 @@ Update the exposure time to match the acquisition observation.
             <param name="decker" value="SHORT_CAM_X_DISP"/>
             <param name="filter" value="ORDER_4"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
             <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
@@ -2427,8 +2581,15 @@ The initial slit image is taken in the H band filter as exposure times in the na
           <param name="priority" value="MEDIUM"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="4cc4a115-dac6-49ca-b2e8-45ac910cb2f2" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
@@ -2448,6 +2609,8 @@ The initial slit image is taken in the H band filter as exposure times in the na
             <param name="decker" value="ACQUISITION"/>
             <param name="filter" value="ORDER_5"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
             <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
@@ -2521,8 +2684,15 @@ The initial slit image is taken in the H band filter as exposure times in the na
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="38431e4c-5b0f-4822-af81-60652b7eb213" name="Observing Conditions">
           <paramset name="Observing Conditions" kind="dataObj">
@@ -2579,6 +2749,8 @@ The initial slit image is taken in the H band filter as exposure times in the na
             <param name="decker" value="ACQUISITION"/>
             <param name="filter" value="ORDER_5"/>
             <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
             <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
           </paramset>
@@ -2892,6 +3064,7 @@ Pinhole flats are used for tracing the XD spectral orders. As with the flats and
     <paramset name="node">
       <param name="key" value="cd218f6e-8b61-418e-9db9-72319a000a90"/>
       <param name="c720bb94-d12b-4dd1-ac41-b8e55e2ea093" value="7"/>
+      <param name="1b4b21cf-b8e0-4df5-b1ea-36150299848f" value="11"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="03c815ba-3525-471b-a631-4bc6af5e13e4"/>
