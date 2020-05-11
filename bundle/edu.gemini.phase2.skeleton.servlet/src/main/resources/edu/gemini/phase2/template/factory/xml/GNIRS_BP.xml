@@ -824,7 +824,7 @@ Briefly, we distinguish four main types of acquisition method, depending on the 
 
 2) Bright objects (11.5 &lt; H &lt; 16): Broad-band filter, no sky subtraction
 
-3) Faint objects (16 &lt; H &lt;20): Broad-band filter, sky subtraction
+3) Faint objects (16 &lt; H &lt; 20): Broad-band filter, sky subtraction
 
 4) Very faint objects (H &gt; 20): Blind offset from a nearby reference star
 
