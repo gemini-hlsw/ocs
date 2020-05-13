@@ -263,6 +263,8 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
   // requests 2020.04.08 Siyi
   // change mean parallactic angle as the default set up for XD mode
   if (xd == SXD || xd == LXD) {
-    forObs(5,6,7,8,9,10,11,12,13,14,22,23)(setPositionAngleConstraint(PosAngleConstraint.PARALLACTIC_ANGLE))
+    val included = curIncludes(TargetGroup).toSet
+    val all      = Set(5,6,7,8,9,10,11,12,13,14,22,23)
+    forObs((all & included).toSeq: _*)(setPositionAngleConstraint(PosAngleConstraint.PARALLACTIC_ANGLE))
   }
 }
