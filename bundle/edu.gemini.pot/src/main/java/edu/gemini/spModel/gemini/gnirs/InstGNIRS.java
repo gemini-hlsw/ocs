@@ -183,10 +183,10 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         _nf.setMaximumFractionDigits(3);
     }
 
-    private static final Duration SETUP_TIME_LGS     = Duration.ofMinutes(25);
-    private static final Duration SETUP_TIME_IFU     = Duration.ofMinutes(20);
-    private static final Duration SETUP_TIME         = Duration.ofMinutes(15);
-    private static final Duration REACQUISITION_TIME = Duration.ofMinutes( 6); // 6 minutes as defined in REL-1346
+    private static final Duration SETUP_TIME_LGS = Duration.ofMinutes(25);
+    private static final Duration SETUP_TIME_IFU = Duration.ofMinutes(20);
+    private static final Duration SETUP_TIME = Duration.ofMinutes(15);
+    private static final Duration REACQUISITION_TIME = Duration.ofMinutes(6); // 6 minutes as defined in REL-1346
 
     /**
      * Constructor
@@ -227,15 +227,15 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     }
 
 
-    public static Duration getSetupTimeLgs () {
+    public static Duration getSetupTimeLgs() {
         return SETUP_TIME_LGS;
     }
 
-    public static Duration getSetupTimeIfu () {
+    public static Duration getSetupTimeIfu() {
         return SETUP_TIME_IFU;
     }
 
-    public static Duration getSetupTime () {
+    public static Duration getSetupTime() {
         return SETUP_TIME;
     }
 
@@ -260,9 +260,11 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
 
     /**
      * For ITC.
+     *
      * @deprecated config is a key-object collection and is thus not type-safe. It is meant for ITC only.
      */
-    @Deprecated @Override
+    @Deprecated
+    @Override
     public Duration getSetupTime(Config conf) {
         if (conf.containsItem(AOConstants.AO_SYSTEM_KEY)) {
             final GuideStarType guideStarType = (GuideStarType) conf.getItemValue(AOConstants.AO_GUIDE_STAR_TYPE_KEY);
@@ -275,7 +277,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
 
         if (slitWidth.equals(GNIRSParams.SlitWidth.IFU)) {
             return getSetupTimeIfu();
-        } else  {
+        } else {
             return getSetupTime();
         }
     }
@@ -292,7 +294,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     }
 
     @Override
-    public Duration getReacquisitionTime (Config config) {
+    public Duration getReacquisitionTime(Config config) {
         return REACQUISITION_TIME;
     }
 
@@ -888,7 +890,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         }
         v = ImOption.apply(Pio.getValue(paramSet, FOCUS_PROP.getName()))
                 .getOrElse(FocusSuggestion.DEFAULT.displayValue());
-            setFocus(new Focus(v));
+        setFocus(new Focus(v));
 
         // REL-2090: Special workaround for elimination of former PositionAngleMode, since functionality has been
         // merged with PosAngleConstraint but we still need legacy code.
@@ -900,7 +902,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
             _setPosAngleConstraint(v);
 
         setOverrideAcqObsWavelength(
-            Pio.getBooleanValue(paramSet, OVERRIDE_ACQ_OBS_WAVELENGTH_PROP.getName(), true)
+                Pio.getBooleanValue(paramSet, OVERRIDE_ACQ_OBS_WAVELENGTH_PROP.getName(), true)
         );
 
         v = Pio.getValue(paramSet, PORT_PROP);
@@ -927,7 +929,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         sc.putParameter(DefaultParameter.getInstance(GNIRSConstants.CROSS_DISPERSED_PROP, getCrossDispersed()));
         sc.putParameter(DefaultParameter.getInstance(GNIRSConstants.WOLLASTON_PRISM_PROP, getWollastonPrism()));
         sc.putParameter(DefaultParameter.getInstance(GNIRSConstants.READ_MODE_PROP, getReadMode()));
-    //    sc.putParameter(DefaultParameter.getInstance(GNIRSConstants.FILTER_PROP, getFilter()));
+        //    sc.putParameter(DefaultParameter.getInstance(GNIRSConstants.FILTER_PROP, getFilter()));
         sc.putParameter(DefaultParameter.getInstance(WELL_DEPTH_PROP, getWellDepth()));
         sc.putParameter(DefaultParameter.getInstance(GNIRSConstants.ACQUISITION_MIRROR_PROP, getAcquisitionMirror()));
         sc.putParameter(DefaultParameter.getInstance(GNIRSConstants.CENTRAL_WAVELENGTH_PROP, getCentralWavelength()));
@@ -1023,7 +1025,8 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         return null;
     }
 
-    @Override public ConfigSequence postProcessSequence(ConfigSequence in) {
+    @Override
+    public ConfigSequence postProcessSequence(ConfigSequence in) {
         final Config[] configs = in.getAllSteps();
 
         for (Config c : configs) {
@@ -1039,8 +1042,8 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
             final Object explicitCamera = c.getItemValue(GNIRSConstants.CAMERA_KEY);
             if (explicitCamera == null) {
                 final Wavelength cwl = (Wavelength) c.getItemValue(GNIRSConstants.CENTRAL_WAVELENGTH_KEY);
-                final PixelScale  ps = (PixelScale) c.getItemValue(GNIRSConstants.PIXEL_SCALE_KEY);
-                final Camera  camera = (cwl == null) || (ps == null) ? Camera.DEFAULT : Camera.getDefault(cwl.doubleValue(), ps);
+                final PixelScale ps = (PixelScale) c.getItemValue(GNIRSConstants.PIXEL_SCALE_KEY);
+                final Camera camera = (cwl == null) || (ps == null) ? Camera.DEFAULT : Camera.getDefault(cwl.doubleValue(), ps);
                 c.putItem(GNIRSConstants.CAMERA_KEY, camera);
             }
         }
@@ -1092,8 +1095,15 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     private static final Angle PWFS1_VIG = Angle.arcmins(5.0);
     private static final Angle PWFS2_VIG = Angle.arcmins(4.8);
 
-    @Override public Angle pwfs1VignettingClearance() { return PWFS1_VIG; }
-    @Override public Angle pwfs2VignettingClearance() { return PWFS2_VIG; }
+    @Override
+    public Angle pwfs1VignettingClearance() {
+        return PWFS1_VIG;
+    }
+
+    @Override
+    public Angle pwfs2VignettingClearance() {
+        return PWFS2_VIG;
+    }
 
 
     /**
@@ -1129,13 +1139,21 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     @Override
     public ImList<PosAngleConstraint> getSupportedPosAngleConstraints() {
         return DefaultImList.create(PosAngleConstraint.FIXED,
-                                    PosAngleConstraint.PARALLACTIC_ANGLE,
-                                    PosAngleConstraint.PARALLACTIC_OVERRIDE);
+                PosAngleConstraint.PARALLACTIC_ANGLE,
+                PosAngleConstraint.PARALLACTIC_OVERRIDE);
     }
 
     @Override
     public boolean allowUnboundedPositionAngle() {
         // Unsupported for GNIRS.
         return false;
+    }
+
+    // REL-3808: We want to avoid CRPAs (Cass Rotator Parallactic Anglees) in [45,150].
+    // Note this is not the same as the parallactic angle, which can still be in [45, 150].
+    // Always flipping the default parallactic angle accomplishes this.
+    @Override
+    public Option<edu.gemini.spModel.core.Angle> calculateParallacticAngle(final ISPObservation obs) {
+        return super.calculateParallacticAngle(obs).map(edu.gemini.spModel.core.Angle::flip);
     }
 }
