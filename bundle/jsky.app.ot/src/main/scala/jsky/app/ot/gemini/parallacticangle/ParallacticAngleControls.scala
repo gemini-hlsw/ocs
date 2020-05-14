@@ -6,9 +6,9 @@ import java.text.Format
 import java.util.logging.Logger
 import java.time.{Instant, ZoneId}
 import java.time.format.DateTimeFormatter
-import javax.swing.{ BorderFactory, Icon }
-import javax.swing.border.EtchedBorder
 
+import javax.swing.{BorderFactory, Icon}
+import javax.swing.border.EtchedBorder
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.core.Site
@@ -22,7 +22,7 @@ import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.syntax.sp.node._
 import jsky.app.ot.editor.OtItemEditor
 import jsky.app.ot.gemini.editor.EphemerisUpdater
-import jsky.app.ot.gemini.schedulingBlock.{ SchedulingBlockDialog, SchedulingBlockUpdate }
+import jsky.app.ot.gemini.schedulingBlock.{SchedulingBlockDialog, SchedulingBlockUpdate}
 import jsky.app.ot.util.TimeZonePreference
 import jsky.util.Resources
 import jsky.util.gui.DialogUtil
@@ -33,6 +33,8 @@ import scala.swing.event.{ButtonClicked, Event}
 import scalaz._
 import Scalaz._
 import scalaz.effect.IO
+
+import scala.util.Try
 
 /**
   * This class encompasses all of the logic required to manage the average parallactic angle information associated
@@ -96,8 +98,8 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
           obs  <- Option(e.getContextObservation)
           inst <- Option(e.getContextInstrumentDataObject)
         } yield {
-          val setupTimeMs = inst.getSetupTime(obs).toMillis();
-          val reacqTimeMs = inst.getReacquisitionTime(obs).toMillis();
+          val setupTimeMs = inst.getSetupTime(obs).toMillis
+          val reacqTimeMs = inst.getReacquisitionTime(obs).toMillis
           def formatMin(ms: Long): String = s"(${math.round(ms/60000.0)} min)"
 
           List(
@@ -157,17 +159,19 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
 
       /**
         * Compares the parallactic angle to the supplied position angle.
+        * We need to use the fmt on the paStr's supposed double to avoid floating point issues, e.g.
+        * fa = 123.00, paStr = "123.0000000001".
         */
       def warningStateFromPAString(paStr: String): Unit = Swing.onEDT {
         for {
           e   <- editor
           fmt <- formatter
+          fpaStr <- \/.fromTryCatchNonFatal(fmt.format(paStr.toDouble))
         } {
-          // We warn only if the parallactic angle exists and has been explicitly set.
           val warningFlag = parallacticAngle.exists { angle =>
             val fa = fmt.format(angle.toDegrees)
             val faFlip = fmt.format(angle.flip.toDegrees)
-            !fa.equals(paStr) && !faFlip.equals(paStr)
+            !fa.equals(fpaStr) && !faFlip.equals(fpaStr)
           }
 
           if (warningFlag) {

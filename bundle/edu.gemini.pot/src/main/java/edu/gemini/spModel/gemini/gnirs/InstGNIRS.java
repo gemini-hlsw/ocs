@@ -1149,23 +1149,11 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         return false;
     }
 
-    // REL-3808: Prefer parallactic angles that avoid [45,150].
-    // All methods to set pos angle in SPInstObsComp delegate to setPosAngleDegrees, so we only need change this method.
+    // REL-3808: We want to avoid CRPAs (Cass Rotator Parallactic Anglees) in [45,150].
+    // Note this is not the same as the parallactic angle, which can still be in [45, 150].
+    // Always flipping the default parallactic angle accomplishes this.
     @Override
-    public void setPosAngleDegrees(double newValue) {
-        final double oldValue = getPosAngleDegrees();
-        final double normalizedValue = edu.gemini.spModel.util.Angle.normalizeDegrees(newValue);
-        final double preferredValue;
-
-        // 150 + 180 = 330 < 360 so we don't have to normalize anything here.
-        if (getPosAngleConstraint() == PosAngleConstraint.PARALLACTIC_ANGLE
-                && normalizedValue >= 45 && normalizedValue <= 150)
-            preferredValue = newValue + 180;
-        else
-            preferredValue = normalizedValue;
-        if (oldValue != preferredValue) {
-            _positionAngle = preferredValue;
-            firePropertyChange(InstConstants.POS_ANGLE_PROP, oldValue, preferredValue);
-        }
+    public Option<edu.gemini.spModel.core.Angle> calculateParallacticAngle(final ISPObservation obs) {
+        return super.calculateParallacticAngle(obs).map(edu.gemini.spModel.core.Angle::flip);
     }
 }
