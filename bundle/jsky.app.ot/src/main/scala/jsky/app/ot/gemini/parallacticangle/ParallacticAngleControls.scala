@@ -9,7 +9,6 @@ import java.time.format.DateTimeFormatter
 
 import javax.swing.{BorderFactory, Icon}
 import javax.swing.border.EtchedBorder
-import edu.gemini.pot.sp.ISPNode
 import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.inst.ParallacticAngleSupport
@@ -17,24 +16,18 @@ import edu.gemini.spModel.obs.{ObsTargetCalculatorService, SPObservation, Schedu
 import edu.gemini.spModel.obs.SchedulingBlock.Duration
 import edu.gemini.spModel.obs.SchedulingBlock.Duration._
 import edu.gemini.spModel.rich.shared.immutable._
-import edu.gemini.shared.util.immutable.{ImOption, Option => JOption}
+import edu.gemini.shared.util.immutable.{Option => JOption}
 import edu.gemini.spModel.obscomp.SPInstObsComp
-import edu.gemini.spModel.syntax.sp.node._
 import jsky.app.ot.editor.OtItemEditor
-import jsky.app.ot.gemini.editor.EphemerisUpdater
 import jsky.app.ot.gemini.schedulingBlock.{SchedulingBlockDialog, SchedulingBlockUpdate}
 import jsky.app.ot.util.TimeZonePreference
 import jsky.util.Resources
-import jsky.util.gui.DialogUtil
 
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing._
 import scala.swing.event.{ButtonClicked, Event}
 import scalaz._
 import Scalaz._
-import scalaz.effect.IO
-
-import scala.util.Try
 
 /**
   * This class encompasses all of the logic required to manage the average parallactic angle information associated
@@ -45,8 +38,8 @@ import scala.util.Try
 class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publisher {
   import ParallacticAngleControls._
 
-  val Nop = new Runnable {
-    override def run() = ()
+  val Nop: Runnable = new Runnable {
+    override def run(): Unit = ()
   }
 
   private var editor:    Option[OtItemEditor[_, _]] = None
@@ -285,7 +278,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
         site,
         mode)
 
-      sb.foreach(updateSchedulingBlock(_))
+      sb.foreach(updateSchedulingBlock)
     }
   }
 
@@ -365,7 +358,7 @@ class ParallacticAngleControls(isPaUi: Boolean) extends GridBagPanel with Publis
 }
 
 object ParallacticAngleControls {
-  val Log = Logger.getLogger(getClass.getName)
+  val Log: Logger = Logger.getLogger(getClass.getName)
   case object ParallacticAngleChangedEvent extends Event
 
   // Precision limit for which two parallactic angles are considered equivalent.
