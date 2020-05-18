@@ -6,21 +6,29 @@ import edu.gemini.seqexec.odb.SeqFailure.{MissingObservation, SeqException}
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances.IDENTITY_MAP
 import edu.gemini.spModel.config2.ConfigSequence
-import edu.gemini.spModel.core.Peer
+import edu.gemini.spModel.core.{Peer, Target}
 import edu.gemini.spModel.io.SpImportService
+import edu.gemini.spModel.obslog.ObsLog
+import edu.gemini.spModel.obs.context.ObsContext
 import java.io.{BufferedReader, InputStreamReader, StringReader}
 import java.net.{HttpURLConnection, URL}
 import java.net.HttpURLConnection.{HTTP_NOT_FOUND, HTTP_OK}
 import java.time.{Duration, Instant}
 import java.util.stream.Collectors
 
-import edu.gemini.spModel.obs.SPObservation
-import edu.gemini.spModel.obslog.ObsLog
-
+import scalaz._
+import Scalaz._
 import scala.collection.JavaConverters._
 
+sealed trait TargetType extends Product with Serializable
+object TargetType {
+  case object ScienceTarget extends TargetType
+  case object GuideTarget extends TargetType
+  case object UserTarget extends TargetType
+}
+
 case class ExecutedDataset(timestamp: Instant, filename: String)
-case class SeqexecSequence(title: String, datasets: Map[Int, ExecutedDataset], config: ConfigSequence)
+case class SeqexecSequence(title: String, datasets: Map[Int, ExecutedDataset], config: ConfigSequence, targets: List[(TargetType, Target)])
 
 /**
  * Sequence Executor Service API.
@@ -81,7 +89,7 @@ object SeqExecService {
           case scala.util.Failure(e) => Left(SeqException(e))
         }
       } finally {
-        db.getDBAdmin.shutdown
+        db.getDBAdmin.shutdown()
       }
     }
 
@@ -92,6 +100,18 @@ object SeqExecService {
   private def extractSequence(obs: ISPObservation): TrySeq[ConfigSequence] =
     catchingAll {
       ConfigBridge.extractSequence(obs, null, IDENTITY_MAP, true)
+    }
+
+  private def extractTargets(obs: ISPObservation): TrySeq[List[(TargetType, Target)]] =
+    catchingAll {
+      ObsContext.create(obs).asScala.headOption.map{te =>
+        val guideTargets = te.getTargets().getGuideEnvironment().getTargets().asScala.map(_.getTarget).toList
+        val userTargets = te.getTargets.getUserTargets.asScala.map(_.target.getTarget).toList
+        val scienceTargets = te.getTargets.getAsterism.allTargets.toList
+        scienceTargets.strengthL(TargetType.ScienceTarget) :::
+          guideTargets.strengthL(TargetType.GuideTarget) :::
+          userTargets.strengthL(TargetType.UserTarget)
+      }.getOrElse(Nil)
     }
 
   private def extractExecutedDatsets(obs: ISPObservation): TrySeq[Map[Int, ExecutedDataset]] =
@@ -120,6 +140,7 @@ object SeqExecService {
           s <- extractSequence(o).right
           n <- extractName(o).right
           e <- extractExecutedDatsets(o).right
-        } yield SeqexecSequence(n, e, s)
+          t <- extractTargets(o).right
+        } yield SeqexecSequence(n, e, s, t)
     }
 }
