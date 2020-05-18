@@ -89,64 +89,70 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
       getObsComponent.getContextObservation.getObsComponents.asScala.
         find(_.getType.broadType === TargetObsComp.SP_TYPE.broadType).
         map(_.getDataObject.asInstanceOf[TargetObsComp]).
-        foreach{_.getAsterism match {
+        foreach{t =>
+          t.getTargetEnvironment.getUserTargets.asScala.zipWithIndex.foreach { case (ut, i) =>
+            val (a, b, c, d, e)= Ghost.userTargetParams(i + 1)
+            coordParam(ut.target, Some(a), b, c, d, e)
+            config.putParameter(systemName, DefaultParameter.getInstance(s"userTarget${i+1}Type", ut.`type`))
+          }
+          t.getAsterism match {
 
-          /** STANDARD RESOLUTION
-           * 1. If the base is overridden, add it to the parameters.
-           * 2. If SRIFU1 is pointing to a sky position, write sky position coordinates.
-           *    Otherwise, write target coordinates and indicate if guiding is turned on for SRIFU1.
-           * 3. If SRIFU2 is set, it can be a sky position or target: repeat the previous step. for SRIFU2 data.
-           */
-          case gsr: GhostAsterism.StandardResolution =>
-            gsr.overriddenBase.foreach(b => coordParam(b, None,
-              Ghost.BASE_RA_DEGREES, Ghost.BASE_DEC_DEGREES,
-              Ghost.BASE_RA_HMS, Ghost.BASE_DEC_DMS))
-
-            gsr.srifu1.fold(c => coordParam(c, Some(Ghost.SRIFU1_NAME),
-              Ghost.SRIFU1_RA_DEG, Ghost.SRIFU1_DEC_DEG,
-              Ghost.SRIFU1_RA_HMS, Ghost.SRIFU1_DEC_DMS),
-              t => {
-                coordParam(t.spTarget, Some(Ghost.SRIFU1_NAME),
-                  Ghost.SRIFU1_RA_DEG, Ghost.SRIFU1_DEC_DEG,
-                  Ghost.SRIFU1_RA_HMS, Ghost.SRIFU1_DEC_DMS)
-                guiding(Ghost.SRIFU1_GUIDING, t)
-              })
-
-            gsr.srifu2.foreach(_.fold(c => coordParam(c, Some(Ghost.SRIFU2_NAME),
-              Ghost.SRIFU2_RA_DEG, Ghost.SRIFU2_DEC_DEG,
-              Ghost.SRIFU2_RA_HMS, Ghost.SRIFU2_DEC_DMS),
-              t => {
-                coordParam(t.spTarget, Some(Ghost.SRIFU2_NAME),
-                  Ghost.SRIFU2_RA_DEG, Ghost.SRIFU2_DEC_DEG,
-                  Ghost.SRIFU2_RA_HMS, Ghost.SRIFU2_DEC_DMS)
-
-                guiding(Ghost.SRIFU2_GUIDING, t)
-              }))
-
-            /** HIGH RESOLUTION
+            /** STANDARD RESOLUTION
              * 1. If the base is overridden, add it to the parameters.
-             * 2. HRIFU1 is always pointing to a target: include the info.
-             * 3. Indicate if guiding is turned on for HRIFU1,
-             * 4. If we have a sky position for HRIFU2, add it to the parameters.
+             * 2. If SRIFU1 is pointing to a sky position, write sky position coordinates.
+             *    Otherwise, write target coordinates and indicate if guiding is turned on for SRIFU1.
+             * 3. If SRIFU2 is set, it can be a sky position or target: repeat the previous step. for SRIFU2 data.
              */
-          case ghr: GhostAsterism.HighResolution =>
-            ghr.overriddenBase.foreach(b => coordParam(b, None,
-              Ghost.BASE_RA_DEGREES, Ghost.BASE_DEC_DEGREES,
-              Ghost.BASE_RA_HMS, Ghost.BASE_DEC_DMS))
+            case gsr: GhostAsterism.StandardResolution =>
+              gsr.overriddenBase.foreach(b => coordParam(b, None,
+                Ghost.BASE_RA_DEGREES, Ghost.BASE_DEC_DEGREES,
+                Ghost.BASE_RA_HMS, Ghost.BASE_DEC_DMS))
 
-            // Always target.
-            coordParam(ghr.hrifu1.spTarget, Some(Ghost.HRIFU1_NAME),
-              Ghost.HRIFU1_RA_DEG, Ghost.HRIFU1_DEC_DEG,
-              Ghost.HRIFU1_RA_HMS, Ghost.HRIFU1_DEC_DMS)
-            guiding(Ghost.HRIFU1_GUIDING, ghr.hrifu1)
+              gsr.srifu1.fold(c => coordParam(c, Some(Ghost.SRIFU1_NAME),
+                Ghost.SRIFU1_RA_DEG, Ghost.SRIFU1_DEC_DEG,
+                Ghost.SRIFU1_RA_HMS, Ghost.SRIFU1_DEC_DMS),
+                t => {
+                  coordParam(t.spTarget, Some(Ghost.SRIFU1_NAME),
+                    Ghost.SRIFU1_RA_DEG, Ghost.SRIFU1_DEC_DEG,
+                    Ghost.SRIFU1_RA_HMS, Ghost.SRIFU1_DEC_DMS)
+                  guiding(Ghost.SRIFU1_GUIDING, t)
+                })
 
-            // Always sky, if it exists.
-            ghr.hrifu2.foreach(c => coordParam(c, Some(Ghost.HRIFU2_NAME),
-              Ghost.HRIFU2_RA_DEG, Ghost.HRIFU2_DEC_DEG,
-              Ghost.HRIFU2_RA_HMS, Ghost.HRIFU2_DEC_DMS))
+              gsr.srifu2.foreach(_.fold(c => coordParam(c, Some(Ghost.SRIFU2_NAME),
+                Ghost.SRIFU2_RA_DEG, Ghost.SRIFU2_DEC_DEG,
+                Ghost.SRIFU2_RA_HMS, Ghost.SRIFU2_DEC_DMS),
+                t => {
+                  coordParam(t.spTarget, Some(Ghost.SRIFU2_NAME),
+                    Ghost.SRIFU2_RA_DEG, Ghost.SRIFU2_DEC_DEG,
+                    Ghost.SRIFU2_RA_HMS, Ghost.SRIFU2_DEC_DMS)
 
-          case _ =>
-            // The asterism may not have been configured by this point.
+                  guiding(Ghost.SRIFU2_GUIDING, t)
+                }))
+
+              /** HIGH RESOLUTION
+               * 1. If the base is overridden, add it to the parameters.
+               * 2. HRIFU1 is always pointing to a target: include the info.
+               * 3. Indicate if guiding is turned on for HRIFU1,
+               * 4. If we have a sky position for HRIFU2, add it to the parameters.
+               */
+            case ghr: GhostAsterism.HighResolution =>
+              ghr.overriddenBase.foreach(b => coordParam(b, None,
+                Ghost.BASE_RA_DEGREES, Ghost.BASE_DEC_DEGREES,
+                Ghost.BASE_RA_HMS, Ghost.BASE_DEC_DMS))
+
+              // Always target.
+              coordParam(ghr.hrifu1.spTarget, Some(Ghost.HRIFU1_NAME),
+                Ghost.HRIFU1_RA_DEG, Ghost.HRIFU1_DEC_DEG,
+                Ghost.HRIFU1_RA_HMS, Ghost.HRIFU1_DEC_DMS)
+              guiding(Ghost.HRIFU1_GUIDING, ghr.hrifu1)
+
+              // Always sky, if it exists.
+              ghr.hrifu2.foreach(c => coordParam(c, Some(Ghost.HRIFU2_NAME),
+                Ghost.HRIFU2_RA_DEG, Ghost.HRIFU2_DEC_DEG,
+                Ghost.HRIFU2_RA_HMS, Ghost.HRIFU2_DEC_DMS))
+
+            case _ =>
+              // The asterism may not have been configured by this point.
         }}
     }
   }

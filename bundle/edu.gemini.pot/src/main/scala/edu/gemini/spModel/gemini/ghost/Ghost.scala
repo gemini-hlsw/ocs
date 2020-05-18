@@ -415,6 +415,10 @@ object Ghost {
   val HRIFU2_RA_HMS: String    = "hrifu2CoordsRAHMS"
   val HRIFU2_DEC_DMS: String   = "hrifu2CoordsDecDMS"
 
+  // Property names for user targets
+  def userTargetParams(index: Int): (String, String, String, String, String) =
+    (s"userTarget${index}Name", s"userTarget${index}CoordsRADeg", s"userTarget${index}CoordsDecDeg", s"userTarget${index}CoordsRAHMS", s"userTarget${index}CoordsDecDMS")
+
   /** The properties supported by this class. */
   private def initProp(propName: String, query: Boolean, iter: Boolean): PropertyDescriptor = {
     PropertySupport.init(propName, classOf[Ghost], query, iter)
