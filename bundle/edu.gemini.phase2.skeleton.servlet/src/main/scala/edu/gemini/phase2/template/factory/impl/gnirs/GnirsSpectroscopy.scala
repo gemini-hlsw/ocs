@@ -2,15 +2,15 @@ package edu.gemini.phase2.template.factory.impl.gnirs
 
 import edu.gemini.spModel.gemini.gnirs.blueprint.SpGnirsBlueprintSpectroscopy
 import edu.gemini.spModel.target.SPTarget
-
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams._
-import edu.gemini.spModel.gemini.gnirs.GNIRSParams.{SlitWidth => FPU, Decker}
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams.{Decker, SlitWidth => FPU}
 import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.gemini.altair.AltairParams.Mode._
 import edu.gemini.spModel.gemini.altair.AltairParams.Mode
 import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.phase2.template.factory.impl._
 import edu.gemini.spModel.rich.pot.sp._
+import edu.gemini.spModel.telescope.PosAngleConstraint
 
 case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarget: Option[SPTarget])
   extends GnirsBase[SpGnirsBlueprintSpectroscopy] {
@@ -258,5 +258,13 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
   if (xd == SXD || xd == LXD) {
     addNote("NOTE2: Bad pixels in XD mode") in TargetGroup
     addNote("NOTE3: Differential refraction and XD mode") in TargetGroup
+  }
+
+  // requests 2020.04.08 Siyi
+  // change mean parallactic angle as the default set up for XD mode
+  if (xd == SXD || xd == LXD) {
+    val included = curIncludes(TargetGroup).toSet
+    val all      = Set(5,6,7,8,9,10,11,12,13,14,22,23)
+    forObs((all & included).toSeq: _*)(setPositionAngleConstraint(PosAngleConstraint.PARALLACTIC_ANGLE))
   }
 }

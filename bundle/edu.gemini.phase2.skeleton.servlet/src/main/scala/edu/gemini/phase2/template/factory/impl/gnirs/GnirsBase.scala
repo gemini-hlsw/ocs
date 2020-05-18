@@ -1,10 +1,11 @@
 package edu.gemini.phase2.template.factory.impl.gnirs
 
-import edu.gemini.spModel.gemini.gnirs.{SeqConfigGNIRS, InstGNIRS}
+import edu.gemini.spModel.gemini.gnirs.{InstGNIRS, SeqConfigGNIRS}
 import edu.gemini.spModel.gemini.gnirs.blueprint.SpGnirsBlueprintBase
 import edu.gemini.phase2.template.factory.impl._
 import edu.gemini.pot.sp.{ISPGroup, ISPObservation}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams._
+import edu.gemini.spModel.telescope.PosAngleConstraint
 
 trait GnirsBase[B <: SpGnirsBlueprintBase] extends GroupInitializer[B] with TemplateDsl2[InstGNIRS] {
 
@@ -30,6 +31,8 @@ trait GnirsBase[B <: SpGnirsBlueprintBase] extends GroupInitializer[B] with Temp
   def setWellDepth = mutateStatic[WellDepth](_.setWellDepth(_))
   def setFPU = mutateStatic[FPU](_.setSlitWidth(_))
   def setExposureTime = mutateStatic[Double](_.setExposureTime(_))
+  def setPositionAngleConstraint = mutateStatic[PosAngleConstraint](_.setPosAngleConstraint(_))
+
 
   // When we update the decker in sequences, only do so if the FPU isn't set to ACQ
   def updateDecker(d:Decker):SequenceMutator = mapSteps { s =>
