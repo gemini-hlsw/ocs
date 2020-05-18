@@ -106,9 +106,8 @@ object SeqExecService {
     catchingAll {
       ObsContext.create(obs).asScala.headOption.map{te =>
         val guideTargets = te.getTargets().getGuideEnvironment().getTargets().asScala.map(_.getTarget).toList
-        val allTargets = te.getTargets.getTargets.asScala.map(_.getTarget).toList
         val userTargets = te.getTargets.getUserTargets.asScala.map(_.target.getTarget).toList
-        val scienceTargets = allTargets.diff(guideTargets).diff(userTargets)
+        val scienceTargets = te.getTargets.getAsterism.allTargets.toList
         scienceTargets.strengthL(TargetType.ScienceTarget) :::
           guideTargets.strengthL(TargetType.GuideTarget) :::
           userTargets.strengthL(TargetType.UserTarget)
