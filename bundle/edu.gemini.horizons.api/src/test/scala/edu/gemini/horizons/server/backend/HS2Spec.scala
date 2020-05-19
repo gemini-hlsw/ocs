@@ -29,15 +29,15 @@ object HS2Spec extends Specification with ScalaCheck {
       runSearch(Search.Comet("kjhdwekuq")) must_== \/-(Nil)
     }
 
-    // "handle multiple results" in {
-    //   runSearch(Search.Comet("hu")).map(_.take(5)) must_== \/-(List(
-    //     Row(HD.Comet("7P"), "Churyumov-Gerasimenko"),
-    //     Row(HD.Comet("06P"), "Schuster"),
-    //     Row(HD.Comet("30P"), "McNaught-Hughes"),
-    //     Row(HD.Comet("78P"), "Hug-Bell"),
-    //     Row(HD.Comet("/1880 Y1"), "Pechule")
-    //   ))
-    // }
+     "handle multiple results" in {
+       runSearch(Search.Comet("hu")).map(_.take(5)) must_== \/-(List(
+         Row(HD.Comet("67P"), "Churyumov-Gerasimenko"),
+         Row(HD.Comet("106P"), "Schuster"),
+         Row(HD.Comet("130P"), "McNaught-Hughes"),
+         Row(HD.Comet("178P"), "Hug-Bell"),
+         Row(HD.Comet("C/1880 Y1"), "Pechule")
+       ))
+     }
 
     "handle single result (Format 1) Hubble (C/1937 P1)" in {
       runSearch(Search.Comet("hubble")) must_== \/-(List(
@@ -61,11 +61,11 @@ object HS2Spec extends Specification with ScalaCheck {
 
     "handle multiple results" in {
       runSearch(Search.Asteroid("her")).map(_.take(5)) must_== \/-(List(
-        Row(HD.AsteroidOldStyle(103), "Hera"),
-        Row(HD.AsteroidOldStyle(121), "Hermione"),
-        Row(HD.AsteroidOldStyle(135), "Hertha"),
-        Row(HD.AsteroidOldStyle(206), "Hersilia"),
-        Row(HD.AsteroidOldStyle(214), "Aschera")
+        Row(HD.AsteroidNewStyle("A868 RA"), "Hera"),
+        Row(HD.AsteroidNewStyle("A872 JA"), "Hermione"),
+        Row(HD.AsteroidNewStyle("A874 DA"), "Hertha"),
+        Row(HD.AsteroidNewStyle("A879 TC"), "Hersilia"),
+        Row(HD.AsteroidNewStyle("A880 DB"), "Aschera")
       ))
     }
 
@@ -77,7 +77,7 @@ object HS2Spec extends Specification with ScalaCheck {
 
     "handle single result (Format 2) 29 Amphitrite" in {
       runSearch(Search.Asteroid("amphitrite")) must_== \/-(List(
-        Row(HD.AsteroidOldStyle(29), "Amphitrite")
+        Row(HD.AsteroidNewStyle("A854 EB"), "Amphitrite")
       ))
     }
 
