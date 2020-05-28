@@ -28,7 +28,7 @@ final public class SeqConfigGhostCB extends HelperSeqCompCB {
 
         config.putParameter(SeqConfigNames.INSTRUMENT_CONFIG_NAME,
                 StringParameter.getInstance(InstConstants.INSTRUMENT_NAME_PROP,
-                        InstGmosSouth.INSTRUMENT_NAME_PROP));
+                        Ghost$.MODULE$.INSTRUMENT_NAME_PROP()));
     }
 
     @Override

@@ -15,15 +15,19 @@ import java.util.Collections;
 import java.util.Map;
 
 final public class SeqConfigGhost extends SeqConfigObsBase implements PropertyProvider {
-    public static final SPComponentType SP_TYPE = SPComponentType.ITERATOR_GHOST;
+
+    public static final SPComponentType SP_TYPE =
+        SPComponentType.ITERATOR_GHOST;
+
     public static final ISPNodeInitializer<ISPSeqComponent, SeqConfigGhost> NI =
-            new ComponentNodeInitializer<>(SP_TYPE, SeqConfigGhost::new, SeqConfigGhostCB::new);
+        new ComponentNodeInitializer<>(SP_TYPE, SeqConfigGhost::new, SeqConfigGhostCB::new);
+
     public static final String SYSTEM_NAME = SeqConfigNames.INSTRUMENT_CONFIG_NAME;
 
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP =
-            Collections.unmodifiableMap(
-                    PropertySupport.filter(PropertyFilter.ITERABLE_FILTER, Ghost$.MODULE$.PropertyMap())
-            );
+        Collections.unmodifiableMap(
+            PropertySupport.filter(PropertyFilter.ITERABLE_FILTER, Ghost$.MODULE$.PropertyMap())
+        );
 
     public SeqConfigGhost() {
         super(SP_TYPE, SYSTEM_NAME);
