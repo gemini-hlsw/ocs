@@ -15,7 +15,7 @@ import java.io.Serializable;
  * The difference here is that GHOST does not have a single exposure time, but due to having two detectors - a red
  * and a blue - exposure times and exposure counts for each. Additionally, GHOST does not have coadds.
  */
-public class GhostSeqRepeatExp extends SeqRepeat implements Serializable {
+public abstract class GhostSeqRepeatExp extends SeqRepeat implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private double redExposureTime = InstConstants.DEF_EXPOSURE_TIME;
