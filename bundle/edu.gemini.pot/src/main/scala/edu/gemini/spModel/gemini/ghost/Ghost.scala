@@ -97,18 +97,20 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
   }
 
   override def getSysConfig: ISysConfig = {
+    // Red/Blue exposure time parameters are added in the "observe" system.
+    //    sc.putParameter(DefaultParameter.getInstance(Ghost.RED_EXPOSURE_TIME_PROP.getName, getRedExposureTime))
+    //    sc.putParameter(DefaultParameter.getInstance(Ghost.RED_EXPOSURE_COUNT_PROP.getName, getRedExposureCount))
+    //    sc.putParameter(DefaultParameter.getInstance(Ghost.BLUE_EXPOSURE_TIME_PROP.getName, getBlueExposureTime))
+    //    sc.putParameter(DefaultParameter.getInstance(Ghost.BLUE_EXPOSURE_COUNT_PROP.getName, getBlueExposureCount))
+
     val sc = new DefaultSysConfig(SeqConfigNames.INSTRUMENT_CONFIG_NAME)
     sc.putParameter(StringParameter.getInstance(ISPDataObject.VERSION_PROP, getVersion))
     sc.putParameter(DefaultParameter.getInstance(Ghost.POS_ANGLE_PROP, getPosAngle))
     sc.putParameter(DefaultParameter.getInstance(Ghost.PORT_PROP, getIssPort))
     sc.putParameter(DefaultParameter.getInstance(Ghost.ENABLE_FIBER_AGITATOR_1_PROP.getName, isEnableFiberAgitator1))
     sc.putParameter(DefaultParameter.getInstance(Ghost.ENABLE_FIBER_AGITATOR_2_PROP.getName, isEnableFiberAgitator2))
-    sc.putParameter(DefaultParameter.getInstance(Ghost.RED_EXPOSURE_TIME_PROP.getName, getRedExposureTime))
-    sc.putParameter(DefaultParameter.getInstance(Ghost.RED_EXPOSURE_COUNT_PROP.getName, getRedExposureCount))
     sc.putParameter(DefaultParameter.getInstance(Ghost.RED_BINNING_PROP.getName, getRedBinning))
     sc.putParameter(DefaultParameter.getInstance(Ghost.RED_READ_NOISE_GAIN_PROP, getRedReadNoiseGain))
-    sc.putParameter(DefaultParameter.getInstance(Ghost.BLUE_EXPOSURE_TIME_PROP.getName, getBlueExposureTime))
-    sc.putParameter(DefaultParameter.getInstance(Ghost.BLUE_EXPOSURE_COUNT_PROP.getName, getBlueExposureCount))
     sc.putParameter(DefaultParameter.getInstance(Ghost.BLUE_BINNING_PROP.getName, getBlueBinning))
     sc.putParameter(DefaultParameter.getInstance(Ghost.BLUE_READ_NOISE_GAIN_PROP, getBlueReadNoiseGain))
     sc
