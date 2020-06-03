@@ -107,6 +107,7 @@ namespace giapi {
 			PAUSE,
 			CONTINUE,
 			STOP,
+			STOP4,
 			ABORT,
             ENGINEERING
 		};
