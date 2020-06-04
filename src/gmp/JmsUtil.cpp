@@ -34,6 +34,7 @@ JmsUtil::JmsUtil() {
 	JmsUtil::sequenceCommandMap[command::PAUSE] = GMPKeys::GMP_SEQUENCE_COMMAND_PAUSE;
 	JmsUtil::sequenceCommandMap[command::CONTINUE] = GMPKeys::GMP_SEQUENCE_COMMAND_CONTINUE;
 	JmsUtil::sequenceCommandMap[command::STOP] = GMPKeys::GMP_SEQUENCE_COMMAND_STOP;
+	JmsUtil::sequenceCommandMap[command::STOP_CYCLE] = GMPKeys::GMP_SEQUENCE_COMMAND_STOP_CYCLE;
 	JmsUtil::sequenceCommandMap[command::ABORT] = GMPKeys::GMP_SEQUENCE_COMMAND_ABORT;
 	JmsUtil::sequenceCommandMap[command::ENGINEERING] = GMPKeys::GMP_SEQUENCE_COMMAND_ENGINEERING;
 }

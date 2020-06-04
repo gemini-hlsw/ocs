@@ -58,6 +58,7 @@ public:
 	const static std::string GMP_SEQUENCE_COMMAND_PAUSE;
 	const static std::string GMP_SEQUENCE_COMMAND_CONTINUE;
 	const static std::string GMP_SEQUENCE_COMMAND_STOP;
+	const static std::string GMP_SEQUENCE_COMMAND_STOP_CYCLE;
 	const static std::string GMP_SEQUENCE_COMMAND_ABORT;
 	const static std::string GMP_SEQUENCE_COMMAND_ENGINEERING;
 

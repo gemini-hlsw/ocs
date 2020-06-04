@@ -46,6 +46,7 @@ int main(int argc, char **argv) {
 	commands_set.insert(std::make_pair(PAUSE, SET_PRESET_START_CANCEL));
 	commands_set.insert(std::make_pair(CONTINUE, SET_PRESET_START_CANCEL));
 	commands_set.insert(std::make_pair(STOP, SET_PRESET_START_CANCEL));
+	commands_set.insert(std::make_pair(STOP_CYCLE, SET_PRESET_START_CANCEL));
 	commands_set.insert(std::make_pair(ABORT, SET_PRESET_START_CANCEL));
 	commands_set.insert(std::make_pair(OBSERVE, SET_PRESET_START_CANCEL));
 
