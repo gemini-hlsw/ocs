@@ -340,6 +340,7 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
     }
 
     def editPi() { listViewer.editPi() }
+    def editInvestigator[A <: Investigator](inv: A) { listViewer.edit(inv) }
 
     object listViewer extends SimpleListViewer[Proposal, Investigators, Investigator] {
 
