@@ -1,5 +1,16 @@
 <institutions>
     <site>
+        <institution>Instituto de Astronomia y Ciencias Planetarias de Atacama (INCT)</institution>
+        <address>Universidad de Atacama</address>
+        <address>Copayapu 485</address>
+        <address>Copiapó</address>
+        <country>Chile</country>
+        <contact>
+            <phone>+56 52 225 5938</phone>
+            <homepage>http://inct.uda.cl/about.html</homepage>
+        </contact>
+    </site>
+    <site>
         <institution>Instituto de Astronomia y Fisica del Espacio (IAFE)</institution>
         <address>Casilla de Correos 67</address>
         <address>Sucursal 28</address>
