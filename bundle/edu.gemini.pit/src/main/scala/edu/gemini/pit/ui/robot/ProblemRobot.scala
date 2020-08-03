@@ -769,6 +769,28 @@ case class TimeProblems(p: Proposal, s: ShellAdvisor) {
   }
   lazy val b3ReqOrZero: TimeAmount = b3Req.map(_.time).getOrElse(TimeAmount.empty)
 
+  // REL-3829 - this is no longer needed but I have been advised that such things are often
+  //            resurrected so I'm leaving it here for now.
+  //
+  //  lazy val jointNotAllowed: List[Problem] = {
+  //    def checkForNotAllowedJointProposals(subs: Option[List[NgoSubmission]]):List[Problem] = {
+  //      val r = for {
+  //          subs <- subs
+  //          if subs.size > 1
+  //        } yield for {
+  //            p <- subs.filter(s => Partners.jointProposalNotAllowed.contains(s.partner))
+  //          } yield new Problem(Severity.Error, s"${~Partners.name.get(p.partner)} cannot be part of a joint proposal, please update the time request.", SCHEDULING_SECTION,
+  //              s.showPartnersView())
+  //      r.sequence.flatten
+  //    }
+  //
+  //    p.proposalClass match {
+  //      case p: GeminiNormalProposalClass => checkForNotAllowedJointProposals(p.subs.left.toOption)
+  //      case e: ExchangeProposalClass     => checkForNotAllowedJointProposals(e.subs.some)
+  //      case x                            => Nil
+  //    }
+  //  }
+
   private def when[A](b: Boolean)(a: => A) = b option a
 
   private def requestedTimeCheck(r: TimeAmount, o: TimeAmount, b: Band) =
