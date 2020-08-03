@@ -8,7 +8,6 @@ object Partners {
 
   val name = Map[Any, String](
     NgoPartner.AR          -> "Argentina",
-    NgoPartner.AU          -> "Australia",
     NgoPartner.BR          -> "Brazil",
     NgoPartner.CA          -> "Canada",
     NgoPartner.CL          -> "Chile",
@@ -20,9 +19,6 @@ object Partners {
     ExchangePartner.SUBARU -> Site.Subaru.name,
     LargeProgramPartner    -> "Large Program"
   )
-
-  // REL-2248 Contains a list of partners that are not allowed on joint proposals
-  val jointProposalNotAllowed = List[NgoPartner](NgoPartner.AU)
 
   // REL-2670 A partner affiliation for an FT proposal can be either Ngo or Subaru
   type FtPartner = Option[NgoPartner \/ ExchangePartner.SUBARU.type]

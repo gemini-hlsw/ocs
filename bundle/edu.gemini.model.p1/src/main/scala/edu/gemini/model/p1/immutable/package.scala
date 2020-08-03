@@ -51,7 +51,6 @@ package object immutable {
   type NgoPartner = M.NgoPartner
   object NgoPartner extends EnumObject[M.NgoPartner] {
     val AR = M.NgoPartner.AR
-    val AU = M.NgoPartner.AU
     val BR = M.NgoPartner.BR
     val CA = M.NgoPartner.CA
     val CL = M.NgoPartner.CL
