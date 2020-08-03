@@ -223,6 +223,7 @@
             <xsd:enumeration value="Directors Time"/>
             <xsd:enumeration value="Poor Weather"/>
             <xsd:enumeration value="System Verification"/>
+            <xsd:enumeration value="Guaranteed Time"/>
         </xsd:restriction>
     </xsd:simpleType>
 
