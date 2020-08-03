@@ -12,7 +12,7 @@ pitVersion in ThisBuild := OcsVersion("2020B", false, 2, 1, 2)
 // Bundles by default use the ocsVersion; this is overridden in bundles used only by the PIT
 version in ThisBuild := ocsVersion.value.toOsgiVersion
 
-scalaVersion in ThisBuild := "2.11.11"
+scalaVersion in ThisBuild := "2.11.12"
 
 updateOptions := updateOptions.value.withCachedResolution(true)
 
