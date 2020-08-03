@@ -134,15 +134,7 @@ object SemesterConverter {
 
   // definition of a ZeroConverter
   private case object ZeroSemesterConverter extends SemesterConverter {
-
-    val removeAustraliaSubmissions: TransformFunction = {
-      case n @ <ngo>{ns @ _*}</ngo> if (ns \\ "partner").exists(_.text == "au") =>
-        StepResult("Submission(s) to Australia have been removed.", Nil).successNel
-    }
-
-    override val transformers: List[TransformFunction] =
-      List(removeAustraliaSubmissions)
-
+    override val transformers: List[TransformFunction] = Nil
   }
 
   // Monoid conversions
@@ -164,8 +156,15 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
   * This converter supports migrating to 2021A.
   */
 case object SemesterConverter2020BTo2021A extends SemesterConverter {
-  // TODO
-  override val transformers: List[TransformFunction] = Nil
+
+    val removeAustraliaSubmissions: TransformFunction = {
+      case n @ <ngo>{ns @ _*}</ngo> if (ns \\ "partner").exists(_.text == "au") =>
+        StepResult("Submission(s) to Australia have been removed.", Nil).successNel
+    }
+
+    override val transformers: List[TransformFunction] =
+      List(removeAustraliaSubmissions)
+
 }
 
 /**
