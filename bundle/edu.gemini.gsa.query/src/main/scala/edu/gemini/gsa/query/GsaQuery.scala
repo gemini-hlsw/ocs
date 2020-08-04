@@ -2,10 +2,8 @@ package edu.gemini.gsa.query
 
 import edu.gemini.spModel.core.catchingNonFatal
 import edu.gemini.gsa.query.GsaQueryError._
-
 import argonaut._
 import Argonaut._
-
 import java.io.{IOException, InputStream}
 import java.net.{HttpURLConnection, URL}
 import java.net.HttpURLConnection._
@@ -14,9 +12,10 @@ import java.util.logging.{Level, Logger}
 
 import scala.Function.const
 import scala.io.Source
-
 import scalaz._
 import Scalaz._
+import edu.gemini.util.ssl.GemSslSocketFactory
+import javax.net.ssl.HttpsURLConnection
 
 /** GsaQuery handles the grim procedural details of making get and post
   * requests to the GSA server with an HttpURLConnection.
@@ -80,9 +79,10 @@ private [query] object GsaQuery {
       try { s.mkString } finally { s.close() }
     }
 
-    val con = url.openConnection().asInstanceOf[HttpURLConnection]
+    val con = url.openConnection().asInstanceOf[HttpsURLConnection]
     con.setConnectTimeout(ConnectTimeout)
     con.setReadTimeout(ReadTimeout)
+    con.setSSLSocketFactory(GemSslSocketFactory.get)
     con.setRequestProperty("Accept-Charset", Cset)
 
     prep(con)
