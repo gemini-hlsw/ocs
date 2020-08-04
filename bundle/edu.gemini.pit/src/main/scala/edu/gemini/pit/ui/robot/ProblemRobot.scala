@@ -768,24 +768,28 @@ case class TimeProblems(p: Proposal, s: ShellAdvisor) {
     case _ => None
   }
   lazy val b3ReqOrZero: TimeAmount = b3Req.map(_.time).getOrElse(TimeAmount.empty)
-  lazy val jointNotAllowed: List[Problem] = {
-    def checkForNotAllowedJointProposals(subs: Option[List[NgoSubmission]]):List[Problem] = {
-      val r = for {
-          subs <- subs
-          if subs.size > 1
-        } yield for {
-            p <- subs.filter(s => Partners.jointProposalNotAllowed.contains(s.partner))
-          } yield new Problem(Severity.Error, s"${~Partners.name.get(p.partner)} cannot be part of a joint proposal, please update the time request.", SCHEDULING_SECTION,
-              s.showPartnersView())
-      r.sequence.flatten
-    }
 
-    p.proposalClass match {
-      case p: GeminiNormalProposalClass => checkForNotAllowedJointProposals(p.subs.left.toOption)
-      case e: ExchangeProposalClass     => checkForNotAllowedJointProposals(e.subs.some)
-      case x                            => Nil
-    }
-  }
+  // REL-3829 - this is no longer needed but I have been advised that such things are often
+  //            resurrected so I'm leaving it here for now.
+  //
+  //  lazy val jointNotAllowed: List[Problem] = {
+  //    def checkForNotAllowedJointProposals(subs: Option[List[NgoSubmission]]):List[Problem] = {
+  //      val r = for {
+  //          subs <- subs
+  //          if subs.size > 1
+  //        } yield for {
+  //            p <- subs.filter(s => Partners.jointProposalNotAllowed.contains(s.partner))
+  //          } yield new Problem(Severity.Error, s"${~Partners.name.get(p.partner)} cannot be part of a joint proposal, please update the time request.", SCHEDULING_SECTION,
+  //              s.showPartnersView())
+  //      r.sequence.flatten
+  //    }
+  //
+  //    p.proposalClass match {
+  //      case p: GeminiNormalProposalClass => checkForNotAllowedJointProposals(p.subs.left.toOption)
+  //      case e: ExchangeProposalClass     => checkForNotAllowedJointProposals(e.subs.some)
+  //      case x                            => Nil
+  //    }
+  //  }
 
   private def when[A](b: Boolean)(a: => A) = b option a
 
@@ -816,7 +820,7 @@ case class TimeProblems(p: Proposal, s: ShellAdvisor) {
   def noMinBand3Time: Option[Problem] = b3Problem(r => r.time.hours > 0.0 && r.minTime.hours <= 0.0, Severity.Todo, "Please enter the minimum required time for a usable Band 3 allocation.")
   def band3MinTime: Option[Problem] = b3Problem(r => r.time.hours < r.minTime.hours, Severity.Error, "The minimum Band 3 required time must not be longer than the total Band 3 requested time.")
 
-  def all: List[Problem] = List(requestedTimeDiffers, requestedB3TimeDiffers, noTimeRequest, noBand3Time, noMinBand3Time, band3MinTime).flatten ++ jointNotAllowed
+  def all: List[Problem] = List(requestedTimeDiffers, requestedB3TimeDiffers, noTimeRequest, noBand3Time, noMinBand3Time, band3MinTime).flatten
 }
 
 

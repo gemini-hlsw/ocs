@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2020.1.1">
+    <meta band3optionChosen="false" overrideAffiliate="false"/>
+    <semester year="2020" half="B"/>
+    <title></title>
+    <abstract></abstract>
+    <scheduling></scheduling>
+    <keywords/>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <gender>None selected</gender>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets/>
+    <conditions/>
+    <blueprints/>
+    <observations/>
+    <proposalClass>
+        <queue tooOption="None">
+            <ngo partnerLead="investigator-0">
+                <request>
+                    <time units="hr">10.0</time>
+                    <minTime units="hr">5.0</minTime>
+                </request>
+                <partner>us</partner>
+            </ngo>
+            <ngo partnerLead="investigator-0">
+                <request>
+                    <time units="hr">1.0</time>
+                    <minTime units="hr">0.5</minTime>
+                </request>
+                <partner>au</partner>
+            </ngo>
+        </queue>
+    </proposalClass>
+</proposal>

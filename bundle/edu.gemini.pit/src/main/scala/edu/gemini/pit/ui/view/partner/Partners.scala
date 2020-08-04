@@ -8,7 +8,6 @@ import javax.swing.Icon
 object PartnersFlags {
   val flag = Map[Any, Icon](
     NgoPartner.AR          -> SharedIcons.FLAG_AR,
-    NgoPartner.AU          -> SharedIcons.FLAG_AU,
     NgoPartner.BR          -> SharedIcons.FLAG_BR,
     NgoPartner.CA          -> SharedIcons.FLAG_CA,
     NgoPartner.CL          -> SharedIcons.FLAG_CL,

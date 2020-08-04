@@ -63,7 +63,6 @@ object Institutions {
 
   def country2Ngo(country: String): FtPartner = country match {
     case "Argentina"            => Some(-\/(NgoPartner.AR))
-    case "Australia"            => Some(-\/(NgoPartner.AU))
     case "Brazil"               => Some(-\/(NgoPartner.BR))
     case "Canada"               => Some(-\/(NgoPartner.CA))
     case "Chile"                => Some(-\/(NgoPartner.CL))

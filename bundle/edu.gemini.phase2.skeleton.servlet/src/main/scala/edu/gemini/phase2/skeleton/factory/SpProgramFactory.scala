@@ -31,7 +31,6 @@ object SpProgramFactory {
 
   private val NGO_TIME_ACCT = Map(
     AR -> TimeAcctCategory.AR,
-    AU -> TimeAcctCategory.AU,
     BR -> TimeAcctCategory.BR,
     CA -> TimeAcctCategory.CA,
     CL -> TimeAcctCategory.CL,

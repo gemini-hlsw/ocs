@@ -36,7 +36,7 @@ class VoTableClientSpec extends Specification with VoTableClient {
       ConeSearchBackend.queryParams(query) should beEqualTo(Array(("CATALOG", "ucac4"), ("RA", "10.000"), ("DEC", "20.000"), ("SR", "0.100")))
     }
     "make a query to a bad site" in {
-      Await.result(doQuery(query, new URL("http://unknown.site.6BD3435D-F573-4760-8233-8ADF7D6137AA"), ConeSearchBackend)(implicitly), 30.seconds) should throwA[UnknownHostException]
+      Await.result(doQuery(query, new URL("http://unknown.site.7732BFA1-9937-4D1E-8969-B02782608DAD"), ConeSearchBackend)(implicitly), 30.seconds) should throwA[UnknownHostException]
     }
     "be able to select the first successful of several futures" in {
       def f1 = Future { Thread.sleep(1000); throw new RuntimeException("oops") }

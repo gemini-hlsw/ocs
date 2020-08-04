@@ -192,7 +192,6 @@
     <xsd:simpleType name="NgoPartner">
         <xsd:restriction base="xsd:token">
             <xsd:enumeration value="ar"/>
-            <xsd:enumeration value="au"/>
             <xsd:enumeration value="br"/>
             <xsd:enumeration value="ca"/>
             <xsd:enumeration value="cl"/>
