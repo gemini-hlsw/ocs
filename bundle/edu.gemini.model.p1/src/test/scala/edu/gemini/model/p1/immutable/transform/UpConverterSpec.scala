@@ -10,6 +10,7 @@ import java.io.InputStreamReader
 import edu.gemini.model.p1.immutable._
 import scalaz.NonEmptyList
 import XMLConverter._
+import scalaz.{ Validation, Success }
 
 class UpConverterSpec extends Specification with SemesterProperties with XmlMatchers {
   "The UpConverter" should {
@@ -810,6 +811,19 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
 
           val proposal = ProposalIo.read(result.toString())
           proposal.category must beSome(TacCategory.GALAXY_EVOLUTION)
+      }
+    }
+    "remove AU submissions" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_au_submission.xml")))
+      val converted = UpConverter.convert(xml)
+      converted match {
+        case Success(StepResult(changes, result)) =>
+          changes must contain(SemesterConverter2020BTo2021A.AuSubmissionMessage)
+          ProposalIo.read(result.toString()).proposalClass match {
+            case QueueProposalClass(_, _, _, Left(List(NgoSubmission(_, _, NgoPartner.US, _))), _, _) => success("ok!") // AU is gone!
+            case x => failure(x.toString)
+          }
+        case x => failure(x.toString)
       }
     }
   }

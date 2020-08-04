@@ -157,13 +157,15 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
   */
 case object SemesterConverter2020BTo2021A extends SemesterConverter {
 
-    val removeAustraliaSubmissions: TransformFunction = {
-      case n @ <ngo>{ns @ _*}</ngo> if (ns \\ "partner").exists(_.text == "au") =>
-        StepResult("Submission(s) to Australia have been removed.", Nil).successNel
-    }
+  val AuSubmissionMessage = "Submission(s) to Australia have been removed."
 
-    override val transformers: List[TransformFunction] =
-      List(removeAustraliaSubmissions)
+  val removeAustraliaSubmissions: TransformFunction = {
+    case n @ <ngo>{ns @ _*}</ngo> if (ns \\ "partner").exists(_.text == "au") =>
+      StepResult(AuSubmissionMessage, Nil).successNel
+  }
+
+  override val transformers: List[TransformFunction] =
+    List(removeAustraliaSubmissions)
 
 }
 
