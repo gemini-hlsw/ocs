@@ -45,7 +45,8 @@ def common(ov: Version, pv: Version) = AppConfig(
     BundleSpec("org.ops4j.pax.web.pax-web-jetty-bundle", Version(1, 1, 13)),
     BundleSpec("edu.gemini.util.javax.mail",             ov),
     BundleSpec("slf4j.api",                              Version(1, 6, 4)),
-    BundleSpec("slf4j.jdk14",                            Version(1, 6, 4))
+    BundleSpec("slf4j.jdk14",                            Version(1, 6, 4)),
+    BundleSpec("org.apache.commons.logging",             Version(1, 1, 0))
   )
 ) extending List()
 

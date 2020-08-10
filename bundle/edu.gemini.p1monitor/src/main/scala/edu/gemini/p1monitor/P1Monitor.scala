@@ -12,12 +12,14 @@ object P1Monitor {
     case "DT" => SpecialProposalType.DIRECTORS_TIME
     case "PW" => SpecialProposalType.POOR_WEATHER
     case "SV" => SpecialProposalType.SYSTEM_VERIFICATION
+    case "GT" => SpecialProposalType.GUARANTEED_TIME
   }
   implicit val proposalType2String = (proposalType:SpecialProposalType) => proposalType match {
     case SpecialProposalType.DEMO_SCIENCE        => "DS"
     case SpecialProposalType.DIRECTORS_TIME      => "DT"
     case SpecialProposalType.POOR_WEATHER        => "PW"
     case SpecialProposalType.SYSTEM_VERIFICATION => "SV"
+    case SpecialProposalType.GUARANTEED_TIME     => "GT"
     case x => sys.error("unsupported proposal type " + x)
   }
 }
