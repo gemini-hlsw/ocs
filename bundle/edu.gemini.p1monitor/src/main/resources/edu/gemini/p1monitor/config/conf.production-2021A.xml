@@ -36,7 +36,7 @@
     <type name="GuaranteedTime">
         <dir>/home/software/proposals/guaranteed_time/proposals/2021A</dir>
         <to>pitgt@gemini.edu</to>
-        <template>gs</template>
+        <template>gt</template>
     </type>
 
     <type name="LargeProgram">
