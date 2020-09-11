@@ -301,7 +301,9 @@ public class GmosSouthType {
         NS_3("N and S 1.00 arcsec", 1.00, "NS1.0arcsec",       Ictd.track("NS1.0arcsec")),
         NS_4("N and S 1.50 arcsec", 1.50, "NS1.5arcsec",       Ictd.track("NS1.5arcsec")),
         NS_5("N and S 2.00 arcsec", 2.00, "NS2.0arcsec",       Ictd.track("NS2.0arcsec")),
-        CUSTOM_MASK("Custom Mask", "custom",                   Ictd.installed()),
+        CUSTOM_MASK("Custom Mask", "custom",                   Ictd.installed()){
+            @Override public boolean isCustom() { return true; }
+        },
         ;
 
         /** The default FPUnit value **/
@@ -367,6 +369,8 @@ public class GmosSouthType {
         public static FPUnitSouth getFPUnit(String name, FPUnitSouth nvalue) {
             return SpTypeUtil.oldValueOf(FPUnitSouth.class, name, nvalue);
         }
+
+        @Override public boolean isCustom() { return false; }
 
         /**
          * Test to see if GMOS is imaging.  This checks for the

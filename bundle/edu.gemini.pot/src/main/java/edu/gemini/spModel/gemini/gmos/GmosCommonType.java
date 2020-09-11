@@ -85,6 +85,7 @@ public class GmosCommonType {
         boolean isIFU();
         boolean isNS();
         boolean isNSslit();
+        boolean isCustom();
 
         /**
          * True if the slit is wider than it is tall.  See REL-661 comment on
