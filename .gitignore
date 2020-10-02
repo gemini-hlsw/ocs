@@ -26,6 +26,7 @@ app/**/idea
 *.iml
 *.ipr
 *.iws
+.idea
 
 # Eclipse specific
 .project
