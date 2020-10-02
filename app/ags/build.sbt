@@ -3,12 +3,16 @@ import OcsKeys._
 import edu.gemini.osgi.tools.Version
 import edu.gemini.osgi.tools.app.{ Configuration => AppConfig, _ }
 import edu.gemini.osgi.tools.app.Configuration.Distribution.{ Test => TestDistro, _ }
-import OcsCredentials.Spdb._
+import OcsCredentials.Ags._
 
 ocsAppSettings
 
 // Application for AGS servlets
 ocsAppManifest := {
+  // check for link to keystore
+  val f = baseDirectory.value / "conf" / "gemKeystore"
+  if (!f.isFile)
+    println(s"[${scala.Console.RED}error${scala.Console.RESET}] Keystore file ${f} was not found ... please link it!")
   val v = ocsVersion.value.toBundleVersion
   Application(
     id = "ags",
@@ -36,7 +40,7 @@ def common(version: Version) = AppConfig(
     "-Dnetworkaddress.cache.ttl=60",
     "-Duser.language=en",
     "-Duser.country=US",
-    "-Xmx2048M",
+    "-Xmx3072M",
     "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5006",
     "-d64"
   ),
@@ -46,8 +50,10 @@ def common(version: Version) = AppConfig(
     "org.osgi.framework.bootdelegation"                -> "*",
     "org.osgi.framework.startlevel.beginning"          -> "99",
     "org.osgi.framework.storage.clean"                 -> "onFirstInit",
-    "org.osgi.service.http.port"                       -> "9123",
-    "org.osgi.service.http.secure.enabled"             -> "false"
+    "org.osgi.service.http.port"                       -> "8442",
+    "org.osgi.service.http.port.secure"                -> "8443",
+    "org.osgi.service.http.secure.enabled"             -> "true",
+    "org.ops4j.pax.web.ssl.keystore"                   -> "conf/gemKeystore"
   ),
   log = Some("log/ags.%u.%g.log"),
   bundles = List(
@@ -61,7 +67,11 @@ def common(version: Version) = AppConfig(
     BundleSpec("org.apache.commons.logging",             Version(1, 1, 0)),
     BundleSpec("org.apache.felix.http.jetty",            Version(2, 2, 0)),
     BundleSpec("io.argonaut",                            Version(6, 2, 0)),
-    BundleSpec("edu.gemini.pot",                         version)
+    BundleSpec("edu.gemini.pot",                         version),
+    BundleSpec("org.ops4j.pax.web.pax-web-extender-war", Version(1, 1, 13)),
+    BundleSpec("org.ops4j.pax.web.pax-web-jetty-bundle", Version(1, 1, 13)),
+    BundleSpec("org.ops4j.pax.web.pax-web-jsp",          Version(1, 1, 13)),
+    BundleSpec("org.ops4j.pax.web.pax-web-spi",          Version(1, 1, 13))
   )
 ) extending List(common_credentials(version), with_gogo_credentials(version))
 
