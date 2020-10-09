@@ -76,6 +76,7 @@ public class GmosSouthType {
         R831_G5322(  "R831_G5322",  "R831",  831, Ictd.track( "R831")),
         B600_G5323(  "B600_G5323",  "B600",  600, Ictd.track( "B600")),
         R600_G5324(  "R600_G5324",  "R600",  600, Ictd.track( "R600")),
+        G480_G5327(  "G480_G5327",  "G480",  480, Ictd.track( "G480")),
         R400_G5325(  "R400_G5325",  "R400",  400, Ictd.track( "R400")),
         R150_G5326(  "R150_G5326",  "R150",  150, Ictd.track( "R150")),
         ;
