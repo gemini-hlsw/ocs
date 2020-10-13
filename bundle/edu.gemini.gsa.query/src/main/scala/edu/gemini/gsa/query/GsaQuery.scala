@@ -79,10 +79,16 @@ private [query] object GsaQuery {
       try { s.mkString } finally { s.close() }
     }
 
-    val con = url.openConnection().asInstanceOf[HttpsURLConnection]
+    val con = url.openConnection() match {
+      // Order is important as HttpsURLConnection extends HttpURLConnection
+      case con: HttpsURLConnection =>
+        con.setSSLSocketFactory(GemSslSocketFactory.get)
+        con
+      case con: HttpURLConnection =>
+        con
+    }
     con.setConnectTimeout(ConnectTimeout)
     con.setReadTimeout(ReadTimeout)
-    con.setSSLSocketFactory(GemSslSocketFactory.get)
     con.setRequestProperty("Accept-Charset", Cset)
 
     prep(con)
