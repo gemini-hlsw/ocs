@@ -30,6 +30,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
+import edu.gemini.ags.gems.GemsCandidates.ops
 
 /**
  * The new NGS2 strategy, which requires Canopus guide stars and a PWFS1 guide
@@ -165,14 +166,28 @@ final case class Ngs2Strategy(
         // that is repositioned at each science offset and then the intersection
         // of these will be the valid range.  For now though, we'll just use the
         // candidates within the (0, 1') range from GemsCandidates.
+        val pf                     = PatrolField.fromRadiusLimits(JAngle.ANGLE_0DEGREES, JAngle.arcmins(1.3))
+        val magc                   = GemsVoTableCatalog.cwfsMagnitudeConstraints(ctx)
+        val candidatesWithValidMag = ts.filter(t => magc.searchBands.extract(t).exists(magc.contains))
 
-        val pf = PatrolField.fromRadiusLimits(JAngle.ANGLE_0DEGREES, JAngle.arcmins(1.3)).offsetIntersection(ctx.getSciencePositions)
+        // A quick radius filter because the exact match done later is expensive
+        // and in a crowded field it takes a while to exact match them all.
+        val radiusFilter =
+        for {
+          rc <- RadiusLimitCalc.getAgsQueryRadiusLimits(Some(pf), ctx)
+          c0 <- ctx.getBaseCoordinates.asScalaOpt
+          c1 <- c0.toCoreCoordinates.asScalaOpt
+        } yield rc.targetsFilter(c1)
 
-        val cwfs =
-          GemsCandidates.groupAndValidate(ctx, posAngles(ctx), ts)
-            .foldLeft(List.empty[SiderealTarget]) { case (cwfs, gc) =>
-              gc.cwfsCandidates ++ cwfs
-            }
+        // candidates with valid magnitude that are also within the correct distance,
+        // ignoring position angle
+        val cwfs = radiusFilter.fold(candidatesWithValidMag)(candidatesWithValidMag.filter)
+
+//        val cwfs =
+//          GemsCandidates.groupAndValidate(ctx, posAngles(ctx), ts)
+//            .foldLeft(List.empty[SiderealTarget]) { case (cwfs, gc) =>
+//              gc.cwfsCandidates ++ cwfs
+//            }
 
         // REL-3747: here we use a special PWFS1 validator. GemsCandidates
         // returns just the "best" SFS option but we need to display all the
