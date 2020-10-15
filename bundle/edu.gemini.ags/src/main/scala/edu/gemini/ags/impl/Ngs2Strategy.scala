@@ -167,7 +167,6 @@ final case class Ngs2Strategy(
         // for selection. We do this in arcsecs so we can use the default value in CanopusWfs and simply grow the size.
         val pf                     = PatrolField.fromRadiusLimits(JAngle.ANGLE_0DEGREES,
                                            JAngle.arcsecs(15.5 + CanopusWfs.RADIUS_ARCSEC))
-        assert(JAngle.arcsecs(15.5 + CanopusWfs.RADIUS_ARCSEC).toArcmins.compareToAngle(JAngle.arcmins(1.3)) == 0)
         val magc                   = GemsVoTableCatalog.cwfsMagnitudeConstraints(ctx)
         val candidatesWithValidMag = ts.filter(t => magc.searchBands.extract(t).exists(magc.contains))
 
