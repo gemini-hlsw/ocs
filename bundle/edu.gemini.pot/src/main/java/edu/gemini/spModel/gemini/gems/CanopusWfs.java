@@ -24,7 +24,7 @@ public enum CanopusWfs implements GuideProbe, ValidatableGuideProbe, OffsetValid
     cwfs2(2),
     cwfs3(3),;
 
-    private static final double RADIUS_ARCSEC = 62.5;
+    public static final double RADIUS_ARCSEC = 62.5;
     private static final PatrolField patrolField;
     static {
         final Ellipse2D AO_PORT = new Ellipse2D.Double(-RADIUS_ARCSEC, -RADIUS_ARCSEC, RADIUS_ARCSEC * 2, RADIUS_ARCSEC * 2);
