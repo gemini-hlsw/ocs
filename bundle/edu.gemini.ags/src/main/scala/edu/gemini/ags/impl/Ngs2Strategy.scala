@@ -1,11 +1,13 @@
 package edu.gemini.ags.impl
 
+import java.awt.geom.AffineTransform
+
 import edu.gemini.ags.api.AgsAnalysis.NoGuideStarForProbe
 import edu.gemini.ags.api.{AgsAnalysis, AgsGuideQuality, AgsMagnitude, AgsStrategy, ProbeCandidates}
-import edu.gemini.ags.api.AgsMagnitude.{ MagnitudeCalc, MagnitudeTable }
-import edu.gemini.ags.api.AgsStrategy.{ Assignment, Selection }
-import edu.gemini.ags.gems.{ GemsCandidates, GemsResultsAnalyzer, GemsVoTableCatalog }
-import edu.gemini.catalog.api.{MagnitudeConstraints, CatalogName, CatalogQuery}
+import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
+import edu.gemini.ags.api.AgsStrategy.{Assignment, Selection}
+import edu.gemini.ags.gems.{GemsCandidates, GemsResultsAnalyzer, GemsVoTableCatalog}
+import edu.gemini.catalog.api.{CatalogName, CatalogQuery, MagnitudeConstraints}
 import edu.gemini.catalog.votable.VoTableBackend
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.ags.AgsStrategyKey
@@ -13,20 +15,22 @@ import edu.gemini.spModel.ags.AgsStrategyKey.Ngs2Key
 import edu.gemini.spModel.core.{Angle, BandsList, RBandsList, SiderealTarget}
 import edu.gemini.spModel.gemini.gems.CanopusWfs
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
-import edu.gemini.spModel.guide.{GuideSpeed, GuideProbe, ValidatableGuideProbe}
+import edu.gemini.spModel.guide.{GuideProbe, GuideSpeed, PatrolField, ValidatableGuideProbe}
 import edu.gemini.spModel.guide.GuideStarValidation.VALID
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe.pwfs1
 import edu.gemini.spModel.telescope.{PosAngleConstraint, PosAngleConstraintAware}
 import edu.gemini.pot.ModelConverters._
+import edu.gemini.skycalc.{Offset, Angle => JAngle}
+import jsky.util
 
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.JavaConverters._
-
 import scalaz._
 import Scalaz._
+import edu.gemini.ags.gems.GemsCandidates.ops
 
 /**
  * The new NGS2 strategy, which requires Canopus guide stars and a PWFS1 guide
@@ -156,18 +160,28 @@ final case class Ngs2Strategy(
       .search(ctx, mt)(ec)
       .map { ts =>
 
-        // REL-3745: here instead of using the actual valid range from
-        // GemsCandidates we'll need to make a new special-purpose validator
-        // with an increased range. So a PatrolField.fromRadiusLimits(0, 1.3')
-        // that is repositioned at each science offset and then the intersection
-        // of these will be the valid range.  For now though, we'll just use the
-        // candidates within the (0, 1') range from GemsCandidates.
+        // REL-3745: The code below handles its own range and magnitude filtering of CWFS candidates instead of
+        // calling GemsCandidates.groupAndValidate. We make a new special-purpose validator using a
+        // PatrolField.fromRadiusLimits(0, 1.3') so that candidates slightly outside of range will be shown alongside
+        // strictly valid candidates. Regardless, the candidate pool is ultimately filtered down to valid targets
+        // for selection. We do this in arcsecs so we can use the default value in CanopusWfs and simply grow the size.
+        val pf                     = PatrolField.fromRadiusLimits(JAngle.ANGLE_0DEGREES,
+                                           JAngle.arcsecs(15.5 + CanopusWfs.RADIUS_ARCSEC))
+        val magc                   = GemsVoTableCatalog.cwfsMagnitudeConstraints(ctx)
+        val candidatesWithValidMag = ts.filter(t => magc.searchBands.extract(t).exists(magc.contains))
 
-        val cwfs =
-          GemsCandidates.groupAndValidate(ctx, posAngles(ctx), ts)
-            .foldLeft(List.empty[SiderealTarget]) { case (cwfs, gc) =>
-              gc.cwfsCandidates ++ cwfs
-            }
+        // A quick radius filter because the exact match done later is expensive
+        // and in a crowded field it takes a while to exact match them all.
+        val radiusFilter =
+          for {
+            rc <- RadiusLimitCalc.getAgsQueryRadiusLimits(Some(pf), ctx)
+            c0 <- ctx.getBaseCoordinates.asScalaOpt
+            c1 <- c0.toCoreCoordinates.asScalaOpt
+          } yield rc.targetsFilter(c1)
+
+        // Candidates with valid magnitude that are also within the correct distance,
+        // ignoring position angle
+        val cwfs = radiusFilter.fold(candidatesWithValidMag)(candidatesWithValidMag.filter)
 
         // REL-3747: here we use a special PWFS1 validator. GemsCandidates
         // returns just the "best" SFS option but we need to display all the
