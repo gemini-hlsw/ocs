@@ -1618,12 +1618,9 @@ public abstract class InstGmosCommon<
         sc.putParameter(DefaultParameter.getInstance(AMP_GAIN_CHOICE_PROP.getName(), getGainChoice()));
         sc.putParameter(DefaultParameter.getInstance(AMP_READ_MODE_PROP.getName(), getAmpReadMode()));
 
-        GmosCommonType.Disperser d = _disperser;
-        sc.putParameter(DefaultParameter.getInstance(DISPERSER_PROP_NAME, d));
-        if (!d.isMirror()) {
-            sc.putParameter(DefaultParameter.getInstance(DISPERSER_ORDER_PROP.getName(), getDisperserOrder()));
-            sc.putParameter(DefaultParameter.getInstance(DISPERSER_LAMBDA_PROP.getName(), getDisperserLambda()));
-        }
+        sc.putParameter(DefaultParameter.getInstance(DISPERSER_PROP_NAME, _disperser));
+        sc.putParameter(DefaultParameter.getInstance(DISPERSER_ORDER_PROP.getName(), getDisperserOrder()));
+        sc.putParameter(DefaultParameter.getInstance(DISPERSER_LAMBDA_PROP.getName(), getDisperserLambda()));
 
         GmosCommonType.FPUnitMode fpuMode = getFPUnitMode();
         sc.putParameter(DefaultParameter.getInstance(FPU_MODE_PROP.getName(), fpuMode));
