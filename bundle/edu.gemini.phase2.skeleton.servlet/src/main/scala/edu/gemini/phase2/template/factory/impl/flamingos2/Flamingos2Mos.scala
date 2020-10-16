@@ -49,7 +49,7 @@ final case class Flamingos2Mos(blueprint:SpFlamingos2BlueprintMos) extends Flami
       "Use the same PA for the MOS science target and telluric",
       "Detector readout modes",
       "Libraries",
-      "MOS Arcs and flats",
+      "MOS Baseline calibrations",
       "MOS slits: only use slit widths of 4 pixels (0.72 arcsec) or larger. Slit length no less than 5 arcsec."
     )
 
