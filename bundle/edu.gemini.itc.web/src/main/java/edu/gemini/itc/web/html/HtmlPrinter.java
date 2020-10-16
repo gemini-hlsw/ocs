@@ -124,9 +124,7 @@ public final class HtmlPrinter {
         final StringBuilder sb = new StringBuilder();
         sb.append("Altair Guide Star properties:");
 
-        if (altair.getWFSMode().equals(AltairParams.GuideStarType.LGS)) {
-            sb.append("<LI>Laser Guide Star Mode selected");
-        }
+        if (altair.getWFSMode().equals(AltairParams.GuideStarType.LGS)) sb.append("<LI>Laser Guide Star Mode selected");
 
         sb.append("<LI>Natural Guide Star Mode selected");
         sb.append("<LI>Guide Star Seperation ");
