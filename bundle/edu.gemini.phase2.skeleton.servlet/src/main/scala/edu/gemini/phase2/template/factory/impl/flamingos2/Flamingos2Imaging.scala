@@ -27,9 +27,11 @@ case class Flamingos2Imaging(blueprint:SpFlamingos2BlueprintImaging) extends Fla
 
   val targetGroup = Seq(1, 2, 3)
   val baselineFolder = Seq.empty
-  val notes = Seq(
+  override val notes: Seq[String] = Seq(
     "F2 Imaging Notes",
+    "Dithering patterns",
     "Imaging flats",
+    "Imaging Baseline calibrations",
     "Detector readout modes",
     "Libraries"
   )

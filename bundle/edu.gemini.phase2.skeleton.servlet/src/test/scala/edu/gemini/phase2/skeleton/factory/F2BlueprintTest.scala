@@ -50,7 +50,9 @@ class F2BlueprintTest extends TemplateSpec("F2_BP.xml") with SpecificationLike w
         expand(proposal(b, Nil, MagnitudeBand.R)) { (_, sp) =>
           val notes = List(
             "F2 Imaging Notes",
+            "Dithering patterns",
             "Imaging flats",
+            "Imaging Baseline calibrations",
             "Detector readout modes",
             "Libraries")
           groups(sp).forall(tg => notes.forall(existsNote(tg, _)))
@@ -66,6 +68,7 @@ class F2BlueprintTest extends TemplateSpec("F2_BP.xml") with SpecificationLike w
           val notes = List(
             "F2 Long-Slit Notes",
             "Use the same PA for science target and telluric",
+            "Long-slit Baseline calibrations",
             "Repeats contain the ABBA offsets",
             "Detector readout modes",
             "Libraries")
@@ -84,7 +87,7 @@ class F2BlueprintTest extends TemplateSpec("F2_BP.xml") with SpecificationLike w
             "Use the same PA for the MOS science target and telluric",
             "Detector readout modes",
             "Libraries",
-            "MOS Arcs and flats",
+            "MOS Baseline calibrations",
             "MOS slits: only use slit widths of 4 pixels (0.72 arcsec) or larger. Slit length no less than 5 arcsec.")
           groups(sp).forall(tg => notes.forall(existsNote(tg, _)))
         }
@@ -104,20 +107,4 @@ class F2BlueprintTest extends TemplateSpec("F2_BP.xml") with SpecificationLike w
       }
     }
   }
-
-  // REL-3661: As of 2019B, F2 imaging can include darks.
-//  "F2 Imaging" should {
-//    "not include darks, REL-2906" in {
-//      forAll { (b: Flamingos2BlueprintImaging) =>
-//        expand(proposal(b, Nil, MagnitudeBand.R)) { (_, sp) =>
-//          groups(sp).forall( tg =>
-//            // None of the component is a dark
-//            !libsMap(tg).exists {
-//              case (_, obs) => obs.getSeqComponent.getSeqComponents.asScala.exists(_.getType == SPComponentType.OBSERVER_DARK)
-//            }
-//          )
-//        }
-//      }
-//    }
-//  }
 }
