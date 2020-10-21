@@ -213,7 +213,7 @@ public abstract class InstGmosCommon<
         DETECTOR_MANUFACTURER_PROP = initProp(InstGmosCommon.DETECTOR_MANUFACTURER_PROP_NAME, false, false);
         DETECTOR_MANUFACTURER_PROP.setDisplayName("Detector Manufacturer");
 
-        DISPERSER_ORDER_PROP = initProp("disperserOrder", query_no, iter_no);
+        DISPERSER_ORDER_PROP = initProp("disperserOrder", query_no, iter_yes);
         DISPERSER_LAMBDA_PROP = initProp("disperserLambda", query_yes, iter_yes);
         DISPERSER_LAMBDA_PROP.setDisplayName("Grating Ctrl Wvl");
         DISPERSER_LAMBDA_PROP.setShortDescription("Grating Central Wavelength");
@@ -1415,13 +1415,9 @@ public abstract class InstGmosCommon<
 //        Pio.addParam(factory, paramSet, ENGINEERING_AMP_GAIN_READ_COMBO_PROP.getName(), getEngineeringGainReadCombo().name());
         Pio.addParam(factory, paramSet, DETECTOR_MANUFACTURER_PROP_NAME, getDetectorManufacturer().name());
 
-        // If using mirror, only write mirror
-        GmosCommonType.Disperser d = _disperser;
         Pio.addParam(factory, paramSet, DISPERSER_PROP_NAME, _disperser.name());
-        if (!d.isMirror()) {
-            Pio.addParam(factory, paramSet, DISPERSER_LAMBDA_PROP.getName(), String.valueOf(getDisperserLambda()));
-            Pio.addParam(factory, paramSet, DISPERSER_ORDER_PROP.getName(), getDisperserOrder().name());
-        }
+        Pio.addParam(factory, paramSet, DISPERSER_LAMBDA_PROP.getName(), String.valueOf(getDisperserLambda()));
+        Pio.addParam(factory, paramSet, DISPERSER_ORDER_PROP.getName(), getDisperserOrder().name());
 
         GmosCommonType.FPUnitMode fpuMode = getFPUnitMode();
         Pio.addParam(factory, paramSet, FPU_MODE_PROP.getName(), fpuMode.name());
@@ -1618,12 +1614,9 @@ public abstract class InstGmosCommon<
         sc.putParameter(DefaultParameter.getInstance(AMP_GAIN_CHOICE_PROP.getName(), getGainChoice()));
         sc.putParameter(DefaultParameter.getInstance(AMP_READ_MODE_PROP.getName(), getAmpReadMode()));
 
-        GmosCommonType.Disperser d = _disperser;
-        sc.putParameter(DefaultParameter.getInstance(DISPERSER_PROP_NAME, d));
-        if (!d.isMirror()) {
-            sc.putParameter(DefaultParameter.getInstance(DISPERSER_ORDER_PROP.getName(), getDisperserOrder()));
-            sc.putParameter(DefaultParameter.getInstance(DISPERSER_LAMBDA_PROP.getName(), getDisperserLambda()));
-        }
+        sc.putParameter(DefaultParameter.getInstance(DISPERSER_PROP_NAME, _disperser));
+        sc.putParameter(DefaultParameter.getInstance(DISPERSER_ORDER_PROP.getName(), getDisperserOrder()));
+        sc.putParameter(DefaultParameter.getInstance(DISPERSER_LAMBDA_PROP.getName(), getDisperserLambda()));
 
         GmosCommonType.FPUnitMode fpuMode = getFPUnitMode();
         sc.putParameter(DefaultParameter.getInstance(FPU_MODE_PROP.getName(), fpuMode));
