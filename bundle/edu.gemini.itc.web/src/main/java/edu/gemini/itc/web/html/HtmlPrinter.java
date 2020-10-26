@@ -124,16 +124,13 @@ public final class HtmlPrinter {
         final StringBuilder sb = new StringBuilder();
         sb.append("Altair Guide Star properties:");
 
-        if (altair.getWFSMode().equals(AltairParams.GuideStarType.LGS)) {
-            sb.append("<LI>Laser Guide Star Mode");
+        if (altair.getWFSMode().equals(AltairParams.GuideStarType.LGS)) sb.append("<LI>Laser Guide Star Mode selected");
 
-        } else {
-            sb.append("<LI>Natural Guide Star Mode");
-            sb.append("<LI>Guide Star Seperation ");
-            sb.append(altair.getGuideStarSeparation());
-            sb.append("<LI>Guide Star Magnitude ");
-            sb.append(altair.getGuideStarMagnitude());
-        }
+        sb.append("<LI>Natural Guide Star Mode selected");
+        sb.append("<LI>Guide Star Seperation ");
+        sb.append(altair.getGuideStarSeparation());
+        sb.append("<LI>Guide Star Magnitude ");
+        sb.append(altair.getGuideStarMagnitude());
 
         sb.append("<LI>Altair Field Lens position: ");
         sb.append(altair.getfieldlens());
