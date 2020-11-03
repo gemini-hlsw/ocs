@@ -2,6 +2,7 @@ package edu.gemini.phase2.template.factory.impl
 
 import edu.gemini.pot.sp._
 import edu.gemini.pot.spdb.{DBLocalDatabase, IDBDatabaseService}
+import edu.gemini.shared.util.immutable.{None => JNone}
 import edu.gemini.spModel.io.SpImportService
 import edu.gemini.spModel.rich.pot.spdb._
 import edu.gemini.spModel.rich.pot.sp._
@@ -11,6 +12,10 @@ import java.util.logging.Logger
 import java.io.InputStreamReader
 import scala.util.{Failure, Success}
 import java.security.Principal
+
+import edu.gemini.spModel.obs.SPObservation
+
+import scala.collection.JavaConverters._
 
 object TemplateDb {
   val LOG = Logger.getLogger(getClass.getName)
@@ -49,6 +54,12 @@ object TemplateDb {
       LOG.fine(s"Loading $url")
       parse(odb)(url)
     }
+
+    for {
+      l <- res.right
+      p <- l
+      o <- p.getAllObservations.asScala
+    } o.getDataObject.asInstanceOf[SPObservation].setSchedulingBlock(JNone.instance())
     res.right foreach { _.foreach(odb.put) }
     res.right map { _ => new TemplateDb(odb, user) }
   }
