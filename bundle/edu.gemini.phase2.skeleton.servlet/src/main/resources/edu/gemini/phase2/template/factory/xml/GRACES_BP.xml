@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2018A-1" subtype="basic" key="e9123279-cbbd-49d2-a609-188cc0c208d0" name="GRACES-BP">
+  <container kind="program" type="Program" version="2020A-1" subtype="basic" key="e9123279-cbbd-49d2-a609-188cc0c208d0" name="GRACES-BP">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="GRACES PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -22,6 +22,7 @@
       <param name="fetched" value="true"/>
       <param name="completed" value="false"/>
       <param name="notifyPi" value="YES"/>
+      <param name="timingWindowNotification" value="true"/>
     </paramset>
     <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="160566f7-eb0d-4e8a-b6dc-6fc2a53115e7" name="Note">
       <paramset name="Note" kind="dataObj">
@@ -34,7 +35,7 @@ Acquisition:
  2. Go to "GMOS-N: Set Exp. Time, Filter and Ctrl Wvl". It is under "Sequence" -&gt; "GMOS-N: GRACES Acquisition" -&gt; "Offset".
  3. In the field "Filter", select the filter for the acquisition.
  4. In the field "Exposure time", set the exposure time for the acquisition that corresponds to the magnitude of your target. 
-     In case of targets brighter than 11 mag  (in V or R), the exposure time is 2s. In case of fainter targets, read the nore "Acquisition exposure times".
+     In case of targets brighter than 9 mag  (in V), the exposure time is 1s. In case of fainter targets, read the nore "Acquisition exposure times".
  5. In the field "Ctrl Wvl", set the central wavelength for your science.
 
 Science:
@@ -42,7 +43,7 @@ Science:
  7. In the component "Observe", set the number of frames you want to observe.
 
 Other:
- 8. If you want a ThAr spectrum to be observed during the night together with your science spectrum, please add a "GMOS-N: ThAr" component. See also the EXAMPLESin the GRACES Library:  Go to OT File-&gt; Open -&gt; Select the check box 'Libs' -&gt; Select and open the program "GN-GRACES-library"). 
+ 8. If you want a ThAr spectrum to be observed during the night together with your science spectrum, please add a "GMOS-N: ThAr" component. See also the EXAMPLES in the GRACES Library:  Go to OT File-&gt; Open -&gt; Select the check box 'Libs' -&gt; Select and open the program "GN-GRACES-library"). 
  Make sure to use the ThAr component that corresponds to your choice of spectral mode.
 
  9. Please fill out the GRACES set-up note.
@@ -60,9 +61,9 @@ Because this is a hack, you can expect to find some warnings in your program.  Y
 
 
 More information can be found at 
-http://www.gemini.edu/sciops/instruments/graces/observation-preparation/graces-ot-details-0
+https://www.gemini.edu/instrumentation/graces/observation-preparation#OT
 
-KC - 22 Aug 2018.</value>
+Updated Nov 2, 2020</value>
         </param>
       </paramset>
     </container>
@@ -74,6 +75,30 @@ KC - 22 Aug 2018.</value>
 readout mode: Normal/Slow
 Central wavelength: XXXXA / XXXnm
 </value>
+        </param>
+      </paramset>
+    </container>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="7ba179a0-e6ad-43a6-9596-95a549314948" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="How GMOS-N components translate to GRACES configuration"/>
+        <param name="NoteText">
+          <value>If it is GRACES: 
+      Focal Plane (in GMOS-N Static component) = IFU-B
+
+If the spectral mode is:
+      1-fiber; Filter (in GMOS-N Static component) = DS920
+      2-fiber; Filter (in GMOS-N Static component) = HeIIC
+
+If the read mode is:
+      Normal; the ROI of the second sequence component = Custom + FAST/Low readout (in GMOS-N static component)
+      Slow; the ROI of the second sequence component = Full Frame + SLOW/High readout (in GMOS-N static component)
+
+If the target's V magnitude is
+      &lt;=9 mag; the filter used is HeII or Halpha and exp. time = 1sec  (Bright target)
+      &gt;9 mag; use "Acquisition exposure times" note or GMOS ITC to select the best filter g, r or i and exp. time  (Faint target)
+      - acquisition exposure time and filter are selected at Sequence &gt; GMOS-N: GRACES Acquisition &gt; GMOS-N: Set Exp. Time, Filter and Ctrl Wvl
+
+The science exposure time for each target goes into the GMOS-N static component in "Exposure Time".</value>
         </param>
       </paramset>
     </container>
@@ -90,9 +115,16 @@ Central wavelength: XXXXA / XXXnm
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1604165400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
           <param name="originatingTemplate" value="59c6aedb-0a43-4236-859a-80f88bd6ed40"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOS" key="6ceea4de-438a-4abc-bb5d-97e931692122" name="GMOS-N">
           <paramset name="GMOS-N" kind="dataObj">
@@ -127,24 +159,28 @@ Central wavelength: XXXXA / XXXnm
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
-        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="d1f1568e-0d2f-40c7-91c4-5c854e7a0ca5" name="Note">
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="3f3a2a2d-b8a0-450f-948c-249c9e140728" name="Note">
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Acquisition exposure times"/>
             <param name="NoteText">
-              <value>V/R      exp. time
-(mag)        (s)
- 11            2
- 12            5
- 13            5
- 14            5
- 15            5
- 16          10
- 17          25
- 18          50
- 19        110
- 20        240
-&gt;21        blind offset
-</value>
+              <value>Suggested acquisition exposure times and filters below assume a solar type G2V star, average observing conditions IQ85 CC70 SB80 and airmass of 1.5. Please use GMOS ITC to find the most appropriate acquisition settings for your target and observing conditions.
+
+V [mag]     Filter     ExpTime [s]
+&lt;=9      HeII or Ha       1
+10           g,r or i          1
+11           g,r or i          1
+12           g,r or i          2
+13           g,r or i          5
+14           g,r or i          5
+15           g,r or i          5
+16           g,r or i          5
+17           g,r or i          5
+18           g,r or i         10
+19           g,r or i         10
+20           g,r or i         20
+21             r or i          40
+22             r or i        120
+&gt;=23     blind offset</value>
             </param>
           </paramset>
         </container>
@@ -245,9 +281,16 @@ Central wavelength: XXXXA / XXXnm
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1604165400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
           <param name="originatingTemplate" value="59c6aedb-0a43-4236-859a-80f88bd6ed40"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOS" key="60983b55-6500-423a-849e-4f03387c483d" name="GMOS-N">
           <paramset name="GMOS-N" kind="dataObj">
@@ -280,6 +323,31 @@ Central wavelength: XXXXA / XXXnm
             </paramset>
             <param name="useNS" value="FALSE"/>
             <param name="mosPreimaging" value="NO"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="df2a16ca-9912-4b57-b98d-a3811eb2a670" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="Acquisition exposure times"/>
+            <param name="NoteText">
+              <value>Suggested acquisition exposure times and filters below assume a solar type G2V star, average observing conditions IQ85 CC70 SB80 and airmass of 1.5. Please use GMOS ITC to find the most appropriate acquisition settings for your target and observing conditions.
+
+V [mag]     Filter     ExpTime [s]
+&lt;=9      HeII or Ha       1
+10           g,r or i          1
+11           g,r or i          1
+12           g,r or i          2
+13           g,r or i          5
+14           g,r or i          5
+15           g,r or i          5
+16           g,r or i          5
+17           g,r or i          5
+18           g,r or i         10
+19           g,r or i         10
+20           g,r or i         20
+21             r or i          40
+22             r or i        120
+&gt;=23     blind offset</value>
+            </param>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="b5a2648b-ac0e-43ae-a32a-f182a9b11d23" name="Observing Log">
@@ -319,7 +387,7 @@ Central wavelength: XXXXA / XXXnm
                   <param name="ampReadMode" value="FAST"/>
                   <param name="disperser" value="MIRROR"/>
                   <param name="disperserLambda" value="700.0"/>
-                  <param name="exposureTime" value="2.0"/>
+                  <param name="exposureTime" value="1.0"/>
                   <param name="filter" value="HeII_G0320"/>
                   <param name="fpu" value="FPU_NONE"/>
                   <param name="gainChoice" value="LOW"/>
@@ -379,9 +447,16 @@ Central wavelength: XXXXA / XXXnm
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1604165400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
           <param name="originatingTemplate" value="59c6aedb-0a43-4236-859a-80f88bd6ed40"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOS" key="cfc83649-2708-44ee-af64-6f62ce41aa85" name="GMOS-N">
           <paramset name="GMOS-N" kind="dataObj">
@@ -416,24 +491,28 @@ Central wavelength: XXXXA / XXXnm
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
-        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="f21ac1aa-ed0d-4395-9a78-1f87750e2bec" name="Note">
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="dcad0939-c4a6-4c72-ad59-ab6f760458f6" name="Note">
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Acquisition exposure times"/>
             <param name="NoteText">
-              <value>V/R      exp. time
-(mag)        (s)
- 11            2
- 12            5
- 13            5
- 14            5
- 15            5
- 16          10
- 17          25
- 18          50
- 19        110
- 20        240
-&gt;21        blind offset
-</value>
+              <value>Suggested acquisition exposure times and filters below assume a solar type G2V star, average observing conditions IQ85 CC70 SB80 and airmass of 1.5. Please use GMOS ITC to find the most appropriate acquisition settings for your target and observing conditions.
+
+V [mag]     Filter     ExpTime [s]
+&lt;=9      HeII or Ha       1
+10           g,r or i          1
+11           g,r or i          1
+12           g,r or i          2
+13           g,r or i          5
+14           g,r or i          5
+15           g,r or i          5
+16           g,r or i          5
+17           g,r or i          5
+18           g,r or i         10
+19           g,r or i         10
+20           g,r or i         20
+21             r or i          40
+22             r or i        120
+&gt;=23     blind offset</value>
             </param>
           </paramset>
         </container>
@@ -534,9 +613,16 @@ Central wavelength: XXXXA / XXXnm
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1604165400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
           <param name="originatingTemplate" value="59c6aedb-0a43-4236-859a-80f88bd6ed40"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOS" key="f0480adf-2dd2-4af3-98e8-9a0a07a0157f" name="GMOS-N">
           <paramset name="GMOS-N" kind="dataObj">
@@ -569,6 +655,31 @@ Central wavelength: XXXXA / XXXnm
             </paramset>
             <param name="useNS" value="FALSE"/>
             <param name="mosPreimaging" value="NO"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="d8a5095f-afda-4aca-b0ae-57a7ced7d092" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="Acquisition exposure times"/>
+            <param name="NoteText">
+              <value>Suggested acquisition exposure times and filters below assume a solar type G2V star, average observing conditions IQ85 CC70 SB80 and airmass of 1.5. Please use GMOS ITC to find the most appropriate acquisition settings for your target and observing conditions.
+
+V [mag]     Filter     ExpTime [s]
+&lt;=9      HeII or Ha       1
+10           g,r or i          1
+11           g,r or i          1
+12           g,r or i          2
+13           g,r or i          5
+14           g,r or i          5
+15           g,r or i          5
+16           g,r or i          5
+17           g,r or i          5
+18           g,r or i         10
+19           g,r or i         10
+20           g,r or i         20
+21             r or i          40
+22             r or i        120
+&gt;=23     blind offset</value>
+            </param>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="6f5f2162-88c0-49a5-8c24-5bde429a28c6" name="Observing Log">
@@ -608,7 +719,7 @@ Central wavelength: XXXXA / XXXnm
                   <param name="ampReadMode" value="FAST"/>
                   <param name="disperser" value="MIRROR"/>
                   <param name="disperserLambda" value="700.0"/>
-                  <param name="exposureTime" value="2.0"/>
+                  <param name="exposureTime" value="1.0"/>
                   <param name="filter" value="HeII_G0320"/>
                   <param name="fpu" value="FPU_NONE"/>
                   <param name="gainChoice" value="LOW"/>
@@ -668,9 +779,16 @@ Central wavelength: XXXXA / XXXnm
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1604165400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
           <param name="originatingTemplate" value="59c6aedb-0a43-4236-859a-80f88bd6ed40"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOS" key="cd7ca95b-48d0-4356-b496-141cd71ae75c" name="GMOS-N">
           <paramset name="GMOS-N" kind="dataObj">
@@ -705,24 +823,28 @@ Central wavelength: XXXXA / XXXnm
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
-        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="9af89e52-4f81-42fd-bc0c-df329d821a5e" name="Note">
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="97308371-e580-4be3-9d29-3ed813f4b2bd" name="Note">
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Acquisition exposure times"/>
             <param name="NoteText">
-              <value>V/R      exp. time
-(mag)        (s)
- 11            2
- 12            5
- 13            5
- 14            5
- 15            5
- 16          10
- 17          25
- 18          50
- 19        110
- 20        240
-&gt;21        blind offset
-</value>
+              <value>Suggested acquisition exposure times and filters below assume a solar type G2V star, average observing conditions IQ85 CC70 SB80 and airmass of 1.5. Please use GMOS ITC to find the most appropriate acquisition settings for your target and observing conditions.
+
+V [mag]     Filter     ExpTime [s]
+&lt;=9      HeII or Ha       1
+10           g,r or i          1
+11           g,r or i          1
+12           g,r or i          2
+13           g,r or i          5
+14           g,r or i          5
+15           g,r or i          5
+16           g,r or i          5
+17           g,r or i          5
+18           g,r or i         10
+19           g,r or i         10
+20           g,r or i         20
+21             r or i          40
+22             r or i        120
+&gt;=23     blind offset</value>
             </param>
           </paramset>
         </container>
@@ -823,9 +945,16 @@ Central wavelength: XXXXA / XXXnm
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1604165400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
           <param name="originatingTemplate" value="59c6aedb-0a43-4236-859a-80f88bd6ed40"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOS" key="3671b44b-0c1e-49c3-bca7-633253675edc" name="GMOS-N">
           <paramset name="GMOS-N" kind="dataObj">
@@ -858,6 +987,31 @@ Central wavelength: XXXXA / XXXnm
             </paramset>
             <param name="useNS" value="FALSE"/>
             <param name="mosPreimaging" value="NO"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="3831ebf9-d379-4ab7-bb19-56367ff3f0f6" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="Acquisition exposure times"/>
+            <param name="NoteText">
+              <value>Suggested acquisition exposure times and filters below assume a solar type G2V star, average observing conditions IQ85 CC70 SB80 and airmass of 1.5. Please use GMOS ITC to find the most appropriate acquisition settings for your target and observing conditions.
+
+V [mag]     Filter     ExpTime [s]
+&lt;=9      HeII or Ha       1
+10           g,r or i          1
+11           g,r or i          1
+12           g,r or i          2
+13           g,r or i          5
+14           g,r or i          5
+15           g,r or i          5
+16           g,r or i          5
+17           g,r or i          5
+18           g,r or i         10
+19           g,r or i         10
+20           g,r or i         20
+21             r or i          40
+22             r or i        120
+&gt;=23     blind offset</value>
+            </param>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="3976edfb-71ee-4c4e-bd90-a1742b8d1e87" name="Observing Log">
@@ -897,7 +1051,7 @@ Central wavelength: XXXXA / XXXnm
                   <param name="ampReadMode" value="FAST"/>
                   <param name="disperser" value="MIRROR"/>
                   <param name="disperserLambda" value="700.0"/>
-                  <param name="exposureTime" value="2.0"/>
+                  <param name="exposureTime" value="1.0"/>
                   <param name="filter" value="HeII_G0320"/>
                   <param name="fpu" value="FPU_NONE"/>
                   <param name="gainChoice" value="LOW"/>
@@ -957,9 +1111,16 @@ Central wavelength: XXXXA / XXXnm
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1604165400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
           <param name="originatingTemplate" value="59c6aedb-0a43-4236-859a-80f88bd6ed40"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOS" key="8855e675-4bf4-4081-9f3d-46242143d7d0" name="GMOS-N">
           <paramset name="GMOS-N" kind="dataObj">
@@ -994,24 +1155,28 @@ Central wavelength: XXXXA / XXXnm
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
-        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="9288b8c6-f6b8-49b7-b42f-b24c98697f7c" name="Note">
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="b5d427c5-7551-4c07-a09e-540b0fe83a54" name="Note">
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Acquisition exposure times"/>
             <param name="NoteText">
-              <value>V/R      exp. time
-(mag)        (s)
- 11            2
- 12            5
- 13            5
- 14            5
- 15            5
- 16          10
- 17          25
- 18          50
- 19        110
- 20        240
-&gt;21        blind offset
-</value>
+              <value>Suggested acquisition exposure times and filters below assume a solar type G2V star, average observing conditions IQ85 CC70 SB80 and airmass of 1.5. Please use GMOS ITC to find the most appropriate acquisition settings for your target and observing conditions.
+
+V [mag]     Filter     ExpTime [s]
+&lt;=9      HeII or Ha       1
+10           g,r or i          1
+11           g,r or i          1
+12           g,r or i          2
+13           g,r or i          5
+14           g,r or i          5
+15           g,r or i          5
+16           g,r or i          5
+17           g,r or i          5
+18           g,r or i         10
+19           g,r or i         10
+20           g,r or i         20
+21             r or i          40
+22             r or i        120
+&gt;=23     blind offset</value>
             </param>
           </paramset>
         </container>
@@ -1112,9 +1277,16 @@ Central wavelength: XXXXA / XXXnm
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="PI_TO_COMPLETE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1604165400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
           <param name="originatingTemplate" value="59c6aedb-0a43-4236-859a-80f88bd6ed40"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOS" key="a0951eb3-9ca2-4aa9-845e-4c2e8a05c68d" name="GMOS-N">
           <paramset name="GMOS-N" kind="dataObj">
@@ -1147,6 +1319,31 @@ Central wavelength: XXXXA / XXXnm
             </paramset>
             <param name="useNS" value="FALSE"/>
             <param name="mosPreimaging" value="NO"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="f2e7dcf4-8674-417e-ac52-cc4f72161237" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="Acquisition exposure times"/>
+            <param name="NoteText">
+              <value>Suggested acquisition exposure times and filters below assume a solar type G2V star, average observing conditions IQ85 CC70 SB80 and airmass of 1.5. Please use GMOS ITC to find the most appropriate acquisition settings for your target and observing conditions.
+
+V [mag]     Filter     ExpTime [s]
+&lt;=9      HeII or Ha       1
+10           g,r or i          1
+11           g,r or i          1
+12           g,r or i          2
+13           g,r or i          5
+14           g,r or i          5
+15           g,r or i          5
+16           g,r or i          5
+17           g,r or i          5
+18           g,r or i         10
+19           g,r or i         10
+20           g,r or i         20
+21             r or i          40
+22             r or i        120
+&gt;=23     blind offset</value>
+            </param>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="77e1f9c8-c2c7-4dc1-820c-14d156e10480" name="Observing Log">
@@ -1186,7 +1383,7 @@ Central wavelength: XXXXA / XXXnm
                   <param name="ampReadMode" value="FAST"/>
                   <param name="disperser" value="MIRROR"/>
                   <param name="disperserLambda" value="700.0"/>
-                  <param name="exposureTime" value="2.0"/>
+                  <param name="exposureTime" value="1.0"/>
                   <param name="filter" value="HeII_G0320"/>
                   <param name="fpu" value="FPU_NONE"/>
                   <param name="gainChoice" value="LOW"/>
@@ -1249,6 +1446,7 @@ Central wavelength: XXXXA / XXXnm
     <paramset name="node">
       <param name="key" value="e208024e-7898-41d6-8d8b-067e6cd29df9"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="3671b44b-0c1e-49c3-bca7-633253675edc"/>
@@ -1304,15 +1502,21 @@ Central wavelength: XXXXA / XXXnm
       <param name="key" value="b450ad05-73b7-4547-8a0e-f24876635500"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="58"/>
       <param name="ee939b46-90bf-4ff5-bf1f-f58d3f8b1faa" value="1"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="44ac7e29-f368-4f55-bd1a-6099ea023e52"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="dcad0939-c4a6-4c72-ad59-ab6f760458f6"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="e9123279-cbbd-49d2-a609-188cc0c208d0"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="2"/>
       <param name="ee939b46-90bf-4ff5-bf1f-f58d3f8b1faa" value="2"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="b279ac95-1083-4558-8b23-59204ead1137"/>
@@ -1329,11 +1533,17 @@ Central wavelength: XXXXA / XXXnm
     <paramset name="node">
       <param name="key" value="03a0dc9e-50aa-4220-a8f1-4de4a44e328b"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="2"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3f3a2a2d-b8a0-450f-948c-249c9e140728"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="c5fa9a67-18de-40fd-b8c4-689f69e609a5"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="54"/>
       <param name="ee939b46-90bf-4ff5-bf1f-f58d3f8b1faa" value="1"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d9b4279b-fe46-438a-86d4-c09eb32f0b12"/>
@@ -1362,10 +1572,15 @@ Central wavelength: XXXXA / XXXnm
     <paramset name="node">
       <param name="key" value="5d3c8d40-0a33-445a-a014-749e0c3055f4"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="3be90da6-76b4-4394-a715-0688743fe950"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d8a5095f-afda-4aca-b0ae-57a7ced7d092"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="c04e6a41-5404-43bc-84b3-000e0bfaa5af"/>
@@ -1433,6 +1648,10 @@ Central wavelength: XXXXA / XXXnm
       <param name="bd7450c1-98a1-4b02-a76e-0e07bb93175e" value="2"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="f2e7dcf4-8674-417e-ac52-cc4f72161237"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="036bccf4-8f7b-4375-a3a5-306b757eb515"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
     </paramset>
@@ -1453,10 +1672,12 @@ Central wavelength: XXXXA / XXXnm
     <paramset name="node">
       <param name="key" value="92a03092-c1d9-4bf2-a663-4c2d5196ea96"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="57"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="c90a17a2-52ad-414e-b01b-f2ab043acb1e"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="56"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="86a6543e-6d9a-42ce-994c-89e131459fbe"/>
@@ -1490,6 +1711,7 @@ Central wavelength: XXXXA / XXXnm
     <paramset name="node">
       <param name="key" value="e511fc5b-b387-4475-a87e-8c25137d2547"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="55"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="c908eeb6-b854-4fe8-aa05-30543596d397"/>
@@ -1512,6 +1734,10 @@ Central wavelength: XXXXA / XXXnm
     <paramset name="node">
       <param name="key" value="331a8777-a0fa-489e-8852-065c3ac7ae03"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3831ebf9-d379-4ab7-bb19-56367ff3f0f6"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="72f908f8-970d-4921-9778-923b43e9dbd2"/>
@@ -1564,6 +1790,7 @@ Central wavelength: XXXXA / XXXnm
     <paramset name="node">
       <param name="key" value="96600ad3-4cca-4208-ac17-ca6a2d142515"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="adc4e54a-82b3-42bd-bbbf-97ef669374ab"/>
@@ -1572,6 +1799,10 @@ Central wavelength: XXXXA / XXXnm
     <paramset name="node">
       <param name="key" value="8609e48c-2821-40c1-b93e-ca94f49c0482"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="97308371-e580-4be3-9d29-3ed813f4b2bd"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="8ade5c9c-813f-407e-9f7a-68e4c738b83e"/>
@@ -1646,10 +1877,18 @@ Central wavelength: XXXXA / XXXnm
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="df2a16ca-9912-4b57-b98d-a3811eb2a670"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="cd7ca95b-48d0-4356-b496-141cd71ae75c"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
       <param name="2a6b86df-ffd0-400e-8835-648c171a30b8" value="1"/>
       <param name="5b2cdd1b-8a4b-4a40-8c39-212123e16e65" value="7"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b5d427c5-7551-4c07-a09e-540b0fe83a54"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="869882b8-fc11-4ff6-ad15-ebf40098af44"/>
@@ -1701,10 +1940,12 @@ Central wavelength: XXXXA / XXXnm
     <paramset name="node">
       <param name="key" value="40f55750-c050-4f86-a246-311cd285f602"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="55"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="44a345e4-c2ac-4388-8c5b-c661b19451cf"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="53"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="9b615c96-0ae4-487e-8df8-a9d04eeb0f72"/>
@@ -1730,6 +1971,11 @@ Central wavelength: XXXXA / XXXnm
     <paramset name="node">
       <param name="key" value="2dfaf50f-ca9c-41df-a3bf-d3ccd0eb8caf"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="55"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7ba179a0-e6ad-43a6-9596-95a549314948"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="12"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="160566f7-eb0d-4e8a-b6dc-6fc2a53115e7"/>
@@ -1737,6 +1983,7 @@ Central wavelength: XXXXA / XXXnm
       <param name="5b2cdd1b-8a4b-4a40-8c39-212123e16e65" value="272"/>
       <param name="bd7450c1-98a1-4b02-a76e-0e07bb93175e" value="15"/>
       <param name="c59f0116-0c69-4bbd-bf96-00ff257ccfcd" value="18"/>
+      <param name="9369b712-d4f9-4241-934c-c82e0fd7ba5e" value="33"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5c0ccef2-c88a-4cee-b57e-35df213bb00c"/>
