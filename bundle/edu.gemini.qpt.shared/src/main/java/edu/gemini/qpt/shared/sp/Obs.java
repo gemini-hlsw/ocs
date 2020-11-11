@@ -209,6 +209,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
     private final Conds conditions;
     private final PlannedStepSummary steps;
     private final SPComponentType[] instrument;
+    private final Option<String> visitorName;
     private final Set<Enum<?>> options = new TreeSet<>(new HeterogeneousEnumComparator());
     private final Group group;
     private final boolean inProgress;
@@ -427,6 +428,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
             ObsClass obsClass,
             TargetEnvironment targetEnvironment,
             SPComponentType[] instrument,
+            Option<String> visitorName,
             Set<Enum<?>> options,
             String customMask,
             Double centralWavelength,
@@ -490,6 +492,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
 
         this.wavefrontSensors = wfs;
         this.instrument = instrument;
+        this.visitorName = visitorName;
         this.options.addAll(options);
 
         int firstStep = 0;
@@ -539,6 +542,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
         this.elapsedTime = 0;
         this.remainingTime = 0;
         this.instrument = null;
+        this.visitorName = None.instance();
         this.wavefrontSensors = null;
         this.firstStep = 0;
         this.priority = null;
@@ -693,6 +697,8 @@ public final class Obs implements Serializable, Comparable<Obs> {
         for (SPComponentType t: instrument) {
             if (InstAltair.SP_TYPE.equals(t)) {
                 buf.append("+AO");
+            } else if (SPComponentType.INSTRUMENT_VISITOR.equals(t) && visitorName.exists(s -> s.length() > 0)) {
+                buf.append(visitorName.getValue());
             } else {
                 if (buf.length() != 0) buf.append(" + ");
                 buf.append(t.readableStr);
@@ -705,6 +711,10 @@ public final class Obs implements Serializable, Comparable<Obs> {
         String s = getOptionsString();
         s = s.length() == 0 ? getInstrumentString() : (getInstrumentString() + " / " + s);
         return s;
+    }
+
+    public Option<String> getVisitorName() {
+        return visitorName;
     }
 
     public int getFirstUnexecutedStep() {

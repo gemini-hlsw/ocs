@@ -104,6 +104,7 @@ object FoldedTargetsProvider {
         headObs.getObsClass,
         headObs.getTargetEnvironment,
         headObs.getInstruments.map(o => o.getSpType),
+        headObs.getVisitorName,
         headObs.getOptions,
         headObs.getCustomMask,
         headObs.getCentralWavelength,
