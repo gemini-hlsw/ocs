@@ -143,7 +143,7 @@ public class InstViewAdvisor implements IViewAdvisor, PropertyChangeListener {
                 while (e.hasMoreElements()) {
                     final OutlineNode n = (OutlineNode) e.nextElement();
                     final Object      o = n.getUserObject();
-                    if (o != null && o instanceof Enum) {
+                    if (o instanceof Enum) {
                         ImOption.apply(m.get((Enum) o)).foreach(a ->
                             n.setSelectedCorrectly(a == Availability.Installed)
                         );

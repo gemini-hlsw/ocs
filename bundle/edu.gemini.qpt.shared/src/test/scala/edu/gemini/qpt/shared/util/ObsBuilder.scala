@@ -4,6 +4,7 @@ import edu.gemini.ags.api.AgsAnalysis
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.qpt.shared.sp.{Group, Obs, Prog}
 import edu.gemini.shared.util.immutable.{None => JNone, DefaultImList}
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core.{Declination, RightAscension, Coordinates, SPProgramID}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.obs.plannedtime.{ PlannedStepSummary, SetupTime }
@@ -49,6 +50,7 @@ case class ObsBuilder(
   customMask: String = null,
   options: Set[Enum[_]] = Set(),
   instrument: Array[SPComponentType] = Array(),
+  visitorName: Option[String] = None,
   analysis: List[AgsAnalysis] = Nil
 )
 {
@@ -69,6 +71,7 @@ case class ObsBuilder(
       obsClass,
       targetEnvironment,
       instrument,
+      visitorName.asGeminiOpt,
       ObsBuilder.javaOptionsSet(options),
       customMask,
       centralWavelength,
@@ -101,6 +104,7 @@ case class ObsBuilder(
   def setTargetEnvironment(t: TargetEnvironment) = copy(targetEnvironment = t)
   def setInstrument(i: Array[SPComponentType]) = copy(instrument = i)
   def setInstrument(i: SPComponentType) = copy(instrument = Array(i))
+  def setVisitorName(n: Option[String]) = copy(visitorName = n)
   def setOptions(o: Set[Enum[_]]) = copy(options = o)
   def setCustomMask(m: String) = copy(customMask = m)
   def setCentralWavelength(w: Double) = copy(centralWavelength = w)

@@ -7,6 +7,7 @@ import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.shared.util.TimeValue;
 import edu.gemini.shared.util.immutable.ApplyOp;
 import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.core.Semester;
@@ -30,6 +31,7 @@ import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.gemini.texes.InstTexes;
 import edu.gemini.spModel.gemini.trecs.InstTReCS;
+import edu.gemini.spModel.gemini.visitor.VisitorInstrument;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.obs.ObsClassService;
 import edu.gemini.spModel.obs.ObsTimesService;
@@ -368,7 +370,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
     }
 
     @SuppressWarnings("unchecked")
-    private SPComponentType[] instrument(ISPObservation obsShell) throws RemoteException {
+    private static SPComponentType[] instrument(ISPObservation obsShell) {
 
         // For each obs, we can have an inst and an AO
         SPComponentType inst = null;
@@ -404,8 +406,15 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
 
     }
 
+    private static Option<String> getVisitorName(ISPObsComponent shell) {
+        final Object d = shell.getDataObject();
+        return (d instanceof VisitorInstrument)                                         ?
+            ImOption.apply(((VisitorInstrument) d).getName()).filter(n -> !n.isEmpty()) :
+            ImOption.empty();
+    }
+
     @SuppressWarnings("unchecked")
-    private Double centralWavelength(ISPObservation obsShell) throws RemoteException {
+    private Double centralWavelength(ISPObservation obsShell) {
         for (ISPObsComponent comp: obsShell.getObsComponents()) {
             SPComponentType type = comp.getType();
 
@@ -879,6 +888,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
             obsClass,
             targetEnv,
             instrument(obsShell),
+            getVisitorName(inst),
             options(obsShell),
             customMask(obsShell),
             centralWavelength(obsShell),
