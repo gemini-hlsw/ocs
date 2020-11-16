@@ -34,6 +34,7 @@ object BaselineGmos {
       DetectorManufacturer.E2V,
       BuiltinROI.FULL_FRAME,
       Site.GN),
+
     GmosParameters(
       FilterNorth.i_G0302,
       DisperserNorth.MIRROR,
@@ -62,6 +63,7 @@ object BaselineGmos {
       DetectorManufacturer.E2V,
       BuiltinROI.FULL_FRAME,
       Site.GS),
+
     GmosParameters(
       FilterSouth.g_G0325,
       DisperserSouth.MIRROR,
@@ -121,7 +123,7 @@ object BaselineGmos {
     // GMOS-N
     GmosParameters(
       FilterNorth.g_G0301,
-      DisperserNorth.R150_G5306,
+      DisperserNorth.B480_G5309,
       500.nm,
       FPUnitNorth.IFU_1,
       AmpGain.HIGH,
@@ -129,9 +131,10 @@ object BaselineGmos {
       None,
       1,
       1,
-      DetectorManufacturer.E2V,
+      DetectorManufacturer.HAMAMATSU,
       BuiltinROI.FULL_FRAME,
       Site.GN),
+
     GmosParameters(
       FilterNorth.g_G0301,
       DisperserNorth.R150_G5306,
@@ -145,8 +148,9 @@ object BaselineGmos {
       DetectorManufacturer.E2V,
       BuiltinROI.FULL_FRAME,
       Site.GN),
+
     GmosParameters(
-      FilterNorth.g_G0301,
+      FilterNorth.NONE,
       DisperserNorth.R400_G5305,
       500.nm,
       FPUnitNorth.IFU_2,
@@ -158,12 +162,13 @@ object BaselineGmos {
       DetectorManufacturer.HAMAMATSU,
       BuiltinROI.FULL_FRAME,
       Site.GN),
+
     // GMOS-S
     GmosParameters(
-      FilterNorth.g_G0301,
-      DisperserNorth.R400_G5305,
+      FilterSouth.NONE,
+      DisperserSouth.R400_G5325,
       500.nm,
-      FPUnitNorth.IFU_3,
+      FPUnitSouth.IFU_3,
       AmpGain.HIGH,
       AmpReadMode.SLOW,
       None,
@@ -171,7 +176,6 @@ object BaselineGmos {
       1,
       DetectorManufacturer.HAMAMATSU,
       BuiltinROI.FULL_FRAME,
-      Site.GN)
+      Site.GS)
   ))
 }
-
