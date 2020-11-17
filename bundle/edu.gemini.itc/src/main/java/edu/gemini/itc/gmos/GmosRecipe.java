@@ -182,8 +182,6 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             morph.accept(instrument.getIFU().getAperture());
 
             final List<Double> sf_list = instrument.getIFU().getFractionOfSourceInAperture();
-            final double slitLength = 5 / instrument.getSpatialBinning();
-            final Slit slit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
 
             // for uniform sources the result is the same regardless of the IFU offsets/position
             // in this case we only calculate and display the result of the first IFU element
@@ -198,13 +196,20 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             specS2Narr = new SpecS2N[ifusToShow];
 
             // process all IFU elements
-            double totalspsf = 0;
+            double totalspsf = 0;  // total source fraction in the aperture
+            double numfibers = 0;  // number of fibers being summed
             if (instrument.isIfuUsed() &&  _obsDetailParameters.analysisMethod() instanceof IfuSum) {
                 for (Double aSf_list : sf_list) {
                     final double spsf = aSf_list;
                     totalspsf += spsf;
+                    numfibers += 1;
                 }
+            } else {
+                numfibers = 1;
             }
+
+            final double slitLength = numfibers * 4.2 / instrument.getSpatialBinning(); // IFU fibers are 0.31" = 4.2 pix
+            final Slit slit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
 
             double shift = 0;
 
