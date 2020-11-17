@@ -297,6 +297,7 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
     protected abstract String[] getCcdNames();
 
     private void validate() {
+
         //Test to see that all conditions for Spectroscopy are met
         if (odp.calculationMethod() instanceof Spectroscopy) {
 
@@ -320,6 +321,12 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
 
                 if (gp.customSlitWidth().get().equals(GmosCommonType.CustomSlitWidth.OTHER))
                     throw new RuntimeException("Slit width for the custom mask is not known.");
+            }
+
+            if ((gp.fpMask().isIFU() || isIfu2()) && gp.spatialBinning() != 1) {
+                throw new RuntimeException("Spatial binning must be 1 with IFU observations.\n" +
+                        "The GMOS fiber traces on the detector blend together if the detector is binned spatially\n" +
+                        "and the fibers cannot be extracted reliably using the Gemini IRAF data reduction package.");
             }
 
             // central wavelength, site dependent
