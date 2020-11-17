@@ -52,6 +52,7 @@ import scala.collection.JavaConversions;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 /**
@@ -59,6 +60,7 @@ import java.util.stream.IntStream;
  */
 public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRecipe {
 
+    private static final Logger Log = Logger.getLogger(GmosRecipe.class.getName());
     private final ItcParameters p;
     private final Gmos mainInstrument;
     private final SourceDefinition _sdParameters;
@@ -209,6 +211,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             }
 
             final double slitLength = numfibers * 4.2 / instrument.getSpatialBinning(); // IFU fibers are 0.31" = 4.2 pix
+            Log.fine("IFU slit length = " + numfibers + " fibers = " + slitLength + " pixels");
             final Slit slit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
 
             double shift = 0;

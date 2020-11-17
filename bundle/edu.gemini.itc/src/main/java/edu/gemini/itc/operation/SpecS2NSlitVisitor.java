@@ -180,7 +180,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
     /** Calculates signal and background per coadd. */
     private void calculateSignal() {
-        Log.fine("Calculating signal and background...");
+        Log.fine("Calculating signal and background in a 1-pixel aperture.");
 
         // total source flux in the aperture
         final VisitableSampledSpectrum signal         = haloIsUsed ? signalWithHalo(throughput.onePixelThroughput(), haloThroughput.onePixelThroughput()) : signal(throughput.onePixelThroughput());
@@ -193,7 +193,6 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         // -- assign results
         resultSignal = signal;
         resultSqrtBackground = sqrtBackground;
-
     }
 
     /** Calculates total source flux (signal) in the aperture per coadd. */
