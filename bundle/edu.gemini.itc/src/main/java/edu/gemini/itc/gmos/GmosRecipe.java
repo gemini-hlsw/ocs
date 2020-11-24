@@ -210,7 +210,9 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 numfibers = 1;
             }
 
-            final double slitLength = numfibers * 4.2 / instrument.getSpatialBinning(); // IFU fibers are 0.31" = 4.2 pix
+            // The IFU slit has an effective width of 4.2 pix in the spectral direction (per the GMOS web page).
+            // However, the distance between fibers on the detector in the spatial direction is ~ 5 pix.
+            final double slitLength = numfibers * 5.0 / instrument.getSpatialBinning();
             Log.fine("IFU slit length = " + numfibers + " fibers = " + slitLength + " pixels");
             final Slit slit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
 
