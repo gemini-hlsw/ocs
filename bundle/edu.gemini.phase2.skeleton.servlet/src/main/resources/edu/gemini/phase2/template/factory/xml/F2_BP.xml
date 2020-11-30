@@ -111,7 +111,7 @@ When modifying the exposure times set at the library example sequences, or on-th
           <param name="title" value="Dithering patterns"/>
           <param name="NoteText">
             <value>Instead of dithering after each image is taken, it is recommended to take a few images on the same dithering position before moving to the next dithering position or the sky postion.
-The sky bakcground variation will still be minimum and telescope time will be saved.</value>
+The sky background variation will still be minimum and telescope time will be saved.</value>
           </param>
         </paramset>
       </container>
