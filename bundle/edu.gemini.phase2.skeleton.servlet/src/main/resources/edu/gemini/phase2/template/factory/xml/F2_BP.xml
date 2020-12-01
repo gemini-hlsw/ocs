@@ -111,7 +111,7 @@ When modifying the exposure times set at the library example sequences, or on-th
           <param name="title" value="Dithering patterns"/>
           <param name="NoteText">
             <value>Instead of dithering after each image is taken, it is recommended to take a few images on the same dithering position before moving to the next dithering position or the sky postion.
-The sky background varaition will still be minimum and telescope time will be saved.</value>
+The sky background variation will still be minimum and telescope time will be saved.</value>
           </param>
         </paramset>
       </container>
@@ -121,10 +121,10 @@ The sky background varaition will still be minimum and telescope time will be sa
           <param name="NoteText">
             <value>Imaging flats are daytime calibrations and do not need to be taken at the same position of the target.  The main purpose of them is to correct for pixel to pixel response variations, therefore a smooth illumination is all that is needed (and what GCAL provides).  The smooth surface is later normalized to get the relative response of the pixels.
 
-Imaging transmission sky flats can be ellaborated from the observation itself (sky background is high enough to allow the dithered positions to be used for making the flat).  
-Please note that the optics transmission per design should vary smoothly less than 0.5% within the central three arcminutes. We do not recommend to use K-band flatfields because there is non-negligible variable thermal emission background from the telescope and the OIWFS base mechanism. The H-band sky flat can be succesfully applied to correct transmission accorss the FOV in the K-band.
+Imaging transmission sky flats can be created from the science observations themselves (the sky background is high enough to allow the dithered positions to be used for making the flat).  
+Please note that the optics transmission per design should vary smoothly less than 0.5% within the central three arcminutes. We do not recommend to use K-band flatfields because there is non-negligible variable thermal emission background from the telescope and the OIWFS base mechanism. The H-band sky flat can be succesfully applied to correct transmission across the FOV in the K-band.
 
-J and H band lamp flats have versions with GCAL shutter open and closed, in order to allow for scattering subtraction in case they are used for correcting the radial transmission variation.  K band lamp flats are taken with GCAL shutter closed, as the thermal contribution from the environment is too hight to get a non-saturated flat.
+J and H band lamp flats have versions with GCAL shutter open and closed, in order to allow for scattering subtraction in case they are used for correcting the radial transmission variation.  K band lamp flats are taken with GCAL shutter closed, as the thermal contribution from the environment is too high to get a non-saturated flat.
 </value>
           </param>
         </paramset>
@@ -2944,6 +2944,7 @@ Additional calibration targets and resources are located at the webpage http://w
     <paramset name="node">
       <param name="key" value="58d67938-ba77-4769-a47e-32d125822a96"/>
       <param name="3b2a8683-137f-4a50-b866-6c81c134fb93" value="1"/>
+      <param name="a29c225f-6a08-437b-aca0-18ae2b7fd0c0" value="81"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="4f6414d4-4553-474f-bdf7-5a44429f8a91"/>
@@ -3429,6 +3430,7 @@ Additional calibration targets and resources are located at the webpage http://w
     <paramset name="node">
       <param name="key" value="6f233151-761c-44b3-a96e-ccff59b46a3b"/>
       <param name="3b2a8683-137f-4a50-b866-6c81c134fb93" value="1"/>
+      <param name="a29c225f-6a08-437b-aca0-18ae2b7fd0c0" value="14"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e8f4c2bd-d9c1-4bf4-8219-e93c65b0c127"/>
