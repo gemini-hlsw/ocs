@@ -548,7 +548,7 @@ def gsodb(version: Version) = AppConfig(
     "edu.gemini.oodb.mail.smtpHost"        -> "smtp.cl.gemini.edu",
     "edu.gemini.spdb.dir"                  -> "/mount/petrohue/odbhome/ugemini/spdb/spdb.active",
     "edu.gemini.util.trpc.name"            -> "Gemini South ODB",
-    "osgi.shell.telnet.ip"                 -> "172.17.5.77"
+    "osgi.shell.telnet.ip"                 -> "172.16.76.71"
   ),
   bundles = List(
     BundleSpec(50, "edu.gemini.smartgcal.servlet", version)
