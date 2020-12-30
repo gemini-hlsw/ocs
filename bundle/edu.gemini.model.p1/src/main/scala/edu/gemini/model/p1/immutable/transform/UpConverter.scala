@@ -34,6 +34,7 @@ object UpConverter {
   }
 
   // Sequence of conversions for proposals from a given semester. Cleaned up for 2017A since older conversion multiples to increment version no longer necessary.
+  val from2021A1:List[SemesterConverter] = List(SchemaVersionConverter, LastStepConverter(Semester(2020, SemesterOption.B)))
   val from2020B:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2020BTo2021A, LastStepConverter(Semester(2020, SemesterOption.B)))
   val from2020A:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2020BTo2021A, SemesterConverter2020ATo2020B, LastStepConverter(Semester(2020, SemesterOption.A)))
   val from2019B:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2020BTo2021A, SemesterConverter2020ATo2020B, SemesterConverter2019BTo2020A, LastStepConverter(Semester(2019, SemesterOption.B)))
@@ -61,6 +62,8 @@ object UpConverter {
   def convert(node: XMLNode):Result = node match {
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == Proposal.currentSchemaVersion =>
       StepResult(Nil, node).successNel[String]
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text.matches("2021.1.1") =>
+      from2021A1.concatenate.convert(node)
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text.matches("2020.2.1")   =>
       from2020B.concatenate.convert(node)
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text.matches("2020.1.1")   =>
