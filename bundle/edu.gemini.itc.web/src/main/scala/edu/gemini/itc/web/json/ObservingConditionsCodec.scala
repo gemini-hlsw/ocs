@@ -12,14 +12,15 @@ trait ObservingConditionsCodec {
   private implicit val WaterVaporCodec = enumCodec[WaterVapor]
   private implicit val SkyBackgroundCodec = enumCodec[SkyBackground]
 
-
   implicit val ObservingConditionsCodec: CodecJson[ObservingConditions] =
-    casecodec5(ObservingConditions.apply, ObservingConditions.unapply)(
+    casecodec7(ObservingConditions.apply, ObservingConditions.unapply)(
       "iq",
       "cc",
       "wv",
       "sb",
-      "airmass"
+      "airmass",
+      "exactiq",
+      "exactcc"
     )
 
 }
