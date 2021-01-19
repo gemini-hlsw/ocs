@@ -699,7 +699,8 @@ trait OcsBundle {
 
   lazy val bundle_edu_gemini_model_p1_submit =
     project.in(file("bundle/edu.gemini.model.p1.submit")).dependsOn(
-      bundle_edu_gemini_model_p1
+      bundle_edu_gemini_model_p1,
+      bundle_edu_gemini_util_ssl
     )
 
   lazy val bundle_edu_gemini_model_p1_targetio =

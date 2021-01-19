@@ -1,7 +1,6 @@
 package edu.gemini.model.p1.submit
 
-import java.security.KeyStore
-import javax.net.ssl.{TrustManagerFactory, SSLContext, HttpsURLConnection}
+import javax.net.ssl.HttpsURLConnection
 
 import edu.gemini.model.p1.immutable.Proposal
 import edu.gemini.model.p1.submit.SubmitResult.{SubmitException, Offline, ServiceError}
@@ -11,6 +10,7 @@ import java.io.{InputStream, IOException}
 import java.net.{HttpURLConnection, URL}
 import java.net.HttpURLConnection.HTTP_CREATED
 import java.util.logging.{Logger, Level}
+import edu.gemini.util.ssl.GemSslSocketFactory
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -38,7 +38,7 @@ case class FutureSubmission(dest: SubmitDestination, url: String, proposal: Prop
     try {
       val http = new URL(url).openConnection().asInstanceOf[HttpsURLConnection]
 
-      http.setSSLSocketFactory(FutureSubmission.sslFactory)
+      http.setSSLSocketFactory(GemSslSocketFactory.get())
       http.setReadTimeout(timeout)
       http.setRequestProperty("Accept-Charset", "UTF-8")
 
@@ -67,21 +67,7 @@ case class FutureSubmission(dest: SubmitDestination, url: String, proposal: Prop
         Option(http.getErrorStream).map(s => parse(read(s))).collect(errorAdapter).getOrElse {
           ServiceError(dest.some, proposal.proposalClass.some, 0, "An unexpected error happened in the submission server.")
         }
-    }
+  }
   }
 
-}
-
-object FutureSubmission {
-
-  val sslFactory = {
-    // Load keystore from the bundle
-    val in = this.getClass.getResourceAsStream("/phase1.jks")
-    // Password in the clear but the keystore has only public keys
-    val ks = KeyStore.getInstance("JKS") <| {_.load(in, "phase1".toCharArray)}
-
-    val tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm) <| {_.init(ks)}
-    // Socket factory to connect to the phase1 backend and complete the SSL handshake with the public certificates
-    SSLContext.getInstance("TLS") <| {_.init(null, tmf.getTrustManagers, null)} |> {_.getSocketFactory}
-  }
 }

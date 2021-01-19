@@ -19,7 +19,7 @@ object PITLauncher extends App {
   Locale.setDefault(Locale.ENGLISH)
 
   // Need to set this manually, as we are not inside OSGi
-  val version = s"${Semester.current.year}.1.2"
+  val version = s"${Semester.current.year}.1.3"
   System.setProperty("edu.gemini.model.p1.schemaVersion", version)
   System.setProperty(classOf[Workspace].getName + ".fonts.shrunk", "true")
 
