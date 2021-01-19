@@ -62,7 +62,7 @@ object UpConverter {
   def convert(node: XMLNode):Result = node match {
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == Proposal.currentSchemaVersion =>
       StepResult(Nil, node).successNel[String]
-    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text.matches("2021.1.1") =>
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text.matches("2021.1.[12]") =>
       from2021A1.concatenate.convert(node)
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text.matches("2020.2.1")   =>
       from2020B.concatenate.convert(node)
