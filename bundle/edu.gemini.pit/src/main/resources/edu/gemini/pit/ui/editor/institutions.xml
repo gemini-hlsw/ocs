@@ -2192,7 +2192,7 @@
         </contact>
     </site>
     <site>
-        <institution>Cerro Tololo Interamerican Observatory</institution>
+        <institution>Cerro Tololo Inter-American Observatory/NSF’s NOIRLab</institution>
         <address>Casilla 603</address>
         <address>La Serena</address>
         <country>Chile</country>
@@ -2200,7 +2200,7 @@
         <contact>
             <phone>56-51-225-415</phone>
             <fax>56-51-205-212</fax>
-            <email>user@noao.edu</email>
+            <email>info@noirlab.edu</email>
         </contact>
     </site>
     <site>
@@ -2844,17 +2844,17 @@
         </contact>
     </site>
     <site>
-        <institution>NOAO</institution>
+        <institution>NSF's NOIRLab</institution>
         <address>PO Box 26732</address>
         <address>950 North Cherry Avenue</address>
         <address>Tucson</address>
         <address>AZ</address>
-        <address>85726-6732</address>
+        <address>85719</address>
         <country>USA</country>
         <contact>
             <phone>520-318-8000</phone>
             <fax>520-318-8360</fax>
-            <email>user@noao.edu</email>
+            <email>info@noirlab.edu</email>
         </contact>
     </site>
     <site>
@@ -3618,7 +3618,7 @@
         </contact>
     </site>
     <site>
-        <institution>Gemini Observatory - North</institution>
+        <institution>Gemini Observatory/NSF’s NOIRLab (North)</institution>
         <address>Gemini Observatory</address>
         <address>670 N. Aohoku Place</address>
         <address>Hilo</address>
@@ -3628,20 +3628,19 @@
         <contact>
             <phone>808-974-2500</phone>
             <fax>808-935-9235</fax>
-            <email>user@gemini.edu</email>
+            <email>info@noirlab.edu</email>
         </contact>
     </site>
     <site>
-        <institution>Gemini Observatory - South</institution>
-        <address>Gemini Observatory</address>
-        <address>Colina El Pino s/n</address>
+        <institution>Gemini Observatory/NSF’s NOIRLab (South)</institution>
+        <address>Casilla 603</address>
         <address>La Serena</address>
         <country>Chile</country>
         <affiliate>USA</affiliate>
         <contact>
             <phone>011-5651-205-600</phone>
             <fax>011-5651-205-650</fax>
-            <email>user@gemini.edu</email>
+            <email>info@noirlab.edu</email>
         </contact>
     </site>
     <site>
