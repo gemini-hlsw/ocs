@@ -39,7 +39,7 @@ object JsonCodecs {
     EncodeJson((label: DatasetLabel) => jString(label.toString))
 
   def invalidDatasetLabel(s: String): String =
-    s"Could not parse `$s` as a dataset label"
+    s"Could not parse `$s` as a data file label"
 
   implicit val DecodeJsonDatasetLabel: DecodeJson[DatasetLabel] =
     DecodeJson(c => {
@@ -61,7 +61,7 @@ object JsonCodecs {
     EncodeJson((qa: DatasetQaState) => jString(qa.displayValue))
 
   def invalidDatasetQaState(s: String): String =
-    s"Could not parse `$s` as a dataset QA state"
+    s"Could not parse `$s` as a data file QA state"
 
   implicit val DecodeJsonDatasetQaState: DecodeJson[DatasetQaState] =
     DecodeJson(c =>
