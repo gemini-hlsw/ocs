@@ -1,14 +1,15 @@
 package edu.gemini.model.p1.immutable
 
 import edu.gemini.model.p1.{mutable => M}
+
 import java.util.{Calendar, TimeZone}
 
 object Semester {
 
   lazy val year = 2021
-  lazy val semesterOption = SemesterOption.B
+  lazy val semesterOption: SemesterOption = SemesterOption.B
 
-  lazy val current = Semester(year, semesterOption)
+  lazy val current: Semester = Semester(year, semesterOption)
 
   def apply(m: M.Semester): Semester = Semester(m.getYear, m.getHalf)
 
@@ -37,11 +38,11 @@ object Semester {
   }
 
   implicit class SemesterOptionExtension(val o:SemesterOption) extends AnyVal {
-    def firstMonth = o match {
+    def firstMonth: Int = o match {
       case M.SemesterOption.A => Calendar.FEBRUARY
       case M.SemesterOption.B => Calendar.AUGUST
     }
-    def lastMonth = o match {
+    def lastMonth: Int = o match {
       case M.SemesterOption.A => Calendar.JULY
       case M.SemesterOption.B => Calendar.JANUARY
     }
@@ -49,11 +50,11 @@ object Semester {
 
 }
 
-sealed case class Semester(year: Int, half: SemesterOption) {
+final case class Semester(year: Int, half: SemesterOption) {
 
   import Semester._
 
-  def mutable = {
+  def mutable: M.Semester = {
     val m = Factory.createSemester
     m.setYear(year)
     m.setHalf(half)
@@ -91,7 +92,7 @@ sealed case class Semester(year: Int, half: SemesterOption) {
     cal.getTimeInMillis
   }
 
-  lazy val midPoint = (firstDay + lastDay) / 2
+  lazy val midPoint: Long = (firstDay + lastDay) / 2
 
   lazy val display: String = s"$year$half"
 }
