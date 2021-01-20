@@ -95,10 +95,10 @@ object ObsPresentation {
     }
 
     (dsetCount collect {
-      case 0 => Green(tooltip = s"""There are no $inst datasets in the GOA within 30" of this target.""")
-      case c => Yellow(tooltip = "There are %d%s %s datasets in the GOA within 30\" of this target.".format(
+      case 0 => Green(tooltip = s"""There are no $inst data files in the GOA within 30" of this target.""")
+      case c => Yellow(tooltip = "There are %d%s %s data files in the GOA within 30\" of this target.".format(
                   c, if (c < 50) "" else " or more", inst
                 ))
-    }).getOrElse(Grey(tooltip = "GOA dataset search result is pending."))
+    }).getOrElse(Grey(tooltip = "GOA data file search result is pending."))
   }
 }
