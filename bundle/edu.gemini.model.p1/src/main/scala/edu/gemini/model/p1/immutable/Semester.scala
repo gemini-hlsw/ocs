@@ -6,7 +6,7 @@ import java.util.{Calendar, TimeZone}
 object Semester {
 
   lazy val year = 2021
-  lazy val semesterOption = SemesterOption.A
+  lazy val semesterOption = SemesterOption.B
 
   lazy val current = Semester(year, semesterOption)
 
@@ -49,7 +49,7 @@ object Semester {
 
 }
 
-case class Semester(year: Int, half: SemesterOption) {
+sealed case class Semester(year: Int, half: SemesterOption) {
 
   import Semester._
 
