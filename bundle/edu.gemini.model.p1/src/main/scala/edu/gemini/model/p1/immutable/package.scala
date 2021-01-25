@@ -69,6 +69,9 @@ package object immutable {
   // Singleton used to represent a Large Program "Partner"
   object LargeProgramPartner
 
+  // Singleton used to represent a GT "Partner"
+  object GuaranteedTimePartner
+
   type SpecialProposalType = M.SpecialProposalType
   object SpecialProposalType extends EnumObject[M.SpecialProposalType] {
     val DEMO_SCIENCE        = M.SpecialProposalType.DEMO_SCIENCE
