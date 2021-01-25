@@ -31,6 +31,13 @@ object TacView {
       }
       case e:ExchangeProposalClass     => e.subs.filter(_.response.isDefined).map {s => s.partner -> s.response}
       case l:LargeProgramClass         => l.sub.response.map(s => List(LargeProgramPartner -> Some(s))).getOrElse(Nil)
+
+      // We only support SpecialProposalClass if it's a GT proposal, otherwise this method yields
+      // no partners and the tab's controls will be disabled. Elsewhere we don't bother with the
+      // `gt.sub.specialType` check.
+      case gt:SpecialProposalClass if gt.sub.specialType === SpecialProposalType.GUARANTEED_TIME =>
+        List(GuaranteedTimePartner -> gt.sub.response)
+
       case _                           => Nil
     }).toMap[Partner, Option[SubmissionResponse]].mapValues(_.get)
 
@@ -59,6 +66,7 @@ object TacView {
       }
       case e:ExchangeProposalClass  => e.copy(subs = swapNgo(e.subs))
       case l:LargeProgramClass      => l.copy(sub = l.sub.copy(response = Some(sr)))
+      case s:SpecialProposalClass   => s.copy(sub = s.sub.copy(response = Some(sr)))
       case _                        => pc
     }
 
@@ -107,7 +115,7 @@ class TacView(loc: Locale) extends BorderPanel with BoundView[ProposalClass] { v
       text = "Partner:"
 
       override def refresh(m:Option[ProposalClass]) = visible = m match {
-        case Some(x: LargeProgramClass) => false
+        case Some(_: LargeProgramClass | _: SpecialProposalClass) => false
         case _                          => true
       }
     }
@@ -115,7 +123,7 @@ class TacView(loc: Locale) extends BorderPanel with BoundView[ProposalClass] { v
     object tacEmailLabel extends Label with Bound.Self[ProposalClass] {
 
       override def refresh(m:Option[ProposalClass]) = text = m match {
-        case Some(x: LargeProgramClass) => "Support Staff Email:"
+        case Some(_: LargeProgramClass | _: SpecialProposalClass) => "Support Staff Email:"
         case _                          => "NGO Support Staff Email:"
       }
     }
@@ -142,7 +150,7 @@ class TacView(loc: Locale) extends BorderPanel with BoundView[ProposalClass] { v
         }
         bindUnderlings() // important; see below
         val isVisible = m match {
-          case Some(x: LargeProgramClass) => false
+          case Some(_: LargeProgramClass | _: SpecialProposalClass) => false
           case _                          => true
         }
         visible = isVisible

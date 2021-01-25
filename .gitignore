@@ -56,7 +56,7 @@ bundle/edu.gemini.oodb.too.window/src/main/resources/resources/emailConf-test.xm
 .metals
 .vscode
 .bloop
-project/metals.sbt
+metals.sbt
 
 # Vim
 *.swp
