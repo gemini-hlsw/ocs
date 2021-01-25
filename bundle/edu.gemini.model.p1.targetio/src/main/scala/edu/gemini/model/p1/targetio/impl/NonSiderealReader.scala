@@ -36,7 +36,7 @@ object NonSiderealReader extends TargetReader[NonSiderealTarget] {
 
     val groupedElements = ephrows.groupBy(_.ord)
     val targets = groupedElements mapValues { lst =>
-      NonSiderealTarget(UUID.randomUUID(), lst.head.name, lst.map(_.element).sortBy(_.validAt), J_2000)
+      NonSiderealTarget(UUID.randomUUID(), lst.head.name, lst.map(_.element).sortBy(_.validAt), J_2000, None)
     }
 
     case class Order(targetList: List[NonSiderealTarget], viewed: Set[Int]) {

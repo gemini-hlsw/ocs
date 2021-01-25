@@ -108,7 +108,7 @@ object HorizonsEphemerisParser extends JavaTokenParsers {
   def header: Parser[String] = headerSection~>name<~headerSection
 
   def target: Parser[NonSiderealTarget] = header~ephemerisSection ^^ {
-    case n~e => NonSiderealTarget(UUID.randomUUID(), n, e, J_2000)
+    case n~e => NonSiderealTarget(UUID.randomUUID(), n, e, J_2000, None)
   }
 
   def read(file: File): Either[TargetIoError, NonSiderealTarget] =
