@@ -3823,6 +3823,52 @@
         </contact>
     </site>
     <site>
+        <institution>Kitt Peak National Observatory/NSF’s NOIRLab</institution>
+        <address>950 N. Cherry Ave.</address>
+        <address>Tucson</address>
+        <address>AZ</address>
+        <address>85719</address>
+        <country>USA</country>
+        <contact>
+            <phone>1 520 318 8000</phone>
+            <email>info@noirlab.edu</email>
+        </contact>
+    </site>
+    <site>
+        <institution>Community Science and Data Center/NSF’s NOIRLab</institution>
+        <address>950 N. Cherry Ave.</address>
+        <address>Tucson</address>
+        <address>AZ</address>
+        <address>85719</address>
+        <country>USA</country>
+        <contact>
+            <phone>1 520 318 8000</phone>
+            <email>info@noirlab.edu</email>
+        </contact>
+    </site>
+    <site>
+        <institution>Mid-Scale Observatories/NSF’s NOIRLab</institution>
+        <address>950 N. Cherry Ave.</address>
+        <address>Tucson</address>
+        <address>AZ</address>
+        <address>85719</address>
+        <country>USA</country>
+        <contact>
+            <phone>1 520 318 8000</phone>
+            <email>info@noirlab.edu</email>
+        </contact>
+    </site>
+    <site>
+        <institution>SOAR Telescope/NSF’s NOIRLab</institution>
+        <address>Casilla 603</address>
+        <address>La Serena</address>
+        <country>Chile</country>
+        <contact>
+            <phone>+56 51 2205200</phone>
+            <email>info@noirlab.edu</email>
+        </contact>
+    </site>
+    <site>
         <institution>Yonsei University (Center for Galaxy Evolution Research)</institution>
         <address>50, Yonsei-ro, Seodaemun-gu</address>
         <address>Seoul, 03722</address>
