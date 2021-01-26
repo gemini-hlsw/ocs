@@ -856,7 +856,6 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
     "update tololo institution" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("inst_tololo.xml")))
       val converted = UpConverter.convert(xml)
-      println(converted)
       converted must beSuccessful.like {
           case StepResult(changes, result) =>
             changes must contain(SemesterConverter2021ATo2021B.TololoTransformMessage)
