@@ -4,6 +4,7 @@ import edu.gemini.model.p1.immutable._
 import edu.gemini.spModel.core
 
 import scalaz._, Scalaz._
+import edu.gemini.spModel.core.HorizonsDesignation
 
 /**
  * Converts a P1 Target to an SPTarget.
@@ -34,6 +35,7 @@ object P1TargetConverter {
       _ <- core.NonSiderealTarget.name       := nsid.name
       _ <- core.NonSiderealTarget.ephemeris  := toCoreEphemeris(s, nsid.ephemeris)
       _ <- core.NonSiderealTarget.magnitudes := nsid.magnitude(time).map(apparentMag).toList
+      _ <- core.NonSiderealTarget.horizonsDesignation := nsid.horizonsDesignation.flatMap(HorizonsDesignation.read)
     } yield ()
 
   private def initSidereal(sid: SiderealTarget): State[core.SiderealTarget, Unit] =

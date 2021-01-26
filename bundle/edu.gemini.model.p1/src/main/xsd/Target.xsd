@@ -60,6 +60,7 @@
                     <xsd:element name="ephemeris" type="EphemerisElement" minOccurs="2" maxOccurs="unbounded"/>
                 </xsd:sequence>
                 <xsd:attribute name="epoch" type="CoordinatesEpoch" default="J2000"/>
+                <xsd:attribute name="horizonsDesignation" type="xsd:token"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>

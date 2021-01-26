@@ -158,13 +158,13 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     } yield new Problem(Severity.Error, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private lazy val emptyEphemerisCheck = for {
-      t @ NonSiderealTarget(_, n, e, _) <- p.targets
+      t @ NonSiderealTarget(_, n, e, _, _) <- p.targets
       if e.isEmpty
       msg = s"""Ephemeris for target "$n" is undefined."""
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private lazy val singlePointEphemerisCheck = for {
-      t @ NonSiderealTarget(_, n, e, _) <- p.targets
+      t @ NonSiderealTarget(_, n, e, _, _) <- p.targets
       if e.size == 1
       msg = s"""Ephemeris for target "$n" contains only one point; please specify at least two."""
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
@@ -172,7 +172,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     lazy val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd").withZone(ZoneId.of("UTC"))
 
     private lazy val initialEphemerisCheck = for {
-      t @ NonSiderealTarget(_, n, e, _) <- p.targets
+      t @ NonSiderealTarget(_, n, e, _, _) <- p.targets
       if e.nonEmpty
       ds = e.map(_.validAt) if ds.size > 1
       dsMin = ds.min
@@ -187,7 +187,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private lazy val finalEphemerisCheck = for {
-      t @ NonSiderealTarget(_, n, e, _) <- p.targets
+      t @ NonSiderealTarget(_, n, e, _, _) <- p.targets
       if e.nonEmpty
       ds = e.map(_.validAt) if ds.size > 1
       dsMax = ds.max
