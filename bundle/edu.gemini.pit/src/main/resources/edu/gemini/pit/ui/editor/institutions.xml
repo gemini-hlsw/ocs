@@ -3879,4 +3879,15 @@
             <fax>+82-2-362-5136</fax>
         </contact>
     </site>
+    <site>
+        <institution>Association of Universities for Research in Astronomy (AURA)</institution>
+        <address>1331 Pennsylvania Ave. NW</address>
+        <address>Washington</address>
+        <address>DC</address>
+        <address>20004</address>
+        <country>USA</country>
+        <contact>
+            <phone>+1 (202) 483-2101</phone>
+        </contact>
+    </site>
 </institutions>
