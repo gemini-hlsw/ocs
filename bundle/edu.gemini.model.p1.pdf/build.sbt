@@ -23,3 +23,7 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.model.p1.pdf")
 
 fork in run := true
+
+unmanagedJars in Compile ++= Seq(
+  new File(baseDirectory.value, "../../lib/bundle/org-apache-commons-logging_2.10-1.1.0.jar")
+)
