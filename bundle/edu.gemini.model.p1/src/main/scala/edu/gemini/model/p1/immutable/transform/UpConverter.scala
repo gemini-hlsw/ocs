@@ -162,7 +162,7 @@ case object SemesterConverter2021ATo2021B extends SemesterConverter {
   val NOAOTransformMessage = "Proposal assigned to NSF's NOIRLab"
   val GNTransformMessage = "Proposal assigned to Gemini Observatory/NSF's NOIRLab(North)"
   val GSTransformMessage = "Proposal assigned to Gemini Observatory/NSF's NOIRLab(South)"
-  val TololoTransformMessage = "Proposal assigned to Gemini Observatory/NSF's NOIRLab(South)"
+  val TololoTransformMessage = "Proposal assigned to Cerro Tololo Inter-American Observatory/NSF’s NOIRLab"
 
   val noirLabInstitutions: TransformFunction = {
     case <address>{r @ _*}</address> if (r \\ "institution").exists(_.text == "NOAO") =>
