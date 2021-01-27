@@ -35,7 +35,6 @@ object UpConverter {
 
   // Sequence of conversions for proposals from a given semester. Cleaned up for 2017A since older conversion multiples to increment version no longer necessary.
   val from2021A:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2021ATo2021B, LastStepConverter(Semester(2021, SemesterOption.A)))
-  val from2021A1:List[SemesterConverter] = List(SchemaVersionConverter, LastStepConverter(Semester(2020, SemesterOption.B)))
   val from2020B:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2021ATo2021B, SemesterConverter2020BTo2021A, LastStepConverter(Semester(2020, SemesterOption.B)))
   val from2020A:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2021ATo2021B, SemesterConverter2020BTo2021A, SemesterConverter2020ATo2020B, LastStepConverter(Semester(2020, SemesterOption.A)))
   val from2019B:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2021ATo2021B, SemesterConverter2020BTo2021A, SemesterConverter2020ATo2020B, SemesterConverter2019BTo2020A, LastStepConverter(Semester(2019, SemesterOption.B)))
@@ -63,10 +62,8 @@ object UpConverter {
   def convert(node: XMLNode):Result = node match {
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == Proposal.currentSchemaVersion =>
       StepResult(Nil, node).successNel[String]
-    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text.matches("2021.1.3") =>
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text.matches("2021.1.[123]") =>
       from2021A.concatenate.convert(node)
-    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text.matches("2021.1.[12]") =>
-      from2021A1.concatenate.convert(node)
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text.matches("2020.2.1")   =>
       from2020B.concatenate.convert(node)
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text.matches("2020.1.1")   =>
@@ -162,7 +159,64 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter supports migrating to 2021A.
  */
 case object SemesterConverter2021ATo2021B extends SemesterConverter {
-  override val transformers: List[TransformFunction] = Nil
+  val NOAOTransformMessage = "Proposal assigned to NSF's NOIRLab"
+  val GNTransformMessage = "Proposal assigned to Gemini Observatory/NSF's NOIRLab(North)"
+  val GSTransformMessage = "Proposal assigned to Gemini Observatory/NSF's NOIRLab(South)"
+  val TololoTransformMessage = "Proposal assigned to Cerro Tololo Inter-American Observatory/NSF’s NOIRLab"
+
+  val noirLabInstitutions: TransformFunction = {
+    case <address>{r @ _*}</address> if (r \\ "institution").exists(_.text == "NOAO") =>
+      StepResult(NOAOTransformMessage,
+        <address>
+          <institution>NSF's NOIRLab</institution>
+          <address>
+            PO Box 26732
+            950 North Cherry Avenue
+            Tucson
+            AZ
+            85719
+          </address>
+          <country>USA</country>
+        </address>
+      ).successNel
+  }
+  val gnInstitutions: TransformFunction = {
+    case <address>{r @ _*}</address> if (r \\ "institution").exists(_.text == "Gemini Observatory - North") =>
+      StepResult(GNTransformMessage,
+        <address>
+          <institution>Gemini Observatory/NSF’s NOIRLab (North)</institution>
+          <address>
+            Gemini Observatory
+            670 N. A'ohoku Place
+            Hilo
+            HI
+            96720
+          </address>
+          <country>USA</country>
+        </address>
+      ).successNel
+  }
+  val gsInstitutions: TransformFunction = {
+    case <address>{r @ _*}</address> if (r \\ "institution").exists(_.text == "Gemini Observatory - South") =>
+      StepResult(GSTransformMessage,
+        <address>
+          <institution>Gemini Observatory/NSF’s NOIRLab (South)</institution>
+          <address>
+            Casilla 603
+            La Serena
+            Chile
+          </address>
+          <country>Chile</country>
+        </address>
+      ).successNel
+  }
+  val tololoInstitutions: TransformFunction = {
+    case <institution>Cerro Tololo Interamerican Observatory</institution> =>
+      StepResult(TololoTransformMessage,
+          <institution>Cerro Tololo Inter-American Observatory/NSF’s NOIRLab</institution>
+      ).successNel
+    }
+  override val transformers: List[TransformFunction] = List(noirLabInstitutions, gnInstitutions, gsInstitutions, tololoInstitutions)
 }
 
   /**
@@ -173,7 +227,7 @@ case object SemesterConverter2020BTo2021A extends SemesterConverter {
   val AuSubmissionMessage = "Submission(s) to Australia have been removed."
 
   val removeAustraliaSubmissions: TransformFunction = {
-    case n @ <ngo>{ns @ _*}</ngo> if (ns \\ "partner").exists(_.text == "au") =>
+    case <ngo>{ns @ _*}</ngo> if (ns \\ "partner").exists(_.text == "au") =>
       StepResult(AuSubmissionMessage, Nil).successNel
   }
 

@@ -826,6 +826,42 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
         case x => failure(x.toString)
       }
     }
+    "update noao institution" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("inst_noao.xml")))
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must contain(SemesterConverter2021ATo2021B.NOAOTransformMessage)
+          ProposalIo.read(result.toString()).investigators.pi.address.institution must contain("NSF's NOIRLab")
+      }
+    }
+    "update gn institution" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("inst_gn.xml")))
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must contain(SemesterConverter2021ATo2021B.GNTransformMessage)
+          ProposalIo.read(result.toString()).investigators.pi.address.institution must contain("Gemini Observatory/NSF’s NOIRLab (North)")
+      }
+    }
+    "update gs institution" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("inst_gs.xml")))
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must contain(SemesterConverter2021ATo2021B.GSTransformMessage)
+          ProposalIo.read(result.toString()).investigators.pi.address.institution must contain("Gemini Observatory/NSF’s NOIRLab (South)")
+      }
+    }
+    "update tololo institution" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("inst_tololo.xml")))
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+          case StepResult(changes, result) =>
+            changes must contain(SemesterConverter2021ATo2021B.TololoTransformMessage)
+            ProposalIo.read(result.toString()).investigators.pi.address.institution must contain("Cerro Tololo Inter-American Observatory/NSF’s NOIRLab")
+      }
+    }
   }
 
   def testF2R3KYConversion(xml: Elem): MatchResult[Result] = {

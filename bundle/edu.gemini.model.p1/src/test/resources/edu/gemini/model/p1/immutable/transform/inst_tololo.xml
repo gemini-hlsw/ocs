@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2021.1.3" tacCategory="Planetary systems">
+    <meta band3optionChosen="true" overrideAffiliate="false">
+        <attachment>/Users/cquiroz/Documents/pittarget.pdf</attachment>
+    </meta>
+    <semester year="2021" half="A"/>
+    <title>Test, please ignore</title>
+    <abstract>Please ignore </abstract>
+    <scheduling></scheduling>
+    <keywords>
+        <keyword>Binaries</keyword>
+    </keywords>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>John</firstName>
+            <lastName>Doe</lastName>
+            <status>PhD</status>
+            <gender>Man</gender>
+            <email>cquiroz@gemini.edu</email>
+            <phone>+56982835076</phone>
+            <address>
+                <institution>Cerro Tololo Interamerican Observatory</institution>
+                <address>Casilla 603
+La Serena</address>
+                <country>Chile</country>
+            </address>
+        </pi>
+    </investigators>
+    <targets>
+        <sidereal epoch="J2000" id="target-0">
+            <name>* alf Lyr</name>
+            <degDeg>
+                <ra>279.23473478999994767946191132068634033203125</ra>
+                <dec>38.78368896000000631829607300460338592529296875</dec>
+            </degDeg>
+            <properMotion deltaRA="200.94" deltaDec="286.23"/>
+            <magnitudes>
+                <magnitude band="U" system="Vega">0.029999999329447746</magnitude>
+                <magnitude band="B" system="Vega">0.029999999329447746</magnitude>
+                <magnitude band="V" system="Vega">0.029999999329447746</magnitude>
+                <magnitude band="R" system="Vega">0.07000000029802322</magnitude>
+                <magnitude band="J" system="Vega">-0.1770000010728836</magnitude>
+                <magnitude band="H" system="Vega">-0.028999999165534973</magnitude>
+                <magnitude band="K" system="Vega">0.1289999932050705</magnitude>
+            </magnitudes>
+        </sidereal>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC Any, IQ Any, SB Any/Bright, WV Any</name>
+            <cc>Any</cc>
+            <iq>Any</iq>
+            <sb>Any/Bright</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <alopeke>
+            <Alopeke id="blueprint-0">
+                <name>'Alopeke Wide Field (0.0725"/pix, 60" FoV)</name>
+                <visitor>true</visitor>
+                <mode>Wide Field (0.0725"/pix, 60" FoV)</mode>
+            </Alopeke>
+        </alopeke>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" target="target-0" condition="condition-0" blueprint="blueprint-0">
+            <progTime units="hr">1.0</progTime>
+            <partTime units="hr">0.0</partTime>
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+    </observations>
+    <proposalClass>
+        <special>
+            <submission>
+                <request>
+                    <time units="hr">1.0</time>
+                    <minTime units="hr">1.0</minTime>
+                </request>
+                <type>Poor Weather</type>
+            </submission>
+        </special>
+    </proposalClass>
+</proposal>
