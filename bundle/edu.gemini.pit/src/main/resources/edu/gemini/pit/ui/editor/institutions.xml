@@ -3410,21 +3410,6 @@
         </contact>
     </site>
     <site>
-        <institution>Stanford University</institution>
-        <address>Astronomy Program</address>
-        <address>Varian Building</address>
-        <address>Room 302c</address>
-        <address>Stanford</address>
-        <address>CA</address>
-        <address>94305-4060</address>
-        <country>USA</country>
-        <contact>
-            <phone>415-723-1436</phone>
-            <fax>415-723-4840</fax>
-            <email>user@bigbang.stanford.edu</email>
-        </contact>
-    </site>
-    <site>
         <institution>Swinburne University of Technology</institution>
         <address>Swinburne Centre for Astrophysics and Supercomputing</address>
         <address>Mail number 31</address>
@@ -3888,6 +3873,17 @@
         <country>USA</country>
         <contact>
             <phone>+1 (202) 483-2101</phone>
+        </contact>
+    </site>
+    <site>
+        <institution>University of Surrey/Astrophysics Research Group</institution>
+        <address>Guildford</address>
+        <address>Surrey</address>
+        <address>GU2 7XH</address>
+        <address>20004</address>
+        <country>United Kingdom</country>
+        <contact>
+            <email>a.gualandris@surrey.ac.uk</email>
         </contact>
     </site>
 </institutions>
