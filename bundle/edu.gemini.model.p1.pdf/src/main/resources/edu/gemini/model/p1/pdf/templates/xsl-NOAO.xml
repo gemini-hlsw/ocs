@@ -25,12 +25,16 @@
 
         <!-- submission entry of this-partner -->
         <xsl:variable name="this-partner-submission" select="proposalClass//ngo/partner[text()=$this-partner]/../response"/>
+        <xsl:variable name="ft-submission" select="proposalClass/fastTurnaround//response"/>
 
         <!-- true proposal id -->
         <xsl:variable name="proposal-id">
             <xsl:choose>
                 <xsl:when test="$this-partner-submission/receipt/id">
                     <xsl:value-of select="$this-partner-submission/receipt/id"/>
+                </xsl:when>
+                <xsl:when test="$ft-submission/receipt/id">
+                    <xsl:value-of select="$ft-submission/receipt/id"/>
                 </xsl:when>
                 <xsl:otherwise>???-????/?</xsl:otherwise>
             </xsl:choose>
