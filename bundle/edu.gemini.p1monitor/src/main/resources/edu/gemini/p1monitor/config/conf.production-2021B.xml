@@ -9,7 +9,6 @@
     <type name="FastTurnaround">
         <dir>/home/software/proposals/fast_turnaround/proposals/2021B</dir>
         <to>pitft@gemini.edu</to>
-        <template>ft</template>
     </type>
 
     <type name="DirectorTime">
@@ -43,6 +42,7 @@
     <type name="LargeProgram">
         <dir>/home/software/proposals/large_program/proposals/2021B</dir>
         <to>pitlp@gemini.edu</to>
+        <template>lp</template>
     </type>
 
     <type name="SIP">
