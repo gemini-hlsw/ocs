@@ -2845,7 +2845,6 @@
     </site>
     <site>
         <institution>NSF's NOIRLab</institution>
-        <address>PO Box 26732</address>
         <address>950 North Cherry Avenue</address>
         <address>Tucson</address>
         <address>AZ</address>
@@ -3604,7 +3603,6 @@
     </site>
     <site>
         <institution>Gemini Observatory/NSF’s NOIRLab (North)</institution>
-        <address>Gemini Observatory</address>
         <address>670 N. Aohoku Place</address>
         <address>Hilo</address>
         <address>HI</address>
@@ -3894,6 +3892,19 @@
         <country>USA</country>
         <contact>
             <phone>+1-301-286-2000</phone>
+        </contact>
+    </site>
+    <site>
+        <institution>Rubin Observatory/NSF's NOIRLab</institution>
+        <address>950 North Cherry Avenue</address>
+        <address>Tucson</address>
+        <address>AZ</address>
+        <address>85719</address>
+        <country>USA</country>
+        <contact>
+            <phone>520-318-8000</phone>
+            <fax>520-318-8360</fax>
+            <email>info@noirlab.edu</email>
         </contact>
     </site>
 </institutions>
