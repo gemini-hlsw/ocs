@@ -12,7 +12,7 @@ object Subaru {
     val description = "Select the Subaru instrument."
     // REL-3769 2020B: Subaru COMICS and FMOS not offered.
     def choices: List[SubaruInstrument] = SubaruInstrument.values.toList
-      .filter(i => i != SubaruInstrument.FMOS && i != SubaruInstrument.SUPRIME_CAM && i != SubaruInstrument.COMICS)
+      .filter(i => i != SubaruInstrument.FMOS && i != SubaruInstrument.SUPRIME_CAM && i != SubaruInstrument.COMICS && i != SubaruInstrument.MOIRCS)
 
     def apply(i: SubaruInstrument) = i match {
       case ins if ins == SubaruInstrument.forName("VISITOR") => Left(CustomNameNode(SubaruBlueprint(ins, None)))
