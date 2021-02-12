@@ -72,7 +72,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       val ps =
         List(genderNotAnsweredCheck, noObs, nonUpdatedInvestigatorName, noPIPhoneNumber, invalidPIPhoneNumber, titleCheck, band3option, abstractCheck, categoryCheck,
           keywordCheck, attachmentCheck, attachmentValidityCheck, attachmentSizeCheck, missingObsDetailsCheck,
-          duplicateInvestigatorCheck, ftReviewerOrMentor, ftAffiliationMismatch, band3Obs).flatten ++
+          duplicateInvestigatorCheck, ftParticipatingPartner, ftReviewerOrMentor, ftAffiliationMismatch, band3Obs).flatten ++
           TimeProblems(p, s).all ++
           TimeProblems.noCFHClassical(p, s) ++
           TimeProblems.partnerZeroTimeRequest(p, s) ++
@@ -592,6 +592,14 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         s.inObsListView(o.band, v => v.Fixes.indicateObservation(o))
       })
     }
+
+    private lazy val ftParticipatingPartner = for {
+      FastTurnaroundProgramClass(_, _, _, _, _, _, _, _, Some(-\/(a))) <- Some(p.proposalClass)
+      if a == NgoPartner.CL
+    } yield new Problem(Severity.Error,
+      "The PI's partner affiliation is not participating in the fast turnaround process.", TimeProblems.SCHEDULING_SECTION, {
+        s.showPartnersView()
+      })
 
     private lazy val ftReviewerOrMentor = for {
         f @ FastTurnaroundProgramClass(_, _, _, _, _, _, r, m, _) <- Some(p.proposalClass)
