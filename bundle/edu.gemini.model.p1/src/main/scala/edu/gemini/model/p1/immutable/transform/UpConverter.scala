@@ -1,12 +1,11 @@
 package edu.gemini.model.p1.immutable.transform
 
-import xml.{Node => XMLNode, Text}
-
+import xml.{Text, Node => XMLNode}
 import scalaz._
 import Scalaz._
-
 import edu.gemini.model.p1.immutable._
 import edu.gemini.model.p1.immutable.transform.XMLConverter._
+
 import scala.xml.transform.BasicTransformer
 
 case class ConversionResult(transformed: Boolean, from: Semester, changes: Seq[String], root: XMLNode)
@@ -159,14 +158,23 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter supports migrating to 2021A.
  */
 case object SemesterConverter2021ATo2021B extends SemesterConverter {
-  val NOAOTransformMessage = "Proposal assigned to NSF's NOIRLab"
-  val GNTransformMessage = "Proposal assigned to Gemini Observatory/NSF's NOIRLab(North)"
-  val GSTransformMessage = "Proposal assigned to Gemini Observatory/NSF's NOIRLab(South)"
-  val TololoTransformMessage = "Proposal assigned to Cerro Tololo Inter-American Observatory/NSF’s NOIRLab"
+  val InvestigatorPrelude = "Investigator"
+  val COInvestigatorPrelude = "Co Investigator"
+  def noaoTransformMessage(prelude: String) = s"$prelude assigned to NSF's NOIRLab"
+  def gnTransformMessage(prelude: String) = s"$prelude assigned to Gemini Observatory/NSF's NOIRLab(North)"
+  def gsTransformMessage(prelude: String) = s"$prelude assigned to Gemini Observatory/NSF's NOIRLab(South)"
+  def tololoTransformMessage(prelude: String) = s"$prelude assigned to Cerro Tololo Inter-American Observatory/NSF’s NOIRLab"
 
   val noirLabInstitutions: TransformFunction = {
+    case p @ <coi>{ns @ _*}</coi> if (ns \\ "institution").exists(_.text == "NOAO")=>
+      val ns2 = ns.collect {
+        case <institution>NOAO</institution> =>
+          <institution>NSF's NOIRLab</institution>
+        case a => a
+      }
+      StepResult(noaoTransformMessage(COInvestigatorPrelude), <coi id={p.attribute("id")}>{ns2}</coi>).successNel
     case <address>{r @ _*}</address> if (r \\ "institution").exists(_.text == "NOAO") =>
-      StepResult(NOAOTransformMessage,
+      StepResult(noaoTransformMessage(InvestigatorPrelude),
         <address>
           <institution>NSF's NOIRLab</institution>
           <address>
@@ -181,8 +189,15 @@ case object SemesterConverter2021ATo2021B extends SemesterConverter {
       ).successNel
   }
   val gnInstitutions: TransformFunction = {
+    case p @ <coi>{ns @ _*}</coi> if (ns \\ "institution").exists(_.text == "Gemini Observatory - North")=>
+      val ns2 = ns.collect {
+        case <institution>Gemini Observatory - North</institution> =>
+          <institution>Gemini Observatory/NSF’s NOIRLab (North)</institution>
+        case a => a
+      }
+      StepResult(gnTransformMessage(COInvestigatorPrelude), <coi id={p.attribute("id")}>{ns2}</coi>).successNel
     case <address>{r @ _*}</address> if (r \\ "institution").exists(_.text == "Gemini Observatory - North") =>
-      StepResult(GNTransformMessage,
+      StepResult(gnTransformMessage(InvestigatorPrelude),
         <address>
           <institution>Gemini Observatory/NSF’s NOIRLab (North)</institution>
           <address>
@@ -197,8 +212,15 @@ case object SemesterConverter2021ATo2021B extends SemesterConverter {
       ).successNel
   }
   val gsInstitutions: TransformFunction = {
+    case p @ <coi>{ns @ _*}</coi> if (ns \\ "institution").exists(_.text == "Gemini Observatory - South")=>
+      val ns2 = ns.collect {
+        case <institution>Gemini Observatory - South</institution> =>
+          <institution>Gemini Observatory/NSF’s NOIRLab (South)</institution>
+        case a => a
+      }
+      StepResult(gsTransformMessage(COInvestigatorPrelude), <coi id={p.attribute("id")}>{ns2}</coi>).successNel
     case <address>{r @ _*}</address> if (r \\ "institution").exists(_.text == "Gemini Observatory - South") =>
-      StepResult(GSTransformMessage,
+      StepResult(gsTransformMessage(InvestigatorPrelude),
         <address>
           <institution>Gemini Observatory/NSF’s NOIRLab (South)</institution>
           <address>
@@ -211,9 +233,24 @@ case object SemesterConverter2021ATo2021B extends SemesterConverter {
       ).successNel
   }
   val tololoInstitutions: TransformFunction = {
-    case <institution>Cerro Tololo Interamerican Observatory</institution> =>
-      StepResult(TololoTransformMessage,
+    case p @ <coi>{ns @ _*}</coi> if (ns \\ "institution").exists(_.text == "Cerro Tololo Interamerican Observatory") =>
+      val ns2 = ns.collect {
+        case <institution>Cerro Tololo Interamerican Observatory</institution> =>
           <institution>Cerro Tololo Inter-American Observatory/NSF’s NOIRLab</institution>
+        case a => a
+      }
+      StepResult(tololoTransformMessage(COInvestigatorPrelude), <coi id={p.attribute("id")}>{ns2}</coi>).successNel
+    case <address>{r @ _*}</address> if (r \\ "institution").exists(_.text == "Cerro Tololo Interamerican Observatory") =>
+      StepResult(tololoTransformMessage(InvestigatorPrelude),
+        <address>
+          <institution>Cerro Tololo Inter-American Observatory/NSF’s NOIRLab</institution>
+          <address>
+            Casilla 603
+            La Serena
+            Chile
+          </address>
+          <country>Chile</country>
+        </address>
       ).successNel
     }
   override val transformers: List[TransformFunction] = List(noirLabInstitutions, gnInstitutions, gsInstitutions, tololoInstitutions)

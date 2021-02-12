@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2021.1.3" tacCategory="Stars and stellar evolution">
+    <meta band3optionChosen="false" overrideAffiliate="false"/>
+    <semester year="2021" half="A"/>
+    <title>REL-3970 conversion test</title>
+    <abstract>Great project.</abstract>
+    <scheduling></scheduling>
+    <keywords/>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Bryan</firstName>
+            <lastName>Miller</lastName>
+            <status>PhD</status>
+            <gender>None selected</gender>
+            <email>bmiller@gemini.edu</email>
+            <address>
+                <institution>Gemini Observatory - South</institution>
+                <address>Gemini Observatory
+Colina El Pino s/n
+La Serena</address>
+                <country>Chile</country>
+            </address>
+        </pi>
+        <coi id="investigator-1">
+            <firstName>Andrew</firstName>
+            <lastName>Stephens</lastName>
+            <status>PhD</status>
+            <gender>None selected</gender>
+            <email></email>
+            <phone></phone>
+            <institution>Gemini Observatory - North</institution>
+        </coi>
+        <coi id="investigator-2">
+            <firstName>Beth</firstName>
+            <lastName>Willman</lastName>
+            <status>PhD</status>
+            <gender>None selected</gender>
+            <email></email>
+            <phone></phone>
+            <institution>NOAO</institution>
+        </coi>
+        <coi id="investigator-3">
+            <firstName>Sean</firstName>
+            <lastName>Points</lastName>
+            <status>PhD</status>
+            <gender>None selected</gender>
+            <email></email>
+            <phone></phone>
+            <institution>Cerro Tololo Interamerican Observatory</institution>
+        </coi>
+    </investigators>
+    <targets>
+        <sidereal epoch="J2000" id="target-0">
+            <name>NGC  3115</name>
+            <degDeg>
+                <ra>151.30824200000000701038516126573085784912109375</ra>
+                <dec>-7.7185809999999719366314820945262908935546875</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude band="B" system="Vega">11.0</magnitude>
+                <magnitude band="R" system="Vega">9.369999885559082</magnitude>
+                <magnitude band="J" system="Vega">6.789000034332275</magnitude>
+                <magnitude band="H" system="Vega">6.11899995803833</magnitude>
+                <magnitude band="K" system="Vega">5.882999897003174</magnitude>
+            </magnitudes>
+        </sidereal>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC 80%/Cloudy, IQ 70%/Good, SB 50%/Dark, WV Any</name>
+            <cc>80%/Cloudy</cc>
+            <iq>70%/Good</iq>
+            <sb>50%/Dark</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <gmosS>
+            <regime>optical</regime>
+            <ifu id="blueprint-0">
+                <name>GMOS-S IFU B600 g (475 nm) IFU 2 slits</name>
+                <visitor>false</visitor>
+                <filter>g (475 nm)</filter>
+                <disperser>B600</disperser>
+                <fpu>IFU 2 slits</fpu>
+            </ifu>
+        </gmosS>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" target="target-0" condition="condition-0" blueprint="blueprint-0">
+            <progTime units="hr">2.0</progTime>
+            <partTime units="hr">0.2</partTime>
+            <time units="hr">2.2</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>42</percentage>
+                    <evaluation>Warning</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>8</gsa>
+            </meta>
+        </observation>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None"/>
+    </proposalClass>
+</proposal>
