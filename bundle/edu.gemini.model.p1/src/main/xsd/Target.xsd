@@ -61,6 +61,7 @@
                 </xsd:sequence>
                 <xsd:attribute name="epoch" type="CoordinatesEpoch" default="J2000"/>
                 <xsd:attribute name="horizonsDesignation" type="xsd:token"/>
+                <xsd:attribute name="horizonsQuery" type="xsd:token"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>

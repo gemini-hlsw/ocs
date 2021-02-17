@@ -95,7 +95,7 @@ final class HorizonsLookup(editor: TargetEditor, site: Site, when: Long) {
   private def handleSingleResult(query: String, r: Row[_ <: HorizonsDesignation]): HS2[Unit] =
     for {
       e <- fetchEphemeris(r.a)
-      t <- p1target(query, r.a.show, e)
+      t <- p1target(query, r.a.show, r.a.queryString, e)
       _ <- onEDT(editor.close(TargetEditor.Replace(t)))
     } yield ()
 
@@ -110,7 +110,7 @@ final class HorizonsLookup(editor: TargetEditor, site: Site, when: Long) {
         map(e => Ephemeris(site, e.data))
 
   /** Create a new phase 1 target from a name and phase-2 (!) ephemeris. */
-  def p1target(name: String, horizonsDesignation: String, ephemeris: Ephemeris): HS2[NonSiderealTarget] =
+  def p1target(name: String, horizonsDesignation: String, horizonsQuery: String, ephemeris: Ephemeris): HS2[NonSiderealTarget] =
     HS2.delay {
       NonSiderealTarget(
         UUID.randomUUID, // side-effect, so need delay above
@@ -119,7 +119,8 @@ final class HorizonsLookup(editor: TargetEditor, site: Site, when: Long) {
           case (t, cd) => EphemerisElement(cd, None, t) // no magnitude info
         },
         CoordinatesEpoch.J_2000,
-        Some(horizonsDesignation)
+        Some(horizonsDesignation),
+        Some(horizonsQuery)
       )
     }
 
