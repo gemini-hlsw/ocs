@@ -26,7 +26,7 @@ object TargetUtil {
     EphemerisElement(Coordinates(RightAscension.fromAngle(Angle.parseHMS(ra).getOrElse(Angle.zero)), Declination.fromAngle(Angle.parseDMS(dec).getOrElse(Angle.zero)).getOrElse(Declination.zero)), Some(mag), utc(year, month, day, hour, min))
 
   def mkTarget(name: String, elements: List[EphemerisElement]): NonSiderealTarget =
-    NonSiderealTarget(UUID.randomUUID(), name, elements, J_2000, None)
+    NonSiderealTarget(UUID.randomUUID(), name, elements, J_2000, None, None)
 
   def mkMag(value: Double, band: MagnitudeBand, system: MagnitudeSystem = MagnitudeSystem.default): Magnitude =
     new Magnitude(value, band, system)
