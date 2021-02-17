@@ -30,6 +30,7 @@ import java.awt.Color
 import edu.gemini.pit.ui.util.ToolButton
 
 import swing._
+import scala.swing.Swing.EmptyIcon
 import scala.swing.event.{ButtonClicked, SelectionChanged, ValueChanged}
 import javax.swing.{BorderFactory, Icon, ListSelectionModel, SwingUtilities}
 import java.text.DecimalFormat
@@ -402,8 +403,20 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
       object Header extends GridBagPanel with Rows {
 
         // Content, defined below.
+        addRow(new Label("Query:"), Query)
         addRow(new Label("Epoch:"), NsEpoch)
 
+      }
+
+      // Our Query String label.
+      object Query extends Label("", EmptyIcon, Alignment.Left) {
+        tooltip    = "HORIZONS query for this target."
+        foreground = Color.GRAY
+        text       = target match {
+          case ns: NonSiderealTarget =>
+            ns.horizonsDesignation.flatMap(HorizonsDesignation.read).foldMap(_.queryString)
+          case _ => ""
+        }
       }
 
       // Our epoch dropdown.
