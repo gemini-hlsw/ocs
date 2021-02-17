@@ -73,7 +73,7 @@ class TargetView(val shellAdvisor:ShellAdvisor) extends BorderPanel with BoundVi
     def size(m:Model) = targets.size
 
     object columns extends Enumeration {
-      val Name, RA, Dec, PM, /* Epoch, */ Magnitudes = Value
+      val Name, RA, Dec, PM, /* Epoch, */ Magnitudes, Query = Value
     }
     import columns._
 
@@ -106,6 +106,7 @@ class TargetView(val shellAdvisor:ShellAdvisor) extends BorderPanel with BoundVi
       case Dec  => (90, 90)
       case PM   => (25, 25)
       case Magnitudes => (100, Integer.MAX_VALUE)
+      case Query => (100, Integer.MAX_VALUE)
     }
 
     def text(e:Target) =
@@ -122,6 +123,10 @@ class TargetView(val shellAdvisor:ShellAdvisor) extends BorderPanel with BoundVi
           case t:SiderealTarget    => t.magnitudes.map(_.band.name).sorted.mkString(" ")
           case t:NonSiderealTarget => t.magnitude(semester.midPoint).map(d => "*").orNull
           case t:TooTarget         => null
+        }
+        case Query => e match {
+          case t:NonSiderealTarget => t.horizonsQuery.orNull
+          case _                   => null
         }
       } else {
         case Name => e.name
