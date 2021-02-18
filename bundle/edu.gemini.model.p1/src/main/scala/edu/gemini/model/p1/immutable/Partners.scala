@@ -31,7 +31,7 @@ object Partners {
 
   // Possible FT Partners: None, Ngos, Subaru
   val ftPartners:Seq[(FtPartner, String)] = {
-    (None -> NoPartnerAffiliation) :: (NgoPartner.values.filter(_ != NgoPartner.CL).toList.map(p => Option(-\/(p)) -> Partners.name.getOrElse(p, "")) ::: List((Option(\/-(ExchangePartner.SUBARU)): FtPartner) -> SubaruAffiliation)).sortBy(_._2)
+    (None -> NoPartnerAffiliation) :: (NgoPartner.values.toList.map(p => Option(-\/(p)) -> Partners.name.getOrElse(p, "")) ::: List((Option(\/-(ExchangePartner.SUBARU)): FtPartner) -> SubaruAffiliation)).sortBy(_._2)
   }
 
   /**
