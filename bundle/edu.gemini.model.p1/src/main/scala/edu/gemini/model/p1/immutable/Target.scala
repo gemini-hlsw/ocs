@@ -129,14 +129,15 @@ case class SiderealTarget (
 
 object NonSiderealTarget extends UuidCache[M.NonSiderealTarget] {
 
-  def empty = apply(UUID.randomUUID(), "Untitled", List.empty, CoordinatesEpoch.J_2000, None)
+  def empty = apply(UUID.randomUUID(), "Untitled", List.empty, CoordinatesEpoch.J_2000, None, None)
 
   def apply(m: M.NonSiderealTarget): NonSiderealTarget = new NonSiderealTarget(
     uuid(m),
     m.getName,
     m.getEphemeris.asScala.map(EphemerisElement(_)).toList,
     m.getEpoch,
-    Option(m.getHorizonsDesignation))
+    Option(m.getHorizonsDesignation),
+    Option(m.getHorizonsQuery()))
 
 }
 
@@ -145,7 +146,8 @@ case class NonSiderealTarget(
   name: String,
   ephemeris: List[EphemerisElement],
   epoch: CoordinatesEpoch,
-  horizonsDesignation: Option[String]
+  horizonsDesignation: Option[String],
+  horizonsQuery: Option[String]
 ) extends Target {
 
   def isEmpty = ephemeris.isEmpty
@@ -157,6 +159,7 @@ case class NonSiderealTarget(
     m.getEphemeris.addAll(ephemeris.map(_.mutable).asJava)
     m.setEpoch(epoch)
     m.setHorizonsDesignation(horizonsDesignation.orNull)
+    m.setHorizonsQuery(horizonsQuery.orNull)
     m
   }
 
