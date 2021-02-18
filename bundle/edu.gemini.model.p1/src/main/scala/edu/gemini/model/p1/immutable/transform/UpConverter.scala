@@ -226,7 +226,6 @@ case object SemesterConverter2021ATo2021B extends SemesterConverter {
           <address>
             Casilla 603
             La Serena
-            Chile
           </address>
           <country>Chile</country>
         </address>
@@ -247,7 +246,6 @@ case object SemesterConverter2021ATo2021B extends SemesterConverter {
           <address>
             Casilla 603
             La Serena
-            Chile
           </address>
           <country>Chile</country>
         </address>
