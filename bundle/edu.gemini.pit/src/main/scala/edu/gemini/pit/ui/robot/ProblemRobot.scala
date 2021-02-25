@@ -838,7 +838,11 @@ object TacProblems {
   type Partner = Any
   // ugh
   def tac: Boolean = AppPreferences.current.mode == AppPreferences.PITMode.TAC
-  def name(p: Partner): String = Partners.name.getOrElse(p, "<unknown>")
+  def name(p: Partner): String = p match {
+    case GuaranteedTimePartner => "Guaranteed time"
+    case LargeProgramPartner => "Large program"
+    case _ => Partners.name.getOrElse(p, "<unknown>")
+  }
 
 }
 

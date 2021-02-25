@@ -36,7 +36,7 @@ object TacView {
       // no partners and the tab's controls will be disabled. Elsewhere we don't bother with the
       // `gt.sub.specialType` check.
       case gt:SpecialProposalClass if gt.sub.specialType === SpecialProposalType.GUARANTEED_TIME =>
-        List(GuaranteedTimePartner -> gt.sub.response)
+        gt.sub.response.map(r => List(GuaranteedTimePartner -> Some(r))).getOrElse(Nil)
 
       case _                           => Nil
     }).toMap[Partner, Option[SubmissionResponse]].mapValues(_.get)
