@@ -48,6 +48,7 @@
     <type name="SIP">
         <dir>/home/software/proposals/subaru_intensive_program/proposals/2021B</dir>
         <to>pitlp@gemini.edu</to>
+        <template>sip</template>
     </type>
 
     <type name="ar">
