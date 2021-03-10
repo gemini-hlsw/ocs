@@ -184,12 +184,13 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             morph.accept(instrument.getIFU().getAperture());
 
             final List<Double> sf_list = instrument.getIFU().getFractionOfSourceInAperture();
+            Log.fine("Fraction of source in " + sf_list.size() + " IFU elements = " + sf_list);
 
             // for uniform sources the result is the same regardless of the IFU offsets/position
             // in this case we only calculate and display the result of the first IFU element
             // For the summed IFU we will also only have a single S/N value.
             int ifusToShow;
-            if (instrument.isIfuUsed() &&  _obsDetailParameters.analysisMethod() instanceof IfuSum) {
+            if (_obsDetailParameters.analysisMethod() instanceof IfuSum) {
                 ifusToShow = 1;
             } else {
                 ifusToShow = sf_list.size();
@@ -200,7 +201,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             // process all IFU elements
             double totalspsf = 0;  // total source fraction in the aperture
             double numfibers = 0;  // number of fibers being summed
-            if (instrument.isIfuUsed() &&  _obsDetailParameters.analysisMethod() instanceof IfuSum) {
+            if (_obsDetailParameters.analysisMethod() instanceof IfuSum) {
                 for (Double aSf_list : sf_list) {
                     final double spsf = aSf_list;
                     totalspsf += spsf;
@@ -210,7 +211,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 numfibers = 1;
             }
 
-            // The IFU slit has an effective width of 4.2 pix in the spectral direction (per the GMOS web page).
+            // The IFU "slit" has an effective width of 4.2 pix in the spectral direction (per the GMOS web page).
             // However, the distance between fibers on the detector in the spatial direction is ~ 5 pix.
             final double slitLength = numfibers * 5.0 / instrument.getSpatialBinning();
             Log.fine("IFU slit length = " + numfibers + " fibers = " + slitLength + " pixels");
@@ -222,11 +223,15 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 GmosSpecS2N s2n = new GmosSpecS2N(numberOfSlits);
 
                 double spsf;
+                double onepixsf;
                 if (_obsDetailParameters.analysisMethod() instanceof IfuSum) {
                     spsf = totalspsf;
+                    onepixsf = sf_list.get((sf_list.size() - 1) / 2);  // use the central element for the one-pix throughput (number of elements is odd)
                 } else {
                     spsf = sf_list.get(i);
+                    onepixsf = spsf;
                 }
+                Log.fine("Fraction of source in IFU:  one-pix = " + onepixsf + "  total = " + spsf);
 
                 final Slit ifuSlit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
 
@@ -242,7 +247,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                     specS2N = new SpecS2NSlitVisitor(
                             ifuSlit,
                             instrument.disperser.get(),
-                            new SlitThroughput(spsf, spsf),
+                            new SlitThroughput(spsf, onepixsf),
                             instrument.getSpectralPixelWidth(),
                             instrument.getObservingStart(shift),
                             instrument.getObservingEnd(shift),
@@ -461,17 +466,14 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final Gmos[] ccdArray     = mainInstrument.getDetectorCcdInstruments();
         final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
 
-        final boolean ifuUsed   = mainInstrument.isIfuUsed();
+        final boolean ifuUsed = mainInstrument.isIfuUsed();
         double  ifuOffset = ifuUsed ? mainInstrument.getIFU().getApertureOffsetList().get(i) : 0.0;
-        if (mainInstrument.isIfuUsed() && mainInstrument.getIfuMethod().get() instanceof IfuSum) {
+        if (ifuUsed && mainInstrument.getIfuMethod().get() instanceof IfuSum) {
             ifuOffset = 0.0;
         }
         final List<ChartAxis> axes = new ArrayList<>();
         String title = "Signal and SQRT(Background) in one pixel" + (ifuUsed ? "\nIFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec" : "");
-        if (mainInstrument.isIfuUsed() &&  mainInstrument.getIfuMethod().get() instanceof IfuSum) {
-            final IfuSum ifu = (IfuSum) mainInstrument.getIfuMethod().get();
-            title = "Signal and SQRT(Background)\nIFU elements summed in a radius of " + String.format("%.2f", ifu.num()) + " arcsec";
-        }
+
         final ChartAxis xAxis = ChartAxis.apply("Wavelength (nm)");
         final ChartAxis yAxis = ChartAxis.apply("e- per exposure per spectral pixel");
 
