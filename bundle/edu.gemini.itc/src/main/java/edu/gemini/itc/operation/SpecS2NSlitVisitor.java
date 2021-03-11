@@ -159,10 +159,12 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     private void calculateS2N() {
 
         // shot noise on dark current flux in aperture
-        final double darkNoise = darkCurrent * slit.lengthPixels() * exposureTime;
+        final double darkNoise = darkCurrent * slit.lengthPixels() * exposureTime;  // per pixel
+        Log.fine("Dark noise = " + darkCurrent + " * "  + slit.lengthPixels() + " pix * " + exposureTime + " sec = " + darkNoise);
 
         // readout noise in aperture
-        final double readNoise = this.readNoise * this.readNoise * slit.lengthPixels();
+        final double readNoise = this.readNoise * this.readNoise * slit.lengthPixels();  // per pixel
+        Log.fine("Read noise = " + this.readNoise + "^2 * "  + slit.lengthPixels() + " pix = " + readNoise);
 
         // signal and background for given slit and throughput
         final VisitableSampledSpectrum signal     = haloIsUsed ? signalWithHalo(throughput.throughput(), haloThroughput.throughput()) : signal(throughput.throughput());
@@ -175,7 +177,6 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
         // final S2N for all exposures
         resultS2NFinal = finalS2N(signal, background, darkNoise, readNoise);
-
     }
 
     /** Calculates signal and background per coadd. */

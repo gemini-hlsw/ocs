@@ -472,7 +472,8 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             ifuOffset = 0.0;
         }
         final List<ChartAxis> axes = new ArrayList<>();
-        String title = "Signal and SQRT(Background) in one pixel" + (ifuUsed ? "\nIFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec" : "");
+        String title = "Signal and SQRT(Background) in one pixel" +
+                (ifuUsed ? "\nIFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec" : "");
 
         final ChartAxis xAxis = ChartAxis.apply("Wavelength (nm)");
         final ChartAxis yAxis = ChartAxis.apply("e- per exposure per spectral pixel");
