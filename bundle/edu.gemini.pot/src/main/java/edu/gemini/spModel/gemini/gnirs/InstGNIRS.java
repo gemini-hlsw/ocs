@@ -255,7 +255,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
             return getSetupTimeLgs();
         }
 
-        return (_slitWidth == SlitWidth.IFU) ? (getSetupTimeIfu()) : (getSetupTime());
+        return _slitWidth.isIfu() ? getSetupTimeIfu() : getSetupTime();
     }
 
     /**
@@ -273,13 +273,8 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
             }
         }
 
-        SlitWidth slitWidth = (SlitWidth) conf.getItemValue(GNIRSConstants.SLIT_WIDTH_KEY);
-
-        if (slitWidth.equals(GNIRSParams.SlitWidth.IFU)) {
-            return getSetupTimeIfu();
-        } else {
-            return getSetupTime();
-        }
+        final SlitWidth slitWidth = (SlitWidth) conf.getItemValue(GNIRSConstants.SLIT_WIDTH_KEY);
+        return slitWidth.isIfu() ? getSetupTimeIfu() : getSetupTime();
     }
 
     /**
@@ -310,7 +305,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
      */
     public double[] getScienceArea() {
         // This is the size of the science area, which is a rectangle.
-        // The height is defined by "slit width" (except IFU), the width is as follows:
+        // The width is defined by "slit width" (except IFU), the height is as follows:
         //   pixel scale 0.05"+XD => 3.1arcsec
         //   pixel scale 0.15"+XD => 6arcsec
         //   Wollaston => 14arcsec (the FOV when Wollaston=Yes is 14.3" x slit width)
@@ -318,31 +313,39 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         //   pixel scale 0.15" => 99arcsec ( " ")
         //   IFU => 3.15arcsec x 4.8arcsec
 
-        if (_slitWidth == SlitWidth.IFU) {
-            return new double[]{3.15, 4.8};
+        final double w = _slitWidth.getValue();
+
+        final double h;
+        switch (_slitWidth) {
+            case IFU:
+            case LR_IFU:
+                h = 4.8;
+                break;
+            case HR_IFU:
+                h = 1.8;
+                break;
+            default:
+                if (checkWollastonPrism()) {
+                    h = 14.3;
+                } else if (_pixelScale == PixelScale.PS_005) {
+                    if (checkCrossDispersed()) {
+                        if (_crossDispersed.equals(CrossDispersed.SXD)) {
+                            h = 7.;
+                        } else {
+                            h = 5.1;
+                        }
+                    } else {
+                        h = 49.;
+                    }
+                } else {
+                    if (checkCrossDispersed()) {
+                        h = 7.;
+                    } else {
+                        h = 99.;
+                    }
+                }
         }
 
-        double w = _slitWidth.getValue();
-        double h;
-        if (checkWollastonPrism()) {
-            h = 14.3;
-        } else if (_pixelScale == PixelScale.PS_005) {
-            if (checkCrossDispersed()) {
-                if (_crossDispersed.equals(CrossDispersed.SXD)) {
-                    h = 7.;
-                } else {
-                    h = 5.1;
-                }
-            } else {
-                h = 49.;
-            }
-        } else {
-            if (checkCrossDispersed()) {
-                h = 7.;
-            } else {
-                h = 99.;
-            }
-        }
         return new double[]{w, h};
     }
 

@@ -156,9 +156,11 @@ public class GNIRSParams {
         SW_8("3.0 arcsec", 3.0, "3.0") {
             @Override public boolean isObsolete() { return true; }
         },
-        IFU("IFU", 4.8, "IFU") {
+        IFU("IFU", 3.15, "IFU") {
             @Override public boolean isObsolete() { return true; }
         },
+        LR_IFU("LR-IFU", 3.15, "LR-IFU"),
+        HR_IFU("HR-IFU", 1.25, "HR-IFU"),
         ACQUISITION("acquisition", "ACQ"),
         PUPIL_VIEWER("pupil viewer", "PV"),
         PINHOLE_1("pinhole 0.1", "SmPin"),
@@ -171,9 +173,9 @@ public class GNIRSParams {
             double DEFAULT_SLIT_WIDTH = 4.33;
         }
 
-        private double _slitWidth = Defaults.DEFAULT_SLIT_WIDTH;
-        private String _displayValue;
-        private String _logValue;
+        private final double _slitWidth;
+        private final String _displayValue;
+        private final String _logValue;
 
         SlitWidth(String displayValue, double slitWidth, String logValue) {
             _displayValue = displayValue;
@@ -242,6 +244,19 @@ public class GNIRSParams {
             }
         }
 
+        public boolean isIfu() {
+            final boolean result;
+            switch (this) {
+                case IFU:
+                case LR_IFU:
+                case HR_IFU:
+                    result = true;
+                    break;
+                default:
+                    result = false;
+            }
+            return result;
+        }
     }
 
     /**
@@ -1137,7 +1152,7 @@ public class GNIRSParams {
             setValue(new Focus(string));
         }
     }
-    
+
     /**Well Depth Values **/
     public enum WellDepth implements DisplayableSpType, SequenceableSpType {
 

@@ -2,6 +2,7 @@ package jsky.app.ot.gemini.gnirs;
 
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.gnirs.GNIRSConstants;
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.*;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
 import edu.gemini.spModel.telescope.IssPort;
@@ -314,14 +315,8 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
             return;
         }
 
-        // -Pixel scale=0.05"/pix: IFU and Res=700 grayed out, limited slit widths?
-        // -Pixel scale=0.15"/pix: Res=18000 grayed out, limited slit widths?
         final PixelScale ps = getDataObject().getPixelScale();
-        final boolean ps_005 = (ps == PixelScale.PS_005);
-        _w.slitWidth.setEnabledObject(SlitWidth.IFU, !ps_005);
-
-        // -XD=yes: Wollaston prism grayed out
-        final boolean isXD = getDataObject().checkCrossDispersed();
+        final boolean  isXD = getDataObject().checkCrossDispersed();
 
         ((XdRenderer) _w.crossDispersed.getRenderer()).setValidOptions(ps);
         ((XdModel) _w.crossDispersed.getModel()).setValidOptions(ps);
@@ -344,16 +339,50 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
         */
     }
 
+    private void _pixelScaleUpdated() {
+        final GNIRSParams.SlitWidth sw = getDataObject().getSlitWidth();
+        if (sw.isIfu()) {
+            final GNIRSParams.PixelScale ps = getDataObject().getPixelScale();
+            getDataObject().setSlitWidth(
+                (ps == PixelScale.PS_005) ? SlitWidth.HR_IFU : SlitWidth.LR_IFU
+            );
+            _updateSlitWidth();
+        }
+    }
 
-    // Apply a set of constraints, as specified in the GNIRS specs (see comments below)
-    private void _applyConstraints() {
-        // -IFU: sets pixel scale=0.15"/pix, XD=no
-        if (getDataObject().getSlitWidth() == SlitWidth.IFU) {
-            getDataObject().setPixelScale(PixelScale.PS_015);
+    private void _slitWidthUpdated() {
+        final GNIRSParams.SlitWidth sw = getDataObject().getSlitWidth();
+        if (sw.isIfu()) {
+            getDataObject().setPixelScale(
+                (sw == SlitWidth.HR_IFU) ? PixelScale.PS_005 : PixelScale.PS_015
+            );
             getDataObject().setCrossDispersed(CrossDispersed.NO);
             _updatePixelScale();
             _updateCrossDispersed();
         }
+    }
+
+    private void _crossDispersedUpdated() {
+        final GNIRSParams.SlitWidth sw = getDataObject().getSlitWidth();
+        if (sw.isIfu()) {
+            switch (getDataObject().getCrossDispersed()) {
+                case NO:
+                    break;
+                case LXD:
+                case SXD:
+                    getDataObject().setSlitWidth(SlitWidth.DEFAULT);
+                    _updateSlitWidth();
+                    break;
+                default:
+                    throw new RuntimeException("Unexpected xd: " + getDataObject().getCrossDispersed());
+            }
+        }
+
+    }
+
+
+    // Apply a set of constraints, as specified in the GNIRS specs (see comments below)
+    private void _applyConstraints() {
 
         if (getDataObject().checkCrossDispersed()) {
             _updateOrderTable();
@@ -591,6 +620,7 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
             watchCrossDispersed(false);
             getDataObject().setCrossDispersed(xd);
             watchCrossDispersed(true);
+            _crossDispersedUpdated();
             if (getDataObject().checkCrossDispersed()) {
                 // set wavelength to default for cross-dispersed
                 getDataObject().setCentralWavelength(Order.XD.getDefaultWavelength(), Order.XD);
@@ -608,6 +638,7 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
 
         } else if (w == _w.pixelScale) {
             getDataObject().setPixelScale(PixelScale.getPixelScaleByIndex(_w.pixelScale.getSelectedIndex()));
+            _pixelScaleUpdated();
         } else if (w == _w.disperser) {
             getDataObject().setDisperser(Disperser.getDisperserByIndex(_w.disperser.getSelectedIndex()));
 //        } else if (w == _w.acqMirror) {
@@ -616,6 +647,7 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
 //            getDataObject().setFilter((Filter) _w.filter.getModel().getSelectedItem());
         } else if (w == _w.slitWidth) {
             getDataObject().setSlitWidth((SlitWidth) _w.slitWidth.getModel().getSelectedItem());
+            _slitWidthUpdated();
         } else if (w == _w.well) {
             getDataObject().setWellDepth((WellDepth) _w.well.getSelectedItem());
         }
