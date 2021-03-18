@@ -2,6 +2,7 @@ package jsky.app.ot.gemini.gnirs;
 
 import com.jgoodies.forms.factories.DefaultComponentFactory;
 import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
 import jsky.app.ot.gemini.parallacticangle.PositionAnglePanel;
 import jsky.util.gui.DropDownListBoxWidget;
@@ -24,7 +25,7 @@ public class GnirsForm extends JPanel {
 		pixelScale = new SingleSelectComboBox();
 		JLabel disperserLabel = new JLabel();
 		disperser = new SingleSelectComboBox();
-		slitWidth = new SingleSelectComboBox();
+		slitWidth = new SingleSelectComboBox<>();
 		JPanel wollastonPrismPanel = new JPanel();
 		JLabel component2 = new JLabel();
 		JLabel scienceFovLabel = new JLabel();
@@ -480,7 +481,7 @@ public class GnirsForm extends JPanel {
 	// Generated using JFormDesigner non-commercial license
 	SingleSelectComboBox pixelScale;
 	SingleSelectComboBox disperser;
-	SingleSelectComboBox slitWidth;
+	SingleSelectComboBox<GNIRSParams.SlitWidth> slitWidth;
 //	SingleSelectComboBox filter;
 //	SingleSelectComboBox acqMirror;
 	JLabel scienceFOV;

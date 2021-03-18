@@ -237,6 +237,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
 
     /** {@inheritDoc} */
     public double getSlitWidth() {
+        // REL-3809: What needs to be done here for IFU
         return params.slitWidth().getValue();
     }
 

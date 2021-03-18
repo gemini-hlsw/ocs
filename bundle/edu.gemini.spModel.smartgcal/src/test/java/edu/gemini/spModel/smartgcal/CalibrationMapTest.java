@@ -49,14 +49,14 @@ public class CalibrationMapTest {
         // Note that obsolete values are allowed!
         properties.setProperty(ConfigKeyGnirs.Values.SLIT_WIDTH.toString(), "*");
         keys = map.createConfig(properties);
-        Assert.assertEquals(13, keys.size());
+        Assert.assertEquals(15, keys.size());
 
-        // combination of wildcards: 13 slit widths (2 obsolete), 2 pixel scales, 2 well depths = 52 keys...
+        // combination of wildcards: 15 slit widths (2 obsolete), 2 pixel scales, 2 well depths = 60 keys...
         properties.setProperty(ConfigKeyGnirs.Values.SLIT_WIDTH.toString(), "*");
         properties.setProperty(ConfigKeyGnirs.Values.PIXEL_SCALE.toString(), "*");
         properties.setProperty(ConfigKeyGnirs.Values.WELL_DEPTH.toString(), "*");
         keys = map.createConfig(properties);
-        Assert.assertEquals(52, keys.size());
+        Assert.assertEquals(60, keys.size());
     }
 
     @Test
