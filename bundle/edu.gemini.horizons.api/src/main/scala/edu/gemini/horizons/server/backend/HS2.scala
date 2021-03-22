@@ -391,7 +391,6 @@ object HorizonsService2 {
       LOG.info(s"Horizons request $url")
       val conn = url.openConnection().asInstanceOf[HttpsURLConnection]
       conn.setHostnameVerifier(hostnameVerifier)
-      conn.setSSLSocketFactory(GemSslSocketFactory.get)
       conn.setReadTimeout(timeout)
       ConnectionCharset.set(conn)
       ResponseStream(conn.getInputStream, ConnectionCharset.get(conn))
