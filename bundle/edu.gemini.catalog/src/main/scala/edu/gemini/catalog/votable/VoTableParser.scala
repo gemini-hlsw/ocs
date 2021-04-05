@@ -577,7 +577,7 @@ trait VoTableParser {
       }
 
     def parsePlx(plx: Option[String]): CatalogProblem \/ Option[Parallax] =
-      parseDoubleVal(plx, VoTableParser.UCD_PLX)(d => Parallax(0.0 max d).right)
+      parseDoubleVal(plx, VoTableParser.UCD_PLX)(d => Parallax.fromMas(d).orZero.right)
 
     def toSiderealTarget(
       id:    String,

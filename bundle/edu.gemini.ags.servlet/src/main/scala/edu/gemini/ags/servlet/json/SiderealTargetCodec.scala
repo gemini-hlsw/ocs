@@ -4,6 +4,9 @@ import argonaut._, Argonaut._
 
 import edu.gemini.spModel.core._
 
+import scalaz._
+import Scalaz._
+
 trait SiderealTargetCodec {
 
   import edu.gemini.json.all._
@@ -58,7 +61,7 @@ trait SiderealTargetCodec {
         o <- (c --\ "coordinates" ).as[Coordinates]
         p <- (c --\ "properMotion").as[Option[ProperMotion]]
         r <- (c --\ "redshift"    ).as[Option[Double]].map(_.map(z => Redshift(z)))
-        x <- (c --\ "parallax"    ).as[Option[Double]].map(_.map(mas => Parallax(mas)))
+        x <- (c --\ "parallax"    ).as[Option[Double]].map(_.map(mas => Parallax.fromMas(mas).orZero))
         m <- (c --\ "magnitudes"  ).as[List[Magnitude]]
       } yield SiderealTarget(n, o, p, r, x, m, None, None)
     }

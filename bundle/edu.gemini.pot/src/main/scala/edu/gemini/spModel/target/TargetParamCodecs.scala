@@ -22,7 +22,7 @@ object TargetParamCodecs {
     ParamCodec[Double].xmap(Angle.fromDegrees, _.toDegrees)
 
   implicit val ParallaxParamCodec: ParamCodec[Parallax] =
-    ParamCodec[Double].xmap(Parallax(_), _.mas)
+    ParamCodec[Double].xmap(mas => Parallax.fromMas(mas).orZero, _.mas)
 
   implicit val VelocityParamCodec: ParamCodec[Velocity] =
     ParamCodec[Double].xmap(KilometersPerSecond(_), _.toKilometersPerSecond)
@@ -45,7 +45,7 @@ object TargetParamCodecs {
   implicit val DeclinationAngularVelocParamCodec: ParamCodec[DeclinationAngularVelocity] =
     ParamCodec[AngularVelocity].xmap(DeclinationAngularVelocity(_), _.velocity)
 
-  implicit val EpochParamCodec: ParamCodec[Epoch] = 
+  implicit val EpochParamCodec: ParamCodec[Epoch] =
     ParamCodec[Double].xmap(Epoch(_), _.year)
 
   implicit val DecParamCodec: ParamCodec[Dec] =

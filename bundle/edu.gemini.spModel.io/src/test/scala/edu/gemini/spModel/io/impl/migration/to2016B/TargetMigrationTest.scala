@@ -33,7 +33,7 @@ class TargetMigrationTest extends Specification with MigrationTest {
         TooTarget("zero")
       )
     }
-    
+
     "Migrate Sidereal Target at the Origin" in withTestProgram2("targetMigration.xml") { p =>
       p.findBaseByObsTitle("origin") must_== Some(
         SiderealTarget(
@@ -41,7 +41,7 @@ class TargetMigrationTest extends Specification with MigrationTest {
           Coordinates.zero,
           None,
           Some(Redshift(0.0)),
-          Some(Parallax(0.0)),
+          Some(Parallax.zero),
           List(),
           None,
           None)
@@ -59,7 +59,7 @@ class TargetMigrationTest extends Specification with MigrationTest {
             DeclinationAngularVelocity(AngularVelocity(10328.12)), Epoch.J2000)
           ),
           Some(Redshift(-3.69E-4)),
-          Some(Parallax(548.31)),
+          Parallax.fromMas(548.31),
           List(
             Magnitude( 4.524, K, None, Vega),
             Magnitude( 4.83,  H, None, Vega),

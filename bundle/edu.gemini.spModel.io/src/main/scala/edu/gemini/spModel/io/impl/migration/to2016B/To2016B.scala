@@ -163,7 +163,7 @@ object To2016B extends Migration {
       _ <- SiderealTarget.properMotion  := Some(pm(ps).exec(ProperMotion.zero)).filterNot(_ == ProperMotion.zero)
       _ <- SiderealTarget.redshift     ?:= ps.double("rv").map(Redshift.fromRadialVelocityJava).map(Some(_))
       _ <- SiderealTarget.redshift     ?:= ps.double("z").map(Redshift(_)).map(Some(_))
-      _ <- SiderealTarget.parallax      := ps.double("parallax").map(Parallax(_))
+      _ <- SiderealTarget.parallax      := ps.double("parallax").map(mas => Parallax.fromMas(mas).orZero)
     } yield ()
 
   // Read proper motion
