@@ -35,7 +35,7 @@ final class SiderealDetailEditor extends TargetDetailEditor {
     Prop("µ RA",     "mas/year", pm >=> ProperMotion.deltaRA  >=> RightAscensionAngularVelocity.velocity >=> AngularVelocity.masPerYear),
     Prop("µ Dec",    "mas/year", pm >=> ProperMotion.deltaDec >=> DeclinationAngularVelocity.velocity    >=> AngularVelocity.masPerYear),
     Prop("Epoch",    "years",    pm >=> ProperMotion.epoch    >=> Epoch.year),
-    Prop("Parallax", "mas",      px >=> Parallax.mas),
+    Prop.nonNegative[SiderealTarget]("Parallax", "mas", st => px.get(st).mas, (st, mas) => px.set(st, Parallax.fromMas(mas).orZero)),
     Prop(RedshiftRepresentations.all, RedshiftRepresentations.repr, RedshiftRepresentations.RedshiftZ, RedshiftRepresentations.renderLabel, RedshiftRepresentations.renderValue, RedshiftRepresentations.editValue, RedshiftRepresentations.formatter)
   )
 

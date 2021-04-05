@@ -47,7 +47,7 @@ public class NumberBoxWidget extends TextBoxWidget {
             final String result = beforeOffset + str + afterOffset;
 
             // Check if this is a negative number
-            if (!allowNegative && result.startsWith("-")) {
+            if (!allowNegative && result.trim().startsWith("-")) {
                 Toolkit.getDefaultToolkit().beep();
                 return;
             }

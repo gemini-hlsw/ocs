@@ -807,7 +807,7 @@ class VoTableParserSpec extends Specification with VoTableParser {
       // redshift
       result.map(_.redshift) should beEqualTo(\/.right(Redshift(-0.000069).some))
       // parallax
-      result.map(_.parallax) should beEqualTo(\/.right(Parallax(130.23).some))
+      result.map(_.parallax) should beEqualTo(\/.right(Parallax.fromMas(130.23)))
       // magnitudes
       result.map(_.magnitudeIn(MagnitudeBand.U)) should beEqualTo(\/.right(Some(new Magnitude(0.03, MagnitudeBand.U))))
       result.map(_.magnitudeIn(MagnitudeBand.B)) should beEqualTo(\/.right(Some(new Magnitude(0.03, MagnitudeBand.B))))
@@ -877,7 +877,7 @@ class VoTableParserSpec extends Specification with VoTableParser {
       val result = VoTableParser.parse(CatalogName.SIMBAD, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
 
       // parallax is reported as -0.57 by Simbad, the parser makes it a 0
-      result.map(_.parallax) should beEqualTo(\/.right(Parallax(0).some))
+      result.map(_.parallax) should beEqualTo(\/.right(Parallax.zero.some))
     }
     "parse simbad with a not-found name" in {
       val xmlFile = "simbad-not-found.xml"

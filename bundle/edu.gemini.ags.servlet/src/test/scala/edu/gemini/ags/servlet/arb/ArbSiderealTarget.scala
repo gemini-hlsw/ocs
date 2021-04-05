@@ -30,7 +30,7 @@ trait ArbSiderealTarget {
 
   implicit val arbParallax: Arbitrary[Parallax] =
     Arbitrary {
-      Gen.choose(0, 10).map(mas => Parallax(mas.toDouble))
+      Gen.choose(0, 10).map(mas => Parallax.unsafeFromMas(mas.toDouble))
     }
 
   implicit val arbMagnitude: Arbitrary[Magnitude] =

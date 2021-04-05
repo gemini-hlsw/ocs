@@ -7,17 +7,26 @@ import Scalaz._
  * Parallax in mas
  * Store the value in mas to avoid rounding errors
  */
-case class Parallax(mas: Double) extends Serializable
+sealed abstract case class Parallax private (mas: Double) {
+
+  assert(mas >= 0.0, "Parallax must be >= 0.0")
+
+}
 
 object Parallax {
 
-  val mas: Parallax @> Double = Lens.lensu((a, b) => a.copy(mas = b), _.mas)
+  def fromMas(mas: Double): Option[Parallax] =
+    (mas >= 0.0).option(new Parallax(mas) {})
+
+  def unsafeFromMas(mas: Double): Parallax =
+    fromMas(mas).get
 
   /**
    * The `No parallax`
    * @group Constructors
    */
-  val zero: Parallax = Parallax(0)
+  val zero: Parallax =
+    unsafeFromMas(0.0)
 
   /** @group Typeclass Instances */
   implicit val order: Order[Parallax] =
@@ -34,7 +43,7 @@ object Parallax {
   implicit val monoid: Monoid[Parallax] =
     new Monoid[Parallax] {
       val zero = Parallax.zero
-      def append(a: Parallax, b: => Parallax): Parallax = Parallax(a.mas + b.mas)
+      def append(a: Parallax, b: => Parallax): Parallax = new Parallax(a.mas + b.mas) {}
     }
 
 }

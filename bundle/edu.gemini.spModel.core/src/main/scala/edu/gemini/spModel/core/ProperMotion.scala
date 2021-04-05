@@ -32,7 +32,7 @@ case class ProperMotion(
       val redshift: Option[Redshift] = Target.redshift.get(t).flatten
       redshift.getOrElse(Redshift.zero).toRadialVelocity.toKilometersPerSecond
     }
-    val parallax = Parallax.mas.get(Target.parallax.get(t).flatten.getOrElse(Parallax.zero)) / ProperMotion.Million
+    val parallax = Target.parallax.get(t).flatten.orZero.mas / ProperMotion.Million
     ProperMotion.properMotionCalculator(baseCoordinates,
                                         Epoch.JulianLengthOfYear,
                                         properVelocity,

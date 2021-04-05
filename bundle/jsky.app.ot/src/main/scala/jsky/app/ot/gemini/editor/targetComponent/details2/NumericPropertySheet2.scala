@@ -4,7 +4,6 @@ import java.awt.{GridBagConstraints, GridBagLayout, Insets}
 import java.text.{DecimalFormat, NumberFormat, ParseException}
 import java.util.Locale
 import javax.swing.JPanel
-
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{Option => JOption}
 import edu.gemini.spModel.core.Target
@@ -155,23 +154,27 @@ object NumericPropertySheet2 {
   case class DoubleProp[A](
     leftCaption: String,
     rightCaption: String,
-    lens: A @> Double
+    allowNegative: Boolean,
+    get: A => Double,
+    set: (A, Double) => A
   ) extends Prop[A] {
 
-    val leftComponent =
+    override val leftComponent: Component =
       new Label(leftCaption) {
         horizontalAlignment = Alignment.Left
       }
 
-    val rightComponent =
+    override val rightComponent: Component =
       new Label(rightCaption) {
         horizontalAlignment = Alignment.Left
       }
 
-    def edit: (A, Double) => A = lens.set(_, _)
+    override def edit: (A, Double) => A =
+      set
 
-    def init: (NumberBoxWidget, A) => Unit = { (w,a) =>
-      w.setValue(format(lens.get(a)))
+    override def init: (NumberBoxWidget, A) => Unit = { (w,a) =>
+      w.setAllowNegative(allowNegative)
+      w.setValue(format(get(a)))
     }
 
   }
@@ -276,7 +279,10 @@ object NumericPropertySheet2 {
   object Prop {
 
     def apply[A](leftCaption: String, rightCaption: String, lens: A @> Double): Prop[A] =
-      DoubleProp(leftCaption, rightCaption, lens)
+      DoubleProp(leftCaption, rightCaption, allowNegative = true, lens.get, lens.set)
+
+    def nonNegative[A](leftCaption: String, rightCaption: String, get: A => Double, set: (A, Double) => A): Prop[A] =
+      DoubleProp(leftCaption, rightCaption, allowNegative = false, get, set)
 
     def apply[A, B](leftOptions: List[B], rightCaptions: Map[B, String], initial: B, render: B => String, f: (A, B) => Double, g: (A, B, Double) => A, h: B => NumberFormat): Prop[A] =
       TransformableProp(leftOptions, rightCaptions, initial, render, f, g, h)
