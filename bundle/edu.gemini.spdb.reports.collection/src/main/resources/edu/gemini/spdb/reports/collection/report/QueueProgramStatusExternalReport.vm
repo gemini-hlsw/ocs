@@ -45,7 +45,6 @@
 			#foreach ($i in [ 1 .. $info.maxBand ])
 				<a href="$info.Hash${info.siteAbbrev}b$i">$i</a>#if ($i < $info.maxBand),#end
 			#end (and previous semester band 1 rollover:
-			<a href="${info.getFileName(-2)}$info.Hash${info.SiteAbbrev}b1">$info.getSemesterAbbrev(-2)</a>,
 			<a href="${info.getFileName(-1)}$info.Hash${info.SiteAbbrev}b1">$info.getSemesterAbbrev(-1)</a>)
 		#end
 		</ul>

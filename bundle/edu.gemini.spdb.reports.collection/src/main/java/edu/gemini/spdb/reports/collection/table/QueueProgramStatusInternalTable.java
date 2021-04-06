@@ -4,6 +4,7 @@ import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.ISPProgram;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.shared.util.TimeValue;
+import edu.gemini.spModel.core.Semester;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.obs.ObsPhase2Status;
 import edu.gemini.spModel.obs.SPObservation;
@@ -82,7 +83,7 @@ public class QueueProgramStatusInternalTable extends AbstractTable {
                 return Collections.emptyList();
 
             // Get the semester
-            String semester = ReportUtils.getSemester(id);
+             final Optional<Semester> semester = ReportUtils.getSemester(id);
 
             // Fetch the program itself.
             final SPProgram prog = (SPProgram) progShell.getDataObject();
@@ -167,7 +168,7 @@ public class QueueProgramStatusInternalTable extends AbstractTable {
 
             // Done. Build the row and return it.
             final Map<IColumn, Object> row = new HashMap<IColumn, Object>();
-            row.put(Columns.SEMESTER, semester);
+            row.put(Columns.SEMESTER, semester.map(Semester::format).orElse(null));
             row.put(Columns.BAND, band);
             row.put(Columns.PROGRAM_ID, id);
             row.put(Columns.STATUS, status);

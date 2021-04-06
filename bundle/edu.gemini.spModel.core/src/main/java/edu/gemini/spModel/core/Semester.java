@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -97,6 +98,14 @@ public final class Semester implements Comparable<Semester>, Serializable {
         int year = Integer.parseInt(yearStr);
         Half half = Half.valueOf(nameStr);
         return new Semester(year, half);
+    }
+
+    public static Optional<Semester> parseOptional(String semesterString) {
+        try {
+            return Optional.of(parse(semesterString));
+        } catch (ParseException ex) {
+            return Optional.empty();
+        }
     }
 
     private final int year;

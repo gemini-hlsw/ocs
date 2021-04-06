@@ -5,7 +5,7 @@ package edu.gemini.rollover.servlet
  */
 
 import edu.gemini.pot.sp.ISPProgram
-import edu.gemini.spModel.core.{Semester, Site, ProgramId}
+import edu.gemini.spModel.core.{ProgramId, RolloverPeriod, Semester, Site}
 import edu.gemini.spModel.gemini.obscomp.SPProgram
 import edu.gemini.spModel.rich.core._
 
@@ -21,9 +21,10 @@ import edu.gemini.spModel.rich.core._
  * <li>Correspond to this site</li>
  * </ul>
  */
-case class IncludeProgram(site: Site, currentSemester: Semester) extends (ISPProgram => Boolean) {
+final case class IncludeProgram(site: Site, currentSemester: Semester) extends (ISPProgram => Boolean) {
 
-  val prevSemester = currentSemester.prev
+  val rolloverPeriod: RolloverPeriod =
+    RolloverPeriod.ending(currentSemester)
 
   private def progContext(progShell: ISPProgram): Option[Context] =
     for {
@@ -34,7 +35,7 @@ case class IncludeProgram(site: Site, currentSemester: Semester) extends (ISPPro
     } yield new Context(site, semester)
 
   private def compatibleContext(progShell: ISPProgram): Boolean =
-    progContext(progShell).exists(ctx => (ctx.site == site) && (ctx.semester >= prevSemester))
+    progContext(progShell).exists(ctx => (ctx.site == site) && rolloverPeriod.includes(ctx.semester))
 
   private def isActiveRollover(progShell: ISPProgram): Boolean = {
     val sp = progShell.getDataObject.asInstanceOf[SPProgram]

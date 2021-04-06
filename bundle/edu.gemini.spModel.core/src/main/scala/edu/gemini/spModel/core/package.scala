@@ -30,6 +30,9 @@ package object core {
   implicit val OrderSPProgramID: Order[SPProgramID] =
     Order.fromScalaOrdering(scala.math.Ordering.ordered[SPProgramID])
 
+  implicit val OrderSemester: Order[Semester] =
+    Order.fromScalaOrdering(scala.math.Ordering.ordered[Semester])
+
   /** Operations for maps of types that we can interpolate.  We use these for Ephemerides. */
   implicit class MoreMapOps[K, V](m: K ==>> V)(implicit O: Order[K], I: Interpolate[K,V]) {
 
