@@ -28,7 +28,7 @@ public class ExecHoursTable extends AbstractTable {
 	private static final String SHORT_DESCRIPTION = "Elapsed time per science program and charge class.";
 	private static final String DISPLAY_NAME = "Executed Program Hours";
 
-	public static enum Columns implements IColumn {
+	public enum Columns implements IColumn {
 
 		PROGRAM_ID("Program ID", "%s"),
 		ALLOCATED_HRS("Allocated", "%2.2f"),
@@ -55,10 +55,6 @@ public class ExecHoursTable extends AbstractTable {
 
 		public String format(Object value) {
 			return String.format(Locale.getDefault(), format, value);
-		}
-
-		public Comparator getComparator() {
-			return null;
 		}
 
 	}
