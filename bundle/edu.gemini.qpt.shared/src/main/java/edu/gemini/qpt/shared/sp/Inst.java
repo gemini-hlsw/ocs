@@ -41,6 +41,7 @@ import edu.gemini.spModel.gemini.trecs.InstTReCS;
 import edu.gemini.spModel.gemini.trecs.TReCSParams;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
+import edu.gemini.spModel.type.ObsoletableSpType;
 
 import java.util.*;
 
@@ -207,8 +208,8 @@ public enum Inst {
         this.north = north;
         this.south = south;
         this.normallyAvailable = normallyAvailable;
-        this.options = options;
-        this.normallyAvailableOptions = normallyAvailableOptions;
+        this.options = filterNotObsolete(options);
+        this.normallyAvailableOptions = filterNotObsolete(normallyAvailableOptions);
         this.hiddenOptions = hiddenOptions;
         this.guideProbe = null;
     }
@@ -285,9 +286,19 @@ public enum Inst {
                 ret[i++] = e;
         return ret;
     }
+
     public static Enum<?>[] arrayOf(Enum<?>... arrays) {
         return arrays;
     }
+
+    // Removes all enum items that have been marked obsolete via the ObsoletableSpType interface.
+    private static Enum<?>[] filterNotObsolete(Enum<?>[] in) {
+        return Arrays
+                .stream(in)
+                .filter(e -> !((e instanceof ObsoletableSpType) && ((ObsoletableSpType) e).isObsolete()))
+                .toArray(Enum<?>[]::new);
+    }
+
     @Override
     public String toString() {
         if (getSpType() != null) {
