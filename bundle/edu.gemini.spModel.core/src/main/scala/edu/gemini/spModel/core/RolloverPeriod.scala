@@ -15,8 +15,8 @@ import Scalaz._
  * A semester range during which a given rollover period is active.
  *
  * @param startSemester starting semester of the rollover period
- * @param endSemester   ending semester of the rollover period (will be the
- *                      same or after startSemester)
+ * @param endSemester   ending semester (inclusive) of the rollover period (will
+ *                      be the same or after startSemester)
  */
 sealed abstract case class RolloverPeriod private (
   startSemester: Semester,
