@@ -9,9 +9,7 @@ import edu.gemini.shared.util.immutable.ApplyOp;
 import edu.gemini.shared.util.immutable.DefaultImList;
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.spModel.core.SPProgramID;
-import edu.gemini.spModel.core.Semester;
-import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.core.*;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.data.config.DefaultParameter;
 import edu.gemini.spModel.data.config.IParameter;
@@ -44,9 +42,6 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummaryService;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.SPGroup;
 import edu.gemini.spModel.obscomp.SPNote;
-import edu.gemini.spModel.core.ProgramId;
-import edu.gemini.spModel.core.ProgramId$;
-import edu.gemini.spModel.core.ProgramType;
 import edu.gemini.spModel.seqcomp.SeqConfigComp;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
@@ -154,11 +149,10 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
         // figure out current semester and add two previous ones for roll overs
         // (this is the default behavior for QPT)
         final Semester semCurrent = new Semester(site, date);
-        final Semester semRollover1 = semCurrent.prev();
-        final Semester semRollover2 = semRollover1.prev();
+        final RolloverPeriod rolloverPeriod = RolloverPeriod.ending(semCurrent);
 
         this.relevantSemesters = new HashSet<Semester>() {{ add(semCurrent); addAll(extraSemesters); }};
-        this.rolloverSemesters = new HashSet<Semester>() {{ add(semRollover1); add(semRollover2); }};
+        this.rolloverSemesters = new HashSet<Semester>() {{ addAll(rolloverPeriod.semestersAsJava()); remove(semCurrent); }};
 
         // QPT skips completed programs, gets invalid observations (e.g. standards without conditions and others)
         // and is not interested in observations that have no remaining steps

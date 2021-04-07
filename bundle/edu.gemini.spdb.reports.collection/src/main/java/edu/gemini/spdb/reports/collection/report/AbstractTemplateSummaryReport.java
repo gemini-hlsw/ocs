@@ -2,14 +2,11 @@ package edu.gemini.spdb.reports.collection.report;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.Map.Entry;
 
 import edu.gemini.pot.spdb.IDBDatabaseService;
+import edu.gemini.spModel.core.Semester;
 import edu.gemini.spdb.reports.IColumn;
 import edu.gemini.spdb.reports.IQuery;
 import edu.gemini.spdb.reports.IRow;
@@ -34,33 +31,31 @@ public abstract class AbstractTemplateSummaryReport extends BundleVelocityReport
 
 	protected abstract ISort[] getGroups();
 	protected abstract IColumn[] getOutputColumns();
-	protected abstract String getSemester(IRow row);
+	protected abstract Optional<Semester> getSemester(IRow row);
 
 	public List<File> execute(IQuery query, Map<IDBDatabaseService, List<IRow>> results, File parentDir) throws IOException {
-		List<File> files = new ArrayList<File>();
+		List<File> files = new ArrayList<>();
 		for (Map.Entry<IDBDatabaseService, List<IRow>> e: results.entrySet()) {
 
 			String abbrev = DatabaseNameManager.getInstance().getSiteAbbreviation(e.getKey());
 			String siteName = DatabaseNameManager.getInstance().getSiteName(e.getKey());
 
 			// Need to break it down by calendar semester.
-			Map<String, List<IRow>> semesterRows = new TreeMap<String, List<IRow>>();
+			final Map<Semester, List<IRow>> semesterRows = new TreeMap<>();
 			for (IRow row: e.getValue()) {
 
-//				String sem = ReportUtils.semester(getDateValue(row));
-				String sem = getSemester(row);
-				if (sem != null) {
+				getSemester(row).ifPresent(sem -> {
 					List<IRow> rows = semesterRows.get(sem);
 					if (rows == null) {
-						rows = new ArrayList<IRow>();
+						rows = new ArrayList<>();
 						semesterRows.put(sem, rows);
 					}
 					rows.add(row);
-				}
+				});
 			}
 
 			// Now write a file per semester
-			for (Entry<String, List<IRow>> entry: semesterRows.entrySet()) {
+			for (Entry<Semester, List<IRow>> entry: semesterRows.entrySet()) {
 
 				Map<String, Object> vc = new TreeMap<String, Object>();
 				vc.put("results", entry.getValue());
@@ -71,7 +66,7 @@ public abstract class AbstractTemplateSummaryReport extends BundleVelocityReport
 				vc.put("db", e.getKey());
 				vc.put("dbm", DatabaseNameManager.getInstance());
 				vc.put("escaper", new HtmlEscaper());
-				vc.put("semester", entry.getKey());
+				vc.put("semester", entry.getKey().format());
 
 				File out = new File(parentDir, "tsr_" + abbrev + "_" + entry.getKey() + "." + getFileExtension());
 				merge(out, getResourcePath(getTemplateName()), vc);

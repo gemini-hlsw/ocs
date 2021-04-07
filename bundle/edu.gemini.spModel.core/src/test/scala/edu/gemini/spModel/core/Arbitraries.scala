@@ -15,6 +15,17 @@ import scalaz.std.anyVal._
 
 trait Arbitraries {
 
+  implicit val arbSemester: Arbitrary[Semester] =
+    Arbitrary {
+      for {
+        y <- Gen.chooseNum(2000, 2099)
+        h <- Gen.oneOf(Semester.Half.A, Semester.Half.B)
+      } yield new Semester(y, h)
+    }
+
+  implicit val arbRolloverPeriod: Arbitrary[RolloverPeriod] =
+    Arbitrary(arbitrary[Semester].map(RolloverPeriod.beginning))
+
   implicit val arbAngle: Arbitrary[Angle] =
     Arbitrary(arbitrary[Short].map(n => n / 10.0).map(Angle.fromDegrees))
 

@@ -2,13 +2,9 @@ package edu.gemini.spdb.reports.collection.util;
 
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.util.TimeValue;
-import edu.gemini.shared.util.immutable.ApplyOp;
-import edu.gemini.shared.util.immutable.None;
-import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.Pair;
-import edu.gemini.shared.util.immutable.Some;
-import edu.gemini.shared.util.immutable.Tuple2;
+import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.SPProgramID;
+import edu.gemini.spModel.core.Semester;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
@@ -20,7 +16,6 @@ import edu.gemini.spModel.obs.ObsTimesService;
 import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.ProgramNote;
-import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.template.TemplateParameters;
@@ -57,11 +52,11 @@ public class ReportUtils {
     }
 
     /**
-     * Returns the semester from the given SPProgramID, or null if none could be determined.
+     * Returns the semester from the given SPProgramID, or empty if none could be determined.
      */
-    public static String getSemester(SPProgramID id) {
-        Matcher m = SEMESTER_PATTERN.matcher(id.toString());
-        return m.matches() ? m.group(1) : null;
+    public static Optional<Semester> getSemester(SPProgramID id) {
+        final Matcher m = SEMESTER_PATTERN.matcher(id.toString());
+        return m.matches() ? Semester.parseOptional(m.group(1)) : Optional.empty();
     }
 
 

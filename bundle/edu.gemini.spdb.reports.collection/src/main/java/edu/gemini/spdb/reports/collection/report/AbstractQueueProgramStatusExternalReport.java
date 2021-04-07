@@ -3,6 +3,7 @@ package edu.gemini.spdb.reports.collection.report;
 import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.spModel.core.ProgramType;
 import edu.gemini.spModel.core.SPProgramID;
+import edu.gemini.spModel.core.Semester;
 import edu.gemini.spdb.reports.*;
 import edu.gemini.spdb.reports.collection.table.QueueProgramStatusExternalTable.Columns;
 import edu.gemini.spdb.reports.collection.table.TypeCheck;

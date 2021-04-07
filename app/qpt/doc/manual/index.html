@@ -66,7 +66,7 @@
 
 				<li>The science program must be of type <code>Q</code>, <code>C</code>, <code>SV</code>, <code>DD</code>, or <code>DS</code>.</li>
 
-				<li>The science program must be assigned to the current semester (based on the UT date of the plan) or must be a rollover program from either of the two preceding semesters. Additional semesters may be added via the <strong>Add Semester</strong> command described below.</li>
+				<li>The science program must be assigned to the current semester (based on the UT date of the plan) or must be a rollover program from the preceding semester. Additional semesters may be added via the <strong>Add Semester</strong> command described below.</li>
 
 				<li>The science program must have a numeric science band.</li>
 
@@ -95,7 +95,7 @@
 				<li><code>OVER_ALLOCATED</code> indicates that the program has no remaining time.</li>
 
 				<li><code>SCHED_GROUP</code> indicates that the observation is part of a scheduling group.</li>
-			
+
 			</ul>The following flags are influenced by the currently available set of instruments and configurations, and will be the same in all variants. Selecting and de-selecting items in the Instruments view can cause these flags to change.
 
 			<ul>
@@ -106,9 +106,9 @@
 
 			<ul>
 				<li><code>CC_UQUAL</code> indicates that the variant's cloud cover condition isn't restrictive enough for this observation. The observation is rendered in light gray and the icon is decorated with a diagonal slash.</li>
-				
+
 				<li><code>WV_UQUAL</code> indicates that the variant's water vapor condition isn't restrictive enough for this observation. The observation is rendered in light gray and the icon is decorated with a diagonal slash.</li>
-				
+
 				<li><code>IQ_UQUAL</code> indicates that the variant's image quality condition isn't restrictive enough for this observation. The observation is rendered in light gray and the icon is decorated with a diagonal slash.</li>
 
 				<li><code>OVER_QUALIFIED</code> indicates that the variant conditions are better than required. The observation is rendered in dark gray with a slightly faded out icon.</li>
@@ -138,7 +138,7 @@
 				<li><code>SETUP_BLOCKED</code> is a corner case and indicates that at least the first step of the observation is schedulable, but only if you skip the setup (possible if some cases).</li>
 
 				<li><code>PARTIALLY_BLOCKED</code> indicates that the observation is schedulable, but not the entire sequence.</li>
-			
+
 
 			</ul>
 		</dd>
@@ -290,19 +290,19 @@
 		<dt>Tools &gt; Add / Remove Semester</dt>
 
 		<dd>
-			<p>QPT automatically shows observations from the current semester (determined by plan date), as well as plans with rollover status from the previous two semesters. These observations are always available.</p>
+			<p>QPT automatically shows observations from the current semester (determined by plan date), as well as plans with rollover status from the previous semester. These observations are always available.</p>
 
 			<p>It is now possible to import complete additional semesters. This can be useful during the "gray" time in between semesters and perhaps for other special needs. In any case, you can import any extra semesters that exist in the database. You can also remove an added semester as long as none of its observations appear in the schedule.</p>
 		</dd>
-		
+
 		<dt>Help &gt; Update Software...</dt>
 		<dd>This command updates QPT to the latest version. You normally only need to do this in response to an email announcing that a new version is available. Note that this doesn't always work correctly; see <a href="../install.html" title="Running QPT"><em>Running QPT</em></a> for more information if you have problems.</dd>
-		
+
 	</dl>
-	
+
 	<h2>User Interface Views</h2>
-	
-	
-	
+
+
+
 </body>
 </html>

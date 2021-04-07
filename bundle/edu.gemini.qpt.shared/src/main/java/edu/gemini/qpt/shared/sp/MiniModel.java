@@ -158,7 +158,7 @@ public class MiniModel {
      * Creates a mini model for a given peer, date and additional semesters containing all observations
      * that match the given observation classes and statuses.
      * This is a convenience method for QPT. The mini model returned by this function will only contain
-     * ENG and CAL observations for the specified date and rollovers for the past two semesters.
+     * ENG and CAL observations for the specified date and rollovers for the past semester.
      * @param peer
      * @param date the date on which the night ends / sunrise
      * @param extraSemesters
@@ -221,10 +221,8 @@ public class MiniModel {
         } catch (UndeclaredThrowableException ute) {
             try {
                 throw ute.getCause();
-            } catch (IOException ioe) {
+            } catch (IOException | RuntimeException ioe) {
                 throw ioe;
-            } catch (RuntimeException re) {
-                throw re;
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
