@@ -152,8 +152,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
         final RolloverPeriod rolloverPeriod = RolloverPeriod.ending(semCurrent);
 
         this.relevantSemesters = new HashSet<Semester>() {{ add(semCurrent); addAll(extraSemesters); }};
-        this.rolloverSemesters = rolloverPeriod.semestersAsJava();
-        this.rolloverSemesters.remove(semCurrent);
+        this.rolloverSemesters = new HashSet<Semester>() {{ addAll(rolloverPeriod.semestersAsJava()); remove(semCurrent); }};
 
         // QPT skips completed programs, gets invalid observations (e.g. standards without conditions and others)
         // and is not interested in observations that have no remaining steps
