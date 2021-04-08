@@ -64,7 +64,7 @@ final class RichNode(val node: ISPNode) extends AnyVal {
 
   def toStream: Stream[ISPNode] =
     node match {
-      case c: ISPContainerNode => c #:: c.children.toStream.map(_.toStream).flatten
+      case c: ISPContainerNode => c #:: c.children.toStream.flatMap(_.toStream)
       case n                   => Stream(n)
     }
 

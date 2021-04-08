@@ -27,7 +27,7 @@ import edu.gemini.spModel.gemini.nifs.blueprint.{SpNifsBlueprint, SpNifsBlueprin
 import edu.gemini.spModel.gemini.niri.blueprint.SpNiriBlueprint
 import edu.gemini.spModel.obs.ObsPhase2Status
 import edu.gemini.pot.sp._
-import edu.gemini.spModel.obscomp.{SPNote, SPGroup}
+import edu.gemini.spModel.obscomp.SPGroup
 import edu.gemini.spModel.gemini.gsaoi.blueprint.SpGsaoiBlueprint
 import edu.gemini.spModel.gemini.texes.blueprint.SpTexesBlueprint
 import texes.Texes
@@ -149,7 +149,7 @@ case class TemplateFactoryImpl(db: TemplateDb) extends TemplateFactory {
 
     // Add all notes to target group for now
     val p = db.progMap(ini.program)
-    ini.notes.map(findNote(p)).flatten.foreach { n =>
+    ini.notes.flatMap(findNote(p)(_).toList).foreach { n =>
       val n0 = db.odb.getFactory.createObsComponentCopy(grp.getProgram, n, false)
       grp.addObsComponent(n0)
     }
@@ -168,13 +168,18 @@ case class TemplateFactoryImpl(db: TemplateDb) extends TemplateFactory {
 
   }
 
-  def findNote(n:ISPNode)(title:String):Option[ISPObsComponent] = n match {
-    case n:ISPObsComponent if isNote(n, title) => Some(n)
-    case n:ISPContainerNode => n.getChildren.asScala.asInstanceOf[Seq[ISPNode]].map(findNote(_)(title)).flatten.headOption
-    case _ => None
-  }
+  def findNote(n:ISPNode)(title:String): Option[ISPObsComponent] =
+    n.findDescendant {
+      case c: ISPObsComponent => isMatchingNote(c, title)
+      case _                  => false
+    }.map(_.asInstanceOf[ISPObsComponent])
 
-  def isNote(n:ISPObsComponent, title:String) =
-    n.getType == SPNote.SP_TYPE && n.getDataObject.asInstanceOf[SPNote].getTitle == title
+  def isMatchingNote(n:ISPObsComponent, title:String): Boolean =
+    n.getType match {
+      case SPComponentType.INFO_NOTE | SPComponentType.INFO_SCHEDNOTE =>
+        n.getDataObject.getTitle == title
+      case _                                                          =>
+        false
+    }
 
 }

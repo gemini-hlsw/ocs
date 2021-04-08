@@ -3,31 +3,16 @@ package edu.gemini.phase2.template.factory.impl.visitor
 import edu.gemini.phase2.template.factory.impl._
 import edu.gemini.spModel.gemini.visitor.blueprint.SpVisitorBlueprint
 import edu.gemini.spModel.gemini.visitor.VisitorInstrument
-import edu.gemini.pot.sp.{ISPGroup, ISPObservation}
+import edu.gemini.pot.sp.{ISPGroup, ISPObservation, SPComponentType}
 
+//noinspection MutatorLikeMethodIsParameterless
 trait VisitorBase extends GroupInitializer[SpVisitorBlueprint] with TemplateDsl {
-  val program = "VISITOR INSTRUMENT PHASE I/II MAPPING BPS"
-  val seqConfigCompType = VisitorInstrument.SP_TYPE
 
-  val AlopekeWavelength: Double = 0.674
-  val DssiWavelength: Double    = 0.700
-  val IgrinsWavelength: Double  = 2.100
-  val ZorroWavelength: Double   = 0.674
+  override val program: String =
+    "VISITOR INSTRUMENT PHASE I/II MAPPING BPS"
 
-  private val WavelengthMapping: List[(String, Double)] =
-    List(
-      "alopeke" -> AlopekeWavelength,
-      "dssi"    -> DssiWavelength,
-      "igrins"  -> IgrinsWavelength,
-      "zorro"   -> ZorroWavelength
-    )
-
-  val IgrinsPosAngle: Double = 90.0
-
-  private val PosAngleMapping: List[(String, Double)] =
-    List(
-      "igrins"  -> IgrinsPosAngle
-    )
+  override val seqConfigCompType: SPComponentType =
+    VisitorInstrument.SP_TYPE
 
   implicit def pimpInst(obs: ISPObservation) = new {
 
@@ -66,16 +51,15 @@ trait VisitorBase extends GroupInitializer[SpVisitorBlueprint] with TemplateDsl 
   def setName: Setter[String] =
     Setter[String](blueprint.name)(_.setName(_))
 
-  private def lookup[A](mapping: List[(String, A)], default: A): A = {
-    val inst = blueprint.name.toLowerCase
-    mapping
-      .collectFirst { case (n, w) if inst.contains(n) => w }
-      .getOrElse(default)
-  }
+  private def lookupInst: Option[VisitorInst] =
+    VisitorInst.findByName(blueprint.name)
+
+  override def notes: List[String] =
+    lookupInst.map(_.noteTitles).getOrElse(Nil)
 
   def setWavelength: Setter[Double] =
-    Setter[Double](lookup(WavelengthMapping, 0.0))(_.setWavelength(_))
+    Setter[Double](lookupInst.map(_.wavelength.toMicrons).getOrElse(0.0))(_.setWavelength(_))
 
   def setPosAngle: Setter[Double] =
-    Setter[Double](lookup(PosAngleMapping, 0.0))(_.setPosAngle(_))
+    Setter[Double](lookupInst.map(_.positionAngle.toDegrees).getOrElse(0.0))(_.setPosAngle(_))
 }

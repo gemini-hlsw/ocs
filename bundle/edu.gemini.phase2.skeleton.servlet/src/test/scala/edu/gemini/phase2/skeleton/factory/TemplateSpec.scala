@@ -98,6 +98,10 @@ abstract class TemplateSpec(xmlName: String) { this: SpecificationLike =>
       .asScala
       .toList
 
+  /** Return the list of all `ISPObservation`s in the template groups of the program. */
+  def templateObservations(sp: ISPProgram): List[ISPObservation] =
+    groups(sp).flatMap(_.getAllObservations.asScala.toList)
+
   /** Assert that the given library IDs are included and excluded; call within a `should`. */
   def checkLibs(label: String, tg: ISPTemplateGroup, incl: Set[Int], excl: Set[Int]) = {
     val ls = libs(tg)
