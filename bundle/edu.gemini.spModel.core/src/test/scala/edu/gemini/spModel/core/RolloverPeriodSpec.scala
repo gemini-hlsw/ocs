@@ -25,8 +25,14 @@ object RolloverPeriodSpec extends Specification with ScalaCheck with Arbitraries
 
     "have semester count according to start semester" !
       forAll { (p: RolloverPeriod) =>
-        val expected = if (p.startSemester.compareTo(RolloverPeriod.s2018B) < 0) 3 else 2
+        val expected = if (p.startSemester.compareTo(RolloverPeriod.s2018A) < 0) 3 else 2
         p.semesters.size == expected
       }
+
+    "starting 2017B has 3 semesters" !
+      (RolloverPeriod.beginning(new Semester(2017, Semester.Half.B)).semesters.size == 3)
+
+    "starting 2018A has 2 semesters" !
+      (RolloverPeriod.beginning(new Semester(2018, Semester.Half.A)).semesters.size == 2)
   }
 }
