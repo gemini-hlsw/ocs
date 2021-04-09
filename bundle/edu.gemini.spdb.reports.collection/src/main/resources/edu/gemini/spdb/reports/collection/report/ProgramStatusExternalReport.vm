@@ -1,12 +1,12 @@
 #foreach ($info in $infoList)
 
-	<table border="0" width="100%" cellpadding="4" cellspacing="0">
+    <table border="0" width="100%" cellpadding="4" cellspacing="0">
 		#set($prev="")
 		#foreach ($row in $info)
 			#set($curr=$row.getGroupValue(1))
 			#if(!$prev.equals($curr))
 				<tr style="background-color: #ffaa88">
-					<td  align="center" bgcolor="#FFD1A4" colspan="7"><a name="${info.siteAbbrev}b$curr">${info.siteAbbrev} Scientific Ranking Band $curr</td>
+					<td  align="center" bgcolor="#FFD1A4" colspan="7"><a name="${info.siteAbbrev}b$curr">$info.getSectionHeader($curr)</a></td>
 				</tr>
 				<tr style="background-color: #BDBDFF">
 					<td nowrap>Ref #</td>

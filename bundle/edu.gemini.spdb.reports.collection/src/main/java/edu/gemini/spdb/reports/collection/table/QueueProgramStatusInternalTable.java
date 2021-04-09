@@ -29,7 +29,7 @@ public class QueueProgramStatusInternalTable extends AbstractTable {
     private static final String DISPLAY_NAME = "Queue Program Status (Internal)";
     private static final String SHORT_DESCRIPTION = "Program status from planning point of view; used for internal report.";
 
-    public static enum Columns implements IColumn {
+    public enum Columns implements IColumn {
 
         SEMESTER("Semester", "%s"),
         BAND("Band", "%d"),
@@ -163,7 +163,7 @@ public class QueueProgramStatusInternalTable extends AbstractTable {
             }
 
             // Done. Build the row and return it.
-            final Map<IColumn, Object> row = new HashMap<IColumn, Object>();
+            final Map<IColumn, Object> row = new HashMap<>();
             row.put(Columns.SEMESTER, semester.map(Semester::format).orElse(null));
             row.put(Columns.BAND, band);
             row.put(Columns.PROGRAM_ID, id);

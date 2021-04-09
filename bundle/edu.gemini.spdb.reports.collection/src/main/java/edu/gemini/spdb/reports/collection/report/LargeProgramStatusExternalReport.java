@@ -6,7 +6,10 @@ import edu.gemini.spdb.reports.IFilter;
 public final class LargeProgramStatusExternalReport extends AbstractQueueProgramStatusExternalReport {
 
     public LargeProgramStatusExternalReport() {
-        super("LargeProgramStatusExternalReport.vm");
+        super(
+            "ProgramStatusExternalReport.vm",
+            (site, band) -> String.format("%s Large Program Queue", site)
+        );
     }
 
     @Override
@@ -14,6 +17,7 @@ public final class LargeProgramStatusExternalReport extends AbstractQueueProgram
         return new ProgramTypeFilter(ProgramType.LargeProgram$.MODULE$);
     }
 
+    @Override
     String getFileName(final String site, final String semester) {
         return "largeProgSchedQueue_" + site + "_" + semester + ".html";
     }
