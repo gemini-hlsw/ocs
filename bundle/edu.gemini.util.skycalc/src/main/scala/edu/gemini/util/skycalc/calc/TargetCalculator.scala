@@ -10,11 +10,11 @@ import edu.gemini.util.skycalc.calc.TargetCalculator.Fields
  * Target calculator that allows to calculate different attributes of a target for a given interval at a given sampling
  * rate. The purpose of this trait is twofold:
  * <ul>
- *   <li>It is a Scala facade to the Java skycalc code in {@see edu.gemini.skycalc.ImprovedSkyCalc}.</li>
+ *   <li>It is a Scala facade to the Java skycalc code in `edu.gemini.skycalc.ImprovedSkyCalc`.</li>
  *   <li>It caches the values for a target for a given interval and sampling rate; this is relevant for places
  *       where these values are needed repetitively because the calculation is pretty complex and slow.</li>
  * </ul>
- * If in doubt use {@link isDefinedAt} to make sure that values for a given time are actually calculated before
+ * If in doubt use `isDefinedAt` to make sure that values for a given time are actually calculated before
  * accessing them, otherwise an out of bounds exception will be thrown.
  */
 trait TargetCalculator extends Calculator {
@@ -109,7 +109,7 @@ trait TargetCalculator extends Calculator {
    * Calculates all values for the given times.
    * @return
    */
-  protected def calculate() = {
+  protected def calculate(): Vector[Vector[Double]] = {
     val skycalc = new ImprovedSkyCalc(site)
 
     // prepare temporary data structure
@@ -123,7 +123,7 @@ trait TargetCalculator extends Calculator {
       new Array[Double](samples)
     )
     // fill temporary data structure with calculated values
-    for (ix <- 0 to samples-1) {
+    for (ix <- 0 until samples) {
       val t = times(ix)
       skycalc.calculate(targetLocation(t), new Date(t), true)
       values(Elevation.id)(ix) = skycalc.getAltitude
@@ -164,14 +164,13 @@ object TargetCalculator {
     val Elevation, Azimuth, Airmass, LunarDistance, ParallacticAngle, HourAngle, SkyBrightness = Value
   }
 
-  def apply(site: Site, targetLocation: Long => Coordinates, defined: Interval, rate: Long = TimeUtils.seconds(30)) = {
-    new IntervalTargetCalculator(site, targetLocation, defined, rate)
-  }
-  def apply(site: Site, targetLocation: Long => Coordinates, time: Long): TargetCalculator = {
-    new SingleValueTargetCalculator(site, targetLocation, time)
-  }
-  def apply(site: Site, targetLocation: Long => Coordinates, times: Vector[Long]): TargetCalculator = {
-    new SampleTargetCalculator(site, targetLocation, times)
-  }
+  def apply(site: Site, targetLocation: Long => Coordinates, defined: Interval, rate: Long = TimeUtils.seconds(30)): TargetCalculator =
+    IntervalTargetCalculator(site, targetLocation, defined, rate)
+
+  def apply(site: Site, targetLocation: Long => Coordinates, time: Long): TargetCalculator =
+    SingleValueTargetCalculator(site, targetLocation, time)
+
+  def apply(site: Site, targetLocation: Long => Coordinates, times: Vector[Long]): TargetCalculator =
+    SampleTargetCalculator(site, targetLocation, times)
 }
 

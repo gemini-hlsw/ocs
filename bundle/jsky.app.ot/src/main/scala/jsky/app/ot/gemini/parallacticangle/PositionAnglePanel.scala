@@ -107,7 +107,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
 
     // Parallactic angle controls, if needed. This is an ugly hack because we only know if an instrument
     // supports parallactic angle by its type.
-    val parallacticAngleControlsOpt = {
+    val parallacticAngleControlsOpt: Option[ParallacticAngleControls] = {
       val supportsParallacticAngle = Set(SPComponentType.INSTRUMENT_FLAMINGOS2,
                                          SPComponentType.INSTRUMENT_GMOS,
                                          SPComponentType.INSTRUMENT_GMOSSOUTH,
@@ -186,10 +186,10 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     val instrument = e.getDataObject
 
     // Turn off the parallactic angle changing event handling as it triggers an AGS lookup.
-    ui.parallacticAngleControlsOpt.foreach(p => {
+    ui.parallacticAngleControlsOpt.foreach { p =>
       deafTo(p)
       p.init(e, s, numberFormatter)
-    })
+    }
 
     // Reset the combo box so that all of the options are enabled by default.
     // TODO: When background AGS is implemented, we can remove the deafTo + listenTo lines, as well as the
@@ -229,7 +229,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     }
   }
 
-  private def updatePATextFieldEditableState(pac: PosAngleConstraint) =
+  private def updatePATextFieldEditableState(pac: PosAngleConstraint): Unit =
     ui.positionAngleTextField.editable = !pac.isCalculated
 
   private def setInstPosAngle(newAngleDegrees: Double): Unit =
@@ -241,14 +241,13 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
   /**
     * Copies the position angle in the data object to the position angle text field.
     */
-  private def copyPosAngleToTextField(): Unit = {
+  private def copyPosAngleToTextField(): Unit =
     editor.foreach { e =>
       val newAngleStr = numberFormatter.format(e.getDataObject.getPosAngleDegrees)
       val oldAngleStr = ui.positionAngleTextField.text
       if (!newAngleStr.equals(oldAngleStr))
         ui.positionAngleTextField.text = newAngleStr
     }
-  }
 
   /**
     * Called whenever a selection is made in the position angle constraint combo box.

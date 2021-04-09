@@ -3,13 +3,13 @@ package jsky.app.ot.ags
 import edu.gemini.pot.client.SPDB
 import edu.gemini.spModel.core.SPProgramID
 import jsky.app.ot.ags.BagsState._
+
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import java.time.Instant
 import java.util.concurrent.TimeoutException
 import java.util.concurrent._
 import java.util.logging.Logger
 import javax.swing.SwingUtilities
-
 import edu.gemini.ags.api.{AgsHash, AgsRegistrar, AgsStrategy}
 import edu.gemini.catalog.votable.{CatalogException, GenericError}
 import edu.gemini.pot.sp._
@@ -19,7 +19,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obsclass.ObsClass
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.rich.shared.immutable._
-import edu.gemini.spModel.target.env.{AutomaticGroup, GuideEnv, GuideEnvironment}
+import edu.gemini.spModel.target.env.{AutomaticGroup, GuideEnv, GuideEnvironment, TargetEnvironment}
 import jsky.app.ot.OT
 import jsky.app.ot.gemini.altair.Altair_WFS_Feature
 import jsky.app.ot.gemini.inst.OIWFS_Feature
@@ -66,7 +66,9 @@ sealed trait BagsState {
 object BagsState {
   type AgsHashVal      = Long
   type StateTransition = (BagsState, IO[Unit]) // Next BagsState, side-effects
-  val ErrorTransition  = (ErrorState, ioUnit)  // Default transition for unexpected events
+
+  val ErrorTransition: StateTransition =
+    (ErrorState, ioUnit)  // Default transition for unexpected events
 
   def hashObs(ctx: ObsContext): AgsHashVal = {
     val when = ctx.getSchedulingBlockStart.asScalaOpt | Instant.now.toEpochMilli
@@ -134,7 +136,7 @@ object BagsState {
         // Returns the new state to switch to, either RunningState if all is well
         // and a new AGS lookup is needed or else IdleState (possibly with an
         // updated hash value) otherwise.
-        def idleAction = tup.fold(BagsManager.clearAction(k)) { _ => ioUnit }
+        def idleAction: IO[Unit] = tup.fold(BagsManager.clearAction(k)) { _ => ioUnit }
         runningTransition | ((IdleState(k, newHash), idleAction))
       }
 
@@ -162,7 +164,7 @@ object BagsState {
         if (r.posAngle === ctx.getPositionAngle) hash
         else hashObs(ctx.withPositionAngle(r.posAngle))
       }
-      (IdleState(k, Some(h)), BagsManager.applyAction(k, results))
+      (IdleState(k, Some(h)), BagsManager.applyAction(k, Some(hash), results))
     }
 
     // Failed AGS lookup.  Move to FailedState for a while and ask the timer to
@@ -259,7 +261,9 @@ object BagsManager {
   private val Log = Logger.getLogger(getClass.getName)
 
   // Worker pool running the AGS search and the timer.
-  val NumWorkers = math.max(1, Runtime.getRuntime.availableProcessors - 1)
+  val NumWorkers: Int =
+    math.max(1, Runtime.getRuntime.availableProcessors - 1)
+
   private val worker = new ScheduledThreadPoolExecutor(NumWorkers, new ThreadFactory() {
     override def newThread(r: Runnable): Thread = {
       val t = new Thread(r, "BagsManager - Worker")
@@ -268,18 +272,23 @@ object BagsManager {
       t
     }
   })
-  private implicit val executionContext = ExecutionContext.fromExecutor(worker)
+
+  private implicit val executionContext: ExecutionContext =
+    ExecutionContext.fromExecutor(worker)
 
   // Worker pool running the blocking queries.
-  private val blockingWorker = new ScheduledThreadPoolExecutor(16, new ThreadFactory() {
-    override def newThread(r: Runnable): Thread = {
-      val t = new Thread(r, "BagsManager - Blocking Query Worker")
-      t.setPriority(Thread.NORM_PRIORITY - 2)
-      t.setDaemon(true)
-      t
-    }
-  })
-  val blockingExecutionContext = ExecutionContext.fromExecutor(blockingWorker)
+  private val blockingWorker: ScheduledThreadPoolExecutor =
+    new ScheduledThreadPoolExecutor(16, new ThreadFactory() {
+      override def newThread(r: Runnable): Thread = {
+        val t = new Thread(r, "BagsManager - Blocking Query Worker")
+        t.setPriority(Thread.NORM_PRIORITY - 2)
+        t.setDaemon(true)
+        t
+      }
+    })
+
+  val blockingExecutionContext: ExecutionContext =
+    ExecutionContext.fromExecutor(blockingWorker)
 
   // This is our mutable state.  It is only read/written by the Swing thread.
   private var stateMap  = ==>>.empty[ProgKey, ObsKey ==>> BagsState]
@@ -479,10 +488,10 @@ object BagsManager {
         Log.info(s"Successful BAGS lookup for observation=${k.oid.getOrElse("?")}; applying on ${Thread.currentThread}")
         BagsManager.success(k, opt)
 
-      case Failure(CatalogException((e: GenericError) :: _)) =>
+      case Failure(CatalogException((_: GenericError) :: _)) =>
         BagsManager.fail(k, "Catalog lookup failed.", 5000)
 
-      case Failure(ex: TimeoutException) =>
+      case Failure(_: TimeoutException) =>
         BagsManager.fail(k, "Catalog timed out.", 0)
 
       case Failure(ex) =>
@@ -491,9 +500,56 @@ object BagsManager {
   }
 
   private[ags] def clearAction(k: ObsKey): IO[Unit] =
-    applyAction(k, None)
+    applyAction(k, None, None)
 
-  private[ags] def applyAction(k: ObsKey, selOpt: Option[AgsStrategy.Selection]): IO[Unit] = IO {
+  /**
+   * Action to apply the selection to the observation.  If provided, the
+   * expectedHash must match the hash of the current version of the observation
+   * or else the update is ignored.
+   *
+   * @param k key of the observation to update
+   * @param expectedHash hash of the state of the observation we expect to find
+   * @param selOpt selection to apply
+   *
+   * @return Action to perform
+   */
+  private[ags] def applyAction(
+    k:            ObsKey,
+    expectedHash: Option[AgsHashVal],
+    selOpt:       Option[AgsStrategy.Selection]
+  ): IO[Unit] = {
+
+    def commitChanges(
+      ctx:    TpeContext,
+      oldEnv: TargetEnvironment,
+      newEnv: TargetEnvironment
+    ): Unit =
+      ctx.targets.dataObject.foreach { targetComp =>
+
+        // Calculate the new target environment and if they are different
+        // referentially, apply them. If the env reference hasn't changed,
+        // this does nothing.
+        if (oldEnv != newEnv) {
+          targetComp.setTargetEnvironment(newEnv)
+          ctx.targets.commit()
+        }
+
+        // Change the pos angle as appropriate if this is the auto group.
+        selOpt.foreach { sel =>
+          if (newEnv.getPrimaryGuideGroup.isAutomatic) {
+            ctx.instrument.dataObject.foreach { inst =>
+              val deg = sel.posAngle.toDegrees
+              val old = inst.getPosAngleDegrees
+              if (deg != old) {
+                inst.setPosAngleDegrees(deg)
+                ctx.instrument.commit()
+              }
+            }
+          }
+        }
+      }
+
+
     def applySelection(ctx: TpeContext): Unit = {
       val oldEnv = ctx.targets.envOrDefault
 
@@ -504,26 +560,18 @@ object BagsManager {
         else oldEnv.setGuideEnvironment(GuideEnvironment(GuideEnv(AutomaticGroup.Initial, oldGuideEnv.manual)))
       }
 
-      // Calculate the new target environment and if they are different referentially, apply them.
-      ctx.targets.dataObject.foreach { targetComp =>
-        // If the env reference hasn't changed, this does nothing.
-        if (oldEnv != newEnv) {
-          targetComp.setTargetEnvironment(newEnv)
-          ctx.targets.commit()
-        }
+      // Commit all the changes inside a write lock, but first make sure that
+      // the underlying observation has not changed from what we expected.  If
+      // it has changed, then a new BAGS calculation will be triggered anyway.
 
-        // Change the pos angle as appropriate if this is the auto group.
-        selOpt.foreach { sel =>
-          if (newEnv.getPrimaryGuideGroup.isAutomatic && selOpt.isDefined) {
-            ctx.instrument.dataObject.foreach { inst =>
-              val deg = sel.posAngle.toDegrees
-              val old = inst.getPosAngleDegrees
-              if (deg != old) {
-                inst.setPosAngleDegrees(deg)
-                ctx.instrument.commit()
-              }
-            }
+      ctx.obsShell.foreach { obs =>
+        obs.getProgramWriteLock()
+        try {
+          if (expectedHash.forall(hashObs(obs).contains)) {
+            commitChanges(ctx, oldEnv, newEnv)
           }
+        } finally {
+          obs.returnProgramWriteLock()
         }
       }
     }
@@ -551,6 +599,6 @@ object BagsManager {
       obs.getProgram.addStructureChangeListener(StructureListener)
     }
 
-    fetchObs(k).foreach(doApply)
+    IO { fetchObs(k).foreach(doApply) }
   }
 }
