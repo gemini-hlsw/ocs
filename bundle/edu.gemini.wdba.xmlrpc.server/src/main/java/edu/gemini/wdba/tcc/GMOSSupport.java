@@ -1,15 +1,20 @@
 package edu.gemini.wdba.tcc;
 
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.gemini.gmos.InstGmosCommon;
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
+import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
+import edu.gemini.spModel.guide.GuideProbe;
+import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.telescope.IssPort;
 
 public final class GMOSSupport implements ITccInstrumentSupport {
 
     private String _wavelength;
-    private ObservationEnvironment _oe;
+    private final ObservationEnvironment _oe;
 
     // Private constructor
     private GMOSSupport(ObservationEnvironment oe) throws NullPointerException {
@@ -55,18 +60,59 @@ public final class GMOSSupport implements ITccInstrumentSupport {
         return inst.getPosAngleDegreesStr();
     }
 
-    public String getTccConfigInstrument() {
-        final String side = _oe.isNorth() ? "5" : "3";
-        final String port = (((InstGmosCommon) _oe.getInstrument()).getIssPort() == IssPort.UP_LOOKING) ? "" : side;
+    private boolean usesProbe(GuideProbe gp) {
+        return _oe.containsTargets(gp);
+    }
 
-        if (_oe.isNorth() && _oe.isAltair()) {
-            final String oi = _oe.containsTargets(GmosOiwfsGuideProbe.instance) ? "_OI" : "";
-            final String p1 = _oe.containsTargets(PwfsGuideProbe.pwfs1) ? "_P1" : "";
-            return "AO2GMOS" + port + p1 + oi;
-        } else {
-            final String p2 = (_oe.containsTargets(PwfsGuideProbe.pwfs2)) ? "_P2" : "";
-            return "GMOS" + port + p2;
+    private boolean usesP1() { return usesProbe(PwfsGuideProbe.pwfs1);         }
+    private boolean usesP2() { return usesProbe(PwfsGuideProbe.pwfs2);         }
+    private boolean usesOI() { return usesProbe(GmosOiwfsGuideProbe.instance); }
+
+    private boolean isIfu() {
+        final SPInstObsComp inst = _oe.getInstrument();
+
+        final boolean ifu;
+        switch (inst.getInstrument()) {
+            case GmosNorth: ifu = ((InstGmosNorth) inst).getFPUnit().isIFU(); break;
+            case GmosSouth: ifu = ((InstGmosSouth) inst).getFPUnit().isIFU(); break;
+            default:        ifu = false;
         }
+        return ifu;
+    }
+
+    private boolean usesAO() {
+        return _oe.getAoAspect() != ObservationEnvironment.AoAspect.none;
+    }
+
+    private Option<Integer> port() {
+        final SPInstObsComp inst = _oe.getInstrument();
+
+        final Option<Integer> p;
+        switch (inst.getInstrument()) {
+            case GmosNorth:
+                p = ImOption.apply(((InstGmosNorth) inst).getIssPort() == IssPort.SIDE_LOOKING ? 5 : 1);
+                break;
+
+            case GmosSouth:
+                p = ImOption.apply(((InstGmosSouth) inst).getIssPort() == IssPort.SIDE_LOOKING ? 3 : 1);
+                break;
+
+            default:
+                p = ImOption.empty();
+        }
+        return p;
+    }
+
+    public String getTccConfigInstrument() {
+        return String.format(
+          "%sGMOS%s%s%s%s%s",
+          usesAO() ? "AO2" : "",
+          isIfu()  ? "IFU" : "",
+          port().filter(p -> p != 1).map(Object::toString).getOrElse(""),
+          usesP1() ? "_P1" : "",
+          usesP2() ? "_P2" : "",
+          usesOI() ? "_OI" : ""
+        );
     }
 
     /**
@@ -84,40 +130,20 @@ public final class GMOSSupport implements ITccInstrumentSupport {
      * @return String that is the name of a TCC config file.  See WDBA-5.
      */
     public String getTccConfigInstrumentOrigin() {
-        final InstGmosCommon<?, ?, ?, ?> inst = (InstGmosCommon) _oe.getInstrument();
-        return (inst instanceof InstGmosNorth) ? northOrigin(inst) : southOrigin(inst);
-    }
-
-    private static final String NGS   = "ngs2gmos";
-    private static final String LGS   = "lgs2gmos";
-    private static final String NO_AO = "gmos";
-
-    private String oi() {
-        return _oe.containsTargets(GmosOiwfsGuideProbe.instance) ? "_oi" : "";
-    }
-
-    private String p1() {
-        return _oe.containsTargets(PwfsGuideProbe.pwfs1) ? "_p1" : "";
-    }
-
-    private static String ifu(InstGmosCommon<?, ?, ?, ?> inst) {
-        return inst.getFPUnit().isIFU() ? "_ifu" : "";
-    }
-
-    private String northOrigin(InstGmosCommon<?, ?, ?, ?> gmos) {
+        final String ao;
         switch (_oe.getAoAspect()) {
-            case ngs: return NGS   + oi();
-            case lgs: return LGS   + p1() + oi();
-            default:  return NO_AO + ifu(gmos);
+            case lgs: ao = "lgs2"; break;
+            case ngs: ao = "ngs2"; break;
+            default:  ao = "";
         }
-    }
-
-    private String southOrigin(InstGmosCommon<?, ?, ?, ?> gmos) {
-        switch (_oe.getAoAspect()) {
-            case ngs : return NGS;
-            case lgs : return LGS   + p1();
-            default:   return NO_AO + ifu(gmos);
-        }
+        return String.format(
+          "%sgmos%s%s%s%s",
+           ao,
+           isIfu() ? "_ifu" : "",
+           usesP1() ? "_p1" : "",
+           usesP2() ? "_p2" : "",
+           usesOI() ? "_oi" : ""
+        );
     }
 
     /**
