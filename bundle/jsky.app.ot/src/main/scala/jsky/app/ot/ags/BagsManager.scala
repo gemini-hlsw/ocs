@@ -164,7 +164,13 @@ object BagsState {
         if (r.posAngle === ctx.getPositionAngle) hash
         else hashObs(ctx.withPositionAngle(r.posAngle))
       }
-      (IdleState(k, Some(h)), BagsManager.applyAction(k, Some(hash), results))
+
+      (FinalizeUpdateState(k, h),
+        for {
+          _ <- BagsManager.applyAction(k, Some(hash), results)
+          _ <- BagsManager.wakeUpAction(k, 0)
+        } yield ()
+      )
     }
 
     // Failed AGS lookup.  Move to FailedState for a while and ask the timer to
@@ -172,6 +178,41 @@ object BagsState {
     // to PendingState (see FailedState.wakeUp).
     private[ags] override def fail(why: String, delayMs: Long): StateTransition =
       (FailureState(k, why), BagsManager.wakeUpAction(k, delayMs))
+  }
+
+  /**
+   * FinalizeUpdate.  This state is entered after a successful AGS lookup.  It
+   * checks that after the update the observation has the expected hash (i.e.,
+   * was not edited during the AGS calculation).  If edited, then we go back to
+   * pending for another lookup but if not we can transition to idle.
+   *
+   * @param k key of the corresponding observation
+   *
+   * @param expected hash code we expect to find if the observation was edited
+   *                 with only the BAGS result
+   */
+  final case class FinalizeUpdateState(k: ObsKey, expected: AgsHashVal) extends BagsState {
+    override private[ags] def edit: StateTransition =
+      (PendingState(k, None), BagsManager.wakeUpAction(k, 0))
+
+    override private[ags] def wakeUp: StateTransition = {
+        // Get the ObsContext and AgsStrategy, if possible.  If not possible,
+        // we won't be able to do AGS for this observation.
+        val ctx = for {
+          o <- fetchObs(k)
+          c <- ObsContext.create(o).asScalaOpt
+          _ <- agsStrategy(o, c)
+        } yield c
+
+        // Compute the new hash value of the observation, if possible.  It may
+        // be possible to (re)run AGS but not necessary if the hash hasn't
+        // changed.
+        val newHash = ctx.map(hashObs)
+
+        if (newHash.contains(expected)) (IdleState(k, newHash), ioUnit)
+        else (PendingState(k, None), BagsManager.wakeUpAction(k, 0))
+    }
+
   }
 
   /** RunningEdited. This state corresponds to a running AGS search for an
@@ -549,6 +590,24 @@ object BagsManager {
         }
       }
 
+    def scheduleTpeUpdate(): Unit = Swing.onEDT {
+
+      // Update the TPE if it is visible
+      selOpt.foreach { sel =>
+        Option(TpeManager.get()).filter(_.isVisible).foreach { tpe =>
+          sel.assignments.foreach { ass =>
+            val clazz = ass.guideProbe.getType match {
+              case GuideProbe.Type.AOWFS => classOf[Altair_WFS_Feature]
+              case GuideProbe.Type.OIWFS => classOf[OIWFS_Feature]
+              case GuideProbe.Type.PWFS  => classOf[TpePWFSFeature]
+            }
+            Option(tpe.getFeature(clazz)).foreach(tpe.selectFeature)
+          }
+        }
+      }
+
+    }
+
 
     def applySelection(ctx: TpeContext): Unit = {
       val oldEnv = ctx.targets.envOrDefault
@@ -569,6 +628,7 @@ object BagsManager {
         try {
           if (expectedHash.forall(hashObs(obs).contains)) {
             commitChanges(ctx, oldEnv, newEnv)
+            scheduleTpeUpdate()
           }
         } finally {
           obs.returnProgramWriteLock()
@@ -579,21 +639,8 @@ object BagsManager {
     def doApply(obs: ISPObservation): Unit = {
       obs.getProgram.removeStructureChangeListener(StructureListener)
       obs.getProgram.removeCompositeChangeListener(ChangeListener)
-      applySelection(TpeContext(obs))
 
-      // Update the TPE if it is visible
-      selOpt.foreach { sel =>
-        Option(TpeManager.get()).filter(_.isVisible).foreach { tpe =>
-          sel.assignments.foreach { ass =>
-            val clazz = ass.guideProbe.getType match {
-              case GuideProbe.Type.AOWFS => classOf[Altair_WFS_Feature]
-              case GuideProbe.Type.OIWFS => classOf[OIWFS_Feature]
-              case GuideProbe.Type.PWFS  => classOf[TpePWFSFeature]
-            }
-            Option(tpe.getFeature(clazz)).foreach(tpe.selectFeature)
-          }
-        }
-      }
+      applySelection(TpeContext(obs))
 
       obs.getProgram.addCompositeChangeListener(ChangeListener)
       obs.getProgram.addStructureChangeListener(StructureListener)
