@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2014A-1" subtype="basic" key="8cb94378-4312-4c80-bf31-cfb499213980" name="VISITOR-BP">
+  <container kind="program" type="Program" version="2020A-1" subtype="basic" key="8cb94378-4312-4c80-bf31-cfb499213980" name="VISITOR-BP">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="VISITOR INSTRUMENT PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -22,11 +22,31 @@
       <param name="fetched" value="yes"/>
       <param name="completed" value="false"/>
       <param name="notifyPi" value="NO"/>
+      <param name="timingWindowNotification" value="true"/>
     </paramset>
     <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="3bcbd49f-4345-4b5a-8ae0-f789b9bfb294" name="Note">
       <paramset name="Note" kind="dataObj">
         <param name="title" value="Next libID = 2"/>
         <param name="NoteText" value=""/>
+      </paramset>
+    </container>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="fd02f63e-ab1a-471f-8efe-0e0be790a78f" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="IGRINS Observing Details"/>
+        <param name="NoteText">
+          <value>1. Exposure time = xxx sec per frame and Expected SNR ~XXX per ABBA sequence in H or K-band
+2. If the sequence is &gt;1.5hr: Can it be interrupted or not be interrupted?
+3. Telluric standard needed or not needed</value>
+        </param>
+      </paramset>
+    </container>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="schedNote" key="23324909-d6f3-4d32-b230-3cc3ae5f37ec" name="Scheduling Note">
+      <paramset name="Scheduling Note" kind="dataObj">
+        <param name="title" value="IGRINS Scheduling Details"/>
+        <param name="NoteText">
+          <value>1. Any timing constrains? Yes/No
+2. List timing windows in UT</value>
+        </param>
       </paramset>
     </container>
     <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="82afc875-b577-42e4-af8c-c0a02403dfe7" name="VISITOR-BP-1">
@@ -38,6 +58,7 @@
         <param name="phase2Status" value="PI_TO_COMPLETE"/>
         <param name="qaState" value="UNDEFINED"/>
         <param name="overrideQaState" value="false"/>
+        <param name="setupTimeType" value="FULL"/>
       </paramset>
       <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Visitor" key="2f19cf5b-8398-4a21-8db8-41b517192db9" name="Visitor Instrument">
         <paramset name="Visitor Instrument" kind="dataObj">
@@ -91,12 +112,25 @@
       <param name="9d0ad4ed-79a1-4d1c-8d52-a099553d5c2e" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="fd02f63e-ab1a-471f-8efe-0e0be790a78f"/>
+      <param name="17aa09c4-1dc4-4260-bdeb-027833cd9bf2" value="38"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b26d1687-61b9-4e09-bbbb-b4ec637084ce"/>
+      <param name="17aa09c4-1dc4-4260-bdeb-027833cd9bf2" value="13"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="8cb94378-4312-4c80-bf31-cfb499213980"/>
       <param name="9d0ad4ed-79a1-4d1c-8d52-a099553d5c2e" value="1"/>
+      <param name="17aa09c4-1dc4-4260-bdeb-027833cd9bf2" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5d10fe08-22a2-4b62-8fee-be986d69a37c"/>
       <param name="9d0ad4ed-79a1-4d1c-8d52-a099553d5c2e" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="23324909-d6f3-4d32-b230-3cc3ae5f37ec"/>
+      <param name="17aa09c4-1dc4-4260-bdeb-027833cd9bf2" value="28"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="82afc875-b577-42e4-af8c-c0a02403dfe7"/>
