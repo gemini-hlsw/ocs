@@ -3,13 +3,13 @@ package jsky.app.ot.ags
 import edu.gemini.pot.client.SPDB
 import edu.gemini.spModel.core.SPProgramID
 import jsky.app.ot.ags.BagsState._
+
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import java.time.Instant
 import java.util.concurrent.TimeoutException
 import java.util.concurrent._
 import java.util.logging.Logger
 import javax.swing.SwingUtilities
-
 import edu.gemini.ags.api.{AgsHash, AgsRegistrar, AgsStrategy}
 import edu.gemini.catalog.votable.{CatalogException, GenericError}
 import edu.gemini.pot.sp._
@@ -19,7 +19,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obsclass.ObsClass
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.rich.shared.immutable._
-import edu.gemini.spModel.target.env.{AutomaticGroup, GuideEnv, GuideEnvironment}
+import edu.gemini.spModel.target.env.{AutomaticGroup, GuideEnv, GuideEnvironment, TargetEnvironment}
 import jsky.app.ot.OT
 import jsky.app.ot.gemini.altair.Altair_WFS_Feature
 import jsky.app.ot.gemini.inst.OIWFS_Feature
@@ -66,7 +66,9 @@ sealed trait BagsState {
 object BagsState {
   type AgsHashVal      = Long
   type StateTransition = (BagsState, IO[Unit]) // Next BagsState, side-effects
-  val ErrorTransition  = (ErrorState, ioUnit)  // Default transition for unexpected events
+
+  val ErrorTransition: StateTransition =
+    (ErrorState, ioUnit)  // Default transition for unexpected events
 
   def hashObs(ctx: ObsContext): AgsHashVal = {
     val when = ctx.getSchedulingBlockStart.asScalaOpt | Instant.now.toEpochMilli
@@ -134,7 +136,7 @@ object BagsState {
         // Returns the new state to switch to, either RunningState if all is well
         // and a new AGS lookup is needed or else IdleState (possibly with an
         // updated hash value) otherwise.
-        def idleAction = tup.fold(BagsManager.clearAction(k)) { _ => ioUnit }
+        def idleAction: IO[Unit] = tup.fold(BagsManager.clearAction(k)) { _ => ioUnit }
         runningTransition | ((IdleState(k, newHash), idleAction))
       }
 
@@ -162,7 +164,13 @@ object BagsState {
         if (r.posAngle === ctx.getPositionAngle) hash
         else hashObs(ctx.withPositionAngle(r.posAngle))
       }
-      (IdleState(k, Some(h)), BagsManager.applyAction(k, results))
+
+      (FinalizeUpdateState(k, h),
+        for {
+          _ <- BagsManager.applyAction(k, Some(hash), results)
+          _ <- BagsManager.wakeUpAction(k, 0)
+        } yield ()
+      )
     }
 
     // Failed AGS lookup.  Move to FailedState for a while and ask the timer to
@@ -170,6 +178,41 @@ object BagsState {
     // to PendingState (see FailedState.wakeUp).
     private[ags] override def fail(why: String, delayMs: Long): StateTransition =
       (FailureState(k, why), BagsManager.wakeUpAction(k, delayMs))
+  }
+
+  /**
+   * FinalizeUpdate.  This state is entered after a successful AGS lookup.  It
+   * checks that after the update the observation has the expected hash (i.e.,
+   * was not edited during the AGS calculation).  If edited, then we go back to
+   * pending for another lookup but if not we can transition to idle.
+   *
+   * @param k key of the corresponding observation
+   *
+   * @param expected hash code we expect to find if the observation was edited
+   *                 with only the BAGS result
+   */
+  final case class FinalizeUpdateState(k: ObsKey, expected: AgsHashVal) extends BagsState {
+    override private[ags] def edit: StateTransition =
+      (PendingState(k, None), BagsManager.wakeUpAction(k, 0))
+
+    override private[ags] def wakeUp: StateTransition = {
+        // Get the ObsContext and AgsStrategy, if possible.  If not possible,
+        // we won't be able to do AGS for this observation.
+        val ctx = for {
+          o <- fetchObs(k)
+          c <- ObsContext.create(o).asScalaOpt
+          _ <- agsStrategy(o, c)
+        } yield c
+
+        // Compute the new hash value of the observation, if possible.  It may
+        // be possible to (re)run AGS but not necessary if the hash hasn't
+        // changed.
+        val newHash = ctx.map(hashObs)
+
+        if (newHash.contains(expected)) (IdleState(k, newHash), ioUnit)
+        else (PendingState(k, None), BagsManager.wakeUpAction(k, 0))
+    }
+
   }
 
   /** RunningEdited. This state corresponds to a running AGS search for an
@@ -259,7 +302,9 @@ object BagsManager {
   private val Log = Logger.getLogger(getClass.getName)
 
   // Worker pool running the AGS search and the timer.
-  val NumWorkers = math.max(1, Runtime.getRuntime.availableProcessors - 1)
+  val NumWorkers: Int =
+    math.max(1, Runtime.getRuntime.availableProcessors - 1)
+
   private val worker = new ScheduledThreadPoolExecutor(NumWorkers, new ThreadFactory() {
     override def newThread(r: Runnable): Thread = {
       val t = new Thread(r, "BagsManager - Worker")
@@ -268,18 +313,23 @@ object BagsManager {
       t
     }
   })
-  private implicit val executionContext = ExecutionContext.fromExecutor(worker)
+
+  private implicit val executionContext: ExecutionContext =
+    ExecutionContext.fromExecutor(worker)
 
   // Worker pool running the blocking queries.
-  private val blockingWorker = new ScheduledThreadPoolExecutor(16, new ThreadFactory() {
-    override def newThread(r: Runnable): Thread = {
-      val t = new Thread(r, "BagsManager - Blocking Query Worker")
-      t.setPriority(Thread.NORM_PRIORITY - 2)
-      t.setDaemon(true)
-      t
-    }
-  })
-  val blockingExecutionContext = ExecutionContext.fromExecutor(blockingWorker)
+  private val blockingWorker: ScheduledThreadPoolExecutor =
+    new ScheduledThreadPoolExecutor(16, new ThreadFactory() {
+      override def newThread(r: Runnable): Thread = {
+        val t = new Thread(r, "BagsManager - Blocking Query Worker")
+        t.setPriority(Thread.NORM_PRIORITY - 2)
+        t.setDaemon(true)
+        t
+      }
+    })
+
+  val blockingExecutionContext: ExecutionContext =
+    ExecutionContext.fromExecutor(blockingWorker)
 
   // This is our mutable state.  It is only read/written by the Swing thread.
   private var stateMap  = ==>>.empty[ProgKey, ObsKey ==>> BagsState]
@@ -479,10 +529,10 @@ object BagsManager {
         Log.info(s"Successful BAGS lookup for observation=${k.oid.getOrElse("?")}; applying on ${Thread.currentThread}")
         BagsManager.success(k, opt)
 
-      case Failure(CatalogException((e: GenericError) :: _)) =>
+      case Failure(CatalogException((_: GenericError) :: _)) =>
         BagsManager.fail(k, "Catalog lookup failed.", 5000)
 
-      case Failure(ex: TimeoutException) =>
+      case Failure(_: TimeoutException) =>
         BagsManager.fail(k, "Catalog timed out.", 0)
 
       case Failure(ex) =>
@@ -491,22 +541,35 @@ object BagsManager {
   }
 
   private[ags] def clearAction(k: ObsKey): IO[Unit] =
-    applyAction(k, None)
+    applyAction(k, None, None)
 
-  private[ags] def applyAction(k: ObsKey, selOpt: Option[AgsStrategy.Selection]): IO[Unit] = IO {
-    def applySelection(ctx: TpeContext): Unit = {
-      val oldEnv = ctx.targets.envOrDefault
+  /**
+   * Action to apply the selection to the observation.  If provided, the
+   * expectedHash must match the hash of the current version of the observation
+   * or else the update is ignored.
+   *
+   * @param k key of the observation to update
+   * @param expectedHash hash of the state of the observation we expect to find
+   * @param selOpt selection to apply
+   *
+   * @return Action to perform
+   */
+  private[ags] def applyAction(
+    k:            ObsKey,
+    expectedHash: Option[AgsHashVal],
+    selOpt:       Option[AgsStrategy.Selection]
+  ): IO[Unit] = {
 
-      // If AGS results were found, apply them to the target env; otherwise, clear out any existing auto group.
-      val newEnv = selOpt.map(_.applyTo(oldEnv)).getOrElse {
-        val oldGuideEnv = oldEnv.getGuideEnvironment.guideEnv
-        if (oldGuideEnv.auto === AutomaticGroup.Initial || oldGuideEnv.auto === AutomaticGroup.Disabled) oldEnv
-        else oldEnv.setGuideEnvironment(GuideEnvironment(GuideEnv(AutomaticGroup.Initial, oldGuideEnv.manual)))
-      }
-
-      // Calculate the new target environment and if they are different referentially, apply them.
+    def commitChanges(
+      ctx:    TpeContext,
+      oldEnv: TargetEnvironment,
+      newEnv: TargetEnvironment
+    ): Unit =
       ctx.targets.dataObject.foreach { targetComp =>
-        // If the env reference hasn't changed, this does nothing.
+
+        // Calculate the new target environment and if they are different
+        // referentially, apply them. If the env reference hasn't changed,
+        // this does nothing.
         if (oldEnv != newEnv) {
           targetComp.setTargetEnvironment(newEnv)
           ctx.targets.commit()
@@ -514,7 +577,7 @@ object BagsManager {
 
         // Change the pos angle as appropriate if this is the auto group.
         selOpt.foreach { sel =>
-          if (newEnv.getPrimaryGuideGroup.isAutomatic && selOpt.isDefined) {
+          if (newEnv.getPrimaryGuideGroup.isAutomatic) {
             ctx.instrument.dataObject.foreach { inst =>
               val deg = sel.posAngle.toDegrees
               val old = inst.getPosAngleDegrees
@@ -526,12 +589,8 @@ object BagsManager {
           }
         }
       }
-    }
 
-    def doApply(obs: ISPObservation): Unit = {
-      obs.getProgram.removeStructureChangeListener(StructureListener)
-      obs.getProgram.removeCompositeChangeListener(ChangeListener)
-      applySelection(TpeContext(obs))
+    def scheduleTpeUpdate(): Unit = Swing.onEDT {
 
       // Update the TPE if it is visible
       selOpt.foreach { sel =>
@@ -547,10 +606,46 @@ object BagsManager {
         }
       }
 
+    }
+
+
+    def applySelection(ctx: TpeContext): Unit = {
+      val oldEnv = ctx.targets.envOrDefault
+
+      // If AGS results were found, apply them to the target env; otherwise, clear out any existing auto group.
+      val newEnv = selOpt.map(_.applyTo(oldEnv)).getOrElse {
+        val oldGuideEnv = oldEnv.getGuideEnvironment.guideEnv
+        if (oldGuideEnv.auto === AutomaticGroup.Initial || oldGuideEnv.auto === AutomaticGroup.Disabled) oldEnv
+        else oldEnv.setGuideEnvironment(GuideEnvironment(GuideEnv(AutomaticGroup.Initial, oldGuideEnv.manual)))
+      }
+
+      // Commit all the changes inside a write lock, but first make sure that
+      // the underlying observation has not changed from what we expected.  If
+      // it has changed, then a new BAGS calculation will be triggered anyway.
+
+      ctx.obsShell.foreach { obs =>
+        obs.getProgramWriteLock()
+        try {
+          if (expectedHash.forall(hashObs(obs).contains)) {
+            commitChanges(ctx, oldEnv, newEnv)
+            scheduleTpeUpdate()
+          }
+        } finally {
+          obs.returnProgramWriteLock()
+        }
+      }
+    }
+
+    def doApply(obs: ISPObservation): Unit = {
+      obs.getProgram.removeStructureChangeListener(StructureListener)
+      obs.getProgram.removeCompositeChangeListener(ChangeListener)
+
+      applySelection(TpeContext(obs))
+
       obs.getProgram.addCompositeChangeListener(ChangeListener)
       obs.getProgram.addStructureChangeListener(StructureListener)
     }
 
-    fetchObs(k).foreach(doApply)
+    IO { fetchObs(k).foreach(doApply) }
   }
 }
