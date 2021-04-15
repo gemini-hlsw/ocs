@@ -33,7 +33,7 @@ public final class QueueProgramStatusExternalTable extends AbstractTable {
     private static final String DISPLAY_NAME = "Queue Program Status (External)";
     private static final String SHORT_DESCRIPTION = "Execution status by semester/band/program. Used in public report.";
 
-    public static enum Columns implements IColumn {
+    public enum Columns implements IColumn {
 
         SEMESTER("Semester", "%s"),
         BAND("Band", "%d"),
@@ -62,10 +62,6 @@ public final class QueueProgramStatusExternalTable extends AbstractTable {
 
         public String format(final Object value) {
             return String.format(Locale.getDefault(), format, value);
-        }
-
-        public Comparator getComparator() {
-            return null;
         }
 
     }

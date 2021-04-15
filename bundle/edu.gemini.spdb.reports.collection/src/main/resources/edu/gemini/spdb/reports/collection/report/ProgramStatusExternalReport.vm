@@ -1,0 +1,51 @@
+#foreach ($info in $infoList)
+
+    <table border="0" width="100%" cellpadding="4" cellspacing="0">
+        #set($prev="")
+        #foreach ($row in $info)
+            #set($curr=$row.getGroupValue(1))
+            #if(!$prev.equals($curr))
+                <tr style="background-color: #ffaa88">
+                    <td  align="center" bgcolor="#FFD1A4" colspan="7"><a name="${info.siteAbbrev}b$curr">$info.getSectionHeader($curr)</a></td>
+                </tr>
+                <tr style="background-color: #BDBDFF">
+                    <td nowrap>Ref #</td>
+                    <td nowrap>PI</td>
+                    <td nowrap>Partner</td>
+                    <td nowrap>Title</td>
+                    <td nowrap>Instrument</td>
+                    <td colspan="2">Hours<br>allocated</td>
+                </tr>
+                #set($prev = $curr)
+            #end
+            <tr style="background-color: #336600; color: white">
+                <td nowrap>$escaper.escape($query.OutputColumns.get(0).format($row.getValue(0)))</td>
+                <td nowrap>$escaper.escape($query.OutputColumns.get(1).format($row.getValue(1)))</td>
+                <td>$escaper.escape($query.OutputColumns.get(2).format($row.getValue(2)))</td>
+                <td>$escaper.escape($query.OutputColumns.get(3).format($row.getValue(3)))</td>
+                <td>$escaper.escape($query.OutputColumns.get(4).format($row.getValue(4)))</td>
+                <td align="right">$escaper.escape($query.OutputColumns.get(5).format($row.getValue(5)))</td>
+                <td>$escaper.escape($query.OutputColumns.get(9).format($row.getValue(9)))</td>
+            </tr>
+            <tr>
+                #set($pid=$query.OutputColumns.get(0).format($row.getValue(0)))
+                <td valign="top" colspan="2" nowrap>
+                    <font color="#008080"><i>Execution Status:</i></font>
+                    $escaper.escape($query.OutputColumns.get(6).format($row.getValue(6)))
+                </td>
+                <td valign="top" colspan="2">
+                    <font color="#008080"><i>Dates Taken:</i></font> <br>$escaper.escape($query.OutputColumns.get(7).format($row.getValue(7).replace("/", "")))
+                </td>
+                <td valign="top" colspan="3" style="padding-right: 0px;">
+                    <font color="#008080"><i>Completion Status:</i></font>
+                    <div style="position: relative; width: 200px; border: 1px solid #999999; padding: 1px;">
+                        <span style="display: block; position: relative; background: #cccccc; text-align: center; color: #333; height: 10pt; line-height: 9pt; font-size: 8pt; width: $query.OutputColumns.get(8).format($row.getValue(8))%;">
+                            $query.OutputColumns.get(8).format($row.getValue(8))%
+                        </span>
+                    </div>
+                </td>
+            </tr>
+        #end
+    </table>
+
+#end

@@ -127,8 +127,8 @@ public class ReportUtils {
 
         }
 
-        // Rollover
-        if (isRollover(progShell)) statusFlags.add("rollover");
+        // Rollover (REL-3913 requests changing "rollover" to "persistent"
+        if (isRollover(progShell)) statusFlags.add("persistent");
 
         // SCT-286 (#7): get the TOO status of the program.
         TooType type = Too.get(progShell);

@@ -3,7 +3,6 @@ package edu.gemini.spdb.reports.collection.report;
 import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.spModel.core.ProgramType;
 import edu.gemini.spModel.core.SPProgramID;
-import edu.gemini.spModel.core.Semester;
 import edu.gemini.spdb.reports.*;
 import edu.gemini.spdb.reports.collection.table.QueueProgramStatusExternalTable.Columns;
 import edu.gemini.spdb.reports.collection.table.TypeCheck;
@@ -16,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.BiFunction;
 
 public abstract class AbstractQueueProgramStatusExternalReport extends BundleVelocityReport {
 
@@ -49,12 +49,17 @@ public abstract class AbstractQueueProgramStatusExternalReport extends BundleVel
     }
 
     private final String templateName;
+    private final BiFunction<String, Integer, String> sectionHeader;
 
     // Subclasses override to return a custom filter
     protected abstract IFilter getFilter();
 
-    public AbstractQueueProgramStatusExternalReport(final String templateName) {
-        this.templateName = templateName;
+    public AbstractQueueProgramStatusExternalReport(
+        final String templateName,
+        final BiFunction<String, Integer, String> sectionHeader
+    ) {
+        this.templateName  = templateName;
+        this.sectionHeader = sectionHeader;
     }
 
     public List<File> execute(final IQuery query, final Map<IDBDatabaseService, List<IRow>> results, final File parentDir) throws IOException {
@@ -163,6 +168,17 @@ public abstract class AbstractQueueProgramStatusExternalReport extends BundleVel
 
         public IDBDatabaseService getDb() {
             return db;
+        }
+
+        /**
+         * Called by velocity to title sections of the report.
+         * @param band expected Integer containing band
+         */
+        public String getSectionHeader(Object band) {
+            if (!(band instanceof Integer)) {
+                throw new RuntimeException("Expecting an Integer 'band', not: " + band);
+            }
+            return sectionHeader.apply(getSiteAbbrev(), (Integer) band);
         }
 
         // Privateish stuff

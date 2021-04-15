@@ -68,10 +68,6 @@ public class TimeAccountingSummaryTable extends AbstractTable {
 			return String.format(Locale.getDefault(), format, value);
 		}
 
-		public Comparator getComparator() {
-			return null;
-		}
-
 	}
 
 	public TimeAccountingSummaryTable() {

@@ -19,12 +19,10 @@ public class CellComparator<T> implements Comparator<T>, Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private final NullPolicy nullPolicy;
-	private final Comparator<T> comparator;
 	private final int factor;
-	
-	public CellComparator(Order sortOrder, NullPolicy nullPolicy, Comparator<T> comparator) {
+
+	public CellComparator(Order sortOrder, NullPolicy nullPolicy) {
 		this.nullPolicy = nullPolicy;
-		this.comparator = comparator;
 		this.factor = sortOrder == Order.ASC ? 1 : -1;
 	}
 
@@ -33,19 +31,17 @@ public class CellComparator<T> implements Comparator<T>, Serializable {
 
 		if (a == null && b == null)
 			return 0;
-		
+
 		if (a == null)
 			return nullPolicy == NullPolicy.NULL_FIRST ? factor : -factor;
 
 		if (b == null)
 			return nullPolicy == NullPolicy.NULL_FIRST ? -factor : factor;
 
-		return (comparator != null) ?
-			factor * comparator.compare(a, b) :
-			factor * ((Comparable) a).compareTo(b);
-	
+		return factor * ((Comparable<T>) a).compareTo(b);
+
 	}
-	
-	
-	
+
+
+
 }

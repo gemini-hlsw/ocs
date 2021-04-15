@@ -39,7 +39,7 @@ public abstract class VelocityReport implements IReport {
 	 * <b>map</b>. The template path will be evaluated by the concrete
 	 * report's Classloader.
 	 * @param file an output file
-	 * @param path a path to be evalued by the classloader
+	 * @param path a path to be evaluated by the classloader
 	 * @param map a binding environment
 	 * @throws IOException
 	 */
@@ -51,11 +51,9 @@ public abstract class VelocityReport implements IReport {
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-			ve.mergeTemplate(path, "US-ASCII", new VelocityContext(map), osw);
-		} catch (IOException ioe) {
+			ve.mergeTemplate(path, "UTF-8", new VelocityContext(map), osw);
+		} catch (IOException | RuntimeException ioe) {
 			throw ioe;
-		} catch (RuntimeException re) {
-			throw re;
 		} catch (Exception e) {
 			throw new IOException(e.toString());
 		} finally {

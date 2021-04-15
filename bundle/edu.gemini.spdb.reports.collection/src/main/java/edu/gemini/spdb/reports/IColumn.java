@@ -18,7 +18,7 @@ public interface IColumn<T> extends Serializable {
 	 * @return the human-readable column header string
 	 */
 	String getCaption();
-	
+
 	/**
 	 * Implementations should return the formatted plaintext string
 	 * value for the passed T
@@ -26,19 +26,11 @@ public interface IColumn<T> extends Serializable {
 	 * @return a plaintext string
 	 */
 	String format(T value);
-	
-	/**
-	 * Implementations should return the comparator to be used when
-	 * sorting on this column, or null to signal that T's natural order
-	 * should be used (i.e., only if T implements Comparable<T>)
-	 * @return
-	 */
-	Comparator<T> getComparator();	
-	
+
 	/**
 	 * Implementations should return the unique (per table) symbolic
 	 * name for this column. Normally Enum will supply the implementation.
 	 */
 	String name();
-	
+
 }
