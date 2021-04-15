@@ -100,15 +100,13 @@ public final class PlannedTime implements Serializable {
 
             if (time != that.time) return false;
             if (category != that.category) return false;
-            if (detail != that.detail) return false;
-
-            return true;
+            return java.util.Objects.equals(detail, that.detail);
         }
 
         @Override public int hashCode() {
             int result = category.hashCode();
             result = 31 * result + (int) (time ^ (time >>> 32));
-            result = 31 * result + detail.hashCode();
+            result = 31 * result + java.util.Objects.hashCode(detail);
             return result;
         }
 
@@ -145,6 +143,10 @@ public final class PlannedTime implements Serializable {
             if (time > that.time) return 1;
 
             return (detail == null || that.detail == null) ? 0 : detail.compareTo(that.detail);
+        }
+
+        @Override public String toString() {
+            return String.format("%15s - %7d - %s", category.name(), time, detail);
         }
     }
 
@@ -218,8 +220,7 @@ public final class PlannedTime implements Serializable {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             CategorizedTimeGroup that = (CategorizedTimeGroup) o;
-            if (!times.equals(that.times)) return false;
-            return true;
+            return times.equals(that.times);
         }
 
         @Override public int hashCode() {

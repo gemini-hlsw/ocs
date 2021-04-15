@@ -1305,9 +1305,11 @@ public abstract class InstGmosCommon<
             //         25 sec per nod cycle regular offsets
             // OT-477: setup-time + numN&Scycles*2*exposure time + numN&Scycles*Noverhead + readout
             //       = setup-time + "total observe time" + numN&Scycles*Noverhead + readout
-            int nOverhead = (_useElectronicOffsetting ? 11 : 25);
-            int numSteps = getPosList().size();
-            exposureTime = (exposureTime * numSteps * _numNSCycles) + (_numNSCycles * nOverhead);
+            // REL-1935: Electronic offsets: Current overhead = 11 s per cycle -> New overhead = 23.2 s per cycle
+            //           Standard offsets: Current overhead = 25 s per cycle -> New overhead = 36 s per cycle
+            final double nOverhead = (_useElectronicOffsetting ? 23.2 : 36.0);
+            final int numSteps = getPosList().size();
+            exposureTime = _numNSCycles * (exposureTime * numSteps + nOverhead);
         }
         times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, exposureTime));
 
