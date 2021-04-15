@@ -681,7 +681,7 @@ class VoTableParserSpec extends Specification with VoTableParser {
     "be able to read Gaia results" in {
 
       // Extract just the targets.
-      val result = parse(CatalogAdapter.Gaia, voTableGaia).tables.head.rows.sequenceU.getOrElse(Nil)
+      val result = parse(CatalogAdapter.GaiaEsa, voTableGaia).tables.head.rows.sequenceU.getOrElse(Nil)
 
       // 6 targets (i.e., and no errors)
       result.size shouldEqual 4
@@ -697,7 +697,7 @@ class VoTableParserSpec extends Specification with VoTableParser {
       c.magnitudes.map(_.band).toSet shouldEqual Set(_g, _r, V, R, I, _i, K, H, J)
 
       // Final target has everything.
-      d.magnitudes.map(_.band).toSet shouldEqual CatalogName.Gaia.supportedBands.toSet
+      d.magnitudes.map(_.band).toSet shouldEqual CatalogName.GaiaEsa.supportedBands.toSet
 
       // Even radial velocity.
       ((d.redshift.get.z - 0.000068).abs < 0.000001) shouldEqual true

@@ -290,10 +290,7 @@ object CatalogAdapter {
     }
   }
 
-  case object Gaia extends CatalogAdapter {
-
-    val catalog: CatalogName =
-      CatalogName.Gaia
+  sealed trait GaiaAdapter extends CatalogAdapter {
 
     override val idField    = FieldId("designation",     VoTableParser.UCD_OBJID)
     override val raField    = FieldId("ra",              VoTableParser.UCD_RA   )
@@ -405,6 +402,20 @@ object CatalogAdapter {
     }
   }
 
+  case object GaiaEsa extends GaiaAdapter {
+
+    override val catalog: CatalogName =
+      CatalogName.GaiaEsa
+
+  }
+
+  case object GaiaGemini extends GaiaAdapter {
+
+    override val catalog: CatalogName =
+      CatalogName.GaiaGemini
+
+  }
+
   case object Simbad extends CatalogAdapter {
 
     val catalog: CatalogName =
@@ -474,7 +485,7 @@ object CatalogAdapter {
   }
 
   val All: List[CatalogAdapter] =
-    List(UCAC4, PPMXL, Gaia, Simbad)
+    List(UCAC4, PPMXL, GaiaEsa, GaiaGemini, Simbad)
 
   def forCatalog(c: CatalogName): Option[CatalogAdapter] =
     All.find(_.catalog === c)

@@ -46,9 +46,8 @@ object CatalogName {
     override val  supportedBands = List(MagnitudeBand._g, MagnitudeBand._r, MagnitudeBand._i, MagnitudeBand.B, MagnitudeBand.V, MagnitudeBand.UC, MagnitudeBand.J, MagnitudeBand.H, MagnitudeBand.K)
   }
 
-  case object Gaia extends CatalogName("gaia", "GAIA @ ESA") {
+  sealed abstract class Gaia(id: String, displayName: String) extends CatalogName(id, displayName) {
 
-    // Gaia bands (why isn't this a Set?)
     override val supportedBands: List[MagnitudeBand] =
       List(
         MagnitudeBand.V,
@@ -69,6 +68,10 @@ object CatalogName {
       VersionToken.unsafeFromIntegers(1, 3)
 
   }
+
+  case object GaiaEsa extends Gaia("gaiaEsa", "GAIA @ ESA")
+
+  case object GaiaGemini extends Gaia("gaiaGemini", "GAIA @ Gemini")
 
   case object TWOMASS_PSC extends CatalogName("twomass_psc", "TwoMass PSC @ Gemini")
 
