@@ -19,6 +19,7 @@ public enum ObsClass implements DisplayableSpType, LoggableSpType, SequenceableS
             action.science();
         }
         public boolean isCalibration() { return false; }
+        public boolean respectsProprietaryPeriod() { return true; }
     },
 
     /**
@@ -29,6 +30,7 @@ public enum ObsClass implements DisplayableSpType, LoggableSpType, SequenceableS
             action.progCal();
         }
         public boolean isCalibration() { return true; }
+        public boolean respectsProprietaryPeriod() { return false; }
     },
 
     /**
@@ -39,6 +41,7 @@ public enum ObsClass implements DisplayableSpType, LoggableSpType, SequenceableS
             action.partnerCal();
         }
         public boolean isCalibration() { return true; }
+        public boolean respectsProprietaryPeriod() { return false; }
     },
 
     /**
@@ -49,6 +52,7 @@ public enum ObsClass implements DisplayableSpType, LoggableSpType, SequenceableS
             action.acq();
         }
         public boolean isCalibration() { return false; }
+        public boolean respectsProprietaryPeriod() { return true; }
     },
 
     /**
@@ -59,6 +63,7 @@ public enum ObsClass implements DisplayableSpType, LoggableSpType, SequenceableS
             action.acqCal();
         }
         public boolean isCalibration() { return true; }
+        public boolean respectsProprietaryPeriod() { return false; }
     },
 
     /**
@@ -69,6 +74,7 @@ public enum ObsClass implements DisplayableSpType, LoggableSpType, SequenceableS
             action.dayCal();
         }
         public boolean isCalibration() { return true; }
+        public boolean respectsProprietaryPeriod() { return false; }
     },
 
     ;
@@ -99,11 +105,11 @@ public enum ObsClass implements DisplayableSpType, LoggableSpType, SequenceableS
         void dayCal();
     }
 
-    private String _headerValue;
-    private String _displayValue;
-    private int _priority;
-    private ChargeClass _charge;
-    private String _logValue;
+    private final String _headerValue;
+    private final String _displayValue;
+    private final int _priority;
+    private final ChargeClass _charge;
+    private final String _logValue;
 
 
     ObsClass(String headerVal, String displayVal, int priority, ChargeClass charge, String logValue) {
@@ -116,6 +122,7 @@ public enum ObsClass implements DisplayableSpType, LoggableSpType, SequenceableS
 
     public abstract void doAction(ObsClass.Action action);
     public abstract boolean isCalibration();
+    public abstract boolean respectsProprietaryPeriod();
 
     public String displayValue() {
         return _displayValue;
@@ -158,15 +165,6 @@ public enum ObsClass implements DisplayableSpType, LoggableSpType, SequenceableS
 
     public String toString() {
         return displayValue();
-    }
-
-    /**
-     * This method is needed by the data manager and was added to merge the FITS ObsClass with this one.
-     * The only programs that are charged are those in ChargeClass PROGRAM.
-     * @return
-     */
-    public boolean shouldChargeProgram() {
-        return _charge.equals(ChargeClass.PROGRAM);
     }
 
 

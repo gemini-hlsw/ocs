@@ -77,6 +77,17 @@ class ProprietaryTest extends InstrumentSequenceTestBase[Flamingos2, SeqConfigFl
     doTest(PUBLIC, 12, 0)
   }
 
+  // REL-3926
+  @Test def testProgramCal(): Unit = {
+    val o2 = addSeqComponent(getInstSeqComp, SeqRepeatObserve.SP_TYPE)
+    o2.dataObject = new SeqRepeatObserve <| (_.setObsClass(ObsClass.PROG_CAL))
+
+    val o3 = addSeqComponent(getInstSeqComp, SeqRepeatObserve.SP_TYPE)
+    o3.dataObject = new SeqRepeatObserve <| (_.setObsClass(ObsClass.SCIENCE))
+
+    doTest(PUBLIC, 12, 0, 12)
+  }
+
   @Test def testDefaultPeriods(): Unit =
     ProgramType.All.foreach { pt =>
       val pid = pt.isScience ? s"GS-2015B-${pt.abbreviation}-1" | s"GS-${pt.abbreviation}20150102"
