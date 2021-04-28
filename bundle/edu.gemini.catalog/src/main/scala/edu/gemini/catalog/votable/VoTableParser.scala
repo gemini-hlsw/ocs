@@ -1,10 +1,10 @@
 package edu.gemini.catalog.votable
 
 import java.io.{ByteArrayInputStream, InputStream}
-
 import edu.gemini.catalog.api.CatalogName
 import edu.gemini.spModel.core._
 
+import scala.collection.immutable
 import scala.io.Source
 import scala.xml.XML
 import scala.xml.Node
@@ -292,17 +292,19 @@ object CatalogAdapter {
 
   sealed trait GaiaAdapter extends CatalogAdapter {
 
-    override val idField    = FieldId("designation",     VoTableParser.UCD_OBJID)
-    override val raField    = FieldId("ra",              VoTableParser.UCD_RA   )
-    override val decField   = FieldId("dec",             VoTableParser.UCD_DEC  )
-    override val pmRaField  = FieldId("pmra",            VoTableParser.UCD_PMRA )
-    override val pmDecField = FieldId("pmdec",           VoTableParser.UCD_PMDEC)
-    override val rvField    = FieldId("radial_velocity", VoTableParser.UCD_RV   )
-    override val plxField   = FieldId("parallax",        VoTableParser.UCD_PLX  )
+    def tableName: String
+
+    override val idField: FieldId    = FieldId("designation",     VoTableParser.UCD_OBJID)
+    override val raField: FieldId    = FieldId("ra",              VoTableParser.UCD_RA   )
+    override val decField: FieldId   = FieldId("dec",             VoTableParser.UCD_DEC  )
+    override val pmRaField: FieldId  = FieldId("pmra",            VoTableParser.UCD_PMRA )
+    override val pmDecField: FieldId = FieldId("pmdec",           VoTableParser.UCD_PMDEC)
+    override val rvField: FieldId    = FieldId("radial_velocity", VoTableParser.UCD_RV   )
+    override val plxField: FieldId   = FieldId("parallax",        VoTableParser.UCD_PLX  )
 
     // These are used to derive all other magnitude values.
-    val gMagField = FieldId("phot_g_mean_mag", Ucd("phot.mag;stat.mean;em.opt"))
-    val bpRpField = FieldId("bp_rp",           Ucd("phot.color"               ))
+    val gMagField: FieldId = FieldId("phot_g_mean_mag", Ucd("phot.mag;stat.mean;em.opt"))
+    val bpRpField: FieldId = FieldId("bp_rp",           Ucd("phot.color"               ))
 
     /**
      * List of all Gaia fields of interest.  These are used in forming the ADQL
@@ -407,12 +409,18 @@ object CatalogAdapter {
     override val catalog: CatalogName =
       CatalogName.GaiaEsa
 
+    override val tableName: String =
+      "gaiadr2.gaia_source"
+
   }
 
   case object GaiaGemini extends GaiaAdapter {
 
     override val catalog: CatalogName =
       CatalogName.GaiaGemini
+
+    override val tableName: String =
+      "gaia2"
 
   }
 
@@ -522,7 +530,7 @@ trait VoTableParser {
     TableRow(rows.flatten.toList)
   }
 
-  protected def parseTableRows(fields: List[FieldDescriptor], xml: Node)  =
+  protected def parseTableRows(fields: List[FieldDescriptor], xml: Node): immutable.Seq[TableRow] =
     for {
       table <-  xml   \\ "TABLEDATA"
       tr    <-  table \\ "TR"

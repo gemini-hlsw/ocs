@@ -233,7 +233,7 @@ sealed trait GaiaBackend extends CachedBackend with RemoteCallBackend {
     val fields = gaia.allFields.map(_.id).mkString(",")
 
     f"""|SELECT TOP $MaxResultCount $fields
-        |      FROM gaiadr2.gaia_source
+        |      FROM ${gaia.tableName}
         |     WHERE CONTAINS(POINT('ICRS',${gaia.raField.id},${gaia.decField.id}),CIRCLE('ICRS', ${cs.base.ra.toDegrees}%9.8f, ${cs.base.dec.toDegrees}%9.8f, ${cs.radiusConstraint.maxLimit.toDegrees}%9.8f))=1
         |       AND (${gaia.plxField.id} > 0)
         |       AND (${gaia.gMagField.id} BETWEEN $BrightLimit AND $FaintLimit)
@@ -285,7 +285,8 @@ case object GaiaGeminiBackend extends GaiaBackend {
     CatalogAdapter.GaiaGemini
 
   override val catalogUrls: NonEmptyList[URL] =
-    NonEmptyList(new URL("https://gncatalog.gemini.edu/gaia"), new URL("https://gscatalog.gemini.edu/gaia"))
+    NonEmptyList(new URL("http://mkocatalog-lv2.hi.gemini.edu/cgi-bin/conesearch.py/tap/sync"))
+//    NonEmptyList(new URL("https://gncatalog.gemini.edu/gaia"), new URL("https://gscatalog.gemini.edu/gaia"))
 
 }
 
