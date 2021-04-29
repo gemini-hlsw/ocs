@@ -233,7 +233,7 @@ sealed trait GaiaBackend extends CachedBackend with RemoteCallBackend {
     val fields = gaia.allFields.map(_.id).mkString(",")
 
     f"""|SELECT TOP $MaxResultCount $fields
-        |      FROM ${gaia.tableName}
+        |      FROM gaiadr2.gaia_source
         |     WHERE CONTAINS(POINT('ICRS',${gaia.raField.id},${gaia.decField.id}),CIRCLE('ICRS', ${cs.base.ra.toDegrees}%9.8f, ${cs.base.dec.toDegrees}%9.8f, ${cs.radiusConstraint.maxLimit.toDegrees}%9.8f))=1
         |       AND (${gaia.plxField.id} > 0)
         |       AND (${gaia.gMagField.id} BETWEEN $BrightLimit AND $FaintLimit)

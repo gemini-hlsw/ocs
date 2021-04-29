@@ -292,8 +292,6 @@ object CatalogAdapter {
 
   sealed trait GaiaAdapter extends CatalogAdapter {
 
-    def tableName: String
-
     override val idField: FieldId    = FieldId("designation",     VoTableParser.UCD_OBJID)
     override val raField: FieldId    = FieldId("ra",              VoTableParser.UCD_RA   )
     override val decField: FieldId   = FieldId("dec",             VoTableParser.UCD_DEC  )
@@ -409,18 +407,12 @@ object CatalogAdapter {
     override val catalog: CatalogName =
       CatalogName.GaiaEsa
 
-    override val tableName: String =
-      "gaiadr2.gaia_source"
-
   }
 
   case object GaiaGemini extends GaiaAdapter {
 
     override val catalog: CatalogName =
       CatalogName.GaiaGemini
-
-    override val tableName: String =
-      "gaia2"
 
   }
 
