@@ -1293,7 +1293,6 @@ public abstract class InstGmosCommon<
     }
 
     // REL-1678 (REL-1385)
-    private static final CategorizedTime DHS_WRITE = CategorizedTime.fromSeconds(Category.DHS_WRITE, 10.0);
 
     public CategorizedTimeGroup calc(Config cur, Option<Config> prev) {
         final Collection<CategorizedTime> times = new ArrayList<>();
@@ -1332,7 +1331,7 @@ public abstract class InstGmosCommon<
         double readoutTime = GmosReadoutTime.getReadoutOverhead(cur, getCustomROIs());
         times.add(CategorizedTime.fromSeconds(Category.READOUT, readoutTime));
 
-        times.add(DHS_WRITE);
+        times.add(DHS_WRITE_TIME);
 
         return CommonStepCalculator.instance.calc(cur, prev).addAll(times);
     }
