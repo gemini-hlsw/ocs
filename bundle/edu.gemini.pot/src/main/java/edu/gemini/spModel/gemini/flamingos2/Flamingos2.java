@@ -1,9 +1,6 @@
 package edu.gemini.spModel.gemini.flamingos2;
 
-import edu.gemini.pot.sp.ISPNodeInitializer;
-import edu.gemini.pot.sp.ISPObsComponent;
-import edu.gemini.pot.sp.ISPObservation;
-import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.pot.sp.*;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.config.injector.ConfigInjector;
@@ -665,8 +662,8 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     public static final int FRACTIONAL_EXP_TIME_MAX = 65;
 
     // Science and OI FOV rotation and flip from config file
-    private static Map<IssPort,Angle[]> FOV_ROTATION;
-    private static Map<IssPort,boolean[]> FLIP;
+    private static final Map<IssPort,Angle[]> FOV_ROTATION;
+    private static final Map<IssPort,boolean[]> FLIP;
 
     /**
      * Set the configuration for rotation and flip
@@ -853,12 +850,13 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         final ReadMode mode = (ReadMode) cur.getItemValue(ReadMode.KEY);
         times.add(CategorizedTime.fromSeconds(Category.READOUT, mode.readoutTimeSec()));
         times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, ExposureCalculator.instance.exposureTimeSec(cur)));
-        times.add(Category.DHS_OVERHEAD); // REL-1678
+
+        times.add(DHS_WRITE_TIME); // REL-1678
 
         return CommonStepCalculator.instance.calc(cur, prev).addAll(times);
     }
 
-    private static final Duration IMAGING_SETUP_TIME_OIWFS = Duration.ofMinutes(15);
+    private static final Duration IMAGING_SETUP_TIME_OIWFS = Duration.ofMinutes(8);
 
     private static final Duration IMAGING_SETUP_TIME_PWFS2 = Duration.ofMinutes(6);
 
@@ -1421,7 +1419,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         return PROPERTY_MAP;
     }
 
-    private static Collection<GuideProbe> GUIDE_PROBES = GuideProbeUtil.instance.createCollection(Flamingos2OiwfsGuideProbe.instance);
+    private static final Collection<GuideProbe> GUIDE_PROBES = GuideProbeUtil.instance.createCollection(Flamingos2OiwfsGuideProbe.instance);
 
     public Collection<GuideProbe> getGuideProbes() {
         return GUIDE_PROBES;

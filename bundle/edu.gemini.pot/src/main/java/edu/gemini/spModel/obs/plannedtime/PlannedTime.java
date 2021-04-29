@@ -1,10 +1,10 @@
 package edu.gemini.spModel.obs.plannedtime;
 
+import edu.gemini.pot.sp.Instrument;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
-import edu.gemini.spModel.guide.StandardGuideOptions;
 import edu.gemini.spModel.time.ChargeClass;
 
 import java.io.Serializable;
@@ -69,8 +69,6 @@ public final class PlannedTime implements Serializable {
 
         public final CategorizedTime ZERO = new CategorizedTime(this, 0);
 
-        // REL-1678: 7 seconds DHS write overhead
-        public static final CategorizedTime DHS_OVERHEAD = CategorizedTime.apply(Category.DHS_WRITE, 7000);
     }
 
     public static final class CategorizedTime implements Comparable<CategorizedTime>, Serializable {
@@ -90,6 +88,14 @@ public final class PlannedTime implements Serializable {
             this.category = cat;
             this.time     = time;
             this.detail   = (detail == null) ? cat.display : detail;
+        }
+
+        public Duration timeDuration() {
+            return Duration.ofMillis(time);
+        }
+
+        public double timeSeconds() {
+            return time / 1000.0;
         }
 
         @Override public boolean equals(Object o) {

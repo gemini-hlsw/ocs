@@ -8,6 +8,7 @@ import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.data.config.IConfig;
 import edu.gemini.spModel.data.config.IParameter;
 import edu.gemini.spModel.data.config.ISysConfig;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
@@ -16,8 +17,9 @@ import edu.gemini.spModel.util.Angle;
 import java.beans.PropertyDescriptor;
 import java.time.Duration;
 import java.text.NumberFormat;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * A base class for instrument observation component items.  One of
@@ -410,4 +412,31 @@ public abstract class SPInstObsComp extends AbstractDataObject {
     public Instrument getInstrument() {
         return Instrument.fromComponentType(getType()).getValue();
     }
+
+    // REL-1678: 7 seconds DHS write overhead
+    // REL-1934: 10 seconds DHS write overhead for F2
+
+    public static final Map<Instrument, PlannedTime.CategorizedTime> DHS_WRITE_TIMES;
+
+    static {
+        Map<Instrument, Duration> m =
+            Arrays.stream(Instrument.values()).collect(Collectors.toMap(Function.identity(), i -> Duration.ofSeconds(7)));
+
+        m.put(Instrument.Flamingos2, Duration.ofSeconds(10));
+        m.put(Instrument.GmosNorth,  Duration.ofSeconds(10));
+        m.put(Instrument.GmosSouth,  Duration.ofSeconds(10));
+        m.put(Instrument.Gnirs,      Duration.ofMillis(8500));
+        m.put(Instrument.Nifs,       Duration.ofMillis(9800));
+        m.put(Instrument.Niri,       Duration.ofMillis(5070));
+
+        DHS_WRITE_TIMES = Collections.unmodifiableMap(
+          m.entrySet()
+           .stream()
+           .collect(Collectors.toMap(Map.Entry::getKey, e -> PlannedTime.CategorizedTime.apply(PlannedTime.Category.DHS_WRITE, e.getValue().toMillis())))
+        );
+    }
+
+    public final PlannedTime.CategorizedTime DHS_WRITE_TIME =
+        DHS_WRITE_TIMES.get(getInstrument());
+
 }

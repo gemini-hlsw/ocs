@@ -1,9 +1,6 @@
 package edu.gemini.spModel.gemini.nifs;
 
-import edu.gemini.pot.sp.ISPNodeInitializer;
-import edu.gemini.pot.sp.ISPObsComponent;
-import edu.gemini.pot.sp.ISPObservation;
-import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.pot.sp.*;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.ao.AOConstants;
@@ -180,9 +177,8 @@ public final class InstNIFS extends SPInstObsComp implements PropertyProvider, G
         final CategorizedTime expTime = CategorizedTime.fromSeconds(Category.EXPOSURE, coadds*exp);
         final double readoutTime      = (readMode.getMinExp() + COADD_CONSTANT) * coadds;
         final CategorizedTime readOut = CategorizedTime.fromSeconds(Category.READOUT, readoutTime);
-        final CategorizedTime dhs     = CategorizedTime.fromSeconds(Category.DHS_WRITE, 9.8); // Updated according to the latest measurements. -OS
 
-        return CommonStepCalculator.instance.calc(cur, prev).addAll(expTime, readOut, dhs);
+        return CommonStepCalculator.instance.calc(cur, prev).addAll(expTime, readOut, DHS_WRITE_TIME);
     }
 
     /**

@@ -1,9 +1,6 @@
 package edu.gemini.spModel.gemini.gpi;
 
-import edu.gemini.pot.sp.ISPNodeInitializer;
-import edu.gemini.pot.sp.ISPObsComponent;
-import edu.gemini.pot.sp.ISPObservation;
-import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.pot.sp.*;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.config.ConfigPostProcessor;
@@ -2300,7 +2297,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         final double totalExposureTime = rawExposureTime * coadds;
         times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, totalExposureTime));
 
-        times.add(Category.DHS_OVERHEAD); // REL-1678
+        times.add(DHS_WRITE_TIME); // REL-1678
 
         return CommonStepCalculator.instance.calc(cur, prev).addAll(times);
     }

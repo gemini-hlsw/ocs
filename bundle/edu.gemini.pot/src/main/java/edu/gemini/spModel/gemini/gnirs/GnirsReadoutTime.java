@@ -1,6 +1,9 @@
 package edu.gemini.spModel.gemini.gnirs;
 
+import edu.gemini.pot.sp.Instrument;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.ReadMode;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime;
+import edu.gemini.spModel.obscomp.SPInstObsComp;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,7 +18,8 @@ import java.util.Map;
  *  2017-12-15: Modified according to the latest read time measurements.
  */
 public final class GnirsReadoutTime {
-    private static final double DHS_WRITE_TIME = 8.5;
+    private static final double DHS_WRITE_TIME =
+        SPInstObsComp.DHS_WRITE_TIMES.get(Instrument.Gnirs).timeSeconds();
 
     //Maps from the read mode to overhead per coadd
     private static final Map<GNIRSParams.ReadMode, Double> map;

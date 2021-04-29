@@ -8,7 +8,6 @@ import edu.gemini.spModel.data.config.DefaultParameter;
 import edu.gemini.spModel.data.config.DefaultSysConfig;
 import edu.gemini.spModel.data.config.IParameter;
 import edu.gemini.spModel.data.config.ISysConfig;
-import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummaryService;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummary;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
@@ -85,7 +84,7 @@ public final class PlannedTimeTest {
 
     @Test
     public void testEmptySequence() throws Exception {
-        final double readout = f2DataObject.getReadMode().readoutTimeSec() + PlannedTime.Category.DHS_OVERHEAD.time/1000.;
+        final double readout = f2DataObject.getReadMode().readoutTimeSec() + f2DataObject.DHS_WRITE_TIME.timeSeconds();
 
         // Imaging setup time.
         verify(Flamingos2.getImagingSetup(obs).getSeconds() + readout);
@@ -100,7 +99,7 @@ public final class PlannedTimeTest {
     @Test
     public void testImagingSetup() throws Exception {
         // Defaulting to PWFS2
-        final double readout = f2DataObject.getReadMode().readoutTimeSec() + PlannedTime.Category.DHS_OVERHEAD.time/1000.;
+        final double readout = f2DataObject.getReadMode().readoutTimeSec() + f2DataObject.DHS_WRITE_TIME.timeSeconds();
 
         // Imaging setup time.
         verify(Flamingos2.getImagingSetup(obs).getSeconds() + readout);
@@ -125,7 +124,7 @@ public final class PlannedTimeTest {
         targetDo.setTargetEnvironment(tenv.putPrimaryGuideProbeTargets(oiwfs));
         targetComp.setDataObject(targetDo);
 
-        assertEquals(900, Flamingos2.getImagingSetup(obs).getSeconds());
+        assertEquals(480L, Flamingos2.getImagingSetup(obs).getSeconds());
         verify(Flamingos2.getImagingSetup(obs).getSeconds() + readout);
     }
 
@@ -161,7 +160,7 @@ public final class PlannedTimeTest {
         f2SeqDataObject.setSysConfig(sc);
         f2SeqComponent.setDataObject(f2SeqDataObject);
 
-        final double base = Flamingos2.getImagingSetup(obs).getSeconds() + 60 + PlannedTime.Category.DHS_OVERHEAD.time/1000.;
+        final double base = Flamingos2.getImagingSetup(obs).getSeconds() + 60 + f2DataObject.DHS_WRITE_TIME.timeSeconds();
 
         for (Flamingos2.ReadMode mode : Flamingos2.ReadMode.values()) {
             final Flamingos2 obj = (Flamingos2) f2ObsComponent.getDataObject();
@@ -184,7 +183,7 @@ public final class PlannedTimeTest {
         // Account for setup, exposure time, and readout time for the 2 steps
         final double time = Flamingos2.getSpectroscopySetup().getSeconds() + 60.0 * 2
                 + f2DataObject.getReadMode().readoutTimeSec() * 2
-                + PlannedTime.Category.DHS_OVERHEAD.time/1000. * 2;
+                + f2DataObject.DHS_WRITE_TIME.timeSeconds() * 2;
 
         // Account for the change
         verify(time + overhead);
@@ -236,7 +235,7 @@ public final class PlannedTimeTest {
         // Account for setup, exposure time, and readout time for the 2 steps.
         final double time = Flamingos2.getSpectroscopySetup().getSeconds() + 60.0 * 2
                 + f2DataObject.getReadMode().readoutTimeSec() * 2
-                + PlannedTime.Category.DHS_OVERHEAD.time/1000. * 2;
+                + f2DataObject.DHS_WRITE_TIME.timeSeconds() * 2;
 
         // Figure out the overhead for the change.
         double over = Flamingos2.getFpuChangeOverheadSec();
@@ -265,7 +264,7 @@ public final class PlannedTimeTest {
         // Account for setup, exposure time, and readout time for the 3 steps.
         final double time = Flamingos2.getSpectroscopySetup().getSeconds() + 60.0 * 3
                 + f2DataObject.getReadMode().readoutTimeSec() * 3
-                + PlannedTime.Category.DHS_OVERHEAD.time/1000. * 3;
+                + f2DataObject.DHS_WRITE_TIME.timeSeconds() * 3;
 
         // Figure out the overhead for the single filter change.
         final double over = Flamingos2.getFilterChangeOverheadSec();
