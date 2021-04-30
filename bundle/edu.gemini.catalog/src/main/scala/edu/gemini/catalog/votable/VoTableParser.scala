@@ -93,13 +93,13 @@ sealed trait CatalogAdapter {
   def isMagnitudeField(v: (FieldId, String)): Boolean =
     containsMagnitude(v._1)                      &&
       !v._1.ucd.includes(VoTableParser.STAT_ERR) &&
-      v._2.nonEmpty
+      v._2.nonEmptyNonNan
 
   // Indicates if the field is a magnitude error
   def isMagnitudeErrorField(v: (FieldId, String)): Boolean =
     containsMagnitude(v._1)                     &&
       v._1.ucd.includes(VoTableParser.STAT_ERR) &&
-      v._2.nonEmpty
+      v._2.nonEmptyNonNan
 
   // Indicates if the field is a magnitude system
   def isMagnitudeSystemField(v: (FieldId, String)): Boolean =
@@ -390,7 +390,7 @@ object CatalogAdapter {
         OptionT[Try, Double](
           entries
             .get(f)
-            .filter(_.nonEmpty)
+            .filter(_.nonEmptyNonNan)
             .traverseU(CatalogAdapter.parseDoubleValue(f.ucd, _))
         )
 
@@ -457,7 +457,7 @@ object CatalogAdapter {
         v._1.ucd.includes(VoTableParser.STAT_ERR)  &&
         errorFluxID.findFirstIn(v._1.id).isDefined &&
         !ignoreMagnitudeField(v._1)                &&
-        v._2.nonEmpty
+        v._2.nonEmptyNonNan
 
     protected def findBand(band: String): Option[MagnitudeBand] =
       MagnitudeBand.all.find(_.name == band)
@@ -469,7 +469,7 @@ object CatalogAdapter {
 
     // Attempts to find the magnitude system for a band
     override def parseMagnitudeSys(p: (FieldId, String)): CatalogProblem \/ Option[(MagnitudeBand, MagnitudeSystem)] = {
-      val band = p._2.nonEmpty option {
+      val band = p._2.nonEmptyNonNan option {
         p._1.id match {
           case magSystemID(x) => findBand(x)
           case _              => None
@@ -554,7 +554,7 @@ trait VoTableParser {
       }
 
     def parseProperMotion(pm: (Option[String], Option[String]), epoch: Option[String]): CatalogProblem \/ Option[ProperMotion] =
-      (pm._1.filter(_.nonEmpty) |@| pm._2.filter(_.nonEmpty)) { (pmra, pmdec) =>
+      (pm._1.filter(_.nonEmptyNonNan) |@| pm._2.filter(_.nonEmptyNonNan)) { (pmra, pmdec) =>
         for {
           pmrav  <- adapter.parseAngularVelocity(VoTableParser.UCD_PMRA, pmra)
           pmra    = RightAscensionAngularVelocity(pmrav)
@@ -569,7 +569,7 @@ trait VoTableParser {
     )(
       f: Double => CatalogProblem \/ A
     ): CatalogProblem \/ Option[A] =
-      s.filter(_.nonEmpty).traverseU { ds =>
+      s.filter(_.nonEmptyNonNan).traverseU { ds =>
         for {
           d <- CatalogAdapter.parseDoubleValue(u, ds)
           a <- f(d)
