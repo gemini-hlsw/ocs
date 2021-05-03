@@ -207,9 +207,9 @@ case object ConeSearchBackend extends CachedBackend with RemoteCallBackend {
   override def queryUrl(e: SearchKey): String = s"${e.url}/cgi-bin/conesearch.py"
 }
 
-case object GaiaBackend extends CachedBackend with RemoteCallBackend {
-  // For Java
-  val instance = this
+sealed trait GaiaBackend extends CachedBackend with RemoteCallBackend {
+
+  def gaia: CatalogAdapter.GaiaAdapter
 
   val MaxResultCount: Int         = 50000  // Arbitrary max limit -- for a crowded field this needs to be largish
   val BrightLimit: Int            =     9  // g GAIA bright limit
@@ -229,18 +229,17 @@ case object GaiaBackend extends CachedBackend with RemoteCallBackend {
     }
 
   def adql(cs: ConeSearchCatalogQuery): String = {
-    import CatalogAdapter.Gaia
 
-    val fields = Gaia.allFields.map(_.id).mkString(",")
+    val fields = gaia.allFields.map(_.id).mkString(",")
 
     f"""|SELECT TOP $MaxResultCount $fields
         |      FROM gaiadr2.gaia_source
-        |     WHERE CONTAINS(POINT('ICRS',${Gaia.raField.id},${Gaia.decField.id}),CIRCLE('ICRS', ${cs.base.ra.toDegrees}%9.8f, ${cs.base.dec.toDegrees}%9.8f, ${cs.radiusConstraint.maxLimit.toDegrees}%9.8f))=1
-        |       AND (${Gaia.plxField.id} > 0)
-        |       AND (${Gaia.gMagField.id} BETWEEN $BrightLimit AND $FaintLimit)
-        |       AND (${Gaia.bpRpField.id} IS NOT NULL)
-        |       AND (SQRT(POWER(${Gaia.pmRaField.id}, 2.0) + POWER(${Gaia.pmDecField.id}, 2.0)) < ${ProperMotionLimitMasYr})
-        |  ORDER BY ${Gaia.gMagField.id}
+        |     WHERE CONTAINS(POINT('ICRS',${gaia.raField.id},${gaia.decField.id}),CIRCLE('ICRS', ${cs.base.ra.toDegrees}%9.8f, ${cs.base.dec.toDegrees}%9.8f, ${cs.radiusConstraint.maxLimit.toDegrees}%9.8f))=1
+        |       AND (${gaia.plxField.id} > 0)
+        |       AND (${gaia.gMagField.id} BETWEEN $BrightLimit AND $FaintLimit)
+        |       AND (${gaia.bpRpField.id} IS NOT NULL)
+        |       AND (SQRT(POWER(${gaia.pmRaField.id}, 2.0) + POWER(${gaia.pmDecField.id}, 2.0)) < ${ProperMotionLimitMasYr})
+        |  ORDER BY ${gaia.gMagField.id}
       """.stripMargin
   }
 
@@ -260,11 +259,35 @@ case object GaiaBackend extends CachedBackend with RemoteCallBackend {
     }
 
 
+  override def queryUrl(e: SearchKey): String =
+    e.url.toExternalForm
+}
+
+case object GaiaEsaBackend extends GaiaBackend {
+
+  // For Java
+  val instance: GaiaBackend = this
+
+  override def gaia: CatalogAdapter.GaiaAdapter =
+    CatalogAdapter.GaiaEsa
+
   override val catalogUrls: NonEmptyList[URL] =
     NonEmptyList(new URL("https://gea.esac.esa.int/tap-server/tap/sync"))
 
-  override def queryUrl(e: SearchKey): String =
-    e.url.toExternalForm
+}
+
+case object GaiaGeminiBackend extends GaiaBackend {
+
+  // For Java
+  val instance: GaiaBackend = this
+
+  override def gaia: CatalogAdapter.GaiaAdapter =
+    CatalogAdapter.GaiaGemini
+
+  override val catalogUrls: NonEmptyList[URL] =
+    NonEmptyList(new URL("http://mkocatalog-lv2.hi.gemini.edu/cgi-bin/conesearch.py/tap/sync"))
+//    NonEmptyList(new URL("https://gncatalog.gemini.edu/gaia"), new URL("https://gscatalog.gemini.edu/gaia"))
+
 }
 
 case object SimbadNameBackend extends CachedBackend with RemoteCallBackend {
@@ -313,9 +336,10 @@ object VoTableClient extends VoTableClient {
 
   def defaultBackend(n: CatalogName): VoTableBackend =
     n match {
-      case CatalogName.Gaia   => GaiaBackend
-      case CatalogName.SIMBAD => SimbadNameBackend
-      case _                  => ConeSearchBackend
+      case CatalogName.GaiaEsa    => GaiaEsaBackend
+      case CatalogName.GaiaGemini => GaiaGeminiBackend
+      case CatalogName.SIMBAD     => SimbadNameBackend
+      case _                      => ConeSearchBackend
     }
 
   /**

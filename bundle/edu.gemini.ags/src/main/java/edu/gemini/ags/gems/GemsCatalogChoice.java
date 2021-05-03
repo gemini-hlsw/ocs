@@ -1,12 +1,14 @@
 package edu.gemini.ags.gems;
 
 import edu.gemini.catalog.api.CatalogName;
-import edu.gemini.catalog.api.CatalogName.Gaia$;
+import edu.gemini.catalog.api.CatalogName.GaiaEsa$;
+import edu.gemini.catalog.api.CatalogName.GaiaGemini$;
 import edu.gemini.catalog.api.CatalogName.PPMXL$;
 import edu.gemini.catalog.api.CatalogName.UCAC4$;
 
 public enum GemsCatalogChoice {
-    GAIA_ESA(    Gaia$.MODULE$,  "Gaia at ESA"),
+    GAIA_ESA(GaiaEsa$.MODULE$, "Gaia at ESA"),
+    GAIA_Gemini(GaiaGemini$.MODULE$, "Gaia at Gemini"),
     PPMXL_GEMINI(PPMXL$.MODULE$, "PPMXL at Gemini"),
     UCAC4_GEMINI(UCAC4$.MODULE$, "UCAC4 at Gemini"),
     ;

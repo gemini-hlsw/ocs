@@ -1,10 +1,10 @@
 package edu.gemini.catalog.votable
 
 import java.io.{ByteArrayInputStream, InputStream}
-
 import edu.gemini.catalog.api.CatalogName
 import edu.gemini.spModel.core._
 
+import scala.collection.immutable
 import scala.io.Source
 import scala.xml.XML
 import scala.xml.Node
@@ -93,13 +93,13 @@ sealed trait CatalogAdapter {
   def isMagnitudeField(v: (FieldId, String)): Boolean =
     containsMagnitude(v._1)                      &&
       !v._1.ucd.includes(VoTableParser.STAT_ERR) &&
-      v._2.nonEmpty
+      v._2.nonEmptyNonNan
 
   // Indicates if the field is a magnitude error
   def isMagnitudeErrorField(v: (FieldId, String)): Boolean =
     containsMagnitude(v._1)                     &&
       v._1.ucd.includes(VoTableParser.STAT_ERR) &&
-      v._2.nonEmpty
+      v._2.nonEmptyNonNan
 
   // Indicates if the field is a magnitude system
   def isMagnitudeSystemField(v: (FieldId, String)): Boolean =
@@ -290,22 +290,19 @@ object CatalogAdapter {
     }
   }
 
-  case object Gaia extends CatalogAdapter {
+  sealed trait GaiaAdapter extends CatalogAdapter {
 
-    val catalog: CatalogName =
-      CatalogName.Gaia
-
-    override val idField    = FieldId("designation",     VoTableParser.UCD_OBJID)
-    override val raField    = FieldId("ra",              VoTableParser.UCD_RA   )
-    override val decField   = FieldId("dec",             VoTableParser.UCD_DEC  )
-    override val pmRaField  = FieldId("pmra",            VoTableParser.UCD_PMRA )
-    override val pmDecField = FieldId("pmdec",           VoTableParser.UCD_PMDEC)
-    override val rvField    = FieldId("radial_velocity", VoTableParser.UCD_RV   )
-    override val plxField   = FieldId("parallax",        VoTableParser.UCD_PLX  )
+    override val idField: FieldId    = FieldId("designation",     VoTableParser.UCD_OBJID)
+    override val raField: FieldId    = FieldId("ra",              VoTableParser.UCD_RA   )
+    override val decField: FieldId   = FieldId("dec",             VoTableParser.UCD_DEC  )
+    override val pmRaField: FieldId  = FieldId("pmra",            VoTableParser.UCD_PMRA )
+    override val pmDecField: FieldId = FieldId("pmdec",           VoTableParser.UCD_PMDEC)
+    override val rvField: FieldId    = FieldId("radial_velocity", VoTableParser.UCD_RV   )
+    override val plxField: FieldId   = FieldId("parallax",        VoTableParser.UCD_PLX  )
 
     // These are used to derive all other magnitude values.
-    val gMagField = FieldId("phot_g_mean_mag", Ucd("phot.mag;stat.mean;em.opt"))
-    val bpRpField = FieldId("bp_rp",           Ucd("phot.color"               ))
+    val gMagField: FieldId = FieldId("phot_g_mean_mag", Ucd("phot.mag;stat.mean;em.opt"))
+    val bpRpField: FieldId = FieldId("bp_rp",           Ucd("phot.color"               ))
 
     /**
      * List of all Gaia fields of interest.  These are used in forming the ADQL
@@ -393,7 +390,7 @@ object CatalogAdapter {
         OptionT[Try, Double](
           entries
             .get(f)
-            .filter(_.nonEmpty)
+            .filter(_.nonEmptyNonNan)
             .traverseU(CatalogAdapter.parseDoubleValue(f.ucd, _))
         )
 
@@ -403,6 +400,20 @@ object CatalogAdapter {
       } yield conversions.map(_.convert(gMag, bpRp))).getOrElse(Nil)
 
     }
+  }
+
+  case object GaiaEsa extends GaiaAdapter {
+
+    override val catalog: CatalogName =
+      CatalogName.GaiaEsa
+
+  }
+
+  case object GaiaGemini extends GaiaAdapter {
+
+    override val catalog: CatalogName =
+      CatalogName.GaiaGemini
+
   }
 
   case object Simbad extends CatalogAdapter {
@@ -446,7 +457,7 @@ object CatalogAdapter {
         v._1.ucd.includes(VoTableParser.STAT_ERR)  &&
         errorFluxID.findFirstIn(v._1.id).isDefined &&
         !ignoreMagnitudeField(v._1)                &&
-        v._2.nonEmpty
+        v._2.nonEmptyNonNan
 
     protected def findBand(band: String): Option[MagnitudeBand] =
       MagnitudeBand.all.find(_.name == band)
@@ -458,7 +469,7 @@ object CatalogAdapter {
 
     // Attempts to find the magnitude system for a band
     override def parseMagnitudeSys(p: (FieldId, String)): CatalogProblem \/ Option[(MagnitudeBand, MagnitudeSystem)] = {
-      val band = p._2.nonEmpty option {
+      val band = p._2.nonEmptyNonNan option {
         p._1.id match {
           case magSystemID(x) => findBand(x)
           case _              => None
@@ -474,7 +485,7 @@ object CatalogAdapter {
   }
 
   val All: List[CatalogAdapter] =
-    List(UCAC4, PPMXL, Gaia, Simbad)
+    List(UCAC4, PPMXL, GaiaEsa, GaiaGemini, Simbad)
 
   def forCatalog(c: CatalogName): Option[CatalogAdapter] =
     All.find(_.catalog === c)
@@ -511,7 +522,7 @@ trait VoTableParser {
     TableRow(rows.flatten.toList)
   }
 
-  protected def parseTableRows(fields: List[FieldDescriptor], xml: Node)  =
+  protected def parseTableRows(fields: List[FieldDescriptor], xml: Node): immutable.Seq[TableRow] =
     for {
       table <-  xml   \\ "TABLEDATA"
       tr    <-  table \\ "TR"
@@ -543,7 +554,7 @@ trait VoTableParser {
       }
 
     def parseProperMotion(pm: (Option[String], Option[String]), epoch: Option[String]): CatalogProblem \/ Option[ProperMotion] =
-      (pm._1.filter(_.nonEmpty) |@| pm._2.filter(_.nonEmpty)) { (pmra, pmdec) =>
+      (pm._1.filter(_.nonEmptyNonNan) |@| pm._2.filter(_.nonEmptyNonNan)) { (pmra, pmdec) =>
         for {
           pmrav  <- adapter.parseAngularVelocity(VoTableParser.UCD_PMRA, pmra)
           pmra    = RightAscensionAngularVelocity(pmrav)
@@ -558,7 +569,7 @@ trait VoTableParser {
     )(
       f: Double => CatalogProblem \/ A
     ): CatalogProblem \/ Option[A] =
-      s.filter(_.nonEmpty).traverseU { ds =>
+      s.filter(_.nonEmptyNonNan).traverseU { ds =>
         for {
           d <- CatalogAdapter.parseDoubleValue(u, ds)
           a <- f(d)

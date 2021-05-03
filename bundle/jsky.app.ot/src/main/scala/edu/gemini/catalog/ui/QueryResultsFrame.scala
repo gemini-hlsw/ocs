@@ -13,7 +13,7 @@ import edu.gemini.ags.api.GuideInFOV.{Outside, Inside}
 import edu.gemini.ags.api._
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
-import edu.gemini.catalog.api.CatalogName.{PPMXL, UCAC4, Gaia}
+import edu.gemini.catalog.api.CatalogName.{PPMXL, UCAC4, GaiaEsa, GaiaGemini}
 import edu.gemini.catalog.ui.adapters.TableQueryResultAdapter
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.catalog.votable._
@@ -487,7 +487,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
     lazy val catalogBox: ComboBox[CatalogName] with TextRenderer[CatalogName] {
       def text(a: CatalogName): String
-    } = new ComboBox(List[CatalogName](UCAC4, PPMXL, Gaia)) with TextRenderer[CatalogName] {
+    } = new ComboBox(List[CatalogName](UCAC4, PPMXL, GaiaEsa, GaiaGemini)) with TextRenderer[CatalogName] {
 
       override def text(a: CatalogName): String =
         Option(a).foldMap(_.displayName)
