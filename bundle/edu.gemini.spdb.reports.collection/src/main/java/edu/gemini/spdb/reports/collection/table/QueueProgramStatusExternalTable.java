@@ -144,7 +144,7 @@ public final class QueueProgramStatusExternalTable extends AbstractTable {
     // 2004A => [r05A]
     private static String getRollover(final Semester semester) {
         return String.format(
-                "[r%s]",
+                "[%s]",
                 RolloverPeriod.beginning(semester).endSemester().toShortString()
         );
     }
