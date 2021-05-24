@@ -45,7 +45,7 @@
         <param name="title" value="IGRINS Scheduling Details"/>
         <param name="NoteText">
           <value>1. Any timing constrains? Yes/No
-2. List timing windows in UT</value>
+2. List timing windows in UT and enter them in the Observing Conditions component.</value>
         </param>
       </paramset>
     </container>
