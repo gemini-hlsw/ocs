@@ -229,7 +229,7 @@ public class SPProgram extends AbstractDataObject implements ISPStaffOnlyFieldPr
 
         // paramset tags
         private static final String _FIRST_NAME = "firstName";
-        private static final String _LAST_NAME = "lastName";
+        private static final String _LAST_NAME = lastName";
         private static final String _EMAIL = "email";
         private static final String _PHONE = "phone";
         private static final String _AFFILIATE = "affiliate";

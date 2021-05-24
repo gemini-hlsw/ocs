@@ -63,7 +63,7 @@ final class SkeletonResetServlet(odb: IDBDatabaseService, templateFactory: Templ
 
   private def lookup(id: StandardProgramId): Either[Failure, ISPProgram] =
     try {
-      Option(odb.lookupProgramByID(id.toSp)).toRight(Failure.badRequest("Could not find a program with id '%s' in the database.".format(id.toString)))
+      Option(odb.lookupProgramByID(id.toSp)).toRight(Failure.badRequest(s"Could not find a program with id ${id} in the database."))
     } catch {
       case ex: Exception => Left(Failure.error(ex))
     }
