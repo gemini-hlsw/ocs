@@ -923,6 +923,8 @@ public class GNIRSParams {
         IFU("IFU") {
             @Override public boolean isObsolete() { return true; }
         },
+        LR_IFU("LR-IFU"),
+        HR_IFU("HR-IFU"),
         LONG_CAM_LONG_SLIT("long camera long slit"),
         LONG_CAM_X_DISP("long camera x-disp"),
         WOLLASTON("wollaston"),
@@ -932,7 +934,7 @@ public class GNIRSParams {
          * The default Decker value *
          */
         public static Decker DEFAULT = ACQUISITION;
-        private String _displayValue;
+        private final String _displayValue;
 
         Decker(String displayValue) {
             _displayValue = displayValue;
