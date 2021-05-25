@@ -17,11 +17,11 @@ import java.util.*;
 
 /**
  * Gets the collection of targets associated with an observation.  The target
- * enviornment houses the asterism of the observation, which contains the
+ * environment houses the asterism of the observation, which contains the
  * science targets themselves, the collection of guide stars organized by
  * {@link GuideProbe} and grouped, and a list of optional "user" targets.
  *
- * <p>User targets are used for blind offseting in the TCC (better support for
+ * <p>User targets are used for blind offsetting in the TCC (better support for
  * which is needed here).
  *
  * <p>A TargetEnvironment always has an asterism, but may or may not have
