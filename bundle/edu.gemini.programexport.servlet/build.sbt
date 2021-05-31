@@ -8,7 +8,9 @@ name := "edu.gemini.programexport.servlet"
 
 unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/javax-servlet_2.10-2.5.0.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/osgi.cmpn-4.3.1.jar")
+  new File(baseDirectory.value, "../../lib/bundle/osgi.cmpn-4.3.1.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/argonaut_2.11-6.2.jar")
+
 )
 
 osgiSettings
