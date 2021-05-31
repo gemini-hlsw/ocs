@@ -48,12 +48,14 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
     Option(odb.lookupProgramByID(id)) match {
       case Some(ispProgram) =>
         val out: BufferedOutputStream = new BufferedOutputStream(response.getOutputStream)
-        response.setContentType("text/plain")
-
-        // TODO: Remove
-        out.write(s"Program name received: $id\n".getBytes)
+        response.setContentType("application/json")
 
         // Start traversing the tree.
+        // TODO: This all ends up producing a monolithic block of text.
+        // TODO: I can't seem to get the pretty print features to work here.
+        // TODO: This version of Argonaut does seem to have the spaces2 and spaces4
+        // TODO: methods defined on the Json class but I'm not quite sure how to piece
+        // TODO: it together.
         process(ispProgram).foreach { case (k, j) => out.write(s"{$k : $j}\n".getBytes) }
         out.close()
 
@@ -95,7 +97,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
       case g: SPGroup => Some(groupFields(g))
       case o: SPObservation => Some(observationFields(o))
       case s: SPSiteQuality => Some(siteQualityFields(s))
-      // etc. etc.
+      // TODO: What else is needed here? I don't think anything else?
 
       case _ => None
 
@@ -103,28 +105,34 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
 
   def programFields(p: SPProgram): Json = {
     val timeAcctAllocation = p.getTimeAcctAllocation
-
     ("piFirstName" := p.getPIFirstName) ->:
       ("piLastName" := p.getPILastName) ->:
       ("piEmail" := p.getPIInfo.getEmail) ->:
-      ("investigators" := p.getGsaPhase1Data.getCois.asScala.zipWithIndex.foldLeft(Json.jEmptyObject) { case (j, (inv, idx)) =>
-        // TODO: Not sure if this is the correct format and will give us the right results?
-        // TODO: I want investigatorNumber to contain an associative array with the three fields
-        // TODO: and investigators to contain an associative array of investigatorNumber.
-        // TODO: Including the j in the parentheses seems incorrect.
-        ("investigatorNumber" := idx) ->: (
-          ("investigatorFirstName" := inv.getFirst) ->:
-            ("investigatorLastName" := inv.getLast) ->:
-            ("investigatorEmail" := inv.getEmail) ->:
-            j)
-      }) ->:
+      ("investigators" := p.getGsaPhase1Data.getCois.asScala.map { i =>
+        ("investigatorFirstName" := i.getFirst) ->:
+          ("investigatorLastName" := i.getLast) ->:
+          ("investigatorEmail" := i.getEmail) ->:
+          jEmptyObject
+      }.zipWithIndex.foldLeft(jEmptyObject){ case (j, (inv, idx)) =>
+        (s"investigator$idx" := inv) ->: j }) ->:
+//      ("investigators" := p.getGsaPhase1Data.getCois.asScala.zipWithIndex.foldLeft(Json.jEmptyObject) { case (j, (inv, idx)) =>
+//        // TODO: Not sure if this is the correct format and will give us the right results?
+//        // TODO: I want investigatorNumber to contain an associative array with the three fields
+//        // TODO: and investigators to contain an associative array of investigatorNumber.
+//        // TODO: Including the j in the parentheses seems incorrect.
+//        ("investigatorNumber" := idx) ->: (
+//          ("investigatorFirstName" := inv.getFirst) ->:
+//            ("investigatorLastName" := inv.getLast) ->:
+//            ("investigatorEmail" := inv.getEmail) ->:
+//            j)
+//      }) ->:
       ("affiliate" :=? Option(p.getPIAffiliate).map(_.displayValue)) ->?:
       ("queueBand" := p.getQueueBand) ->:
       ("rolloverFlag" := p.getRolloverStatus) ->:
       ("isThesis" := p.isThesis.toYesNo.displayValue) ->:
       ("programMode" := p.getProgramMode.displayValue) ->:
       ("tooType" := p.getTooType.getDisplayValue) ->:
-      // TODO: TimeValue: Bryan said we wanted ms?
+      // TODO: TimeValue: Bryan said we wanted ms.
       ("awardedTime" := p.getAwardedProgramTime.getMilliseconds) ->:
       ("timeAccountAllocationCategories" := timeAcctAllocation.getCategories.asScala.foldLeft(Json.jEmptyObject) { case (j, c) =>
         val award = timeAcctAllocation.getAward(c)
