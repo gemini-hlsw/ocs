@@ -19,6 +19,9 @@ sealed abstract case class VersionToken private (toNel: NonEmptyList[Int]) {
   def format: String =
     toNel.list.toList.mkString(".")
 
+  def fallsInRange(min: VersionToken, max: VersionToken): Boolean =
+    min <= this && this <= max
+
 }
 
 object VersionToken {

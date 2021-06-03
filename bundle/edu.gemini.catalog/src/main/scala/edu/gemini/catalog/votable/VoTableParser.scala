@@ -4,14 +4,19 @@ import java.io.{ByteArrayInputStream, InputStream}
 import edu.gemini.catalog.api.CatalogName
 import edu.gemini.spModel.core._
 
+import java.util.logging.Logger
+
 import scala.collection.immutable
 import scala.io.Source
+import scala.util.matching.Regex
 import scala.xml.XML
 import scala.xml.Node
 import scalaz._
 import Scalaz._
 
 object VoTableParser extends VoTableParser {
+  private val LOG: Logger = Logger.getLogger(this.getClass.getName)
+
   type CatalogResult = CatalogProblem \/ ParsedVoResource
 
   // by band
@@ -32,12 +37,48 @@ object VoTableParser extends VoTableParser {
   val UCD_MAG        = UcdWord("phot.mag")
   val STAT_ERR       = UcdWord("stat.error")
 
-  private def validate(catalogName: CatalogName, xmlText: String): CatalogProblem \/ Unit =
+  private val VoTableHeader: Regex =
+    """<VOTABLE([^>]*)>""".r.unanchored
+
+  private val MinVersion: VersionToken = VersionToken.unsafeFromIntegers(1, 2)
+  private val MaxVersion: VersionToken = VersionToken.unsafeFromIntegers(1, 3)
+
+  private val VersionRegex: Regex =
+    """version="(\d+\.\d+)"""".r.unanchored
+
+  private def extractHeader(catalogName: CatalogName, xmlText: String): CatalogProblem \/ String =
+    xmlText match {
+      case VoTableHeader(header) =>
+        \/-(header)
+      case _                    =>
+        LOG.warning(s"Couldn't find VOTABLE header in $catalogName catalog output.")
+        -\/(ValidationError(catalogName))
+    }
+
+  private def parseVersion(catalogName: CatalogName, header: String): CatalogProblem \/ VersionToken =
+    header match {
+      case VersionRegex(versionToken) =>
+        VersionToken.parse(versionToken).toRightDisjunction {
+          LOG.warning(s"Couldn't parse version token '$versionToken' in $catalogName catalog output.")
+          ValidationError(catalogName)
+        }
+      case _                          =>
+        LOG.warning(s"Couldn't find version token in $catalogName catalog header '$header'.")
+        -\/(ValidationError(catalogName))
+    }
+
+  private def validateVersion(catalogName: CatalogName, version: VersionToken): CatalogProblem \/ Unit =
+    version.fallsInRange(MinVersion, MaxVersion).option(()).toRightDisjunction {
+      LOG.warning(s"$catalogName catalog returned unsupported version: ${version.format}")
+      ValidationError(catalogName)
+    }
+
+  private def versionedValidate(catalogName: CatalogName, xmlText: String, version: VersionToken): CatalogProblem \/ Unit =
     \/.fromTryCatchNonFatal {
       import javax.xml.transform.stream.StreamSource
       import javax.xml.validation.SchemaFactory
 
-      val xsd        = s"/votable-${catalogName.voTableVersion.format}.xsd"
+      val xsd        = s"/votable-${version.format}.xsd"
       val schemaLang = "http://www.w3.org/2001/XMLSchema"
       val factory    = SchemaFactory.newInstance(schemaLang)
       val schema     = factory.newSchema(new StreamSource(getClass.getResourceAsStream(xsd)))
@@ -45,6 +86,14 @@ object VoTableParser extends VoTableParser {
 
       validator.validate(new StreamSource(new ByteArrayInputStream(xmlText.getBytes(java.nio.charset.Charset.forName("UTF-8")))))
     }.leftMap(_ => ValidationError(catalogName))
+
+  private def validate(catalogName: CatalogName, xmlText: String): CatalogProblem \/ Unit =
+    for {
+      h <- extractHeader(catalogName, xmlText)
+      v <- parseVersion(catalogName, h)
+      _ <- validateVersion(catalogName, v)
+      _ <- versionedValidate(catalogName, xmlText, v)
+    } yield ()
 
   /**
    * parse takes an input stream and attempts to read the xml content and convert it to a VoTable resource

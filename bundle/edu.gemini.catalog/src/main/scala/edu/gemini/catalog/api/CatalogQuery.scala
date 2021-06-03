@@ -26,9 +26,6 @@ sealed abstract class CatalogName(val id: String, val displayName: String) exten
   def rBand: MagnitudeBand =
     MagnitudeBand.UC
 
-  def voTableVersion: VersionToken =
-    VersionToken.unsafeFromIntegers(1, 3)
-
 }
 
 object CatalogName {
