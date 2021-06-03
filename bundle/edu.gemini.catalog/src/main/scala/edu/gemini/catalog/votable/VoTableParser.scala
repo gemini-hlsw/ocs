@@ -37,14 +37,14 @@ object VoTableParser extends VoTableParser {
   val UCD_MAG        = UcdWord("phot.mag")
   val STAT_ERR       = UcdWord("stat.error")
 
+  private val VoTableHeader: Regex =
+    """<VOTABLE([^>]*)>""".r.unanchored
+
   private val MinVersion: VersionToken = VersionToken.unsafeFromIntegers(1, 2)
   private val MaxVersion: VersionToken = VersionToken.unsafeFromIntegers(1, 3)
 
   private val VersionRegex: Regex =
     """version="(\d+\.\d+)"""".r.unanchored
-
-  private val VoTableHeader: Regex =
-    """<VOTABLE([^>]*)>""".r.unanchored
 
   private def extractHeader(catalogName: CatalogName, xmlText: String): CatalogProblem \/ String =
     xmlText match {
@@ -58,18 +58,19 @@ object VoTableParser extends VoTableParser {
   private def parseVersion(catalogName: CatalogName, header: String): CatalogProblem \/ VersionToken =
     header match {
       case VersionRegex(versionToken) =>
-        VersionToken.parse(versionToken).toRightDisjunction(ValidationError(catalogName))
+        VersionToken.parse(versionToken).toRightDisjunction {
+          LOG.warning(s"Couldn't parse version token '$versionToken' in $catalogName catalog output.")
+          ValidationError(catalogName)
+        }
       case _                          =>
-        LOG.warning(s"Couldn't find version token in $catalogName catalog output.")
+        LOG.warning(s"Couldn't find version token in $catalogName catalog header '$header'.")
         -\/(ValidationError(catalogName))
     }
 
   private def validateVersion(catalogName: CatalogName, version: VersionToken): CatalogProblem \/ Unit =
-    if (version.fallsInRange(MinVersion, MaxVersion))
-      \/-(())
-    else {
+    version.fallsInRange(MinVersion, MaxVersion).option(()).toRightDisjunction {
       LOG.warning(s"$catalogName catalog returned unsupported version: ${version.format}")
-      -\/(ValidationError(catalogName))
+      ValidationError(catalogName)
     }
 
   private def versionedValidate(catalogName: CatalogName, xmlText: String, version: VersionToken): CatalogProblem \/ Unit =
