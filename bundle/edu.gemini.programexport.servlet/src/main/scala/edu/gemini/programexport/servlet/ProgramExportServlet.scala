@@ -13,6 +13,7 @@ import edu.gemini.spModel.gemini.obscomp.{SPProgram, SPSiteQuality}
 import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.obscomp.{SPGroup, SPNote}
 import edu.gemini.spModel.rich.pot.sp._
+import edu.gemini.spModel.guide._
 
 import scala.collection.JavaConverters._
 import argonaut.Json
@@ -30,7 +31,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator
 import edu.gemini.spModel.seqcomp.SeqBase
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.env.{Asterism, GuideEnv, GuideGroup, GuideGrp, OptsList, TargetEnvironment}
+import edu.gemini.spModel.target.env.{Asterism, AutomaticGroup, GuideEnv, GuideGroup, GuideGrp, ManualGroup, OptsList, TargetEnvironment}
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 
 import java.util.concurrent.TimeUnit
@@ -120,7 +121,8 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         j
     }
 
-  def targetFields(spTarget: SPTarget, te: TargetEnvironment): JsonAssoc = {
+  // The optional index is for ordering guide probes.
+  def targetFields(spTarget: SPTarget, te: TargetEnvironment, index: Option[Int] = 0): JsonAssoc = {
     val target = spTarget.getTarget
 
     // Spectral distribution
@@ -169,6 +171,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
     "target" := (target match {
       case SiderealTarget(name, coordinates, properMotion, _, _, magnitudes, spectralDistribution, spatialProfile) =>
         ("name" := name) ->:
+          ("index" :=? index) ->?:
           ("tag" := tag) ->:
           ("type" := targetType) ->:
           ("ra" := coordinates.ra.toAngle.formatHMS) ->:
@@ -181,6 +184,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
           jEmptyObject
       case NonSiderealTarget(name, _, horizonsDesignation, magnitudes, spectralDistribution, spatialProfile) =>
         ("name" := name) ->:
+          ("index" :=? index) ->?:
           ("tag" := tag) ->:
           ("type" := targetType) ->:
           ("des" :=? horizonsDesignation.map(_.des)) ->?:
@@ -190,62 +194,117 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
     })
   }
 
-  def asterismFields(oc: ISPObsComponent, t: TargetObsComp): Json = {
-    // Needed for guide speed. May not include this as per discussion with Bryan.
+  def asterismField(oc: ISPObsComponent, t: TargetObsComp): Json = {
     val ispObs = oc.getContextObservation
     val obsCtx = ObsContext.create(ispObs)
-    val te = t.getTargetEnvironment
-    val a = te.getAsterism
+    val targetEnv = t.getTargetEnvironment
+    val guideEnv = targetEnv.getGuideEnvironment.guideEnv
 
     // Base information: we are only dealing with asterisms with a single target.
-    val base = a.asInstanceOf[Asterism.Single]
-    val baseInfo = "base" := targetFields(base.t, te) ->: jEmptyObject
+    val asterism = targetEnv.getAsterism.asInstanceOf[Asterism.Single]
+    val baseInfo = "base" := targetFields(asterism.t, targetEnv) ->: jEmptyObject
 
     // User target information.
-    val userTargetInfo = te.getUserTargets.asScala.foldLeft(jEmptyObject) { (j, t) =>
-      ("target" := targetFields(t.target, te)) ->: j
+    val userTargetInfo = "userTargets" := targetEnv.getUserTargets.asScala.foldLeft(jEmptyObject) { (j, t) =>
+      ("target" := targetFields(t.target, targetEnv)) ->: j
     }
 
     // Guide group information.
+    // We must process manual and automatic guide groups separately.
+    val guideGroupInfo = "guideGroups" := {
+      ("primaryIndex" := guideEnv.primaryIndex) ->:
+      // Loop over guide groups
+        guideEnv.groups.zipWithIndex.foldLeft(jEmptyObject){ case (j, (group, groupIdx)) =>
+          ("primaryGroup" := (group === guideEnv.primaryGroup).toYesNo.displayValue) ->:
+            (group match {
+              // Process manual guide groups
+            case ManualGroup(name, guideProbeMap) =>
+              ("tag" := "manual") ->:
+              ("name" := name) ->: jEmptyObject
+              // Process the auto guide group
+            case AutomaticGroup.Active(guideProbeMap, _) =>
+              ("tag" := "auto") ->:
+              ("name" := "auto") ->:
+                guideProbeMap.keys.zipWithIndex.foldLeft(jEmptyObject){ case (j2, (guideProbe, guideProbeIdx)) =>
+                  ("guideProbeKey" := guideProbe.getKey) ->:
+                    ("guideProbeIndex" := guideProbeIdx) ->:
+                    ("targets" := guideProbeMap.lookup(guideProbe).zipWithIndex.foldLeft(jEmptyObject) { case (j3, (spTarget, spTargetIdx)) =>
+                      targetFields(spTarget, targetEnv, Some(spTargetIdx)) ->: j3
+                    }) ->: j2}
+                jEmptyObject
+          })
+        }
+        jEmptyObject
+    }
 
-
-
-      // Guide groups.
-//      val guideEnv = te.getGuideEnvironment.guideEnv
-//      guideEnv.groups.foldLeft(jEmptyObject){(j, grp) =>
-//        val primary = grp === guideEnv.primaryGroup
-//        val tgtMap = GuideGrp.TargetCollectionGuideGroup.targets(grp)
-//        tgtMap.values.map { xyz => xyz.map {  }}
-//        grp.referencedGuiders.
-//      }
-
-      // Guide groups.
-//      def guideGroups: Option[Json] = target match {
-//        case t:SiderealTarget =>
-//          var xyz =
-//          Some()
-//        case _: => None
-//        val target: SiderealTarget = ???
-//        val primaryGuiders = gg.getPrimaryReferencedGuiders.asScala.toSet
-//        val magOpt = gg.getReferencedGuiders.asScala.foldLeft(jEmptyObject) { (j, gp) =>primaryGuiders.con
-//          ("guiderKey" := gp.getKey) ->:
-//          ("guiderPrimary" := primaryGuiders.contains(gp).toYesNo.displayValue) ->: j
-//          val key = gp.getKey
-//          val isPrimary = primaryGuiders.contains(gp)
-//          gp.getBands.extract(target)
-//        }
-//        val guideSpeed = AgsMagnitude.fastestGuideSpeed(MagTable, )
-//        jEmptyObject
-//      }
-
-//      val ge = te.getGroups.asScala.foldLeft(jEmptyObject){ case (j, g) =>
-//        g
-//        ("name" := g.getName.getOrElse("Unnamed")) ->: j
-//
-//      }
-
-    baseInfo ->: ("targets" := userTargetInfo) ->: jEmptyObject
+    baseInfo ->: userTargetInfo ->: guideGroupInfo ->: jEmptyObject
   }
+//
+//  def asterismFields(oc: ISPObsComponent, t: TargetObsComp): Json = {
+//    // Needed for guide speed. May not include this as per discussion with Bryan.
+//    val ispObs = oc.getContextObservation
+//    val obsCtx = ObsContext.create(ispObs)
+//    val te = t.getTargetEnvironment
+//    val ge = te.getGuideEnvironment.guideEnv
+//    val a = te.getAsterism
+//
+//    // Base information: we are only dealing with asterisms with a single target.
+//    val base = a.asInstanceOf[Asterism.Single]
+//    val baseInfo = "base" := targetFields(base.t, te) ->: jEmptyObject
+//
+//    // User target information.
+//    val userTargetInfo = te.getUserTargets.asScala.foldLeft(jEmptyObject) { (j, t) =>
+//      ("target" := targetFields(t.target, te)) ->: j
+//    }
+//
+//    // Guide group information.
+//    val guideInfo = {
+//      // Specify primary group
+//      ("primaryIndex" := ge.primaryIndex) ->:
+//      // All groups
+//        ge.groups.zipWithIndex.foldLeft(jEmptyObject){ case (j, (g, idx)) =>
+//          val info = g match {
+//            case ManualGroup(name, targetMap) =>
+//              ("tag" := "manual") ->:
+//                ("primaryGroup" := (g === ge.primaryGroup).toYesNo.displayValue) ->:
+//                (targetMap.keys.zipWithIndex.foldLeft(jEmptyObject){ case (j, (gp, gpIdx)) => {
+//                  val optsList: Option[OptsList[SPTarget]] = targetMap.lookup(gp)
+//                  val primaryGuider: Option[Boolean] = optsList.flatMap(_.focusIndex).map(_ == gpIdx)
+//                  val idxTargetList: Option[List[(SPTarget, Int)]] = optsList.map(_.toList.zipWithIndex)
+//                  ("guiderKey" := gp.getKey) ->:
+//                    ("primary" :=? primaryGuider) ->?:
+//                    ("targets" :=? idxTargetList.map(_.foldLeft(jEmptyObject){{case (j, (target, idx)) =>
+//                    targetFields(target, te, Some(idx)) ->?: j
+//                  }}) ->?: j
+//                }
+//
+//                })
+//                jEmptyObject
+//            case AutomaticGroup.Active(targetMap, _) => Some("auto", targetMap)
+//            case _ => None
+//          }
+//
+//          ("name" :=? info.map(_._1)) ->?:
+//          ("index" := idx) ->:
+//            ("primaryGroup" := (g === ge.primaryGroup).toYesNo.displayValue) ->:
+//            ("tag" := g.isAutomatic ? "auto" | "manual") ->:
+//            g.referencedGuiders.foldLeft(j){ (j, gp) => {
+//              val targets = info.map(_._2)
+//
+//
+//              ("key" := gp.getKey) ->:
+//                ("primary" := g.primaryReferencedGuiders.contains(gp).toYesNo.displayValue) ->:
+//                ("targets" ->: info.map(_._2).map { thing => val xyz = thing.lookup(gp)
+//                xy}
+//                j
+//            }
+//          }
+//    }
+//    }
+//  }
+//}
+//    baseInfo ->: ("targets" := userTargetInfo) ->: jEmptyObject
+//  }
 
   def programFields(p: SPProgram): Json = {
     val timeAcctAllocation = p.getTimeAcctAllocation
