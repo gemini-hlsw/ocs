@@ -259,72 +259,6 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
 
     baseInfo ->: userTargetInfo ->: guideGroupInfo ->: jEmptyObject
   }
-//
-//  def asterismFields(oc: ISPObsComponent, t: TargetObsComp): Json = {
-//    // Needed for guide speed. May not include this as per discussion with Bryan.
-//    val ispObs = oc.getContextObservation
-//    val obsCtx = ObsContext.create(ispObs)
-//    val te = t.getTargetEnvironment
-//    val ge = te.getGuideEnvironment.guideEnv
-//    val a = te.getAsterism
-//
-//    // Base information: we are only dealing with asterisms with a single target.
-//    val base = a.asInstanceOf[Asterism.Single]
-//    val baseInfo = "base" := targetFields(base.t, te) ->: jEmptyObject
-//
-//    // User target information.
-//    val userTargetInfo = te.getUserTargets.asScala.foldLeft(jEmptyObject) { (j, t) =>
-//      ("target" := targetFields(t.target, te)) ->: j
-//    }
-//
-//    // Guide group information.
-//    val guideInfo = {
-//      // Specify primary group
-//      ("primaryIndex" := ge.primaryIndex) ->:
-//      // All groups
-//        ge.groups.zipWithIndex.foldLeft(jEmptyObject){ case (j, (g, idx)) =>
-//          val info = g match {
-//            case ManualGroup(name, targetMap) =>
-//              ("tag" := "manual") ->:
-//                ("primaryGroup" := (g === ge.primaryGroup).toYesNo.displayValue) ->:
-//                (targetMap.keys.zipWithIndex.foldLeft(jEmptyObject){ case (j, (gp, gpIdx)) => {
-//                  val optsList: Option[OptsList[SPTarget]] = targetMap.lookup(gp)
-//                  val primaryGuider: Option[Boolean] = optsList.flatMap(_.focusIndex).map(_ == gpIdx)
-//                  val idxTargetList: Option[List[(SPTarget, Int)]] = optsList.map(_.toList.zipWithIndex)
-//                  ("guiderKey" := gp.getKey) ->:
-//                    ("primary" :=? primaryGuider) ->?:
-//                    ("targets" :=? idxTargetList.map(_.foldLeft(jEmptyObject){{case (j, (target, idx)) =>
-//                    targetFields(target, te, Some(idx)) ->?: j
-//                  }}) ->?: j
-//                }
-//
-//                })
-//                jEmptyObject
-//            case AutomaticGroup.Active(targetMap, _) => Some("auto", targetMap)
-//            case _ => None
-//          }
-//
-//          ("name" :=? info.map(_._1)) ->?:
-//          ("index" := idx) ->:
-//            ("primaryGroup" := (g === ge.primaryGroup).toYesNo.displayValue) ->:
-//            ("tag" := g.isAutomatic ? "auto" | "manual") ->:
-//            g.referencedGuiders.foldLeft(j){ (j, gp) => {
-//              val targets = info.map(_._2)
-//
-//
-//              ("key" := gp.getKey) ->:
-//                ("primary" := g.primaryReferencedGuiders.contains(gp).toYesNo.displayValue) ->:
-//                ("targets" ->: info.map(_._2).map { thing => val xyz = thing.lookup(gp)
-//                xy}
-//                j
-//            }
-//          }
-//    }
-//    }
-//  }
-//}
-//    baseInfo ->: ("targets" := userTargetInfo) ->: jEmptyObject
-//  }
 
   def programFields(p: SPProgram): Json = {
     val timeAcctAllocation = p.getTimeAcctAllocation
@@ -337,6 +271,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
           ("investigatorEmail" := i.getEmail) ->:
           jEmptyObject
       }.foldLeft(jEmptyObject) { (j, inv) =>
+        print("jdkjk")
         (s"investigator" := inv) ->: j
       }) ->:
       ("affiliate" :=? Option(p.getPIAffiliate).map(_.displayValue)) ->?:
