@@ -172,7 +172,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
     }
 
     "target" := (target match {
-      case SiderealTarget(name, coordinates, properMotion, _, _, magnitudes, spectralDistribution, spatialProfile) =>
+      case SiderealTarget(name, coordinates, properMotion, _, _, magnitudes, _, _) =>
         ("name" := name) ->:
           ("index" :=? index) ->?:
           ("tag" := tag) ->:
@@ -185,7 +185,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
           ("magnitudes" := magnitudeFields(magnitudes)) ->:
           sd ->?: sp ->?:
           jEmptyObject
-      case NonSiderealTarget(name, _, horizonsDesignation, magnitudes, spectralDistribution, spatialProfile) =>
+      case NonSiderealTarget(name, _, horizonsDesignation, magnitudes, _, _) =>
         ("name" := name) ->:
           ("index" :=? index) ->?:
           ("tag" := tag) ->:
