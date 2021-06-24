@@ -48,8 +48,12 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
     doRequest(request, response)
 
   // Attempt to retrieve the program name.
-  def doRequest(request: HttpServletRequest, response: HttpServletResponse): Unit =
+  def doRequest(request: HttpServletRequest, response: HttpServletResponse): Unit = {
+    Log.warning(s"string: ${request.getRequestURL.toString}")
+    Log.warning(s"hello")
+    Log.warning(s"attribs = ${request.getAttributeNames.asScala.toList.map{_.toString}}")
     ParamParser(request).id.fold(t => throw new ServletException(t), build(_, response))
+  }
 
   // Build the JSON in a bottom-up approach starting at ISPProgram.
   // Traverse a node's children and on the way back up, add the information for the node.
@@ -122,7 +126,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
     }
 
   // The optional index is for ordering guide probes.
-  def targetFields(spTarget: SPTarget, te: TargetEnvironment, index: Option[Int] = 0): JsonAssoc = {
+  def targetFields(spTarget: SPTarget, te: TargetEnvironment, index: Option[Int] = None): JsonAssoc = {
     val target = spTarget.getTarget
 
     // Spectral distribution
@@ -218,7 +222,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
       }) ->:
       jEmptyObject
 
-  def asterismField(oc: ISPObsComponent, t: TargetObsComp): Json = {
+  def asterismFields(oc: ISPObsComponent, t: TargetObsComp): Json = {
     val ispObs = oc.getContextObservation
     val obsCtx = ObsContext.create(ispObs)
     val targetEnv = t.getTargetEnvironment
@@ -240,34 +244,16 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
       // Loop over guide groups
         guideEnv.groups.zipWithIndex.foldLeft(jEmptyObject){ case (j, (group, groupIdx)) =>
           ("primaryGroup" := (group === guideEnv.primaryGroup).toYesNo.displayValue) ->:
-            (group match {
+            ("groupIndex" := groupIdx) ->:
+            ("groupData" :=? (group match {
+                // We ignore disabled and initial (empty).
               case AutomaticGroup.Active(guideProbeMap, _) =>
-                ("tag" := "auto") ->:
-                  ("name" := "auto") ->:
-                  ("guideProbes" := guideProbeMap.keys.zipWithIndex.foldLeft(jEmptyObject){ case (j2, (guideProbe, guideProbeIdx)) =>
-                    ("guideProbeKey" := guideProbe.getKey) ->:
-                      ("guideProbeIndex" := guideProbeIdx) ->:
-                      ("targets" := guideProbeMap.lookup(guideProbe).zipWithIndex.foldLeft(jEmptyObject) { case (j3, (spTarget, spTargetIdx)) =>
-                        ("target" := targetFields(spTarget, targetEnv, Some(spTargetIdx))) ->: j3
-                      }) ->: j2})
-              // Process manual guide groups
-            case ManualGroup(name, guideProbeMap) =>
-              ("tag" := "manual") ->:
-                ("name" := name) ->:
-              // THIS IS WHERE HELL BEGINS. guideProbeMap is GuideProbe ==> OptsList[SPTarget]
-//                guideProbeMap.keys.zipWithIndex.foldLeft(jEmptyObject){ case (j2, (guideProbe, guideProbeIdx)) =>
-//                  ("guideProbeKey" := guideProbe.getKey) ->:
-//                    ("guideProbeIndex" := guideProbeIdx) ->:
-//                    ("primaryGuider" :=? guideProbeMap.lookup(guideProbe).flatMap(_.focusIndex).map(_ == guideProbeIdx).map(_.toYesNo.displayValue)) ->?:
-////                    ("targets" :=? guideProbeMap.lookup(guideProbe).zipWithIndex.foldLeft(jEmptyObject) { case (j3, (optsList, optsListIdx)) =>
-////                      ("primaryTarget" :=? optsList.focusIndex.map(_ == optsListIdx).map(_.toYesNo.displayValue)) ->?:
-////                      optsList.toList.zipWithIndex.foldLeft(jEmptyObject) { case (j4, (spTarget, spTargetIdx)) =>
-////                        ("target" := targetFields(spTarget, targetEnv, Some(spTargetIdx))) ->: j4
-////                      } ->?: j3)
-//                    j2
-//                }
-              // Process the auto guide group. guideProbeMap is GuideProbe ==>> SPTarget
-          }) ->: j
+                Some(automaticGroup(guideProbeMap, targetEnv))
+              case ManualGroup(name, guideProbeMap) =>
+                Some(manualGroup(name, guideProbeMap, targetEnv))
+              case _ =>
+                None
+          })) ->?: j
         }
     }
 

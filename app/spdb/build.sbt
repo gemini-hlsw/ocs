@@ -162,7 +162,7 @@ def with_remote_gogo(version: Version) = AppConfig(
 // SRAAPHORST
 def sraaphorst(version: Version) = AppConfig(
   id = "sraaphorst",
-  distribution = List(TestDistro),
+  distribution = List(TestDistro),オg。ワrニンg
    vmargs = List(
      "-Xmx1024M",
      "-Dedu.gemini.site=south",
@@ -184,6 +184,7 @@ def sraaphorst(version: Version) = AppConfig(
     "edu.gemini.dataman.gsa.summit.host"   -> "cpofits-lv1new.cl.gemini.edu",
     "edu.gemini.dbTools.archive.directory" -> "/Users/sraaphorst/tmp/archiver",
     "osgi.shell.telnet.ip"                 -> "172.16.77.244"
+    //"osgi.shell.telnet.ip"                -> "192.168.1.5"
   )
 ) extending List(with_gogo(version), sraaphorst_credentials(version))
 
