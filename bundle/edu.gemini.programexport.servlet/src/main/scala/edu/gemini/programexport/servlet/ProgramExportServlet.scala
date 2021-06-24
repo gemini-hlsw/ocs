@@ -5,7 +5,7 @@ import java.util.logging.{Level, Logger}
 import javax.servlet.ServletException
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import edu.gemini.pot.spdb.IDBDatabaseService
-import edu.gemini.spModel.core.{BandsList, BlackBody, EmissionLine, GaussianSource, LibraryNonStar, LibraryStar, Magnitude, NonSiderealTarget, PointSource, PowerLaw, SPProgramID, SiderealTarget, Target, UniformSource, UserDefinedSpectrum}
+import edu.gemini.spModel.core.{BlackBody, EmissionLine, GaussianSource, LibraryNonStar, LibraryStar, Magnitude, NonSiderealTarget, PointSource, PowerLaw, SPProgramID, SiderealTarget, Target, UniformSource, UserDefinedSpectrum}
 import edu.gemini.pot.sp.{ISPGroup, ISPNode, ISPObsComponent, ISPObsQaLog, ISPObservation, ISPProgram, ISPSeqComponent, SPComponentType}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.data.YesNoType
@@ -22,7 +22,6 @@ import argonaut._
 import Argonaut._
 import scalaz._
 import Scalaz._
-import edu.gemini.ags.api.AgsMagnitude
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.spModel.config.ConfigBridge
@@ -31,7 +30,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator
 import edu.gemini.spModel.seqcomp.SeqBase
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.env.{Asterism, AutomaticGroup, GuideEnv, GuideGroup, GuideGrp, ManualGroup, OptsList, TargetEnvironment}
+import edu.gemini.spModel.target.env.{Asterism, AutomaticGroup, ManualGroup, OptsList, TargetEnvironment}
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 
 import java.util.concurrent.TimeUnit
