@@ -115,14 +115,23 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
 
     }
 
-  def magnitudeFields(magnitudes: List[Magnitude]): Json =
-    magnitudes.foldLeft(jEmptyObject) { case (j, m) =>
-      ("band" := m.band.name) ->:
-        ("value" := m.value) ->:
-        ("system" := m.system.name) ->:
-        ("error" :=? m.error) ->?:
-        j
+  def magnitudeFields(magnitudes: List[Magnitude]): List[JsonAssoc] = {
+    Log.warning(s"*** Magnitudes ${magnitudes.map{_.toString}}, size=${magnitudes.size}")
+    Log.warning(s"s*** ${magnitudes.foldLeft(""){case (j,m) => s"${m.band.name} $j"}}")
+//    magnitudes.foldLeft(jEmptyObject) { case (j, m) =>
+//      ("band" := m.band.name) ->:
+//        ("value" := m.value) ->:
+//        ("system" := m.system.name) ->:
+//        ("error" :=? m.error) ->?:
+//        j
+//    }
+    magnitudes.map { m =>
+      "magnitude" := (
+        ("band" := m.band.name) ->:
+          ("value" := m.value) ->:
+          ("sysem" := m.system.name) ->: jEmptyObject)
     }
+  }
 
   // The optional index is for ordering guide probes.
   def targetFields(spTarget: SPTarget, te: TargetEnvironment, index: Option[Int] = None): JsonAssoc = {

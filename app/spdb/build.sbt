@@ -162,7 +162,7 @@ def with_remote_gogo(version: Version) = AppConfig(
 // SRAAPHORST
 def sraaphorst(version: Version) = AppConfig(
   id = "sraaphorst",
-  distribution = List(TestDistro),オg。ワrニンg
+  distribution = List(TestDistro),
    vmargs = List(
      "-Xmx1024M",
      "-Dedu.gemini.site=south",
