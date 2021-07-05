@@ -436,7 +436,8 @@ public abstract class SPInstObsComp extends AbstractDataObject {
         );
     }
 
-    public final PlannedTime.CategorizedTime DHS_WRITE_TIME =
-        DHS_WRITE_TIMES.get(getInstrument());
+    public final PlannedTime.CategorizedTime getDhsWriteTime() {
+        return DHS_WRITE_TIMES.get(getInstrument());
+    }
 
 }

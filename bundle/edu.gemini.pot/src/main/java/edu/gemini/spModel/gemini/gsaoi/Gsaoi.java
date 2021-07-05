@@ -821,8 +821,8 @@ public final class Gsaoi extends SPInstObsComp
         // Add readout overhead
         int lowNoiseReads = getNonDestructiveReads();
 
-        times.add(CategorizedTime.fromSeconds(Category.READOUT, readout(coadds, lowNoiseReads)).add(- DHS_WRITE_TIME.time)); // REL-1678
-        times.add(DHS_WRITE_TIME); // REL-1678
+        times.add(CategorizedTime.fromSeconds(Category.READOUT, readout(coadds, lowNoiseReads)).add(- getDhsWriteTime().time)); // REL-1678
+        times.add(getDhsWriteTime()); // REL-1678
 
         return commonGroup(cur, prev).addAll(times);
     }
