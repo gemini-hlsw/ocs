@@ -851,7 +851,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         times.add(CategorizedTime.fromSeconds(Category.READOUT, mode.readoutTimeSec()));
         times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, ExposureCalculator.instance.exposureTimeSec(cur)));
 
-        times.add(DHS_WRITE_TIME); // REL-1678
+        times.add(getDhsWriteTime()); // REL-1678
 
         return CommonStepCalculator.instance.calc(cur, prev).addAll(times);
     }
