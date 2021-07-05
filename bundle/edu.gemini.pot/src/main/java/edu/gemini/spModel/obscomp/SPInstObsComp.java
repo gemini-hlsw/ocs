@@ -15,6 +15,7 @@ import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.util.Angle;
 
 import java.beans.PropertyDescriptor;
+import java.io.IOException;
 import java.time.Duration;
 import java.text.NumberFormat;
 import java.util.*;
@@ -434,6 +435,21 @@ public abstract class SPInstObsComp extends AbstractDataObject {
            .stream()
            .collect(Collectors.toMap(Map.Entry::getKey, e -> PlannedTime.CategorizedTime.apply(PlannedTime.Category.DHS_WRITE, e.getValue().toMillis())))
         );
+    }
+
+    // REL-3955: Initialization issues prompted a switch to add and use
+    // 'getDhsWriteTime()` below instead of referring to a public field
+    // DHS_WRITE_TIME. The class has a `serialVersionUID` and not-updated
+    // clients will be expecting a DHS_WRITE_TIME field. Adding a `readObject`
+    // to initialize the value for not-updated clients.
+    private PlannedTime.CategorizedTime DHS_WRITE_TIME;
+
+    private void readObject(java.io.ObjectInputStream in)
+        throws IOException, ClassNotFoundException {
+
+        in.defaultReadObject();
+
+        DHS_WRITE_TIME = getDhsWriteTime();
     }
 
     public final PlannedTime.CategorizedTime getDhsWriteTime() {
