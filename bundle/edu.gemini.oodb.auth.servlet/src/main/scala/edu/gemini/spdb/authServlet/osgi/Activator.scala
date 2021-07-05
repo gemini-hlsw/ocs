@@ -4,8 +4,7 @@ import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.spdb.authServlet.AuthServlet
 import edu.gemini.util.osgi.Tracker._
 import edu.gemini.util.security.auth.keychain.KeyService
-
-import org.osgi.framework.{BundleContext, BundleActivator}
+import org.osgi.framework.{BundleActivator, BundleContext}
 import org.osgi.service.http.HttpService
 import org.osgi.util.tracker.ServiceTracker
 
