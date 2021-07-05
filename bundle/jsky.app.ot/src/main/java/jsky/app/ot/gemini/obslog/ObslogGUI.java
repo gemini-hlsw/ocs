@@ -76,11 +76,22 @@ class ObslogGUI extends JPanel {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             final JLabel lab = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-            final DataflowStatus dfs = (DataflowStatus) value;
-            lab.setText(dfs.description());
+            final String text;
+            final Icon   icon;
 
-            final Icon icon = STATUS_ICON.get(dfs);
-            lab.setIcon(icon != null ? icon : BLANK);
+            // When clearing the selection as a result of resetting the model,
+            // the table is temporarily rendered with a null DataflowStatus value.
+            final DataflowStatus dfs = (DataflowStatus) value;
+            if (dfs == null) {
+                text = "";
+                icon = BLANK;
+            } else {
+                text = dfs.description();
+                icon = STATUS_ICON.getOrDefault(dfs, BLANK);
+            }
+
+            lab.setText(text);
+            lab.setIcon(icon);
 
             return lab;
         }
