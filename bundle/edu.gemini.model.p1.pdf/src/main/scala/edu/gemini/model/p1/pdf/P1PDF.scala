@@ -71,20 +71,20 @@ object P1PDF {
     "Chilean NGO", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.DefaultList, PartnerLeadDisplayOption.DefaultDisplay,
     Map("partner"->"cl", "pageLayout" -> "default-us-letter", "title" -> "PROPUESTA CONICYT-Gemini"))
 
-  object NOAO extends Template(
-    "NOAO",   "templates/xsl-NOAO.xml", PDF.Letter, InvestigatorsListOption.DefaultList, PartnerLeadDisplayOption.DefaultDisplay,
+  object NOIRLab extends Template(
+    "NOIRLab",   "templates/xsl-NOIRLAB.xml", PDF.Letter, InvestigatorsListOption.DefaultList, PartnerLeadDisplayOption.DefaultDisplay,
     Map("partner"->"us", "pageLayout" -> "default-us-letter"))
 
-  object NOAOListAtTheEnd extends Template(
-    "NOAO CoIs at End",   "templates/xsl-NOAO.xml", PDF.Letter, InvestigatorsListOption.AtTheEndList, PartnerLeadDisplayOption.DefaultDisplay,
+  object NOIRLabListAtTheEnd extends Template(
+    "NOIRLab CoIs at End",   "templates/xsl-NOIRLAB.xml", PDF.Letter, InvestigatorsListOption.AtTheEndList, PartnerLeadDisplayOption.DefaultDisplay,
     Map("partner"->"us", "pageLayout" -> "default-us-letter"))
 
-  object NOAONoInvestigatorsList extends Template(
-    "NOAO No CoIs",   "templates/xsl-NOAO.xml", PDF.Letter, InvestigatorsListOption.NoList, PartnerLeadDisplayOption.DefaultDisplay,
+  object NOIRLabNoInvestigatorsList extends Template(
+    "NOIRLab No CoIs",   "templates/xsl-NOIRLAB.xml", PDF.Letter, InvestigatorsListOption.NoList, PartnerLeadDisplayOption.DefaultDisplay,
     Map("partner"->"us", "pageLayout" -> "default-us-letter"))
 
   /** Gets a list with all templates that are currently available. */
-  def templates = List(GeminiDefault, GeminiDefaultNoInvestigatorsList, GeminiDefaultListAtTheEnd, AU, CL, NOAO, NOAOListAtTheEnd, NOAONoInvestigatorsList)
+  def templates = List(GeminiDefault, GeminiDefaultNoInvestigatorsList, GeminiDefaultListAtTheEnd, AU, CL, NOIRLab, NOIRLabListAtTheEnd, NOIRLabNoInvestigatorsList)
 
   def templatesMap: Map[String, Template] = templatesList.toMap
 
@@ -99,9 +99,9 @@ object P1PDF {
     "gs"     -> GeminiDefault,
     "gsiend" -> GeminiDefaultListAtTheEnd,
     "gsnoi"  -> GeminiDefaultNoInvestigatorsList,
-    "us"     -> NOAO,
-    "usend"  -> NOAOListAtTheEnd,
-    "usnoi"  -> NOAONoInvestigatorsList)
+    "us"     -> NOIRLab,
+    "usend"  -> NOIRLabListAtTheEnd,
+    "usnoi"  -> NOIRLabNoInvestigatorsList)
 
   /**
    * Creates a pdf from a given xml file and template and writes the resulting pdf file to the output folder.
@@ -196,7 +196,7 @@ object P1PDF {
     val home = System.getProperty("user.home")
     val in = new File(s"$home/pitsource.xml")
     val out = new File(s"$home/pittarget.pdf")
-    createFromFile(in, NOAOListAtTheEnd, out)
+    createFromFile(in, NOIRLabListAtTheEnd, out)
 
     val ok = Runtime.getRuntime.exec(Array("open", out.getAbsolutePath)).waitFor
     println("Exec returned " + ok)
