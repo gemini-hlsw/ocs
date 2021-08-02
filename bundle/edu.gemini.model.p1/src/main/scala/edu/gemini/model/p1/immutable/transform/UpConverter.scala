@@ -161,7 +161,16 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter supports migrating to 2022A.
  */
 case object SemesterConverter2021BTo2022A extends SemesterConverter {
-  override val transformers: List[TransformFunction] = Nil
+  val removeKeywords: TransformFunction = {
+    case p @ <proposal>{ns @ _*}</proposal> =>
+      val b = ns.filter {
+        case <keywords>{_ @ _*}</keywords> =>
+          false
+        case a => true
+      }
+      StepResult("Removed keywords", <proposal tacCategory={p.attribute("tacCategory")} schemaVersion={p.attribute("schemaVersion")}>{b}</proposal>).successNel
+  }
+  override val transformers: List[TransformFunction] = List(removeKeywords)
 }
 
 /**

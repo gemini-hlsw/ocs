@@ -19,7 +19,6 @@ object Proposal {
   val abstrakt:Lens[Proposal, String] = Lens.lensu((a, b) => a.copy(abstrakt = b), _.abstrakt)
   val scheduling:Lens[Proposal, String] = Lens.lensu((a, b) => a.copy(scheduling = b), _.scheduling)
   val category:Lens[Proposal, Option[TacCategory]] = Lens.lensu((a, b) => a.copy(category = b), _.category)
-  val keywords:Lens[Proposal, List[Keyword]] = Lens.lensu((a, b) => a.copy(keywords = b), _.keywords)
   val investigators:Lens[Proposal, Investigators] = Lens.lensu((a, b) => a.copy(investigators = b), _.investigators)
   val observations:Lens[Proposal, List[Observation]] = Lens.lensu((a, b) => a.copy(observations = clean(b)), _.observations)
   val proposalClass:Lens[Proposal, ProposalClass] = Lens.lensu((a, b) => a.copy(proposalClass = b), _.proposalClass)
@@ -72,7 +71,6 @@ object Proposal {
     "",
     "",
     None,
-    List.empty[Keyword],
     Investigators.empty,
     List.empty[Target],
     List(Observation.empty, Observation.emptyBand3), // REL-3290: Template observations
@@ -98,7 +96,6 @@ case class Proposal(meta:Meta,
                     abstrakt:String,
                     scheduling:String,
                     category:Option[TacCategory],
-                    keywords:List[Keyword],
                     investigators:Investigators,
                     targets:List[Target],
                     observations:List[Observation],
@@ -139,7 +136,6 @@ case class Proposal(meta:Meta,
     m.getAbstract.unwrapLines,
     m.getScheduling,
     Option(m.getTacCategory),
-    m.getKeywords.getKeyword.asScala.toList,
     Investigators(m),
     m.getTargets.getSiderealOrNonsiderealOrToo.asScala.map(Target(_)).toList,
     Proposal.nonEmptyObsList(m.getObservations.getObservation.asScala.map(Observation(_)).toList),
@@ -159,8 +155,6 @@ case class Proposal(meta:Meta,
     m.setAbstract(abstrakt)
     m.setScheduling(scheduling)
     m.setTacCategory(category.orNull)
-    m.setKeywords(Factory.createKeywords())
-    m.getKeywords.getKeyword.addAll(keywords.asJavaCollection)
     m.setInvestigators(investigators.mutable(n))
     val ts = Factory.createTargets()
     ts.getSiderealOrNonsiderealOrToo.addAll(targets.map(_.mutable(n)).asJava)

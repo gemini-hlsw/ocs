@@ -292,21 +292,6 @@ public final class PioSpXmlParser {
         return new GsaPhase1Data.Category(Pio.getValue(c, "phase1Document/common/keywords/keywords-attributes/category", ""));
     }
 
-    private Collection<GsaPhase1Data.Keyword> getP1Keywords(Container c) {
-        final ParamSet kps = c.lookupParamSet(new PioPath("phase1Document/common/keywords"));
-        if (kps == null) return Collections.emptyList();
-
-        @SuppressWarnings("unchecked") List<Param> keywords = (List<Param>) kps.getParams("keyword");
-
-        // keywords.map(new GsaPhase1Data.Keyword(_))
-        final List<GsaPhase1Data.Keyword> lst = new ArrayList<GsaPhase1Data.Keyword>(keywords.size());
-        for (Param p : keywords) {
-            final String keyword = p.getValue();
-            if (keyword != null) lst.add(new GsaPhase1Data.Keyword(keyword));
-        }
-        return Collections.unmodifiableCollection(lst);
-    }
-
     private GsaPhase1Data.Investigator getInvestigator(ParamSet ps) {
         final String first = Pio.getValue(ps, "name/first", "");
         final String last  = Pio.getValue(ps, "name/last", "");
@@ -334,7 +319,6 @@ public final class PioSpXmlParser {
         return new GsaPhase1Data(
                 getP1Abstract(c),
                 getP1Category(c),
-                getP1Keywords(c),
                 getP1Pi(c),
                 getP1Cois(c)
         );

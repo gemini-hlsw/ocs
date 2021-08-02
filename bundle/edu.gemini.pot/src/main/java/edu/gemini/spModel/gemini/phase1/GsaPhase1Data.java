@@ -39,7 +39,6 @@ public final class GsaPhase1Data implements Serializable {
     public static final GsaPhase1Data EMPTY = new GsaPhase1Data(
             Abstract.EMPTY,
             Category.EMPTY,
-            Collections.emptyList(),
             Investigator.EMPTY,
             Collections.emptyList()
     );
@@ -164,26 +163,17 @@ public final class GsaPhase1Data implements Serializable {
 
     private final String abstrakt;
     private final String category;
-    private final List<String> keywords;
     private final Investigator pi;
     private final List<Investigator> cois;
 
-    public GsaPhase1Data(Abstract abstrakt, Category cat, Collection<Keyword> keywords, Investigator pi, Collection<Investigator> cois) {
+    public GsaPhase1Data(Abstract abstrakt, Category cat, Investigator pi, Collection<Investigator> cois) {
         if (abstrakt == null) abstrakt = new Abstract("");
         if (cat == null) cat = new Category("");
-        if (keywords == null) keywords = Collections.emptyList();
         if (pi == null) pi = Investigator.EMPTY;
         if (cois == null) cois = Collections.emptyList();
 
         this.abstrakt = abstrakt.getValue();
         this.category = cat.getValue();
-        if (keywords.size() == 0) {
-            this.keywords = Collections.emptyList();
-        } else {
-            List<String> ks = new ArrayList<>(keywords.size());
-            for (Keyword k : keywords) ks.add(k.getValue());
-            this.keywords = Collections.unmodifiableList(ks);
-        }
         this.pi = pi;
         if (cois.size() == 0) {
             this.cois = Collections.emptyList();
@@ -199,16 +189,6 @@ public final class GsaPhase1Data implements Serializable {
         this.category = Pio.getValue(pset, CATEGORY_PARAM, "");
 
         List<Param> ks = pset.getParams(KEYWORD_PARAM);
-        if (ks.size() == 0) {
-            this.keywords = Collections.emptyList();
-        } else {
-            List<String> keywords = new ArrayList<>(ks.size());
-            for (Param p : ks) {
-                String keyword = p.getValue();
-                if (keyword != null) keywords.add(keyword);
-            }
-            this.keywords = Collections.unmodifiableList(keywords);
-        }
 
         ParamSet invsPset = pset.getParamSet(INVESTIGATORS_PARAM_SET);
         if (invsPset == null) {
@@ -236,11 +216,6 @@ public final class GsaPhase1Data implements Serializable {
 
     public Abstract getAbstract() { return new Abstract(abstrakt); }
     public Category getCategory() { return new Category(category); }
-    public List<Keyword> getKeywords() {
-        List<Keyword> keys = new ArrayList<>(keywords.size());
-        for (String keyword : this.keywords) keys.add(new Keyword(keyword));
-        return keys;
-    }
     public Investigator getPi() { return pi; }
     public List<Investigator> getCois() { return cois; }
 
@@ -248,10 +223,6 @@ public final class GsaPhase1Data implements Serializable {
         ParamSet pset = factory.createParamSet(PARAM_SET_NAME);
         Pio.addParam(factory, pset, ABSTRACT_PARAM, abstrakt);
         Pio.addParam(factory, pset, CATEGORY_PARAM, category);
-
-        for (String keyword : keywords) {
-            Pio.addParam(factory, pset, KEYWORD_PARAM, keyword);
-        }
 
         ParamSet invPset = factory.createParamSet(INVESTIGATORS_PARAM_SET);
         invPset.addParamSet(pi.toParamSet(factory, PI_PARAM_SET));
@@ -271,7 +242,6 @@ public final class GsaPhase1Data implements Serializable {
 
         if (!abstrakt.equals(that.abstrakt)) return false;
         if (!category.equals(that.category)) return false;
-        if (!keywords.equals(that.keywords)) return false;
         if (!pi.equals(that.pi)) return false;
         if (!cois.equals(that.cois)) return false;
 
@@ -282,7 +252,6 @@ public final class GsaPhase1Data implements Serializable {
     public int hashCode() {
         int result = abstrakt.hashCode();
         result = 31 * result + category.hashCode();
-        result = 31 * result + keywords.hashCode();
         result = 31 * result + pi.hashCode();
         result = 31 * result + cois.hashCode();
         return result;
@@ -294,7 +263,6 @@ public final class GsaPhase1Data implements Serializable {
         sb.append("GsaPhase1Data");
         sb.append("{abstrakt='").append(abstrakt).append('\'');
         sb.append(", category='").append(category).append('\'');
-        sb.append(", keywords=").append(keywords);
         sb.append(", pi=").append(pi);
         sb.append(", cois=").append(cois);
         sb.append('}');
