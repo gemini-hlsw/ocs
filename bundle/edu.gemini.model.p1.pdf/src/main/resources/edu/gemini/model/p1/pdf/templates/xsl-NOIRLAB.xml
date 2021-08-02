@@ -16,7 +16,7 @@
     <xsl:param name="investigatorsList"/>
 
     <!-- Global variables -->
-    <xsl:variable name="obs-name">NOAO</xsl:variable>
+    <xsl:variable name="obs-name">NOIRLab</xsl:variable>
     <xsl:variable name="this-partner"><xsl:value-of select="$partner"/></xsl:variable>
 
     <xsl:template match="proposal">

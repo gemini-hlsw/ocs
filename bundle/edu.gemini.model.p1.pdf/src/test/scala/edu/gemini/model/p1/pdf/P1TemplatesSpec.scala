@@ -234,14 +234,14 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
       ftMode must be size 1
     }
     "display reviewer for FT, REL-1894" in {
-      val result = transformProposal("proposal_fast_turnaround.xml", P1PDF.NOAO.copy(investigatorsList = InvestigatorsListOption.DefaultList))
+      val result = transformProposal("proposal_fast_turnaround.xml", P1PDF.NOIRLab.copy(investigatorsList = InvestigatorsListOption.DefaultList))
       val proposalXml = XML.loadString(result)
       // Check the reviewer is displayed
       proposalXml must (\\("inline") \>~ """\s*Reviewer:\s*""")
       proposalXml must (\\("block") \>~ """.*Andrew.Stephens\s*""")
     }
     "display mentor for FT, REL-1894" in {
-      val result = transformProposal("proposal_fast_turnaround.xml", P1PDF.NOAO.copy(investigatorsList = InvestigatorsListOption.DefaultList))
+      val result = transformProposal("proposal_fast_turnaround.xml", P1PDF.NOIRLab.copy(investigatorsList = InvestigatorsListOption.DefaultList))
       val proposalXml = XML.loadString(result)
       // Check that Observing Mode is correct
       proposalXml must (\\("inline") \>~ """\s*Mentor:\s*""")
@@ -277,9 +277,9 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
 
   }
 
-  "The P1 NOAO Template" should {
+  "The P1 NOIRLab Template" should {
     "include text with scheduling requests, REL-687" in {
-      val result = transformProposal("proposal_with_schedule.xml", P1PDF.NOAONoInvestigatorsList)
+      val result = transformProposal("proposal_with_schedule.xml", P1PDF.NOIRLabNoInvestigatorsList)
       val schedRegex = """\s*This proposal has the following scheduling restrictions.*""".r
       val foundMatches = (XML.loadString(result) \\ "block") collect {
         case e if schedRegex.findFirstIn(e.text).isDefined => true
@@ -290,82 +290,82 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
       foundMatches must be size 1
     }
     "include TAC partner ranking, REL-677" in {
-      val result = transformProposal("proposal_submitted_to_tac_all_approved.xml", P1PDF.NOAONoInvestigatorsList)
+      val result = transformProposal("proposal_submitted_to_tac_all_approved.xml", P1PDF.NOIRLabNoInvestigatorsList)
 
       // Check there is a block with text 4.0
       XML.loadString(result) must \\("block") \> "4.0"
     }
     "include recommended and min recommended time, REL-677" in {
-      val result = transformProposal("proposal_submitted_to_tac_all_approved.xml", P1PDF.NOAONoInvestigatorsList)
+      val result = transformProposal("proposal_submitted_to_tac_all_approved.xml", P1PDF.NOIRLabNoInvestigatorsList)
 
       // Check there is a block with text 2.0 hr (1.0 hr)
       XML.loadString(result) must \\("block")  \>~ """2\.0.hr.\(1\.0.hr\)"""
     }
     "show that GSAOI is in Gemini South, REL-693" in {
-      val result = transformProposal("proposal_with_gsaoi.xml", P1PDF.NOAONoInvestigatorsList)
+      val result = transformProposal("proposal_with_gsaoi.xml", P1PDF.NOIRLabNoInvestigatorsList)
       // Check that GSAOI is shown in Gemini South
       XML.loadString(result) must (\\("table-cell") \ "block" \> "Gemini South")
     }
     "show that Texes is in Gemini North, REL-1062" in {
-      val result = transformProposal("proposal_with_texes.xml", P1PDF.NOAONoInvestigatorsList)
+      val result = transformProposal("proposal_with_texes.xml", P1PDF.NOIRLabNoInvestigatorsList)
       // Check that Texes is shown in Gemini North
       XML.loadString(result) must (\\("table-cell") \ "block" \> "Gemini North")
     }
     "show that a GN visitor is in Gemini North, REL-1090" in {
-      val result = transformProposal("proposal_with_visitor_gn.xml", P1PDF.NOAONoInvestigatorsList)
+      val result = transformProposal("proposal_with_visitor_gn.xml", P1PDF.NOIRLabNoInvestigatorsList)
       // Check that Speckle is shown in Gemini North
       XML.loadString(result) must (\\("table-cell") \ "block" \> "Gemini North")
     }
     "show that a GS visitor is in Gemini North, REL-1090" in {
-      val result = transformProposal("proposal_with_visitor_gs.xml", P1PDF.NOAONoInvestigatorsList)
+      val result = transformProposal("proposal_with_visitor_gs.xml", P1PDF.NOIRLabNoInvestigatorsList)
       // Check that Speckle is shown in Gemini North
       XML.loadString(result) must (\\("table-cell") \ "block" \> "Gemini South")
     }
     "show that a Phoenix site is displayed, REL-1090" in {
-      val result = transformProposal("proposal_with_phoenix.xml", P1PDF.NOAONoInvestigatorsList)
+      val result = transformProposal("proposal_with_phoenix.xml", P1PDF.NOIRLabNoInvestigatorsList)
       // Check that Phoenix is shown in Gemini South
       XML.loadString(result) must (\\("table-cell") \ "block" \> "Gemini South")
     }
     "show an ITAC information section if the proposal contains a comment, REL-1165" in {
-      val result = transformProposal("proposal_with_itac_comment.xml", P1PDF.NOAONoInvestigatorsList)
+      val result = transformProposal("proposal_with_itac_comment.xml", P1PDF.NOIRLabNoInvestigatorsList)
       // Check that we have an ITAC information section with the comment
       XML.loadString(result) must \\("block") \ "inline" \>~ "ITAC Information.*"
       XML.loadString(result) must \\("block") \>~ "An Itac comment"
     }
     "show an ITAC information section if the proposal contains multiple comment, REL-1165" in {
-      val result = transformProposal("proposal_with_itac_and_several_comments.xml", P1PDF.NOAONoInvestigatorsList)
+      val result = transformProposal("proposal_with_itac_and_several_comments.xml", P1PDF.NOIRLabNoInvestigatorsList)
       // Check that we have an ITAC information section with the comment
       XML.loadString(result) must \\("block") \ "inline" \>~ "ITAC Information.*"
       XML.loadString(result) must \\("block") \>~ "One Itac comment"
       XML.loadString(result) must \\("block") \>~ "Another itac comment"
     }
     "show an ITAC information section if the proposal contains itac and ntac comments, REL-1165" in {
-      val result = transformProposal("proposal_with_itac_and_ntac_comments.xml", P1PDF.NOAONoInvestigatorsList)
+      val result = transformProposal("proposal_with_itac_and_ntac_comments.xml", P1PDF.NOIRLabNoInvestigatorsList)
       // Check that we have an ITAC information section with the comment
       XML.loadString(result) must (\\("block") \ "inline" \>~ "ITAC Information:.*")
     }
     "if there is no ITAC section in the proposal, no ITAC Information section should be included, REL-1165" in {
-      val result = transformProposal("proposal_with_gsaoi.xml", P1PDF.NOAONoInvestigatorsList)
+      val result = transformProposal("proposal_with_gsaoi.xml", P1PDF.NOIRLabNoInvestigatorsList)
       // Check that there is no ITAC information section
       XML.loadString(result) must not (\\("block") \ "inline" \> "ITAC Information: ")
     }
     "show that GPI is in GS, REL-1193" in {
-      val result = transformProposal("proposal_with_gpi.xml", P1PDF.NOAONoInvestigatorsList)
+      val result = transformProposal("proposal_with_gpi.xml", P1PDF.NOIRLabNoInvestigatorsList)
       // Check that GPI is shown in Gemini South
       XML.loadString(result) must (\\("table-cell") \ "block" \>~ "Gemini South")
     }
     "show that GRACES is in GN, REL-1356" in {
-      val result = transformProposal("proposal_with_graces.xml", P1PDF.NOAONoInvestigatorsList)
+      val result = transformProposal("proposal_with_graces.xml", P1PDF.NOIRLabNoInvestigatorsList)
       // Check that Graces is shown in Gemini South
       XML.loadString(result) must (\\("table-cell") \ "block" \>~ "Gemini North")
     }
     "show that Phoenix is in GS, REL-2356" in {
-      val result = transformProposal("proposal_with_phoenix.xml", P1PDF.NOAONoInvestigatorsList)
+      val result = transformProposal("proposal_with_phoenix.xml", P1PDF.NOIRLabNoInvestigatorsList)
       // Check that Phoenix is shown in Gemini South
       XML.loadString(result) must (\\("table-cell") \ "block" \>~ "Gemini South")
     }
     "show correct Observing Mode for FT, REL-1894" in {
-      val result = transformProposal("proposal_fast_turnaround.xml", P1PDF.NOAONoInvestigatorsList)
+      val result = transformProposal("proposal_fast_turnaround.xml", P1PDF.NOIRLabNoInvestigatorsList)
       val proposalXml = XML.loadString(result)
       // Check that Observing Mode is correct
       val ftMode = (proposalXml \\ "table-cell" \ "block") collect {
@@ -374,7 +374,7 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
       ftMode must be size 1
     }
     "calculate the total time for all observations for GN and GS, REL-1298" in {
-      val result = transformProposal("proposal_with_gn_and_gs.xml", P1PDF.NOAONoInvestigatorsList)
+      val result = transformProposal("proposal_with_gn_and_gs.xml", P1PDF.NOIRLabNoInvestigatorsList)
       val proposalXml = XML.loadString(result)
       // Check values manually calculated
       // Band 1/2 GN
