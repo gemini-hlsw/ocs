@@ -1,6 +1,5 @@
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
             xmlns:xs="http://www.w3.org/2001/XMLSchema" jaxb:version="1.0">
-    <xsd:include schemaLocation="Keyword.xsd"/>
     <xsd:include schemaLocation="Investigator.xsd"/>
     <xsd:include schemaLocation="Target.xsd"/>
     <xsd:include schemaLocation="Flamingos2.xsd"/>
@@ -37,7 +36,6 @@
                 <xsd:element name="title"         type="xsd:token"/>
                 <xsd:element name="abstract"      type="xsd:string"/>
                 <xsd:element name="scheduling"    type="xsd:string" minOccurs="0"/>
-                <xsd:element name="keywords"      type="Keywords"/>
                 <xsd:element name="investigators" type="Investigators"/>
                 <xsd:element name="targets"       type="Targets"/>
                 <xsd:element name="conditions"    type="Conditions"/>

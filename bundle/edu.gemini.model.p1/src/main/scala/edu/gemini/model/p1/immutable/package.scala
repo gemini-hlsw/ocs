@@ -391,9 +391,6 @@ package object immutable {
     val PREFER_NOT_TO_SAY = M.InvestigatorGender.PREFER_NOT_TO_SAY
   }
 
-  type Keyword = M.Keyword
-  object Keyword extends EnumObject[M.Keyword]
-
   // Bands that are on the phase1 model
   val allowedBands = List(
     MagnitudeBand._u,

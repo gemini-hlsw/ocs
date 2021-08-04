@@ -26,7 +26,7 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
   implicit val boolMonoid = Monoid.instance[Boolean](_ || _,  false)
 
   // Bound
-  override def children = List(title, abstrakt, /* scheduling, */ category, keywords, attachment, investigators)
+  override def children = List(title, abstrakt, /* scheduling, */ category, attachment, investigators)
   val lens = Model.proposal
 
   // Our content, which is defined below
@@ -35,7 +35,6 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
     addRow(new Label("Title:"), title)
     addRow(new Label("Abstract:"), new ScrollPane(abstrakt), GridBagPanel.Fill.Both, 100)
     addRow(new Label("Category:"), category)
-    addRow(new Label("Keywords:"), keywords)
     addRow(new Label("Attachment:"), attachment)
     addSpacer()
   }, BorderPanel.Position.Center)
@@ -71,42 +70,6 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
   object category extends ComboBox[TacCategory](TacCategory.values) with BoundCombo[Proposal, TacCategory] with Uninitialized.ValueRenderer[TacCategory] {
     val boundView = panel
     val lens = Uninitialized.lens(Proposal.category)
-  }
-
-  // Keywords
-  object keywords extends BorderPanel with Bound[Proposal, List[Keyword]] {panel =>
-
-    // Bound
-    val lens = Proposal.keywords
-    override val children = List(select, view)
-
-    // Children, defined below
-    add(select, BorderPanel.Position.West)
-    add(view, BorderPanel.Position.Center)
-
-    object select extends Button with Bound.Self[List[Keyword]] {
-      icon = SharedIcons.ICON_SELECT
-      override def refresh(ks:Option[List[Keyword]]) {
-        enabled = ks.isDefined
-      }
-      reactions += {
-        case ButtonClicked(_) => for {
-          m <- model
-          kws <- KeywordsEditor.selectKeywords(m, canEdit, panel)
-        } model = Some(kws)
-      }
-    }
-
-    object view extends Label with Bound.Self[List[Keyword]] {
-      horizontalAlignment = Alignment.Left
-      override def refresh(value:Option[List[Keyword]]) {
-        val count = value.map(_.size).getOrElse(0)
-        val all = value.map(_.map(_.value).mkString(": ", "; ", "")).getOrElse("")
-        text = " %d Selected".format(count) + (if (count > 0) all else "")
-        peer.setToolTipText(all)
-      }
-    }
-
   }
 
   // Attachment

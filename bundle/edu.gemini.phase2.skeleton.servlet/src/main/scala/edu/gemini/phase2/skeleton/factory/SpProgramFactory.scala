@@ -283,10 +283,9 @@ object SpProgramFactory {
   def gsaPhase1Data(proposal: Proposal): Gsa = {
     val abstrakt = new Gsa.Abstract(proposal.abstrakt)
     val category = new Gsa.Category(~proposal.category.map(_.value()))
-    val keywords = proposal.keywords.map(k => new Gsa.Keyword(k.value())).asJava
     val pi       = gsaPhase1DataInvestigator(proposal.investigators.pi)
     val cois     = proposal.investigators.cois.map(gsaPhase1DataInvestigator).asJava
-    new Gsa(abstrakt, category, keywords, pi, cois)
+    new Gsa(abstrakt, category, pi, cois)
   }
 
   private def gsaPhase1DataInvestigator(inv: Investigator): Gsa.Investigator =
