@@ -93,13 +93,27 @@
     -->
     <xsd:simpleType name="TacCategory">
         <xsd:restriction base="xsd:token">
-            <xsd:enumeration value="Planetary systems"/>
-            <xsd:enumeration value="Star and planet formation"/>
-            <xsd:enumeration value="Stars and stellar evolution"/>
-            <xsd:enumeration value="Formation and evolution of compact objects"/>
-            <xsd:enumeration value="Resolved stellar populations and their environments"/>
-            <xsd:enumeration value="Galaxy evolution"/>
-            <xsd:enumeration value="Cosmology and fundamental physics"/>
+            <xsd:enumeration value="Small Bodies: Asteroids, Comets, Moons, Kuiper Belt"/>
+            <xsd:enumeration value="Planetary Atmospheres"/>
+            <xsd:enumeration value="Planetary Surfaces"/>
+            <xsd:enumeration value="Solar System Other"/>
+            <xsd:enumeration value="Exoplanet Radial Velocities"/>
+            <xsd:enumeration value="Exoplanet Atmospheres/Activity"/>
+            <xsd:enumeration value="Exoplanet Transits, Rossiter McLaughlin"/>
+            <xsd:enumeration value="Exoplanet Host Star Properties/Connections"/>
+            <xsd:enumeration value="Exoplanet Other"/>
+            <xsd:enumeration value="Stellar Astrophysics, Evolution, Supernovae, Abundances"/>
+            <xsd:enumeration value="Stellar Populations, Clusters, Chemical Evolution"/>
+            <xsd:enumeration value="Star Formation"/>
+            <xsd:enumeration value="Gaseous Astrophysics, H II regions, PN, ISM, SN remnants, Novae"/>
+            <xsd:enumeration value="Stellar Remnants/Compact Objects, WD, NS, BH"/>
+            <xsd:enumeration value="Galactic Other"/>
+            <xsd:enumeration value="Cosmology, Fundamental Physics, Large Scale Structure"/>
+            <xsd:enumeration value="Clusters/Groups of Galaxies"/>
+            <xsd:enumeration value="High-z Universe"/>
+            <xsd:enumeration value="Low-z Universe"/>
+            <xsd:enumeration value="Active Galaxies, Quasars, SMBH"/>
+            <xsd:enumeration value="Extragalactic Other"/>
         </xsd:restriction>
     </xsd:simpleType>
 

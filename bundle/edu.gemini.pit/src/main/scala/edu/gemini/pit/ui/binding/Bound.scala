@@ -46,7 +46,6 @@ trait Bound[A, M] {
   // TODO: this is a hack only used for some warning logging in BoundView. Fix it
   private[binding] def outer = a
 
-
   def rebind() {
     p.foreach(bind(a, _))
   }

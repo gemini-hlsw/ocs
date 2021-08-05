@@ -188,8 +188,6 @@ public final class GsaPhase1Data implements Serializable {
         this.abstrakt = Pio.getValue(pset, ABSTRACT_PARAM, "");
         this.category = Pio.getValue(pset, CATEGORY_PARAM, "");
 
-        List<Param> ks = pset.getParams(KEYWORD_PARAM);
-
         ParamSet invsPset = pset.getParamSet(INVESTIGATORS_PARAM_SET);
         if (invsPset == null) {
             this.pi   = Investigator.EMPTY;
