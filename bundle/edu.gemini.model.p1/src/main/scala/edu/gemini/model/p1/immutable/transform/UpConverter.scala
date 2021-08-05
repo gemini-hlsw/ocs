@@ -161,6 +161,31 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter supports migrating to 2022A.
  */
 case object SemesterConverter2021BTo2022A extends SemesterConverter {
+  lazy val planetarySystemCategoryMessage: String = "The 'Planetary systems' category is now classified as 'Exoplanet Other'."
+  lazy val starPlanetFormationCategoryMessage: String = "The 'Star and planet formation' category is now classified as 'Star Formation'."
+  lazy val starStellarEvolutionCategoryMessage: String = "The 'Stars and stellar evolution' category is now classified as 'Stellar Astrophysics, Evolution, Supernovae, Abundances'."
+  lazy val formationEvolutionCategoryMessage: String = "The 'Formation and evolution of compact objects' category is now classified as 'Stellar Remnants/Compact Objects, WD, NS, BH'."
+  lazy val resolvedPopulationCategoryMessage: String = "The 'Resolved stellar populations and their environments' category is now classified as 'Stellar Remnants/Compact Objects, WD, NS, BH'."
+  lazy val galaxyEvolutionCategoryMessage: String = "The 'Galaxy evolution' category is now classified as 'Extragalactic Other'."
+  lazy val cosmologyCategoryMessage: String = "The 'Cosmology and fundamental physics' category is now classified as 'Cosmology, Fundamental Physics, Large Scale Structure'."
+
+  val categoryUpdateTransform: TransformFunction = {
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@tacCategory").exists(_.text == "Planetary systems") =>
+      StepResult(planetarySystemCategoryMessage, <proposal tacCategory={TacCategory.EXOPLANET_OTHER.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@tacCategory").exists(_.text == "Star and planet formation") =>
+      StepResult(starPlanetFormationCategoryMessage, <proposal tacCategory={TacCategory.STAR_FORMATION.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@tacCategory").exists(_.text == "Stars and stellar evolution") =>
+      StepResult(starStellarEvolutionCategoryMessage, <proposal tacCategory={TacCategory.STELLAR_ASTROPHYSICS_EVOLUTION_SUPERNOVAE_ABUNDANCES.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@tacCategory").exists(_.text == "Formation and evolution of compact objects") =>
+      StepResult(starStellarEvolutionCategoryMessage, <proposal tacCategory={TacCategory.STELLAR_REMNANTS_COMPACT_OBJECTS_WD_NS_BH.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@tacCategory").exists(_.text == "Resolved stellar populations and their environments") =>
+      StepResult(starStellarEvolutionCategoryMessage, <proposal tacCategory={TacCategory.STELLAR_POPULATIONS_CLUSTERS_CHEMICAL_EVOLUTION.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@tacCategory").exists(_.text == "Galaxy evolution") =>
+      StepResult(starStellarEvolutionCategoryMessage, <proposal tacCategory={TacCategory.EXTRAGALACTIC_OTHER.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@tacCategory").exists(_.text == "Cosmology and fundamental physics") =>
+      StepResult(starStellarEvolutionCategoryMessage, <proposal tacCategory={TacCategory.COSMOLOGY_FUNDAMENTAL_PHYSICS_LARGE_SCALE_STRUCTURE.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
+  }
+
   val removeKeywords: TransformFunction = {
     case p @ <proposal>{ns @ _*}</proposal> =>
       val b = ns.filter {
@@ -168,9 +193,9 @@ case object SemesterConverter2021BTo2022A extends SemesterConverter {
           false
         case a => true
       }
-      StepResult("Removed keywords", <proposal tacCategory={p.attribute("tacCategory")} schemaVersion={p.attribute("schemaVersion")}>{b}</proposal>).successNel
+      StepResult("Removed keywords", <proposal tacCategory={p.attribute("tacCategory")} schemaVersion={Proposal.currentSchemaVersion}>{b}</proposal>).successNel
   }
-  override val transformers: List[TransformFunction] = List(removeKeywords)
+  override val transformers: List[TransformFunction] = List(removeKeywords, categoryUpdateTransform)
 }
 
 /**
@@ -347,11 +372,11 @@ case object SemesterConverter2019BTo2020A extends SemesterConverter {
   lazy val extragalacticCategoryMessage: String = "The Extragalactic category is now classified as Galaxy evolution."
   val categoryUpdateTransform: TransformFunction = {
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@tacCategory").exists(_.text == "Solar System") =>
-      StepResult(solarSystemCategoryMessage, <proposal tacCategory={TacCategory.PLANETARY_SYSTEMS.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
+      StepResult(solarSystemCategoryMessage, <proposal tacCategory={TacCategory.SOLAR_SYSTEM_OTHER.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@tacCategory").exists(_.text == "Galactic") =>
-      StepResult(galacticCategoryMessage, <proposal tacCategory={TacCategory.STARS_AND_STELLAR_EVOLUTION.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
+      StepResult(galacticCategoryMessage, <proposal tacCategory={TacCategory.GALACTIC_OTHER.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@tacCategory").exists(_.text == "Extragalactic") =>
-      StepResult(extragalacticCategoryMessage, <proposal tacCategory={TacCategory.GALAXY_EVOLUTION.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
+      StepResult(extragalacticCategoryMessage, <proposal tacCategory={TacCategory.EXTRAGALACTIC_OTHER.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
   }
 
   val texesRemover: TransformFunction = removeBlueprint("texes", "Texes")._1

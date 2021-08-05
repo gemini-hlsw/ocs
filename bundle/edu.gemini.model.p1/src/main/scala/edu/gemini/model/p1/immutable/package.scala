@@ -504,13 +504,27 @@ package object immutable {
 
   type TacCategory = M.TacCategory
   object TacCategory extends EnumObject[M.TacCategory] {
-    val PLANETARY_SYSTEMS                                   = M.TacCategory.PLANETARY_SYSTEMS
-    val STAR_AND_PLANET_FORMATION                           = M.TacCategory.STAR_AND_PLANET_FORMATION
-    val STARS_AND_STELLAR_EVOLUTION                         = M.TacCategory.STARS_AND_STELLAR_EVOLUTION
-    val FORMATION_AND_EVOLUTION_OF_COMPACT_OBJECTS          = M.TacCategory.FORMATION_AND_EVOLUTION_OF_COMPACT_OBJECTS
-    val RESOLVED_STELLAR_POPULATIONS_AND_THEIR_ENVIRONMENTS = M.TacCategory.RESOLVED_STELLAR_POPULATIONS_AND_THEIR_ENVIRONMENTS
-    val GALAXY_EVOLUTION                                    = M.TacCategory.GALAXY_EVOLUTION
-    val COSMOLOGY_AND_FUNDAMENTAL_PHYSICS                   = M.TacCategory.COSMOLOGY_AND_FUNDAMENTAL_PHYSICS
+    val SMALL_BODIES_ASTEROIDS_COMETS_MOONS_KUIPER_BELT            = M.TacCategory.SMALL_BODIES_ASTEROIDS_COMETS_MOONS_KUIPER_BELT
+    val PLANETARY_SURFACES                                         = M.TacCategory.PLANETARY_SURFACES
+    val PLANETARY_ATMOSPHERES                                      = M.TacCategory.PLANETARY_ATMOSPHERES
+    val SOLAR_SYSTEM_OTHER                                         = M.TacCategory.SOLAR_SYSTEM_OTHER
+    val EXOPLANET_RADIAL_VELOCITIES                                = M.TacCategory.EXOPLANET_RADIAL_VELOCITIES
+    val EXOPLANET_ATMOSPHERES_ACTIVITY                             = M.TacCategory.EXOPLANET_ATMOSPHERES_ACTIVITY
+    val EXOPLANET_TRANSITS_ROSSITER_MC_LAUGHLIN                    = M.TacCategory.EXOPLANET_TRANSITS_ROSSITER_MC_LAUGHLIN
+    val EXOPLANET_HOST_STAR_PROPERTIES_CONNECTIONS                 = M.TacCategory.EXOPLANET_HOST_STAR_PROPERTIES_CONNECTIONS
+    val EXOPLANET_OTHER                                            = M.TacCategory.EXOPLANET_OTHER
+    val STELLAR_ASTROPHYSICS_EVOLUTION_SUPERNOVAE_ABUNDANCES       = M.TacCategory.STELLAR_ASTROPHYSICS_EVOLUTION_SUPERNOVAE_ABUNDANCES
+    val STELLAR_POPULATIONS_CLUSTERS_CHEMICAL_EVOLUTION            = M.TacCategory.STELLAR_POPULATIONS_CLUSTERS_CHEMICAL_EVOLUTION
+    val STAR_FORMATION                                             = M.TacCategory.STAR_FORMATION
+    val GASEOUS_ASTROPHYSICS_H_II_REGIONS_PN_ISM_SN_REMNANTS_NOVAE = M.TacCategory.GASEOUS_ASTROPHYSICS_H_II_REGIONS_PN_ISM_SN_REMNANTS_NOVAE
+    val STELLAR_REMNANTS_COMPACT_OBJECTS_WD_NS_BH                  = M.TacCategory.STELLAR_REMNANTS_COMPACT_OBJECTS_WD_NS_BH
+    val GALACTIC_OTHER                                             = M.TacCategory.GALACTIC_OTHER
+    val COSMOLOGY_FUNDAMENTAL_PHYSICS_LARGE_SCALE_STRUCTURE        = M.TacCategory.COSMOLOGY_FUNDAMENTAL_PHYSICS_LARGE_SCALE_STRUCTURE
+    val CLUSTERS_GROUPS_OF_GALAXIES                                = M.TacCategory.CLUSTERS_GROUPS_OF_GALAXIES
+    val HIGH_Z_UNIVERSE                                            = M.TacCategory.HIGH_Z_UNIVERSE
+    val LOW_Z_UNIVERSE                                             = M.TacCategory.LOW_Z_UNIVERSE
+    val ACTIVE_GALAXIES_QUASARS_SMBH                               = M.TacCategory.ACTIVE_GALAXIES_QUASARS_SMBH
+    val EXTRAGALACTIC_OTHER                                        = M.TacCategory.EXTRAGALACTIC_OTHER
   }
 
   type TimeUnit = M.TimeUnit

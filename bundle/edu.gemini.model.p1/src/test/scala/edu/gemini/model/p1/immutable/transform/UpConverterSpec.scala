@@ -762,7 +762,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           changes must contain(SemesterConverter2019BTo2020A.solarSystemCategoryMessage)
 
           val proposal = ProposalIo.read(result.toString())
-          proposal.category must beSome(TacCategory.PLANETARY_SYSTEMS)
+          proposal.category must beSome(TacCategory.SOLAR_SYSTEM_OTHER)
       }
     }
     "update the tacCategory Galactic attribute" in {
@@ -773,7 +773,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           changes must contain(SemesterConverter2019BTo2020A.galacticCategoryMessage)
 
           val proposal = ProposalIo.read(result.toString())
-          proposal.category must beSome(TacCategory.STARS_AND_STELLAR_EVOLUTION)
+          proposal.category must beSome(TacCategory.GALACTIC_OTHER)
       }
     }
     "update the tacCategory Extragalactic attribute" in {
@@ -784,7 +784,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           changes must contain(SemesterConverter2019BTo2020A.extragalacticCategoryMessage)
 
           val proposal = ProposalIo.read(result.toString())
-          proposal.category must beSome(TacCategory.GALAXY_EVOLUTION)
+          proposal.category must beSome(TacCategory.EXTRAGALACTIC_OTHER)
       }
     }
     "remove AU submissions" in {
