@@ -503,10 +503,20 @@ package object immutable {
   }
 
   type TacCategory = M.TacCategory
+  final case class TacCategoryGroup(title: String)
+  object TacCategoryGroup extends EnumObject[M.TacCategory] {
+    val SOLAR_SYSTEM = new TacCategoryGroup("SOLAR SYSTEM")
+    val EXOPLANETS = new TacCategoryGroup("EXOPLANETS")
+    val GALACTIC = new TacCategoryGroup("GALACTIC/LOCAL GROUP")
+    val EXTRA_GALACTIC = new TacCategoryGroup("EXTRAGALACTIC")
+
+    val all = List(SOLAR_SYSTEM, EXOPLANETS, GALACTIC, EXTRA_GALACTIC)
+  }
+
   object TacCategory extends EnumObject[M.TacCategory] {
     val SMALL_BODIES_ASTEROIDS_COMETS_MOONS_KUIPER_BELT            = M.TacCategory.SMALL_BODIES_ASTEROIDS_COMETS_MOONS_KUIPER_BELT
-    val PLANETARY_SURFACES                                         = M.TacCategory.PLANETARY_SURFACES
     val PLANETARY_ATMOSPHERES                                      = M.TacCategory.PLANETARY_ATMOSPHERES
+    val PLANETARY_SURFACES                                         = M.TacCategory.PLANETARY_SURFACES
     val SOLAR_SYSTEM_OTHER                                         = M.TacCategory.SOLAR_SYSTEM_OTHER
     val EXOPLANET_RADIAL_VELOCITIES                                = M.TacCategory.EXOPLANET_RADIAL_VELOCITIES
     val EXOPLANET_ATMOSPHERES_ACTIVITY                             = M.TacCategory.EXOPLANET_ATMOSPHERES_ACTIVITY
@@ -525,6 +535,34 @@ package object immutable {
     val LOW_Z_UNIVERSE                                             = M.TacCategory.LOW_Z_UNIVERSE
     val ACTIVE_GALAXIES_QUASARS_SMBH                               = M.TacCategory.ACTIVE_GALAXIES_QUASARS_SMBH
     val EXTRAGALACTIC_OTHER                                        = M.TacCategory.EXTRAGALACTIC_OTHER
+
+    val groups: List[(TacCategoryGroup, TacCategory)] = List(
+      TacCategoryGroup.SOLAR_SYSTEM -> SMALL_BODIES_ASTEROIDS_COMETS_MOONS_KUIPER_BELT,
+      TacCategoryGroup.SOLAR_SYSTEM -> PLANETARY_ATMOSPHERES,
+      TacCategoryGroup.SOLAR_SYSTEM -> PLANETARY_SURFACES,
+      TacCategoryGroup.SOLAR_SYSTEM -> SOLAR_SYSTEM_OTHER,
+      TacCategoryGroup.EXOPLANETS -> EXOPLANET_RADIAL_VELOCITIES,
+      TacCategoryGroup.EXOPLANETS -> EXOPLANET_ATMOSPHERES_ACTIVITY,
+      TacCategoryGroup.EXOPLANETS -> EXOPLANET_TRANSITS_ROSSITER_MC_LAUGHLIN,
+      TacCategoryGroup.EXOPLANETS -> EXOPLANET_HOST_STAR_PROPERTIES_CONNECTIONS,
+      TacCategoryGroup.EXOPLANETS -> EXOPLANET_OTHER,
+      TacCategoryGroup.GALACTIC -> STELLAR_ASTROPHYSICS_EVOLUTION_SUPERNOVAE_ABUNDANCES,
+      TacCategoryGroup.GALACTIC -> STELLAR_POPULATIONS_CLUSTERS_CHEMICAL_EVOLUTION,
+      TacCategoryGroup.GALACTIC -> STAR_FORMATION,
+      TacCategoryGroup.GALACTIC -> GASEOUS_ASTROPHYSICS_H_II_REGIONS_PN_ISM_SN_REMNANTS_NOVAE,
+      TacCategoryGroup.GALACTIC -> STELLAR_REMNANTS_COMPACT_OBJECTS_WD_NS_BH,
+      TacCategoryGroup.GALACTIC -> GALACTIC_OTHER,
+      TacCategoryGroup.EXTRA_GALACTIC -> COSMOLOGY_FUNDAMENTAL_PHYSICS_LARGE_SCALE_STRUCTURE,
+      TacCategoryGroup.EXTRA_GALACTIC -> CLUSTERS_GROUPS_OF_GALAXIES,
+      TacCategoryGroup.EXTRA_GALACTIC -> HIGH_Z_UNIVERSE,
+      TacCategoryGroup.EXTRA_GALACTIC -> LOW_Z_UNIVERSE,
+      TacCategoryGroup.EXTRA_GALACTIC -> ACTIVE_GALAXIES_QUASARS_SMBH,
+      TacCategoryGroup.EXTRA_GALACTIC -> EXTRAGALACTIC_OTHER
+    )
+
+    val items: List[Either[TacCategoryGroup, TacCategory]] = TacCategoryGroup.all.flatMap { g =>
+      List(Left(g)) ++ groups.filter(_._1 == g).map(x => Right(x._2))
+    }
   }
 
   type TimeUnit = M.TimeUnit

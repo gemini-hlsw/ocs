@@ -1,6 +1,6 @@
 package edu.gemini.pit.ui.view.proposal
 
-import com.jgoodies.forms.factories.Borders.DLU4_BORDER
+import com.jgoodies.forms.factories.Borders.{DLU4_BORDER, EMPTY_BORDER}
 import edu.gemini.model.p1.immutable._
 import edu.gemini.pit.model.Model
 import edu.gemini.pit.ui.{ShellAdvisor, URLConstants}
@@ -10,16 +10,20 @@ import edu.gemini.pit.ui.editor._
 import edu.gemini.pit.ui.util.SimpleToolbar.StaticText
 import edu.gemini.pit.ui.util._
 import edu.gemini.pit.util._
+
 import java.io.File
-import javax.swing.{BorderFactory, Icon}
+import javax.swing.{BorderFactory, Icon, JLabel, SwingConstants}
+import java.awt.{Color, Font}
+import javax.swing.border.Border
 
 import scalaz._
+
 import swing._
 import event.ButtonClicked
 import Scalaz._
 import edu.gemini.pit.ui.util.gface.SimpleListViewer
-import java.net.URI
 
+import java.net.URI
 import edu.gemini.shared.gui.{Browser, Chooser}
 
 class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Proposal] {panel =>
@@ -67,9 +71,34 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
   }
 
   // TAC category
-  object category extends ComboBox[TacCategory](TacCategory.values) with BoundCombo[Proposal, TacCategory] with Uninitialized.ValueRenderer[TacCategory] {
+  object category extends ComboBox[Either[TacCategoryGroup, TacCategory]](TacCategory.items) with BoundCombo[Proposal, Either[TacCategoryGroup, TacCategory]] {
     val boundView = panel
-    val lens = Uninitialized.lens(Proposal.category)
+    val lensCat: Lens[Proposal, Option[Either[TacCategoryGroup, TacCategory]]] =
+      Lens.lensu((a, b) => a.copy(category = b.flatMap(_.fold(_ => None, c => Some(c)))), _.category.map(Right(_)))
+    val lens: Lens[Proposal, Either[TacCategoryGroup, TacCategory]] = Uninitialized.lens(lensCat)
+
+    renderer = new ListView.Renderer[Either[TacCategoryGroup, TacCategory]] {
+      val delegate = renderer
+      def componentFor(list: ListView[_ <: Either[TacCategoryGroup, TacCategory]], isSelected: Boolean, focused: Boolean, a: Either[TacCategoryGroup, TacCategory], index: Int) = {
+        val c = delegate.componentFor(list, isSelected, focused, a, index)
+        val t = Option(a) map { _.fold(_.title, _.value()) } getOrElse "Select"
+        val label = c.peer.asInstanceOf[JLabel]
+        label.setText(t)
+        Option(a).foreach {
+          case Left(_) =>
+            label.setHorizontalAlignment(SwingConstants.RIGHT)
+            label.setFocusable(false)
+            val border: Border = BorderFactory.createLineBorder(Color.LIGHT_GRAY)
+            label.setBorder(border)
+            label.setFont(label.getFont.deriveFont(Font.BOLD, label.getFont.getSize))
+          case _ =>
+            c.peer.asInstanceOf[JLabel].setHorizontalAlignment(SwingConstants.LEFT)
+            c.peer.asInstanceOf[JLabel].setFocusable(true)
+            c.peer.asInstanceOf[JLabel].setBorder(EMPTY_BORDER)
+        }
+        c
+      }
+    }
   }
 
   // Attachment
@@ -148,7 +177,6 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
       case ButtonClicked(_) => Browser.open(new URI(URLConstants.GET_TEMPLATES._1))
     }
   }
-
 
   object investigators extends BorderPanel with Bound.Self[Proposal] {
 
