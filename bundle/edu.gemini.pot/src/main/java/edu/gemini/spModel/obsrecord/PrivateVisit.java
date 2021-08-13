@@ -7,17 +7,11 @@ package edu.gemini.spModel.obsrecord;
 import edu.gemini.pot.sp.Instrument;
 import edu.gemini.pot.sp.SPObservationID;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.skycalc.Night;
-import edu.gemini.skycalc.ObservingNight;
-import edu.gemini.skycalc.TwilightBoundType;
-import edu.gemini.skycalc.TwilightBoundedNight;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.dataset.DatasetLabel;
-import edu.gemini.spModel.dataset.DatasetQaState;
 import edu.gemini.spModel.event.*;
 import edu.gemini.spModel.obsclass.ObsClass;
-import edu.gemini.spModel.time.ChargeClass;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -30,14 +24,14 @@ import java.util.List;
 final class PrivateVisit implements Serializable {
     private static final long serialVersionUID = -7796307171519915226L;
 
-    List<ObsExecEvent> _events = new ArrayList<ObsExecEvent>();
+    List<ObsExecEvent> _events = new ArrayList<>();
 
     PrivateVisit() {
     }
 
     PrivateVisit(PrivateVisit that) {
         // each event is immutable, no need to copy them
-        _events = new ArrayList<ObsExecEvent>(that._events);
+        _events = new ArrayList<>(that._events);
     }
 
     void add(ObsExecEvent evt) {
@@ -54,6 +48,14 @@ final class PrivateVisit implements Serializable {
         int sz = _events.size();
         if (sz == 0) return null;
         return _events.get(sz-1);
+    }
+
+    boolean isEmpty() {
+        return _events.isEmpty();
+    }
+
+    boolean nonEmpty() {
+        return !isEmpty();
     }
 
     boolean endsBefore(ObsExecEvent evt) {

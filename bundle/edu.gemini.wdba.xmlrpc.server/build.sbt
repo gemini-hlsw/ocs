@@ -7,6 +7,9 @@ name := "edu.gemini.wdba.xmlrpc.server"
 // version set in ThisBuild
 
 unmanagedJars in Compile ++= Seq(
+  new File(baseDirectory.value, "../../lib/bundle/argonaut_2.11-6.2.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/monocle-core_2.11-1.2.1.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/monocle-macro_2.11-1.2.1.jar"),
   new File(baseDirectory.value, "../../lib/bundle/osgi.cmpn-4.3.1.jar"),
   new File(baseDirectory.value, "../../lib/bundle/javax-servlet_2.10-2.5.0.jar"),
   new File(baseDirectory.value, "../../lib/bundle/org-apache-xmlrpc_2.10-3.0.0.jar"),

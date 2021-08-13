@@ -380,6 +380,13 @@ public final class ObsExecRecord implements Serializable {
     }
 
     /**
+     * Gets the start time of the last non-empty visit, if any.
+     */
+    public synchronized long getLastVisitStartTime() {
+        return _visits.getLastVisitStartTime();
+    }
+
+    /**
      * Gets the total time used by all visits, regardless of
      * {@link edu.gemini.spModel.time.ChargeClass}.  Time between visits is
      * ignored. This value represents the real time that was spent executing
