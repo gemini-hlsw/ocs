@@ -177,7 +177,7 @@ public abstract class EventMsg implements Serializable {
     private static int _nextOrdinal = 0;
 
     private final int _ordinal = _nextOrdinal++;
-    private String _msgStr;
+    private final String _msgStr;
 
     private EventMsg(String msgStr) {
         _msgStr = msgStr;

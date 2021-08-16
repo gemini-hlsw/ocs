@@ -1,8 +1,9 @@
 package edu.gemini.wdba.session;
 
 import edu.gemini.wdba.glue.api.WdbaContext;
-import edu.gemini.wdba.session.dbup.DBUpdateService;
-import edu.gemini.wdba.session.dbup.AllEventsLoggingService;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 //
 // Gemini Observatory/AURA
@@ -13,6 +14,8 @@ public final class ProductionSessionConfiguration implements ISessionConfigurati
 
     private final WdbaContext ctx;
 
+    private final Executor exec = Executors.newSingleThreadExecutor();
+
     public ProductionSessionConfiguration(WdbaContext ctx) {
         this.ctx = ctx;
     }
@@ -20,10 +23,10 @@ public final class ProductionSessionConfiguration implements ISessionConfigurati
     public void initialize(ISessionEventProducer producer) {
 
         // Start the service that logs events to the database
-        new DBUpdateService(producer, ctx);
+        final DBUpdateService dbUpdateService = new DBUpdateService(ctx);
+        producer.addSessionEventListener(dbUpdateService);
 
-        // Start a service that logs all events to LOG4j
-        new AllEventsLoggingService(producer);
+        exec.execute(dbUpdateService);
     }
 
 }

@@ -16,6 +16,7 @@ public interface ISessionEventListener extends EventListener {
     /**
      * Receive a state update event.
      */
-    void sessionUpdate(ExecEvent event);
+    void sessionUpdate(ExecEvent event) throws InterruptedException;
+
 }
 
