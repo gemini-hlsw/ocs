@@ -7,7 +7,7 @@ import edu.gemini.spModel.core.catchingNonFatal
 import edu.gemini.wdba.fire.FireFailure.FireException
 
 import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
 import scalaz.concurrent.Task
 
 package object fire {

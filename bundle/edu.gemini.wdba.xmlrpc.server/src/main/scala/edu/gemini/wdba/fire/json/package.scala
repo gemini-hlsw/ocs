@@ -3,10 +3,10 @@
 
 package edu.gemini.wdba.fire
 
-import edu.gemini.spModel.core.SPProgramID
-import edu.gemini.pot.sp.SPObservationID
+import argonaut.Argonaut._
 import argonaut._
-import Argonaut._
+import edu.gemini.pot.sp.SPObservationID
+import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.too.TooType
 
 import java.time.format.DateTimeFormatter.ISO_INSTANT

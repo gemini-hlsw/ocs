@@ -18,8 +18,9 @@ import java.util.concurrent.TimeUnit
 import java.util.function.BiFunction
 
 import scala.concurrent.duration._
+
 import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
 import scalaz.concurrent.Task
 
 
