@@ -14,7 +14,8 @@ public final class ProductionSessionConfiguration implements ISessionConfigurati
 
     private final WdbaContext ctx;
 
-    private final Executor exec = Executors.newSingleThreadExecutor();
+    private final Executor exec =
+            Executors.newSingleThreadExecutor(r -> new Thread(r, "DBUpdateService"));
 
     public ProductionSessionConfiguration(WdbaContext ctx) {
         this.ctx = ctx;

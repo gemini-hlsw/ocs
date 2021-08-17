@@ -12,6 +12,7 @@ import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.ext.ObservationNode;
 import edu.gemini.spModel.ext.ObservationNodeFunctor;
 import edu.gemini.util.security.principal.StaffPrincipal;
+import edu.gemini.wdba.fire.FireService;
 import edu.gemini.wdba.glue.WdbaGlueService;
 import edu.gemini.wdba.glue.api.WdbaContext;
 import edu.gemini.wdba.glue.api.WdbaDatabaseAccessService;
@@ -50,9 +51,8 @@ public abstract class TestBase /*extends TestCase*/ {
     protected WdbaDatabaseAccessService databaseAccessService;
 
     // We will run as superuser
-    final Set<Principal> user = Collections.<Principal>singleton(StaffPrincipal.Gemini());
+    final Set<Principal> user = Collections.singleton(StaffPrincipal.Gemini());
 
-    @SuppressWarnings({"ResultOfMethodCallIgnored"})
     @Before public void setUp() throws Exception {
         odb = DBLocalDatabase.createTransient();
 
@@ -68,15 +68,15 @@ public abstract class TestBase /*extends TestCase*/ {
         databaseAccessService = new WdbaGlueService(odb, user);
     }
 
-    @After public void tearDown() throws Exception {
+    @After public void tearDown() {
         odb.getDBAdmin().shutdown();
     }
 
     protected ITccXmlRpc getHandler(final Site site) {
-        return new TccHandler(new WdbaContext(site, databaseAccessService, user));
+        return new TccHandler(new WdbaContext(site, databaseAccessService, user, FireService.loggingOnly(odb)));
     }
 
-    protected ObservationNode getObsNode() throws Exception {
+    protected ObservationNode getObsNode() {
         return ObservationNodeFunctor.getObservationNode(odb, obs, user);
     }
 
@@ -134,7 +134,7 @@ public abstract class TestBase /*extends TestCase*/ {
         return getSubconfig(doc, TccNames.TCS_CONFIGURATION);
     }
 
-    protected Map<String, String> getTcsConfigurationMap(Document doc) throws Exception {
+    protected Map<String, String> getTcsConfigurationMap(Document doc) {
         final Map<String, String> res = new HashMap<>();
 
         final Element psetElement = getTcsConfiguration(doc);

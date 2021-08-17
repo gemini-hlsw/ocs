@@ -4,6 +4,7 @@ import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.util.security.principal.StaffPrincipal;
 import edu.gemini.wdba.exec.ExecXmlRpcHandler;
+import edu.gemini.wdba.fire.FireService;
 import edu.gemini.wdba.glue.WdbaGlueService;
 import edu.gemini.wdba.glue.api.WdbaContext;
 import edu.gemini.wdba.server.WdbaXmlRpcServlet;
@@ -29,6 +30,10 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -50,8 +55,10 @@ public class WDBAServerActivator implements BundleActivator {
     private ServiceTracker<IDBDatabaseService, WdbaContext> _glueTracker;
     private ServiceTracker<IDBDatabaseService, IDBDatabaseService> _dbTracker;
     private BundleContext _bundleContext;
-    private WdbaXmlRpcServlet _servlet = new WdbaXmlRpcServlet();
+    private final WdbaXmlRpcServlet _servlet = new WdbaXmlRpcServlet();
     private HttpService _http;
+
+    private ExecutorService fireExecutor;
 
     public void start(BundleContext bundleContext) throws Exception {
         LOG.info("Start WDBA OSGi Service");
@@ -78,7 +85,11 @@ public class WDBAServerActivator implements BundleActivator {
                             throw new RuntimeException("Could not parse site: " + siteStr);
                         }
 
-                        final WdbaContext ctx = new WdbaContext(site, new WdbaGlueService(db, user), user);
+                        fireExecutor = Executors.newSingleThreadExecutor(r -> new Thread(r, "FireExecutor"));
+                        final FireService fireService = FireService.loggingOnly(db);
+                        fireExecutor.execute(fireService);
+
+                        final WdbaContext ctx = new WdbaContext(site, new WdbaGlueService(db, user), user, fireService);
                         ExecXmlRpcHandler.setContext(ctx);
                         TccXmlRpcHandler.setContext(ctx);
                         SessionXmlRpcHandler.setContext(ctx);
@@ -90,6 +101,7 @@ public class WDBAServerActivator implements BundleActivator {
 
                     public void removedService(ServiceReference<IDBDatabaseService> ref, WdbaContext object) {
                         LOG.info("Removing WDBA Access Service");
+                        fireExecutor.shutdownNow();
                         ExecXmlRpcHandler.setContext(null);
                         TccXmlRpcHandler.setContext(null);
                         SessionXmlRpcHandler.setContext(null);

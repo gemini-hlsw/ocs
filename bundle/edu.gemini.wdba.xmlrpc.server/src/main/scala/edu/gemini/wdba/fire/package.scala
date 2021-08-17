@@ -15,8 +15,12 @@ package object fire {
   type FireAction[A] = EitherT[Task, FireFailure, A]
 
   object FireAction {
+
     def apply[A](a: => A): FireAction[A] =
       EitherT(Task.delay(a.right))
+
+    val unit: FireAction[Unit] =
+      apply(())
 
     def fail[A](f: => FireFailure): FireAction[A] =
       EitherT(Task.delay(f.left[A]))

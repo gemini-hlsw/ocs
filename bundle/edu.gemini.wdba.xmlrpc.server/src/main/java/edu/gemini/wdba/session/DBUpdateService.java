@@ -128,15 +128,20 @@ public final class DBUpdateService implements ISessionEventListener, Runnable {
         // Runnable
     public void run() {
         // Remove from queue and run
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             try {
                 final ExecEvent event = queue.take();
                 LOG.info(String.format("%s: start processing event: %s", getName(), event));
                 doMsgUpdate(event);
+
+                // FIRE messages need to be handled after the database has
+                // recorded the event because they perform calculations that
+                // depend on the presence of the event.
+                _context.getFireService().addEvent(event);
+
                 LOG.info(String.format("%s: done processing event: %s", getName(), event));
             } catch (InterruptedException ex) {
                 LOG.log(Level.INFO, "Stopping session event consumer: " + ex.getMessage(), ex);
-                return;
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE, ex.getMessage(), ex);
             }
