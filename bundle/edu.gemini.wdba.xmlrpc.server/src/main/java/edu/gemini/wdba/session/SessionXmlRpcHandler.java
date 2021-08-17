@@ -116,8 +116,8 @@ public final class SessionXmlRpcHandler implements ISessionXmlRpc {
     /**
      * Remove all sessions and contents.
      */
-    public boolean removeAllSessions() throws ServiceException {
-        return sm().removeAllSessions();
+    public void removeAllSessions() throws ServiceException {
+        sm().removeAllSessions();
     }
 
     /**

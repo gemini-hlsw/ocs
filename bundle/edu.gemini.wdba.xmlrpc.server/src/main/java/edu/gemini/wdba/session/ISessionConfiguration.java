@@ -7,6 +7,6 @@ package edu.gemini.wdba.session;
 
 public interface ISessionConfiguration {
 
-    public void initialize(ISessionEventProducer producer);
+    void initialize(ISessionEventProducer producer);
 
 }

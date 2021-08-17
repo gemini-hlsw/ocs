@@ -52,6 +52,7 @@ public final class DBUpdateService implements ISessionEventListener, Runnable {
      *
      * @param event the execution event to enqueue</code>
      */
+    // TODO: return a completable future and link it to something that posts the JSON
     public void sessionUpdate(ExecEvent event) throws InterruptedException {
 
         LOG.info(String.format("%s: enqueueing event: %s", getName(), event));
