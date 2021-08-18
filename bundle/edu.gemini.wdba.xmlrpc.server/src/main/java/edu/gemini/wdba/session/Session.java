@@ -4,7 +4,6 @@
 package edu.gemini.wdba.session;
 
 import edu.gemini.pot.sp.SPObservationID;
-import edu.gemini.shared.util.EventSupport;
 import edu.gemini.spModel.dataset.Dataset;
 import edu.gemini.spModel.dataset.DatasetLabel;
 import edu.gemini.spModel.event.*;
@@ -13,6 +12,7 @@ import edu.gemini.wdba.xmlrpc.ServiceException;
 import edu.gemini.wdba.shared.QueuedObservation;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 /**
@@ -37,30 +37,26 @@ public class Session {
 
     private final List<String> _observationIDs = Collections.synchronizedList(new ArrayList<>());
 
-    private final ISessionEventProducer _evtSupport;
     private final String _sessionID;
     // Interface to database methods
     private final WdbaDatabaseAccessService _dbAccess;
+    private final Consumer<ExecEvent> _eventConsumer;
 
     /**
-     * Default constructor.
-     * <p/>
-     * <tt>SessionTime</tt> inherits from <tt>{@link EventSupport}</tt> and
-     * this method initiailizes the super class.
      * @param sessionID a unique name used to identify the session
-     * @param dbAccess implementation of interface to use for this <tt>Session</tt>
      */
-    public Session(String sessionID, WdbaDatabaseAccessService dbAccess) {
+    public Session(
+        String sessionID,
+        WdbaDatabaseAccessService dbAccess,
+        Consumer<ExecEvent> eventConsumer
+    ) {
         if (sessionID == null) throw new NullPointerException("sessionID");
         if (dbAccess == null) throw new NullPointerException("dbAccess");
+        if (eventConsumer == null) throw new NullPointerException("eventConsumer");
 
-        _evtSupport = new SessionEventSupport();
-        _sessionID = sessionID;
-        _dbAccess = dbAccess;
-    }
-
-    public void setSessionConfiguration(ISessionConfiguration config) {
-        config.initialize(_evtSupport);
+        _sessionID     = sessionID;
+        _dbAccess      = dbAccess;
+        _eventConsumer = eventConsumer;
     }
 
     public String getSessionID() {
@@ -201,7 +197,7 @@ public class Session {
      * @param evt the {@link ExecEvent} that is being passed to the associated services.
      */
     private void _fireEvent(ExecEvent evt) {
-        _evtSupport.fireEvent(evt);
+        _eventConsumer.accept(evt);
     }
 
     /**
@@ -244,8 +240,8 @@ public class Session {
                 return _observationID;
             }
 
-            synchronized boolean isDatasetInProgress() {
-                return _datasetInProgress;
+            synchronized boolean noDatasetInProgress() {
+                return !_datasetInProgress;
             }
 
             synchronized void setDatasetInProgress(boolean state) {
@@ -529,7 +525,7 @@ public class Session {
                 // another obs something has gone wrong since there can't be
                 // two datasets being collected at once.  So close out this
                 // observation.
-                if (!obs.isDatasetInProgress() || (evt instanceof StartDatasetEvent)) {
+                if (obs.noDatasetInProgress() || (evt instanceof StartDatasetEvent)) {
                     endVisit(evt.getTimestamp(), obs.getObservationID());
                 }
             }
@@ -551,7 +547,7 @@ public class Session {
             // This bit considers whether a new visit is needed (is a dataset in progress?)
             for (OpenObservation obs : opens) {
                 // If an open observation has no dataset ongoing, close it and start a new one
-                if (!obs.isDatasetInProgress()) {
+                if (obs.noDatasetInProgress()) {
                     endVisit(evt.getTimestamp(), obs.getObservationID());
                 } else {
                     // It does have a dataset open so mark it as having an overlap

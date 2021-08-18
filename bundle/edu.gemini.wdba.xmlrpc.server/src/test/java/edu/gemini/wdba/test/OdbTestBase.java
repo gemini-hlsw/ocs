@@ -1,8 +1,7 @@
-//
-// $
-//
+// Copyright (c) 2016-2018 Association of Universities for Research in Astronomy, Inc. (AURA)
+// For license information see LICENSE or https://opensource.org/licenses/BSD-3-Clause
 
-package edu.gemini.spModel.test;
+package edu.gemini.wdba.test;
 
 import edu.gemini.pot.sp.*;
 import edu.gemini.pot.spdb.DBLocalDatabase;
@@ -12,10 +11,8 @@ import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import junit.framework.TestCase;
 
-/**
- * A base class for SP Model test cases.
- */
-public abstract class SpModelTestBase extends TestCase {
+public abstract class OdbTestBase extends TestCase {
+
     private IDBDatabaseService odb;
 
     private SPNodeKey progKey;
@@ -118,4 +115,5 @@ public abstract class SpModelTestBase extends TestCase {
     protected static ISPSeqComponent getSeqComponent(ISPObservation obs, SPComponentType type) throws Exception {
         return getSeqComponent(obs.getSeqComponent(), type);
     }
+
 }

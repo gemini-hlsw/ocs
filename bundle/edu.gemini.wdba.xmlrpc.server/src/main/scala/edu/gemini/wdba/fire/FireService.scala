@@ -4,10 +4,9 @@
 package edu.gemini.wdba.fire
 
 import edu.gemini.wdba.fire.json._
-
+import edu.gemini.wdba.session.ServiceExecutor
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.spModel.event.ExecEvent
-
 import argonaut._
 import Argonaut._
 
@@ -21,40 +20,50 @@ final class FireService(
   db:      IDBDatabaseService,
   process: FireMessage => FireAction[Unit],
   timeout: Duration = 1.minute
-) extends Runnable {
+) {
 
   import FireService.{Log, QueueCapacity}
 
   private val queue: ArrayBlockingQueue[ExecEvent] =
     new ArrayBlockingQueue(QueueCapacity, true)
 
+  private val exec: ServiceExecutor =
+    new ServiceExecutor("FireService", task)
+
   def addEvent(event: ExecEvent): Unit = {
     Log.info(s"FireService enqueuing event $event")
     queue.add(event)
   }
 
-  def run(): Unit =
+  def start(): Unit =
+    exec.start()
 
-    while (!Thread.currentThread.isInterrupted) {
+  def stop(): Unit =
+    exec.stop()
 
-      val event = queue.take()
+  private object task extends Runnable {
+    def run(): Unit =
 
-      Log.info(s"FireService handling event $event")
+      while (!Thread.currentThread.isInterrupted) {
 
-      val action: FireAction[FireMessage] =
-        for {
-          m <- FireBuilder.buildMessage(db, event)
-          _ <- process(m)
-        } yield m
+        val event = queue.take()
 
-      action.run.unsafePerformSyncAttemptFor(timeout) match {
-        case -\/(t)      => Log.log(Level.WARNING, "Exception attempting to handle FIRE message", t)
-        case \/-(-\/(e)) => Log.log(Level.WARNING, e.message, e.exception.orNull)
-        case \/-(\/-(m)) => Log.info(s"Handled FireMessage:\n${m.asJson.spaces2}")
+        Log.info(s"FireService handling event $event")
+
+        val action: FireAction[FireMessage] =
+          for {
+            m <- FireBuilder.buildMessage(db, event)
+            _ <- process(m)
+          } yield m
+
+        action.run.unsafePerformSyncAttemptFor(timeout) match {
+          case -\/(t)      => Log.log(Level.WARNING, "Exception attempting to handle FIRE message", t)
+          case \/-(-\/(e)) => Log.log(Level.WARNING, e.message, e.exception.orNull)
+          case \/-(\/-(m)) => Log.info(s"Handled FireMessage:\n${m.asJson.spaces2}")
+        }
+
       }
-
-    }
-
+  }
 }
 
 object FireService {
@@ -69,9 +78,9 @@ object FireService {
     new FireService(db, _ => FireAction.unit)
 
   def forTesting(
-    db:           IDBDatabaseService,
-    stringBuffer: StringBuffer
+    db:  IDBDatabaseService,
+    buf: StringBuilder
   ): FireService =
-    new FireService(db, m => FireAction(stringBuffer.append(m.asJson.spaces2)))
+    new FireService(db, m => FireAction(buf.append(m.asJson.spaces2)))
 
 }

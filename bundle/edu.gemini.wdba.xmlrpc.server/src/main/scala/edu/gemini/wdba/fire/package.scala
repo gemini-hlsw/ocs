@@ -6,6 +6,8 @@ package edu.gemini.wdba
 import edu.gemini.spModel.core.catchingNonFatal
 import edu.gemini.wdba.fire.FireFailure.FireException
 
+import java.util.concurrent.{ExecutorService, Executors, ThreadFactory}
+
 import scalaz._
 import scalaz.Scalaz._
 import scalaz.concurrent.Task

@@ -12,7 +12,6 @@ import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.ext.ObservationNode;
 import edu.gemini.spModel.ext.ObservationNodeFunctor;
 import edu.gemini.util.security.principal.StaffPrincipal;
-import edu.gemini.wdba.fire.FireService;
 import edu.gemini.wdba.glue.WdbaGlueService;
 import edu.gemini.wdba.glue.api.WdbaContext;
 import edu.gemini.wdba.glue.api.WdbaDatabaseAccessService;
@@ -33,12 +32,8 @@ import java.util.*;
  * creator.  It handles making the test database, putting a test program in it,
  * and cleaning up afterwords.  It also has convenience methods for working
  * with the configuration file and for adding targets etc. to observations.
- *
- * <p>
- * <b>The property <code>HLPG_PROJECT_BASE</code> must be set to OCS
- * installation dir.</b>
  */
-public abstract class TestBase /*extends TestCase*/ {
+public abstract class TestBase {
 
     protected IDBDatabaseService odb;
 
@@ -73,7 +68,7 @@ public abstract class TestBase /*extends TestCase*/ {
     }
 
     protected ITccXmlRpc getHandler(final Site site) {
-        return new TccHandler(new WdbaContext(site, databaseAccessService, user, FireService.loggingOnly(odb)));
+        return new TccHandler(new WdbaContext(site, databaseAccessService, user));
     }
 
     protected ObservationNode getObsNode() {

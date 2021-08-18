@@ -1,9 +1,10 @@
 package edu.gemini.wdba.glue.api;
 
 import edu.gemini.spModel.core.Site;
-import edu.gemini.wdba.fire.FireService;
 
 import java.security.Principal;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -12,21 +13,18 @@ import java.util.Set;
  */
 public final class WdbaContext {
 
-    public final WdbaDatabaseAccessService db;
-    public final Site site;
-    public final Set<Principal> user;
-    public final FireService fireService;
+    private final WdbaDatabaseAccessService db;
+    private final Site site;
+    private final Set<Principal> user;
 
     public WdbaContext(
         Site                      site,
         WdbaDatabaseAccessService db,
-        Set<Principal>            user,
-        FireService               fireService
+        Set<Principal>            user
     ) {
-        this.site        = site;
-        this.db          = db;
-        this.user        = user;
-        this.fireService = fireService;
+        this.site  = site;
+        this.db    = db;
+        this.user  = Collections.unmodifiableSet(new HashSet<>(user));
     }
 
     public WdbaDatabaseAccessService getWdbaDatabaseAccessService() {
@@ -37,7 +35,7 @@ public final class WdbaContext {
         return site;
     }
 
-    public FireService getFireService() {
-        return fireService;
+    public Set<Principal> getUser() {
+        return user;
     }
 }

@@ -9,6 +9,7 @@ package edu.gemini.wdba.session;
 
 import edu.gemini.spModel.core.SPBadIDException;
 import edu.gemini.pot.sp.SPObservationID;
+import edu.gemini.spModel.event.ExecEvent;
 import edu.gemini.wdba.glue.api.WdbaContext;
 import edu.gemini.wdba.xmlrpc.ServiceException;
 import edu.gemini.wdba.shared.QueuedObservation;
@@ -17,6 +18,7 @@ import edu.gemini.wdba.shared.Helpers;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 /**
@@ -33,17 +35,17 @@ public final class SessionManagement {
 
     private int _sessionCount = 0;
     private final WdbaContext _ctx;
-    private final ISessionConfiguration _config;
     private final Map<String, Session> _sessions = new HashMap<>();
+    private final Consumer<ExecEvent> _eventConsumer;
 
     /**
      * Returns the <code>SessionManagement</code> object.
      *
      * @return The singleton SessionManagement object.
      */
-    public SessionManagement(WdbaContext ctx, ISessionConfiguration config) {
-        _ctx    = ctx;
-        _config = config;
+    public SessionManagement(WdbaContext ctx, Consumer<ExecEvent> eventConsumer) {
+        _ctx           = ctx;
+        _eventConsumer = eventConsumer;
     }
 
     /**
@@ -114,8 +116,7 @@ public final class SessionManagement {
         // First try to look it up
         Session session = _sessions.get(sessionId);
         if (session == null) {
-            session = new Session(sessionId, _ctx.db);
-            session.setSessionConfiguration(_config);
+            session = new Session(sessionId, _ctx.getWdbaDatabaseAccessService(), _eventConsumer);
             _sessions.put(sessionId, session);
         }
         // Else, it is the correct session
@@ -205,7 +206,7 @@ public final class SessionManagement {
     }
 
     private void _checkDatabase() throws ServiceException {
-        if (_ctx.db == null) {
+        if (_ctx.getWdbaDatabaseAccessService() == null) {
             String message = "Database unavailable: try again later.";
             LOG.severe(message);
             throw new ServiceException(message);

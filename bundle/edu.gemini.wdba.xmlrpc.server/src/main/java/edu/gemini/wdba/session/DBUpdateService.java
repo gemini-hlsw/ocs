@@ -6,26 +6,27 @@ package edu.gemini.wdba.session;
 
 import edu.gemini.pot.sp.*;
 import edu.gemini.pot.spdb.IDBDatabaseService;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SPProgramID;
-import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.event.*;
 import edu.gemini.spModel.gemini.plan.NightlyRecord;
 import edu.gemini.spModel.obs.ObsExecEventFunctor;
 import edu.gemini.spModel.util.NightlyProgIdGenerator;
 import edu.gemini.wdba.glue.api.WdbaContext;
-import edu.gemini.wdba.glue.api.WdbaDatabaseAccessService;
 import edu.gemini.wdba.glue.api.WdbaGlueException;
 
 
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * This class responds to session events and updates the database as needed.
  */
-public final class DBUpdateService implements ISessionEventListener, Runnable {
+public final class DBUpdateService implements Runnable {
 
     private static final Logger LOG =
             Logger.getLogger(DBUpdateService.class.getName());
@@ -34,47 +35,54 @@ public final class DBUpdateService implements ISessionEventListener, Runnable {
 
     private static final int QUEUE_CAPACITY = 10000;
 
+    private static final class UnhandledEvent {
+        public final ExecEvent event;
+        public final CompletableFuture<ExecEvent> future = new CompletableFuture<>();
 
-
-    private final ArrayBlockingQueue<ExecEvent> queue =
-        new ArrayBlockingQueue<>(QUEUE_CAPACITY, true);
-
-    private final WdbaContext _context;
-
-    public DBUpdateService(WdbaContext context) {
-        assert context != null : "Session Context is null";
-        _context = context;
+        public UnhandledEvent(ExecEvent event) {
+            this.event = event;
+        }
     }
 
-    /**
-     * Implements <code>ISessionEventListener</code> to place events on the
-     * queue.
-     *
-     * @param event the execution event to enqueue</code>
-     */
-    // TODO: return a completable future and link it to something that posts the JSON
-    public void sessionUpdate(ExecEvent event) throws InterruptedException {
+    private final ServiceExecutor exec =
+        new ServiceExecutor("DBUpdateService", this);
+
+    private final ArrayBlockingQueue<UnhandledEvent> queue =
+        new ArrayBlockingQueue<>(QUEUE_CAPACITY, true);
+
+    private final WdbaContext ctx;
+
+    public DBUpdateService(WdbaContext ctx) {
+        this.ctx  = ctx;
+    }
+
+    public synchronized void start() {
+        exec.start();
+    }
+
+    public synchronized void stop() {
+        exec.stop();
+    }
+
+    public CompletableFuture<ExecEvent> handleEvent(ExecEvent event) throws InterruptedException {
 
         LOG.info(String.format("%s: enqueueing event: %s", getName(), event));
 
         // Place on queue
-        queue.put(event);
+        final UnhandledEvent ue = new UnhandledEvent(event);
+        queue.put(ue);
+        return ue.future;
     }
 
 
     // Add the given obs id to nightly log, creating the log if necessary
     // for the current night.
-    private void addToNightlyRecord(
-        WdbaDatabaseAccessService dbAccess,
-        SPObservationID obsId
-    ) {
-        final Site site = _context.getSite();
-
-        final SPProgramID recordId = NightlyProgIdGenerator.getProgramID(NightlyProgIdGenerator.PLAN_ID_PREFIX, site);
+    private void addToNightlyRecord(SPObservationID obsId) {
+        final SPProgramID recordId = NightlyProgIdGenerator.getProgramID(NightlyProgIdGenerator.PLAN_ID_PREFIX, ctx.getSite());
 
         final ISPNightlyRecord nightlyRecordNode;
         try {
-            nightlyRecordNode = dbAccess.getNightlyRecord(recordId);
+            nightlyRecordNode = ctx.getWdbaDatabaseAccessService().getNightlyRecord(recordId);
         } catch (Exception ex) {
             // Messages are logged at lower level
             return;
@@ -95,18 +103,12 @@ public final class DBUpdateService implements ISessionEventListener, Runnable {
 
         event.doAction(EVENT_LOGGER);
 
-        final Optional<WdbaDatabaseAccessService> dbAccess =
-                Optional.ofNullable(_context.getWdbaDatabaseAccessService());
-
-        final Optional<IDBDatabaseService> db;
-        db = dbAccess.flatMap(a -> {
-            try {
-                return Optional.ofNullable(a.getDatabase());
-            } catch (WdbaGlueException e) {
-                LOG.log(Level.WARNING, "Exception getting database from WDBA Access", e);
-                return Optional.empty();
-            }
-        });
+        Optional<IDBDatabaseService> db = Optional.empty();
+        try {
+            db = Optional.ofNullable(ctx.getWdbaDatabaseAccessService().getDatabase());
+        } catch (WdbaGlueException e) {
+            LOG.log(Level.WARNING, "Exception getting database from WDBA Access", e);
+        }
 
         try {
 
@@ -114,10 +116,10 @@ public final class DBUpdateService implements ISessionEventListener, Runnable {
                 final ObsExecEvent obsExecEvent = (ObsExecEvent) event;
 
                 if (event instanceof StartSequenceEvent) {
-                    dbAccess.ifPresent(a -> addToNightlyRecord(a, obsExecEvent.getObsId()));
+                    addToNightlyRecord(obsExecEvent.getObsId());
                 }
 
-                db.ifPresent(d -> ObsExecEventFunctor.handle(obsExecEvent, d, _context.user));
+                db.ifPresent(d -> ObsExecEventFunctor.handle(obsExecEvent, d, ctx.getUser()));
             }
 
         } catch (Throwable ex) {
@@ -125,26 +127,30 @@ public final class DBUpdateService implements ISessionEventListener, Runnable {
         }
     }
 
-        // Runnable
+    private Option<UnhandledEvent> nextEvent() {
+        Option<UnhandledEvent> ue = ImOption.empty();
+        try {
+            ue = ImOption.apply(queue.take());
+        } catch (InterruptedException ex) {
+            LOG.log(Level.INFO, "Stopping session event consumer: " + ex.getMessage(), ex);
+        }
+        return ue;
+    }
+
     public void run() {
         // Remove from queue and run
         while (!Thread.currentThread().isInterrupted()) {
-            try {
-                final ExecEvent event = queue.take();
-                LOG.info(String.format("%s: start processing event: %s", getName(), event));
-                doMsgUpdate(event);
-
-                // FIRE messages need to be handled after the database has
-                // recorded the event because they perform calculations that
-                // depend on the presence of the event.
-                _context.getFireService().addEvent(event);
-
-                LOG.info(String.format("%s: done processing event: %s", getName(), event));
-            } catch (InterruptedException ex) {
-                LOG.log(Level.INFO, "Stopping session event consumer: " + ex.getMessage(), ex);
-            } catch (Exception ex) {
-                LOG.log(Level.SEVERE, ex.getMessage(), ex);
-            }
+            nextEvent().foreach(ue -> {
+                try {
+                    LOG.info(String.format("%s: start processing event: %s", getName(), ue.event));
+                    doMsgUpdate(ue.event);
+                    LOG.info(String.format("%s: done processing event: %s", getName(), ue.event));
+                    ue.future.complete(ue.event);
+                } catch (Exception ex) {
+                    LOG.log(Level.SEVERE, ex.getMessage(), ex);
+                    ue.future.completeExceptionally(ex);
+                }
+            });
         }
     }
 

@@ -63,7 +63,7 @@ public final class ExecHandler implements IExecXmlRpc {
         if (observationId == null) throw new ServiceException("ObservationId was null.");
 
         LOG.info("Fetching exec: " + observationId);
-        final WdbaDatabaseAccessService dbAccess = ctx.db;
+        final WdbaDatabaseAccessService dbAccess = ctx.getWdbaDatabaseAccessService();
         try {
             ISPObservation spObs = dbAccess.getObservation(observationId);
             return _getSequence(spObs);

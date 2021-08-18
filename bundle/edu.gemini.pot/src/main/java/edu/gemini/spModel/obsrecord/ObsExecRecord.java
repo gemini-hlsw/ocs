@@ -186,7 +186,7 @@ public final class ObsExecRecord implements Serializable {
      * to the event list).
      */
     private class AddEventAction implements ExecAction {
-        private Config _config;
+        private final Config _config;
 
         AddEventAction(Config config) {
             _config = config;
