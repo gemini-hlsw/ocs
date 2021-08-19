@@ -6,7 +6,6 @@ import edu.gemini.spModel.gemini.niri.Niri;
 import edu.gemini.spModel.gemini.niri.NiriOiwfsGuideProbe;
 
 import edu.gemini.spModel.gemini.niri.Niri.Camera;
-import edu.gemini.wdba.session.Mode;
 import edu.gemini.wdba.tcc.ObservationEnvironment.AoAspect;
 
 import java.util.Collections;

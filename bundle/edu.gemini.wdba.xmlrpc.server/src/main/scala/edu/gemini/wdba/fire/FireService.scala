@@ -42,12 +42,8 @@ final class FireService(
     exec.stop()
 
   private object task extends Runnable {
-    def run(): Unit =
 
-      while (!Thread.currentThread.isInterrupted) {
-
-        val event = queue.take()
-
+    def handleEvent(event: ExecEvent): Unit = {
         Log.info(s"FireService handling event $event")
 
         val action: FireAction[FireMessage] =
@@ -61,8 +57,20 @@ final class FireService(
           case \/-(-\/(e)) => Log.log(Level.WARNING, e.message, e.exception.orNull)
           case \/-(\/-(m)) => Log.info(s"Handled FireMessage:\n${m.asJson.spaces2}")
         }
+    }
 
+    def run(): Unit =
+      while (!Thread.currentThread.isInterrupted) {
+        try {
+          handleEvent(queue.take())
+        } catch {
+          case _: InterruptedException =>
+            Log.info("Stopping FireService")
+          case ex: Throwable =>
+            Log.log(Level.WARNING, "Unexpected exception taking exec event from queue", ex)
+        }
       }
+
   }
 }
 
@@ -76,11 +84,5 @@ object FireService {
 
   def loggingOnly(db: IDBDatabaseService): FireService =
     new FireService(db, _ => FireAction.unit)
-
-  def forTesting(
-    db:  IDBDatabaseService,
-    buf: StringBuilder
-  ): FireService =
-    new FireService(db, m => FireAction(buf.append(m.asJson.spaces2)))
 
 }

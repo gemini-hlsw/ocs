@@ -4,6 +4,7 @@ import edu.gemini.pot.sp.SPObservationID
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.dataset.Dataset
 import edu.gemini.spModel.too.TooType
+import monocle.Lens
 
 import java.time.Instant
 import java.util.UUID
@@ -31,7 +32,7 @@ final case class FireMessage(
 
 }
 
-object FireMessage {
+object FireMessage extends FireMessageOptics {
 
   final case class Sequence(
     totalStepCount:     Int,           // SRS-ODBM-C006, SRS-ODBM-C013
@@ -44,7 +45,7 @@ object FireMessage {
 
   }
 
-  object Sequence {
+  object Sequence extends SequenceOptics {
 
     val Empty: Sequence =
       Sequence(
@@ -52,6 +53,19 @@ object FireMessage {
         completedStepCount = 0,
         duration           = 0.milliseconds
       )
+
+  }
+
+  sealed trait SequenceOptics { self: Sequence.type =>
+
+    val totalStepCount: Lens[Sequence, Int] =
+      Lens.apply[Sequence, Int](_.totalStepCount)(a => _.copy(totalStepCount = a))
+
+    val completedStepCount: Lens[Sequence, Int] =
+      Lens.apply[Sequence, Int](_.completedStepCount)(a => _.copy(completedStepCount = a))
+
+    val duration: Lens[Sequence, FiniteDuration] =
+      Lens.apply[Sequence, FiniteDuration](_.duration)(a => _.copy(duration = a))
 
   }
 
@@ -79,5 +93,39 @@ object FireMessage {
 
   def emptyAt(when: Instant, nature: String): FireAction[FireMessage] =
     FireAction(UUID.randomUUID).map(u => FireMessage.empty(u, when, nature))
+
+}
+
+sealed trait FireMessageOptics { self: FireMessage.type =>
+
+  val uuid: Lens[FireMessage, UUID] =
+    Lens.apply[FireMessage, UUID](_.uuid)(a => _.copy(uuid = a))
+
+  val time: Lens[FireMessage, Instant] =
+    Lens.apply[FireMessage, Instant](_.time)(a => _.copy(time = a))
+
+  val observationId: Lens[FireMessage, Option[SPObservationID]] =
+    Lens.apply[FireMessage, Option[SPObservationID]](_.observationId)(a => _.copy(observationId = a))
+
+  val too: Lens[FireMessage, Option[TooType]] =
+    Lens.apply[FireMessage, Option[TooType]](_.too)(a => _.copy(too = a))
+
+  val visitStart: Lens[FireMessage, Option[Instant]] =
+    Lens.apply[FireMessage, Option[Instant]](_.visitStart)(a => _.copy(visitStart = a))
+
+  val datasets: Lens[FireMessage, List[Dataset]] =
+    Lens.apply[FireMessage, List[Dataset]](_.datasets)(a => _.copy(datasets = a))
+
+  val sequence: Lens[FireMessage, Sequence] =
+    Lens.apply[FireMessage, Sequence](_.sequence)(a => _.copy(sequence = a))
+
+  val totalStepCount: Lens[FireMessage, Int] =
+    sequence ^|-> Sequence.totalStepCount
+
+  val completedStepCount: Lens[FireMessage, Int] =
+    sequence ^|-> Sequence.completedStepCount
+
+  val duration: Lens[FireMessage, FiniteDuration] =
+    sequence ^|-> Sequence.duration
 
 }

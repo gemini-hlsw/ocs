@@ -114,9 +114,8 @@ object FireBuilder {
       }
     }
 
-  def buildMessage(db: IDBDatabaseService, event: ExecEvent): FireAction[FireMessage] = {
+  def buildMessage(db: IDBDatabaseService, event: ExecEvent): FireAction[FireMessage] =
     fromEvent(db, event)
       .flatMap(_.fold(FireMessage.emptyAt(Instant.ofEpochMilli(event.getTimestamp), event.getName))(_.toMessage))
-  }
 
 }

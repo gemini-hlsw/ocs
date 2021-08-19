@@ -6,6 +6,8 @@ package edu.gemini.wdba.session;
 
 import edu.gemini.pot.sp.SPObservationID;
 
+import java.time.Instant;
+
 /**
  * Specialized <tt>{@link SessionEvent}</tt> used to indicate that a dataset
  * has been started.
@@ -27,7 +29,11 @@ public final class DatasetStartEvent extends SessionEvent {
      * @param fileName the filename associated with this dataset
      */
     public DatasetStartEvent(Object src, SPObservationID observationID, String dataLabel, String fileName) {
-        super(src, observationID, EventMsg.DATASET_START);
+        this(src, observationID, Instant.now(), dataLabel, fileName);
+    }
+
+    public DatasetStartEvent(Object src, SPObservationID observationID, Instant when, String dataLabel, String fileName) {
+        super(src, observationID, EventMsg.DATASET_START, when);
         if (dataLabel == null) throw new NullPointerException();
         _dataLabel = dataLabel;
         _fileName  = fileName;

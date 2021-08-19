@@ -4,15 +4,17 @@
 
 package edu.gemini.wdba.session;
 
+import java.time.Instant;
+
 /**
  * Specialized <tt>{@link SessionEvent}</tt> used to indicate that a session
  * is idle and the reason why.
  */
 public class IdleCauseEvent extends SessionEvent {
     // The type of idleness (
-    private String _category;
+    private final String _category;
     // The optinoal reason for the idleness
-    private String _comment;
+    private final String _comment;
 
     /**
      * Specialized <tt>{@link SessionEvent}</tt> used to indicate that a session
@@ -23,9 +25,13 @@ public class IdleCauseEvent extends SessionEvent {
      * @param comment the optional comment on the idleness
      */
     public IdleCauseEvent(Object src, String category, String comment) {
-        super(src, null, EventMsg.SET_IDLE_CAUSE);
+        this(src, Instant.now(), category, comment);
+    }
+
+    public IdleCauseEvent(Object src, Instant when, String category, String comment) {
+        super(src, null, EventMsg.SET_IDLE_CAUSE, when);
         _category = category;
-        _comment = comment;
+        _comment  = comment;
     }
 
     /**

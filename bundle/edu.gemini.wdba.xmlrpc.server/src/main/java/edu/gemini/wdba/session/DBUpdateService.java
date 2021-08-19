@@ -132,7 +132,7 @@ public final class DBUpdateService implements Runnable {
         try {
             ue = ImOption.apply(queue.take());
         } catch (InterruptedException ex) {
-            LOG.log(Level.INFO, "Stopping session event consumer: " + ex.getMessage(), ex);
+            LOG.info("Stopping DBUpdateService");
         }
         return ue;
     }

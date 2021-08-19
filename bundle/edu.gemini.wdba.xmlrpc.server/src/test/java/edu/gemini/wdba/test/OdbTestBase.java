@@ -29,6 +29,7 @@ public abstract class OdbTestBase extends TestCase {
         progKey = prog.getProgramKey();
 
         obs = odb.getFactory().createObservation(prog, Instrument.none, null);
+
         prog.addObservation(obs);
 
         target = getObsComponent(obs, TargetObsComp.SP_TYPE);

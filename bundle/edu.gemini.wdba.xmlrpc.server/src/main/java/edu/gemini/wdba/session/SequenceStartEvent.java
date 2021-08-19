@@ -6,6 +6,8 @@ package edu.gemini.wdba.session;
 
 import edu.gemini.pot.sp.SPObservationID;
 
+import java.time.Instant;
+
 /**
  * Specialized <tt>{@link SessionEvent}</tt> used to indicate the start of an
  * observation's sequence.
@@ -24,7 +26,11 @@ public final class SequenceStartEvent extends SessionEvent {
      * @param startFileName the dhs filename for the completed observation
      */
     public SequenceStartEvent(Object src, SPObservationID observationID, String startFileName) {
-        super(src, observationID, EventMsg.SEQUENCE_START);
+        this(src, observationID, Instant.now(), startFileName);
+    }
+
+    public SequenceStartEvent(Object src, SPObservationID observationID, Instant when, String startFileName) {
+        super(src, observationID, EventMsg.SEQUENCE_START, when);
         if (startFileName == null) throw new NullPointerException();
         _startFileName = startFileName;
     }

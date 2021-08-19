@@ -15,6 +15,7 @@ import edu.gemini.wdba.xmlrpc.ServiceException;
 import edu.gemini.wdba.shared.QueuedObservation;
 import edu.gemini.wdba.shared.Helpers;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -217,11 +218,15 @@ public final class SessionManagement {
      * Sender indicates that an observation has started.
      */
     public boolean observationStart(String sessionID, String observationID) throws ServiceException {
+        return observationStart(sessionID, observationID, Instant.now());
+    }
+
+    public boolean observationStart(String sessionID, String observationID, Instant when) throws ServiceException {
         assert (sessionID != null) && (observationID != null) : "an observationStart arg is null";
         _checkDatabase();
         Session session = lookupOrCreateSession(sessionID);
         SPObservationID spObservationID = _toObservationID(observationID);
-        SessionEvent sse = new SessionEvent(this, spObservationID, EventMsg.OBSERVATION_START);
+        SessionEvent sse = new SessionEvent(this, spObservationID, EventMsg.OBSERVATION_START, when);
         session.doEventMsg(sse);
         return true;
     }
@@ -231,11 +236,15 @@ public final class SessionManagement {
      * the idle state.
      */
     public boolean observationEnd(String sessionID, String observationID) throws ServiceException {
+        return observationEnd(sessionID, observationID, Instant.now());
+    }
+
+    public boolean observationEnd(String sessionID, String observationID, Instant when) throws ServiceException {
         assert (sessionID != null) && (observationID != null) : "an observationEnd arg is null";
         _checkDatabase();
         Session session = lookupOrCreateSession(sessionID);
         SPObservationID spObservationID = _toObservationID(observationID);
-        SessionEvent sse = new SessionEvent(this, spObservationID, EventMsg.OBSERVATION_END);
+        SessionEvent sse = new SessionEvent(this, spObservationID, EventMsg.OBSERVATION_END, when);
         session.doEventMsg(sse);
         return true;
     }
@@ -244,11 +253,15 @@ public final class SessionManagement {
      * The sending application indicates that the sequence has started.
      */
     public boolean sequenceStart(String sessionID, String observationID, String firstFileName) throws ServiceException {
+        return sequenceStart(sessionID, observationID, Instant.now(), firstFileName);
+    }
+
+    public boolean sequenceStart(String sessionID, String observationID, Instant when, String firstFileName) throws ServiceException {
         assert (sessionID != null) && (observationID != null) && (firstFileName != null) : "a sequenceStart arg is null";
         _checkDatabase();
         Session session = lookupOrCreateSession(sessionID);
         SPObservationID spObservationID = _toObservationID(observationID);
-        SessionEvent sse = new SequenceStartEvent(this, spObservationID, firstFileName);
+        SessionEvent sse = new SequenceStartEvent(this, spObservationID, when, firstFileName);
         session.doEventMsg(sse);
         return true;
     }
@@ -257,11 +270,15 @@ public final class SessionManagement {
      * Indicates the given observation has completed its sequence.
      */
     public boolean sequenceEnd(String sessionID, String observationID) throws ServiceException {
+        return sequenceEnd(sessionID, observationID, Instant.now());
+    }
+
+    public boolean sequenceEnd(String sessionID, String observationID, Instant when) throws ServiceException {
         assert (sessionID != null) && (observationID != null) : "a sequenceEnd arg is null";
         _checkDatabase();
         Session session = lookupOrCreateSession(sessionID);
         SPObservationID spObservationID = _toObservationID(observationID);
-        SessionEvent sse = new SessionEvent(this, spObservationID, EventMsg.SEQUENCE_END);
+        SessionEvent sse = new SessionEvent(this, spObservationID, EventMsg.SEQUENCE_END, when);
         session.doEventMsg(sse);
         return true;
     }
@@ -270,11 +287,15 @@ public final class SessionManagement {
      * The sending application indciates that the session is now idle.
      */
     public boolean setIdleCause(String sessionID, String category, String comment) throws ServiceException {
+        return setIdleCause(sessionID, Instant.now(), category, comment);
+    }
+
+    public boolean setIdleCause(String sessionID, Instant when, String category, String comment) throws ServiceException {
         // Note that comment may be null
         assert (sessionID != null) && (category != null) : "a sequenceEnd arg is null";
         _checkDatabase();
         Session session = lookupOrCreateSession(sessionID);
-        SessionEvent sse = new IdleCauseEvent(this, category, comment);
+        SessionEvent sse = new IdleCauseEvent(this, when, category, comment);
         session.doEventMsg(sse);
         return true;
     }
@@ -284,11 +305,15 @@ public final class SessionManagement {
      * null causing no error.
      */
     public boolean observationAbort(String sessionID, String observationID, String reason) throws ServiceException {
+        return observationAbort(sessionID, observationID, Instant.now(), reason);
+    }
+
+    public boolean observationAbort(String sessionID, String observationID, Instant when, String reason) throws ServiceException {
         assert (sessionID != null) && (observationID != null) : "a sequenceEnd arg is null";
         _checkDatabase();
         Session session = lookupOrCreateSession(sessionID);
         SPObservationID spObservationID = _toObservationID(observationID);
-        SessionEvent sse = new ObservationAbortEvent(this, spObservationID, reason);
+        SessionEvent sse = new ObservationAbortEvent(this, spObservationID, when, reason);
         session.doEventMsg(sse);
         return true;
     }
@@ -297,12 +322,16 @@ public final class SessionManagement {
      * The sender has paused the sequence or observation
      */
     public boolean observationPause(String sessionID, String observationID, String reason) throws ServiceException {
+        return observationPause(sessionID, observationID, Instant.now(), reason);
+    }
+
+    public boolean observationPause(String sessionID, String observationID, Instant when, String reason) throws ServiceException {
         // Note that reason may be null
         assert (sessionID != null) && (observationID != null) : "a sequenceEnd arg is null";
         _checkDatabase();
         Session session = lookupOrCreateSession(sessionID);
         SPObservationID spObservationID = _toObservationID(observationID);
-        SessionEvent sse = new ObservationPauseEvent(this, spObservationID, reason);
+        SessionEvent sse = new ObservationPauseEvent(this, spObservationID, when, reason);
         session.doEventMsg(sse);
         return true;
     }
@@ -311,11 +340,15 @@ public final class SessionManagement {
      * The sender has continued the sequence or observation
      */
     public boolean observationContinue(String sessionID, String observationID) throws ServiceException {
+        return observationContinue(sessionID, observationID, Instant.now());
+    }
+
+    public boolean observationContinue(String sessionID, String observationID, Instant when) throws ServiceException {
         assert (sessionID != null) && (observationID != null) : "a sequenceEnd arg is null";
         _checkDatabase();
         Session session = lookupOrCreateSession(sessionID);
         SPObservationID spObservationID = _toObservationID(observationID);
-        SessionEvent sse = new SessionEvent(this, spObservationID, EventMsg.OBSERVATION_CONTINUE);
+        SessionEvent sse = new SessionEvent(this, spObservationID, EventMsg.OBSERVATION_CONTINUE, when);
         session.doEventMsg(sse);
         return true;
     }
@@ -325,12 +358,16 @@ public final class SessionManagement {
      * null causing no error.
      */
     public boolean observationStop(String sessionID, String observationID, String reason) throws ServiceException {
+        return observationStop(sessionID, observationID, Instant.now(), reason);
+    }
+
+    public boolean observationStop(String sessionID, String observationID, Instant when, String reason) throws ServiceException {
         // Note that reason may be null
         assert (sessionID != null) && (observationID != null) : "a sequenceEnd arg is null";
         _checkDatabase();
         Session session = lookupOrCreateSession(sessionID);
         SPObservationID spObservationID = _toObservationID(observationID);
-        SessionEvent sse = new ObservationStopEvent(this, spObservationID, reason);
+        SessionEvent sse = new ObservationStopEvent(this, spObservationID, when, reason);
         session.doEventMsg(sse);
         return true;
     }
@@ -340,11 +377,15 @@ public final class SessionManagement {
      * given dataset.
      */
     public boolean datasetStart(String sessionID, String observationID, String datasetID, String fileName) throws ServiceException {
+        return datasetStart(sessionID, observationID, Instant.now(), datasetID, fileName);
+    }
+
+    public boolean datasetStart(String sessionID, String observationID, Instant when, String datasetID, String fileName) throws ServiceException {
         assert (sessionID != null) && (observationID != null) && (datasetID != null) && (fileName != null) : "a datasetStart arg is null";
         Session session = lookupOrCreateSession(sessionID);
         _checkDatabase();
         SPObservationID spObservationID = _toObservationID(observationID);
-        SessionEvent sse = new DatasetStartEvent(this, spObservationID, datasetID, fileName);
+        SessionEvent sse = new DatasetStartEvent(this, spObservationID, when, datasetID, fileName);
         session.doEventMsg(sse);
         return true;
     }
@@ -354,13 +395,16 @@ public final class SessionManagement {
      * given dataset.
      */
     public boolean datasetComplete(String sessionID, String observationID, String datasetID, String fileName) throws ServiceException {
+        return datasetComplete(sessionID, observationID, Instant.now(), datasetID, fileName);
+    }
+
+    public boolean datasetComplete(String sessionID, String observationID, Instant when, String datasetID, String fileName) throws ServiceException {
         assert (sessionID != null) && (observationID != null) && (datasetID != null) && (fileName != null) : "a datasetComplete arg is null";
         _checkDatabase();
         Session session = lookupOrCreateSession(sessionID);
         SPObservationID spObservationID = _toObservationID(observationID);
-        SessionEvent sse = new DatasetCompleteEvent(this, spObservationID, datasetID, fileName);
+        SessionEvent sse = new DatasetCompleteEvent(this, spObservationID, when, datasetID, fileName);
         session.doEventMsg(sse);
         return true;
     }
-
 }
