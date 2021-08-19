@@ -14,8 +14,6 @@ import scala.annotation.tailrec
 sealed trait Overheads {
   // REL-2985 -> REL-2926: acquisitionOverhead and otherOverheadFraction are no longer used.
   def partnerOverheadFraction: Double // fpart
-  def acquisitionOverhead: Time       // acqover
-  def otherOverheadFraction: Double   // fother
 
   // Everything was, per REL-2985, formerly a
 //  def calculateFromIntTime(intTime: TimeAmount): ObservationTimes = {
@@ -74,47 +72,44 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
 //  lazy val visTime    = Hours(2)
 //  lazy val visTimeHrs = Overheads.visTime.toHours
 
-  private case class SimpleOverheads(override val partnerOverheadFraction: Double,
-                                     acquisitionOverheadMins: Long,
-                                     override val otherOverheadFraction: Double) extends Overheads {
-    override val acquisitionOverhead = Minutes(acquisitionOverheadMins)
-  }
+  private case class SimpleOverheads(partnerOverheadFraction: Double) extends Overheads
 
   // Empty overheads for instruments from exchange partners, e.g. Keck and Subaru.
-  private lazy val EmptyOverheads          = SimpleOverheads(0.00,  0, 0.000).some
+  private lazy val EmptyOverheads          = SimpleOverheads(0.00).some
 
   // GMOS overheads are the same between sites.
-  private lazy val GmosImagingOverheads    = SimpleOverheads(0.00,  6, 0.144).some
-  private lazy val GmosLongslitOverheads   = SimpleOverheads(0.10, 16, 0.034).some
-  private lazy val GmosLongslitNsOverheads = SimpleOverheads(0.10, 16, 0.271).some
-  private lazy val GmosMosOverheads        = SimpleOverheads(0.10, 18, 0.028).some
-  private lazy val GmosMosNsOverheads      = SimpleOverheads(0.10, 18, 0.271).some
-  private lazy val GmosIfuOverheads        = SimpleOverheads(0.10, 18, 0.083).some
-  private lazy val GmosIfuNsOverheads      = SimpleOverheads(0.10, 18, 0.311).some
+  private lazy val GmosImagingOverheads    = SimpleOverheads(0.00).some
+  private lazy val GmosLongslitOverheads   = SimpleOverheads(0.10).some
+  private lazy val GmosLongslitNsOverheads = SimpleOverheads(0.10).some
+  private lazy val GmosMosOverheads        = SimpleOverheads(0.10).some
+  private lazy val GmosMosNsOverheads      = SimpleOverheads(0.10).some
+  private lazy val GmosIfuOverheads        = SimpleOverheads(0.10).some
+  private lazy val GmosIfuNsOverheads      = SimpleOverheads(0.10).some
 
   def apply(b: BlueprintBase): Option[Overheads] = b match {
-    case _: Flamingos2BlueprintImaging  => SimpleOverheads(0.10,  6, 0.490).some
-    case _: Flamingos2BlueprintLongslit => SimpleOverheads(0.25, 20, 0.283).some
-    case _: Flamingos2BlueprintMos      => SimpleOverheads(0.25, 30, 0.283).some
+    case _: Flamingos2BlueprintImaging  => SimpleOverheads(0.10).some
+    case _: Flamingos2BlueprintLongslit => SimpleOverheads(0.25).some
+    case _: Flamingos2BlueprintMos      => SimpleOverheads(0.25).some
 
-    case _: GnirsBlueprintImaging       => SimpleOverheads(0.10, 10, 0.193).some
-    case _: GnirsBlueprintSpectroscopy  => SimpleOverheads(0.25, 15, 0.080).some
+    case _: GnirsBlueprintImaging       => SimpleOverheads(0.10).some
+    case _: GnirsBlueprintSpectroscopy  => SimpleOverheads(0.25).some
 
-    case _: NifsBlueprintBase           => SimpleOverheads(0.25, 11, 0.175).some
-    case _: GsaoiBlueprint              => SimpleOverheads(0.00, 30, 0.875).some
-    case _: GracesBlueprint             => SimpleOverheads(0.00, 10, 0.036).some
-    case _: GpiBlueprint                => SimpleOverheads(0.05, 10, 0.333).some
-    case _: PhoenixBlueprint            => SimpleOverheads(0.25, 20, 0.021).some
-    case _: TexesBlueprint              => SimpleOverheads(0.00, 20, 0.022).some
+    case _: NifsBlueprintBase           => SimpleOverheads(0.25).some
+    case _: GsaoiBlueprint              => SimpleOverheads(0.00).some
+    case _: GracesBlueprint             => SimpleOverheads(0.00).some
+    case _: GpiBlueprint                => SimpleOverheads(0.05).some
+    case _: PhoenixBlueprint            => SimpleOverheads(0.25).some
+    case _: TexesBlueprint              => SimpleOverheads(0.00).some
 
-    case _: DssiBlueprint               => SimpleOverheads(0.00, 10, 0.010).some
-    case _: VisitorBlueprint            => SimpleOverheads(0.00, 10, 0.100).some
-    case _: AlopekeBlueprint            => SimpleOverheads(0.00,  6, 0.000).some
-    case _: ZorroBlueprint              => SimpleOverheads(0.00,  6, 0.000).some
-    case _: IgrinsBlueprint             => SimpleOverheads(0.20, 10, 0.000).some
+    case _: DssiBlueprint               => SimpleOverheads(0.00).some
+    case _: VisitorBlueprint            => SimpleOverheads(0.00).some
+    case _: AlopekeBlueprint            => SimpleOverheads(0.00).some
+    case _: ZorroBlueprint              => SimpleOverheads(0.00).some
+    case _: IgrinsBlueprint             => SimpleOverheads(0.20).some
+    case _: MaroonXBlueprint            => SimpleOverheads(0.00).some
 
     // NIRI relies on whether or not AO is being used.
-    case nbp: NiriBlueprint             => SimpleOverheads(0.10, nbp.altair.ao.toBoolean ? 10 | 6, 0.193).some
+    case _: NiriBlueprint             => SimpleOverheads(0.10).some
 
 
     // GMOS is independent of site unless N&S is being used.
