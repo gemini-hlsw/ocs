@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2022.2.1">
+    <meta band3optionChosen="false" overrideAffiliate="false"/>
+    <semester year="2022" half="A"/>
+    <title></title>
+    <abstract></abstract>
+    <scheduling></scheduling>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <gender>None selected</gender>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets/>
+    <conditions/>
+    <blueprints>
+        <maroonx>
+            <MaroonX id="blueprint-0">
+                <name>Maroon-X</name>
+                <visitor>true</visitor>
+            </MaroonX>
+        </maroonx>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" blueprint="blueprint-0"/>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None"/>
+    </proposalClass>
+</proposal>

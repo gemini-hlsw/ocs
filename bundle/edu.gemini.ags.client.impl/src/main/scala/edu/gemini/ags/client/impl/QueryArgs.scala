@@ -58,6 +58,7 @@ object QueryArgs {
     case g: TexesBlueprint      => Right(Instrument.Nifs.id)      // REL-1062
     case g: VisitorBlueprint    => Right(Instrument.Niri.id)      // REL-1090
     case g: ZorroBlueprint      => Right(Instrument.Nifs.id)      // REL-3454: treat Zorro like NIFS.
+    case g: MaroonXBlueprint    => Right(Instrument.Nifs.id)      // REL-3959: MaroonX uses PWFS1
     case g: GeminiBlueprintBase => Right(g.instrument.id)
     case _ => Left("Not a Gemini Instrument")
   }
