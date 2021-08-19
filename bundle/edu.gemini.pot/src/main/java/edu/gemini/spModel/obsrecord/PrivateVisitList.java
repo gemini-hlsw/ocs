@@ -6,7 +6,6 @@ package edu.gemini.spModel.obsrecord;
 
 import edu.gemini.pot.sp.Instrument;
 import edu.gemini.shared.util.immutable.DefaultImList;
-import edu.gemini.shared.util.immutable.ImCollections;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.Site;
@@ -20,6 +19,7 @@ import edu.gemini.spModel.time.ObsTimeCharges;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * An implementation class that holds all the visits and handles event
@@ -28,14 +28,14 @@ import java.util.stream.Collectors;
 final class PrivateVisitList implements Serializable {
     private static final long serialVersionUID = -2686488059242714341L;
 
-    private List<PrivateVisit> _visits;
+    private final List<PrivateVisit> _visits;
 
     PrivateVisitList() {
-        _visits  = new ArrayList<PrivateVisit>();
+        _visits  = new ArrayList<>();
     }
 
     PrivateVisitList(PrivateVisitList that) {
-        _visits = new ArrayList<PrivateVisit>(that._visits);
+        _visits = new ArrayList<>(that._visits);
         for (ListIterator<PrivateVisit> it=_visits.listIterator(); it.hasNext(); ) {
             PrivateVisit iv = it.next();
             it.set(new PrivateVisit(iv));
@@ -77,7 +77,7 @@ final class PrivateVisitList implements Serializable {
     }
 
     List<ObsExecEvent> getAllEventList() {
-        List<ObsExecEvent> res = new ArrayList<ObsExecEvent>();
+        List<ObsExecEvent> res = new ArrayList<>();
         for (PrivateVisit pv : _visits) {
             res.addAll(pv._events);
         }
@@ -85,7 +85,7 @@ final class PrivateVisitList implements Serializable {
     }
 
     private void _rebuild(List<ObsExecEvent> eventList) {
-        Collections.sort(eventList, ExecEvent.TIME_COMPARATOR);
+        eventList.sort(ExecEvent.TIME_COMPARATOR);
         _visits.clear();
 
         PrivateVisit lastVisit = null;
@@ -106,15 +106,31 @@ final class PrivateVisitList implements Serializable {
         return time;
     }
 
-    long getLastEventTime() {
-        int sz = _visits.size();
-        for (int i=sz-1; i>=0; ++i) {
-            PrivateVisit visit = _visits.get(i);
-            ObsExecEvent evt = visit.getLastEvent();
-            if (evt != null) return evt.getTimestamp();
-        }
+    private Stream<PrivateVisit> reverseNonEmptyVisitStream() {
+        final ListIterator<PrivateVisit> it = _visits.listIterator(_visits.size());
+        return Stream
+                .generate(it::previous)
+                .limit(_visits.size())
+                .filter(PrivateVisit::nonEmpty);
+    }
 
-        return 0;
+    private Optional<PrivateVisit> lastNonEmptyVisit() {
+        return reverseNonEmptyVisitStream().findFirst();
+    }
+
+    long getLastEventTime() {
+        return lastNonEmptyVisit()
+                .flatMap(v -> Optional.ofNullable(v.getLastEvent()))
+                .map(ExecEvent::getTimestamp)
+                .orElse(0L);
+    }
+
+    long getLastVisitStartTime() {
+        return lastNonEmptyVisit()
+                .flatMap(v -> Optional.ofNullable(v.getFirstEvent()))
+                .map(ExecEvent::getTimestamp)
+                .orElse(0L);
+
     }
 
     // Creates an ImList<PrivateVisit> from the ArrayList<PrivateVisit> _visits

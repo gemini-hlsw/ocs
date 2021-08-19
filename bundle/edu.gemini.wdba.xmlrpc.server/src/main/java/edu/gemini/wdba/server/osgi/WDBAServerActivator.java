@@ -1,12 +1,16 @@
 package edu.gemini.wdba.server.osgi;
 
 import edu.gemini.pot.spdb.IDBDatabaseService;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.event.ExecEvent;
 import edu.gemini.util.security.principal.StaffPrincipal;
 import edu.gemini.wdba.exec.ExecXmlRpcHandler;
+import edu.gemini.wdba.fire.FireService;
 import edu.gemini.wdba.glue.WdbaGlueService;
 import edu.gemini.wdba.glue.api.WdbaContext;
 import edu.gemini.wdba.server.WdbaXmlRpcServlet;
+import edu.gemini.wdba.session.DBUpdateService;
 import edu.gemini.wdba.session.SessionXmlRpcHandler;
 import edu.gemini.wdba.tcc.TccXmlRpcHandler;
 import edu.gemini.wdba.xmlrpc.IExecXmlRpc;
@@ -29,6 +33,7 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -50,8 +55,11 @@ public class WDBAServerActivator implements BundleActivator {
     private ServiceTracker<IDBDatabaseService, WdbaContext> _glueTracker;
     private ServiceTracker<IDBDatabaseService, IDBDatabaseService> _dbTracker;
     private BundleContext _bundleContext;
-    private WdbaXmlRpcServlet _servlet = new WdbaXmlRpcServlet();
+    private final WdbaXmlRpcServlet _servlet = new WdbaXmlRpcServlet();
     private HttpService _http;
+
+    private DBUpdateService dbUpdateService;
+    private FireService fireService;
 
     public void start(BundleContext bundleContext) throws Exception {
         LOG.info("Start WDBA OSGi Service");
@@ -79,9 +87,36 @@ public class WDBAServerActivator implements BundleActivator {
                         }
 
                         final WdbaContext ctx = new WdbaContext(site, new WdbaGlueService(db, user), user);
+
+                        fireService     = FireService.loggingOnly(db);
+                        dbUpdateService = new DBUpdateService(ctx);
+
+                        // Define what happens when the session receives an
+                        // ExecEvent.  This is configurable so that it is easier
+                        // to change for testing.  DBUpdateService records the
+                        // event in the ODB in a separate thread and when it is
+                        // finished with that, a FireMessage is produced and
+                        // posted in another thread.
+                        final Consumer<ExecEvent> eventConsumer = e -> {
+                            try {
+                                dbUpdateService
+                                    .handleEvent(e)
+                                    .whenCompleteAsync((maybeEvent, maybeException) ->
+                                        ImOption.apply(maybeEvent)
+                                                .foreach(evt -> fireService.handleEvent(evt))
+                                    );
+                            } catch (InterruptedException ex) {
+                                LOG.info("Interrupted while processing exec event: " + e);
+                            }
+                        };
+
                         ExecXmlRpcHandler.setContext(ctx);
                         TccXmlRpcHandler.setContext(ctx);
-                        SessionXmlRpcHandler.setContext(ctx);
+                        SessionXmlRpcHandler.setContext(ctx, eventConsumer);
+
+                        fireService.start();
+                        dbUpdateService.start();
+
                         return ctx;
                     }
 
@@ -90,9 +125,11 @@ public class WDBAServerActivator implements BundleActivator {
 
                     public void removedService(ServiceReference<IDBDatabaseService> ref, WdbaContext object) {
                         LOG.info("Removing WDBA Access Service");
+                        dbUpdateService.stop();
+                        fireService.stop();
                         ExecXmlRpcHandler.setContext(null);
                         TccXmlRpcHandler.setContext(null);
-                        SessionXmlRpcHandler.setContext(null);
+                        SessionXmlRpcHandler.setContext(null, e -> {});
 
                     }
                 });

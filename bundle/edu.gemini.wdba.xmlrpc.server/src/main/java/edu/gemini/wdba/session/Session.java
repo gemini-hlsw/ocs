@@ -4,7 +4,6 @@
 package edu.gemini.wdba.session;
 
 import edu.gemini.pot.sp.SPObservationID;
-import edu.gemini.shared.util.EventSupport;
 import edu.gemini.spModel.dataset.Dataset;
 import edu.gemini.spModel.dataset.DatasetLabel;
 import edu.gemini.spModel.event.*;
@@ -13,6 +12,7 @@ import edu.gemini.wdba.xmlrpc.ServiceException;
 import edu.gemini.wdba.shared.QueuedObservation;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 /**
@@ -35,32 +35,28 @@ public class Session {
     // The EventHandler instance handles events arriving from SessionXmlRpcHandler
     private final EventHandler _sessionEventHandler = new EventHandler();
 
-    private final List<String> _observationIDs = Collections.synchronizedList(new ArrayList<String>());
+    private final List<String> _observationIDs = Collections.synchronizedList(new ArrayList<>());
 
-    private ISessionEventProducer _evtSupport;
-    private String _sessionID;
+    private final String _sessionID;
     // Interface to database methods
-    private WdbaDatabaseAccessService _dbAccess;
+    private final WdbaDatabaseAccessService _dbAccess;
+    private final Consumer<ExecEvent> _eventConsumer;
 
     /**
-     * Default constructor.
-     * <p/>
-     * <tt>SessionTime</tt> inherits from <tt>{@link EventSupport}</tt> and
-     * this method initiailizes the super class.
      * @param sessionID a unique name used to identify the session
-     * @param dbAccess implementation of interface to use for this <tt>Session</tt>
      */
-    public Session(String sessionID, WdbaDatabaseAccessService dbAccess) {
+    public Session(
+        String sessionID,
+        WdbaDatabaseAccessService dbAccess,
+        Consumer<ExecEvent> eventConsumer
+    ) {
         if (sessionID == null) throw new NullPointerException("sessionID");
         if (dbAccess == null) throw new NullPointerException("dbAccess");
+        if (eventConsumer == null) throw new NullPointerException("eventConsumer");
 
-        _evtSupport = new SessionEventSupport();
-        _sessionID = sessionID;
-        _dbAccess = dbAccess;
-    }
-
-    public void setSessionConfiguration(ISessionConfiguration config) {
-        config.initialize(_evtSupport);
+        _sessionID     = sessionID;
+        _dbAccess      = dbAccess;
+        _eventConsumer = eventConsumer;
     }
 
     public String getSessionID() {
@@ -88,7 +84,7 @@ public class Session {
     // Look through the list of current ids.  If any of them have now been deleted, remove them from the
     // internal list
     private void _fixObservationList(List<QueuedObservation> result) {
-        List<String> removers = new ArrayList<String>();
+        List<String> removers = new ArrayList<>();
         for (String obsId: _observationIDs) {
             if (!_checkForId(obsId, result)) {
                 LOG.info("Removing deleted observation from session: " + obsId);
@@ -158,11 +154,10 @@ public class Session {
      * @throws ServiceException when database functor for checking observation existence fails
      */
     public String[] getObservations() throws ServiceException {
-        if (_dbAccess == null) throw new NullPointerException("dbAccess is null");
         List<QueuedObservation> checkedResult = _getCheckedObservationList();
 
         // At this time, throw away the titles since the public interface does not support it
-        List<String> results = new ArrayList<String>();
+        List<String> results = new ArrayList<>();
         for (QueuedObservation qobs : checkedResult) {
             results.add(qobs.getId().stringValue());
         }
@@ -182,13 +177,8 @@ public class Session {
      * Remove all observation ids from the session.
      * @return return true if successful
      */
-    public boolean removeAllObservations() {
+    public void removeAllObservations() {
         _getObservationList().clear();
-        return true;
-    }
-
-    public int getOpenObservationCount() {
-        return _sessionEventHandler.getOpenObservationCount();
     }
 
     /**
@@ -207,7 +197,7 @@ public class Session {
      * @param evt the {@link ExecEvent} that is being passed to the associated services.
      */
     private void _fireEvent(ExecEvent evt) {
-        _evtSupport.fireEvent(evt);
+        _eventConsumer.accept(evt);
     }
 
     /**
@@ -216,7 +206,7 @@ public class Session {
      */
     private class OpenObservations {
         // Indicates the timer can be a daemon
-        private Timer _timer = new Timer(true);
+        private final Timer _timer = new Timer(true);
 
         /**
          * This small class contains the values for a single open observation
@@ -240,7 +230,7 @@ public class Session {
             private TimerTask _task;
             private boolean _datasetInProgress = false;
             private boolean _overlap = false;
-            private SPObservationID _observationID;
+            private final SPObservationID _observationID;
 
             OpenObservation(SPObservationID observationID) {
                 _observationID = observationID;
@@ -250,8 +240,8 @@ public class Session {
                 return _observationID;
             }
 
-            synchronized boolean isDatasetInProgress() {
-                return _datasetInProgress;
+            synchronized boolean noDatasetInProgress() {
+                return !_datasetInProgress;
             }
 
             synchronized void setDatasetInProgress(boolean state) {
@@ -362,8 +352,7 @@ public class Session {
         }
 
         // A list to hold OpenObservations
-        private final List<OpenObservation> _openObservations =
-                                               new ArrayList<OpenObservation>();
+        private final List<OpenObservation> _openObservations = new ArrayList<>();
 
         /**
          * This method is called to generate a specific {@link ExecEvent}.  It also checks for a start and
@@ -513,7 +502,7 @@ public class Session {
             // Get a copy of the list of open observations
             List<OpenObservation> opens;
             synchronized (_openObservations) {
-                opens = new ArrayList<OpenObservation>(_openObservations);
+                opens = new ArrayList<>(_openObservations);
             }
 
             for (OpenObservation obs : opens) {
@@ -536,7 +525,7 @@ public class Session {
                 // another obs something has gone wrong since there can't be
                 // two datasets being collected at once.  So close out this
                 // observation.
-                if (!obs.isDatasetInProgress() || (evt instanceof StartDatasetEvent)) {
+                if (obs.noDatasetInProgress() || (evt instanceof StartDatasetEvent)) {
                     endVisit(evt.getTimestamp(), obs.getObservationID());
                 }
             }
@@ -552,13 +541,13 @@ public class Session {
             // Get a copy of the list of open observations
             List<OpenObservation> opens;
             synchronized (_openObservations) {
-                opens = new ArrayList<OpenObservation>(_openObservations);
+                opens = new ArrayList<>(_openObservations);
             }
 
             // This bit considers whether a new visit is needed (is a dataset in progress?)
             for (OpenObservation obs : opens) {
                 // If an open observation has no dataset ongoing, close it and start a new one
-                if (!obs.isDatasetInProgress()) {
+                if (obs.noDatasetInProgress()) {
                     endVisit(evt.getTimestamp(), obs.getObservationID());
                 } else {
                     // It does have a dataset open so mark it as having an overlap
@@ -620,7 +609,7 @@ public class Session {
      */
     public final class EventHandler extends EventMsg.AbstractAction {
         // This is the session's list of observation's underway
-        private OpenObservations _openObservations = new OpenObservations();
+        private final OpenObservations _openObservations = new OpenObservations();
 
         /**
          * Performs the action associated with OBSERVATION_START event.
@@ -754,15 +743,6 @@ public class Session {
             DatasetLabel dsLabel = _makeDatasetLabel(oaEvt.getDataLabel());
             EndDatasetEvent stEvent = new EndDatasetEvent(evt.getTime(), dsLabel);
             _openObservations.checkVisit(evtObsID, stEvent);
-        }
-
-        /**
-         * Diagnostic method for testing returns the number of open observations
-         *
-         * @return int that is that number
-         */
-        public int getOpenObservationCount() {
-            return _openObservations.getOpenObservationCount();
         }
 
     }

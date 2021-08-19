@@ -7,10 +7,12 @@
 //
 package edu.gemini.wdba.session;
 
+import edu.gemini.spModel.event.ExecEvent;
 import edu.gemini.wdba.glue.api.WdbaContext;
 import edu.gemini.wdba.xmlrpc.ISessionXmlRpc;
 import edu.gemini.wdba.xmlrpc.ServiceException;
 
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.List;
 import java.util.Map;
@@ -72,8 +74,11 @@ public final class SessionXmlRpcHandler implements ISessionXmlRpc {
     // this has to be set from the activator and then later used by the
     // SessionXmlRpcHandler that is eventually created.
     private static SessionManagement sm = null;
-    public static synchronized void setContext(WdbaContext context) {
-        sm = (context == null) ? null : new SessionManagement(context, new ProductionSessionConfiguration(context));
+    public static synchronized void setContext(
+        WdbaContext context,
+        Consumer<ExecEvent> eventConsumer
+    ) {
+        sm = (context == null) ? null : new SessionManagement(context, eventConsumer);
     }
 
     private static synchronized SessionManagement sm() throws ServiceException {
@@ -116,8 +121,8 @@ public final class SessionXmlRpcHandler implements ISessionXmlRpc {
     /**
      * Remove all sessions and contents.
      */
-    public boolean removeAllSessions() throws ServiceException {
-        return sm().removeAllSessions();
+    public void removeAllSessions() throws ServiceException {
+        sm().removeAllSessions();
     }
 
     /**
@@ -191,7 +196,7 @@ public final class SessionXmlRpcHandler implements ISessionXmlRpc {
         return true;
     }
 
-    /** ------------------- Time Accounting Events ----------------------- */
+    /* ------------------- Time Accounting Events ----------------------- */
 
     /**
      * Sender indicates that an observation has started.
@@ -211,7 +216,7 @@ public final class SessionXmlRpcHandler implements ISessionXmlRpc {
     }
 
     /**
-     * The sending application indciates that the session is now idle and includes
+     * The sending application indicates that the session is now idle and includes
      * a category for why it is idle.
      */
     public boolean setIdleCause(String sessionId, String category, String comment) throws ServiceException {

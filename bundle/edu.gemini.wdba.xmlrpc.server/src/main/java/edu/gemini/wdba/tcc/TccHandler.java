@@ -151,8 +151,8 @@ public final class TccHandler implements ITccXmlRpc {
             throw new ServiceException(message);
         }
 
-        final WdbaDatabaseAccessService dbAccess = ctx.db;
-        final Site site = ctx.site;
+        final WdbaDatabaseAccessService dbAccess = ctx.getWdbaDatabaseAccessService();
+        final Site site = ctx.getSite();
 
         // Result string
         String result;
@@ -161,7 +161,7 @@ public final class TccHandler implements ITccXmlRpc {
             LOG.fine("Fetching tcc: " + observationId);
             ISPObservation spObs = dbAccess.getObservation(observationId);
             IDBDatabaseService db = dbAccess.getDatabase();
-            obsNode = ObservationNodeFunctor.getObservationNode(db, spObs, ctx.user);
+            obsNode = ObservationNodeFunctor.getObservationNode(db, spObs, ctx.getUser());
         } catch (WdbaGlueException ex) {
             throw new ServiceException("Database Exception building config: ", ex);
         }

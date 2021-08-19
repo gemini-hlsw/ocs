@@ -51,7 +51,7 @@ public interface ISessionXmlRpc {
      * @return true if the operation is successful, else false
      *         methods.
      */
-    boolean removeAllSessions() throws ServiceException;
+    void removeAllSessions() throws ServiceException;
 
     /**
      * Return the number of sessions in use.

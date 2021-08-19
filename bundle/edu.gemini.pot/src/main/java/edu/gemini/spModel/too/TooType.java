@@ -10,9 +10,9 @@ public enum TooType {
     standard("Standard", 0, "n/a"),
     none("None", 0, "n/a"),;
 
-    private String _displayValue;
-    private long _windowDuration;
-    private String _durationDisplay;
+    private final String _displayValue;
+    private final long _windowDuration;
+    private final String _durationDisplay;
 
     TooType(String displayValue, long defaultWindowDuration, String dur) {
         _displayValue = displayValue;
@@ -38,7 +38,6 @@ public enum TooType {
 
     public static TooType getTooType(String name, TooType defaultValue) {
         TooType res = SpTypeUtil.noExceptionValueOf(TooType.class, name);
-        if (res == null) res = defaultValue;
-        return res;
+        return (res == null) ? defaultValue : res;
     }
 }

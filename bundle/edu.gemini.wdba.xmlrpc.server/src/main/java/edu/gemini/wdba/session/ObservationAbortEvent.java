@@ -6,6 +6,8 @@ package edu.gemini.wdba.session;
 
 import edu.gemini.pot.sp.SPObservationID;
 
+import java.time.Instant;
+
 /**
  * Specialized <tt>{@link SessionEvent}</tt> used to indicate that a session
  * observation has aborted with a reason why.
@@ -25,7 +27,11 @@ public final class ObservationAbortEvent extends SessionEvent {
      * @param reason the optional reason on the premature pause
      */
     public ObservationAbortEvent(Object src, SPObservationID observationID, String reason) {
-        super(src, observationID, EventMsg.OBSERVATION_ABORT);
+        this(src, observationID, Instant.now(), reason);
+    }
+
+    public ObservationAbortEvent(Object src, SPObservationID observationID, Instant when, String reason) {
+        super(src, observationID, EventMsg.OBSERVATION_ABORT, when);
         _reason = reason;
     }
 

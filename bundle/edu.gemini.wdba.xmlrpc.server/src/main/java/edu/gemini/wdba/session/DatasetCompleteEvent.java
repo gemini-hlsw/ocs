@@ -6,6 +6,8 @@ package edu.gemini.wdba.session;
 
 import edu.gemini.pot.sp.SPObservationID;
 
+import java.time.Instant;
+
 /**
  * Specialized <tt>{@link SessionEvent}</tt> used to indicate that a dataset
  * has been collected and completed.
@@ -28,7 +30,11 @@ public final class DatasetCompleteEvent extends SessionEvent {
      * @param fileName the filename associated with this dataset
      */
     public DatasetCompleteEvent(Object src, SPObservationID observationID, String dataLabel, String fileName) {
-        super(src, observationID, EventMsg.DATASET_COMPLETE);
+        this(src, observationID, Instant.now(), dataLabel, fileName);
+    }
+
+    public DatasetCompleteEvent(Object src, SPObservationID observationID, Instant when, String dataLabel, String fileName) {
+        super(src, observationID, EventMsg.DATASET_COMPLETE, when);
         if (dataLabel == null) throw new NullPointerException();
         _dataLabel = dataLabel;
         _fileName = fileName;

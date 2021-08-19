@@ -7,6 +7,8 @@ package edu.gemini.wdba.session;
 import edu.gemini.pot.sp.SPObservationID;
 import edu.gemini.shared.util.immutable.ImOption;
 
+import java.time.Instant;
+
 /**
  * Specialized <tt>{@link SessionEvent}</tt> used to indicate that a session
  * observation has stopped with a reason why.
@@ -26,7 +28,11 @@ public final class ObservationStopEvent extends SessionEvent {
      * @param reason the optional reason on the premature stop
      */
     public ObservationStopEvent(Object src, SPObservationID observationID, String reason) {
-        super(src, observationID, EventMsg.OBSERVATION_STOP);
+        this(src, observationID, Instant.now(), reason);
+    }
+
+    public ObservationStopEvent(Object src, SPObservationID observationID, Instant when, String reason) {
+        super(src, observationID, EventMsg.OBSERVATION_STOP, when);
         _reason = reason;
     }
 

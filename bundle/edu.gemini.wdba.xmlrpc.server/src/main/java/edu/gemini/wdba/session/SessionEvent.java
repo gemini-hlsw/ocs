@@ -6,6 +6,7 @@ package edu.gemini.wdba.session;
 
 import edu.gemini.pot.sp.SPObservationID;
 
+import java.time.Instant;
 import java.util.EventObject;
 
 /**
@@ -32,11 +33,15 @@ public class SessionEvent extends EventObject {
      * is <code>null</code>
      */
     public SessionEvent(Object source, SPObservationID observationID, EventMsg msg) {
+        this(source, observationID, msg, Instant.now());
+    }
+
+    public SessionEvent(Object source, SPObservationID observationID, EventMsg msg, Instant when) {
         super(source);
 
         _observationID = observationID;
         _msg           = msg;
-        _time          = System.currentTimeMillis();
+        _time          = when.toEpochMilli();
     }
 
     /**
@@ -64,7 +69,7 @@ public class SessionEvent extends EventObject {
     }
 
     /**
-     * Gets the time that the event occured.
+     * Gets the time that the event occurred.
      * @return the time the event was created as a long from the familiar epoch
      */
     public long getTime() {
