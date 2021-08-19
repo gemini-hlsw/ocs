@@ -190,7 +190,7 @@ object FireTest {
         override def accept(e: ExecEvent): Unit =
           dup.handleEvent(e).whenComplete(new BiConsumer[ExecEvent, Throwable] {
             override def accept(e: ExecEvent, u: Throwable): Unit =
-              Option(e).foreach(fyr.addEvent)
+              Option(e).foreach(fyr.handleEvent)
           })
       }
       val man = new SessionManagement(ctx, cns)

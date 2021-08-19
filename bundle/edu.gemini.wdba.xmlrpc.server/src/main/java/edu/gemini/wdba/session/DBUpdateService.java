@@ -68,9 +68,14 @@ public final class DBUpdateService implements Runnable {
 
         LOG.info(String.format("%s: enqueueing event: %s", getName(), event));
 
-        // Place on queue
+        // Place (event, future) pair on the blocking work queue.
         final UnhandledEvent ue = new UnhandledEvent(event);
         queue.put(ue);
+
+        // The future will be completed when the job is done, letting the
+        // next stage of handling events continue.  It's important that the
+        // event be recorded in the database before anything else happens
+        // because computations like completed step count depend on it.
         return ue.future;
     }
 
@@ -127,6 +132,8 @@ public final class DBUpdateService implements Runnable {
         }
     }
 
+    // Gets the next event when it becomes available.  Returns None if
+    // interrupted.
     private Option<UnhandledEvent> nextEvent() {
         Option<UnhandledEvent> ue = ImOption.empty();
         try {
@@ -138,7 +145,7 @@ public final class DBUpdateService implements Runnable {
     }
 
     public void run() {
-        // Remove from queue and run
+        // Loops removing events from the work queue and recording them.
         while (!Thread.currentThread().isInterrupted()) {
             nextEvent().foreach(ue -> {
                 try {

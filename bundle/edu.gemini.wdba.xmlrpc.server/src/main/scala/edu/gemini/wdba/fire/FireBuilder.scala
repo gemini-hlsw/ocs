@@ -23,7 +23,10 @@ import scalaz._
 import scalaz.Scalaz._
 import scalaz.concurrent.Task
 
-
+/**
+ * Utility for creating `FireMessage`.  It handles extracting the underlying
+ * information from an `ISPObservation` looked up in the database.
+ */
 final case class FireBuilder(
   event:       ObsExecEvent,
   too:         TooType,

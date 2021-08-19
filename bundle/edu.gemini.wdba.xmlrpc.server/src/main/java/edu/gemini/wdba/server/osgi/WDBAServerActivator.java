@@ -9,7 +9,6 @@ import edu.gemini.wdba.exec.ExecXmlRpcHandler;
 import edu.gemini.wdba.fire.FireService;
 import edu.gemini.wdba.glue.WdbaGlueService;
 import edu.gemini.wdba.glue.api.WdbaContext;
-import edu.gemini.wdba.glue.api.WdbaDatabaseAccessService;
 import edu.gemini.wdba.server.WdbaXmlRpcServlet;
 import edu.gemini.wdba.session.DBUpdateService;
 import edu.gemini.wdba.session.SessionXmlRpcHandler;
@@ -34,7 +33,6 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Set;
-import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -93,13 +91,19 @@ public class WDBAServerActivator implements BundleActivator {
                         fireService     = FireService.loggingOnly(db);
                         dbUpdateService = new DBUpdateService(ctx);
 
+                        // Define what happens when the session receives an
+                        // ExecEvent.  This is configurable so that it is easier
+                        // to change for testing.  DBUpdateService records the
+                        // event in the ODB in a separate thread and when it is
+                        // finished with that, a FireMessage is produced and
+                        // posted in another thread.
                         final Consumer<ExecEvent> eventConsumer = e -> {
                             try {
                                 dbUpdateService
                                     .handleEvent(e)
                                     .whenCompleteAsync((maybeEvent, maybeException) ->
                                         ImOption.apply(maybeEvent)
-                                                .foreach(evt -> fireService.addEvent(evt))
+                                                .foreach(evt -> fireService.handleEvent(evt))
                                     );
                             } catch (InterruptedException ex) {
                                 LOG.info("Interrupted while processing exec event: " + e);

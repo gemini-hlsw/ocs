@@ -16,6 +16,12 @@ import java.util.logging.{Level, Logger}
 import scala.concurrent.duration._
 import scalaz.{-\/, \/-}
 
+/**
+ * FireService receives `ExecEvent`s and turns them into `FireMessage`s and then
+ * does "something" with them according to the supplied `process`.  In
+ * production this will be posting to a configured web server.  For testing, it
+ * can be to simply record the messages received for later verification.
+ */
 final class FireService(
   db:      IDBDatabaseService,
   process: FireMessage => FireAction[Unit],
@@ -30,7 +36,7 @@ final class FireService(
   private val exec: ServiceExecutor =
     new ServiceExecutor("FireService", task)
 
-  def addEvent(event: ExecEvent): Unit = {
+  def handleEvent(event: ExecEvent): Unit = {
     Log.info(s"FireService enqueuing event $event")
     queue.add(event)
   }

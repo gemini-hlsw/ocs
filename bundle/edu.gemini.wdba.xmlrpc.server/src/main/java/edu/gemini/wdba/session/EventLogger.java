@@ -39,7 +39,6 @@ public final class EventLogger implements ExecAction {
     }
 
     public void startVisit(ExecEvent event) {
-        LOG.info("--------------------");
         logObsExecEvent((StartVisitEvent) event);
     }
 

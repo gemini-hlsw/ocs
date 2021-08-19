@@ -10,6 +10,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Provides convenience for executing a Runnable in a single thread executor
+ * with a named work thread.
+ */
 public final class ServiceExecutor {
 
     private final String threadName;
