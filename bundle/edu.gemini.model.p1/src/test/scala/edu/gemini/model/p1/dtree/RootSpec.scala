@@ -55,5 +55,9 @@ class RootSpec extends Specification {
       val root = new Root(Semester(2020, A))
       root.choices.contains(Instrument.Igrins) must beTrue
     }
+    "include MaroonX" in {
+      val root = new Root(Semester(2022, A))
+      root.choices.contains(Instrument.MaroonX) must beTrue
+    }
   }
 }

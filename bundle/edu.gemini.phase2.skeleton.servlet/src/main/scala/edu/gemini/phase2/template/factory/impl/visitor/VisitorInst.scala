@@ -74,6 +74,15 @@ object VisitorInst {
 
   }
 
+  case object MaroonX extends VisitorInst {
+
+    override def name: String = "maroonx"
+
+    override def wavelength: Wavelength =
+      Wavelength.fromNanometers(700)
+
+  }
+
   implicit val EqVisitorInst: Equal[VisitorInst] =
     Equal.equalBy(_.name)
 
@@ -82,7 +91,8 @@ object VisitorInst {
       Alopeke,
       Dssi,
       Igrins,
-      Zorro
+      Zorro,
+      MaroonX
     )
 
   def findByName(name: String): Option[VisitorInst] =

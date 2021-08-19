@@ -78,6 +78,9 @@ object BlueprintBase {
     case b: M.SubaruBlueprint               => SubaruBlueprint(b)
     case b: M.KeckBlueprint                 => KeckBlueprint(b)
 
+    // MaroonX
+    case b: M.MaroonXBlueprint              => MaroonXBlueprint(b)
+
     case b: M.VisitorBlueprint              => VisitorBlueprint(b)
   }
 }

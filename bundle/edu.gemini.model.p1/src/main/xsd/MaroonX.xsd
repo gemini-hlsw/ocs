@@ -1,0 +1,30 @@
+<!--
+  Schema definition for MaroonX blueprints.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+
+    <!-- Options for MaroonX Blueprint. -->
+    <xsd:complexType name="MaroonXBlueprintChoice">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="null"  type="MaroonXBlueprintNull"/>
+                <xsd:element name="MaroonX" type="MaroonXBlueprint"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- MaroonX null. Empty blueprint, not available in PIT. -->
+    <xsd:complexType name="MaroonXBlueprintNull"/>
+
+    <!--
+      MaroonX Blueprint base type.
+    -->
+    <xsd:complexType name="MaroonXBlueprint">
+        <xsd:complexContent>
+            <xsd:extension base="BlueprintBase">
+                <xsd:sequence/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+</xsd:schema>
