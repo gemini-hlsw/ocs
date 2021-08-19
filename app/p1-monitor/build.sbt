@@ -19,7 +19,8 @@ ocsAppManifest := {
         dev(ov, pv),
         staging(ov, pv),
         v2021A(ov, pv),
-        v2021B(ov, pv)
+        v2021B(ov, pv),
+        v2022A(ov, pv)
     )
   )
 }
@@ -97,6 +98,18 @@ def v2021B(ov: Version, pv: Version) = AppConfig(
     "org.osgi.framework.storage" -> "${user.home}/.edu.gemini.p1monitor.2021B/felix-cache",
     "p1monitor.config" -> "conf.production-2021B.xml",
     "org.osgi.service.http.port" -> "9007",
+    "p1monitor.host" -> "phase1.gemini.edu"
+  ),
+  distribution = List(Linux32, Linux64)
+) extending List(common(ov, pv))
+
+// 2022A
+def v2022A(ov: Version, pv: Version) = AppConfig(
+  id = "2022A",
+  props = Map(
+    "org.osgi.framework.storage" -> "${user.home}/.edu.gemini.p1monitor.2022A/felix-cache",
+    "p1monitor.config" -> "conf.production-2022A.xml",
+    "org.osgi.service.http.port" -> "9006",
     "p1monitor.host" -> "phase1.gemini.edu"
   ),
   distribution = List(Linux32, Linux64)
