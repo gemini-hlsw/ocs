@@ -8,7 +8,7 @@ object MaroonXBlueprint {
 }
 
 case class MaroonXBlueprint() extends GeminiBlueprintBase {
-  override val name: String = "Maroon-X"
+  override val name: String = "MAROON-X"
   override val visitor: Boolean = true
 
   def this(m: M.MaroonXBlueprint) = this()

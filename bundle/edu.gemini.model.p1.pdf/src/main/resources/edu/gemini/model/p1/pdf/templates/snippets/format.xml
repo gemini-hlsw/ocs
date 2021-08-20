@@ -226,7 +226,7 @@
             <xsl:when test="$inst = 'graces'">GRACES</xsl:when>
             <xsl:when test="$inst = 'gpi'">GPI</xsl:when>
             <xsl:when test="$inst = 'igrins'">IGRINS</xsl:when>
-            <xsl:when test="$inst = 'maroonx'">Maroon-X</xsl:when>
+            <xsl:when test="$inst = 'maroonx'">MAROON-X</xsl:when>
             <xsl:when test="$inst = 'michelle'">Michelle</xsl:when>
             <xsl:when test="$inst = 'nici'">NICI</xsl:when>
             <xsl:when test="$inst = 'nifs'">NIFS</xsl:when>
