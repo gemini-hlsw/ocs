@@ -9,7 +9,7 @@ class Root(sem:Semester) extends SingleSelectNode[Semester, Instrument, Any](sem
   var description = s"The following instruments are available for semester ${sem.year}${sem.half}. See the Gemini website for information on instrument capabilities and configuration options."
 
   // REL-3769: GPI not available in 2020B.
-  def choices: List[Instrument] = List(Alopeke, Flamingos2, GmosNorth, GmosSouth, Gnirs, Graces, Gsaoi, Igrins, Nifs, Niri, Visitor, Zorro, MaroonX)
+  def choices: List[Instrument] = List(Alopeke, Flamingos2, GmosNorth, GmosSouth, Gnirs, Graces, Gsaoi, Igrins, MaroonX, Nifs, Niri, Visitor, Zorro)
 
   def apply(i:Instrument) = i match {
     case Alopeke    => Left(inst.Alopeke())
