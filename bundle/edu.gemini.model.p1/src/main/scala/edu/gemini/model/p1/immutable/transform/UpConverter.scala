@@ -177,13 +177,13 @@ case object SemesterConverter2021BTo2022A extends SemesterConverter {
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@tacCategory").exists(_.text == "Stars and stellar evolution") =>
       StepResult(starStellarEvolutionCategoryMessage, <proposal tacCategory={TacCategory.STELLAR_ASTROPHYSICS_EVOLUTION_SUPERNOVAE_ABUNDANCES.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@tacCategory").exists(_.text == "Formation and evolution of compact objects") =>
-      StepResult(starStellarEvolutionCategoryMessage, <proposal tacCategory={TacCategory.STELLAR_REMNANTS_COMPACT_OBJECTS_WD_NS_BH.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
+      StepResult(formationEvolutionCategoryMessage, <proposal tacCategory={TacCategory.STELLAR_REMNANTS_COMPACT_OBJECTS_WD_NS_BH.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@tacCategory").exists(_.text == "Resolved stellar populations and their environments") =>
-      StepResult(starStellarEvolutionCategoryMessage, <proposal tacCategory={TacCategory.STELLAR_POPULATIONS_CLUSTERS_CHEMICAL_EVOLUTION.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
+      StepResult(resolvedPopulationCategoryMessage, <proposal tacCategory={TacCategory.STELLAR_POPULATIONS_CLUSTERS_CHEMICAL_EVOLUTION.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@tacCategory").exists(_.text == "Galaxy evolution") =>
-      StepResult(starStellarEvolutionCategoryMessage, <proposal tacCategory={TacCategory.EXTRAGALACTIC_OTHER.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
+      StepResult(galaxyEvolutionCategoryMessage, <proposal tacCategory={TacCategory.EXTRAGALACTIC_OTHER.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@tacCategory").exists(_.text == "Cosmology and fundamental physics") =>
-      StepResult(starStellarEvolutionCategoryMessage, <proposal tacCategory={TacCategory.COSMOLOGY_FUNDAMENTAL_PHYSICS_LARGE_SCALE_STRUCTURE.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
+      StepResult(cosmologyCategoryMessage, <proposal tacCategory={TacCategory.COSMOLOGY_FUNDAMENTAL_PHYSICS_LARGE_SCALE_STRUCTURE.value()} schemaVersion={Proposal.currentSchemaVersion}>{ns}</proposal>).successNel
   }
 
   val removeKeywords: TransformFunction = {

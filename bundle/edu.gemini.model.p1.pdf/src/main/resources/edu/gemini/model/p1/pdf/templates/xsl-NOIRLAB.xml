@@ -16,7 +16,7 @@
     <xsl:param name="investigatorsList"/>
 
     <!-- Global variables -->
-    <xsl:variable name="obs-name">NOIRLab</xsl:variable>
+    <xsl:variable name="obs-name">NSF's NOIRLab</xsl:variable>
     <xsl:variable name="this-partner"><xsl:value-of select="$partner"/></xsl:variable>
 
     <xsl:template match="proposal">
@@ -24,10 +24,10 @@
         <!-- Useful variables -->
 
         <!-- submission entry of this-partner -->
-        <xsl:variable name="this-partner-submission" select="proposalClass//ngo/partner[text()=$this-partner]/../response"/>
-        <xsl:variable name="ft-submission" select="proposalClass/fastTurnaround//response"/>
-        <xsl:variable name="lp-submission" select="proposalClass/large//response"/>
-        <xsl:variable name="sip-submission" select="proposalClass/sip//response"/>
+        <xsl:variable name="this-partner-submission" select="proposalClass/ngo/partner[text()=$this-partner]/../response"/>
+        <xsl:variable name="ft-submission" select="proposalClass/fastTurnaround/response"/>
+        <xsl:variable name="lp-submission" select="proposalClass/large/response"/>
+        <xsl:variable name="sip-submission" select="proposalClass/sip/response"/>
 
         <!-- true proposal id -->
         <xsl:variable name="proposal-id">
@@ -144,25 +144,29 @@
                 <fo:table table-layout="fixed">
                     <fo:table-column column-width="6.5cm"/>
                     <fo:table-column column-width="4cm"/>
-                    <fo:table-column column-width="2cm"/>
-                    <fo:table-column column-width="3.5cm"/>
+                    <fo:table-column />
                     <fo:table-body>
-                        <fo:table-row>
+                        <fo:table-row margin-bottom="5mm">
                             <fo:table-cell>
-                                <fo:block font-size="14pt" font-weight="bold">
-                                    <xsl:value-of select="$obs-name"/> Observing Proposal
+                                <fo:block>
+                                    <fo:inline font-size="14pt" font-weight="bold" border-bottom="0.5mm solid">
+                                        <xsl:value-of select="$obs-name"/> TAC
+                                    </fo:inline>
                                 </fo:block>
-                            </fo:table-cell>
-                            <fo:table-cell>
                                 <fo:block font-style="italic">
+                                    <fo:inline font-weight="bold">Type:</fo:inline>
                                     <xsl:value-of select="$prop-type"/>
+                                    <xsl:if test="count(investigators/*[status='Grad Thesis']) > 0">
+                                        - Thesis
+                                    </xsl:if>
                                 </fo:block>
                             </fo:table-cell>
                             <fo:table-cell>
-                                <fo:block font-weight="bold">Panel:</fo:block>
+                                <fo:block></fo:block>
                             </fo:table-cell>
                             <fo:table-cell>
                                 <fo:block>
+                                    <fo:inline font-weight="bold">Category:</fo:inline>
                                     <xsl:if test="not(@tacCategory)">
                                         Galactic
                                     </xsl:if>
@@ -171,17 +175,12 @@
                             </fo:table-cell>
                         </fo:table-row>
                         <fo:table-row>
-                            <fo:table-cell>
-                                    <xsl:variable name="timestamp" select="$this-partner-submission/receipt/timestamp"/>
-                                    <fo:block>Date Received:
+                            <fo:table-cell >
+                                <xsl:variable name="timestamp" select="$this-partner-submission/receipt/timestamp"/>
+                                <fo:block margin-top="0.5mm" margin-bottom="0.5mm">
+                                    <fo:inline font-weight="bold">Date Received:
                                         <xsl:value-of select="substring($timestamp, 0, 11)"/>
-                                    </fo:block>
-                            </fo:table-cell>
-                            <fo:table-cell>
-                                <fo:block font-style="italic" text-align="center">
-                                    <xsl:if test="count(investigators/*[status='Grad Thesis']) > 0">
-                                        Thesis
-                                    </xsl:if>
+                                    </fo:inline>
                                 </fo:block>
                             </fo:table-cell>
                             <fo:table-cell>
@@ -223,20 +222,6 @@
                     </fo:block>
                 </fo:block>
                 <!-- END abstract -->
-
-                <!-- BEGIN keywords -->
-                <fo:block space-after="12pt">
-                    <fo:inline font-weight="bold">
-                        Keywords:
-                    </fo:inline>
-                    <xsl:for-each select="keywords/keyword">
-                        <xsl:value-of select="."/>
-                        <xsl:if test="position()!=last()">
-                            <xsl:text>, </xsl:text>
-                        </xsl:if>
-                    </xsl:for-each>
-                </fo:block>
-                <!-- END keywords -->
 
                 <!-- BEGIN observing mode -->
                 <xsl:variable name="obs-mode">
