@@ -710,17 +710,11 @@
 
                             <!-- BEGIN category -->
                             <fo:block space-after="6pt">
-                                <fo:inline font-weight="bold">TAC Category / Keywords</fo:inline>
+                                <fo:inline font-weight="bold">TAC Category</fo:inline>
                             </fo:block>
                             <fo:block font-style="italic" font-size="11pt" space-after="12pt">
                                 <xsl:value-of select="@tacCategory"/>
                                 <xsl:text>&#160;/&#160;</xsl:text>
-                                <xsl:for-each select="keywords/keyword">
-                                    <xsl:value-of select="."/>
-                                    <xsl:if test="position()!=last()">
-                                        <xsl:text>, </xsl:text>
-                                    </xsl:if>
-                                </xsl:for-each>
                             </fo:block>
                             <!-- END category -->
 
@@ -752,24 +746,6 @@
                                 </xsl:for-each>
                             </xsl:if>
                             <!-- END ITAC Information -->
-
-                            <!-- BEGIN keywords -->
-                            <!--
-                            <fo:block space-after="6pt">
-                                <fo:inline font-weight="bold">
-                                    Keywords
-                                </fo:inline>
-                            </fo:block>
-                            <fo:block font-style="italic" font-size="11pt" space-after="12pt">
-                                <xsl:for-each select="keywords/keyword">
-                                    <xsl:value-of select="."/>
-                                    <xsl:if test="position()!=last()">
-                                        <xsl:text>, </xsl:text>
-                                    </xsl:if>
-                                </xsl:for-each>
-                            </fo:block>
-                            -->
-                            <!-- END keywords -->
 
                             <!-- BEGIN problems -->
                             <xsl:variable name="guiding-problems"    select="count(/proposal/observations/observation/meta/guiding[evaluation!='Success'])"/>
