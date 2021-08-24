@@ -1,18 +1,29 @@
 package edu.gemini.itc.shared
 
-import edu.gemini.spModel.core.{SpectralDistribution, UniformSource, SpatialProfile, Redshift, BrightnessUnit, MagnitudeBand}
-import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{WaterVapor, CloudCover, SkyBackground, ImageQuality}
+import edu.gemini.shared.util.immutable.ImEither
+import edu.gemini.spModel.core.{BrightnessUnit, MagnitudeBand, Redshift, SpatialProfile, SpectralDistribution, UniformSource}
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, ImageQuality, SkyBackground, WaterVapor}
+
+import scalaz.\/
 
 // ==== Observing conditions
 
 final case class ObservingConditions(
-                      iq: ImageQuality,
-                      cc: CloudCover,
+                      iq: Double \/ ImageQuality,
+                      cc: Double \/ CloudCover,
                       wv: WaterVapor,
                       sb: SkyBackground,
-                      airmass: Double,
-                      exactiq: Double,
-                      exactcc: Double)
+                      airmass: Double) {
+
+  import edu.gemini.shared.util.immutable.ScalaConverters._
+
+  def javaIq: ImEither[java.lang.Double, ImageQuality] =
+    iq.leftMap(d => new java.lang.Double(d.doubleValue())).asImEither
+
+  def javaCc: ImEither[java.lang.Double, CloudCover] =
+    cc.leftMap(d => new java.lang.Double(d.doubleValue())).asImEither
+
+}
 
 // ==== Source definition
 final case class SourceDefinition(
