@@ -6,13 +6,18 @@ package edu.gemini.wdba
 import edu.gemini.spModel.core.catchingNonFatal
 import edu.gemini.wdba.fire.FireFailure.FireException
 
-import java.util.concurrent.{ExecutorService, Executors, ThreadFactory}
+import java.util.logging.Level
 
 import scalaz._
 import scalaz.Scalaz._
 import scalaz.concurrent.Task
 
 package object fire {
+
+  val DetailLevel: Level =
+    Level.INFO
+
+  type FireResponse[A] = FireFailure \/ A
 
   type FireAction[A] = EitherT[Task, FireFailure, A]
 

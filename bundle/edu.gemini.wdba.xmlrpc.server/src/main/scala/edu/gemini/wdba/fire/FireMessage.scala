@@ -2,7 +2,6 @@ package edu.gemini.wdba.fire
 
 import edu.gemini.pot.sp.SPObservationID
 import edu.gemini.spModel.core.SPProgramID
-import edu.gemini.spModel.dataset.Dataset
 import edu.gemini.spModel.too.TooType
 import monocle.Lens
 
@@ -18,17 +17,13 @@ final case class FireMessage(
   observationId:    Option[SPObservationID], // SRS-ODBM-C003
   too:              Option[TooType],         // SRS-ODBM-C009
   visitStart:       Option[Instant],         // From example message
-  datasets:         List[Dataset],
+  fileNames:        List[String],            // SRS-ODBM-C004
   sequence:         FireMessage.Sequence
 ) {
 
   // SRS-ODBM-C002
   def programId: Option[SPProgramID] =
     observationId.flatMap(oid => Option(oid.getProgramID))
-
-  // SRS-ODBM-C004
-  def fileNames: List[String] =
-    datasets.map(_.getDhsFilename)
 
 }
 
@@ -81,7 +76,7 @@ object FireMessage extends FireMessageOptics {
       observationId = Option.empty,
       too           = Option.empty,
       visitStart    = Option.empty,
-      datasets      = List.empty,
+      fileNames     = List.empty,
       sequence      = Sequence.Empty
     )
 
@@ -113,8 +108,8 @@ sealed trait FireMessageOptics { self: FireMessage.type =>
   val visitStart: Lens[FireMessage, Option[Instant]] =
     Lens.apply[FireMessage, Option[Instant]](_.visitStart)(a => _.copy(visitStart = a))
 
-  val datasets: Lens[FireMessage, List[Dataset]] =
-    Lens.apply[FireMessage, List[Dataset]](_.datasets)(a => _.copy(datasets = a))
+  val fileNames: Lens[FireMessage, List[String]] =
+    Lens.apply[FireMessage, List[String]](_.fileNames)(a => _.copy(fileNames = a))
 
   val sequence: Lens[FireMessage, Sequence] =
     Lens.apply[FireMessage, Sequence](_.sequence)(a => _.copy(sequence = a))
