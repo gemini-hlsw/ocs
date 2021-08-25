@@ -208,9 +208,9 @@ object ConfigExtractor {
     def extractGems(filter: Filter): String \/ GemsParameters =
       filter.getCatalogBand.asScalaOpt.fold(error) { band =>
         (band, iq) match {
-          case (SingleBand(MagnitudeBand.J), -\/(ExactIq(a))) => GemsParameters(a, "J").right
-          case (SingleBand(MagnitudeBand.H), -\/(ExactIq(a))) => GemsParameters(a, "H").right
-          case (SingleBand(MagnitudeBand.K), -\/(ExactIq(a))) => GemsParameters(a, "K").right
+          case (SingleBand(MagnitudeBand.J), -\/(ExactIq(a))) => GemsParameters(-0.1754 * a + 0.1648, "J").right
+          case (SingleBand(MagnitudeBand.H), -\/(ExactIq(a))) => GemsParameters(-0.2213 * a + 0.2365, "H").right
+          case (SingleBand(MagnitudeBand.K), -\/(ExactIq(a))) => GemsParameters(-0.4344 * a + 0.4295, "K").right
           case (SingleBand(MagnitudeBand.J), \/-(ImageQuality.PERCENT_20)) => GemsParameters(0.10, "J").right
           case (SingleBand(MagnitudeBand.J), \/-(ImageQuality.PERCENT_70)) => GemsParameters(0.05, "J").right
           case (SingleBand(MagnitudeBand.J), \/-(ImageQuality.PERCENT_85)) => GemsParameters(0.02, "J").right
