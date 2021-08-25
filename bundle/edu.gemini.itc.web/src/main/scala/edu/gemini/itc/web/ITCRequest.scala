@@ -28,7 +28,8 @@ import squants.motion.VelocityConversions._
 import squants.radio.IrradianceConversions._
 import squants.radio.SpectralIrradianceConversions._
 
-import scalaz.{-\/, \/, \/-}
+import scalaz.{Enum => _, _}
+import Scalaz._
 
 /**
  * ITC requests define a generic mechanism to look up values by their parameter names.
@@ -82,10 +83,13 @@ sealed abstract class ITCRequest {
       .getOrElse(throw new IllegalArgumentException(s"Missing '$name' double parameter"))
 
   def optionalDoubleParameter(name: String): Option[Double] =
-    optionalParameter(name).map(_.trim).map {
-      case "" => 0.0
+    optionalDoubleParameter(name, Some(0.0))
+
+  def optionalDoubleParameter(name: String, empty: Option[Double]): Option[Double] =
+    optionalParameter(name).map(_.trim).flatMap {
+      case "" => empty
       case d  =>
-        try d.toDouble catch {
+        try Some(d.toDouble) catch {
           case _: NumberFormatException => throw new IllegalArgumentException(s"$d is not a valid double number value for parameter $name")
         }
     }
@@ -126,13 +130,20 @@ object ITCRequest {
 
 
   def obsConditionParameters(r: ITCRequest): ObservingConditions = {
-    def either[A <: Enum[A]](exactName: String, c: Class[A]): Double \/ A =
-      (r.optionalDoubleParameter(exactName), r.optionalEnumParameter(c)) match {
-        case (Some(_), Some(_)) => throw new IllegalArgumentException(s"Specify either '${c.getSimpleName}' or '$exactName', but not both.")
-        case (None, None)       => throw new IllegalArgumentException(s"Specify one of either '${c.getSimpleName}' or else '$exactName'.")
-        case (Some(d), None)    => -\/(d)
-        case (None, Some(e))    => \/-(e)
+    def either[A <: Enum[A]](exactName: String, c: Class[A]): Double \/ A = {
+      val msg: String =
+        s"Specify one of either '${c.getSimpleName}' bins or else '$exactName' with a floating point value."
+
+      r.optionalParameter(c.getSimpleName) match {
+        case Some("EXACT") | None =>
+          r.optionalDoubleParameter(exactName, None)
+           .toLeftDisjunction[A](throw new IllegalArgumentException(msg))
+
+        case _                    =>
+          r.optionalEnumParameter(c)
+           .toRightDisjunction[Double](throw new IllegalArgumentException(msg))
       }
+    }
 
     def iq: ExactIq \/ SPSiteQuality.ImageQuality =
       either("ExactIQ", classOf[SPSiteQuality.ImageQuality])
