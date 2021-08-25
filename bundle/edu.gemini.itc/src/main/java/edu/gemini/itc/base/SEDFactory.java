@@ -252,7 +252,7 @@ public final class SEDFactory {
         // inputs: SED, AIRMASS, sky emmision file, mirror configuration,
         // output: SED and sky background as they arrive at instruments
 
-        final SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(odp.cc(), odp.exactcc());
+        final SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(odp.javaCc());
         sed.accept(clouds);
 
         final SampledSpectrumVisitor water = WaterTransmissionVisitor.create(

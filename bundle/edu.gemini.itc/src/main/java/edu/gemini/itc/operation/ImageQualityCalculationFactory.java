@@ -4,7 +4,6 @@ import edu.gemini.itc.base.Instrument;
 import edu.gemini.itc.shared.ObservingConditions;
 import edu.gemini.itc.shared.SourceDefinition;
 import edu.gemini.itc.shared.TelescopeDetails;
-import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.core.GaussianSource;
 
@@ -19,9 +18,9 @@ public final class ImageQualityCalculationFactory {
             TelescopeDetails telescope,
             Instrument instrument) {
 
-        if (observingConditions.iq() == SPSiteQuality.ImageQuality.EXACT) {
+        if (observingConditions.javaIq().isLeft()) {
             // Case C: The exact delivered FHWM at the science wavelength is specified.
-            final double fwhm = observingConditions.exactiq();
+            final double fwhm = observingConditions.javaIq().toOptionLeft().getValue();
             if (fwhm <= 0.0) throw new IllegalArgumentException("Exact Image Quality must be > zero arcseconds.");
             return new GaussianImageQualityCalculation(fwhm);
 
@@ -42,7 +41,7 @@ public final class ImageQualityCalculationFactory {
             // This case creates an ImageQuality Calculation
             return new ImageQualityCalculation(
                     wfs,
-                    observingConditions.iq(),
+                    observingConditions.javaIq().toOption().getValue(),
                     observingConditions.airmass(),
                     instrument.getEffectiveWavelength());
         }

@@ -2,7 +2,6 @@ package edu.gemini.itc.web
 
 import java.util.logging.Logger
 import javax.servlet.http.HttpServletRequest
-
 import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.WavelengthConversions._
@@ -29,7 +28,7 @@ import squants.motion.VelocityConversions._
 import squants.radio.IrradianceConversions._
 import squants.radio.SpectralIrradianceConversions._
 
-import scalaz.{-\/, \/-}
+import scalaz.{-\/, \/, \/-}
 
 /**
  * ITC requests define a generic mechanism to look up values by their parameter names.
@@ -46,11 +45,24 @@ sealed abstract class ITCRequest {
   /** Gets the value of the parameter with this name. */
   def parameter(name: String): String
 
+  /** Gets the value of a parameter with this name, if it is defined. */
+  def optionalParameter(name: String): Option[String] =
+    Option(parameter(name))
+
   /** Gets the named value as an enum of type {{{Class[T]}}} using the simple name of the class as the parameter name. */
-  def enumParameter[T <: Enum[T]](c: Class[T]): T = enumParameter(c, c.getSimpleName)
+  def enumParameter[T <: Enum[T]](c: Class[T]): T =
+    enumParameter(c, c.getSimpleName)
 
   /** Gets the named value as an enum of type {{{Class[T]}}} using the given name as the parameter name. */
-  def enumParameter[T <: Enum[T]](c: Class[T], n: String): T = Enum.valueOf(c, parameter(n))
+  def enumParameter[T <: Enum[T]](c: Class[T], n: String): T =
+    optionalEnumParameter(c, n)
+      .getOrElse(throw new IllegalArgumentException(s"Missing '$n' enum parameter"))
+
+  def optionalEnumParameter[T <: Enum[T]](c: Class[T]): Option[T] =
+    optionalEnumParameter(c, c.getSimpleName)
+
+  def optionalEnumParameter[T <: Enum[T]](c: Class[T], n: String): Option[T] =
+    optionalParameter(n).map(Enum.valueOf(c, _))
 
   /** Gets the named value as an integer. */
   def intParameter(name: String): Int = parameter(name).trim() match {
@@ -65,13 +77,18 @@ sealed abstract class ITCRequest {
   def booleanParameter(name: String): Boolean = java.lang.Boolean.parseBoolean(parameter(name).trim())
 
   /** Gets the named value as a double. */
-  def doubleParameter(name: String): Double = parameter(name).trim() match {
-    case ""   => 0.0
-    case d    =>
-      try d.toDouble catch {
-        case _: NumberFormatException => throw new IllegalArgumentException(s"$d is not a valid double number value for parameter $name")
-      }
-  }
+  def doubleParameter(name: String): Double =
+    optionalDoubleParameter(name)
+      .getOrElse(throw new IllegalArgumentException(s"Missing '$name' double parameter"))
+
+  def optionalDoubleParameter(name: String): Option[Double] =
+    optionalParameter(name).map(_.trim).map {
+      case "" => 0.0
+      case d  =>
+        try d.toDouble catch {
+          case _: NumberFormatException => throw new IllegalArgumentException(s"$d is not a valid double number value for parameter $name")
+        }
+    }
 
   /** Gets the central wavelength in microns. */
   def centralWavelengthInMicrons():    Wavelength = doubleParameter("instrumentCentralWavelength").microns
@@ -107,15 +124,23 @@ object ITCRequest {
     new TelescopeDetails(coating, port, wfs)
   }
 
+
   def obsConditionParameters(r: ITCRequest): ObservingConditions = {
-    val iq      = r.enumParameter(classOf[SPSiteQuality.ImageQuality])
-    val cc      = r.enumParameter(classOf[SPSiteQuality.CloudCover])
-    val wv      = r.enumParameter(classOf[SPSiteQuality.WaterVapor])
-    val sb      = r.enumParameter(classOf[SPSiteQuality.SkyBackground])
+    def either[A <: Enum[A]](exactName: String, c: Class[A]): Double \/ A =
+      (r.optionalDoubleParameter(exactName), r.optionalEnumParameter(c)) match {
+        case (Some(_), Some(_)) => throw new IllegalArgumentException(s"Specify either '${c.getSimpleName}' or '$exactName', but not both.")
+        case (None, None)       => throw new IllegalArgumentException(s"Specify one of either '${c.getSimpleName}' or else '$exactName'.")
+        case (Some(d), None)    => -\/(d)
+        case (None, Some(e))    => \/-(e)
+      }
+
+    val iq      = either("ExactIQ", classOf[SPSiteQuality.ImageQuality])
+    val cc      = either("ExactCC", classOf[SPSiteQuality.CloudCover])
+    val wvEnum  = r.enumParameter(classOf[SPSiteQuality.WaterVapor])
+    val sbEnum  = r.enumParameter(classOf[SPSiteQuality.SkyBackground])
     val airmass = r.doubleParameter("Airmass")
-    val exactiq = r.doubleParameter("ExactIQ")
-    val exactcc = r.doubleParameter("ExactCC")
-    ObservingConditions(iq, cc, wv, sb, airmass, exactiq, exactcc)
+
+    ObservingConditions(iq, cc, wvEnum, sbEnum, airmass)
   }
 
   def instrumentName(r: ITCRequest): String =
