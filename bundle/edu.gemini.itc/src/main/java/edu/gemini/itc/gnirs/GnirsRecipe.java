@@ -90,11 +90,11 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // Altair specific section
         final Option<AOSystem> altair;
         if (_gnirsParameters.altair().isDefined()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _obsConditionParameters.cc().getExtinction(), _gnirsParameters.altair().get(), 0.1);
-            altair = Option.<AOSystem>apply((AOSystem) ao);
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _obsConditionParameters.ccExtinction(), _gnirsParameters.altair().get(), 0.1);
+            altair = Option.apply(ao);
 
         } else {
-            altair = Option.<AOSystem>empty();
+            altair = Option.empty();
         }
 
         // Get the summed source and sky
@@ -326,10 +326,10 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // Altair specific section
         final Option<AOSystem> altair;
         if (_gnirsParameters.altair().isDefined()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _obsConditionParameters.cc().getExtinction(), _gnirsParameters.altair().get(), 0.1); // Since GNIRS does not have perfect optics, the PSF delivered by Altair is convolved with a ~0.10" Gaussian to reproduce the ~0.12" images which are measured under optimal conditions.
-            altair = Option.<AOSystem>apply((AOSystem) ao);
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _obsConditionParameters.ccExtinction(), _gnirsParameters.altair().get(), 0.1); // Since GNIRS does not have perfect optics, the PSF delivered by Altair is convolved with a ~0.10" Gaussian to reproduce the ~0.12" images which are measured under optimal conditions.
+            altair = Option.apply(ao);
         } else {
-            altair = Option.<AOSystem>empty();
+            altair = Option.empty();
         }
 
         final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope, altair);

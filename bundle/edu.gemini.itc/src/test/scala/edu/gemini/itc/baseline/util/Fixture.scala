@@ -12,6 +12,8 @@ import squants.motion.VelocityConversions._
 import squants.radio.IrradianceConversions._
 import squants.radio.SpectralIrradianceConversions._
 
+import scalaz.\/-
+
 /**
  * Definition of test fixtures which hold all input parameters needed to execute different ITC recipes.
  */
@@ -230,7 +232,7 @@ object Fixture {
       (iq, cc, wv)  <- weatherConditions
       sb            <- List(PERCENT_50, PERCENT_80) // SB20=1, SB50=2, SB80=3, ANY=4
       am            <- List(1.5)                    // airmass 1.0, 1.5, 2.0 (relevant levels: < 1.26; 1.26..1.75, > 1.75)
-    } yield new ObservingConditions(iq, cc, wv, sb, am, 0.0, 0.0)
+    } yield new ObservingConditions(\/-(iq), \/-(cc), wv, sb, am)
 
   // Defines a set of relevant telescope configurations; total 1*2*2=4 configurations
   // NOTE: looking at TeleParameters.getWFS() it seems that AOWFS is always replaced with OIWFS

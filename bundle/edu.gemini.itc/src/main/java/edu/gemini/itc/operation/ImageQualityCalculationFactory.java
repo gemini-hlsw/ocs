@@ -20,7 +20,7 @@ public final class ImageQualityCalculationFactory {
 
         if (observingConditions.javaIq().isLeft()) {
             // Case C: The exact delivered FHWM at the science wavelength is specified.
-            final double fwhm = observingConditions.javaIq().toOptionLeft().getValue();
+            final double fwhm = observingConditions.javaIq().toOptionLeft().getValue().toArcsec();
             if (fwhm <= 0.0) throw new IllegalArgumentException("Exact Image Quality must be > zero arcseconds.");
             return new GaussianImageQualityCalculation(fwhm);
 

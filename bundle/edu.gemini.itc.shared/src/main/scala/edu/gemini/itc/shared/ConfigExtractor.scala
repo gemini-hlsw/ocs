@@ -190,9 +190,10 @@ object ConfigExtractor {
     } yield gsaoi
   }
   // We need this available outside to calculate the GeMS parameters in ITCRequest
-  def createGsaoiParameters(filter: Gsaoi.Filter, readMode: Gsaoi.ReadMode, iq: Double \/ SPSiteQuality.ImageQuality): String \/ GsaoiParameters = createGsaoiParameters(filter, readMode, iq, 0)
+  def createGsaoiParameters(filter: Gsaoi.Filter, readMode: Gsaoi.ReadMode, iq: ExactIq \/ SPSiteQuality.ImageQuality): String \/ GsaoiParameters =
+    createGsaoiParameters(filter, readMode, iq, 0)
 
-  def createGsaoiParameters(filter: Gsaoi.Filter, readMode: Gsaoi.ReadMode, iq: Double \/ SPSiteQuality.ImageQuality, largeSkyOffset: Int): String \/ GsaoiParameters = {
+  def createGsaoiParameters(filter: Gsaoi.Filter, readMode: Gsaoi.ReadMode, iq: ExactIq \/ SPSiteQuality.ImageQuality, largeSkyOffset: Int): String \/ GsaoiParameters = {
     import Gsaoi._
     import SPSiteQuality._
 
@@ -207,7 +208,9 @@ object ConfigExtractor {
     def extractGems(filter: Filter): String \/ GemsParameters =
       filter.getCatalogBand.asScalaOpt.fold(error) { band =>
         (band, iq) match {
-          case (_, -\/(_)) => "GeMS requires a predefined image quality setting".left // TODO: what should actually happen here?
+          case (SingleBand(MagnitudeBand.J), -\/(ExactIq(a))) => GemsParameters(a, "J").right
+          case (SingleBand(MagnitudeBand.H), -\/(ExactIq(a))) => GemsParameters(a, "H").right
+          case (SingleBand(MagnitudeBand.K), -\/(ExactIq(a))) => GemsParameters(a, "K").right
           case (SingleBand(MagnitudeBand.J), \/-(ImageQuality.PERCENT_20)) => GemsParameters(0.10, "J").right
           case (SingleBand(MagnitudeBand.J), \/-(ImageQuality.PERCENT_70)) => GemsParameters(0.05, "J").right
           case (SingleBand(MagnitudeBand.J), \/-(ImageQuality.PERCENT_85)) => GemsParameters(0.02, "J").right
@@ -217,8 +220,8 @@ object ConfigExtractor {
           case (SingleBand(MagnitudeBand.K), \/-(ImageQuality.PERCENT_20)) => GemsParameters(0.30, "K").right
           case (SingleBand(MagnitudeBand.K), \/-(ImageQuality.PERCENT_70)) => GemsParameters(0.15, "K").right
           case (SingleBand(MagnitudeBand.K), \/-(ImageQuality.PERCENT_85)) => GemsParameters(0.10, "K").right
-          case (_, \/-(ImageQuality.ANY))             => "GeMS cannot be used in IQ=Any conditions".left
-          case _                                      => "ITC GeMS only supports J, H and K band".left
+          case (_, \/-(ImageQuality.ANY)) => "GeMS cannot be used in IQ=Any conditions".left
+          case _                          => "ITC GeMS only supports J, H and K band".left
         }
     }
 

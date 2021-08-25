@@ -134,8 +134,14 @@ object ITCRequest {
         case (None, Some(e))    => \/-(e)
       }
 
-    val iq      = either("ExactIQ", classOf[SPSiteQuality.ImageQuality])
-    val cc      = either("ExactCC", classOf[SPSiteQuality.CloudCover])
+    def iq: ExactIq \/ SPSiteQuality.ImageQuality =
+      either("ExactIQ", classOf[SPSiteQuality.ImageQuality])
+        .leftMap(ExactIq.fromArcsecOrException)
+
+    val cc: ExactCc \/ SPSiteQuality.CloudCover =
+      either("ExactCC", classOf[SPSiteQuality.CloudCover])
+        .leftMap(ExactCc.fromExtinctionOrException)
+
     val wvEnum  = r.enumParameter(classOf[SPSiteQuality.WaterVapor])
     val sbEnum  = r.enumParameter(classOf[SPSiteQuality.SkyBackground])
     val airmass = r.doubleParameter("Airmass")

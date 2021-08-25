@@ -79,10 +79,10 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // Altair specific section
         final Option<AOSystem> altair;
         if (niriParameters.altair().isDefined()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _obsConditionParameters.cc().getExtinction(), niriParameters.altair().get(), 0.0);
-            altair = Option.<AOSystem>apply((AOSystem) ao);
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _obsConditionParameters.ccExtinction(), niriParameters.altair().get(), 0.0);
+            altair = Option.apply(ao);
         } else {
-            altair = Option.<AOSystem>empty();
+            altair = Option.empty();
         }
 
         final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope, altair);
@@ -146,10 +146,10 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // Altair specific section
         final Option<AOSystem> altair;
         if (niriParameters.altair().isDefined()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _obsConditionParameters.cc().getExtinction(), niriParameters.altair().get(), 0.0);
-            altair = Option.<AOSystem>apply((AOSystem) ao);
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _obsConditionParameters.ccExtinction(), niriParameters.altair().get(), 0.0);
+            altair = Option.apply(ao);
         } else {
-            altair = Option.<AOSystem>empty();
+            altair = Option.empty();
         }
 
         final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope, altair);

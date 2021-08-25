@@ -96,7 +96,7 @@ public final class Right<L,R> implements ImEither<L,R>, Serializable {
 
     @Override
     public boolean isLeft() {
-        return true;
+        return false;
     }
 
     @Override
