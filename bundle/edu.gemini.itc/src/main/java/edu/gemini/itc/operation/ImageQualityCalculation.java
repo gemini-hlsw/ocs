@@ -9,8 +9,10 @@ import java.util.logging.Logger;
 
 public class ImageQualityCalculation implements ImageQualityCalculatable {
 
-    private String im_qual_model_file;
-    private double airmass, effectiveWavelength, im_qual;
+    private final String im_qual_model_file;
+    private final double airmass;
+    private final double effectiveWavelength;
+    private double im_qual;
     private static final Logger Log = Logger.getLogger( ImageQualityCalculation.class.getName() );
 
     public ImageQualityCalculation(final GuideProbe.Type wfs,

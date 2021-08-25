@@ -113,8 +113,8 @@ object JsonServletSpec extends Specification with ScalaCheck {
         servlet.doPost(req, res)
 
         // Check Headers
-        res.getContentType() mustEqual    "text/json; charset=UTF-8"
         res.getStatus()      mustEqual    HttpServletResponse.SC_OK
+        res.getContentType() mustEqual    "text/json; charset=UTF-8"
 
         // Ensure we can decode the result
         val result = Parse.decodeOption[ItcResult](res.body)

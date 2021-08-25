@@ -142,8 +142,8 @@ object Hash {
   def calc(ocp: ObservingConditions): Int =
     hash(
       ocp.airmass,
-      ocp.iq.name,
-      ocp.cc.name,
+      ocp.iq.fold(_.toArcsec, _.name),
+      ocp.cc.fold(_.toExtinction, _.name),
       ocp.wv.name,
       ocp.sb.name
     )

@@ -4,24 +4,66 @@ import edu.gemini.shared.util.immutable.ImEither
 import edu.gemini.spModel.core.{BrightnessUnit, MagnitudeBand, Redshift, SpatialProfile, SpectralDistribution, UniformSource}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, ImageQuality, SkyBackground, WaterVapor}
 
-import scalaz.\/
+import scalaz._
+import Scalaz._
 
 // ==== Observing conditions
 
+final case class ExactIq private (toArcsec: Double)
+
+object ExactIq {
+
+  def fromArcsec(d: Double): Option[ExactIq] =
+    if ((0.05 <= d) && (d <= 5.0)) Some(ExactIq(d)) else None
+
+  def unsafeFromArcsec(d: Double): ExactIq =
+    fromArcsec(d).get
+
+  def fromArcsecOrException(d: Double): ExactIq =
+    fromArcsec(d)
+      .getOrElse(throw new IllegalArgumentException("ExactIQ must be in the range 0.05 - 5.0 arcsec"))
+
+  implicit def EqualExactIq: Equal[ExactIq] =
+    Equal.equalBy(_.toArcsec)
+
+}
+
+final case class ExactCc private (toExtinction: Double)
+
+object ExactCc {
+
+  def fromExtinction(d: Double): Option[ExactCc] =
+    if ((0.00 <= d) && (d <= 5.0)) Some(ExactCc(d)) else None
+
+  def unsafeFromExtinction(d: Double): ExactCc =
+    fromExtinction(d).get
+
+  def fromExtinctionOrException(d: Double): ExactCc =
+    fromExtinction(d)
+      .getOrElse(throw new IllegalArgumentException("ExactCC must be in the range 0.0 - 5.0"))
+
+  implicit def EqualExactCc: Equal[ExactCc] =
+    Equal.equalBy(_.toExtinction)
+
+}
+
 final case class ObservingConditions(
-                      iq: Double \/ ImageQuality,
-                      cc: Double \/ CloudCover,
+                      iq: ExactIq \/ ImageQuality,
+                      cc: ExactCc \/ CloudCover,
                       wv: WaterVapor,
                       sb: SkyBackground,
                       airmass: Double) {
 
   import edu.gemini.shared.util.immutable.ScalaConverters._
 
-  def javaIq: ImEither[java.lang.Double, ImageQuality] =
-    iq.leftMap(d => new java.lang.Double(d.doubleValue())).asImEither
+  def javaIq: ImEither[ExactIq, ImageQuality] =
+    iq.asImEither
 
-  def javaCc: ImEither[java.lang.Double, CloudCover] =
-    cc.leftMap(d => new java.lang.Double(d.doubleValue())).asImEither
+  def javaCc: ImEither[ExactCc, CloudCover] =
+    cc.asImEither
+
+  def ccExtinction: Double =
+    cc.fold(_.toExtinction, _.getExtinction)
 
 }
 
