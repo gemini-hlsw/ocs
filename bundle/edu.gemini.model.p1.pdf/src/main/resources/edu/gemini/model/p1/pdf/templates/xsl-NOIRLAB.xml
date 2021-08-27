@@ -24,10 +24,11 @@
         <!-- Useful variables -->
 
         <!-- submission entry of this-partner -->
-        <xsl:variable name="this-partner-submission" select="proposalClass/ngo/partner[text()=$this-partner]/../response"/>
-        <xsl:variable name="ft-submission" select="proposalClass/fastTurnaround/response"/>
-        <xsl:variable name="lp-submission" select="proposalClass/large/response"/>
-        <xsl:variable name="sip-submission" select="proposalClass/sip/response"/>
+        <!-- Note the double slash is meaningful in xsl -->
+        <xsl:variable name="this-partner-submission" select="proposalClass//ngo/partner[text()=$this-partner]/../response"/>
+        <xsl:variable name="ft-submission" select="proposalClass//fastTurnaround/response"/>
+        <xsl:variable name="lp-submission" select="proposalClass//large/response"/>
+        <xsl:variable name="sip-submission" select="proposalClass//sip/response"/>
 
         <!-- true proposal id -->
         <xsl:variable name="proposal-id">
