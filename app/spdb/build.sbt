@@ -402,7 +402,8 @@ def odbtest(version: Version) = AppConfig(
     "edu.gemini.smartgcal.svnRootUrl"            -> "http://source.gemini.edu/gcal/branches/development/calibrations",
     "edu.gemini.spdb.dir"                        -> "/home/software/ugemini/spdb/spdb.active",
     "edu.gemini.util.trpc.name"                  -> "Gemini ODB (Test)",
-    "org.osgi.framework.startlevel.beginning"    -> "50"
+    "org.osgi.framework.startlevel.beginning"    -> "50",
+    "edu.gemini.fire.url"                        -> "http://hbffire-lv2.hi.gemini.edu:5000/ocsmsg"
   )
 ) extending List(with_remote_gogo(version), odbtest_credentials(version))
 
@@ -476,7 +477,8 @@ def gnodb(version: Version) = AppConfig(
     "edu.gemini.oodb.mail.smtpHost"        -> "smtp.hi.gemini.edu",
     "edu.gemini.spdb.dir"                  -> "/mount/wikiwiki/odbhome/ugemini/spdb/spdb.active",
     "edu.gemini.util.trpc.name"            -> "Gemini North ODB",
-    "osgi.shell.telnet.ip"                 -> "10.2.4.77"
+    "osgi.shell.telnet.ip"                 -> "10.2.4.77",
+    "edu.gemini.fire.url"                  -> "http://hbffire-lv1.hi.gemini.edu/ocsmsg"
   )
 ) extending List(odbproduction(version), gnodb_credentials(version))
 
@@ -548,7 +550,8 @@ def gsodb(version: Version) = AppConfig(
     "edu.gemini.oodb.mail.smtpHost"        -> "smtp.cl.gemini.edu",
     "edu.gemini.spdb.dir"                  -> "/mount/petrohue/odbhome/ugemini/spdb/spdb.active",
     "edu.gemini.util.trpc.name"            -> "Gemini South ODB",
-    "osgi.shell.telnet.ip"                 -> "172.16.76.71"
+    "osgi.shell.telnet.ip"                 -> "172.16.76.71",
+    "edu.gemini.fire.url"                  -> "http://sbffire-lv1.cl.gemini.edu/ocsmsg"
   ),
   bundles = List(
     BundleSpec(50, "edu.gemini.smartgcal.servlet", version)

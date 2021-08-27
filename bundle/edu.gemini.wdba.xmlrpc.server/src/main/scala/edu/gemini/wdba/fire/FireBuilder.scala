@@ -77,7 +77,7 @@ final case class FireBuilder(
         observationId = Option(observationId),
         too           = Option(too),
         visitStart    = visitStart,
-        datasets      = datasets,
+        fileNames     = datasets.map(_.getDhsFilename),
         sequence      = Sequence(
           sequenceStepCount,
           sequenceCompletedCount,

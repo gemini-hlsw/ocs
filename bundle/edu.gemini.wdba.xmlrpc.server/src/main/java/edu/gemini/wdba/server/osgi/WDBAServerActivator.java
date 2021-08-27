@@ -2,6 +2,9 @@ package edu.gemini.wdba.server.osgi;
 
 import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.None;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.event.ExecEvent;
 import edu.gemini.util.security.principal.StaffPrincipal;
@@ -28,6 +31,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import javax.servlet.ServletException;
+import java.net.URL;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -50,6 +54,7 @@ public class WDBAServerActivator implements BundleActivator {
 
     private static final String APP_CONTEXT = WdbaConstants.APP_CONTEXT;
     private static final String SITE_KEY = "edu.gemini.site";
+    private static final String FIRE_URL = "edu.gemini.fire.url";
 
     private ServiceTracker<HttpService, HttpService> _httpTracker;
     private ServiceTracker<IDBDatabaseService, WdbaContext> _glueTracker;
@@ -59,7 +64,7 @@ public class WDBAServerActivator implements BundleActivator {
     private HttpService _http;
 
     private DBUpdateService dbUpdateService;
-    private FireService fireService;
+    private Option<FireService> fireService;
 
     public void start(BundleContext bundleContext) throws Exception {
         LOG.info("Start WDBA OSGi Service");
@@ -77,18 +82,18 @@ public class WDBAServerActivator implements BundleActivator {
                         final IDBDatabaseService db = _bundleContext.getService(ref);
 
                         // Get the site for TCC and Session
-                        String siteStr = getProperty(_bundleContext, SITE_KEY);
-                        Site site;
-                        try {
-                            site = Site.parse(siteStr);
-                        } catch (Exception ex) {
-                            LOG.info("Could not parse site: " + siteStr);
-                            throw new RuntimeException("Could not parse site: " + siteStr);
-                        }
+                        final Site site = parseSite(_bundleContext);
 
                         final WdbaContext ctx = new WdbaContext(site, new WdbaGlueService(db, user), user);
 
-                        fireService     = FireService.loggingOnly(db);
+                        final Option<URL> fireUrl = parseFireUrl(_bundleContext);
+                        if (fireUrl.isEmpty()) {
+                            LOG.warning("Missing FIRE URL property '" + FIRE_URL + "', no FIRE messages will be posted.");
+                        } else {
+                            fireUrl.foreach(u -> LOG.info("Using FIRE URL: " + u.toString()));
+                        }
+
+                        fireService     = fireUrl.map(url -> FireService.posting(db, url));
                         dbUpdateService = new DBUpdateService(ctx);
 
                         // Define what happens when the session receives an
@@ -103,7 +108,7 @@ public class WDBAServerActivator implements BundleActivator {
                                     .handleEvent(e)
                                     .whenCompleteAsync((maybeEvent, maybeException) ->
                                         ImOption.apply(maybeEvent)
-                                                .foreach(evt -> fireService.handleEvent(evt))
+                                                .foreach(evt -> fireService.foreach(s -> s.handleEvent(evt)))
                                     );
                             } catch (InterruptedException ex) {
                                 LOG.info("Interrupted while processing exec event: " + e);
@@ -114,7 +119,7 @@ public class WDBAServerActivator implements BundleActivator {
                         TccXmlRpcHandler.setContext(ctx);
                         SessionXmlRpcHandler.setContext(ctx, eventConsumer);
 
-                        fireService.start();
+                        fireService.foreach(FireService::start);
                         dbUpdateService.start();
 
                         return ctx;
@@ -126,7 +131,7 @@ public class WDBAServerActivator implements BundleActivator {
                     public void removedService(ServiceReference<IDBDatabaseService> ref, WdbaContext object) {
                         LOG.info("Removing WDBA Access Service");
                         dbUpdateService.stop();
-                        fireService.stop();
+                        fireService.foreach(FireService::stop);
                         ExecXmlRpcHandler.setContext(null);
                         TccXmlRpcHandler.setContext(null);
                         SessionXmlRpcHandler.setContext(null, e -> {});
@@ -179,13 +184,41 @@ public class WDBAServerActivator implements BundleActivator {
         System.out.println("edu.gemini.wdba.session started.");
     }
 
-    private String getProperty(BundleContext ctx, String key) {
+    private static String getProperty(BundleContext ctx, String key) {
         final String res = ctx.getProperty(key);
         if (res == null) throw new RuntimeException("Missing configuration: " + key);
         return res;
     }
 
-    public void stop(BundleContext bundleContext) throws Exception {
+    private static Option<String> getOptionalProperty(BundleContext ctx, String key) {
+        return ImOption.apply(ctx.getProperty(key));
+    }
+
+    private static Site parseSite(BundleContext ctx) {
+        final String s = getProperty(ctx, SITE_KEY);
+        try {
+            return Site.parse(s);
+        } catch (Exception ex) {
+            final String message = "Could not parse '" + SITE_KEY + "' key: " + ex.getMessage();
+            LOG.log(Level.WARNING, message, ex);
+            throw new RuntimeException(message, ex);
+        }
+    }
+
+    private static Option<URL> parseFireUrl(BundleContext ctx) {
+        final Option<String> urlStr = getOptionalProperty(ctx, FIRE_URL);
+        return urlStr.flatMap(s -> {
+            try {
+                return new Some<>(new URL(s));
+            } catch (Exception ex) {
+                final String message = "Could not parse '" + FIRE_URL + "' key: " + ex.getMessage();
+                LOG.log(Level.WARNING, message, ex);
+                return None.instance();
+            }
+        });
+    }
+
+    public void stop(BundleContext bundleContext) {
         LOG.info("Stop WDBA OSGi Service");
 
         _dbTracker.close();

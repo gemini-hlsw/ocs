@@ -10,11 +10,13 @@ import edu.gemini.spModel.event.ExecEvent
 import argonaut._
 import Argonaut._
 
+import java.net.URL
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.logging.{Level, Logger}
 
 import scala.concurrent.duration._
-import scalaz.{-\/, \/-}
+import scalaz._
+import Scalaz._
 
 /**
  * FireService receives `ExecEvent`s and turns them into `FireMessage`s and then
@@ -37,7 +39,7 @@ final class FireService(
     new ServiceExecutor("FireService", task)
 
   def handleEvent(event: ExecEvent): Unit = {
-    Log.info(s"FireService enqueuing event $event")
+    Log.log(DetailLevel, s"FireService enqueuing event $event")
     queue.add(event)
   }
 
@@ -50,7 +52,7 @@ final class FireService(
   private object task extends Runnable {
 
     def handleEvent(event: ExecEvent): Unit = {
-        Log.info(s"FireService handling event $event")
+        Log.log(DetailLevel, s"FireService handling event $event")
 
         val action: FireAction[FireMessage] =
           for {
@@ -61,7 +63,7 @@ final class FireService(
         action.run.unsafePerformSyncAttemptFor(timeout) match {
           case -\/(t)      => Log.log(Level.WARNING, "Exception attempting to handle FIRE message", t)
           case \/-(-\/(e)) => Log.log(Level.WARNING, e.message, e.exception.orNull)
-          case \/-(\/-(m)) => Log.info(s"Handled FireMessage:\n${m.asJson.spaces2}")
+          case \/-(\/-(m)) => Log.log(DetailLevel, s"Handled FireMessage:\n${m.asJson.spaces2}")
         }
     }
 
@@ -71,7 +73,7 @@ final class FireService(
           handleEvent(queue.take())
         } catch {
           case _: InterruptedException =>
-            Log.info("Stopping FireService")
+            Log.log(DetailLevel, "Stopping FireService")
           case ex: Throwable =>
             Log.log(Level.WARNING, "Unexpected exception taking exec event from queue", ex)
         }
@@ -90,5 +92,8 @@ object FireService {
 
   def loggingOnly(db: IDBDatabaseService): FireService =
     new FireService(db, _ => FireAction.unit)
+
+  def posting(db: IDBDatabaseService, url: URL): FireService =
+    new FireService(db, msg => FirePost.post[FireMessage](url, msg).void)
 
 }

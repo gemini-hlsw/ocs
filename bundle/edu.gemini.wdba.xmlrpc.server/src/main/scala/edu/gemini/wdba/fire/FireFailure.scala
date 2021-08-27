@@ -5,9 +5,12 @@ package edu.gemini.wdba.fire
 
 import edu.gemini.pot.sp.SPObservationID
 
+import java.io.IOException
+
 sealed trait FireFailure {
 
-  def exception: Option[Throwable]
+  def exception: Option[Throwable] =
+    None
 
   def message: String
 
@@ -16,9 +19,6 @@ sealed trait FireFailure {
 object FireFailure {
 
   final case class ObsNotFound(obsId: SPObservationID) extends FireFailure {
-
-    override def exception: Option[Throwable] =
-      None
 
     override def message: String =
       s"Observation ${obsId.stringValue} was referenced in an event but does not exist in the ODB."
@@ -40,5 +40,15 @@ object FireFailure {
 
   def fireException(ex: Throwable): FireFailure =
     FireException(ex)
+
+  final case class PostError(code: Int, message: String) extends FireFailure
+
+  def postError(code: Int, message: String): FireFailure =
+    PostError(code, message)
+
+  final case class InvalidResponse(message: String) extends FireFailure
+
+  def invalidResponse(message: String): FireFailure =
+    InvalidResponse(message)
 
 }
