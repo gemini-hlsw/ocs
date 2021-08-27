@@ -58,14 +58,16 @@ final class ConditionsPanel(owner: EdIteratorFolder) extends GridBagPanel {
   private val wv = new ConditionCB[WaterVapor]     (WaterVapor.values,                          "WV " + _.displayValue())
   private val am = new ConditionCB[Double]         (List(1.0, 1.5, 2.0),                        d => f"Airmass $d%.1f")
 
-  def conditions = new ObservingConditions(
-    iq.selection.item,
-    cc.selection.item,
-    wv.selection.item,
-    sb.selection.item,
-    am.selection.item)
+  def conditions: ObservingConditions =
+    ObservingConditions(
+      \/-(iq.selection.item),
+      \/-(cc.selection.item),
+      wv.selection.item,
+      sb.selection.item,
+      am.selection.item
+    )
 
-  def update() = {
+  def update(): Unit =
     // Note: site quality node can be missing (i.e. null)
     Option(owner.getContextSiteQuality).foreach { qual =>
       sb.sync(qual.getSkyBackground)
@@ -76,7 +78,6 @@ final class ConditionsPanel(owner: EdIteratorFolder) extends GridBagPanel {
       // TODO: can we get this value from the airmass constraints?
       am.sync(1.5)
     }
-  }
 
   tooltip = ttMsg
 

@@ -303,9 +303,7 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         PERCENT_90("90%",        90, -3.0) {
             @Override public boolean isObsolete() { return true; }
         },
-        ANY(       "Any",       100, -3.0),
-        ;
-
+        ANY(       "Any",       100, -3.0);
 
         /** The default CloudCover value **/
         public static CloudCover DEFAULT = ANY;
@@ -386,7 +384,6 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
             return _percentage;
         }
 
-
         public String displayValue() {
             return _displayValue;
         }
@@ -417,7 +414,6 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         public static Option<ImageQuality> read(String s) {
             return SPSiteQuality.read(s, values());
         }
-
 
         @Override
         public double getAdjustment(final BandsList bl) {

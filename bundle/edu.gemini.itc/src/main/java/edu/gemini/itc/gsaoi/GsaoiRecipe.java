@@ -58,7 +58,7 @@ public final class GsaoiRecipe implements ImagingRecipe {
                 IQcalc.getImageQuality(),
                 _gsaoiParameters.gems().avgStrehl(),
                 _gsaoiParameters.gems().strehlBand(),
-                _obsConditionParameters.iq(),
+                _obsConditionParameters.javaIq(),
                 _sdParameters);
 
         final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope, new Some<>(gems));

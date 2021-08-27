@@ -359,6 +359,7 @@
                 <td><input name="ImageQuality" value="PERCENT_70" type="radio" checked /> 70%/Good</td>
                 <td><input name="ImageQuality" value="PERCENT_85" type="radio" /> 85%/Poor</td>
                 <td><input name="ImageQuality" value="ANY"        type="radio" /> Any</td>
+				<td><input name="ImageQuality" value="EXACT"      type="radio" /> <input name="ExactIQ" type="text" value="0.8" size="4"> arcsec</td>
             </tr>
             <tr>
                 <td><b>Cloud Cover:</b></td>
@@ -366,6 +367,7 @@
                 <td><input name="CloudCover" value="PERCENT_70" type="radio" /> 70%/Cirrus</td>
                 <td><input name="CloudCover" value="PERCENT_80" type="radio" disabled /> 80%/Cloudy</td>
                 <td><input name="CloudCover" value="ANY"        type="radio" disabled /> Any</td>
+				<td><input name="CloudCover" value="EXACT"      type="radio" /> <input name="ExactCC" type="text" value="0.3" size="4"> mag</td>
             </tr>
             <tr>
                 <td><b>Water Vapor:</b></td>
@@ -379,7 +381,8 @@
                 <td><input name="SkyBackground" value="PERCENT_20" type="radio"/> 20%/Darkest</td>
                 <td><input name="SkyBackground" value="PERCENT_50" type="radio" checked/> 50%/Dark</td>
                 <td><input name="SkyBackground" value="PERCENT_80" type="radio"/> 80%/Grey</td>
-                <td><input name="SkyBackground" value="ANY"        type="radio"/> Any/Bright</td>
+				<td colspan="2"><input name="SkyBackground" value="ANY" type="radio"/> Any/Bright
+					(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10272','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>explanatory notes</span></a>)</td>
             </tr>
             <tr>
                 <td><b>Airmass:</b></td>
@@ -406,21 +409,20 @@
 	</p>
 	<table background="https://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0" height="70" width="100%">
 		<tbody>
-
 			<tr>
 				<td colspan="2" height="50" valign="bottom"><b>Calculation method:</b> <i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i><br />
 				<i>Select the calculation method (note: second method is not available for spectroscopy)</i></td>
 			</tr>
 			<tr>
 				<td><input value="s2n" name="calcMethod" checked="checked" type="radio" /><input name="numExpA" value="0" type="hidden" /></td>
-				<td>Total S/N ratio resulting from a total time of <input name="expTimeA" size="5" value="1800" type="text" /> secs and with a fraction <input name="fracOnSourceA" size="4" value="0.5" type="text" /> of exposures that observe the source (number of individual
-				exposures will be calculated from assumed frame time) </td>
-
+				<td>Total S/N ratio resulting from a total time of <input name="expTimeA" size="5" value="1800" type="text" />
+					secs and with a fraction <input name="fracOnSourceA" size="4" value="0.5" type="text" />
+					of exposures that observe the source (number of individual exposures will be calculated from assumed frame time) </td>
 			</tr>
 			<tr>
 				<td><input value="intTime" name="calcMethod" type="radio" /><input name="expTimeC" value="0" type="hidden" /></td>
-				<td>Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" />  and with a fraction <input name="fracOnSourceC" size="4" value="0.5" type="text" /> of exposures that observe the source </td>
-
+				<td>Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" />
+					and with a fraction <input name="fracOnSourceC" size="4" value="0.5" type="text" /> of exposures that observe the source </td>
 			</tr>
 			<tr>
 				<td colspan="2" height="40" valign="bottom"><b>Telescope offset:</b><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/sciops/instruments/gnirs/spectroscopy/observing-strategies#offsetting','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
@@ -433,14 +435,12 @@
 				<td colspan="2" height="50" valign="bottom"><b>Analysis method:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256#analysis','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
 			</tr>
 			<tr>
-
 				<td><input value="autoAper" name="analysisMethod" checked="checked" type="radio" /></td>
 				<td>Software aperture that gives 'optimum' S/N ratio and with a sky aperture <input name="autoSkyAper" size="4" value="5" type="text" /> times the target aperture</td>
 			</tr>
 			<tr>
 				<td><input value="userAper" name="analysisMethod" type="radio" /></td>
 				<td>Software aperture of diameter (or slit length) <input name="userAperDiam" size="4" value="2" type="text" /> arcsec and with a sky aperture <input name="userSkyAper" size="4" value="5" type="text" /> times the target aperture</td>
-
 			</tr>
 			<tr>
 				<td colspan="2" height="50" valign="bottom"><b>Output:</b> </td>
@@ -448,7 +448,6 @@
 			<tr>
 				<td colspan="2">For spectroscopy, <input value="AUTO" name="PlotLimits" checked="checked" type="radio" /> autoscale or <input value="USER" name="PlotLimits" type="radio" /> specify
 				limits for plotted spectra (lower wavelength <input name="plotWavelengthL" size="6" value="8.0" type="text" /> µm and upper wavelength <input name="plotWavelengthU" size="6" value="13.000" type="text" /> µm) </td>
-
 			</tr>
 			<tr>
 				<td colspan="2">
@@ -457,7 +456,6 @@
 					</p>
 				</td>
 			</tr>
-
 		</tbody>
 	</table>
 	<div align="center">
