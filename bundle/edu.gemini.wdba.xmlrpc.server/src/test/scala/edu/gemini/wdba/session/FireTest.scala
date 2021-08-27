@@ -133,12 +133,9 @@ object FireTest {
     queue: LinkedBlockingQueue[FireMessage]
   ) extends HttpHandler {
 
-    override def handle(ex: HttpExchange): Unit = {
-      val bytes = new Array[Byte](ex.getRequestBody.available())
-      ex.getRequestBody.read(bytes)
-      val jsonString = new String(bytes, "UTF-8")
-
-      Parse.decodeEither[FireMessage](new String(bytes, "UTF-8")) match {
+    private def unsafeHandle(ex: HttpExchange): Unit = {
+      val jsonString = scala.io.Source.fromInputStream(ex.getRequestBody).mkString
+      Parse.decodeEither[FireMessage](jsonString) match {
         case Left(err)  =>
           println(s"FireMessage parsing failed: $err")
           println(jsonString)
@@ -156,6 +153,12 @@ object FireTest {
       }
     }
 
+    override def handle(ex: HttpExchange): Unit =
+      try {
+        unsafeHandle(ex)
+      } finally {
+        ex.close()
+      }
   }
 
   def initMessage(nature: String): FireMessage =
