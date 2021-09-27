@@ -45,9 +45,9 @@ object Target {
     } yield Coordinates(RightAscension.fromAngle(raHms), dec)
   }
 
-  def apply(m: M.Target): Target = m match {
+  def apply(m: M.Target, referenceCoordinates: Option[Coordinates]): Target = m match {
     case m: M.SiderealTarget    => SiderealTarget(m)
-    case m: M.NonSiderealTarget => NonSiderealTarget(m)
+    case m: M.NonSiderealTarget => NonSiderealTarget(m, referenceCoordinates)
     case m: M.TooTarget         => TooTarget(m)
   }
 
@@ -129,25 +129,36 @@ case class SiderealTarget (
 
 object NonSiderealTarget extends UuidCache[M.NonSiderealTarget] {
 
-  def empty = apply(UUID.randomUUID(), "Untitled", List.empty, CoordinatesEpoch.J_2000, None, None)
+  def empty = apply(UUID.randomUUID(), "Untitled", List.empty, CoordinatesEpoch.J_2000, None, None, None)
 
-  def apply(m: M.NonSiderealTarget): NonSiderealTarget = new NonSiderealTarget(
+  /**
+   * @param referenceCoordinates optional coordinates that will be used instead of the ephemeris
+   *   for ITAC bucket-filling. This value is used only by ITAC and does not exist in Phase 2.
+   */
+  def apply(m: M.NonSiderealTarget, referenceCoordinates: Option[Coordinates]): NonSiderealTarget = new NonSiderealTarget(
     uuid(m),
     m.getName,
     m.getEphemeris.asScala.map(EphemerisElement(_)).toList,
     m.getEpoch,
     Option(m.getHorizonsDesignation),
-    Option(m.getHorizonsQuery()))
+    Option(m.getHorizonsQuery()),
+    referenceCoordinates
+  )
 
 }
 
+  /**
+   * @param referenceCoordinates optional coordinates that will be used instead of the ephemeris
+   *   for ITAC bucket-filling. This value is used only by ITAC and does not exist in Phase 2.
+   */
 case class NonSiderealTarget(
   uuid:UUID,
   name: String,
   ephemeris: List[EphemerisElement],
   epoch: CoordinatesEpoch,
   horizonsDesignation: Option[String],
-  horizonsQuery: Option[String]
+  horizonsQuery: Option[String],
+  referenceCoordinates: Option[Coordinates] = None
 ) extends Target {
 
   def isEmpty = ephemeris.isEmpty

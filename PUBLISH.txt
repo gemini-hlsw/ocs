@@ -1,0 +1,32 @@
+
+LOCAL PUBLISHING OF 2.13 ARTIFACTS
+
+
+sbt -Dsbt.boot.directory=/tmp/boot1 -Dsbt.launcher.coursier=false
+
+
+++2.13.1
+bundle_edu_gemini_model_p1_pdf/publishLocal
+bundle_edu_gemini_model_p1_targetio/publishLocal
+bundle_edu_gemini_model_p1/publishLocal
+bundle_edu_gemini_pot/publishLocal
+bundle_edu_gemini_seqexec_odb/publishLocal
+bundle_edu_gemini_shared_skyobject/publishLocal
+bundle_edu_gemini_shared_util/publishLocal
+bundle_edu_gemini_spModel_core/publishLocal
+bundle_edu_gemini_spModel_io/publishLocal
+bundle_edu_gemini_spModel_pio/publishLocal
+bundle_edu_gemini_spModel_smartgcal/publishLocal
+bundle_edu_gemini_util_javax_mail/publishLocal
+bundle_edu_gemini_util_osgi/publishLocal
+bundle_edu_gemini_util_pdf/publishLocal
+bundle_edu_gemini_util_skycalc/publishLocal
+bundle_edu_gemini_util_ssl/publishLocal
+bundle_edu_gemini_util_ssl_apache/publishLocal
+bundle_edu_gemini_wdba_session_client/publishLocal
+bundle_edu_gemini_wdba_shared/publishLocal
+bundle_edu_gemini_wdba_xmlrpc_api/publishLocal
+bundle_jsky_coords/publishLocal
+bundle_jsky_util/publishLocal
+bundle_jsky_util_gui/publishLocal
+bundle_edu_gemini_epics_acm/publishLocal

@@ -5,6 +5,7 @@ import edu.gemini.model.p1.{mutable => M}
 
 import scalaz.{Band => SBand, _}
 import Scalaz._
+import edu.gemini.spModel.core.Coordinates
 
 object Observation {
   // Some lenses.
@@ -20,7 +21,12 @@ object Observation {
             band:Band,
             progTime:Option[TimeAmount]) = new Observation(blueprint, condition, target, progTime, band)
 
-  def apply(m:M.Observation) = new Observation(m)
+  /**
+   * @param referenceCoordinates optional coordinates that will overide the ephemeris for ITAC
+   *   bing-filling. This value is ignored unless the target is nonsidereal, is used only by
+   *   ITAC, and does not exist in Phase 2.
+   */
+  def apply(m:M.Observation, referenceCoordinates: Option[Coordinates]) = new Observation(m, referenceCoordinates)
 
   def unapply(o:Observation) = Some((o.blueprint, o.condition, o.target, o.progTime, o.band))
 
@@ -71,10 +77,11 @@ class Observation private (val blueprint:Option[BlueprintBase],
            enabled:Boolean = enabled) =
     new Observation(blueprint, condition, target, progTime, band, meta, enabled)
 
-  def this(m:M.Observation) = this (
+  // see companion apply for explanation of `referenceCoordinates`
+  def this(m:M.Observation, referenceCoordinates: Option[Coordinates]) = this (
       Option(m.getBlueprint).map(BlueprintBase(_)),
       Option(m.getCondition).map(Condition(_)),
-      Option(m.getTarget).map(Target(_)),
+      Option(m.getTarget).map(Target(_, referenceCoordinates)),
       Option(m.getProgTime).map(TimeAmount(_)),
       Option(m.getBand).getOrElse(M.Band.BAND_1_2),
       Option(m.getMeta).map(ObservationMeta(_)),
