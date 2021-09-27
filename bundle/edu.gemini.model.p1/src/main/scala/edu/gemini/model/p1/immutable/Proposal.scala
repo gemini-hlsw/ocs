@@ -9,6 +9,7 @@ import org.xml.sax.SAXException
 
 import scalaz.{Band => SBand, _}
 import Scalaz._
+import edu.gemini.spModel.core.Coordinates
 
 object Proposal {
 
@@ -77,7 +78,13 @@ object Proposal {
     ProposalClass.empty,
     currentSchemaVersion)
 
-  def apply(m:M.Proposal) = new Proposal(m)
+  /**
+   * @param referenceCoordinates a map from nonsidereal target id to reference coordinates, for
+   *   cases where the Ephemeris must be overridden for ITAC bucket-filling. This notion applies
+   *   only to nonsidereal targets, is used only by ITAC, and does not exist in phase 2.
+   */
+  def apply(m:M.Proposal, referenceCoordinates: Map[String, Coordinates] = Map.empty) =
+    new Proposal(m, referenceCoordinates)
 
   // REL-3290: Create a non-empty list of observations, i.e. make sure that if there are no defined observations,
   // then an empty one is provided to serve as a dummy observation for users to edit.
@@ -129,7 +136,8 @@ case class Proposal(meta:Meta,
   // REL-3290: Check to see if there are observations that are non-empty.
   def hasNonEmptyObservations: Boolean = nonEmptyObservations.nonEmpty
 
-  private def this(m:M.Proposal) = this(
+  // see companion apply for explanation of `referenceCoordinates`
+  private def this(m:M.Proposal, referenceCoordinates: Map[String, Coordinates]) = this(
     Meta(m.getMeta),
     Semester(m.getSemester),
     m.getTitle,
@@ -137,8 +145,8 @@ case class Proposal(meta:Meta,
     m.getScheduling,
     Option(m.getTacCategory),
     Investigators(m),
-    m.getTargets.getSiderealOrNonsiderealOrToo.asScala.map(Target(_)).toList,
-    Proposal.nonEmptyObsList(m.getObservations.getObservation.asScala.map(Observation(_)).toList),
+    m.getTargets.getSiderealOrNonsiderealOrToo.asScala.map(t => Target(t, referenceCoordinates.get(t.getId()))).toList,
+    Proposal.nonEmptyObsList(m.getObservations.getObservation.asScala.map(o => Observation(o, Option(o.getTarget()).map(_.getId).flatMap(referenceCoordinates.get))).toList),
     Option(m.getProposalClass).map(ProposalClass(_)).getOrElse(ProposalClass.empty),  // TODO: get rid of the empty case
     m.getSchemaVersion)
 
