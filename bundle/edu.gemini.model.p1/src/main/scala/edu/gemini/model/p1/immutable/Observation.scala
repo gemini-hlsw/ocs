@@ -23,7 +23,7 @@ object Observation {
 
   /**
    * @param referenceCoordinates optional coordinates that will overide the ephemeris for ITAC
-   *   bing-filling. This value is ignored unless the target is nonsidereal, is used only by
+   *   bin-filling. This value is ignored unless the target is nonsidereal, is used only by
    *   ITAC, and does not exist in Phase 2.
    */
   def apply(m:M.Observation, referenceCoordinates: Option[Coordinates]) = new Observation(m, referenceCoordinates)
