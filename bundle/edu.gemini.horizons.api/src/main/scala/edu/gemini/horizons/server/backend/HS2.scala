@@ -102,10 +102,7 @@ object HorizonsService2 {
 
     val queryParams: Map[String, String] =
       Map(
-        "format"   -> "text",
-        // BATCH      -> "1",
-        // TABLE_TYPE -> OBSERVER_TABLE,
-        // CSV_FORMAT -> NO,
+        FORMAT     -> "text",
         EPHEMERIS  -> NO,
         COMMAND    -> s"'${search.queryString}'"
       )
@@ -176,12 +173,8 @@ object HorizonsService2 {
 
     val queryParams: Map[String, String] =
       Map(
-        "format"         -> "text",
-        // BATCH            -> "1",
-        // TABLE_TYPE       -> OBSERVER_TABLE,
-        // CSV_FORMAT       -> NO,
+        FORMAT           -> "text",
         EPHEMERIS        -> YES,
-        // TABLE_FIELDS_ARG -> TABLE_FIELDS,
         CENTER           -> CENTER_COORD,
         COORD_TYPE       -> COORD_TYPE_GEO,
         COMMAND          -> s"'${target.queryString}'",
@@ -370,13 +363,7 @@ object HorizonsService2 {
     horizonsRequest(params) { method =>
       IO {
         val s = Source.fromInputStream(method.in, method.charset.displayName())
-        try     {
-          val lines = s.getLines.toList
-          // print(Console.GREEN)
-          // lines.foreach(println)
-          // print(Console.RESET)
-          lines
-        }
+        try     s.getLines.toList
         finally s.close()
       }
     }
