@@ -229,7 +229,7 @@ object HorizonsService2 {
   private def parseHeader[A](lines: List[String])(f: (String, List[String]) => String \/ List[A]): String \/ List[A] =
     lines match {
       case _ :: _ :: _ :: _ :: h :: t => f(h, t)
-      case _                => "Fewer than 5 lines!".left
+      case _                          => "Fewer than 5 lines!".left
     }
 
   // Parse the result of the given search
