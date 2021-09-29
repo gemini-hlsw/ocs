@@ -22,8 +22,22 @@ ocsAppManifest := {
     configs = List(
       common(v), // note, each config extends xxx_credentials, defined in $TOP/project/OcsCredentials.scala
         with_gogo(v),
+          rnorris(v),
+          swalker(v),
+          jluhrs(v),
+          cquiroz(v),
           sraaphorst(v),
-          with_remote_gogo(v)
+          anunez(v),
+          astephens(v),
+          osmirnova(v),
+          with_remote_gogo(v),
+            odbtest(v),
+              gsodbtest(v),
+              gnodbtest(v),
+            odbproduction(v),
+              gsodb(v),
+              gnodb(v),
+      gnagsodb(v)
     )
   )
 }
@@ -100,8 +114,7 @@ def common(version: Version) = AppConfig(
     BundleSpec("edu.gemini.oodb.too.url",                version),
     BundleSpec("edu.gemini.oodb.too.window",             version),
     BundleSpec("edu.gemini.osgi.main",                   Version(4, 2, 1)),
-    BundleSpec("edu.gemini.p2checker",                   version),
-    BundleSpec("edu.gemini.programexport.servlet",       version),
+    BundleSpec("edu.gemini.p2checker",                   version), // ?
     BundleSpec("edu.gemini.phase2.skeleton.servlet",     version),
     BundleSpec("edu.gemini.qpt.shared",                  version),
     BundleSpec("edu.gemini.services.server",             version),
@@ -159,6 +172,67 @@ def with_remote_gogo(version: Version) = AppConfig(
   )
 ) extending List(with_gogo(version), with_remote_gogo_credentials(version))
 
+// RNORRIS
+def rnorris(version: Version) = AppConfig(
+  id = "rnorris",
+  distribution = List(TestDistro),
+  vmargs = List(
+    "-Dcom.cosylab.epics.caj.CAJContext.addr_list=172.17.2.255",
+    "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/gemsoft/var/data/www/public/reports/obsStatus/test",
+    "-Dcron.*.edu.gemini.dbTools.html.ftpHost=gnconfig.gemini.edu",
+    "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/home/dataproc/OT_XML/test",
+    "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=gsags.cl.gemini.edu",
+    "-Dcron.odbMail.SITE_SMTP_SERVER=smtp.cl.gemini.edu",
+    "-Dcron.reports.edu.gemini.spdb.reports.public.host=gnconfig.gemini.edu",
+    "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/gemsoft/var/data/www/public/reports/test",
+    "-Dedu.gemini.site=south",
+    "-Xmx1024M"
+  ),
+  props = Map(
+    "edu.gemini.auxfile.fits.host"               -> "gsconfig.gemini.edu",
+    "edu.gemini.auxfile.root"                    -> "/Users/rnorris/.auxfile",
+    "edu.gemini.dataman.gsa.summit.host"         -> "mkofits-lv1new.hi.gemini.edu",
+    "edu.gemini.spdb.dir"                        -> "/Users/rnorris/.spdb/",
+    "edu.gemini.util.trpc.name"                  -> "Rob's ODB (Test)",
+    "edu.gemini.services.telescope.schedule.id.north"  -> "00h6i49qldh5qrteote4nfhldo@group.calendar.google.com",
+    "edu.gemini.services.telescope.schedule.id.south"  -> "c4br8ehtv4i8741jfe4ef5saq8@group.calendar.google.com",
+    "edu.gemini.services.telescope.schedule.url.north" -> "https://www.google.com/calendar/embed?src=00h6i49qldh5qrteote4nfhldo%40group.calendar.google.com",
+    "edu.gemini.services.telescope.schedule.url.south" -> "https://www.google.com/calendar/embed?src=c4br8ehtv4i8741jfe4ef5saq8%40group.calendar.google.com"
+  )
+) extending List(with_gogo(version), rnorris_credentials(version))
+
+// SWALKER
+def swalker(version: Version) = AppConfig(
+  id = "swalker",
+  distribution = List(TestDistro),
+  vmargs = List(
+    "-Xmx1024M",
+    "-Dcom.cosylab.epics.caj.CAJContext.addr_list=172.17.2.255",
+    "-Dedu.gemini.site=south",
+    "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005",
+    "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
+    "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/swalker/sftp",
+    "-Dcron.odbMail.SITE_SMTP_SERVER=dummy.cl.gemini.edu",
+    "-Dcron.reports.edu.gemini.spdb.reports.public.host=localhost",
+    "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/Users/swalker/cron",
+    "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=localhost",
+    "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/swalker/cron"
+  ),
+  props = Map(
+    "edu.gemini.auxfile.fits.dest"               -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.fits.host"               -> "gsconfig.gemini.edu",
+    "edu.gemini.auxfile.other.dest"              -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.root"                    -> "/Users/swalker/.auxfile",
+    "edu.gemini.dataman.gsa.summit.host"         -> "cpofits-lv1new.cl.gemini.edu",
+    "edu.gemini.dbTools.maskcheck.nagdelay"      -> "PT1M",
+    "edu.gemini.dbTools.tcs.ephemeris.directory" -> "/Users/swalker/.ephemeris",
+    "edu.gemini.services.server.start"           -> "false",
+    "edu.gemini.smartgcal.host"                  -> "localhost",
+    "edu.gemini.spdb.dir"                        -> "/Users/swalker/.spdb/",
+    "edu.gemini.util.trpc.name"                  -> "Shane's ODB (Test)"
+  )
+) extending List(with_gogo(version), swalker_credentials(version))
+
 // SRAAPHORST
 def sraaphorst(version: Version) = AppConfig(
   id = "sraaphorst",
@@ -184,7 +258,6 @@ def sraaphorst(version: Version) = AppConfig(
     "edu.gemini.dataman.gsa.summit.host"   -> "cpofits-lv1new.cl.gemini.edu",
     "edu.gemini.dbTools.archive.directory" -> "/Users/sraaphorst/tmp/archiver",
     "osgi.shell.telnet.ip"                 -> "172.16.77.244"
-    //"osgi.shell.telnet.ip"                -> "192.168.1.5"
   )
 ) extending List(with_gogo(version), sraaphorst_credentials(version))
 
