@@ -71,10 +71,13 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
   // Recursive method to build up the JSON representation of the program.
   // TODO: I am assuming on ISPProgram that we need to call getObservations and getObsComponents
   // TODO: at some point, as the observations and obs components are not
-  def process(n: ISPNode): Option[JsonAssoc] = {
+  def process(n: ISPNode): Option[JsonAssoc] =
+    process_(n, 0)
+
+  def process_(n: ISPNode, i: Int): Option[JsonAssoc] = {
     n match {
       case _: ISPProgram | _: ISPGroup | _: ISPObservation | _: ISPObsComponent | _: ISPObsQaLog =>
-        simpleNode(n)
+        simpleNode(n, i)
 
       case _: ISPSeqComponent =>
         sequenceNode(n)
@@ -85,14 +88,14 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
   }
 
   // TODO: Some information is not appearing, such as multiple observations in groups.
-  def simpleNode(n: ISPNode): Option[JsonAssoc] = {
+  def simpleNode(n: ISPNode, i: Int): Option[JsonAssoc] = {
     for {
       t <- n.dataObject.map(_.getType)
       j <- componentFields(n)
     } yield (
-      t.name,
-      n.children.foldLeft(("key" := n.getNodeKey.toString) ->: j) { (jp, c) =>
-        process(c) ->?: jp
+      s"${t.name}-$i",
+      n.children.zipWithIndex.foldLeft(("key" := n.getNodeKey.toString) ->: j) { case (jp, (c, x)) =>
+        process_(c, x) ->?: jp
       }
     )
   }

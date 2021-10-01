@@ -116,6 +116,7 @@ def common(version: Version) = AppConfig(
     BundleSpec("edu.gemini.osgi.main",                   Version(4, 2, 1)),
     BundleSpec("edu.gemini.p2checker",                   version), // ?
     BundleSpec("edu.gemini.phase2.skeleton.servlet",     version),
+    BundleSpec("edu.gemini.programexport.servlet",       version),
     BundleSpec("edu.gemini.qpt.shared",                  version),
     BundleSpec("edu.gemini.services.server",             version),
     BundleSpec("edu.gemini.seqexec.odb",                 version),
