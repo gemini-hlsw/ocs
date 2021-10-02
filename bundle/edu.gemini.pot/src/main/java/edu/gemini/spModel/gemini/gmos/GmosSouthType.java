@@ -205,8 +205,8 @@ public class GmosSouthType {
         JWL38_G0351("JWL38_G0351", "JWL38", "0.3920",    Ictd.track("JWL38")),
         F396N_G0352("F396N_G0352", "F396N", "0.3960",    Ictd.track("F396N")),
         JWL43_G0353("JWL43_G0353", "JWL43", "0.4303",    Ictd.track("JWL43")),
-        STRY_G0354("Stry_G0354", "Stry", "0.4671",       Ictd.track("Stry")),
-        STRB_G0355("Strb_G0355", "Strb", "0.5460",       Ictd.track("Strb")),
+        STRY_G0354("Stry_G0354", "Stry", "0.5460",       Ictd.track("Stry")),
+        STRB_G0355("Strb_G0355", "Strb", "0.4671",       Ictd.track("Strb")),
         ;
 
         public static final FilterSouth DEFAULT = NONE;
