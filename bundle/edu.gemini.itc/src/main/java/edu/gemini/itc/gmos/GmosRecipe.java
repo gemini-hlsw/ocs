@@ -529,17 +529,16 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         return new SpcChartData(S2NChart.instance(), title, xAxis, yAxis, scalaData, scalaAxes);
     }
 
-    /** Creates the signal in pixel space chart. */
+    /** Creates the IFU signal in pixel-space chart. */
     private static SpcChartData createSignalPixelChart(final SpectroscopyResult[] results, final int i) {
         final Gmos mainInstrument = (Gmos) results[0].instrument(); // This must be GMOS here.
         final Gmos[] ccdArray     = mainInstrument.getDetectorCcdInstruments();
         final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
 
-        final boolean ifuUsed   = mainInstrument.isIfuUsed();
-        final double  ifuOffset = ifuUsed ? mainInstrument.getIFU().getApertureOffsetList().get(i) : 0.0;
+        final double ifuOffset = mainInstrument.getIfuMethod().get() instanceof IfuSum ? 0.0 : mainInstrument.getIFU().getApertureOffsetList().get(i);
 
         final List<ChartAxis> axes = new ArrayList<>();
-        final String title    = "Pixel Signal and SQRT(Background)" + (ifuUsed ? "\nIFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec" : "");
+        final String title = "Pixel Signal and SQRT(Background)\nIFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec";
         final ChartAxis xAxis = new ChartAxis("Pixels", true, new Some<>(new ChartAxisRange(0, tv.fullArrayPix())));
         final ChartAxis yAxis = ChartAxis.apply("e- per exposure per spectral pixel");
 
