@@ -73,6 +73,7 @@ public final class ObsLog {
             final ISPFactory factory = db.getFactory();
             final ISPObservation obs = db.lookupObservationByID(obsId);
             if (obs == null) {
+                LOG.log(Level.WARNING, "Could not find observation " + obsId + " for obs log update");
                 throw new RuntimeException("Could not find observation " + obsId);
             }
 

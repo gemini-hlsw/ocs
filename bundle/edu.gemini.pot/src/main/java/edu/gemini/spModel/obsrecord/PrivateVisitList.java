@@ -5,6 +5,7 @@
 package edu.gemini.spModel.obsrecord;
 
 import edu.gemini.pot.sp.Instrument;
+import edu.gemini.pot.sp.SPObservationID;
 import edu.gemini.shared.util.immutable.DefaultImList;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
@@ -18,6 +19,7 @@ import edu.gemini.spModel.time.ObsTimeCharges;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,6 +29,8 @@ import java.util.stream.Stream;
  */
 final class PrivateVisitList implements Serializable {
     private static final long serialVersionUID = -2686488059242714341L;
+
+    private static final Logger LOG = Logger.getLogger(PrivateVisitList.class.getName());
 
     private final List<PrivateVisit> _visits;
 
@@ -85,6 +89,9 @@ final class PrivateVisitList implements Serializable {
     }
 
     private void _rebuild(List<ObsExecEvent> eventList) {
+        final String ids = eventList.stream().map(ObsExecEvent::getObsId).distinct().map(SPObservationID::stringValue).reduce((a, b) -> a + ", " + b).orElse("");
+        LOG.info("Rebuilding visit list for: " + ids);
+
         eventList.sort(ExecEvent.TIME_COMPARATOR);
         _visits.clear();
 
@@ -148,7 +155,7 @@ final class PrivateVisitList implements Serializable {
         ConfigStore        store
     ) {
         final List<ObsExecEvent[]> visits =
-          _visits.stream().map(v -> v.getEvents()).collect(Collectors.toList());
+          _visits.stream().map(PrivateVisit::getEvents).collect(Collectors.toList());
 
         return VisitCalculator$.MODULE$.calcForJava(visits, instrument, oc, qa, store);
     }
@@ -162,7 +169,7 @@ final class PrivateVisitList implements Serializable {
     ) {
         return calcVisitTimes(instrument, oc, qa, store)
                    .stream()
-                   .reduce(new VisitTimes(), (a, b) -> a.plus(b))
+                   .reduce(new VisitTimes(), VisitTimes::plus)
                    .getTimeCharges(mainChargeClass);
     }
 

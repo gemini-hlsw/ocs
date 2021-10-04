@@ -41,7 +41,7 @@ public final class ObsExecLog extends AbstractDataObject implements ISPMergeable
     public static final SPComponentType SP_TYPE = SPComponentType.OBS_EXEC_LOG;
 
     public static final ISPNodeInitializer<ISPObsExecLog, ObsExecLog> NI =
-        new SimpleNodeInitializer<>(SP_TYPE, () -> new ObsExecLog());
+        new SimpleNodeInitializer<>(SP_TYPE, ObsExecLog::new);
 
 
     private ObsExecRecord _obsExecRecord;
@@ -120,13 +120,13 @@ public final class ObsExecLog extends AbstractDataObject implements ISPMergeable
             // any missing configurations between the end of the existing
             // completed steps and the beginning of the labels we're adding now.
             final int first = labels.first().getIndex() - 1;
-            final int start = (first > completedSteps.size()) ? completedSteps.size() : first;
+            final int start = Math.min(first, completedSteps.size());
             final int end   = labels.last().getIndex() - 1;
 
             // Sequences can be edited at any time and there may not be a step
             // that corresponds to one or more datasets.
             if (start<0 || end>=seq.size()) {
-                LOG.warning("Datasets do not correspond to observation sequence: obsId=" + oid + ", labels=" + labels.toString());
+                LOG.warning("Datasets do not correspond to observation sequence: obsId=" + oid + ", labels=" + labels);
                 return;
             }
 
@@ -232,27 +232,26 @@ public final class ObsExecLog extends AbstractDataObject implements ISPMergeable
     public static void updateObsLog(final IDBDatabaseService db, final SPObservationID obsId, final Option<DatasetLabel> label, final Option<ObsExecEvent> evt) {
 
         ObsLog.update(db, obsId, (obs, log) -> {
-            final Option<SequenceData> seqData = label.map(new MapOp<DatasetLabel, SequenceData>() {
-                @Override public SequenceData apply(DatasetLabel datasetLabel) {
-                    return new SequenceData(obs, datasetLabel);
-                }
-            });
+            LOG.info(String.format("%s starting obslog update (label=%s, evt=%s)", obsId, label.getOrNull(), evt.getOrNull()));
+
+            final Option<SequenceData> seqData = label.map(
+                datasetLabel -> new SequenceData(obs, datasetLabel)
+            );
 
             try {
                 // Add the event to the obs record, if one was provided.
                 evt.foreach(oee -> {
                     // Extract the config out of the sequence, if any.
-                    final Option<Config> rawConfig = seqData.flatMap(new MapOp<SequenceData, Option<Config>>() {
-                        @Override public Option<Config> apply(SequenceData sd) { return sd.config; }
-                    });
+                    final Option<Config> rawConfig = seqData.flatMap(
+                        sd -> sd.config
+                    );
 
                     // Add the event, but map the config to String/display values.
-                    log.execLogDataObject.getRecord().addEvent(oee, rawConfig.map(new MapOp<Config, Config>() {
-                        @Override
-                        public Config apply(Config config) {
-                            return ConfigValMapUtil.mapValues(config, ConfigValMapInstances.TO_DISPLAY_VALUE);
-                        }
-                    }).getOrNull());
+                    log.execLogDataObject.getRecord().addEvent(oee, rawConfig.map(
+                        config -> ConfigValMapUtil.mapValues(config, ConfigValMapInstances.TO_DISPLAY_VALUE)
+                    ).getOrNull());
+
+                    LOG.info(String.format("%s recorded event %s", obsId, evt.getOrNull()));
                 });
 
 
@@ -263,6 +262,8 @@ public final class ObsExecLog extends AbstractDataObject implements ISPMergeable
             } catch (Exception ex) {
                 LOG.log(Level.WARNING, String.format("Could not update %s ObsLog for event: %s", obsId, evt.getOrNull()), ex);
                 throw new RuntimeException(ex);
+            } finally {
+                LOG.info(String.format("%s completed obslog update (label=%s, evt=%s)", obsId, label.getOrNull(), evt.getOrNull()));
             }
         });
     }
