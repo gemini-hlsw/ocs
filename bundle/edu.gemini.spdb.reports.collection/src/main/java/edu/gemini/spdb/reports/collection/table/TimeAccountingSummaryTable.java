@@ -227,19 +227,21 @@ public class TimeAccountingSummaryTable extends AbstractTable {
                 // Get accounts string
                 final TimeAcctCategory cat = ratioEntry.getKey();
                 final double ratio = ratioEntry.getValue();
-                final String account = cat.name();
+                if (ratio > 0.0) {
+                    final String account = cat.name();
 
-                // We can create a table row now!
-                final Map<IColumn, Object> row = createRow();
-                row.put(Columns.DATE, night.getNightString());
-                row.put(Columns.PROGRAM_ID, id);
-                row.put(Columns.INSTRUMENT, instrumentsString);
-                row.put(Columns.PRG, prg * ratio);
-                row.put(Columns.CAL, cal * ratio);
-                row.put(Columns.TOTAL, total * ratio);
-                row.put(Columns.ACCOUNT, account);
-                if (comment != null) row.put(Columns.COMMENT, comment);
-                rows.add(row);
+                    // We can create a table row now!
+                    final Map<IColumn, Object> row = createRow();
+                    row.put(Columns.DATE, night.getNightString());
+                    row.put(Columns.PROGRAM_ID, id);
+                    row.put(Columns.INSTRUMENT, instrumentsString);
+                    row.put(Columns.PRG, prg * ratio);
+                    row.put(Columns.CAL, cal * ratio);
+                    row.put(Columns.TOTAL, total * ratio);
+                    row.put(Columns.ACCOUNT, account);
+                    if (comment != null) row.put(Columns.COMMENT, comment);
+                    rows.add(row);
+                }
             }
         }
 	}
