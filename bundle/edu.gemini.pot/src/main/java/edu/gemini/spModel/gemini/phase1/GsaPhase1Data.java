@@ -39,6 +39,7 @@ public final class GsaPhase1Data implements Serializable {
     public static final GsaPhase1Data EMPTY = new GsaPhase1Data(
             Abstract.EMPTY,
             Category.EMPTY,
+            Collections.emptyList(),
             Investigator.EMPTY,
             Collections.emptyList()
     );
@@ -163,12 +164,14 @@ public final class GsaPhase1Data implements Serializable {
 
     private final String abstrakt;
     private final String category;
+    private final List<String> keywords;  // TODO: REMOVE ME
     private final Investigator pi;
     private final List<Investigator> cois;
 
-    public GsaPhase1Data(Abstract abstrakt, Category cat, Investigator pi, Collection<Investigator> cois) {
+    public GsaPhase1Data(Abstract abstrakt, Category cat, Collection<Keyword> keywords, Investigator pi, Collection<Investigator> cois) {
         if (abstrakt == null) abstrakt = new Abstract("");
         if (cat == null) cat = new Category("");
+        this.keywords = Collections.emptyList();
         if (pi == null) pi = Investigator.EMPTY;
         if (cois == null) cois = Collections.emptyList();
 
@@ -187,6 +190,7 @@ public final class GsaPhase1Data implements Serializable {
     public GsaPhase1Data(ParamSet pset) {
         this.abstrakt = Pio.getValue(pset, ABSTRACT_PARAM, "");
         this.category = Pio.getValue(pset, CATEGORY_PARAM, "");
+        this.keywords = Collections.emptyList();
 
         ParamSet invsPset = pset.getParamSet(INVESTIGATORS_PARAM_SET);
         if (invsPset == null) {
@@ -214,6 +218,9 @@ public final class GsaPhase1Data implements Serializable {
 
     public Abstract getAbstract() { return new Abstract(abstrakt); }
     public Category getCategory() { return new Category(category); }
+    public List<Keyword> getKeywords() {
+        return new ArrayList<>();
+    }
     public Investigator getPi() { return pi; }
     public List<Investigator> getCois() { return cois; }
 

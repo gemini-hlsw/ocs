@@ -319,6 +319,7 @@ public final class PioSpXmlParser {
         return new GsaPhase1Data(
                 getP1Abstract(c),
                 getP1Category(c),
+                Collections.emptyList(),
                 getP1Pi(c),
                 getP1Cois(c)
         );

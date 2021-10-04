@@ -12,7 +12,7 @@ import edu.gemini.model.p1.mutable.TooOption
 import edu.gemini.spModel.gemini.obscomp.SPProgram
 import edu.gemini.spModel.gemini.obscomp.SPProgram.{PIInfo, ProgramMode}
 import edu.gemini.shared.util.TimeValue
-
+import edu.gemini.spModel.gemini.phase1.GsaPhase1Data.Keyword
 import edu.gemini.spModel.timeacct.{TimeAcctAllocation, TimeAcctAward, TimeAcctCategory}
 import edu.gemini.spModel.gemini.phase1.{GsaPhase1Data => Gsa}
 
@@ -285,7 +285,7 @@ object SpProgramFactory {
     val category = new Gsa.Category(~proposal.category.map(_.value()))
     val pi       = gsaPhase1DataInvestigator(proposal.investigators.pi)
     val cois     = proposal.investigators.cois.map(gsaPhase1DataInvestigator).asJava
-    new Gsa(abstrakt, category, pi, cois)
+    new Gsa(abstrakt, category, java.util.Collections.emptyList[Keyword], pi, cois)
   }
 
   private def gsaPhase1DataInvestigator(inv: Investigator): Gsa.Investigator =
