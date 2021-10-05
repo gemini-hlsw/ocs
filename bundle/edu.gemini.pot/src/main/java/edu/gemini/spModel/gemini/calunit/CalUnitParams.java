@@ -28,9 +28,6 @@ public final class CalUnitParams {
         XE_ARC("Xe arc", "Xe", LampType.arc),
         ;
 
-//        KR_ARC =
-//                new Lamp("Kr arc", "Kr", true);
-
         /** The default Lamp value **/
         public static final Lamp DEFAULT = IR_GREY_BODY_HIGH;
 
