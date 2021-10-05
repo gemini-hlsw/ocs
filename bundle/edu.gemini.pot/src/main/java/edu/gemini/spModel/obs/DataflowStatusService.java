@@ -15,9 +15,9 @@ import edu.gemini.spModel.dataset.DataflowStatus;
  * finding the {@link edu.gemini.spModel.obsrecord.ObsExecRecord} associated with
  * the Observation and asking it to calculate the minimum step.
  */
-public final class DatasetDispositionService {
+public final class DataflowStatusService {
 
-    private DatasetDispositionService() {
+    private DataflowStatusService() {
     }
 
     /**
@@ -34,7 +34,7 @@ public final class DatasetDispositionService {
      * @throws java.rmi.RemoteException if there is a problem communicating
      * with the database
      */
-    public static scala.Option<DataflowStatus> lookupDatasetDisposition(ISPObservation obs)  {
+    public static scala.Option<DataflowStatus> lookupDataflowStatus(ISPObservation obs)  {
         // First check the cache.
         scala.Option<DataflowStatus> dis = SPObsCache.getDatasetDisposition(obs);
         if (dis != null) return dis;

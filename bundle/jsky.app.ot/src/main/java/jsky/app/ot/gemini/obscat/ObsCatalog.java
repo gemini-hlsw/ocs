@@ -31,6 +31,7 @@ import jsky.catalog.skycat.SkycatConfigEntry;
 import jsky.catalog.skycat.SkycatConfigFile;
 import jsky.util.NameValue;
 import jsky.util.gui.DialogUtil;
+import scala.Option$;
 
 import java.awt.event.*;
 import java.util.*;
@@ -204,7 +205,7 @@ public final class ObsCatalog extends SkycatCatalog {
 
         p = new FieldDescAdapter(ObsCatalogInfo.DATAFLOW_STEP);
         p.setDescription("Select the dataflow step");
-        p.setOptions(_getDatasetDispositionNameValues());
+        p.setOptions(_getDataflowStatusNameValues());
         params.add(p);
 
         p = new FieldDescAdapter(ObsCatalogInfo.IMAGE_QUALITY);
@@ -234,10 +235,11 @@ public final class ObsCatalog extends SkycatCatalog {
         return paramDesc;
     }
 
-    private static NameValue[] _getDatasetDispositionNameValues() {
+    private static NameValue[] _getDataflowStatusNameValues() {
         final List<NameValue> res = new ArrayList<>();
-        for (DataflowStatus dispo : DataflowStatus$.MODULE$.AllJava()) {
-            res.add(new NameValue(dispo.description(), dispo.description()));
+        res.add(new NameValue(DataflowStatus$.MODULE$.NoData(), DataflowStatus$.MODULE$.NoData()));
+        for (DataflowStatus status : DataflowStatus$.MODULE$.AllJava()) {
+            res.add(new NameValue(status.description(), status.description()));
         }
         final NameValue[] resA = new NameValue[res.size()];
         return res.toArray(resA);

@@ -4,7 +4,6 @@ import edu.gemini.spModel.dataset.SummitState.{ActiveRequest, Idle, Missing}
 
 import scala.Function.const
 import scala.collection.JavaConverters._
-
 import scalaz._
 import Scalaz._
 
@@ -31,6 +30,7 @@ sealed trait DataflowStatus {
 }
 
 object DataflowStatus {
+
   /** The initial status, usually.  It means that we know about the dataset in
     * the OCS because we received an event from the seqexec but it has not been
     * confirmed by querying either the summit FITS server nor the public
@@ -126,27 +126,30 @@ object DataflowStatus {
   // Order of attention urgency / priority that each option deserves.  When
   // summarizing a collection of datasets, we show the highest priority of the
   // states as *the* state that represents the group as a whole.
-  val All = List(
-    unavailable,
-    checkRequested,
-    needsQa,
-    syncPending,
-    updateFailure,
-    updateInProgress,
-    summitOnly,
-    diverged,
-    inSync,
-    archived
-  )
+  val All: List[DataflowStatus] =
+    List(
+      unavailable,
+      checkRequested,
+      needsQa,
+      syncPending,
+      updateFailure,
+      updateInProgress,
+      summitOnly,
+      diverged,
+      inSync,
+      archived
+    )
 
-  val AllJava = All.asJava
+  val AllJava: java.util.List[DataflowStatus] =
+    All.asJava
 
   private val OrderMap = All.zipWithIndex.toMap
 
   /**
     * @group Typeclass Instances
     */
-  implicit val OrderDatasetDisposition: Order[DataflowStatus] = Order.orderBy(OrderMap)
+  implicit val OrderDatasetDisposition: Order[DataflowStatus] =
+    Order.orderBy(OrderMap)
 
   /** Returns the `DataflowStatus` that should be associated with the
     * corresponding dataset.
@@ -183,4 +186,10 @@ object DataflowStatus {
   /** Returns the highest priority status amongst all the datasets (if any). */
   def rollUp(recs: List[DatasetRecord]): Option[DataflowStatus] =
     recs.map(derive).minimum
+
+  val NoData: String =
+    "No Data"
+
+  def description(s: Option[DataflowStatus]): String =
+    s.fold(NoData)(_.description)
 }
