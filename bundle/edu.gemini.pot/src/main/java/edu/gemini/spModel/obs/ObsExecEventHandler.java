@@ -62,7 +62,7 @@ public final class ObsExecEventHandler {
         @Override public void startDataset(ExecEvent event) {
             StartDatasetEvent sde = (StartDatasetEvent) event;
             DatasetLabel    label = sde.getDataset().getLabel();
-            updateObsLog(new Some<DatasetLabel>(label));
+            updateObsLog(new Some<>(label));
         }
 
         @Override public void endDataset(ExecEvent event) { updateObsLog(); }
@@ -70,7 +70,7 @@ public final class ObsExecEventHandler {
         private void updateObsLog() { updateObsLog(None.instance()); }
 
         private void updateObsLog(Option<DatasetLabel> label) {
-            ObsExecLog.updateObsLog(db, obs.getObservationID(), label, new Some<ObsExecEvent>(evt));
+            ObsExecLog.updateObsLog(db, obs.getObservationID(), label, new Some<>(evt));
         }
     }
 

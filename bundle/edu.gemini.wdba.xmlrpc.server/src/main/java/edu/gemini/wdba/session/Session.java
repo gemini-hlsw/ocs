@@ -210,7 +210,7 @@ public class Session {
 
         /**
          * This small class contains the values for a single open observation
-         * The datasetInProgress flag is true when a datasetStart event has been recieved but not an end dataset event
+         * The datasetInProgress flag is true when a datasetStart event has been received but not an end dataset event
          * The overlap flag is true when this observation was in a dataset and a second observation was started
          * This generally results in the overlapped observation ending as soon as the second observation starts
          * a sequence or a dataset.
@@ -445,15 +445,15 @@ public class Session {
             // start a new visit on the new ID
             StartVisitEvent nevt = new StartVisitEvent(originalEventTime - EVENT_DELTA, obsID);
 
-            // Add the observation
             add(obsID);
+
             // Note this must come after the add so it's there to handle the posting
             _postEvent(nevt, obsID);
         }
 
         /**
-         * Convenience method to end a vist using a given event time and observation ID.
-         * This method also remvoes the observation from the open observation list
+         * Convenience method to end a visit using a given event time and observation ID.
+         * This method also removes the observation from the open observation list
          *
          * @param originalEventTime event time to use (NOTE: end visit is posted 2*EVENT_DELTA behind this time
          * @param obsID            observation ID of the observation with a visit ending
@@ -463,7 +463,6 @@ public class Session {
             EndVisitEvent nevt = new EndVisitEvent(originalEventTime - 2 * EVENT_DELTA, obsID);
             _postEvent(nevt, obsID);
 
-            // Add the observation
             remove(obsID);
         }
 
@@ -559,7 +558,7 @@ public class Session {
         }
 
         /**
-         * Check visit handles whether or not the current visit should be closed before starting a new one.
+         * Check visit handles whether the current visit should be closed before starting a new one.
          * It does the following:
          * <ul>
          * <li>If the current observation ID and the next observation ID are the same, it does nothing and returns.
@@ -589,7 +588,7 @@ public class Session {
             if (!isOpen(evtObsID)) {
                 // So it's not on the list of open observations yet,
                 _handleClosing(evt, evtObsID);
-                // And post the origina event
+                // And post the original event
                 _postEvent(evt, evtObsID);
                 return;
             }
