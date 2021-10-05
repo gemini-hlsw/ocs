@@ -40,13 +40,13 @@ See the "Example K-band Observation Set" in the NIFS Library for a guideline.
 
 1.  SCIENCE:  All Science observations, grouped as necessary.
 ----------------------
-NIFS Science exposure times should be selected based on the science goals and target brightnesses.  Note, that the NIFS Hawaii 2RG detector can be adversely affected by strong cosmic ray hits for exposure times of 600s and longer - taking several exposures and median filtering them for the science is suggested.  Because the NIFS grating repositioning is not accurately repeatable to &lt; 2 pix in the wavelength dimension, it is very strongly urged that arcs are merged into the science sequences so that proper wavelength calibration can be obtained for all science exposures.  At least ~2 arcs per 2 hours of science observations are recommended to ensure that arcs are taken each time a science target is observed.  Wavelength calibration of data in the Z and H bands is also possible using sky emission lines (See also #6 below).
+NIFS Science exposure times should be selected based on the science goals and target brightnesses.  Note, that the NIFS Hawaii 2RG detector can be adversely affected by strong cosmic ray hits for exposure times of 600s and longer - taking several exposures and median filtering them for the science is suggested.  Because the NIFS grating repositioning is not accurately repeatable to &lt; 2 pix in the wavelength dimension, it is very strongly urged that arcs are merged into the science sequences so that proper wavelength calibration can be obtained for all science exposures.  At least 1 arc per 2 hours of science observations are recommended to ensure that arcs are taken each time a science target is observed.  Wavelength calibration of data in the Z and H bands is also possible using sky emission lines (See also #6 below).
 
-2.  SCIENCE ACQUISITION:  Acquisitions for all Science observations.  
+2.  SCIENCE ACQUISITION:  Acquisitions for all Science observations.
 ----------------------
-- Use the "Acq: K&lt;=9" if your target is brighter than K~9 mag.  
+- Use the "Acq: K&lt;=9" if your target is brighter than K~9 mag.
 - Use the "Acq: 9&lt;K&lt;=13" with an offset sky image and the imaging mirror "out" if your target magnitude is 9&lt;K&lt;=13
-- Use the "Acq: K &gt;13" with an offset sky image and the imaging mirror "in" if your science target is fainter than K~13.  
+- Use the "Acq: K &gt;13" with an offset sky image and the imaging mirror "in" if your science target is fainter than K~13.
 
 During the commissioning and system verification we found that we can identify science targets to K~20.8mag in one ~100s acquisition exposure with the imaging mirror in.
 
@@ -54,7 +54,7 @@ IMPORTANT NOTE: If the NIFS flip mirror is set to "in" for acquisition then an o
 
 3. TELLURICS:  1 Telluric standard "before", 1 Telluric standard "after"
 ----------------------
-Telluric calibrator stars should be defined (with acquisitions) for both before and after the science.  "Baseline calibration" is for 1 Standard star observation for every ~1.5 hours of science.  So multiple "before" and "after tellurics may need defined if the science observation is longer than 3+ hours in duration. 
+Telluric calibrator stars should be defined (with acquisitions) for both before and after the science.  "Baseline calibration" is for 1 Standard star observation for every ~1.5 hours of science.  So multiple "before" and "after tellurics may need defined if the science observation is longer than 3+ hours in duration.
 
 4. TELLURIC ACQUISITIONS:  An Acquisition sequence for both "before" and "after" standards.
 -----------------------
@@ -64,7 +64,7 @@ An acquisition observation must accompany every spectral observation for the tel
 ------------------------
 The standard NIFS Daycals consist of:
 	- "Lamps on" flats
-	-  "Lamps off" flats 
+	-  "Lamps off" flats
 	-  darks obtained at the same exposure time as the arc frames
 	- a set of 2 "Ronchi" calibration mask images which are used for rectifying the spatial field of the IFU data.
 
@@ -109,7 +109,7 @@ DAYTIME CALIBRATIONS:
 - Are the daycal configurations consistent with the values defined for proper exposures times and configurations in the OT library?
 - Are the daycal configurations consistent with the science (i.e., same grating/filter configurations, etc...)
 - Do the daytime calibrations defined in the sequence include lamps on flats, lamps off flats, arc darks and Ronchi calibration frames?
-- Are daytime calibrations defined for every science target?  If so, is this really needed? (i.e., it will be unnecessary to execute daycals for program targets that are observed with the same setting on the same night).  
+- Are daytime calibrations defined for every science target?  If so, is this really needed? (i.e., it will be unnecessary to execute daycals for program targets that are observed with the same setting on the same night).
 - Are daytime calibrations defined for every time a science target is observed?  If so, and the science observation is long (i.e., &gt;4 hours which may not be executed all in one night), then an OT note would be helpful to describe this.  More than one set of calibrations would need defined.
 
 SCIENCE DARKS:
@@ -565,14 +565,14 @@ SCIENCE DARKS:
             <param name="title" value="Phase II Requirements: Blind offsets"/>
             <param name="NoteText">
               <value>We assume that the reference star for blind offsets acquisition will have a magnitude of   9&lt;K&lt;=13 (sequence has an offset sky image and the imaging mirror is "out" ).
- 
+
 In the target component:
     - select a guide star
     - replace the blank reference object (= User1)  with a nearby reference star.
 
 If applicable, add a note for the observer with any special acquisition instructions.
 
-We also suggest uploading a finding chart.  Guidelines for making finding charts can be found here : 
+We also suggest uploading a finding chart.  Guidelines for making finding charts can be found here :
 http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-charts</value>
             </param>
           </paramset>
