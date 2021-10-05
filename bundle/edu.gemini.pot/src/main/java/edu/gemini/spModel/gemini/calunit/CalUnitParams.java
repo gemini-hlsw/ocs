@@ -21,7 +21,8 @@ public final class CalUnitParams {
     public enum Lamp implements DisplayableSpType, SequenceableSpType {
         IR_GREY_BODY_HIGH("IR grey body - high", "GCALflat", LampType.flat),
         IR_GREY_BODY_LOW("IR grey body - low", "GCALflat", LampType.flat),
-        QUARTZ("Quartz Halogen", "GCALflat", LampType.flat),
+        QUARTZ_5W("5W Quartz Halogen", "GCALflat", LampType.flat),
+        QUARTZ_100W("100W Quartz Halogen", "GCALflat", LampType.flat),
         AR_ARC("Ar arc", "Ar", LampType.arc),
         THAR_ARC("ThAr arc", "ThAr", LampType.arc),
         CUAR_ARC("CuAr arc", "CuAr", LampType.arc),
@@ -68,12 +69,9 @@ public final class CalUnitParams {
 
         /** Return a Lamp by name, or the given default value if not found. **/
         public static Lamp getLamp(String name, Lamp def) {
-            return SpTypeUtil.oldValueOf(Lamp.class, name, def);
-        }
-
-        /** Return a Lamp by index **/
-        public static Lamp getLampByIndex(int index) {
-            return SpTypeUtil.valueOf(Lamp.class, index, DEFAULT);
+            return ("QUARTZ".equals(name) || "Quartz Halogen".equals(name)) ?
+                    QUARTZ_5W                                               :
+                    SpTypeUtil.oldValueOf(Lamp.class, name, def);
         }
 
         /** Return the name expected by the TCC software for this lamp */

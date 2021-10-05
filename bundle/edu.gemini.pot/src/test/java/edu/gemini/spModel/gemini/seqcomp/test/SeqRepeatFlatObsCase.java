@@ -40,7 +40,7 @@ public class SeqRepeatFlatObsCase extends TestCase {
         s.setLamp(Lamp.IR_GREY_BODY_LOW);
         assertTrue(!s.isArc());
 
-        s.setLamp(Lamp.QUARTZ);
+        s.setLamp(Lamp.QUARTZ_5W);
         assertTrue(!s.isArc());
 
         s.setLamp(Lamp.AR_ARC);

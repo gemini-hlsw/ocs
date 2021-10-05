@@ -1,6 +1,7 @@
 package jsky.app.ot.gemini.editor;
 
 import edu.gemini.pot.sp.ISPSeqComponent;
+import edu.gemini.spModel.gemini.calunit.CalUnitParams;
 import edu.gemini.spModel.gemini.calunit.CalUnitParams.Diffuser;
 import edu.gemini.spModel.gemini.calunit.CalUnitParams.Filter;
 import edu.gemini.spModel.gemini.calunit.CalUnitParams.Lamp;
@@ -18,6 +19,7 @@ import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -55,13 +57,16 @@ public final class EdIterFlatObs extends OtItemEditor<ISPSeqComponent, SeqRepeat
             }
         });
 
-        final List<Lamp> flatLamps = Lamp.flatLamps();
-        for (int i = 0; i < _w.lamps.length; i++) {
-            final Lamp l = flatLamps.get(i);
+        final List<CalUnitParams.Lamp> flatLamps = Arrays.asList(
+            Lamp.IR_GREY_BODY_HIGH, Lamp.IR_GREY_BODY_LOW, Lamp.QUARTZ_5W
+        );
+        for (int i = 0; i < flatLamps.size(); i++) {
+            final CalUnitParams.Lamp l = flatLamps.get(i);
             _w.lamps[i].putClientProperty(LAMP_PROPERTY, l);
             _w.lamps[i].setText(l.displayValue());
             _w.lamps[i].addActionListener(lampListener);
         }
+
         final List<Lamp> arcLamps = Lamp.arcLamps();
         for (int i = 0; i < _w.arcs.length; i++) {
             final Lamp l = arcLamps.get(i);
@@ -196,7 +201,9 @@ public final class EdIterFlatObs extends OtItemEditor<ISPSeqComponent, SeqRepeat
             if (_w.lamps[i].isSelected()) {
                 final Lamp lamp = Lamp.flatLamps().get(i);
                 getDataObject().setLamp(lamp);
-                getDataObject().setDiffuser(lamp == Lamp.QUARTZ ? Diffuser.VISIBLE : Diffuser.IR);  // See OT-426
+                getDataObject().setDiffuser(
+                    (lamp == Lamp.QUARTZ_5W) || (lamp == Lamp.QUARTZ_100W) ? Diffuser.VISIBLE : Diffuser.IR
+                );  // See OT-426
                 final boolean b = (lamp == Lamp.IR_GREY_BODY_HIGH ||
                         lamp == Lamp.IR_GREY_BODY_LOW);
                 if (b) {

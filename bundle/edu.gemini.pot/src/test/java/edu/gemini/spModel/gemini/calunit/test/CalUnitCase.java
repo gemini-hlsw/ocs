@@ -42,16 +42,16 @@ public final class CalUnitCase {
         Lamp l = getLamp0(_t1);
         assertEquals(Lamp.DEFAULT, l);
 
-        _t1.setLamp(Lamp.QUARTZ);
+        _t1.setLamp(Lamp.QUARTZ_5W);
         l = getLamp0(_t1);
-        assertEquals(Lamp.QUARTZ, l);
+        assertEquals(Lamp.QUARTZ_5W, l);
 
-        _t1.setLamp(Lamp.getLamp(Lamp.QUARTZ.name()));
+        _t1.setLamp(Lamp.getLamp(Lamp.QUARTZ_5W.name()));
         l = getLamp0(_t1);
-        assertEquals(Lamp.QUARTZ, l);
+        assertEquals(Lamp.QUARTZ_5W, l);
 
         String s = getLamp0(_t1).name();
-        assertEquals(Lamp.QUARTZ.name(), s);
+        assertEquals(Lamp.QUARTZ_5W.name(), s);
     }
 
     @Test
@@ -130,24 +130,24 @@ public final class CalUnitCase {
         PioFactory factory = new PioXmlFactory();
         ParamSet p = factory.createParamSet("");
 
-        Pio.addParam(factory, p, CalUnitConstants.LAMP_PROP, Lamp.QUARTZ.name());
+        Pio.addParam(factory, p, CalUnitConstants.LAMP_PROP, Lamp.QUARTZ_5W.name());
         _t1.setParamSet(p);
 
         // Now check
         p = _t1.getParamSet(new PioXmlFactory());
         String v = Pio.getValue(p, CalUnitConstants.LAMP_PROP);
-        assertEquals(Lamp.QUARTZ.name(), v);
+        assertEquals(Lamp.QUARTZ_5W.name(), v);
     }
 
     @Test
     public void testSerialization() throws Exception {
         final SeqRepeatFlatObs outObject = new SeqRepeatFlatObs();
-        outObject.setLamp(Lamp.QUARTZ);
+        outObject.setLamp(Lamp.QUARTZ_5W);
         outObject.setDiffuser(Diffuser.VISIBLE);
         outObject.setFilter(Filter.ND_10);
 
         final SeqRepeatFlatObs inObject = ser(outObject);
-        assertSame(Lamp.QUARTZ, getLamp0(inObject));
+        assertSame(Lamp.QUARTZ_5W, getLamp0(inObject));
         assertSame(Filter.ND_10, inObject.getFilter());
         assertSame(Diffuser.VISIBLE, inObject.getDiffuser());
     }
