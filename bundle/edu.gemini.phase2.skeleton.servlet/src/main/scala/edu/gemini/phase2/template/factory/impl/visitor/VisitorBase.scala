@@ -2,7 +2,7 @@ package edu.gemini.phase2.template.factory.impl.visitor
 
 import edu.gemini.phase2.template.factory.impl._
 import edu.gemini.spModel.gemini.visitor.blueprint.SpVisitorBlueprint
-import edu.gemini.spModel.gemini.visitor.VisitorInstrument
+import edu.gemini.spModel.gemini.visitor.{VisitorConfig, VisitorInstrument}
 import edu.gemini.pot.sp.{ISPGroup, ISPObservation, SPComponentType}
 
 //noinspection MutatorLikeMethodIsParameterless
@@ -51,8 +51,8 @@ trait VisitorBase extends GroupInitializer[SpVisitorBlueprint] with TemplateDsl 
   def setName: Setter[String] =
     Setter[String](blueprint.name)(_.setName(_))
 
-  private def lookupInst: Option[VisitorInst] =
-    VisitorInst.findByName(blueprint.name)
+  private def lookupInst: Option[VisitorConfig] =
+    VisitorConfig.findByName(blueprint.name)
 
   override def notes: List[String] =
     lookupInst.map(_.noteTitles).getOrElse(Nil)

@@ -131,12 +131,12 @@ public class VisitorInstrument extends SPInstObsComp
         return _centralWavelength;
     }
 
-    /**
-     * Return the setup time in seconds before observing can begin
-     */
     @Override
     public Duration getSetupTime(ISPObservation obs) {
-        return Duration.ofMinutes(10);
+        return VisitorConfig$.MODULE$
+                .findByNameJava(name)
+                .map(VisitorConfig::setupTime)
+                .getOrElse(VisitorConfig$.MODULE$.DefaultSetupTime());
     }
 
 
@@ -157,9 +157,23 @@ public class VisitorInstrument extends SPInstObsComp
 
     @Override
     public PlannedTime.CategorizedTimeGroup calc(Config stepConfig, Option<Config> prevStepConfig) {
-        PlannedTime.CategorizedTime exposureTime = PlannedTime.CategorizedTime.fromSeconds(PlannedTime.Category.EXPOSURE,
+        final PlannedTime.CategorizedTime exposureTime = PlannedTime.CategorizedTime.fromSeconds(PlannedTime.Category.EXPOSURE,
                 ExposureCalculator.instance.exposureTimeSec(stepConfig));
-        return CommonStepCalculator.instance.calc(stepConfig, prevStepConfig).add(exposureTime);
+
+        final Duration readoutDuration =
+            VisitorConfig$.MODULE$
+                .findByNameJava(name)
+                .map(VisitorConfig::readoutTime)
+                .getOrElse(VisitorConfig$.MODULE$.DefaultReadoutTime());
+
+        final PlannedTime.CategorizedTime readoutTime =
+            PlannedTime.CategorizedTime.apply(PlannedTime.Category.READOUT, readoutDuration.toMillis());
+
+        return CommonStepCalculator
+                    .instance
+                    .calc(stepConfig, prevStepConfig)
+                    .add(exposureTime)
+                    .add(readoutTime);
     }
 
     /**
@@ -184,7 +198,7 @@ public class VisitorInstrument extends SPInstObsComp
      * queryable configuration parameters.
      */
     public static List<InstConfigInfo> getInstConfigInfo() {
-        return new LinkedList<InstConfigInfo>();
+        return new LinkedList<>();
     }
 
     /**
@@ -215,7 +229,7 @@ public class VisitorInstrument extends SPInstObsComp
         setWavelength(Double.parseDouble(v));
     }
 
-    private static Collection<GuideProbe> GUIDE_PROBES = GuideProbeUtil.instance.createCollection();
+    private static final Collection<GuideProbe> GUIDE_PROBES = GuideProbeUtil.instance.createCollection();
 
     @Override
     public Collection<GuideProbe> getGuideProbes() {
@@ -223,7 +237,6 @@ public class VisitorInstrument extends SPInstObsComp
     }
 
     @Override
-    /** Return true if this instrument has an OIWFS */
     public boolean hasOIWFS() {
         return false;
     }
