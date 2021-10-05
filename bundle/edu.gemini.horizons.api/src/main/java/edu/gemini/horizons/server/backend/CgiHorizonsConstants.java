@@ -7,12 +7,13 @@ package edu.gemini.horizons.server.backend;
 public final class CgiHorizonsConstants {
     public static final String HORIZONS_PROTOCOL = "https://";
     public static final String HORIZONS_SERVER = "ssd.jpl.nasa.gov";
-    public static final String HORIZONS_CGI = "horizons_batch.cgi";
+    public static final String HORIZONS_CGI = "api/horizons.api";
     public static final String HORIZONS_URL = HORIZONS_PROTOCOL + HORIZONS_SERVER + "/" + HORIZONS_CGI;
 
     public static final String BATCH = "batch";
     public static final String COMMAND = "COMMAND";
     public static final String EPHEMERIS = "MAKE_EPHEM";
+    public static final String FORMAT = "format";
     public static final String TABLE_TYPE = "TABLE_TYPE";
     public static final String OBSERVER_TABLE = "OBSERVER";
     public static final String START_TIME = "START_TIME";

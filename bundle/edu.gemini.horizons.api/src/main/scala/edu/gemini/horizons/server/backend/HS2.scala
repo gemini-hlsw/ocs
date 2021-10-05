@@ -102,9 +102,7 @@ object HorizonsService2 {
 
     val queryParams: Map[String, String] =
       Map(
-        BATCH      -> "1",
-        TABLE_TYPE -> OBSERVER_TABLE,
-        CSV_FORMAT -> NO,
+        FORMAT     -> "text",
         EPHEMERIS  -> NO,
         COMMAND    -> s"'${search.queryString}'"
       )
@@ -175,11 +173,8 @@ object HorizonsService2 {
 
     val queryParams: Map[String, String] =
       Map(
-        BATCH            -> "1",
-        TABLE_TYPE       -> OBSERVER_TABLE,
-        CSV_FORMAT       -> NO,
+        FORMAT           -> "text",
         EPHEMERIS        -> YES,
-        TABLE_FIELDS_ARG -> TABLE_FIELDS,
         CENTER           -> CENTER_COORD,
         COORD_TYPE       -> COORD_TYPE_GEO,
         COMMAND          -> s"'${target.queryString}'",
@@ -233,8 +228,8 @@ object HorizonsService2 {
   // Split into header/tail, parse
   private def parseHeader[A](lines: List[String])(f: (String, List[String]) => String \/ List[A]): String \/ List[A] =
     lines match {
-      case _ :: h :: t => f(h, t)
-      case _           => "Fewer than 2 lines!".left
+      case _ :: _ :: _ :: _ :: h :: t => f(h, t)
+      case _                          => "Fewer than 5 lines!".left
     }
 
   // Parse the result of the given search
