@@ -32,15 +32,15 @@ public final class CalUnitParams {
 //                new Lamp("Kr arc", "Kr", true);
 
         /** The default Lamp value **/
-        public static Lamp DEFAULT = IR_GREY_BODY_HIGH;
+        public static final Lamp DEFAULT = IR_GREY_BODY_HIGH;
 
-        private String _displayValue;
+        private final String _displayValue;
 
         // Name expected by the TCC software
-        private String _tccName;
+        private final String _tccName;
 
         // Set to true for arcs
-        private LampType _type;
+        private final LampType _type;
 
         Lamp(String displayValue, String tccName, LampType lampType) {
             _displayValue = displayValue;
@@ -154,9 +154,9 @@ public final class CalUnitParams {
         ;
 
         /** The default Filter value **/
-        public static Filter DEFAULT = NONE;
+        public static final Filter DEFAULT = NONE;
 
-        private String _displayValue;
+        private final String _displayValue;
 
         Filter(String displayVal) {
             _displayValue = displayVal;
@@ -200,9 +200,9 @@ public final class CalUnitParams {
         ;
 
         /** The default Diffuser value **/
-        public static Diffuser DEFAULT = IR;
+        public static final Diffuser DEFAULT = IR;
 
-        private String _displayValue;
+        private final String _displayValue;
 
         Diffuser(String displayValue) {
             _displayValue = displayValue;
@@ -247,9 +247,9 @@ public final class CalUnitParams {
         ;
 
         /** The default Shutter value **/
-        public static Shutter DEFAULT = OPEN;
+        public static final Shutter DEFAULT = OPEN;
 
-        private String _displayValue;
+        private final String _displayValue;
 
         Shutter(String displayValue) {
             _displayValue = displayValue;
