@@ -4,6 +4,7 @@ import edu.gemini.pot.sp.*;
 import edu.gemini.pot.spdb.DBAbstractQueryFunctor;
 import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.pot.spdb.IDBQueryRunner;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.ao.AOConstants;
 import edu.gemini.spModel.ao.AOTreeUtil;
@@ -12,6 +13,7 @@ import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.data.YesNoType;
 import edu.gemini.spModel.dataset.DataflowStatus;
+import edu.gemini.spModel.dataset.DataflowStatus$;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
@@ -26,7 +28,6 @@ import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.pio.xml.PioXmlFactory;
-import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.time.ChargeClass;
@@ -326,14 +327,13 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
                     final ObsQaState qa = ObsQaStateService.getObsQaState(o);
                     if (!a_sc.isTrueFor(qa.name())) return false;
 
-                    // DMAN TODO: why was this commented out?  Do we not need to
-                    // match on dataflow step?  Why is it in the menu of options?
-//                } else if (name.equals(ObsCatalogInfo.DATAFLOW_STEP)) {
-//                    final DatasetDisposition dispo;
-//                    dispo = DatasetDispositionService.lookupDatasetDisposition(o);
-//                    String desc = "No Data";
-//                    if (dispo != null) desc = dispo.getDisplayString();
-//                    if (!a_sc.isTrueFor(desc)) return false;
+                } else if (name.equals(ObsCatalogInfo.DATAFLOW_STEP)) {
+                    final scala.Option<DataflowStatus> status =
+                        DataflowStatusService.lookupDataflowStatus(o);
+
+                    final String desc = DataflowStatus$.MODULE$.description(status);
+
+                    if (!a_sc.isTrueFor(desc)) return false;
 
                 } else if (name.equals(ObsCatalogInfo.PRIORITY)) {
                     if (!a_sc.isTrueFor(obs.getPriority().displayValue())) {
@@ -654,8 +654,8 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
         final ObsQaState qaState = ObsQaStateService.getObsQaState(o);
 
         // Figure out the dataflow step
-        final scala.Option<DataflowStatus> dispo = DatasetDispositionService.lookupDatasetDisposition(o);
-        final String datasetDispoStr = dispo.isEmpty() ? "No Data" : dispo.get().description();
+        final scala.Option<DataflowStatus> dataflowStatus = DataflowStatusService.lookupDataflowStatus(o);
+        final String dataflowStatusDescription = DataflowStatus$.MODULE$.description(dataflowStatus);
 
         // Figure out ready status
         final boolean ready = status.isScheduleable();
@@ -696,7 +696,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
         map.put(ObsCatalogInfo.PARTNER_COUNTRY, country);
         map.put(ObsCatalogInfo.OBS_STATUS, status.displayValue());
         map.put(ObsCatalogInfo.OBS_QA, qaState.displayValue());
-        map.put(ObsCatalogInfo.DATAFLOW_STEP, datasetDispoStr);
+        map.put(ObsCatalogInfo.DATAFLOW_STEP, dataflowStatusDescription);
         map.put(ObsCatalogInfo.PRIORITY, priority);
         map.put(ObsCatalogInfo.QUEUE_BAND, queueBand);
         map.put(ObsCatalogInfo.SKY_BACKGROUND, skyBackground);

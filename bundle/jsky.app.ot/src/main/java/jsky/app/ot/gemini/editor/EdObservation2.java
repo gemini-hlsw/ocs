@@ -9,6 +9,7 @@ import edu.gemini.skycalc.ObservingNight;
 import edu.gemini.shared.util.TimeValue;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.dataset.DataflowStatus;
+import edu.gemini.spModel.dataset.DataflowStatus$;
 import edu.gemini.spModel.dataset.DatasetQaState;
 import edu.gemini.spModel.dataset.DatasetQaStateSums;
 import edu.gemini.spModel.obs.*;
@@ -649,7 +650,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
     private void _showStatus() {
 
         // First collect the information to display.
-        final scala.Option<DataflowStatus> dispo = DatasetDispositionService.lookupDatasetDisposition(getNode());
+        final scala.Option<DataflowStatus> dataflowStatus = DataflowStatusService.lookupDataflowStatus(getNode());
         final DatasetQaStateSums sums = DatasetQaStateSumsService.sumDatasetQaStates(getNode());
 
         final SPObservation obs = getDataObject();
@@ -657,7 +658,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
         final ObsQaState obsQaState = override ? obs.getOverriddenObsQaState() : ObsQaState.computeDefault(sums);
 
         // Format the dataset disposition ("dataflow step").
-        final String statusString = (dispo.isEmpty()) ? "No Data" : dispo.get().description();
+        final String statusString = DataflowStatus$.MODULE$.description(dataflowStatus);
 
         // Format the summary of dataset information.
         String sumsStr = "(No Data)";
