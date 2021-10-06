@@ -487,7 +487,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
     lazy val catalogBox: ComboBox[CatalogName] with TextRenderer[CatalogName] {
       def text(a: CatalogName): String
-    } = new ComboBox(List[CatalogName](UCAC4, PPMXL, GaiaEsa/*, GaiaGemini*/)) with TextRenderer[CatalogName] {
+    } = new ComboBox(List[CatalogName](UCAC4, PPMXL, GaiaEsa, GaiaGemini)) with TextRenderer[CatalogName] {
 
       override def text(a: CatalogName): String =
         Option(a).foldMap(_.displayName)
