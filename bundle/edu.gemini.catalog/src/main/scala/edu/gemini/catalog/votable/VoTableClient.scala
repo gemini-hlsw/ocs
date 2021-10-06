@@ -193,8 +193,9 @@ case object ConeSearchBackend extends CachedBackend with RemoteCallBackend {
 
   override val catalogUrls: NonEmptyList[URL] =
     NonEmptyList(
-      new URL("http://gscatalog.gemini.edu"),
-      new URL("http://gncatalog.gemini.edu")
+        new URL("http://mkocatalog-lv2.hi.gemini.edu")
+//      new URL("http://gscatalog.gemini.edu"),
+//      new URL("http://gncatalog.gemini.edu")
     )
 
   private def format(a: Angle)= f"${a.toDegrees}%4.03f"
