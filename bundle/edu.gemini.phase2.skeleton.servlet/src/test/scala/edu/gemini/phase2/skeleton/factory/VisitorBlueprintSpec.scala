@@ -4,10 +4,9 @@
 package edu.gemini.phase2.skeleton.factory
 
 import edu.gemini.model.p1.immutable.{Site, VisitorBlueprint}
-import edu.gemini.phase2.template.factory.impl.visitor.VisitorInst
 import edu.gemini.pot.sp.{ISPProgram, SPComponentType}
 import edu.gemini.spModel.core.MagnitudeBand
-import edu.gemini.spModel.gemini.visitor.VisitorInstrument
+import edu.gemini.spModel.gemini.visitor.{VisitorConfig, VisitorInstrument}
 import edu.gemini.spModel.rich.pot.sp._
 import org.scalacheck.Prop._
 import org.scalacheck.{Arbitrary, Gen}
@@ -20,7 +19,7 @@ class VisitorBlueprintSpec extends TemplateSpec("VISITOR_BP.xml") with Specifica
     Arbitrary {
       for {
         s <- Gen.oneOf(Site.GN, Site.GS)
-        n <- Gen.oneOf(VisitorInst.All.map(_.name))
+        n <- Gen.oneOf(VisitorConfig.All.map(_.name))
       } yield VisitorBlueprint(s, n)
     }
 
@@ -35,7 +34,7 @@ class VisitorBlueprintSpec extends TemplateSpec("VISITOR_BP.xml") with Specifica
     "include all notes" in {
       forAll { (b: VisitorBlueprint) =>
         expand(proposal(b, Nil, MagnitudeBand.R)) { (_, sp) =>
-          val notes = VisitorInst.findByName(b.customName).toList.flatMap(_.noteTitles)
+          val notes = VisitorConfig.findByName(b.customName).toList.flatMap(_.noteTitles)
           groups(sp).forall(tg => notes.forall(existsNote(tg, _)))
         }
       }
@@ -45,7 +44,7 @@ class VisitorBlueprintSpec extends TemplateSpec("VISITOR_BP.xml") with Specifica
       forAll { (b: VisitorBlueprint) =>
         expand(proposal(b, Nil, MagnitudeBand.R)) { (_, sp) =>
           visitorInstrumentComponents(sp).forall { vi =>
-            vi.getPosAngleDegrees == VisitorInst.findByName(b.customName).map(_.positionAngle.toDegrees).getOrElse(0.0)
+            vi.getPosAngleDegrees == VisitorConfig.findByName(b.customName).map(_.positionAngle.toDegrees).getOrElse(0.0)
           }
         }
       }
@@ -55,7 +54,7 @@ class VisitorBlueprintSpec extends TemplateSpec("VISITOR_BP.xml") with Specifica
       forAll { (b: VisitorBlueprint) =>
         expand(proposal(b, Nil, MagnitudeBand.R)) { (_, sp) =>
           visitorInstrumentComponents(sp).forall { vi =>
-            vi.getWavelength == VisitorInst.findByName(b.customName).map(_.wavelength.toMicrons).getOrElse(0.0)
+            vi.getWavelength == VisitorConfig.findByName(b.customName).map(_.wavelength.toMicrons).getOrElse(0.0)
           }
         }
       }

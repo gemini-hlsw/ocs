@@ -78,7 +78,7 @@ public abstract class SPInstObsComp extends AbstractDataObject {
     public abstract String getPhaseIResourceName();
 
     /**
-     * Return the setup time in seconds before observing can begin
+     * Return the setup time before observing can begin
      * (value may depend on the selected disperser, etc.).
      * Should normally be redefined in a derived class.
      */
