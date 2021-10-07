@@ -23,19 +23,22 @@ public class SequenceRule implements IRule {
     private static final ItemKey P_OFFSET_KEY = new ItemKey("telescope:p");
     private static final ItemKey Q_OFFSET_KEY = new ItemKey("telescope:q");
     private static final ItemKey REPEAT_COUNT_KEY = new ItemKey(String.format("%s:%s", SeqConfigNames.OBSERVE_CONFIG_NAME, InstConstants.REPEAT_COUNT_PROP));
+
     /**
      * This is an {@link IConfigRule rule} in name only.  It can be added
      * to an instrument's list of rules in order to print each configuration.
      * It will never generate a problem.
      */
-    public static IConfigRule DUMP_CONFIG_RULE = new AbstractConfigRule() {
+    @SuppressWarnings("unused")
+    public static final IConfigRule DUMP_CONFIG_RULE = new AbstractConfigRule() {
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            StringBuilder buf = new StringBuilder();
+            final StringBuilder buf = new StringBuilder();
             for (ItemEntry ie : config.itemEntries()) {
-                Object val = ie.getItemValue();
-                String classStr = (val == null) ? "" : val.getClass().getName();
+                final Object val = ie.getItemValue();
+                final String classStr = (val == null) ? "" : val.getClass().getName();
                 buf.append(ie.getKey()).append(" -> ").append(val).append("\t[").append(classStr).append("]\n");
             }
+            System.out.println(buf);
             return null;
         }
     };
@@ -140,7 +143,7 @@ public class SequenceRule implements IRule {
     }
 
     private static final ItemKey INSTRUMENT_EXPOSURE_TIME_KEY = new ItemKey(INSTRUMENT_PREFIX + "exposureTime");
-    
+
     /**
      * Return the exposure time for the instrument. Will try to
      * get it both as a Double and String. The result is always a double
@@ -210,8 +213,8 @@ public class SequenceRule implements IRule {
         return getInstrumentOrSequenceNode(step, elems);
     }
 
-    private Set<IConfigRule> _instRules;
-    private Object _state;
+    private final Set<IConfigRule> _instRules;
+    private final Object _state;
 
     public SequenceRule(Collection<IConfigRule> instRules, Object state) {
         _instRules = new HashSet<>(instRules);
