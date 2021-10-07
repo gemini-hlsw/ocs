@@ -2,6 +2,7 @@ package edu.gemini.spModel.gemini.seqcomp;
 
 import edu.gemini.pot.sp.ISPSeqComponent;
 import edu.gemini.spModel.config.AbstractSeqComponentCB;
+import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.data.config.*;
 import edu.gemini.spModel.dataflow.GsaSequenceEditor;
 import edu.gemini.spModel.gemini.calunit.CalUnitConstants;
@@ -14,6 +15,8 @@ import edu.gemini.spModel.seqcomp.SeqConfigNames;
 import edu.gemini.spModel.seqcomp.SeqRepeatCbOptions;
 
 import java.util.Map;
+
+import static edu.gemini.spModel.obscomp.InstConstants.OBSERVE_TYPE_PROP;
 
 /**
  * A configuration builder for the Gemini CalUnit sequence component for GHOST.
@@ -69,27 +72,36 @@ final public class GhostSeqRepeatFlatObsCB extends AbstractSeqComponentCB {
         CalConfigBuilderUtil.clear(config);
 
         final GhostSeqRepeatFlatObs c = (GhostSeqRepeatFlatObs) getDataObject();
-        config.putParameter(SeqConfigNames.OBSERVE_CONFIG_NAME,
-                DefaultParameter.getInstance(CalUnitConstants.LAMP_PROP, Lamp.write(c.getLamps())));
-        config.putParameter(SeqConfigNames.OBSERVE_CONFIG_NAME,
+
+        config.putParameter(SeqConfigNames.CALIBRATION_CONFIG_NAME,
+                DefaultParameter.getInstance(CalUnitConstants.BASECAL_DAY_PROP, Boolean.FALSE));
+        config.putParameter(SeqConfigNames.CALIBRATION_CONFIG_NAME,
+                DefaultParameter.getInstance(CalUnitConstants.BASECAL_NIGHT_PROP, Boolean.FALSE));
+
+        config.putParameter(SeqConfigNames.CALIBRATION_CONFIG_NAME,
+                DefaultParameter.getInstance(CalUnitConstants.LAMP_PROP, Lamp.show(c.getLamps(), Lamp::sequenceValue)));
+        config.putParameter(SeqConfigNames.CALIBRATION_CONFIG_NAME,
                 DefaultParameter.getInstance(CalUnitConstants.SHUTTER_PROP, c.getShutter().sequenceValue()));
-        config.putParameter(SeqConfigNames.OBSERVE_CONFIG_NAME,
+        config.putParameter(SeqConfigNames.CALIBRATION_CONFIG_NAME,
                 DefaultParameter.getInstance(CalUnitConstants.FILTER_PROP, c.getFilter().sequenceValue()));
-        config.putParameter(SeqConfigNames.OBSERVE_CONFIG_NAME,
+        config.putParameter(SeqConfigNames.CALIBRATION_CONFIG_NAME,
                 DefaultParameter.getInstance(CalUnitConstants.DIFFUSER_PROP, c.getDiffuser().sequenceValue()));
+
+        config.putParameter(SeqConfigNames.OBSERVE_CONFIG_NAME,
+              DefaultParameter.getInstance(OBSERVE_TYPE_PROP, c.getObserveType()));
 
         config.putParameter(SeqConfigNames.OBSERVE_CONFIG_NAME,
                 StringParameter.getInstance(InstConstants.OBS_CLASS_PROP,
                         c.getObsClass().sequenceValue()));
 
-        config.putParameter(SeqConfigNames.OBSERVE_CONFIG_NAME,
+        config.putParameter(SeqConfigNames.CALIBRATION_CONFIG_NAME,
                 DefaultParameter.getInstance(Ghost$.MODULE$.RED_EXPOSURE_TIME_PROP(), c.getRedExposureTime()));
-        config.putParameter(SeqConfigNames.OBSERVE_CONFIG_NAME,
+        config.putParameter(SeqConfigNames.CALIBRATION_CONFIG_NAME,
                 DefaultParameter.getInstance(Ghost$.MODULE$.RED_EXPOSURE_COUNT_PROP(), c.getRedExposureCount()));
 
-        config.putParameter(SeqConfigNames.OBSERVE_CONFIG_NAME,
+        config.putParameter(SeqConfigNames.CALIBRATION_CONFIG_NAME,
                 DefaultParameter.getInstance(Ghost$.MODULE$.BLUE_EXPOSURE_TIME_PROP(), c.getBlueExposureTime()));
-        config.putParameter(SeqConfigNames.OBSERVE_CONFIG_NAME,
+        config.putParameter(SeqConfigNames.CALIBRATION_CONFIG_NAME,
                 DefaultParameter.getInstance(Ghost$.MODULE$.BLUE_EXPOSURE_COUNT_PROP(), c.getBlueExposureCount()));
 
         GsaSequenceEditor.instance.addProprietaryPeriod(config, getSeqComponent().getProgram(), c.getObsClass());
