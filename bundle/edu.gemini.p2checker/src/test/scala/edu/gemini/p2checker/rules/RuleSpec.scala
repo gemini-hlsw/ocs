@@ -1,9 +1,8 @@
 package edu.gemini.p2checker.rules
 
 import java.util.UUID
-
 import edu.gemini.p2checker.api.{IRule, ObservationElements}
-import edu.gemini.pot.sp.{Instrument, ISPObservation, SPComponentType}
+import edu.gemini.pot.sp.{ISPFactory, ISPObservation, ISPProgram, Instrument, SPComponentType}
 import edu.gemini.pot.util.POTUtil
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.data.ISPDataObject
@@ -23,7 +22,13 @@ abstract class RuleSpec extends Specification {
   def ruleSet: IRule
 
   // configurable test setup, feel free to adapt as needed for future tests
-  def setup[I <: ISPDataObject](instrument: SPComponentType, programId: String = "")(mod: I => Unit): ISPObservation = {
+  def setup[I <: ISPDataObject](instrument: SPComponentType, programId: String = "")(mod: I => Unit): ISPObservation =
+    advancedSetup[I](instrument, programId) { (_, _, i, _) =>
+      mod(i)
+    }
+
+    // configurable test setup, feel free to adapt as needed for future tests
+  def advancedSetup[I <: ISPDataObject](instrument: SPComponentType, programId: String = "")(mod: (ISPProgram, ISPObservation, I, ISPFactory) => Unit): ISPObservation = {
     val f = POTUtil.createFactory(UUID.randomUUID())
     val p = f.createProgram(null, SPProgramID.toProgramID(programId))
     val o = f.createObservation(p, Instrument.none, null) <| p.addObservation
@@ -32,9 +37,11 @@ abstract class RuleSpec extends Specification {
     val t = e.getDataObject.asInstanceOf[TargetObsComp]
     e.setDataObject(t)
 
+    f.createSeqComponent(p, SPComponentType.OBSERVER_OBSERVE, null) <| o.getSeqComponent.addSeqComponent
+
     // Modify the instrument's data object as needed
     val dataObj = i.getDataObject
-    mod(dataObj.asInstanceOf[I])
+    mod(p, o, dataObj.asInstanceOf[I], f)
     i.setDataObject(dataObj)
 
     // This is our observation..

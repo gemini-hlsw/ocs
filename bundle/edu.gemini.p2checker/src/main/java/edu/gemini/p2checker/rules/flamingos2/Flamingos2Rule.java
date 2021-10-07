@@ -8,7 +8,10 @@ import edu.gemini.p2checker.util.MdfConfigRule;
 import edu.gemini.p2checker.util.NoPOffsetWithSlitRule;
 import edu.gemini.p2checker.util.SequenceRule;
 import edu.gemini.spModel.config2.Config;
+import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2.Disperser;
+import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import scala.Option;
 import scala.runtime.AbstractFunction2;
@@ -23,7 +26,33 @@ public final class Flamingos2Rule implements IRule {
     private static final Collection<IConfigRule> FLAM2_RULES = new ArrayList<IConfigRule>();
     private static final String PREFIX = "Flamingos2Rule_";
 
-    private static IConfigRule EXPOSURE_TIME_RULE = new IConfigRule() {
+    private static final ItemKey DISPERSER_KEY = new ItemKey("instrument:disperser");
+
+    private static Disperser getDisperser(Config config) {
+        return (Disperser) SequenceRule.getItem(config, Disperser.class, DISPERSER_KEY);
+    }
+
+    private static final IConfigRule ACQUISITION_RULE = new AbstractConfigRule() {
+        private static final String MESSAGE =
+            "Acquisition observation should not use a grism";
+
+        @Override
+        public Problem check(Config config, int step, ObservationElements elems, Object state) {
+            Problem result = null;
+
+            final ObsClass obsClass = SequenceRule.getObsClass(config);
+            if (obsClass == ObsClass.ACQ || obsClass == ObsClass.ACQ_CAL) {
+                if (getDisperser(config) != Disperser.NONE) {
+                    result = new Problem(WARNING, PREFIX + "ACQUISITION_RULE", MESSAGE,
+                                 SequenceRule.getInstrumentOrSequenceNode(step, elems));
+                }
+            }
+
+            return result;
+        }
+    };
+
+    private static final IConfigRule EXPOSURE_TIME_RULE = new IConfigRule() {
 
         private static final String MIN_MESSAGE =
                 "Exposure time (%.1f) below minimum for read mode (%.1f).";
@@ -88,7 +117,7 @@ public final class Flamingos2Rule implements IRule {
      * REL-1811: Warn if there are P-offsets for a slit spectroscopy observation.
      * Warn for FPU = (*arcsec or Custom Mask)
      */
-    private static IConfigRule NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE = new NoPOffsetWithSlitRule(
+    private static final IConfigRule NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE = new NoPOffsetWithSlitRule(
         PREFIX,
         new AbstractFunction2<Config, ObservationElements, Boolean>() {
             public Boolean apply(Config config, ObservationElements elems) {
@@ -98,10 +127,11 @@ public final class Flamingos2Rule implements IRule {
         }
     );
 
-    /**
-     * Register all the Flamingos 2 rules to apply.
-     */
+    //
+    // Register all the Flamingos 2 rules to apply.
+    //
     static {
+        FLAM2_RULES.add(ACQUISITION_RULE);
         FLAM2_RULES.add(EXPOSURE_TIME_RULE);
         FLAM2_RULES.add(NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE);
         FLAM2_RULES.add(new MdfMaskNameRule(Problem.Type.ERROR));
