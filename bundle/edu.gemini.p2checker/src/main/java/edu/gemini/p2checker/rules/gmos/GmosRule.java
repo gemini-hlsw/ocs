@@ -46,7 +46,7 @@ import static edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
  */
 public final class GmosRule implements IRule {
     private static final String PREFIX = "GmosRule_";
-    private static Collection<IConfigRule> GMOS_RULES = new ArrayList<>();
+    private static final Collection<IConfigRule> GMOS_RULES = new ArrayList<>();
 
     //keys to access sequence elements
     private static final ItemKey FPU_KEY = new ItemKey("instrument:fpu");
@@ -62,7 +62,7 @@ public final class GmosRule implements IRule {
      * either a filter or a grating should be defined whatever the fpu
      * WARN if (disperser == 'Mirror' && filter == 'none'), \
      */
-    private static IConfigRule DISPERSER_AND_MIRROR_RULE = new AbstractConfigRule() {
+    private static final IConfigRule DISPERSER_AND_MIRROR_RULE = new AbstractConfigRule() {
         private static final String MESSAGE = "Mirror must be used with a filter, or select a grating " +
                 "and a filter is optional";
 
@@ -85,7 +85,7 @@ public final class GmosRule implements IRule {
      * Shouldn't contain grating
      * WARN if (class == 'Acquisition) and (disperser != 'Mirror'),
      */
-    private static IConfigRule ACQUISITION_RULE = new AbstractConfigRule() {
+    private static final IConfigRule ACQUISITION_RULE = new AbstractConfigRule() {
         private static final String MESSAGE = "Acquisition observation should not contain grating";
 
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
@@ -103,18 +103,18 @@ public final class GmosRule implements IRule {
     };
 
 
-    private static IConfigMatcher SCIENCE_DAYCAL_MATCHER = (config, step, elems) -> {
+    private static final IConfigMatcher SCIENCE_DAYCAL_MATCHER = (config, step, elems) -> {
         ObsClass obsClass = SequenceRule.getObsClass(config);
         return obsClass == ObsClass.SCIENCE || obsClass == ObsClass.DAY_CAL;
     };
 
-    private static IConfigMatcher IMAGING_MATCHER = (config, step, elems) -> {
+    private static final IConfigMatcher IMAGING_MATCHER = (config, step, elems) -> {
         if (!SequenceRule.SCIENCE_MATCHER.matches(config, step, elems))
             return false;
         return getDisperser(config).isMirror() && getFPU(config, elems).isImaging();
     };
 
-    private static IConfigMatcher SPECTROSCOPY_MATCHER = (config, step, elems) -> {
+    private static final IConfigMatcher SPECTROSCOPY_MATCHER = (config, step, elems) -> {
         if (!SequenceRule.SCIENCE_MATCHER.matches(config, step, elems))
             return false;
         if (!isSpecFPUnselected(config, elems)) return false;
@@ -122,14 +122,14 @@ public final class GmosRule implements IRule {
         return !disperser.isMirror();
     };
 
-    private static IConfigMatcher N_S_SPECTROSCOPY_MATCHER = (config, step, elems) -> {
+    private static final IConfigMatcher N_S_SPECTROSCOPY_MATCHER = (config, step, elems) -> {
         if (!SPECTROSCOPY_MATCHER.matches(config, step, elems))
             return false;
         final InstGmosCommon<?,?,?,?> inst = (InstGmosCommon) elems.getInstrument();
         return inst != null && inst.getUseNS() == UseNS.TRUE;
     };
 
-    private static IConfigMatcher N_S_SPECTROSCOPY_SCIENCE_DAYCAL__MATCHER = (config, step, elems) -> {
+    private static final IConfigMatcher N_S_SPECTROSCOPY_SCIENCE_DAYCAL__MATCHER = (config, step, elems) -> {
         if (!SCIENCE_DAYCAL_MATCHER.matches(config, step, elems)) {
             return false;
         }
@@ -157,9 +157,9 @@ public final class GmosRule implements IRule {
             String getId();
         }
 
-        private IConfigMatcher _matcher;
-        private IScienceChecker _checker;
-        private Problem.Type _type;
+        private final IConfigMatcher _matcher;
+        private final IScienceChecker _checker;
+        private final Problem.Type _type;
 
         public ScienceRule(IScienceChecker checker, IConfigMatcher validator) {
             this(checker, validator, WARNING);
@@ -190,7 +190,7 @@ public final class GmosRule implements IRule {
      * This is for GMOS-N only.
      * REL-1194: Also for GMOS-S now, but with different default and rule.
      */
-    private static IConfigRule CHECK_3_AMP_MODE = new AbstractConfigRule() {
+    private static final IConfigRule CHECK_3_AMP_MODE = new AbstractConfigRule() {
         private static final String GMOS_NORTH_MESSAGE = "The E2V detectors must use 6 amp mode";
         private static final String GMOS_SOUTH_MESSAGE = "The E2V detectors must use 3 amp mode";
 
@@ -236,7 +236,7 @@ public final class GmosRule implements IRule {
     /**
      * Error if we try to use an amp count not supported by the CCD.
      */
-    private static IConfigRule BAD_AMP_COUNT_RULE = new AbstractConfigRule() {
+    private static final IConfigRule BAD_AMP_COUNT_RULE = new AbstractConfigRule() {
         private static final String MESSAGE = "Amp count %s is not compatible with the %s CCD";
 
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
@@ -273,7 +273,7 @@ public final class GmosRule implements IRule {
     /**
      * WARN if (gain != 'low' && !HAMAMATSU)
      */
-    private static ScienceRule GAIN_SCIENCE_RULE = new ScienceRule(
+    private static final ScienceRule GAIN_SCIENCE_RULE = new ScienceRule(
             new ScienceRule.IScienceChecker() {
                 private static final String MESSAGE = "Low gain is recommended for science observations";
 
@@ -311,7 +311,7 @@ public final class GmosRule implements IRule {
     /**
      * WARN if (read == 'fast'  && !HAMAMATSU)
      */
-    private static ScienceRule READMODE_SCIENCE_RULE = new ScienceRule(
+    private static final ScienceRule READMODE_SCIENCE_RULE = new ScienceRule(
             new ScienceRule.IScienceChecker() {
                 private static final String MESSAGE = "Slow read-out is recommended for science observations";
 
@@ -347,7 +347,7 @@ public final class GmosRule implements IRule {
     /**
      * WARNING  if configured with slow-read and high-gain.
      */
-    private static IConfigRule GAIN_READMODE_RULE = new AbstractConfigRule() {
+    private static final IConfigRule GAIN_READMODE_RULE = new AbstractConfigRule() {
         private static final String MESSAGE = "Slow readout and high gain is not recommended.";
 
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
@@ -374,7 +374,7 @@ public final class GmosRule implements IRule {
      * For imaging observations, it is required to use 1x1, 2x2, or 4x4 binning.
      * For MOS pre-imaging, only 1x1 or 2x2 are allowe.
      */
-    private static IConfigRule BINNING_RULE = new IConfigRule() {
+    private static final IConfigRule BINNING_RULE = new IConfigRule() {
 
         private static final String IMAGING_MSG = "For imaging, binning is limited to 1x1, 2x2 or 4x4.";
         private static final String PREIMAGING_MSG = "For MOS pre-imaging, binning is limited to 1x1 or 2x2.";
@@ -422,7 +422,7 @@ public final class GmosRule implements IRule {
     public static final String GMOS_S_DTA_X_RULE_Y1_ID = PREFIX + "Y1";
     public static final String GMOS_S_DTA_X_RULE_Y2_4_ID = PREFIX + "Y2_4";
 
-    private static IConfigRule GMOS_S_DTA_X_RULE = new IConfigRule() {
+    private static final IConfigRule GMOS_S_DTA_X_RULE = new IConfigRule() {
 
         private static final String Y1   = "The GMOS-S Hamamatsu allowed DTA X range is -4 to +6 for Ybin=1";
         private static final String Y2_4 = "The GMOS-S Hamamatsu allowed DTA X range is -2 to +6 for Ybin=2 or 4";
@@ -489,7 +489,7 @@ public final class GmosRule implements IRule {
      * so that the GmosRule can check whether to add a warning after the
      * entire sequence has been iterated.
      */
-    private static IConfigRule SPATIAL_DITHER_IMAGING_RULE = new IConfigRule() {
+    private static final IConfigRule SPATIAL_DITHER_IMAGING_RULE = new IConfigRule() {
 
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
             GmosSpatialDitherState gsds = (GmosSpatialDitherState) state;
@@ -551,7 +551,7 @@ public final class GmosRule implements IRule {
     /**
      * WARN if (ccd bin = 1,1) && (IQ != 20) && !Altair
      */
-    private static ScienceRule CCD_BIN_AND_IQ_IMAGING_RULE = new ScienceRule(
+    private static final ScienceRule CCD_BIN_AND_IQ_IMAGING_RULE = new ScienceRule(
             new ScienceRule.IScienceChecker() {
                 private static final String MESSAGE = "1x1 binning is usually only necessary in IQ=20";
 
@@ -585,7 +585,7 @@ public final class GmosRule implements IRule {
     /**
      * WARN if (ccd bin != 1,1) && Altair
      */
-    private static ScienceRule CCD_BIN_AND_ALTAIR_IMAGING_RULE = new ScienceRule(
+    private static final ScienceRule CCD_BIN_AND_ALTAIR_IMAGING_RULE = new ScienceRule(
             new ScienceRule.IScienceChecker() {
                 private static final String MESSAGE = "Altair observations should use 1x1 binning.";
 
@@ -618,7 +618,7 @@ public final class GmosRule implements IRule {
     /**
      * WARN if (disperser != 'Mirror) && (Built In fpu == selected) && (fpu == 'None')
      */
-    private static ScienceRule GRATING_NO_SLIT_SCIENCE_RULE = new ScienceRule(
+    private static final ScienceRule GRATING_NO_SLIT_SCIENCE_RULE = new ScienceRule(
             new ScienceRule.IScienceChecker() {
                 private static final String MESSAGE = "A grating is defined but not a slit, mask or IFU";
 
@@ -640,7 +640,7 @@ public final class GmosRule implements IRule {
     /**
      * REL-388: OT Phase-2 check for old GMOS-N B600 grating
      */
-    private static ScienceRule B600_G5303_RULE = new ScienceRule(
+    private static final ScienceRule B600_G5303_RULE = new ScienceRule(
             new ScienceRule.IScienceChecker() {
                 private static final String MESSAGE = "The B600_G5303 grating has been superseded by the B600_G5307.";
 
@@ -663,7 +663,7 @@ public final class GmosRule implements IRule {
     /**
      * Spectroscopic element in fpu without grating
      */
-    private static ScienceRule SPECTROSCOPIC_ELEMENT_IN_FPU_SCIENCE_RULE = new ScienceRule(
+    private static final ScienceRule SPECTROSCOPIC_ELEMENT_IN_FPU_SCIENCE_RULE = new ScienceRule(
             new ScienceRule.IScienceChecker() {
                 private static final String MESSAGE = "A slit, mask or IFU is defined, but no grating is selected";
 
@@ -687,7 +687,7 @@ public final class GmosRule implements IRule {
     /**
      * nod and shuffle without slit or grating
      */
-    private static ScienceRule N_S_NO_SLIT_OR_GRATING_SCIENCE_RULE = new ScienceRule(
+    private static final ScienceRule N_S_NO_SLIT_OR_GRATING_SCIENCE_RULE = new ScienceRule(
             new ScienceRule.IScienceChecker() {
                 private static final String MESSAGE = "Nod and Shuffle science observations require a " +
                         "grating and a spectroscopic element in the fpu";
@@ -720,7 +720,7 @@ public final class GmosRule implements IRule {
      * this value is defined the result is reported either in the static component or in the sequence node
      */
 
-    private static IConfigRule EXP_SPECTROSCOPIC_RULE = new IConfigRule() {
+    private static final IConfigRule EXP_SPECTROSCOPIC_RULE = new IConfigRule() {
         private static final String MESSAGE = "It is usually best to keep spectroscopic exposure " +
                 "times less than one hour";
 
@@ -744,7 +744,7 @@ public final class GmosRule implements IRule {
     /**
      * WARN  if (Built in FPU == selected) && (fpu == 'IFU Left Slit (blue)')
      */
-    private static ScienceRule IFU_LEFT_SLIT_SPECTROSCOPIC_RULE = new ScienceRule(
+    private static final ScienceRule IFU_LEFT_SLIT_SPECTROSCOPIC_RULE = new ScienceRule(
             new ScienceRule.IScienceChecker() {
                 private static final String MESSAGE = "In IFU one slit mode it is recommended to use the red slit";
 
@@ -768,7 +768,7 @@ public final class GmosRule implements IRule {
     /**
      * WARN  if (Built in FPU == selected) && (fpu == 'IFU 2 Slits') && (Filter == 'none')
      */
-    private static ScienceRule IFU_2_SLIT_AND_FILTER_SPECTROSCOPIC_RULE = new ScienceRule(
+    private static final ScienceRule IFU_2_SLIT_AND_FILTER_SPECTROSCOPIC_RULE = new ScienceRule(
             new ScienceRule.IScienceChecker() {
                 private static final String MESSAGE = "In IFU 2-slit mode, it is recommended to use a " +
                         "filter to prevent spectral overlap";
@@ -797,7 +797,7 @@ public final class GmosRule implements IRule {
     /**
      * WARN if (wavelength < 450) || (wavelength > 900)
      */
-    private static ScienceRule WAVELENGTH_SPECTROSCOPIC_RULE = new ScienceRule(
+    private static final ScienceRule WAVELENGTH_SPECTROSCOPIC_RULE = new ScienceRule(
             new ScienceRule.IScienceChecker() {
                 private static final String MESSAGE = "The central wavelength is likely too blue or too red";
 
@@ -827,7 +827,7 @@ public final class GmosRule implements IRule {
         private static final String MESSAGE = "For the selected central wavelength and disperser it is recommended to " +
                 "use a blocking filter to avoid second order overlap";
 
-        private static Map<Disperser, Double> DISPERSER_LIMITS_MAP = new HashMap<>();
+        private static final Map<Disperser, Double> DISPERSER_LIMITS_MAP = new HashMap<>();
 
         static {
             //north dispersers
@@ -840,7 +840,7 @@ public final class GmosRule implements IRule {
             DISPERSER_LIMITS_MAP.put(DisperserSouth.R600_G5324, 775.0);
         }
 
-        private static DisperserWavelengthChecker _instance = new DisperserWavelengthChecker();
+        private static final DisperserWavelengthChecker _instance = new DisperserWavelengthChecker();
 
         public static DisperserWavelengthChecker getInstance() {
             return _instance;
@@ -879,7 +879,7 @@ public final class GmosRule implements IRule {
      * || ((disperser == 'R600_G5304') && (central wavelength > 775)) \
      * || (disperser == 'R150_G5306'))
      */
-    private static ScienceRule DISPERSER_WAVELENGTH_SPECTROSCOPIC_RULE =
+    private static final ScienceRule DISPERSER_WAVELENGTH_SPECTROSCOPIC_RULE =
             new ScienceRule(
                     DisperserWavelengthChecker.getInstance(),
                     SPECTROSCOPY_MATCHER
@@ -889,7 +889,7 @@ public final class GmosRule implements IRule {
     /**
      * check correct fpu for N&S
      */
-    private static ScienceRule N_S_FPU_SPECTROSCOPIC_RULE = new ScienceRule(
+    private static final ScienceRule N_S_FPU_SPECTROSCOPIC_RULE = new ScienceRule(
             new ScienceRule.IScienceChecker() {
                 private static final String MESSAGE_SOUTH = "For Nod and Shuffle, either a Nod and Shuffle slit, " +
                         "or a Custom mask or Nod and Shuffle IFU option must be selected";
@@ -933,7 +933,7 @@ public final class GmosRule implements IRule {
      * <p/>
      * Bryan on SCT-203: I define nod_distance=sqrt((p2-p1)^2 + (q2-q1)^2)
      */
-    private static ScienceRule NOD_DISTANCE_N_S_SPECTROSCOPY_RULE = new ScienceRule(
+    private static final ScienceRule NOD_DISTANCE_N_S_SPECTROSCOPY_RULE = new ScienceRule(
             new ScienceRule.IScienceChecker() {
                 private static final String MESSAGE = "For Nod and Shuffle a nod distance must be set";
 
@@ -984,7 +984,7 @@ public final class GmosRule implements IRule {
      * which is basically the same as the N_S_SPECTROSCOPY_MATCHER but matches for Daytime calibrations
      * as well.
      */
-    private static ScienceRule SHUFFLE_DISTANCE_N_S_SPECTROSCOPY_RULE = new ScienceRule(
+    private static final ScienceRule SHUFFLE_DISTANCE_N_S_SPECTROSCOPY_RULE = new ScienceRule(
             new ScienceRule.IScienceChecker() {
                 private static final String MESSAGE = "For Nod and Shuffle a shuffle distance must be set";
 
@@ -1010,7 +1010,7 @@ public final class GmosRule implements IRule {
     /**
      * WARN if (N&S_cycles == 0)
      */
-    private static ScienceRule N_S_CYCLES_N_S_SPECTROSCOPY_RULE = new ScienceRule(
+    private static final ScienceRule N_S_CYCLES_N_S_SPECTROSCOPY_RULE = new ScienceRule(
             new ScienceRule.IScienceChecker() {
                 private static final String MESSAGE = "For Nod and Shuffle > 0 cycles must be set";
 
@@ -1033,7 +1033,7 @@ public final class GmosRule implements IRule {
     /**
      * WARN if (Electronic_Offseting == selected) && (Nod_Distance > 2)
      */
-    private static ScienceRule EOFFSET_N_S_SPECTROSCOPY_RULE = new ScienceRule(
+    private static final ScienceRule EOFFSET_N_S_SPECTROSCOPY_RULE = new ScienceRule(
             new ScienceRule.IScienceChecker() {
                 private static final String MESSAGE = "To use electronic offsetting the Nod Distance must be <= 2";
                 private static final int MAX_NOD_DISTANCE = 2;
@@ -1073,7 +1073,7 @@ public final class GmosRule implements IRule {
      * WARN if (Built in fpu == selected) && (fpu == N&S slit) \
      * && (shuffle_distance != 1536)
      */
-    private static IConfigRule NS_SLIT_SPECTROSCOPY_RULE = new IConfigRule() {
+    private static final IConfigRule NS_SLIT_SPECTROSCOPY_RULE = new IConfigRule() {
         private static final String MESSAGE = "For long slit Nod and Shuffle the shuffle distance must be %d";
 
         // This is a bit poor but it returns null if there is no need to issue
@@ -1111,7 +1111,7 @@ public final class GmosRule implements IRule {
     /**
      * WARN if (shuffle_distance % ccd_y_binning != 0
      */
-    private static ScienceRule Y_BINNING_AND_SHUFFLE_DISTANCE_SPECTROSCOPY_RULE = new ScienceRule(
+    private static final ScienceRule Y_BINNING_AND_SHUFFLE_DISTANCE_SPECTROSCOPY_RULE = new ScienceRule(
             new ScienceRule.IScienceChecker() {
                 private static final String MESSAGE = "The shuffle distance must be a multiple of the CCD Y binning";
 
@@ -1151,7 +1151,7 @@ public final class GmosRule implements IRule {
      * GMOS-N EEV: 40 min
      * GMOS-N Hamamatsu: 20 min
      */
-    private static IConfigRule MAX_EXPOSURE_TIME_RULE = new AbstractConfigRule() {
+    private static final IConfigRule MAX_EXPOSURE_TIME_RULE = new AbstractConfigRule() {
         private static final String msg = "Exposure time exceeds recommended maximum for the GMOS instruments due to excessive contamination of the image due to cosmic rays";
 
         @Override
@@ -1190,7 +1190,7 @@ public final class GmosRule implements IRule {
      * time less than 1 sec the GMOS DC rounds down to 0 sec but it still opens and closes the shutter.
      * There is no way to calibrate such data since we don't really know how long the shutter was open for.
      */
-    private static IConfigRule INTEGER_EXPOSURE_TIME_RULE = new AbstractConfigRule() {
+    private static final IConfigRule INTEGER_EXPOSURE_TIME_RULE = new AbstractConfigRule() {
         private static final String msg = "The GMOS DC does not support fractional exposure times";
 
         @Override
@@ -1205,7 +1205,7 @@ public final class GmosRule implements IRule {
         }
     };
 
-    private static IConfigRule NON_ZERO_EXPOSURE_TIME_RULE = new AbstractConfigRule() {
+    private static final IConfigRule NON_ZERO_EXPOSURE_TIME_RULE = new AbstractConfigRule() {
         private static final String msg = "Exposure time must be greater than 0";
 
         @Override
@@ -1253,7 +1253,7 @@ public final class GmosRule implements IRule {
      * (Note that very soon we will have to apply this rule to GMOS-N, too.)
      */
     private static final Semester SEMESTER_2014A = new Semester(2014, Semester.Half.A);
-    private static IConfigRule POST_2014A_GMOS_S_WITH_E2V = new AbstractConfigRule() {
+    private static final IConfigRule POST_2014A_GMOS_S_WITH_E2V = new AbstractConfigRule() {
         private static final String msg = "Starting with 2014B GMOS-S must use the Hamamatsu CCDs. Please create a new observation or ask your contact scientist to update the CCD settings.";
 
         private Option<Semester> semester(final ObservationElements elems) {
@@ -1528,7 +1528,7 @@ public final class GmosRule implements IRule {
 
     }
 
-    private static IConfigRule FILTER_MAX_EXPOSURE_TIME_RULE = new IConfigRule() {
+    private static final IConfigRule FILTER_MAX_EXPOSURE_TIME_RULE = new IConfigRule() {
         private static final String warnMsg = "The exposure time will cause the background to exceed 50% full well for the configuration and conditions";
         private static final String errMsg = "The exposure time may cause the background to saturate for the configuration and conditions";
 
@@ -1650,7 +1650,7 @@ public final class GmosRule implements IRule {
         return diffX * diffX + diffY * diffY;
     }
 
-    private static IConfigRule MAX_ROI_RULE = new IConfigRule() {
+    private static final IConfigRule MAX_ROI_RULE = new IConfigRule() {
         private static final String errMsgE2V = "E2V CCDs support up to 4 custom ROIs";
         private static final String errMsgHamamatsu = "Hamamatsu CCDs support up to 5 custom ROIs";
 
@@ -1689,7 +1689,7 @@ public final class GmosRule implements IRule {
         }
     };
 
-    private static IConfigRule CUSTOM_ROI_NOT_DECLARED_RULE = new IConfigRule() {
+    private static final IConfigRule CUSTOM_ROI_NOT_DECLARED_RULE = new IConfigRule() {
         //private static final String warnMsg = "Custom ROIs are declared but not used in any step";
         private static final String errMsg = "Custom ROIs are not declared but are used in a step";
 
@@ -1713,7 +1713,7 @@ public final class GmosRule implements IRule {
         }
     };
 
-    private static IConfigRule ROI_OVERLAP_RULE = new IConfigRule() {
+    private static final IConfigRule ROI_OVERLAP_RULE = new IConfigRule() {
         private static final String errMsg = "The custom ROIs must not overlap";
 
 
@@ -1750,7 +1750,7 @@ public final class GmosRule implements IRule {
      * REL-2057: It is possible to invalidate custom ROIs by changing the detector. This rule detects ROIs that
      * have been invalidated by doing so.
      */
-    private static IConfigRule ROI_INVALID_RULE = new IConfigRule() {
+    private static final IConfigRule ROI_INVALID_RULE = new IConfigRule() {
         private static final String errMsg = "One or several custom ROIs are invalid";
 
         @Override
@@ -1774,7 +1774,7 @@ public final class GmosRule implements IRule {
      * REL-1811: Warn if there are P-offsets for a slit spectroscopy observation.
      * Warn for FPUs = (*arcsec or Custom Mask).
      */
-    private static IConfigRule NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE = new NoPOffsetWithSlitRule(
+    private static final IConfigRule NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE = new NoPOffsetWithSlitRule(
         PREFIX,
         new AbstractFunction2<Config, ObservationElements, Boolean>() {
             public Boolean apply(Config config, ObservationElements elems) {
@@ -1795,9 +1795,9 @@ public final class GmosRule implements IRule {
 
     );
 
-    private static IRule UNUSED_CUSTOM_ROI_RULE = new IRule() {
+    private static final IRule UNUSED_CUSTOM_ROI_RULE = new IRule() {
         private static final String warnMsg = "Custom ROIs are declared but not used in any step";
-        private IConfigRule rule = new AbstractConfigRule() {
+        private final IConfigRule rule = new AbstractConfigRule() {
 
             @Override
             public Problem check(Config config, int step, ObservationElements elems, Object state) {
@@ -1841,7 +1841,7 @@ public final class GmosRule implements IRule {
      * REL-1249: Warn if IFU observations have a spatial binning.
      * This rules fires for any IFU observations that do not use the mirror and has a y binning != 1.
      */
-    private static IConfigRule IFU_NO_SPATIAL_BINNING_RULE = new IConfigRule() {
+    private static final IConfigRule IFU_NO_SPATIAL_BINNING_RULE = new IConfigRule() {
         private static final String errMsg = "IFU observations generally should not be binned in the spatial direction (y)";
 
         @Override
@@ -1866,7 +1866,7 @@ public final class GmosRule implements IRule {
      * REL-2456: We request a Phase II check to give a warning if the DTA-X
      * position is not a multiple of the y-pixel binning.
      */
-    private static IConfigRule DTA_X_Y_MULTIPLE_BINNING_RULE = new IConfigRule() {
+    private static final IConfigRule DTA_X_Y_MULTIPLE_BINNING_RULE = new IConfigRule() {
         private static final String errMsg = "The DTA X offset (%d) should be multiple of the Y-binning (%d)";
 
         @Override
