@@ -22,8 +22,6 @@ import argonaut._
 import Argonaut._
 import scalaz._
 import Scalaz._
-import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
-import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.TimingWindow
@@ -108,8 +106,6 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
       case o: SPObservation => Some((n.asInstanceOf[ISPObservation], o).asJson)
       case s: SPSiteQuality => Some(s.asJson)
       case t: TargetObsComp => Some((n.asInstanceOf[ISPObsComponent], t).asJson)
-      // TODO: What else is needed here? Obslog data? Where is that?
-
       case _ => None
 
     }
@@ -183,12 +179,6 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
     } else
       "Base"
   }
-
-//  implicit def UserTargetEncodeJson: EncodeJson[(TargetEnvironment, UserTarget, Option[Int])] =
-//    EncodeJason(p => {
-//      val (te, ut, idx) = p
-//      (te, ut.target, ut.target.spTarget, idx).toJson ->: jEmptyObject
-//    })
 
   // Unfortunately, we have to pass a lot of crap to this to get everything we need.
   implicit def SiderealTargetEncodeJson: EncodeJson[(TargetEnvironment, SPTarget, SiderealTarget, Option[Int])] =
@@ -301,22 +291,18 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         jEmptyObject
     })
 
-  // TODO: I feel stupid. This should be generalizable but I can't figure it out.
-  // TODO: Or even if we want to generalize it or it will possibly cause an exception.
-  implicit def UserTargetGuideGrpEncodeJson: EncodeJson[(TargetEnvironment, List[UserTarget])] =
+  // A general encoding of a GuideGrp that has an implicit JSON encoder.
+  // This works for T = UserTarget and T = ManualGroup.
+  implicit def GeneralGuideGrpEncodeJson[T](implicit enc: EncodeJson[(TargetEnvironment, T)]): EncodeJson[(TargetEnvironment, List[T])] =
     EncodeJson( { case (te, lst) =>
-      lst.map(ut => (te, ut)).asJson
-    })
-  implicit def ManualGuideGrpEncodeJson: EncodeJson[(TargetEnvironment, List[ManualGroup])] =
-    EncodeJson( { case (te, lst) =>
-      lst.map(ut => (te, ut)).asJson
+      lst.map(t => (te, t)).asJson
     })
 
-  // We include ISPObsComponent because if we expand with GuideSpeed, we need an
-  // ObsContext.creete(oc.getContextObservation).
+  // We include ISPObsComponent because if we expand with GuideSpeed in the future, we need an:
+  // ObsContext.create(oc.getContextObservation).
   implicit def AsterismEncodeJson: EncodeJson[(ISPObsComponent, TargetObsComp)] =
     EncodeJson(p => {
-      val (oc, targetObs) = p
+      val (_, targetObs) = p
 
       val te = targetObs.getTargetEnvironment
       val ge = te.getGuideEnvironment.guideEnv
@@ -378,15 +364,15 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
     })
 
   implicit def ObservationFieldsEncodeJson: EncodeJson[(ISPObservation, SPObservation)] =
-    EncodeJson( { case (n, o) =>
+    EncodeJson( { case (ispObs, spObs) =>
       // TODO: Need acquisition overhead here. Is this it?
-      ("acquisitionOverhead" := PlannedTimeCalculator.instance.calc(n).toPlannedStepSummary.getSetupTime.reacquisitionOnlyTime.toMillis) ->:
-        ("setupTimeType" := o.getSetupTimeType.toString) ->:
-        ("tooOverrideRapid" := o.isOverrideRapidToo.toYesNo.displayValue) ->:
-        ("priority" := o.getPriority.displayValue) ->:
-        ("execStatusOverride" :=? o.getExecStatusOverride.asScalaOpt.map(_.displayValue)) ->?:
-        ("phase2Status" := o.getPhase2Status.displayValue) ->:
-        ("title" := o.getTitle) ->:
+      ("totalTime" := PlannedTimeCalculator.instance.calc(ispObs).totalTime()) ->: // PlannedStepSummary.getSetupTime.reacquisitionOnlyTime.toMillis) ->:
+        ("setupTimeType" := spObs.getSetupTimeType.toString) ->:
+        ("tooOverrideRapid" := spObs.isOverrideRapidToo.toYesNo.displayValue) ->:
+        ("priority" := spObs.getPriority.displayValue) ->:
+        ("execStatusOverride" :=? spObs.getExecStatusOverride.asScalaOpt.map(_.displayValue)) ->?:
+        ("phase2Status" := spObs.getPhase2Status.displayValue) ->:
+        ("title" := spObs.getTitle) ->:
         jEmptyObject
     })
 
@@ -403,9 +389,9 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
 
     "sequence" := steps.map {s =>
       s.itemEntries.toList.foldLeft(jEmptyObject) { (j, e) =>
-        // TODO: e is an ItemEntry and the value should have been mapped to a String by TO_SEQUENCE_VALUE
-        // TODO: I suspect this has something to do with Scala / Java Option since
-        // TODO: TO_SEQUENCE_VALUE returns a Java Option<String>.
+        // e is an ItemEntry and the value should have been mapped to a String by TO_SEQUENCE_VALUE.
+        // I suspect this has something to do with Scala / Java Option since TO_SEQUENCE_VALUE returns a
+        // Java Option<String>.
         (e.getKey.getPath := e.getItemValue.toString) ->: j
       }
     }
@@ -428,7 +414,4 @@ object ProgramExportServlet {
     def toYesNo: YesNoType =
       b ? YesNoType.YES | YesNoType.NO
   }
-
-  // This is in case we want to include guide speed.
-//  val MagTable: MagnitudeTable = ProbeLimitsTable.loadOrThrow()
 }
