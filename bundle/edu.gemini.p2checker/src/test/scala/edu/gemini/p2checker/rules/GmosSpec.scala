@@ -3,6 +3,7 @@ package edu.gemini.p2checker.rules
 import edu.gemini.p2checker.rules.gmos.GmosRule
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.gemini.gmos._
+import edu.gemini.spModel.obsclass.ObsClass
 
 /**
  * Some GMOS tests.
@@ -74,6 +75,49 @@ final class GmosSpec extends RuleSpec {
       }}
     }
   }
+
+  "GMOS N&S Configuration Rule" should {
+
+    import GmosSouthType.DisperserSouth._
+    import GmosSouthType.FPUnitSouth._
+
+    import SPComponentType._
+
+    val rule = "GmosRule_N_S_FPU_SPECTROSCOPIC_RULE"
+
+    "give no error for properly configured N&S" in {
+      expectNoneOf(rule) {
+        setup[InstGmosSouth](INSTRUMENT_GMOSSOUTH) { d =>
+          d.setUseNS(true)
+          d.setDisperser(R150_G5326)
+          d.setFPUnit(NS_1)
+        }
+      }
+    }
+
+    "warn for improperly configured N&S" in {
+      expectAllOf(rule) {
+        setup[InstGmosSouth](INSTRUMENT_GMOSSOUTH) { d =>
+          d.setUseNS(true)
+          d.setDisperser(R150_G5326)
+          d.setFPUnit(LONGSLIT_1)
+        }
+      }
+    }
+
+    "warn even for calibrations" in {
+      expectAllOf(rule) {
+        advancedSetup[InstGmosSouth](INSTRUMENT_GMOSSOUTH) { (p, o, d, f) =>
+          d.setUseNS(true)
+          d.setDisperser(R150_G5326)
+          d.setFPUnit(LONGSLIT_1)
+
+          addObserve(ObsClass.PARTNER_CAL, p, o, f)
+        }
+      }
+    }
+  }
+
 
 }
 

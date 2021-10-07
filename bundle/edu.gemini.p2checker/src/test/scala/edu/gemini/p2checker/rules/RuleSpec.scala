@@ -6,7 +6,9 @@ import edu.gemini.pot.sp.{ISPFactory, ISPObservation, ISPProgram, Instrument, SP
 import edu.gemini.pot.util.POTUtil
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.data.ISPDataObject
+import edu.gemini.spModel.obsclass.ObsClass
 import edu.gemini.spModel.rich.pot.sp._
+import edu.gemini.spModel.seqcomp.SeqRepeatObserve
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import org.specs2.mutable.Specification
 
@@ -59,5 +61,13 @@ abstract class RuleSpec extends Specification {
 
   // check if expected errors and warnings are part of the result
   def expectNoneOf(ids: String*)(o: ISPObservation) = executeRules(o) must not(containAnyOf(ids))
+
+  def addObserve(c: ObsClass, p: ISPProgram, o: ISPObservation, f: ISPFactory): Unit = {
+    val sc   = f.createSeqComponent(p, SPComponentType.OBSERVER_OBSERVE, null)
+    val dobj = sc.getDataObject.asInstanceOf[SeqRepeatObserve]
+    dobj.setObsClass(c)
+    sc.setDataObject(dobj)
+    o.getSeqComponent.addSeqComponent(sc)
+  }
 
 }

@@ -19,14 +19,6 @@ final class Flamingos2RuleSpec extends RuleSpec {
 
     val AcqErrId = "Flamingos2Rule_ACQUISITION_RULE"
 
-    def addObserve(c: ObsClass, p: ISPProgram, o: ISPObservation, f: ISPFactory): Unit = {
-      val sc   = f.createSeqComponent(p, SPComponentType.OBSERVER_OBSERVE, null)
-      val dobj = sc.getDataObject.asInstanceOf[SeqRepeatObserve]
-      dobj.setObsClass(c)
-      sc.setDataObject(dobj)
-      o.getSeqComponent.addSeqComponent(sc)
-    }
-
     "give no warning when disperser is none for ACQ" in {
       expectNoneOf(AcqErrId) {
         advancedSetup[Flamingos2](INSTRUMENT_FLAMINGOS2) { (p, o, d, f) =>
