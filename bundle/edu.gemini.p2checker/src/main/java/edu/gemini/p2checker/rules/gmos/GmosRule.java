@@ -103,37 +103,37 @@ public final class GmosRule implements IRule {
     };
 
 
-    private static final IConfigMatcher SCIENCE_DAYCAL_MATCHER = (config, step, elems) -> {
-        ObsClass obsClass = SequenceRule.getObsClass(config);
-        return obsClass == ObsClass.SCIENCE || obsClass == ObsClass.DAY_CAL;
-    };
+    private static final IConfigMatcher SCIENCE_DAYCAL_MATCHER =
+        SequenceRule.obsClassesMatcher(ObsClass.SCIENCE, ObsClass.DAY_CAL);
 
-    private static final IConfigMatcher IMAGING_MATCHER = (config, step, elems) -> {
-        if (!SequenceRule.SCIENCE_MATCHER.matches(config, step, elems))
-            return false;
-        return getDisperser(config).isMirror() && getFPU(config, elems).isImaging();
-    };
+    private static final IConfigMatcher IMAGING_MATCHER = (config, step, elems) ->
+        getDisperser(config).isMirror() && getFPU(config, elems).isImaging();
 
-    private static final IConfigMatcher SPECTROSCOPY_MATCHER = (config, step, elems) -> {
-        if (!SequenceRule.SCIENCE_MATCHER.matches(config, step, elems))
-            return false;
-        if (!isSpecFPUnselected(config, elems)) return false;
-        final Disperser disperser = getDisperser(config);
-        return !disperser.isMirror();
-    };
+    private static final IConfigMatcher SPECTROSCOPY_MATCHER = (config, step, elems) ->
+        !getDisperser(config).isMirror() && isSpecFpuSelected(config, elems);
 
-    private static final IConfigMatcher N_S_SPECTROSCOPY_MATCHER = (config, step, elems) -> {
-        if (!SPECTROSCOPY_MATCHER.matches(config, step, elems))
-            return false;
+    private static final IConfigMatcher SCIENCE_IMAGING_MATCHER =
+        ConfigMatcher.matchAll(SequenceRule.SCIENCE_MATCHER, IMAGING_MATCHER);
+
+    private static final IConfigMatcher SCIENCE_SPECTROSCOPY_MATCHER =
+        ConfigMatcher.matchAll(SequenceRule.SCIENCE_MATCHER, SPECTROSCOPY_MATCHER);
+
+    private static final IConfigMatcher N_S_MATCHER = (config, step, elems) -> {
         final InstGmosCommon<?,?,?,?> inst = (InstGmosCommon) elems.getInstrument();
         return inst != null && inst.getUseNS() == UseNS.TRUE;
     };
 
-    private static final IConfigMatcher N_S_SPECTROSCOPY_SCIENCE_DAYCAL__MATCHER = (config, step, elems) -> {
+    private static final IConfigMatcher N_S_SPECTROSCOPY_SCIENCE_MATCHER =
+        ConfigMatcher.matchAll(SequenceRule.SCIENCE_MATCHER, N_S_MATCHER, SPECTROSCOPY_MATCHER);
+
+    private static final IConfigMatcher N_S_SPECTROSCOPY_ANY_MATCHER =
+        ConfigMatcher.matchAll(N_S_MATCHER, SPECTROSCOPY_MATCHER);
+
+    private static final IConfigMatcher N_S_SPECTROSCOPY_SCIENCE_DAYCAL_MATCHER = (config, step, elems) -> {
         if (!SCIENCE_DAYCAL_MATCHER.matches(config, step, elems)) {
             return false;
         }
-        if (!isSpecFPUnselected(config, elems)) {
+        if (!isSpecFpuSelected(config, elems)) {
             return false;
         }
         final Disperser disperser = getDisperser(config);
@@ -415,7 +415,7 @@ public final class GmosRule implements IRule {
 
         // We only want to do this check for imaging observations.
         public IConfigMatcher getMatcher() {
-            return IMAGING_MATCHER;
+            return SCIENCE_IMAGING_MATCHER;
         }
     };
 
@@ -544,7 +544,7 @@ public final class GmosRule implements IRule {
         }
 
         public IConfigMatcher getMatcher() {
-            return IMAGING_MATCHER;
+            return SCIENCE_IMAGING_MATCHER;
         }
     };
 
@@ -580,7 +580,7 @@ public final class GmosRule implements IRule {
                     return PREFIX + "CCD_BIN_AND_IQ_IMAGING_RULE";
                 }
             }
-            , IMAGING_MATCHER
+            , SCIENCE_IMAGING_MATCHER
     );
     /**
      * WARN if (ccd bin != 1,1) && Altair
@@ -611,7 +611,7 @@ public final class GmosRule implements IRule {
                     return PREFIX + "CCD_BIN_AND_ALTAIR_IMAGING_RULE";
                 }
             }
-            , IMAGING_MATCHER
+            , SCIENCE_IMAGING_MATCHER
     );
 
 
@@ -669,7 +669,7 @@ public final class GmosRule implements IRule {
 
                 public boolean check(Config config, ObservationElements elems) {
                     final Disperser disperser = getDisperser(config);
-                    return disperser != null && isSpecFPUnselected(config, elems) && disperser.isMirror();
+                    return disperser != null && isSpecFpuSelected(config, elems) && disperser.isMirror();
                 }
 
                 public String getMessage() {
@@ -698,7 +698,7 @@ public final class GmosRule implements IRule {
                     final InstGmosCommon<?,?,?,?> inst = (InstGmosCommon) elems.getInstrument();
                     if (inst == null) return false; //can't check
                     final UseNS useNs = inst.getUseNS();
-                    return useNs == UseNS.TRUE && disperser.isMirror() && !isSpecFPUnselected(config, elems);
+                    return useNs == UseNS.TRUE && disperser.isMirror() && !isSpecFpuSelected(config, elems);
                 }
 
                 public String getMessage() {
@@ -735,7 +735,7 @@ public final class GmosRule implements IRule {
         }
 
         public IConfigMatcher getMatcher() {
-            return SPECTROSCOPY_MATCHER;
+            return SCIENCE_SPECTROSCOPY_MATCHER;
         }
 
     };
@@ -762,7 +762,7 @@ public final class GmosRule implements IRule {
                     return PREFIX + "IFU_LEFT_SLIT_SPECTROSCOPIC_RULE";
                 }
             }
-            , SPECTROSCOPY_MATCHER
+            , SCIENCE_SPECTROSCOPY_MATCHER
     );
 
     /**
@@ -790,7 +790,7 @@ public final class GmosRule implements IRule {
                     return PREFIX + "IFU_2_SLIT_AND_FILTER_SPECTROSCOPIC_RULE";
                 }
             }
-            , SPECTROSCOPY_MATCHER
+            , SCIENCE_SPECTROSCOPY_MATCHER
     );
 
 
@@ -815,7 +815,7 @@ public final class GmosRule implements IRule {
                     return PREFIX + "WAVELENGTH_SPECTROSCOPIC_RULE";
                 }
             }
-            , SPECTROSCOPY_MATCHER
+            , SCIENCE_SPECTROSCOPY_MATCHER
     );
 
 
@@ -882,7 +882,7 @@ public final class GmosRule implements IRule {
     private static final ScienceRule DISPERSER_WAVELENGTH_SPECTROSCOPIC_RULE =
             new ScienceRule(
                     DisperserWavelengthChecker.getInstance(),
-                    SPECTROSCOPY_MATCHER
+                    SCIENCE_SPECTROSCOPY_MATCHER
             );
 
 
@@ -917,7 +917,7 @@ public final class GmosRule implements IRule {
                     return PREFIX + "N_S_FPU_SPECTROSCOPIC_RULE";
                 }
             }
-            , N_S_SPECTROSCOPY_MATCHER
+            , N_S_SPECTROSCOPY_ANY_MATCHER
     );
 
 
@@ -964,7 +964,7 @@ public final class GmosRule implements IRule {
                     return PREFIX + "NOD_DISTANCE_N_S_SPECTROSCOPY_RULE";
                 }
             }
-            , N_S_SPECTROSCOPY_MATCHER,
+            , N_S_SPECTROSCOPY_SCIENCE_MATCHER,
             ERROR
     );
 
@@ -1003,7 +1003,7 @@ public final class GmosRule implements IRule {
                     return PREFIX + "SHUFFLE_DISTANCE_N_S_SPECTROSCOPY_RULE";
                 }
             },
-            N_S_SPECTROSCOPY_SCIENCE_DAYCAL__MATCHER,
+            N_S_SPECTROSCOPY_SCIENCE_DAYCAL_MATCHER,
             ERROR
     );
 
@@ -1027,7 +1027,7 @@ public final class GmosRule implements IRule {
                     return PREFIX + "N_S_CYCLES_N_S_SPECTROSCOPY_RULE";
                 }
             },
-            N_S_SPECTROSCOPY_MATCHER
+            N_S_SPECTROSCOPY_SCIENCE_MATCHER
     );
 
     /**
@@ -1066,7 +1066,7 @@ public final class GmosRule implements IRule {
                     return PREFIX + "EOFFSET_N_S_SPECTROSCOPY_RULE";
                 }
             }
-            , N_S_SPECTROSCOPY_MATCHER
+            , N_S_SPECTROSCOPY_SCIENCE_MATCHER
     );
 
     /**
@@ -1104,7 +1104,7 @@ public final class GmosRule implements IRule {
         }
 
         public IConfigMatcher getMatcher() {
-            return N_S_SPECTROSCOPY_MATCHER;
+            return N_S_SPECTROSCOPY_SCIENCE_MATCHER;
         }
     };
 
@@ -1133,7 +1133,7 @@ public final class GmosRule implements IRule {
                     return PREFIX + "Y_BINNING_AND_SHUFFLE_DISTANCE_SPECTROSCOPY_RULE";
                 }
             }
-            , N_S_SPECTROSCOPY_MATCHER, ERROR
+            , N_S_SPECTROSCOPY_SCIENCE_MATCHER, ERROR
     );
 
 
@@ -1560,7 +1560,7 @@ public final class GmosRule implements IRule {
 
         @Override
         public IConfigMatcher getMatcher() {
-            return IMAGING_MATCHER;
+            return SCIENCE_IMAGING_MATCHER;
         }
     };
 
@@ -1634,7 +1634,7 @@ public final class GmosRule implements IRule {
         }
     }
 
-    private static boolean isSpecFPUnselected(Config config, ObservationElements elems) {
+    private static boolean isSpecFpuSelected(Config config, ObservationElements elems) {
         final FPUnitMode fpuMode = (FPUnitMode) SequenceRule.getInstrumentItem(config, InstGmosCommon.FPU_MODE_PROP);
         if (fpuMode == FPUnitMode.CUSTOM_MASK) return true;
         if (fpuMode != FPUnitMode.BUILTIN) return false;

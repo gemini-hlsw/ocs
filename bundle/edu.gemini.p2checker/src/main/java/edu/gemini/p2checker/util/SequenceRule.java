@@ -51,26 +51,25 @@ public class SequenceRule implements IRule {
     private static final Map<Class<?>, Class<?>> PRIMITIVE_MAP = new HashMap<>();
 
     // Matcher for science observations only.
-    public static final IConfigMatcher SCIENCE_MATCHER = (config, step, elems) -> {
-        ObsClass obsClass = getObsClass(config);
-        return obsClass == ObsClass.SCIENCE;
-    };
+    public static final IConfigMatcher SCIENCE_MATCHER =
+        obsClassMatcher(ObsClass.SCIENCE);
+
+    public static IConfigMatcher obsClassMatcher(ObsClass obsClass) {
+        return obsClassesMatcher(Collections.singleton(obsClass));
+    }
+
+    public static IConfigMatcher obsClassesMatcher(ObsClass... obsClasses) {
+        return obsClassesMatcher(new HashSet<>(Arrays.asList(obsClasses)));
+    }
+
+    public static IConfigMatcher obsClassesMatcher(Set<ObsClass> obsClassSet) {
+        final Set<ObsClass> s = Collections.unmodifiableSet(new HashSet<>(obsClassSet));
+        return (config, step, elems) -> s.contains(getObsClass(config));
+    }
 
     // Matcher for science observations and nighttime calibrations.
-    public static final IConfigMatcher SCIENCE_NIGHTTIME_CAL_MATCHER = (config, step, elems) -> {
-        ObsClass obsClass = getObsClass(config);
-        if (obsClass == null)
-            return false;
-        switch(obsClass) {
-            case SCIENCE:
-            case PARTNER_CAL:
-            case PROG_CAL:
-                return true;
-            default:
-                return false;
-        }
-    };
-
+    public static final IConfigMatcher SCIENCE_NIGHTTIME_CAL_MATCHER =
+        obsClassesMatcher(ObsClass.SCIENCE, ObsClass.PARTNER_CAL, ObsClass.PROG_CAL);
 
     static {
         PRIMITIVE_MAP.put(boolean.class, Boolean.class);
