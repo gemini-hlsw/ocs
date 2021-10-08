@@ -21,26 +21,24 @@ public final class CalUnitParams {
     public enum Lamp implements DisplayableSpType, SequenceableSpType {
         IR_GREY_BODY_HIGH("IR grey body - high", "GCALflat", LampType.flat),
         IR_GREY_BODY_LOW("IR grey body - low", "GCALflat", LampType.flat),
-        QUARTZ("Quartz Halogen", "GCALflat", LampType.flat),
+        QUARTZ_5W("5W Quartz Halogen", "GCALflat", LampType.flat),
+        QUARTZ_100W("100W Quartz Halogen", "GCALflat", LampType.flat),
         AR_ARC("Ar arc", "Ar", LampType.arc),
         THAR_ARC("ThAr arc", "ThAr", LampType.arc),
         CUAR_ARC("CuAr arc", "CuAr", LampType.arc),
         XE_ARC("Xe arc", "Xe", LampType.arc),
         ;
 
-//        KR_ARC =
-//                new Lamp("Kr arc", "Kr", true);
-
         /** The default Lamp value **/
-        public static Lamp DEFAULT = IR_GREY_BODY_HIGH;
+        public static final Lamp DEFAULT = IR_GREY_BODY_HIGH;
 
-        private String _displayValue;
+        private final String _displayValue;
 
         // Name expected by the TCC software
-        private String _tccName;
+        private final String _tccName;
 
         // Set to true for arcs
-        private LampType _type;
+        private final LampType _type;
 
         Lamp(String displayValue, String tccName, LampType lampType) {
             _displayValue = displayValue;
@@ -71,12 +69,9 @@ public final class CalUnitParams {
 
         /** Return a Lamp by name, or the given default value if not found. **/
         public static Lamp getLamp(String name, Lamp def) {
-            return SpTypeUtil.oldValueOf(Lamp.class, name, def);
-        }
-
-        /** Return a Lamp by index **/
-        public static Lamp getLampByIndex(int index) {
-            return SpTypeUtil.valueOf(Lamp.class, index, DEFAULT);
+            return ("QUARTZ".equals(name) || "Quartz Halogen".equals(name)) ?
+                    QUARTZ_5W                                               :
+                    SpTypeUtil.oldValueOf(Lamp.class, name, def);
         }
 
         /** Return the name expected by the TCC software for this lamp */
@@ -123,9 +118,6 @@ public final class CalUnitParams {
             return Arrays.stream(ar).map(Lamp::getLamp).collect(Collectors.toList());
         }
 
-        public static String write(final SortedSet<Lamp> lamps) {
-            return show(lamps, Lamp::name);
-        }
     }
 
     /**
@@ -154,9 +146,9 @@ public final class CalUnitParams {
         ;
 
         /** The default Filter value **/
-        public static Filter DEFAULT = NONE;
+        public static final Filter DEFAULT = NONE;
 
-        private String _displayValue;
+        private final String _displayValue;
 
         Filter(String displayVal) {
             _displayValue = displayVal;
@@ -200,9 +192,9 @@ public final class CalUnitParams {
         ;
 
         /** The default Diffuser value **/
-        public static Diffuser DEFAULT = IR;
+        public static final Diffuser DEFAULT = IR;
 
-        private String _displayValue;
+        private final String _displayValue;
 
         Diffuser(String displayValue) {
             _displayValue = displayValue;
@@ -247,9 +239,9 @@ public final class CalUnitParams {
         ;
 
         /** The default Shutter value **/
-        public static Shutter DEFAULT = OPEN;
+        public static final Shutter DEFAULT = OPEN;
 
-        private String _displayValue;
+        private final String _displayValue;
 
         Shutter(String displayValue) {
             _displayValue = displayValue;

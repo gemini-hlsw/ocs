@@ -15,10 +15,7 @@ import jsky.util.gui.TextBoxWidgetWatcher;
 import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class GhostEdIterFlatObs extends OtItemEditor<ISPSeqComponent, GhostSeqRepeatFlatObs> {
     private final GhostIterFlatObsForm form;
@@ -40,13 +37,18 @@ public class GhostEdIterFlatObs extends OtItemEditor<ISPSeqComponent, GhostSeqRe
     public GhostEdIterFlatObs() {
         form = new GhostIterFlatObsForm();
 
-        final List<CalUnitParams.Lamp> flatLamps = CalUnitParams.Lamp.flatLamps();
-        for (int i = 0; i < form.lamps.length; i++) {
-            final CalUnitParams.Lamp l = flatLamps.get(i);
-            form.lamps[i].putClientProperty(LAMP_PROPERTY, l);
-            form.lamps[i].setText(l.displayValue());
-            form.lamps[i].addActionListener(lampListener);
-        }
+        form.lamps[0].setText("high");
+        form.lamps[0].putClientProperty(LAMP_PROPERTY, CalUnitParams.Lamp.IR_GREY_BODY_HIGH);
+        form.lamps[1].setText("low");
+        form.lamps[1].putClientProperty(LAMP_PROPERTY, CalUnitParams.Lamp.IR_GREY_BODY_LOW);
+        form.lamps[2].setText("5W");
+        form.lamps[2].putClientProperty(LAMP_PROPERTY, CalUnitParams.Lamp.QUARTZ_5W);
+        form.lamps[3].setText("100W");
+        form.lamps[3].putClientProperty(LAMP_PROPERTY, CalUnitParams.Lamp.QUARTZ_100W);
+
+        Arrays.stream(form.lamps).sequential().forEach(b -> b.addActionListener(lampListener));
+
+
         final List<CalUnitParams.Lamp> arcLamps = CalUnitParams.Lamp.arcLamps();
         for (int i = 0; i < form.arcs.length; i++) {
             final CalUnitParams.Lamp l = arcLamps.get(i);
@@ -203,7 +205,9 @@ public class GhostEdIterFlatObs extends OtItemEditor<ISPSeqComponent, GhostSeqRe
             if (form.lamps[i].isSelected()) {
                 final CalUnitParams.Lamp lamp = CalUnitParams.Lamp.flatLamps().get(i);
                 getDataObject().setLamp(lamp);
-                getDataObject().setDiffuser(lamp == CalUnitParams.Lamp.QUARTZ ? CalUnitParams.Diffuser.VISIBLE : CalUnitParams.Diffuser.IR);
+                getDataObject().setDiffuser(
+                    (lamp == CalUnitParams.Lamp.QUARTZ_5W) || (lamp == CalUnitParams.Lamp.QUARTZ_100W) ? CalUnitParams.Diffuser.VISIBLE : CalUnitParams.Diffuser.IR
+                );
                 final boolean b = (lamp == CalUnitParams.Lamp.IR_GREY_BODY_HIGH ||
                         lamp == CalUnitParams.Lamp.IR_GREY_BODY_LOW);
                 if (b) {

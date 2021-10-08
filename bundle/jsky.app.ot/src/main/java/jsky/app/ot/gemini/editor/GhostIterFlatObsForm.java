@@ -75,32 +75,48 @@ public class GhostIterFlatObsForm extends JPanel {
         setLayout(formLayout);
         formLayout.setRowGroups(new int[][] {{5, 25}});
 
-        /** Lamp **/
+        // Lamp
         add(new JLabel("Lamp"), cc.xy(3, 7));
         final JPanel lampPanel = new JPanel();
         lampPanel.setLayout(new FormLayout(
                 new ColumnSpec[] {
-                        FormFactory.DEFAULT_COLSPEC,
-                        FormFactory.UNRELATED_GAP_COLSPEC,
-                        FormFactory.DEFAULT_COLSPEC,
-                        FormFactory.UNRELATED_GAP_COLSPEC,
-                        FormFactory.DEFAULT_COLSPEC
+                    FormFactory.DEFAULT_COLSPEC,         // IR grey body
+                    FormFactory.RELATED_GAP_COLSPEC,
+                    FormFactory.DEFAULT_COLSPEC,         // _ high
+                    FormFactory.RELATED_GAP_COLSPEC,
+                    FormFactory.DEFAULT_COLSPEC,         // _ low
+
+                    FormFactory.UNRELATED_GAP_COLSPEC,
+                    FormFactory.UNRELATED_GAP_COLSPEC,
+
+                    FormFactory.DEFAULT_COLSPEC,         // Quartz Halogen
+                    FormFactory.RELATED_GAP_COLSPEC,
+                    FormFactory.DEFAULT_COLSPEC,         // _ 5 W
+                    FormFactory.RELATED_GAP_COLSPEC,
+                    FormFactory.DEFAULT_COLSPEC          // _ 100 W
                 },
                 RowSpec.decodeSpecs("default"))
         );
 
         final ButtonGroup group = new ButtonGroup();
-        lamps = new JRadioButton[3];
-        for (int i = 0; i < 3; ++i) {
+        lamps = new JRadioButton[4];
+        for (int i=0; i<4; ++i) {
             lamps[i] = new JRadioButton();
-            lampPanel.add(lamps[i], cc.xy(i*2 + 1, 1));
             group.add(lamps[i]);
         }
         lamps[0].setSelected(true);
 
+        lampPanel.add(new JLabel("IR grey body"), cc.xy(1, 1));
+        lampPanel.add(lamps[0], cc.xy(3, 1));
+        lampPanel.add(lamps[1], cc.xy(5, 1));
+
+        lampPanel.add(new JLabel("Quartz Halogen"), cc.xy(8, 1));
+        lampPanel.add(lamps[2], cc.xy(10, 1));
+        lampPanel.add(lamps[3], cc.xy(12, 1));
+
         add(lampPanel, cc.xywh(5, 7, 5, 1));
 
-        /** Arc **/
+        // Arc
         add(new JLabel("Arcs"), cc.xy(3, 9));
         final JPanel arcPanel = new JPanel();
         arcPanel.setLayout(new FormLayout(
@@ -128,19 +144,19 @@ public class GhostIterFlatObsForm extends JPanel {
 
         add(arcPanel, cc.xywh(5, 9, 5, 1));
 
-        /** Shutter **/
+        // Shutter
         add(new JLabel("Shutter"), cc.xy(3, 11));
         add(shutter, cc.xy(5, 11));
 
-        /** Filter **/
+        // Filter
         add(new JLabel("Filter"), cc.xy(3, 13));
         add(filter, cc.xy(5, 13));
 
-        /** Observe **/
+        // Diffuser
         add(new JLabel("Diffuser"), cc.xy(3, 15));
         add(diffuser, cc.xy(5, 15));
 
-        /** Observe **/
+        // Observe
         add(new JLabel("Observe"), cc.xy(3, 17));
         repeatSpinner.setModel(new SpinnerNumberModel(1, 1, null, 1));
         repeatSpinner.setMinimumSize(new Dimension(80, 20));
@@ -148,14 +164,14 @@ public class GhostIterFlatObsForm extends JPanel {
         repeatSpinner.setOpaque(false);
         add(repeatSpinner, cc.xy(5, 17));
 
-        /** Red Exposure Time **/
+        // Red Exposure Time
         add(new JLabel("Red Exposure Time"), cc.xy(3, 19));
         redExposureTime.setMinimumSize(new Dimension(80, 20));
         redExposureTime.setPreferredSize(new Dimension(80, 20));
         add(redExposureTime, cc.xy(5, 19));
         add(new JLabel("(sec)"), cc.xy(7, 19));
 
-        /** Red Exposure Count **/
+        // Red Exposure Count
         add(new JLabel("Red Exposure Count"), cc.xy(3, 21));
         redExposureCount.setModel(new SpinnerNumberModel(1, 1, null, 1));
         redExposureCount.setMinimumSize(new Dimension(80, 20));
@@ -164,7 +180,7 @@ public class GhostIterFlatObsForm extends JPanel {
         add(redExposureCount, cc.xy(5, 21));
         add(new JLabel("X"), cc.xy(7, 21));
 
-        /** Blue Exposure Time **/
+        // Blue Exposure Time
         add(new JLabel("Blue Exposure Time"), cc.xy(3, 23));
         blueExposureCount.setModel(new SpinnerNumberModel(1, 1, null, 1));
         blueExposureTime.setMinimumSize(new Dimension(80, 20));
@@ -172,7 +188,7 @@ public class GhostIterFlatObsForm extends JPanel {
         add(blueExposureTime, cc.xy(5, 23));
         add(new JLabel("(sec)"), cc.xy(7, 23));
 
-        /** Blue Exposure Count **/
+        // Blue Exposure Count
         add(new JLabel("Blue Exposure Count"), cc.xy(3, 25));
         blueExposureCount.setMinimumSize(new Dimension(80, 20));
         blueExposureCount.setPreferredSize(new Dimension(80, 20));
@@ -180,7 +196,7 @@ public class GhostIterFlatObsForm extends JPanel {
         add(blueExposureCount, cc.xy(5, 25));
         add(new JLabel("X"), cc.xy(7, 25));
 
-        /** Class Controls **/
+        // Class Controls
         add(new JLabel("Class"), cc.xywh(7, 3, 1, 1, CellConstraints.RIGHT, CellConstraints.DEFAULT));
         add(obsClass, cc.xywh(9, 3, 1, 1, CellConstraints.LEFT, CellConstraints.DEFAULT));
     }
