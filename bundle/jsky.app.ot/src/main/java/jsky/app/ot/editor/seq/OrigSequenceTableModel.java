@@ -16,7 +16,7 @@ import javax.swing.table.AbstractTableModel;
 import java.util.*;
 
 public class OrigSequenceTableModel extends AbstractTableModel {
-    private static ItemKey[] SYS_KEYS = new ItemKey[] {
+    private static final ItemKey[] SYS_KEYS = new ItemKey[] {
             TELESCOPE_KEY,
             INSTRUMENT_KEY,
             CALIBRATION_KEY,
@@ -57,9 +57,8 @@ public class OrigSequenceTableModel extends AbstractTableModel {
         },
         obsClass() {
             public String map(Config c) {
-                String s = (String) c.getItemValue(OBS_CLASS_KEY);
-                if (s == null) return ObsClass.SCIENCE.logValue();
-                return ObsClass.parseType(s).logValue();
+                final String s = (String) c.getItemValue(OBS_CLASS_KEY);
+                return (s == null) ? ObsClass.SCIENCE.logValue() : ObsClass.parseType(s).logValue();
             }
         },
         obsObject() {
@@ -91,10 +90,7 @@ public class OrigSequenceTableModel extends AbstractTableModel {
                         return s;
                     }
                 }
-                if (time instanceof Double) {
-                    return time.toString() + "s";
-                }
-                return "";
+                return (time instanceof Double) ? time + "s" : "";
             }
 
             public String map(Config c) {
@@ -226,7 +222,7 @@ public class OrigSequenceTableModel extends AbstractTableModel {
     }
 
     private static class SplitConfig {
-        private final Map<ItemKey, List<ItemEntry>> m = new HashMap<ItemKey, List<ItemEntry>>();
+        private final Map<ItemKey, List<ItemEntry>> m = new HashMap<>();
         private final Row datasetRow;
         private final String datasetLabel;
 
@@ -234,18 +230,14 @@ public class OrigSequenceTableModel extends AbstractTableModel {
             datasetRow = new TitleRow(c);
             datasetLabel = c.getItemValue(Keys.DATALABEL_KEY).toString();
             for (ItemEntry ie : c.itemEntries()) {
-                ItemKey root = ie.getKey().getRoot();
-                List<ItemEntry> lst = m.get(root);
-                if (lst == null) {
-                    lst = new ArrayList<ItemEntry>();
-                    m.put(root, lst);
-                }
-                lst.add(ie);
+                final ItemKey root = ie.getKey().getRoot();
+                m.computeIfAbsent(root, k -> new ArrayList<>())
+                 .add(ie);
             }
         }
 
         List<Row> rows() {
-            List<Row> rows = new ArrayList<Row>();
+            List<Row> rows = new ArrayList<>();
             rows.add(datasetRow);
 
             int max = 0;
@@ -277,19 +269,19 @@ public class OrigSequenceTableModel extends AbstractTableModel {
         }
     }
 
-    private List<Row> rows = new ArrayList<Row>();
-    private Map<String, RowInterval> datasetMap = new HashMap<String, RowInterval>();
+    private final List<Row> rows = new ArrayList<>();
+    private final Map<String, RowInterval> datasetMap = new HashMap<>();
 
     private static Config[] extractConfigs(ConfigSequence cs) {
-        Config[] configs   = cs.getCompactView();
-        Map<ItemKey, Object[]> m = new HashMap<ItemKey, Object[]>();
+        final Config[] configs   = cs.getCompactView();
+        final Map<ItemKey, Object[]> m = new HashMap<>();
 
         for (ItemKey key : ADD) {
             m.put(key, cs.getItemValueAtEachStep(key));
         }
 
         for (int i=0; i<configs.length; ++i) {
-            Config c = configs[i];
+            final Config c = configs[i];
             for (ItemKey key : REMOVE) c.remove(key);
             for (ItemKey key : ADD) c.putItem(key, m.get(key)[i]);
         }
@@ -323,7 +315,7 @@ public class OrigSequenceTableModel extends AbstractTableModel {
 
     public int getRowCount() { return rows.size(); }
     public int getColumnCount() { return SYS_KEYS.length * 2; }
-    public Class getColumnClass(int columnIndex) { return String.class; }
+    public Class<?> getColumnClass(int columnIndex) { return String.class; }
     public String getColumnName(int columnIndex) { return ""; }
     public RowType getType(int row) { return rows.get(row).type(); }
     public boolean hasMappingError(int row) { return rows.get(row).hasMappingError(); }
