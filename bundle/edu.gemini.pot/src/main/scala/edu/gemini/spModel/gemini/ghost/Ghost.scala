@@ -4,7 +4,6 @@ import java.beans.PropertyDescriptor
 import java.util
 import java.util.logging.Logger
 import java.util.{Collections, List => JList, Map => JMap, Set => JSet}
-
 import edu.gemini.pot.sp._
 import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption}
 import edu.gemini.skycalc.{Angle, CoordinateDiff, Coordinates}
@@ -17,7 +16,7 @@ import edu.gemini.spModel.gemini.init.{ComponentNodeInitializer, ObservationNI}
 import edu.gemini.spModel.inst.{ScienceAreaGeometry, VignettableScienceAreaInstrument}
 import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.obs.plannedtime.{CommonStepCalculator, PlannedTime}
+import edu.gemini.spModel.obs.plannedtime.{CommonStepCalculator, ExposureCalculator, PlannedTime}
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.{CategorizedTime, CategorizedTimeGroup, Category}
 import edu.gemini.spModel.obscomp.{InstConfigInfo, InstConstants, SPInstObsComp}
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
@@ -39,8 +38,14 @@ import edu.gemini.spModel.target.SPSkyObject
 /** The GHOST instrument SP model.
   * Note that we do not override clone since private variables are immutable.
   */
-final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvider
-  with GhostMixin with IssPortProvider with PlannedTime.StepCalculator with VignettableScienceAreaInstrument {
+final class Ghost
+  extends SPInstObsComp(GhostMixin.SP_TYPE)
+     with GhostMixin
+     with IssPortProvider
+     with PlannedTime.StepCalculator
+     with PropertyProvider
+     with VignettableScienceAreaInstrument {
+
   override def getSite: JSet[Site] = {
     Site.SET_GS
   }
@@ -97,13 +102,14 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
   }
 
   override def getSysConfig: ISysConfig = {
-    // Red/Blue exposure time parameters are added in the "observe" system.
-    //    sc.putParameter(DefaultParameter.getInstance(Ghost.RED_EXPOSURE_TIME_PROP.getName, getRedExposureTime))
-    //    sc.putParameter(DefaultParameter.getInstance(Ghost.RED_EXPOSURE_COUNT_PROP.getName, getRedExposureCount))
-    //    sc.putParameter(DefaultParameter.getInstance(Ghost.BLUE_EXPOSURE_TIME_PROP.getName, getBlueExposureTime))
-    //    sc.putParameter(DefaultParameter.getInstance(Ghost.BLUE_EXPOSURE_COUNT_PROP.getName, getBlueExposureCount))
-
     val sc = new DefaultSysConfig(SeqConfigNames.INSTRUMENT_CONFIG_NAME)
+
+    sc.putParameter(DefaultParameter.getInstance(InstConstants.EXPOSURE_TIME_PROP, GhostCameras.fromGhostComponent(this).totalSeconds))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.RED_EXPOSURE_TIME_PROP.getName, getRedExposureTime))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.RED_EXPOSURE_COUNT_PROP.getName, getRedExposureCount))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.BLUE_EXPOSURE_TIME_PROP.getName, getBlueExposureTime))
+    sc.putParameter(DefaultParameter.getInstance(Ghost.BLUE_EXPOSURE_COUNT_PROP.getName, getBlueExposureCount))
+
     sc.putParameter(StringParameter.getInstance(ISPDataObject.VERSION_PROP, getVersion))
     sc.putParameter(DefaultParameter.getInstance(Ghost.POS_ANGLE_PROP, getPosAngle))
     sc.putParameter(DefaultParameter.getInstance(Ghost.PORT_PROP, getIssPort))
@@ -316,8 +322,7 @@ final class Ghost extends SPInstObsComp(GhostMixin.SP_TYPE) with PropertyProvide
     // TODO-GHOST: Default values
     times.add(CategorizedTime.fromSeconds(Category.READOUT, 60))
 
-    // TODO-GHOST: Have to handle exposure times differently. Max of exposure times?
-    times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, Math.max(redExposureTime * redExposureCount, blueExposureTime * blueExposureCount)))
+    times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, ExposureCalculator.instance.exposureTimeSec(cur)));
     CommonStepCalculator.instance.calc(cur, prev).addAll(times)
   }
 
@@ -449,6 +454,18 @@ object Ghost {
   val BLUE_EXPOSURE_COUNT_PROP: PropertyDescriptor = initProp(COUNT_BLUE, query_no, iter_yes)
   val BLUE_BINNING_PROP: PropertyDescriptor = initProp(BINNING_BLUE, query = query_yes, iter = iter_no)
   val BLUE_READ_NOISE_GAIN_PROP: PropertyDescriptor = initProp(NOISE_GAIN_BLUE, query = query_no, iter = iter_no)
+
+  val RED_EXPOSURE_TIME_KEY: ItemKey =
+    new ItemKey(INSTRUMENT_KEY, RED_EXPOSURE_TIME_PROP.getName)
+
+  val RED_EXPOSURE_COUNT_KEY: ItemKey =
+    new ItemKey(INSTRUMENT_KEY, RED_EXPOSURE_COUNT_PROP.getName)
+
+  val BLUE_EXPOSURE_TIME_KEY: ItemKey =
+    new ItemKey(INSTRUMENT_KEY, BLUE_EXPOSURE_TIME_PROP.getName)
+
+  val BLUE_EXPOSURE_COUNT_KEY: ItemKey =
+    new ItemKey(INSTRUMENT_KEY, BLUE_EXPOSURE_COUNT_PROP.getName)
 
   private val Properties: List[(String, PropertyDescriptor)] = List(
     POS_ANGLE_PROP,

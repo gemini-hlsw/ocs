@@ -1,21 +1,22 @@
 package edu.gemini.spModel.gemini.seqcomp;
 
 import edu.gemini.pot.sp.ISPSeqComponent;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.spModel.config.AbstractSeqComponentCB;
-import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.data.config.*;
 import edu.gemini.spModel.dataflow.GsaSequenceEditor;
 import edu.gemini.spModel.gemini.calunit.CalUnitConstants;
 import edu.gemini.spModel.gemini.calunit.CalUnitParams.*;
 import edu.gemini.spModel.gemini.calunit.calibration.CalConfigBuilderUtil;
 import edu.gemini.spModel.gemini.ghost.Ghost$;
+import edu.gemini.spModel.gemini.ghost.GhostCameras$;
 import edu.gemini.spModel.obscomp.InstConstants;
-import edu.gemini.spModel.seqcomp.GhostSeqRepeatExp;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 import edu.gemini.spModel.seqcomp.SeqRepeatCbOptions;
 
 import java.util.Map;
 
+import static edu.gemini.spModel.obscomp.InstConstants.OBJECT_PROP;
 import static edu.gemini.spModel.obscomp.InstConstants.OBSERVE_TYPE_PROP;
 
 /**
@@ -91,8 +92,25 @@ final public class GhostSeqRepeatFlatObsCB extends AbstractSeqComponentCB {
               DefaultParameter.getInstance(OBSERVE_TYPE_PROP, c.getObserveType()));
 
         config.putParameter(SeqConfigNames.OBSERVE_CONFIG_NAME,
+          DefaultParameter.getInstance(
+              OBJECT_PROP,
+              ImOption.apply(c.getLamps()).map(lamps -> Lamp.show(lamps, Lamp::getTccName)).getOrElse("")
+          )
+        );
+
+        config.putParameter(SeqConfigNames.OBSERVE_CONFIG_NAME,
                 StringParameter.getInstance(InstConstants.OBS_CLASS_PROP,
                         c.getObsClass().sequenceValue()));
+
+        System.out.println(c.getObserveType());
+        System.out.println(GhostCameras$.MODULE$.fromGhostSeqComponent(c));
+
+        config.putParameter(SeqConfigNames.OBSERVE_CONFIG_NAME,
+            DefaultParameter.getInstance(
+                InstConstants.EXPOSURE_TIME_PROP,
+                GhostCameras$.MODULE$.fromGhostSeqComponent(c).totalSeconds()
+            )
+        );
 
         config.putParameter(SeqConfigNames.CALIBRATION_CONFIG_NAME,
                 DefaultParameter.getInstance(Ghost$.MODULE$.RED_EXPOSURE_TIME_PROP(), c.getRedExposureTime()));

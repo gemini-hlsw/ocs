@@ -1,6 +1,6 @@
 package edu.gemini.spModel.gemini.ghost
 
-import java.time.Instant
+import java.time.{Duration, Instant}
 import java.util.{Map => JMap}
 
 import edu.gemini.pot.sp.ISPObsComponent
@@ -23,7 +23,6 @@ import scalaz._
 final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obsComp) {
 
   @transient private var sysConfig: Option[ISysConfig] = None
-  @transient private var expConfig: Option[GhostCB.Exposure] = None
 
   override def clone(): AnyRef = {
     val result = super.clone().asInstanceOf[GhostCB]
@@ -36,29 +35,12 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
     if (dataObj == null)
       throw new IllegalArgumentException("The data object for GHOST cannot be null")
     sysConfig = Some(dataObj.getSysConfig)
-    expConfig = Some(GhostCB.Exposure(dataObj))
   }
 
-  override protected def thisHasConfiguration(): Boolean = {
-    sysConfig.exists(_.getParameterCount > 0) || expConfig.isDefined
-  }
+  override protected def thisHasConfiguration(): Boolean =
+    sysConfig.exists(_.getParameterCount > 0)
 
   override protected def thisApplyNext(config: IConfig, prevFull: IConfig): Unit = {
-    expConfig.foreach { ec =>
-
-      config.putParameter(OBSERVE_CONFIG_NAME,
-          DefaultParameter.getInstance(Ghost.RED_EXPOSURE_COUNT_PROP, ec.redCount))
-
-      config.putParameter(OBSERVE_CONFIG_NAME,
-          DefaultParameter.getInstance(Ghost.RED_EXPOSURE_TIME_PROP, ec.redTime))
-
-      config.putParameter(OBSERVE_CONFIG_NAME,
-          DefaultParameter.getInstance(Ghost.BLUE_EXPOSURE_COUNT_PROP, ec.blueCount))
-
-      config.putParameter(OBSERVE_CONFIG_NAME,
-          DefaultParameter.getInstance(Ghost.BLUE_EXPOSURE_TIME_PROP, ec.blueTime))
-
-    }
 
     sysConfig.foreach { sc =>
       val systemName: String = sc.getSystemName
@@ -176,27 +158,4 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
         }}
     }
   }
-}
-
-object GhostCB {
-
-  // Exposure parameters handled separately to place them in the "observe"
-  // system.
-  final case class Exposure(
-    redCount:  Int,
-    redTime:   Double,
-    blueCount: Int,
-    blueTime:  Double
-  )
-
-  object Exposure {
-    def apply(g: Ghost): Exposure =
-      Exposure(
-        g.getRedExposureCount,
-        g.getRedExposureTime,
-        g.getBlueExposureCount,
-        g.getBlueExposureTime
-      )
-  }
-
 }

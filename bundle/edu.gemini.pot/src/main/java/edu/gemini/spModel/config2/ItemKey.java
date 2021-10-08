@@ -2,7 +2,6 @@ package edu.gemini.spModel.config2;
 
 import edu.gemini.shared.util.immutable.DefaultImList;
 import edu.gemini.shared.util.immutable.ImList;
-//import edu.gemini.shared.util.immutable.PredicateOp;
 
 import java.io.Serializable;
 
@@ -33,7 +32,7 @@ public final class ItemKey implements Comparable<ItemKey>, Serializable {
 
     public static final String WILDCARD = "*";
 
-    private String _path;
+    private final String _path;
 
     /**
      * Constructs with the given name or path.  A path is a single string

@@ -7,6 +7,7 @@ import edu.gemini.spModel.data.config.IConfig;
 import edu.gemini.spModel.data.config.StringParameter;
 import edu.gemini.spModel.dataflow.GsaSequenceEditor;
 import edu.gemini.spModel.gemini.ghost.Ghost$;
+import edu.gemini.spModel.gemini.ghost.GhostCameras$;
 import edu.gemini.spModel.obscomp.InstConstants;
 
 import java.util.Map;
@@ -62,6 +63,16 @@ final public class GhostSeqRepeatExpCB extends AbstractSeqComponentCB {
 
         config.putParameter(SYSTEM_NAME, StringParameter.getInstance(InstConstants.OBJECT_PROP,
                 _objectName));
+
+        System.out.println(c.getObserveType());
+        System.out.println(GhostCameras$.MODULE$.fromGhostSeqComponent(c));
+
+        config.putParameter(SYSTEM_NAME,
+            DefaultParameter.getInstance(
+                InstConstants.EXPOSURE_TIME_PROP,
+                GhostCameras$.MODULE$.fromGhostSeqComponent(c).totalSeconds()
+            )
+        );
 
         config.putParameter(SYSTEM_NAME,
                 DefaultParameter.getInstance(Ghost$.MODULE$.RED_EXPOSURE_TIME_PROP(), c.getRedExposureTime()));
