@@ -126,7 +126,10 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
 
   implicit def InvestigatorsEncodeJson: EncodeJson[GsaPhase1Data.Investigator] =
     EncodeJson(i =>
-      ("investigatorEmail" := i.getEmail) ->: ("investigatorLastName" := i.getLast) ->:("investigatorFirstName" := i.getFirst) ->: jEmptyObject
+      ("investigatorEmail" := i.getEmail) ->:
+        ("investigatorLastName" := i.getLast) ->:
+        ("investigatorFirstName" := i.getFirst) ->:
+        jEmptyObject
     )
 
   implicit def TimeAccountAward: EncodeJson[(TimeAcctCategory, TimeAcctAward)] =
@@ -137,8 +140,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         ("category" := c.getDisplayName) ->:
         jEmptyObject}
     )
-
-  // TODO: Seems this could be better? fold?
+  
   implicit def TimeAccountAllocationEncodeJson: EncodeJson[TimeAcctAllocation] =
     EncodeJson(t =>
       t.getCategories.asScala.toList.map(c => (c, t.getAward(c))).filter(_._2 != TimeAcctAward.ZERO).asJson
@@ -156,39 +158,58 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
   implicit def SpatialProfileEncodeJson: EncodeJson[SpatialProfile] =
     EncodeJson {
       case PointSource =>
-        ("type" := "pointSource") ->: jEmptyObject
+        ("type" := "pointSource") ->:
+          jEmptyObject
       case UniformSource =>
-        ("type" := "uniformSource") ->: jEmptyObject
+        ("type" := "uniformSource") ->:
+          jEmptyObject
       case GaussianSource(fwhm) =>
-        ("fwhm" := fwhm) ->: ("type" := "gaussianSource") ->: jEmptyObject
+        ("fwhm" := fwhm) ->:
+          ("type" := "gaussianSource") ->:
+          jEmptyObject
     }
 
   implicit def SpectralDistributionEncodeJson: EncodeJson[SpectralDistribution] =
     EncodeJson {
       case BlackBody(t) =>
-        ("temperature" := t) ->: ("type" := "blackBody") ->: jEmptyObject
+        ("temperature" := t) ->:
+          ("type" := "blackBody") ->:
+          jEmptyObject
       case PowerLaw(idx) =>
-        ("index" := idx) ->: ("type" := "powerLaw") ->: jEmptyObject
+        ("index" := idx) ->:
+          ("type" := "powerLaw") ->:
+          jEmptyObject
       case EmissionLine(wl, w, f, c) =>
-        ("continuum" := c.value) ->: ("flux" := f.value) ->: ("width" := w.value) ->: ("wavelength" := wl.length.toMicrons) ->: ("type" := "emissionLine") ->: jEmptyObject
+        ("continuum" := c.value) ->:
+          ("flux" := f.value) ->:
+          ("width" := w.value) ->:
+          ("wavelength" := wl.length.toMicrons) ->:
+          ("type" := "emissionLine") ->:
+          jEmptyObject
       case UserDefinedSpectrum(_, _) =>
-        ("type" := "userDefined") ->: jEmptyObject
+        ("type" := "userDefined") ->:
+          jEmptyObject
       case s: LibraryStar =>
-        ("sedSpectrum" := s.sedSpectrum) ->: ("type" := "libraryStar") ->: jEmptyObject
+        ("sedSpectrum" := s.sedSpectrum) ->:
+          ("type" := "libraryStar") ->:
+          jEmptyObject
       case n: LibraryNonStar =>
-        ("sedSpectrum" := n.sedSpectrum) ->: ("label" := n.label) ->: ("type" := "libraryNonStar") ->: jEmptyObject
-      case _: AuxFileSpectrum => jEmptyObject
+        ("sedSpectrum" := n.sedSpectrum) ->:
+          ("label" := n.label) ->:
+          ("type" := "libraryNonStar") ->:
+          jEmptyObject
+      case _: AuxFileSpectrum =>
+        jEmptyObject
     }
 
   // Determine the target type.
-  def targetType(te: TargetEnvironment, spTarget: SPTarget): String = {
+  def targetType(te: TargetEnvironment, spTarget: SPTarget): String =
     if (te.getUserTargets.asScala.map(_.target).contains(spTarget))
       te.getUserTargets.asScala.find(_.target == spTarget).map(_.`type`.displayName).get
-    else if (te.getGuideEnvironment.containsTarget(spTarget)) {
+    else if (te.getGuideEnvironment.containsTarget(spTarget))
       "GuideStar"
-    } else
+    else
       "Base"
-  }
 
   // Unfortunately, we have to pass a lot of crap to this to get everything we need.
   implicit def SiderealTargetEncodeJson: EncodeJson[(TargetEnvironment, SPTarget, SiderealTarget, Option[Int])] =
@@ -351,7 +372,9 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
 
   implicit def NoteEncodeJson: EncodeJson[SPNote] =
     EncodeJson(n =>
-      ("text" := n.getNote) ->: ("title" := n.getTitle) ->: jEmptyObject
+      ("text" := n.getNote) ->:
+        ("title" := n.getTitle) ->:
+        jEmptyObject
     )
 
   implicit def SiteQualityEncodeJson: EncodeJson[SPSiteQuality] =
