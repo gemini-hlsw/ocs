@@ -121,7 +121,10 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
 
   implicit def MagnitudeEncodeJson: EncodeJson[Magnitude] =
     EncodeJson(m =>
-      ("system" := m.system.name) ->: ("value" := m.value) ->: ("name" := m.band.name) ->: jEmptyObject
+      ("system" := m.system.name) ->:
+        ("value" := m.value) ->:
+        ("name" := m.band.name) ->:
+        jEmptyObject
     )
 
   implicit def InvestigatorsEncodeJson: EncodeJson[GsaPhase1Data.Investigator] =
@@ -265,7 +268,9 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
   implicit def AutomaticGroupGuideProbeMapEncodeJson: EncodeJson[(TargetEnvironment, GuideProbe, SPTarget)] =
     EncodeJson(p => {
       val (te, gp, sp) = p
-      ("target" := (te, sp, None).asJson) ->: ("guideProbeKey" := gp.getKey) ->: jEmptyObject
+      ("target" := (te, sp, None).asJson) ->:
+        ("guideProbeKey" := gp.getKey) ->:
+        jEmptyObject
     })
 
   implicit def AutomaticGroupEncodeJson: EncodeJson[(TargetEnvironment, AutomaticGroup.Active)] =
