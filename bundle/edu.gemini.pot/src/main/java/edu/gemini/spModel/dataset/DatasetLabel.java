@@ -23,12 +23,12 @@ public final class DatasetLabel implements Comparable<DatasetLabel>, Serializabl
     /**
      * The observation id of the dataset.
      */
-    private SPObservationID _observationId;
+    private final SPObservationID _observationId;
 
     /**
      * The index of this dataset.
      */
-    private int _index;
+    private final int _index;
 
     /**
      * Constructs with the complete dataset label, which is assumed to be

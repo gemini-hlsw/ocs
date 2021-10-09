@@ -30,9 +30,7 @@ final class Activator extends BundleActivator {
   val user: JSet[Principal] = java.util.Collections.singleton[Principal](StaffPrincipal.Gemini)
 
   def start(ctx: BundleContext): Unit = {
-    Log.warning(s"Start Program Export Service: $AppContext")
     tracker = track[IDBDatabaseService, HttpService, HttpService](ctx) { (odb, http) =>
-      Log.warning(s"Registering $AppContext servlet")
       http.registerServlet(AppContext, ProgramExportServlet(odb, user.toSet), new JHashtable(), null)
       http
     } { http =>
@@ -43,7 +41,6 @@ final class Activator extends BundleActivator {
   }
 
   def stop(ctx: BundleContext): Unit = {
-    Log.warning(s"Stop Program Export Service: $AppContext")
     tracker.close()
     tracker = null
   }

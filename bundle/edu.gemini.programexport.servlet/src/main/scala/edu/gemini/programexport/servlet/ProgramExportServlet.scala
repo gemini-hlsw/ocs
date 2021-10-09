@@ -1,44 +1,44 @@
 package edu.gemini.programexport.servlet
 
-import java.security.Principal
-import java.util.logging.{Level, Logger}
-import javax.servlet.ServletException
-import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
-import edu.gemini.pot.spdb.IDBDatabaseService
-import edu.gemini.spModel.core.{BlackBody, EmissionLine, GaussianSource, LibraryNonStar, LibraryStar, Magnitude, NonSiderealTarget, PointSource, PowerLaw, SPProgramID, SiderealTarget, SpatialProfile, SpectralDistribution, UniformSource, UserDefinedSpectrum}
-import edu.gemini.pot.sp.{ISPGroup, ISPNode, ISPObsComponent, ISPObsQaLog, ISPObservation, ISPProgram, ISPSeqComponent}
-import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.data.YesNoType
-import edu.gemini.spModel.gemini.obscomp.{SPProgram, SPSiteQuality}
-import edu.gemini.spModel.obs.SPObservation
-import edu.gemini.spModel.obscomp.{SPGroup, SPNote}
-import edu.gemini.spModel.rich.pot.sp._
-import edu.gemini.spModel.guide._
-
-import scala.collection.JavaConverters._
-import argonaut.Json
+import argonaut.Argonaut._
 import argonaut.Json.JsonAssoc
 import argonaut._
-import Argonaut._
-import scalaz._
-import Scalaz._
+
+import edu.gemini.pot.sp._
+import edu.gemini.pot.spdb.IDBDatabaseService
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances
+import edu.gemini.spModel.core.{AuxFileSpectrum, BlackBody, EmissionLine, GaussianSource, LibraryNonStar, LibraryStar, Magnitude, NonSiderealTarget, PointSource, PowerLaw, SPProgramID, SiderealTarget, SpatialProfile, SpectralDistribution, TooTarget, UniformSource, UserDefinedSpectrum}
+import edu.gemini.spModel.data.YesNoType
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.TimingWindow
+import edu.gemini.spModel.gemini.obscomp.{SPProgram, SPSiteQuality}
 import edu.gemini.spModel.gemini.phase1.GsaPhase1Data
+import edu.gemini.spModel.guide._
+import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator
+import edu.gemini.spModel.obscomp.{SPGroup, SPNote}
+import edu.gemini.spModel.obslog._
+import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.seqcomp.SeqBase
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.env.{Asterism, AutomaticGroup, ManualGroup, OptsList, TargetEnvironment, UserTarget}
+import edu.gemini.spModel.target.env._
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.spModel.timeacct.{TimeAcctAllocation, TimeAcctAward, TimeAcctCategory}
 
+import java.security.Principal
 import java.util.concurrent.TimeUnit
+import java.util.logging.{Level, Logger}
+import javax.servlet.ServletException
+import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
+
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
+
+import scalaz.Scalaz._
+import scalaz._
 
 final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Principal]) extends HttpServlet {
-
-  import ProgramExportServlet._
 
   override def doPost(request: HttpServletRequest, response: HttpServletResponse): Unit =
     doRequest(request, response)
@@ -59,16 +59,19 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         response.setStatus(HttpServletResponse.SC_OK)
         response.setContentType("text/json; charset=UTF-8")
         val writer = response.getWriter
-        process(ispProgram).foreach { case (k, j) => writer.write(s"{$k : ${j.spaces2}\n") }
-        writer.close()
+        // This feels hackish but if we don't wrap k in quotes, the PROGRAM_BASIC key does not get quotes and
+        // the JSON cannot be parsed. It is a known bug that escape characters do not work in string interpolations
+        // in this version of Scala.
+        process(ispProgram).foreach { case (k, j) => writer.write(s"{${'"'}$k${'"'} : ${j.spaces2}}") }
 
+        // This approach doesn't work at all.
+        // process(ispProgram).foreach { out => writer.write(out.asJson.spaces2) }
+        writer.close()
       case None =>
         response.sendError(HttpServletResponse.SC_BAD_REQUEST, s"Program $id is not in the database!")
     }
 
   // Recursive method to build up the JSON representation of the program.
-  // TODO: I am assuming on ISPProgram that we need to call getObservations and getObsComponents
-  // TODO: at some point, as the observations and obs components are not
   def process(n: ISPNode): Option[JsonAssoc] =
     process_(n, 0)
 
@@ -85,16 +88,20 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
     }
   }
 
-  // TODO: Some information is not appearing, such as multiple observations in groups.
   def simpleNode(n: ISPNode, i: Int): Option[JsonAssoc] = {
     for {
-      t <- n.dataObject.map(_.getType)
+      o <- n.dataObject
+      t = o.getType
       j <- componentFields(n)
     } yield (
-      s"${t.name}-$i",
-      n.children.zipWithIndex.foldLeft(("key" := n.getNodeKey.toString) ->: j) { case (jp, (c, x)) =>
-        process_(c, x) ->?: jp
-      }
+      // We want to not append a suffix to program as it is unnecessary.
+      // We also want to identify groups by their types in the JSON output code.
+      o match {
+        case _: SPProgram => t.name
+        case gp: SPGroup  => s"${t.name}_${(gp.getGroupType == SPGroup.GroupType.TYPE_FOLDER) ? "FOLDER" | "SCHEDULING"}-$i"
+        case _            => s"${t.name}-$i"
+      },
+      n.children.zipWithIndex.foldLeft(("key" := n.getNodeKey.toString) ->: j) { case (jp, (c, x)) => process_(c, x) ->?: jp }
     )
   }
 
@@ -107,7 +114,6 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
       case s: SPSiteQuality => Some(s.asJson)
       case t: TargetObsComp => Some((n.asInstanceOf[ISPObsComponent], t).asJson)
       case _ => None
-
     }
 
   implicit def MagnitudeEncodeJson: EncodeJson[Magnitude] =
@@ -168,6 +174,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         ("sedSpectrum" := s.sedSpectrum) ->: ("type" := "libraryStar") ->: jEmptyObject
       case n: LibraryNonStar =>
         ("sedSpectrum" := n.sedSpectrum) ->: ("label" := n.label) ->: ("type" := "libraryNonStar") ->: jEmptyObject
+      case _: AuxFileSpectrum => jEmptyObject
     }
 
   // Determine the target type.
@@ -217,8 +224,9 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
     EncodeJson(p => {
       val (te, sp, idx) = p
       sp.getTarget match {
-        case st: SiderealTarget => (te, sp, st, idx).asJson
+        case st: SiderealTarget     => (te, sp, st, idx).asJson
         case nst: NonSiderealTarget => (te, sp, nst, idx).asJson
+        case _: TooTarget           => jEmptyObject
       }
     })
 
@@ -365,8 +373,8 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
 
   implicit def ObservationFieldsEncodeJson: EncodeJson[(ISPObservation, SPObservation)] =
     EncodeJson( { case (ispObs, spObs) =>
-      // TODO: Need acquisition overhead here. Is this it?
-      ("totalTime" := PlannedTimeCalculator.instance.calc(ispObs).totalTime()) ->: // PlannedStepSummary.getSetupTime.reacquisitionOnlyTime.toMillis) ->:
+      ("obsLog" :=? Option(ObsLog.getIfExists(ispObs))) ->?:
+      ("totalTime" := PlannedTimeCalculator.instance.calc(ispObs).totalTime()) ->: // output in ms
         ("setupTimeType" := spObs.getSetupTimeType.toString) ->:
         ("tooOverrideRapid" := spObs.isOverrideRapidToo.toYesNo.displayValue) ->:
         ("priority" := spObs.getPriority.displayValue) ->:
@@ -375,6 +383,18 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         ("title" := spObs.getTitle) ->:
         jEmptyObject
     })
+
+  implicit def ObsLogEncodeJson: EncodeJson[ObsLog] = {
+    EncodeJson(obslog => {
+      jArray(obslog.getDatasetLabels.toList.map { l =>
+        val rec = obslog.getDatasetRecord(l)
+        ("label" := rec.label.toString) ->:
+          ("filename" := rec.exec.dataset.getDhsFilename) ->:
+          ("qaState" := rec.qa.qaState.displayValue) ->:
+          jEmptyObject
+      })
+    })
+  }
 
   def sequenceNode(n: ISPNode): Option[JsonAssoc] =
     n.dataObject.flatMap {
