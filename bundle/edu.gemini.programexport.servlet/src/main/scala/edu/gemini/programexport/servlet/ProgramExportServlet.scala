@@ -140,7 +140,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         ("category" := c.getDisplayName) ->:
         jEmptyObject}
     )
-  
+
   implicit def TimeAccountAllocationEncodeJson: EncodeJson[TimeAcctAllocation] =
     EncodeJson(t =>
       t.getCategories.asScala.toList.map(c => (c, t.getAward(c))).filter(_._2 != TimeAcctAward.ZERO).asJson
