@@ -1,9 +1,5 @@
 package edu.gemini.programexport.servlet
 
-import argonaut.Argonaut._
-import argonaut.Json.JsonAssoc
-import argonaut._
-
 import edu.gemini.pot.sp._
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.shared.util.immutable.ScalaConverters._
@@ -38,7 +34,13 @@ import scala.collection.JavaConverters._
 import scalaz.Scalaz._
 import scalaz._
 
+import argonaut.Argonaut._
+import argonaut.Json.JsonAssoc
+import argonaut._
+
 final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Principal]) extends HttpServlet {
+
+  import ProgramExportServlet._
 
   override def doPost(request: HttpServletRequest, response: HttpServletResponse): Unit =
     doRequest(request, response)
@@ -251,7 +253,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
       ("guideProbe" := gpm.keys.map(gp => (gp, gpm.lookup(gp))).collect {
         case (gp, Some(sp)) => (te, gp, sp)
       }) ->:
-        ("primaryGroup" := (te.getGuideEnvironment.guideEnv.primaryGroup === grp).toYesNo.displayValue) ->:
+        ("primaryGroup" := (te.getGuideEnvironment.guideEnv.primaryGroup === grp)) ->:
         ("tag" := "auto") ->:
         ("name" := "auto") ->:
         jEmptyObject
@@ -293,7 +295,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
       val gplistopt = Option(gplst).filter(_.nonEmpty).map(lst => (te, lst))
 
       ("guideProbes" :=? gplistopt) ->?:
-        ("primaryGroup" := (te.getGuideEnvironment.guideEnv.primaryGroup === mg).toYesNo.displayValue) ->:
+        ("primaryGroup" := (te.getGuideEnvironment.guideEnv.primaryGroup === mg)) ->:
         ("tag" := "manual") ->:
         ("name" := mg.name) ->:
         jEmptyObject
@@ -324,8 +326,8 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         case _ => "guideGroup" := "initial"
       }) ->:
         ("primaryIndex" := ge.primaryIndex) ->:
-      ("userTargets" := (te, te.getUserTargets.asScala.toList)) ->:
-      ("base" := (te, asterism.t, None)) ->:
+        ("userTargets" := (te, te.getUserTargets.asScala.toList)) ->:
+        ("base" := (te, asterism.t, None)) ->:
         jEmptyObject
     })
 
@@ -335,7 +337,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         ("awardedTime" := p.getAwardedProgramTime.getMilliseconds) ->:
         ("tooType" := p.getTooType.getDisplayValue) ->:
         ("programMode" := p.getProgramMode.displayValue) ->:
-        ("isThesis" := p.isThesis.toYesNo.displayValue) ->:
+        ("isThesis" := p.isThesis) ->:
         ("rolloverFlag" := p.getRolloverStatus) ->:
         ("queueBand" := p.getQueueBand) ->:
         ("affiliate" :=? Option(p.getPIAffiliate).map(_.displayValue)) ->?:
@@ -343,7 +345,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         ("piEmail" := p.getPIInfo.getEmail) ->:
         ("piLastName" := p.getPILastName) ->:
         ("piFirstName" := p.getPIFirstName) ->:
-        Json.jEmptyObject
+        jEmptyObject
     )
 
   implicit def NoteEncodeJson: EncodeJson[SPNote] =
@@ -374,9 +376,9 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
   implicit def ObservationFieldsEncodeJson: EncodeJson[(ISPObservation, SPObservation)] =
     EncodeJson( { case (ispObs, spObs) =>
       ("obsLog" :=? Option(ObsLog.getIfExists(ispObs))) ->?:
-      ("totalTime" := PlannedTimeCalculator.instance.calc(ispObs).totalTime()) ->: // output in ms
+        ("totalTime" := PlannedTimeCalculator.instance.calc(ispObs).totalTime()) ->: // output in ms
         ("setupTimeType" := spObs.getSetupTimeType.toString) ->:
-        ("tooOverrideRapid" := spObs.isOverrideRapidToo.toYesNo.displayValue) ->:
+        ("tooOverrideRapid" := spObs.isOverrideRapidToo) ->:
         ("priority" := spObs.getPriority.displayValue) ->:
         ("execStatusOverride" :=? spObs.getExecStatusOverride.asScalaOpt.map(_.displayValue)) ->?:
         ("phase2Status" := spObs.getPhase2Status.displayValue) ->:
@@ -428,10 +430,5 @@ object ProgramExportServlet {
         Log.log(Level.SEVERE, "Problem running ProgramExportServlet", t)
         t
       }
-  }
-
-  implicit class ToYesNo(val b: Boolean) extends AnyVal {
-    def toYesNo: YesNoType =
-      b ? YesNoType.YES | YesNoType.NO
   }
 }
