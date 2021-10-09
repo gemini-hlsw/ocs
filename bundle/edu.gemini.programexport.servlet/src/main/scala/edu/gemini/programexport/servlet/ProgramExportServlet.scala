@@ -5,8 +5,9 @@ import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances
-import edu.gemini.spModel.core.{AuxFileSpectrum, BlackBody, EmissionLine, GaussianSource, LibraryNonStar, LibraryStar, Magnitude, NonSiderealTarget, PointSource, PowerLaw, SPProgramID, SiderealTarget, SpatialProfile, SpectralDistribution, TooTarget, UniformSource, UserDefinedSpectrum}
-import edu.gemini.spModel.data.YesNoType
+import edu.gemini.spModel.core.{AuxFileSpectrum, BlackBody, EmissionLine, GaussianSource, LibraryNonStar, LibraryStar,
+  Magnitude, NonSiderealTarget, PointSource, PowerLaw, SPProgramID, SiderealTarget, SpatialProfile,
+  SpectralDistribution, TooTarget, UniformSource, UserDefinedSpectrum}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.TimingWindow
 import edu.gemini.spModel.gemini.obscomp.{SPProgram, SPSiteQuality}
 import edu.gemini.spModel.gemini.phase1.GsaPhase1Data
@@ -22,6 +23,10 @@ import edu.gemini.spModel.target.env._
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.spModel.timeacct.{TimeAcctAllocation, TimeAcctAward, TimeAcctCategory}
 
+import argonaut.Argonaut._
+import argonaut.Json.JsonAssoc
+import argonaut._
+
 import java.security.Principal
 import java.util.concurrent.TimeUnit
 import java.util.logging.{Level, Logger}
@@ -31,12 +36,8 @@ import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 
-import scalaz.Scalaz._
 import scalaz._
-
-import argonaut.Argonaut._
-import argonaut.Json.JsonAssoc
-import argonaut._
+import Scalaz._
 
 final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Principal]) extends HttpServlet {
 
