@@ -6,14 +6,20 @@ package jsky.app.ot.editor.seq;
 
 import static jsky.app.ot.editor.seq.Keys.*;
 
+import edu.gemini.pot.sp.Instrument;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.config.map.ConfigValMapInstances;
 import edu.gemini.spModel.config2.*;
 import edu.gemini.spModel.gemini.calunit.calibration.CalDictionary;
+import edu.gemini.spModel.gemini.ghost.Ghost;
 import edu.gemini.spModel.gemini.seqcomp.smartgcal.SmartgcalSysConfig;
 import edu.gemini.spModel.obsclass.ObsClass;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class OrigSequenceTableModel extends AbstractTableModel {
     private static final ItemKey[] SYS_KEYS = new ItemKey[] {
@@ -41,8 +47,24 @@ public class OrigSequenceTableModel extends AbstractTableModel {
             OBS_STATUS_KEY,
             OBS_ELAPSED_KEY,
             TEL_BASE_NAME,
-            TEL_VERSION_KEY,
+            TEL_VERSION_KEY
     };
+
+    private static final Map<Instrument, ItemKey[]> INSTRUMENT_REMOVE;
+
+    static {
+        final Map<Instrument, ItemKey[]> m = new HashMap<>();
+
+        m.put(Instrument.Ghost, new ItemKey[] {
+            Ghost.RED_EXPOSURE_COUNT_KEY(),
+            Ghost.RED_EXPOSURE_TIME_KEY(),
+            Ghost.BLUE_EXPOSURE_COUNT_KEY(),
+            Ghost.BLUE_EXPOSURE_TIME_KEY()
+        });
+
+        INSTRUMENT_REMOVE = Collections.unmodifiableMap(m);
+    }
+
 
     enum RowType {
         title,
@@ -58,7 +80,7 @@ public class OrigSequenceTableModel extends AbstractTableModel {
         obsClass() {
             public String map(Config c) {
                 final String s = (String) c.getItemValue(OBS_CLASS_KEY);
-                return (s == null) ? ObsClass.SCIENCE.logValue() : ObsClass.parseType(s).logValue();
+                return (s == null) ? ObsClass.SCIENCE.logValue() : ImOption.apply(ObsClass.parseType(s)).map(ObsClass::logValue).getOrElse("");
             }
         },
         obsObject() {
@@ -272,18 +294,34 @@ public class OrigSequenceTableModel extends AbstractTableModel {
     private final List<Row> rows = new ArrayList<>();
     private final Map<String, RowInterval> datasetMap = new HashMap<>();
 
+    private static Option<Instrument> extractInstrument(ConfigSequence cs) {
+        final Option<Object> o = ImOption.apply(cs.getItemValue(0, INST_INSTRUMENT_KEY));
+        return o.flatMap(o1 -> {
+            if (o1 instanceof String) {
+                return Instrument.fromName((String) o1);
+            } else {
+                return ImOption.empty();
+            }
+        });
+    }
+
     private static Config[] extractConfigs(ConfigSequence cs) {
         final Config[] configs   = cs.getCompactView();
         final Map<ItemKey, Object[]> m = new HashMap<>();
 
-        for (ItemKey key : ADD) {
-            m.put(key, cs.getItemValueAtEachStep(key));
-        }
+        final Option<Instrument> inst = extractInstrument(cs);
+        final List<ItemKey> allAdd = Arrays.stream(ADD).collect(Collectors.toList());
+
+        allAdd.forEach(key -> m.put(key, cs.getItemValueAtEachStep(key)));
+
+        final ItemKey[]    instRm = inst.map(i -> INSTRUMENT_REMOVE.getOrDefault(i, ItemKey.EMPTY_ARRAY)).getOrElse(ItemKey.EMPTY_ARRAY);
+        final List<ItemKey> allRm = Stream.concat(Arrays.stream(REMOVE), Arrays.stream(instRm)).collect(Collectors.toList());
 
         for (int i=0; i<configs.length; ++i) {
             final Config c = configs[i];
-            for (ItemKey key : REMOVE) c.remove(key);
-            for (ItemKey key : ADD) c.putItem(key, m.get(key)[i]);
+            allRm.forEach(c::remove);
+            final int index = i;
+            allAdd.forEach(key -> c.putItem(key, m.get(key)[index]));
         }
 
         return configs;
