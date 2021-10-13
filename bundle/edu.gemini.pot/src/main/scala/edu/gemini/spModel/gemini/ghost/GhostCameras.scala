@@ -4,7 +4,6 @@
 package edu.gemini.spModel.gemini.ghost
 
 import edu.gemini.spModel.config2.Config
-import edu.gemini.spModel.seqcomp.GhostExpSeqComponent
 
 import java.time.Duration
 
@@ -31,18 +30,16 @@ object GhostCameras {
   implicit val EqualGhostCameras: Equal[GhostCameras] =
     Equal.equalA
 
-  def fromGhostComponent(g: Ghost): GhostCameras =
+  def fromGhostComponent(g: GhostExposureTimeProvider): GhostCameras =
     GhostCameras(
       GhostCamera.Red.fromGhostComponent(g),
       GhostCamera.Blue.fromGhostComponent(g)
     )
 
-  def fromGhostSeqComponent(g: GhostExpSeqComponent): GhostCameras =
-    GhostCameras(
-      GhostCamera.Red.fromGhostSeqComponent(g),
-      GhostCamera.Blue.fromGhostSeqComponent(g)
-    )
-
+  /**
+   * Reads the exposure time parameters from the "observe" system and creates
+   * the corresponding GhostCameras instance.
+   */
   def fromConfig(c: Config): GhostCameras =
     GhostCameras(
       GhostCamera.Red.fromConfig(c),

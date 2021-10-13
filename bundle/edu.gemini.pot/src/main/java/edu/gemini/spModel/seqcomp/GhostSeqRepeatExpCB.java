@@ -6,8 +6,8 @@ import edu.gemini.spModel.data.config.DefaultParameter;
 import edu.gemini.spModel.data.config.IConfig;
 import edu.gemini.spModel.data.config.StringParameter;
 import edu.gemini.spModel.dataflow.GsaSequenceEditor;
-import edu.gemini.spModel.gemini.ghost.Ghost$;
 import edu.gemini.spModel.gemini.ghost.GhostCameras$;
+import edu.gemini.spModel.gemini.ghost.GhostExposureTimeProvider;
 import edu.gemini.spModel.obscomp.InstConstants;
 
 import java.util.Map;
@@ -43,7 +43,7 @@ final public class GhostSeqRepeatExpCB extends AbstractSeqComponentCB {
     @Override
     protected void thisReset(Map<String, Object> options) {
         _curCount = 0;
-        final GhostExpTimeSeqComponent c = (GhostExpTimeSeqComponent) getDataObject();
+        final GhostExpSeqComponent c = (GhostExpSeqComponent) getDataObject();
         _max = c.getStepCount();
         _limit = SeqRepeatCbOptions.getCollapseRepeat(options) ? 1 : _max;
         _objectName = c.getType().readableStr;
@@ -64,27 +64,17 @@ final public class GhostSeqRepeatExpCB extends AbstractSeqComponentCB {
         config.putParameter(SYSTEM_NAME, StringParameter.getInstance(InstConstants.OBJECT_PROP,
                 _objectName));
 
-        System.out.println(c.getObserveType());
-        System.out.println(GhostCameras$.MODULE$.fromGhostSeqComponent(c));
-
         config.putParameter(SYSTEM_NAME,
             DefaultParameter.getInstance(
                 InstConstants.EXPOSURE_TIME_PROP,
-                GhostCameras$.MODULE$.fromGhostSeqComponent(c).totalSeconds()
+                GhostCameras$.MODULE$.fromGhostComponent(c).totalSeconds()
             )
         );
 
-        config.putParameter(SYSTEM_NAME,
-                DefaultParameter.getInstance(Ghost$.MODULE$.RED_EXPOSURE_TIME_PROP(), c.getRedExposureTime()));
-
-        config.putParameter(SYSTEM_NAME,
-                DefaultParameter.getInstance(Ghost$.MODULE$.RED_EXPOSURE_COUNT_PROP(), c.getRedExposureCount()));
-
-        config.putParameter(SYSTEM_NAME,
-                DefaultParameter.getInstance(Ghost$.MODULE$.BLUE_EXPOSURE_TIME_PROP(), c.getBlueExposureTime()));
-
-        config.putParameter(SYSTEM_NAME,
-                DefaultParameter.getInstance(Ghost$.MODULE$.BLUE_EXPOSURE_COUNT_PROP(), c.getBlueExposureCount()));
+        // We add the exposure time parameters to the "observe" system, but not
+        // "instrument".  We don't want to override the "instrument" values for
+        // subsequent steps.
+        GhostExposureTimeProvider.addToConfig(config, SYSTEM_NAME, c);
 
         config.putParameter(SYSTEM_NAME,
                 StringParameter.getInstance(InstConstants.OBS_CLASS_PROP,

@@ -46,12 +46,9 @@ public class InstConstants {
 
     public static final String UID_PROP = "uid";
 
-    //public static final String OFFSET_PROP = "offset";
-
-    //public static final String VERSION_PROP = "version";
-
     // The type of the observation (science|flat|bias)
     public static final String OBSERVE_TYPE_PROP = "observeType";
+    public static final ItemKey OBSERVE_TYPE_KEY = new ItemKey(OBSERVE_KEY, OBSERVE_TYPE_PROP);
     public static final String SCIENCE_OBSERVE_TYPE = "OBJECT";
     public static final String BIAS_OBSERVE_TYPE = "BIAS";
     public static final String DARK_OBSERVE_TYPE = "DARK";

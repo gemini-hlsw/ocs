@@ -8,8 +8,7 @@ import edu.gemini.spModel.dataflow.GsaSequenceEditor;
 import edu.gemini.spModel.gemini.calunit.CalUnitConstants;
 import edu.gemini.spModel.gemini.calunit.CalUnitParams.*;
 import edu.gemini.spModel.gemini.calunit.calibration.CalConfigBuilderUtil;
-import edu.gemini.spModel.gemini.ghost.Ghost$;
-import edu.gemini.spModel.gemini.ghost.GhostCameras$;
+import edu.gemini.spModel.gemini.ghost.GhostExposureTimeProvider;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 import edu.gemini.spModel.seqcomp.SeqRepeatCbOptions;
@@ -30,8 +29,6 @@ final public class GhostSeqRepeatFlatObsCB extends AbstractSeqComponentCB {
     private transient int limit;
     private transient Map<String, Object> options;
 
-    private transient String obsClass;
-
     public GhostSeqRepeatFlatObsCB(ISPSeqComponent seqComp) {
         super(seqComp);
     }
@@ -43,7 +40,6 @@ final public class GhostSeqRepeatFlatObsCB extends AbstractSeqComponentCB {
         result.max = 0;
         result.limit = 0;
         result.options = null;
-        result.obsClass = null;
         return result;
     }
 
@@ -54,7 +50,6 @@ final public class GhostSeqRepeatFlatObsCB extends AbstractSeqComponentCB {
         max = c.getStepCount();
         limit = SeqRepeatCbOptions.getCollapseRepeat(options) ? 1 : max;
 
-        obsClass = c.getObsClass().sequenceValue();
         this.options = options;
     }
 
@@ -102,25 +97,7 @@ final public class GhostSeqRepeatFlatObsCB extends AbstractSeqComponentCB {
                 StringParameter.getInstance(InstConstants.OBS_CLASS_PROP,
                         c.getObsClass().sequenceValue()));
 
-        System.out.println(c.getObserveType());
-        System.out.println(GhostCameras$.MODULE$.fromGhostSeqComponent(c));
-
-        config.putParameter(SeqConfigNames.OBSERVE_CONFIG_NAME,
-            DefaultParameter.getInstance(
-                InstConstants.EXPOSURE_TIME_PROP,
-                GhostCameras$.MODULE$.fromGhostSeqComponent(c).totalSeconds()
-            )
-        );
-
-        config.putParameter(SeqConfigNames.CALIBRATION_CONFIG_NAME,
-                DefaultParameter.getInstance(Ghost$.MODULE$.RED_EXPOSURE_TIME_PROP(), c.getRedExposureTime()));
-        config.putParameter(SeqConfigNames.CALIBRATION_CONFIG_NAME,
-                DefaultParameter.getInstance(Ghost$.MODULE$.RED_EXPOSURE_COUNT_PROP(), c.getRedExposureCount()));
-
-        config.putParameter(SeqConfigNames.CALIBRATION_CONFIG_NAME,
-                DefaultParameter.getInstance(Ghost$.MODULE$.BLUE_EXPOSURE_TIME_PROP(), c.getBlueExposureTime()));
-        config.putParameter(SeqConfigNames.CALIBRATION_CONFIG_NAME,
-                DefaultParameter.getInstance(Ghost$.MODULE$.BLUE_EXPOSURE_COUNT_PROP(), c.getBlueExposureCount()));
+        GhostExposureTimeProvider.addToConfig(config, SeqConfigNames.OBSERVE_CONFIG_NAME, c);
 
         GsaSequenceEditor.instance.addProprietaryPeriod(config, getSeqComponent().getProgram(), c.getObsClass());
 

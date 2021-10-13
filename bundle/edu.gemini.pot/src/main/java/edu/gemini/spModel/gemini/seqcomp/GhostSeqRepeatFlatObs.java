@@ -9,7 +9,6 @@ import edu.gemini.spModel.gemini.calunit.CalUnitConstants;
 import edu.gemini.spModel.gemini.calunit.CalUnitParams.*;
 import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.obscomp.InstConstants;
-import edu.gemini.spModel.seqcomp.GhostExpSeqComponent;
 import edu.gemini.spModel.seqcomp.GhostSeqRepeatExp;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
@@ -23,8 +22,7 @@ import java.util.*;
  * The difference here is that GHOST does not have a single exposure time, but due to having two detectors - a red
  * and a blue - exposure times and exposure counts for each. Additionally, GHOST does not have coadds.
  */
-final public class GhostSeqRepeatFlatObs extends GhostSeqRepeatExp
-    implements GhostExpSeqComponent {
+final public class GhostSeqRepeatFlatObs extends GhostSeqRepeatExp {
     private static final long serialVersionUID = 1L;
 
     public static final SPComponentType SP_TYPE = SPComponentType.OBSERVER_GHOST_GEMFLAT;

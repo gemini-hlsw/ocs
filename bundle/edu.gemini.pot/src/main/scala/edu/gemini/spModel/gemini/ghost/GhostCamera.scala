@@ -4,7 +4,6 @@
 package edu.gemini.spModel.gemini.ghost
 
 import edu.gemini.spModel.config2.{Config, ItemKey}
-import edu.gemini.spModel.seqcomp.GhostExpSeqComponent
 
 import java.time.Duration
 
@@ -14,6 +13,9 @@ sealed trait GhostCamera extends Product with Serializable {
 
   def count: Int
   def time:  Duration
+
+  def timeSeconds: Double =
+    time.toMillis.toDouble / 1000.0
 
   def totalDuration: Duration =
     time.multipliedBy(count.toLong)
@@ -34,32 +36,38 @@ object GhostCamera {
   private def secondsToDuration(secs: Double): Duration =
     Duration.ofMillis(Math.round(secs * 1000.0))
 
-  private def configToDuration(config: Config, key: ItemKey): Duration =
-    secondsToDuration(
-      Option(config.getItemValue(key)).collect {
-        case d: java.lang.Double => d.doubleValue
-      }.getOrElse(0.0)
-    )
+  private def anyToDuration(any: Option[AnyRef]): Duration =
+    secondsToDuration(any.collect {
+      case d: java.lang.Double => d.doubleValue
+    }.getOrElse(0.0))
 
-  private def configToCount(config: Config, key: ItemKey): Int =
-    Option(config.getItemValue(key)).collect {
+  private def configToDuration(config: Config, key: ItemKey): Duration =
+    anyToDuration(Option(config.getItemValue(key)))
+
+  private def anyToCount(any: Option[AnyRef]): Int =
+    any.collect {
       case i: java.lang.Integer => i.intValue
     }.getOrElse(1)
 
+  private def configToCount(config: Config, key: ItemKey): Int =
+    anyToCount(Option(config.getItemValue(key)))
+
   object Red {
 
-    def fromGhostComponent(g: Ghost): Red =
-      Red(g.getRedExposureCount, secondsToDuration(g.getRedExposureTime))
+    def fromCountAndSeconds(count: Int, seconds: Double): Red =
+      Red(
+        if (count < 0) 0 else count,
+        Duration.ofMillis(Math.round((if (seconds < 0.0) 0.0 else seconds) * 1000.0))
+      )
 
-    def fromGhostSeqComponent(g: GhostExpSeqComponent): Red =
+    def fromGhostComponent(g: GhostExposureTimeProvider): Red =
       Red(g.getRedExposureCount, secondsToDuration(g.getRedExposureTime))
 
     def fromConfig(c: Config): Red =
       Red(
-        configToCount(c, Ghost.RED_EXPOSURE_COUNT_KEY),
-        configToDuration(c, Ghost.RED_EXPOSURE_TIME_KEY)
+        configToCount(c, Ghost.RED_EXPOSURE_COUNT_OBS_KEY),
+        configToDuration(c, Ghost.RED_EXPOSURE_TIME_OBS_KEY)
       )
-
 
   }
 
@@ -68,16 +76,19 @@ object GhostCamera {
 
   object Blue {
 
-    def fromGhostComponent(g: Ghost): Blue =
-      Blue(g.getBlueExposureCount, secondsToDuration(g.getBlueExposureTime))
+    def fromCountAndSeconds(count: Int, seconds: Double): Blue =
+      Blue(
+        if (count < 0) 0 else count,
+        Duration.ofMillis(Math.round((if (seconds < 0.0) 0.0 else seconds) * 1000.0))
+      )
 
-    def fromGhostSeqComponent(g: GhostExpSeqComponent): Blue =
+    def fromGhostComponent(g: GhostExposureTimeProvider): Blue =
       Blue(g.getBlueExposureCount, secondsToDuration(g.getBlueExposureTime))
 
     def fromConfig(c: Config): Blue =
       Blue(
-        configToCount(c, Ghost.BLUE_EXPOSURE_COUNT_KEY),
-        configToDuration(c, Ghost.BLUE_EXPOSURE_TIME_KEY)
+        configToCount(c, Ghost.BLUE_EXPOSURE_COUNT_OBS_KEY),
+        configToDuration(c, Ghost.BLUE_EXPOSURE_TIME_OBS_KEY)
       )
 
   }
