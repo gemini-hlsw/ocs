@@ -1,19 +1,18 @@
 package edu.gemini.spModel.gemini.ghost
 
-import java.time.Instant
+import java.time.{Duration, Instant}
 import java.util.{Map => JMap}
-
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.spModel.config.AbstractObsComponentCB
 import edu.gemini.spModel.data.config._
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostTarget
 import edu.gemini.spModel.obscomp.InstConstants
+import edu.gemini.spModel.seqcomp.SeqConfigNames
 import edu.gemini.spModel.seqcomp.SeqConfigNames.OBSERVE_CONFIG_NAME
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.spModel.target.{SPCoordinates, SPSkyObject, SPTarget}
 
 import scala.collection.JavaConverters._
-
 import scalaz.Scalaz._
 import scalaz._
 
@@ -23,7 +22,6 @@ import scalaz._
 final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obsComp) {
 
   @transient private var sysConfig: Option[ISysConfig] = None
-  @transient private var expConfig: Option[GhostCB.Exposure] = None
 
   override def clone(): AnyRef = {
     val result = super.clone().asInstanceOf[GhostCB]
@@ -31,34 +29,19 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
     result
   }
 
+  private def getGhostComponent: Ghost =
+    getDataObject.asInstanceOf[Ghost]
+
   override def thisReset(options: JMap[String, Object]): Unit = {
-    val dataObj: Ghost = getDataObject.asInstanceOf[Ghost]
-    if (dataObj == null)
-      throw new IllegalArgumentException("The data object for GHOST cannot be null")
-    sysConfig = Some(dataObj.getSysConfig)
-    expConfig = Some(GhostCB.Exposure(dataObj))
+    sysConfig = Some(getGhostComponent.getSysConfig)
   }
 
-  override protected def thisHasConfiguration(): Boolean = {
-    sysConfig.exists(_.getParameterCount > 0) || expConfig.isDefined
-  }
+  override protected def thisHasConfiguration(): Boolean =
+    sysConfig.exists(_.getParameterCount > 0)
 
   override protected def thisApplyNext(config: IConfig, prevFull: IConfig): Unit = {
-    expConfig.foreach { ec =>
 
-      config.putParameter(OBSERVE_CONFIG_NAME,
-          DefaultParameter.getInstance(Ghost.RED_EXPOSURE_COUNT_PROP, ec.redCount))
-
-      config.putParameter(OBSERVE_CONFIG_NAME,
-          DefaultParameter.getInstance(Ghost.RED_EXPOSURE_TIME_PROP, ec.redTime))
-
-      config.putParameter(OBSERVE_CONFIG_NAME,
-          DefaultParameter.getInstance(Ghost.BLUE_EXPOSURE_COUNT_PROP, ec.blueCount))
-
-      config.putParameter(OBSERVE_CONFIG_NAME,
-          DefaultParameter.getInstance(Ghost.BLUE_EXPOSURE_TIME_PROP, ec.blueTime))
-
-    }
+    GhostExposureTimeProvider.addToConfig(config, SeqConfigNames.OBSERVE_CONFIG_NAME, getGhostComponent)
 
     sysConfig.foreach { sc =>
       val systemName: String = sc.getSystemName
@@ -176,27 +159,4 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
         }}
     }
   }
-}
-
-object GhostCB {
-
-  // Exposure parameters handled separately to place them in the "observe"
-  // system.
-  final case class Exposure(
-    redCount:  Int,
-    redTime:   Double,
-    blueCount: Int,
-    blueTime:  Double
-  )
-
-  object Exposure {
-    def apply(g: Ghost): Exposure =
-      Exposure(
-        g.getRedExposureCount,
-        g.getRedExposureTime,
-        g.getBlueExposureCount,
-        g.getBlueExposureTime
-      )
-  }
-
 }

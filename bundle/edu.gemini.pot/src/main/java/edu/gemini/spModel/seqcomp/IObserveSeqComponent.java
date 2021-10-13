@@ -21,16 +21,16 @@ public interface IObserveSeqComponent extends ISPSeqObject {
     /**
      * Return the OBSERVE_TYPE property value.
      */
-    public String getObserveType();
+    String getObserveType();
 
     /**
      * Set the repeat count and fire an event.
      */
-    public void setStepCount(int repeatCount);
+    void setStepCount(int repeatCount);
 
     /**
      * Return the observation (charging) class for this object.
      */
-    public ObsClass getObsClass();
+    ObsClass getObsClass();
 }
 

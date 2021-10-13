@@ -71,4 +71,13 @@ public enum Instrument {
                       .findFirst()
                );
     }
+
+    public static Option<Instrument> fromName(String name) {
+        return ImOption.fromOptional(
+                   Arrays.stream(values())
+                      .filter(i -> i.name().equalsIgnoreCase(name))
+                      .findFirst()
+               );
+    }
+
 }

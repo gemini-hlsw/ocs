@@ -18,8 +18,6 @@ import java.awt.event.MouseEvent;
 import java.util.Comparator;
 import java.util.Map;
 
-import static jsky.app.ot.editor.seq.Keys.DATALABEL_KEY;
-
 
 /**
  * A TimeLine node for use with the ObserveTimeLine class.
@@ -139,11 +137,11 @@ public class ObserveTimeLineNode extends DefaultTimeLineNode {
         return buf.toString();
     }
 
-    private static final String formatCategory(CategorizedTime ct) {
+    private static String formatCategory(CategorizedTime ct) {
         return (ct.detail == null) ? ct.category.display : ct.detail;
     }
 
-    private static final String formatSec(long time) {
+    private static String formatSec(long time) {
         return String.format("%.1f", time/1000.0);
     }
 

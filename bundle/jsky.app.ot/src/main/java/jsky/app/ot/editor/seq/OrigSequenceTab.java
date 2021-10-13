@@ -77,10 +77,8 @@ final class OrigSequenceTab {
 
             // Align the exposure time to the RIGHT.
             if (type == RowType.title) {
-                switch (TitleColumns.values()[column]) {
-                    case obsExposure:
-                        lab.setHorizontalAlignment(RIGHT);
-                        break;
+                if (TitleColumns.values()[column] == TitleColumns.obsExposure) {
+                    lab.setHorizontalAlignment(RIGHT);
                 }
             }
 
@@ -98,7 +96,7 @@ final class OrigSequenceTab {
     }
 
     // the GUI layout panel
-    private IterFolderForm _w;
+    private final IterFolderForm _w;
     private final EdIteratorFolder _parent;
 
     // cached current SP data

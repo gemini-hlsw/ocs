@@ -12,8 +12,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Injects the observing wavelength into the configuration at a particular
- * step.
+ * Injects a value into the configuration at a particular step based on the
+ * current values of one or more other parameters.
  */
 public final class ConfigInjector<R> implements Serializable {
 
@@ -28,7 +28,7 @@ public final class ConfigInjector<R> implements Serializable {
     }
 
     /**
-     * Adpater for single argument calculators.
+     * Adapter for single argument calculators.
      */
     private static final class Adapter1<A, R> implements CalcAdapter<R> {
         private final ConfigInjectorCalc1<A, R> calc;
@@ -57,7 +57,7 @@ public final class ConfigInjector<R> implements Serializable {
 
 
     /**
-     * Adpater for two argument calculators.
+     * Adapter for two argument calculators.
      */
     private static final class Adapter2<A, B, R> implements CalcAdapter<R> {
         private final ConfigInjectorCalc2<A, B, R> calc;
@@ -89,7 +89,7 @@ public final class ConfigInjector<R> implements Serializable {
     }
 
     /**
-     * Adpater for three argument calculators.
+     * Adapter for three argument calculators.
      */
     private static final class Adapter3<A, B, C, R> implements CalcAdapter<R> {
         private final ConfigInjectorCalc3<A, B, C, R> calc;
@@ -124,34 +124,79 @@ public final class ConfigInjector<R> implements Serializable {
     }
 
     /**
-     * Creates an ObsWavelengthInjector for a calculator that requires a
-     * single argument.
+     * Adapter for four argument calculators.
+     */
+    private static final class Adapter4<A, B, C, D, R> implements CalcAdapter<R> {
+        private final ConfigInjectorCalc4<A, B, C, D, R> calc;
+        private final List<PropertyDescriptor> props;
+        private final String result;
+
+        Adapter4(ConfigInjectorCalc4<A, B, C, D, R> calc) {
+            this.calc = calc;
+
+            List<PropertyDescriptor> tmp = new ArrayList<>();
+            tmp.add(calc.descriptor1());
+            tmp.add(calc.descriptor2());
+            tmp.add(calc.descriptor3());
+            tmp.add(calc.descriptor4());
+            props = Collections.unmodifiableList(tmp);
+            result = calc.resultPropertyName();
+        }
+
+        public List<PropertyDescriptor> list() { return props; }
+        public String resultPropertyName() { return result; }
+
+        @SuppressWarnings({"unchecked"})
+        public R apply(ISysConfig cur, ISysConfig prev) {
+            A aVal = (A) getValue(calc.descriptor1(), cur, prev);
+            if (aVal == null) return null;
+            B bVal = (B) getValue(calc.descriptor2(), cur, prev);
+            if (bVal == null) return null;
+            C cVal = (C) getValue(calc.descriptor3(), cur, prev);
+            if (cVal == null) return null;
+            D dVal = (D) getValue(calc.descriptor4(), cur, prev);
+            if (dVal == null) return null;
+
+            return calc.apply(aVal, bVal, cVal, dVal);
+        }
+    }
+
+    /**
+     * Creates a ConfigInjector for a calculator that requires one argument.
      *
-     * @param calc calculator for observing wavelengths.
+     * @param calc calculator for a derived sequence property
      */
     public static <A, R> ConfigInjector<R> create(ConfigInjectorCalc1<A, R> calc) {
         return new ConfigInjector<>(new Adapter1<>(calc));
     }
 
     /**
-     * Creates an ObsWavelengthInjector for a calculator that requires two
-     * arguments.
+     * Creates a ConfigInjector for a calculator that requires two arguments.
      *
-     * @param calc calculator for observing wavelengths.
+     * @param calc calculator for a derived sequence property
      */
     public static <A, B, R> ConfigInjector<R> create(ConfigInjectorCalc2<A, B, R> calc) {
         return new ConfigInjector<>(new Adapter2<>(calc));
     }
 
     /**
-     * Creates an ObsWavelengthInjector for a calculator that requires three
-     * arguments.
+     * Creates a ConfigInjector for a calculator that requires three arguments.
      *
-     * @param calc calculator for observing wavelengths.
+     * @param calc calculator for a derived sequence property
      */
     public static <A, B, C, R> ConfigInjector<R> create(ConfigInjectorCalc3<A, B, C, R> calc) {
         return new ConfigInjector<>(new Adapter3<>(calc));
     }
+
+    /**
+     * Creates a ConfigInjector for a calculator that requires four arguments.
+     *
+     * @param calc calculator for a derived sequence property
+     */
+    public static <A, B, C, D, R> ConfigInjector<R> create(ConfigInjectorCalc4<A, B, C, D, R> calc) {
+        return new ConfigInjector<>(new Adapter4<>(calc));
+    }
+
 
     private final CalcAdapter<R> adapter;
 
@@ -183,18 +228,18 @@ public final class ConfigInjector<R> implements Serializable {
      * set of values for all parameters as they existed in the last step
      */
     public void inject(IConfig cur, IConfig fullPrev) {
-        ISysConfig curSys = cur.getSysConfig(INSTRUMENT_CONFIG_NAME);
-        ISysConfig prevSys = fullPrev.getSysConfig(INSTRUMENT_CONFIG_NAME);
+        final ISysConfig curSys  = cur.getSysConfig(INSTRUMENT_CONFIG_NAME);
+        final ISysConfig prevSys = fullPrev.getSysConfig(INSTRUMENT_CONFIG_NAME);
 
-        String propName = adapter.resultPropertyName();
+        final String propName = adapter.resultPropertyName();
         if (curSys != null) {
             curSys.removeParameter(propName); // may not exist, but if it does, remove it
         }
         if (propertyUpdated(curSys, prevSys)) {
-            R newValue = adapter.apply(curSys, prevSys);
+            final R newValue = adapter.apply(curSys, prevSys);
 
             if (newValue != null) {
-                Object oldValue = ConfigInjectorUtil.instance.lookup(propName, prevSys);
+                final Object oldValue = ConfigInjectorUtil.instance.lookup(propName, prevSys);
                 if ((oldValue == null) || !oldValue.equals(newValue)) {
                     cur.putParameter(INSTRUMENT_CONFIG_NAME,
                             DefaultParameter.getInstance(propName, newValue));

@@ -14,7 +14,7 @@ import java.util.Map;
 
 /**
  * A configuration builder for the science object observe sequence
- * component that include coadds and expsosure time.
+ * component that include coadds and exposure time.
  */
 public class SeqRepeatCoaddExpCB extends AbstractSeqComponentCB {
 
@@ -49,7 +49,7 @@ public class SeqRepeatCoaddExpCB extends AbstractSeqComponentCB {
         ICoaddExpSeqComponent c = (ICoaddExpSeqComponent) getDataObject();
         _max = c.getStepCount();
         _limit = SeqRepeatCbOptions.getCollapseRepeat(options) ? 1 : _max;
-        _objectName = ((AbstractDataObject) c).getType().readableStr;
+        _objectName = c.getType().readableStr;
         _options = options;
     }
 
@@ -69,12 +69,8 @@ public class SeqRepeatCoaddExpCB extends AbstractSeqComponentCB {
 
         config.putParameter(SYSTEM_NAME,
                 DefaultParameter.getInstance(InstConstants.EXPOSURE_TIME_PROP, c.getExposureTime()));
-//                            StringParameter.getInstance(InstConstants.EXPOSURE_TIME_PROP,
-//                                                        String.valueOf(c.getExposureTime())));
         config.putParameter(SYSTEM_NAME,
                 DefaultParameter.getInstance(InstConstants.COADDS_PROP, c.getCoaddsCount()));
-//                            StringParameter.getInstance(InstConstants.COADDS_PROP,
-//                                                        String.valueOf(c.getCoaddsCount())));
         config.putParameter(SYSTEM_NAME,
                             StringParameter.getInstance(InstConstants.OBS_CLASS_PROP,
                                                         c.getObsClass().sequenceValue()));

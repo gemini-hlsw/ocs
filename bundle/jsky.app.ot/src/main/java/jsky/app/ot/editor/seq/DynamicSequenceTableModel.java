@@ -8,6 +8,7 @@ import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.dataflow.GsaSequenceEditor;
 import edu.gemini.spModel.gemini.calunit.calibration.CalDictionary;
+import edu.gemini.spModel.gemini.ghost.Ghost;
 import edu.gemini.spModel.gemini.seqcomp.smartgcal.SmartgcalSysConfig;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
@@ -89,9 +90,21 @@ public final class DynamicSequenceTableModel extends AbstractTableModel {
         res.remove(OBS_ELAPSED_KEY);
 
         // Remove the duplicate instrument exposure time and instrument coadd
-        // keys.  Why do we put those in there?
+        // keys.  The "instrument" system exposure time represents the exposure
+        // time configured in the instrument but it is overridden for bias steps
+        // etc.  The important parameter for the user is the "observe" system
+        // exposure time which is derived from the "instrument" precursor so it.
         res.remove(INST_EXP_TIME_KEY);
         res.remove(INST_COADDS_KEY);
+
+        // GHOST complicates exposure time settings in that it has its own
+        // values, though they work in a similar way to the normal instrument
+        // exposure time.  Accordingly, we don't want to see the "instrument"
+        // system exposure time parameters for Ghost if they are there.
+        res.remove(Ghost.RED_EXPOSURE_COUNT_KEY());
+        res.remove(Ghost.RED_EXPOSURE_TIME_KEY());
+        res.remove(Ghost.BLUE_EXPOSURE_COUNT_KEY());
+        res.remove(Ghost.BLUE_EXPOSURE_TIME_KEY());
 
         // Take out the proprietary months, which isn't important for sequence
         // planning.

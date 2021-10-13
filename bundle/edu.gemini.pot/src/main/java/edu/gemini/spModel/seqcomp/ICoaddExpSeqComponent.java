@@ -19,22 +19,22 @@ public interface ICoaddExpSeqComponent extends IObserveSeqComponent {
     /**
      * Return the exposure time.
      */
-    public double getExposureTime();
+    double getExposureTime();
 
     /**
      * Set the exposure time and fire an event.
      */
-    public void setExposureTime(double expTime);
+    void setExposureTime(double expTime);
 
     /**
      * Return the current coadd count.
      */
-    public int getCoaddsCount();
+    int getCoaddsCount();
 
     /**
      * Set the coadds count and fire an event.
      */
-    public void setCoaddsCount(int coaddsCount);
+    void setCoaddsCount(int coaddsCount);
 
 }
 

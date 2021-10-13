@@ -18,7 +18,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyVetoException;
 import java.beans.VetoableChangeListener;
 import java.util.EventListener;
 import java.util.EventObject;
@@ -43,6 +42,7 @@ final class ObserveTimeLine extends TimeLine implements VetoableChangeListener {
         }
     }
 
+    @SuppressWarnings("unused")
     public interface ObserveTimeLineListener extends EventListener {
         // Called via reflection (EventSupport)... don't delete.
         void showSetup(ObserveTimeLineEvent event);
@@ -50,7 +50,7 @@ final class ObserveTimeLine extends TimeLine implements VetoableChangeListener {
     }
 
     private final EventSupport support = new EventSupport(ObserveTimeLineListener.class, ObserveTimeLineEvent.class);
-    private final Map<String, ObserveTimeLineNode> nodeMap = new HashMap<String, ObserveTimeLineNode>();
+    private final Map<String, ObserveTimeLineNode> nodeMap = new HashMap<>();
 
     private ObserveTimeLineNode selected = null;
 
@@ -170,7 +170,7 @@ final class ObserveTimeLine extends TimeLine implements VetoableChangeListener {
         // do nothing
     }
 
-    public void vetoableChange(PropertyChangeEvent evt) throws PropertyVetoException {
+    public void vetoableChange(PropertyChangeEvent evt) {
         // do nothing
     }
 }

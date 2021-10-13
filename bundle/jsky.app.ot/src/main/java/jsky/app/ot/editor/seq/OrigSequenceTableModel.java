@@ -6,17 +6,23 @@ package jsky.app.ot.editor.seq;
 
 import static jsky.app.ot.editor.seq.Keys.*;
 
+import edu.gemini.pot.sp.Instrument;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.config.map.ConfigValMapInstances;
 import edu.gemini.spModel.config2.*;
 import edu.gemini.spModel.gemini.calunit.calibration.CalDictionary;
+import edu.gemini.spModel.gemini.ghost.Ghost;
 import edu.gemini.spModel.gemini.seqcomp.smartgcal.SmartgcalSysConfig;
 import edu.gemini.spModel.obsclass.ObsClass;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class OrigSequenceTableModel extends AbstractTableModel {
-    private static ItemKey[] SYS_KEYS = new ItemKey[] {
+    private static final ItemKey[] SYS_KEYS = new ItemKey[] {
             TELESCOPE_KEY,
             INSTRUMENT_KEY,
             CALIBRATION_KEY,
@@ -41,8 +47,24 @@ public class OrigSequenceTableModel extends AbstractTableModel {
             OBS_STATUS_KEY,
             OBS_ELAPSED_KEY,
             TEL_BASE_NAME,
-            TEL_VERSION_KEY,
+            TEL_VERSION_KEY
     };
+
+    private static final Map<Instrument, ItemKey[]> INSTRUMENT_REMOVE;
+
+    static {
+        final Map<Instrument, ItemKey[]> m = new HashMap<>();
+
+        m.put(Instrument.Ghost, new ItemKey[] {
+            Ghost.RED_EXPOSURE_COUNT_KEY(),
+            Ghost.RED_EXPOSURE_TIME_KEY(),
+            Ghost.BLUE_EXPOSURE_COUNT_KEY(),
+            Ghost.BLUE_EXPOSURE_TIME_KEY()
+        });
+
+        INSTRUMENT_REMOVE = Collections.unmodifiableMap(m);
+    }
+
 
     enum RowType {
         title,
@@ -57,9 +79,8 @@ public class OrigSequenceTableModel extends AbstractTableModel {
         },
         obsClass() {
             public String map(Config c) {
-                String s = (String) c.getItemValue(OBS_CLASS_KEY);
-                if (s == null) return ObsClass.SCIENCE.logValue();
-                return ObsClass.parseType(s).logValue();
+                final String s = (String) c.getItemValue(OBS_CLASS_KEY);
+                return (s == null) ? ObsClass.SCIENCE.logValue() : ImOption.apply(ObsClass.parseType(s)).map(ObsClass::logValue).getOrElse("");
             }
         },
         obsObject() {
@@ -91,10 +112,7 @@ public class OrigSequenceTableModel extends AbstractTableModel {
                         return s;
                     }
                 }
-                if (time instanceof Double) {
-                    return time.toString() + "s";
-                }
-                return "";
+                return (time instanceof Double) ? time + "s" : "";
             }
 
             public String map(Config c) {
@@ -226,7 +244,7 @@ public class OrigSequenceTableModel extends AbstractTableModel {
     }
 
     private static class SplitConfig {
-        private final Map<ItemKey, List<ItemEntry>> m = new HashMap<ItemKey, List<ItemEntry>>();
+        private final Map<ItemKey, List<ItemEntry>> m = new HashMap<>();
         private final Row datasetRow;
         private final String datasetLabel;
 
@@ -234,18 +252,14 @@ public class OrigSequenceTableModel extends AbstractTableModel {
             datasetRow = new TitleRow(c);
             datasetLabel = c.getItemValue(Keys.DATALABEL_KEY).toString();
             for (ItemEntry ie : c.itemEntries()) {
-                ItemKey root = ie.getKey().getRoot();
-                List<ItemEntry> lst = m.get(root);
-                if (lst == null) {
-                    lst = new ArrayList<ItemEntry>();
-                    m.put(root, lst);
-                }
-                lst.add(ie);
+                final ItemKey root = ie.getKey().getRoot();
+                m.computeIfAbsent(root, k -> new ArrayList<>())
+                 .add(ie);
             }
         }
 
         List<Row> rows() {
-            List<Row> rows = new ArrayList<Row>();
+            List<Row> rows = new ArrayList<>();
             rows.add(datasetRow);
 
             int max = 0;
@@ -277,21 +291,37 @@ public class OrigSequenceTableModel extends AbstractTableModel {
         }
     }
 
-    private List<Row> rows = new ArrayList<Row>();
-    private Map<String, RowInterval> datasetMap = new HashMap<String, RowInterval>();
+    private final List<Row> rows = new ArrayList<>();
+    private final Map<String, RowInterval> datasetMap = new HashMap<>();
+
+    private static Option<Instrument> extractInstrument(ConfigSequence cs) {
+        final Option<Object> o = ImOption.apply(cs.getItemValue(0, INST_INSTRUMENT_KEY));
+        return o.flatMap(o1 -> {
+            if (o1 instanceof String) {
+                return Instrument.fromName((String) o1);
+            } else {
+                return ImOption.empty();
+            }
+        });
+    }
 
     private static Config[] extractConfigs(ConfigSequence cs) {
-        Config[] configs   = cs.getCompactView();
-        Map<ItemKey, Object[]> m = new HashMap<ItemKey, Object[]>();
+        final Config[] configs   = cs.getCompactView();
+        final Map<ItemKey, Object[]> m = new HashMap<>();
 
-        for (ItemKey key : ADD) {
-            m.put(key, cs.getItemValueAtEachStep(key));
-        }
+        final Option<Instrument> inst = extractInstrument(cs);
+        final List<ItemKey> allAdd = Arrays.stream(ADD).collect(Collectors.toList());
+
+        allAdd.forEach(key -> m.put(key, cs.getItemValueAtEachStep(key)));
+
+        final ItemKey[]    instRm = inst.map(i -> INSTRUMENT_REMOVE.getOrDefault(i, ItemKey.EMPTY_ARRAY)).getOrElse(ItemKey.EMPTY_ARRAY);
+        final List<ItemKey> allRm = Stream.concat(Arrays.stream(REMOVE), Arrays.stream(instRm)).collect(Collectors.toList());
 
         for (int i=0; i<configs.length; ++i) {
-            Config c = configs[i];
-            for (ItemKey key : REMOVE) c.remove(key);
-            for (ItemKey key : ADD) c.putItem(key, m.get(key)[i]);
+            final Config c = configs[i];
+            allRm.forEach(c::remove);
+            final int index = i;
+            allAdd.forEach(key -> c.putItem(key, m.get(key)[index]));
         }
 
         return configs;
@@ -323,7 +353,7 @@ public class OrigSequenceTableModel extends AbstractTableModel {
 
     public int getRowCount() { return rows.size(); }
     public int getColumnCount() { return SYS_KEYS.length * 2; }
-    public Class getColumnClass(int columnIndex) { return String.class; }
+    public Class<?> getColumnClass(int columnIndex) { return String.class; }
     public String getColumnName(int columnIndex) { return ""; }
     public RowType getType(int row) { return rows.get(row).type(); }
     public boolean hasMappingError(int row) { return rows.get(row).hasMappingError(); }
