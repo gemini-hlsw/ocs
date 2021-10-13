@@ -478,7 +478,7 @@ def gnodb(version: Version) = AppConfig(
     "edu.gemini.spdb.dir"                  -> "/mount/wikiwiki/odbhome/ugemini/spdb/spdb.active",
     "edu.gemini.util.trpc.name"            -> "Gemini North ODB",
     "osgi.shell.telnet.ip"                 -> "10.2.4.77",
-    "edu.gemini.fire.url"                  -> "http://hbffire-lv1.hi.gemini.edu/ocsmsg"
+    "edu.gemini.fire.url"                  -> "http://hbffireops.hi.gemini.edu:5000/ocsmsg"
   )
 ) extending List(odbproduction(version), gnodb_credentials(version))
 
@@ -551,7 +551,7 @@ def gsodb(version: Version) = AppConfig(
     "edu.gemini.spdb.dir"                  -> "/mount/petrohue/odbhome/ugemini/spdb/spdb.active",
     "edu.gemini.util.trpc.name"            -> "Gemini South ODB",
     "osgi.shell.telnet.ip"                 -> "172.16.76.71",
-    "edu.gemini.fire.url"                  -> "http://sbffire-lv1.cl.gemini.edu/ocsmsg"
+    "edu.gemini.fire.url"                  -> "http://sbffireops.cl.gemini.edu:5000/ocsmsg"
   ),
   bundles = List(
     BundleSpec(50, "edu.gemini.smartgcal.servlet", version)
