@@ -27,7 +27,7 @@ public final class SpVisitorBlueprint extends SpBlueprint {
 
     public SpVisitorBlueprint(String name, Option<VisitorConfig> visitorConfig) {
         if (name == null) throw new NullPointerException("'name' parameter cannot be null");
-        if (visitorConfig == null) throw new NullPointerException("'instrumentConfig' parameter cannot be null");
+        if (visitorConfig == null) throw new NullPointerException("'visitorConfig' parameter cannot be null");
 
         this.name          = name;
         this.visitorConfig = visitorConfig;
