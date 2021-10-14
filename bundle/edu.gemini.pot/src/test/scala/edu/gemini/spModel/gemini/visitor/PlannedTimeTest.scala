@@ -4,18 +4,13 @@
 package edu.gemini.spModel.gemini.visitor
 
 import edu.gemini.pot.sp.{ISPObsComponent, SPComponentType}
-import edu.gemini.spModel.data.config.ISysConfig
 import edu.gemini.spModel.gemini.visitor.VisitorConfig.{DefaultReadoutTime, DefaultSetupTime}
-import edu.gemini.spModel.obs.plannedtime.PlannedTime.Category
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator
 import edu.gemini.spModel.seqcomp.SeqRepeatObserve
-import edu.gemini.spModel.test.{InstrumentSequenceTestBase, SpModelTestBase}
-import org.junit.{Before, Test}
+import edu.gemini.spModel.test.SpModelTestBase
 import org.junit.Assert.assertEquals
 
 import java.time.Duration
-
-import scala.collection.JavaConverters._
 
 
 final class PlannedTimeTest extends SpModelTestBase {

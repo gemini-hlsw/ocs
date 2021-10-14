@@ -39,6 +39,9 @@ sealed trait VisitorConfig extends Product with Serializable {
 
 object VisitorConfig {
 
+  val DefaultExposureTime: Duration =
+    Duration.ofSeconds(0L)
+
   val DefaultSetupTime: Duration =
     Duration.ofMinutes(10L)
 

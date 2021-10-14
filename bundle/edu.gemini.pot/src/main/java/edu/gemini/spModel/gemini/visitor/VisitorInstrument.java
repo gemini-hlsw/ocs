@@ -4,6 +4,7 @@ import edu.gemini.pot.sp.ISPNodeInitializer;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.config2.Config;
@@ -38,7 +39,7 @@ import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_CONFIG_NAME;
 public class VisitorInstrument extends SPInstObsComp
         implements PropertyProvider, GuideProbeProvider, PlannedTime.StepCalculator {
     // for serialization
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     /**
      * This obs component's SP type.
@@ -46,10 +47,11 @@ public class VisitorInstrument extends SPInstObsComp
     public static final SPComponentType SP_TYPE = SPComponentType.INSTRUMENT_VISITOR;
 
     public static final ISPNodeInitializer<ISPObsComponent, VisitorInstrument> NI =
-        new ComponentNodeInitializer<>(SP_TYPE, () -> new VisitorInstrument(), c -> new VisitorInstrumentCB(c));
+        new ComponentNodeInitializer<>(SP_TYPE, VisitorInstrument::new, VisitorInstrumentCB::new);
 
     //Properties
     public static final PropertyDescriptor NAME_PROP;
+    public static final PropertyDescriptor CONFIG_PROP;
     public static final PropertyDescriptor WAVELENGTH_PROP;
     public static final PropertyDescriptor EXPOSURE_TIME_PROP;
     public static final PropertyDescriptor POS_ANGLE_PROP;
@@ -58,10 +60,10 @@ public class VisitorInstrument extends SPInstObsComp
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
 
     //Defaults
-    public static final double DEFAULT_EXPOSURE_TIME  = 0;
-    public static final double DEFAULT_POSITION_ANGLE = 0;
-    public static final String INSTRUMENT_NAME_PROP = SP_TYPE.readableStr;
-    public static final double DEF_WAVELENGTH         = 0.7;
+    public static final double DEFAULT_EXPOSURE_TIME  = VisitorConfig$.MODULE$.DefaultExposureTime().toMillis() / 1000.0;
+    public static final double DEFAULT_POSITION_ANGLE = VisitorConfig$.MODULE$.DefaultPositionAngle().toDegrees();
+    public static final String INSTRUMENT_NAME_PROP   = SP_TYPE.readableStr;
+    public static final double DEF_WAVELENGTH         = VisitorConfig$.MODULE$.DefaultWavelength().toMicrons();
 
     private static PropertyDescriptor initProp(String propName, boolean query, boolean iter) {
         PropertyDescriptor pd = PropertySupport.init(propName, VisitorInstrument.class, query, iter);
@@ -72,6 +74,7 @@ public class VisitorInstrument extends SPInstObsComp
     // Instrument properties
     private String name = "";
     private double _centralWavelength = DEF_WAVELENGTH;
+    private Option<VisitorConfig> visitorConfig = ImOption.empty();
 
     static {
         final boolean query_yes = true;
@@ -79,6 +82,7 @@ public class VisitorInstrument extends SPInstObsComp
         final boolean query_no = false;
 
         NAME_PROP          = initProp("name", query_yes, iter_no);
+        CONFIG_PROP        = initProp("config", query_no, iter_no);
         WAVELENGTH_PROP    = initProp("wavelength", query_no, iter_no);
         EXPOSURE_TIME_PROP = initProp("exposureTime", query_no, iter_no);
         POS_ANGLE_PROP     = initProp("posAngle", query_no, iter_no);
@@ -112,6 +116,17 @@ public class VisitorInstrument extends SPInstObsComp
         }
     }
 
+    public Option<VisitorConfig> getVisitorConfig() {
+        return visitorConfig;
+    }
+
+    public void setVisitorConfig(Option<VisitorConfig> newValue) {
+        final Option<VisitorConfig> oldValue = getVisitorConfig();
+        if (!oldValue.equals(newValue)) {
+            visitorConfig = newValue;
+            firePropertyChange(CONFIG_PROP.getName(), oldValue, newValue);
+        }
+    }
 
     /**
      * Set the grating wavelength.
@@ -133,8 +148,7 @@ public class VisitorInstrument extends SPInstObsComp
 
     @Override
     public Duration getSetupTime(ISPObservation obs) {
-        return VisitorConfig$.MODULE$
-                .findByNameJava(name)
+        return getVisitorConfig()
                 .map(VisitorConfig::setupTime)
                 .getOrElse(VisitorConfig$.MODULE$.DefaultSetupTime());
     }
@@ -161,8 +175,7 @@ public class VisitorInstrument extends SPInstObsComp
                 ExposureCalculator.instance.exposureTimeSec(stepConfig));
 
         final Duration readoutDuration =
-            VisitorConfig$.MODULE$
-                .findByNameJava(name)
+            getVisitorConfig()
                 .map(VisitorConfig::readoutTime)
                 .getOrElse(VisitorConfig$.MODULE$.DefaultReadoutTime());
 
@@ -210,6 +223,7 @@ public class VisitorInstrument extends SPInstObsComp
 
         Pio.addParam(factory, paramSet, NAME_PROP, getName());
         Pio.addParam(factory, paramSet, WAVELENGTH_PROP.getName(), Double.toString(getWavelength()));
+        visitorConfig.foreach(c -> Pio.addParam(factory, paramSet, CONFIG_PROP.getName(), c.name()));
 
         return paramSet;
     }
@@ -227,6 +241,11 @@ public class VisitorInstrument extends SPInstObsComp
         }
         v = Pio.getValue(paramSet, WAVELENGTH_PROP.getName());
         setWavelength(Double.parseDouble(v));
+
+        setVisitorConfig(
+            ImOption.apply(Pio.getValue(paramSet, CONFIG_PROP.getName()))
+                    .flatMap(VisitorConfig$.MODULE$::findByNameJava)
+        );
     }
 
     private static final Collection<GuideProbe> GUIDE_PROBES = GuideProbeUtil.instance.createCollection();
