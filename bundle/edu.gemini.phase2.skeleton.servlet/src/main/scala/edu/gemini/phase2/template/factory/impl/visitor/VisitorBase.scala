@@ -41,8 +41,8 @@ trait VisitorBase extends GroupInitializer[SpVisitorBlueprint] with TemplateDsl 
       this.db = None
     }
 
-  def attempt[A](a: => A) = tryFold(a) {
-    e =>
+  def attempt[A](a: => A): Either[String, A] =
+    tryFold(a) { e =>
       e.printStackTrace()
       e.getMessage
     }
@@ -51,15 +51,15 @@ trait VisitorBase extends GroupInitializer[SpVisitorBlueprint] with TemplateDsl 
   def setName: Setter[String] =
     Setter[String](blueprint.name)(_.setName(_))
 
-  private def lookupInst: Option[VisitorConfig] =
-    VisitorConfig.findByName(blueprint.name)
+  def instrumentConfig: Option[VisitorConfig] =
+    blueprint.scalaVisitorConfig
 
   override def notes: List[String] =
-    lookupInst.map(_.noteTitles).getOrElse(Nil)
+    instrumentConfig.map(_.noteTitles).getOrElse(Nil)
 
   def setWavelength: Setter[Double] =
-    Setter[Double](lookupInst.map(_.wavelength.toMicrons).getOrElse(0.0))(_.setWavelength(_))
+    Setter[Double](instrumentConfig.map(_.wavelength.toMicrons).getOrElse(VisitorConfig.DefaultWavelength))(_.setWavelength(_))
 
   def setPosAngle: Setter[Double] =
-    Setter[Double](lookupInst.map(_.positionAngle.toDegrees).getOrElse(0.0))(_.setPosAngle(_))
+    Setter[Double](instrumentConfig.map(_.positionAngle.toDegrees).getOrElse(VisitorConfig.DefaultPositionAngle))(_.setPosAngle(_))
 }

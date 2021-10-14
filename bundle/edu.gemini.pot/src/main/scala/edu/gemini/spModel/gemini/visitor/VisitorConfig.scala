@@ -5,6 +5,7 @@ package edu.gemini.spModel.gemini.visitor
 
 import edu.gemini.spModel.core.{Angle, Wavelength}
 import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.spModel.gemini.visitor.VisitorConfig.{DefaultPositionAngle, DefaultWavelength}
 
 import java.time.Duration
 
@@ -20,10 +21,10 @@ sealed trait VisitorConfig extends Product with Serializable {
   def name: String
 
   def wavelength: Wavelength =
-    Wavelength.zero
+    DefaultWavelength
 
   def positionAngle: Angle =
-    Angle.zero
+    DefaultPositionAngle
 
   def noteTitles: List[String] =
     Nil
@@ -38,11 +39,17 @@ sealed trait VisitorConfig extends Product with Serializable {
 
 object VisitorConfig {
 
-  def DefaultSetupTime: Duration =
+  val DefaultSetupTime: Duration =
     Duration.ofMinutes(10L)
 
-  def DefaultReadoutTime: Duration =
+  val DefaultReadoutTime: Duration =
     Duration.ofSeconds(0)
+
+  val DefaultWavelength: Wavelength =
+    Wavelength.fromNanometers(700L)
+
+  val DefaultPositionAngle: Angle =
+    Angle.zero
 
   case object Alopeke extends VisitorConfig {
 

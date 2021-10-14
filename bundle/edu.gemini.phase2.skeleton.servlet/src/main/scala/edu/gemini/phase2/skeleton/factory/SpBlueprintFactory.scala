@@ -1,29 +1,27 @@
 package edu.gemini.phase2.skeleton.factory
 
 import edu.gemini.model.p1.immutable._
-
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
-import edu.gemini.spModel.gemini.flamingos2.blueprint.{SpFlamingos2BlueprintMos, SpFlamingos2BlueprintLongslit, SpFlamingos2BlueprintImaging}
+import edu.gemini.spModel.gemini.flamingos2.blueprint.{SpFlamingos2BlueprintImaging, SpFlamingos2BlueprintLongslit, SpFlamingos2BlueprintMos}
 import edu.gemini.spModel.gemini.gmos.blueprint._
 import edu.gemini.spModel.gemini.gmos.{GmosCommonType, GmosNorthType, GmosSouthType}
 import edu.gemini.spModel.gemini.michelle.MichelleParams
-import edu.gemini.spModel.gemini.michelle.blueprint.{SpMichelleBlueprintSpectroscopy, SpMichelleBlueprintImaging}
+import edu.gemini.spModel.gemini.michelle.blueprint.{SpMichelleBlueprintImaging, SpMichelleBlueprintSpectroscopy}
 import edu.gemini.spModel.gemini.phoenix.PhoenixParams
 import edu.gemini.spModel.gemini.phoenix.blueprint.SpPhoenixBlueprint
-
 import edu.gemini.spModel.template.SpBlueprint
 
 import scala.collection.JavaConverters._
-import edu.gemini.spModel.gemini.altair.blueprint.{SpAltairLgs, SpAltairNgs, SpAltairNone, SpAltair}
+import edu.gemini.spModel.gemini.altair.blueprint.{SpAltair, SpAltairLgs, SpAltairNgs, SpAltairNone}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
-import edu.gemini.spModel.gemini.gnirs.blueprint.{SpGnirsBlueprintSpectroscopy, SpGnirsBlueprintImaging}
+import edu.gemini.spModel.gemini.gnirs.blueprint.{SpGnirsBlueprintImaging, SpGnirsBlueprintSpectroscopy}
 import edu.gemini.spModel.gemini.nici.NICIParams
-import edu.gemini.spModel.gemini.nici.blueprint.{SpNiciBlueprintStandard, SpNiciBlueprintCoronagraphic}
+import edu.gemini.spModel.gemini.nici.blueprint.{SpNiciBlueprintCoronagraphic, SpNiciBlueprintStandard}
 import edu.gemini.spModel.gemini.nifs.NIFSParams
-import edu.gemini.spModel.gemini.nifs.blueprint.{SpNifsBlueprintAo, SpNifsBlueprint}
+import edu.gemini.spModel.gemini.nifs.blueprint.{SpNifsBlueprint, SpNifsBlueprintAo}
 import edu.gemini.spModel.gemini.trecs.TReCSParams
-import edu.gemini.spModel.gemini.trecs.blueprint.{SpTrecsBlueprintSpectroscopy, SpTrecsBlueprintImaging}
+import edu.gemini.spModel.gemini.trecs.blueprint.{SpTrecsBlueprintImaging, SpTrecsBlueprintSpectroscopy}
 import edu.gemini.spModel.gemini.niri.blueprint.SpNiriBlueprint
 import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
@@ -34,6 +32,7 @@ import edu.gemini.spModel.gemini.visitor.blueprint.SpVisitorBlueprint
 import edu.gemini.spModel.gemini.gpi.Gpi
 import edu.gemini.spModel.gemini.gpi.blueprint.SpGpiBlueprint
 import edu.gemini.spModel.gemini.graces.blueprint.SpGracesBlueprint
+import edu.gemini.spModel.gemini.visitor.VisitorConfig
 
 object SpBlueprintFactory {
 
@@ -398,12 +397,12 @@ object SpBlueprintFactory {
   }
 
   object VisitorHandler {
-    def apply(b: VisitorBlueprint):Either[String, SpVisitorBlueprint] = Right(new SpVisitorBlueprint(b.customName))
-    def apply(b: AlopekeBlueprint):Either[String, SpVisitorBlueprint] = Right(new SpVisitorBlueprint(b.name))
-    def apply(b: ZorroBlueprint):Either[String, SpVisitorBlueprint] = Right(new SpVisitorBlueprint(b.name))
-    def apply(b: DssiBlueprint):Either[String, SpVisitorBlueprint] = Right(new SpVisitorBlueprint("DSSI"))
-    def apply(b: IgrinsBlueprint):Either[String, SpVisitorBlueprint] = Right(new SpVisitorBlueprint(b.name))
-    def apply(b: MaroonXBlueprint):Either[String, SpVisitorBlueprint] = Right(new SpVisitorBlueprint(b.name))
+    def apply(b: VisitorBlueprint):Either[String, SpVisitorBlueprint] = Right(new SpVisitorBlueprint(b.customName, None))
+    def apply(b: AlopekeBlueprint):Either[String, SpVisitorBlueprint] = Right(new SpVisitorBlueprint(b.name, Some(VisitorConfig.Alopeke)))
+    def apply(b: ZorroBlueprint):Either[String, SpVisitorBlueprint]   = Right(new SpVisitorBlueprint(b.name, Some(VisitorConfig.Zorro)))
+    def apply(b: DssiBlueprint):Either[String, SpVisitorBlueprint]    = Right(new SpVisitorBlueprint("DSSI", Some(VisitorConfig.Dssi)))
+    def apply(b: IgrinsBlueprint):Either[String, SpVisitorBlueprint]  = Right(new SpVisitorBlueprint(b.name, Some(VisitorConfig.Igrins)))
+    def apply(b: MaroonXBlueprint):Either[String, SpVisitorBlueprint] = Right(new SpVisitorBlueprint(b.name, Some(VisitorConfig.MaroonX)))
   }
 
   object GpiHandler {
