@@ -397,12 +397,12 @@ object SpBlueprintFactory {
   }
 
   object VisitorHandler {
-    def apply(b: VisitorBlueprint):Either[String, SpVisitorBlueprint] = Right(new SpVisitorBlueprint(b.customName, None))
-    def apply(b: AlopekeBlueprint):Either[String, SpVisitorBlueprint] = Right(new SpVisitorBlueprint(b.name, Some(VisitorConfig.Alopeke)))
-    def apply(b: ZorroBlueprint):Either[String, SpVisitorBlueprint]   = Right(new SpVisitorBlueprint(b.name, Some(VisitorConfig.Zorro)))
-    def apply(b: DssiBlueprint):Either[String, SpVisitorBlueprint]    = Right(new SpVisitorBlueprint("DSSI", Some(VisitorConfig.Dssi)))
-    def apply(b: IgrinsBlueprint):Either[String, SpVisitorBlueprint]  = Right(new SpVisitorBlueprint(b.name, Some(VisitorConfig.Igrins)))
-    def apply(b: MaroonXBlueprint):Either[String, SpVisitorBlueprint] = Right(new SpVisitorBlueprint(b.name, Some(VisitorConfig.MaroonX)))
+    def apply(b: VisitorBlueprint):Either[String, SpVisitorBlueprint] = Right(new SpVisitorBlueprint(b.customName, VisitorConfig.GenericVisitor))
+    def apply(b: AlopekeBlueprint):Either[String, SpVisitorBlueprint] = Right(new SpVisitorBlueprint(b.name, VisitorConfig.Alopeke))
+    def apply(b: ZorroBlueprint):Either[String, SpVisitorBlueprint]   = Right(new SpVisitorBlueprint(b.name, VisitorConfig.Zorro))
+    def apply(b: DssiBlueprint):Either[String, SpVisitorBlueprint]    = Right(new SpVisitorBlueprint("DSSI", VisitorConfig.Dssi))
+    def apply(b: IgrinsBlueprint):Either[String, SpVisitorBlueprint]  = Right(new SpVisitorBlueprint(b.name, VisitorConfig.Igrins))
+    def apply(b: MaroonXBlueprint):Either[String, SpVisitorBlueprint] = Right(new SpVisitorBlueprint(b.name, VisitorConfig.MaroonX))
   }
 
   object GpiHandler {

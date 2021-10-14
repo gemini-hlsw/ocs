@@ -1,8 +1,13 @@
 package jsky.app.ot.gemini.visitor;
 
 import edu.gemini.pot.sp.ISPObsComponent;
+import edu.gemini.shared.gui.bean.ComboPropertyCtrl;
 import edu.gemini.shared.gui.bean.TextFieldPropertyCtrl;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.gemini.visitor.VisitorConfig;
+import edu.gemini.spModel.gemini.visitor.VisitorConfig$;
 import edu.gemini.spModel.gemini.visitor.VisitorInstrument;
+import jsky.app.ot.StaffBean;
 import jsky.app.ot.gemini.editor.ComponentEditor;
 
 import javax.swing.*;
@@ -19,7 +24,8 @@ public class VisitorEditor extends ComponentEditor<ISPObsComponent, VisitorInstr
     private final TextFieldPropertyCtrl<VisitorInstrument, Double> posAngleCtrl;
     private final TextFieldPropertyCtrl<VisitorInstrument, String> nameCtrl;
     private final TextFieldPropertyCtrl<VisitorInstrument, Double> wavelengthCtrl;
-    private static final int gapCol        = 1;
+    private final ComboPropertyCtrl<VisitorInstrument, VisitorConfig> configCtrl;
+
     private static final int rightLabelCol = 1;
     private static final int rightWidgetCol= 2;
     private static final int rightUnitsCol = 3;
@@ -38,6 +44,17 @@ public class VisitorEditor extends ComponentEditor<ISPObsComponent, VisitorInstr
         nameCtrl.getTextField().addMouseListener(focusOnCaretPositionListener);
         pan.add(new JLabel(instrumentNameProp.getDisplayName()), propLabelGbc(rightLabelCol, row));
         pan.add(nameCtrl.getComponent(), propWidgetGbc(rightWidgetCol, row, 2, 1));
+
+        ++row;
+
+        // Visitor Config
+        final PropertyDescriptor configProp = VisitorInstrument.CONFIG_PROP;
+        configCtrl = new ComboPropertyCtrl<>(configProp, VisitorConfig$.MODULE$.AllArray(), VisitorConfig::displayValue);
+
+//                ComboPropertyCtrl.optionInstance(configProp, VisitorConfig$.MODULE$.AllArray(), v -;
+
+        pan.add(new JLabel("Visitor"), propLabelGbc(rightLabelCol, row));
+        pan.add(configCtrl.getComponent(), propWidgetGbc(rightWidgetCol, row));
 
         ++row;
 
@@ -73,6 +90,10 @@ public class VisitorEditor extends ComponentEditor<ISPObsComponent, VisitorInstr
 
         // Filler
         pan.add(new JPanel(), pushGbc(colCount, row + 1));
+
+        // When the key changes, enable/disable the visitor instrument selector
+        StaffBean.addPropertyChangeListener(evt -> adjustStaffOnlyFields());
+        adjustStaffOnlyFields();
     }
 
     @Override
@@ -86,6 +107,11 @@ public class VisitorEditor extends ComponentEditor<ISPObsComponent, VisitorInstr
         posAngleCtrl.setBean(inst);
         nameCtrl.setBean(inst);
         wavelengthCtrl.setBean(inst);
+        configCtrl.setBean(inst);
+    }
+
+    private void adjustStaffOnlyFields() {
+        configCtrl.getComponent().setEnabled(StaffBean.isStaff());
     }
 
 }

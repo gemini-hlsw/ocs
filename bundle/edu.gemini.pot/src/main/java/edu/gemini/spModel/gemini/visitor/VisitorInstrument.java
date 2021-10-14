@@ -65,6 +65,7 @@ public class VisitorInstrument extends SPInstObsComp
     public static final String INSTRUMENT_NAME_PROP   = SP_TYPE.readableStr;
     public static final double DEF_WAVELENGTH         = VisitorConfig$.MODULE$.DefaultWavelength().toMicrons();
 
+    @SuppressWarnings("SameParameterValue")
     private static PropertyDescriptor initProp(String propName, boolean query, boolean iter) {
         PropertyDescriptor pd = PropertySupport.init(propName, VisitorInstrument.class, query, iter);
         PRIVATE_PROP_MAP.put(pd.getName(), pd);
@@ -74,7 +75,7 @@ public class VisitorInstrument extends SPInstObsComp
     // Instrument properties
     private String name = "";
     private double _centralWavelength = DEF_WAVELENGTH;
-    private Option<VisitorConfig> visitorConfig = ImOption.empty();
+    private VisitorConfig visitorConfig = VisitorConfig.GenericVisitor$.MODULE$;
 
     static {
         final boolean query_yes = true;
@@ -82,7 +83,7 @@ public class VisitorInstrument extends SPInstObsComp
         final boolean query_no = false;
 
         NAME_PROP          = initProp("name", query_yes, iter_no);
-        CONFIG_PROP        = initProp("config", query_no, iter_no);
+        CONFIG_PROP        = initProp("visitorConfig", query_no, iter_no);
         WAVELENGTH_PROP    = initProp("wavelength", query_no, iter_no);
         EXPOSURE_TIME_PROP = initProp("exposureTime", query_no, iter_no);
         POS_ANGLE_PROP     = initProp("posAngle", query_no, iter_no);
@@ -116,12 +117,12 @@ public class VisitorInstrument extends SPInstObsComp
         }
     }
 
-    public Option<VisitorConfig> getVisitorConfig() {
+    public VisitorConfig getVisitorConfig() {
         return visitorConfig;
     }
 
-    public void setVisitorConfig(Option<VisitorConfig> newValue) {
-        final Option<VisitorConfig> oldValue = getVisitorConfig();
+    public void setVisitorConfig(VisitorConfig newValue) {
+        final VisitorConfig oldValue = getVisitorConfig();
         if (!oldValue.equals(newValue)) {
             visitorConfig = newValue;
             firePropertyChange(CONFIG_PROP.getName(), oldValue, newValue);
@@ -148,9 +149,7 @@ public class VisitorInstrument extends SPInstObsComp
 
     @Override
     public Duration getSetupTime(ISPObservation obs) {
-        return getVisitorConfig()
-                .map(VisitorConfig::setupTime)
-                .getOrElse(VisitorConfig$.MODULE$.DefaultSetupTime());
+        return getVisitorConfig().setupTime();
     }
 
 
@@ -174,10 +173,7 @@ public class VisitorInstrument extends SPInstObsComp
         final PlannedTime.CategorizedTime exposureTime = PlannedTime.CategorizedTime.fromSeconds(PlannedTime.Category.EXPOSURE,
                 ExposureCalculator.instance.exposureTimeSec(stepConfig));
 
-        final Duration readoutDuration =
-            getVisitorConfig()
-                .map(VisitorConfig::readoutTime)
-                .getOrElse(VisitorConfig$.MODULE$.DefaultReadoutTime());
+        final Duration readoutDuration = getVisitorConfig().readoutTime();
 
         final PlannedTime.CategorizedTime readoutTime =
             PlannedTime.CategorizedTime.apply(PlannedTime.Category.READOUT, readoutDuration.toMillis());
@@ -223,7 +219,7 @@ public class VisitorInstrument extends SPInstObsComp
 
         Pio.addParam(factory, paramSet, NAME_PROP, getName());
         Pio.addParam(factory, paramSet, WAVELENGTH_PROP.getName(), Double.toString(getWavelength()));
-        visitorConfig.foreach(c -> Pio.addParam(factory, paramSet, CONFIG_PROP.getName(), c.name()));
+        Pio.addParam(factory, paramSet, CONFIG_PROP.getName(), getVisitorConfig().name());
 
         return paramSet;
     }
@@ -244,7 +240,8 @@ public class VisitorInstrument extends SPInstObsComp
 
         setVisitorConfig(
             ImOption.apply(Pio.getValue(paramSet, CONFIG_PROP.getName()))
-                    .flatMap(VisitorConfig$.MODULE$::findByNameJava)
+                    .flatMap(id -> ImOption.fromScalaOpt(VisitorConfig$.MODULE$.findByName(id)))
+                    .getOrElse(VisitorConfig.GenericVisitor$.MODULE$)
         );
     }
 
