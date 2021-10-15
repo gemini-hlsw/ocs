@@ -3,7 +3,6 @@ package jsky.app.ot.gemini.visitor;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.gui.bean.ComboPropertyCtrl;
 import edu.gemini.shared.gui.bean.TextFieldPropertyCtrl;
-import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.gemini.visitor.VisitorConfig;
 import edu.gemini.spModel.gemini.visitor.VisitorConfig$;
 import edu.gemini.spModel.gemini.visitor.VisitorInstrument;
@@ -13,6 +12,7 @@ import jsky.app.ot.gemini.editor.ComponentEditor;
 import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyDescriptor;
+import java.util.function.Function;
 
 /**
  * User Interface for visitor instruments.
@@ -49,9 +49,8 @@ public class VisitorEditor extends ComponentEditor<ISPObsComponent, VisitorInstr
 
         // Visitor Config
         final PropertyDescriptor configProp = VisitorInstrument.CONFIG_PROP;
-        configCtrl = new ComboPropertyCtrl<>(configProp, VisitorConfig$.MODULE$.AllArray(), VisitorConfig::displayValue);
-
-//                ComboPropertyCtrl.optionInstance(configProp, VisitorConfig$.MODULE$.AllArray(), v -;
+        final Function<VisitorConfig, String> renderer = v -> (v == VisitorConfig.GenericVisitor$.MODULE$) ? "Other" : v.displayValue();
+        configCtrl = new ComboPropertyCtrl<>(configProp, VisitorConfig$.MODULE$.AllArray(), renderer);
 
         pan.add(new JLabel("Visitor"), propLabelGbc(rightLabelCol, row));
         pan.add(configCtrl.getComponent(), propWidgetGbc(rightWidgetCol, row));
