@@ -3,8 +3,9 @@
 
 package edu.gemini.spModel.gemini.visitor
 
+import edu.gemini.model.p1.immutable.Instrument
 import edu.gemini.spModel.core.{Angle, Wavelength}
-import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.spModel.gemini.visitor.VisitorConfig.{DefaultPositionAngle, DefaultWavelength}
 
 import java.time.Duration
 
@@ -17,13 +18,19 @@ import scalaz._
  */
 sealed trait VisitorConfig extends Product with Serializable {
 
-  def name: String
+  def instrument: Instrument
+
+  def name: String =
+    instrument.display
+
+  def displayValue: String =
+    instrument.display
 
   def wavelength: Wavelength =
-    Wavelength.zero
+    DefaultWavelength
 
   def positionAngle: Angle =
-    Angle.zero
+    DefaultPositionAngle
 
   def noteTitles: List[String] =
     Nil
@@ -38,88 +45,107 @@ sealed trait VisitorConfig extends Product with Serializable {
 
 object VisitorConfig {
 
-  def DefaultSetupTime: Duration =
+  val DefaultExposureTime: Duration =
+    Duration.ofSeconds(0L)
+
+  val DefaultSetupTime: Duration =
     Duration.ofMinutes(10L)
 
-  def DefaultReadoutTime: Duration =
+  val DefaultReadoutTime: Duration =
     Duration.ofSeconds(0)
+
+  val DefaultWavelength: Wavelength =
+    Wavelength.fromMicrons(0.7)
+
+  val DefaultPositionAngle: Angle =
+    Angle.zero
 
   case object Alopeke extends VisitorConfig {
 
-    override def name: String = "alopeke"
+    override val instrument: Instrument =
+      Instrument.Alopeke
 
-    override def wavelength: Wavelength =
-      Wavelength.fromNanometers(674)
+    override val wavelength: Wavelength =
+      Wavelength.fromMicrons(0.674)
 
-    override def setupTime: Duration =
+    override val setupTime: Duration =
       Duration.ofMinutes(5L)
 
-    override def readoutTime: Duration =
+    override val readoutTime: Duration =
       Duration.ofSeconds(6L)
 
   }
 
   case object Dssi extends VisitorConfig {
 
-    override def name: String = "dssi"
+    override val instrument: Instrument =
+      Instrument.Dssi
 
-    override def wavelength: Wavelength =
-      Wavelength.fromNanometers(700)
+    override val wavelength: Wavelength =
+      Wavelength.fromMicrons(0.7)
 
   }
 
   case object Igrins extends VisitorConfig {
 
-    override def name: String = "igrins"
+    override val instrument: Instrument =
+      Instrument.Igrins
 
-    override def wavelength: Wavelength =
-      Wavelength.fromNanometers(2100)
+    override val wavelength: Wavelength =
+      Wavelength.fromMicrons(2.1)
 
-    override def positionAngle: Angle =
+    override val positionAngle: Angle =
       Angle.fromDegrees(90.0)
 
-    override def noteTitles: List[String] =
+    override val noteTitles: List[String] =
       List(
         "IGRINS Observing Details",
         "IGRINS Scheduling Details"
       )
 
-    override def setupTime: Duration =
+    override val setupTime: Duration =
       Duration.ofMinutes(8L)
 
-    override def readoutTime: Duration =
+    override val readoutTime: Duration =
       Duration.ofSeconds(28L)
+
+  }
+
+    case object MaroonX extends VisitorConfig {
+
+    override val instrument: Instrument =
+      Instrument.MaroonX
+
+    override val wavelength: Wavelength =
+      Wavelength.fromMicrons(0.7)
+
+    override val setupTime: Duration =
+      Duration.ofMinutes(5L)
+
+    override val readoutTime: Duration =
+      Duration.ofSeconds(100L)
 
   }
 
   case object Zorro extends VisitorConfig {
 
-    override def name: String = "zorro"
+    override val instrument: Instrument =
+      Instrument.Zorro
 
-    override def wavelength: Wavelength =
-      Wavelength.fromNanometers(674)
+    override val wavelength: Wavelength =
+      Wavelength.fromMicrons(0.674)
 
-    override def setupTime: Duration =
+    override val setupTime: Duration =
       Duration.ofMinutes(5L)
 
-    override def readoutTime: Duration =
+    override val readoutTime: Duration =
       Duration.ofSeconds(6L)
 
   }
 
-  case object MaroonX extends VisitorConfig {
-
-    override def name: String = "maroonx"
-
-    override def wavelength: Wavelength =
-      Wavelength.fromNanometers(700)
-
-    override def setupTime: Duration =
-      Duration.ofMinutes(5L)
-
-    override def readoutTime: Duration =
-      Duration.ofSeconds(100L)
-
+  case object GenericVisitor extends VisitorConfig {
+    override val instrument: Instrument =
+      Instrument.Visitor
   }
 
   implicit val EqVisitorInst: Equal[VisitorConfig] =
@@ -130,14 +156,18 @@ object VisitorConfig {
       Alopeke,
       Dssi,
       Igrins,
+      MaroonX,
       Zorro,
-      MaroonX
+      GenericVisitor
     )
+
+  def AllArray: Array[VisitorConfig] =
+    All.toArray
 
   def findByName(name: String): Option[VisitorConfig] =
     All.find(_.name.equalsIgnoreCase(name))
 
-  def findByNameJava(name: String): edu.gemini.shared.util.immutable.Option[VisitorConfig] =
-    findByName(name).asGeminiOpt
+  def findByInstrument(instrument: Instrument): Option[VisitorConfig] =
+    All.find(_.instrument == instrument)
 
 }

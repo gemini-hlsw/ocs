@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyDescriptor;
+import java.util.function.Function;
 
 /**
  * A PropertyCtrl implementation for associating a JComboBox with a bean
@@ -54,6 +55,16 @@ public final class ComboPropertyCtrl<B, T> extends PropertyCtrl<B, T> {
         }
     }
 
+    private static <T> BasicComboBoxRenderer renderObject(final Function<T, String> toDisplay) {
+        return new BasicComboBoxRenderer() {
+            public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                final JLabel lab = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                lab.setText(toDisplay.apply((T) value));
+                return lab;
+            }
+        };
+    }
+
     /**
      * Creates a ComboPropertyCtrl for associating a JComboBox with a bean
      * property whose type is {@link Option} with a contained enumerated type.
@@ -80,13 +91,25 @@ public final class ComboPropertyCtrl<B, T> extends PropertyCtrl<B, T> {
 
         ComboPropertyCtrl<B, Option<T>> res;
         res = new ComboPropertyCtrl<>(pd, vals);
-        ((JComboBox) res.getComponent()).setRenderer(new OptionRenderer());
+        ((JComboBox<T>) res.getComponent()).setRenderer(new OptionRenderer());
         return res;
     }
 
-    private final JComboBox combo;
+    public static <B, T> ComboPropertyCtrl<B, Option<T>> optionInstance(PropertyDescriptor pd, T[] values) {
+        final Option<T>[] optValues = new Option[values.length + 1];
 
-    private ActionListener actionListener = new ActionListener() {
+        optValues[0] = None.instance();
+        int i = 1;
+        for (T v : values) optValues[i++] = new Some<>(v);
+
+        final ComboPropertyCtrl<B, Option<T>> res = new ComboPropertyCtrl<>(pd, optValues);
+        ((JComboBox<T>) res.getComponent()).setRenderer(new OptionRenderer());
+        return res;
+    }
+
+    private final JComboBox<T> combo;
+
+    private final ActionListener actionListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             T oldVal = getVal();
             @SuppressWarnings({"unchecked"}) T newVal = (T) combo.getModel().getSelectedItem();
@@ -107,12 +130,17 @@ public final class ComboPropertyCtrl<B, T> extends PropertyCtrl<B, T> {
     }
 
     public ComboPropertyCtrl(PropertyDescriptor pd, T[] values) {
+        this(pd, values, Object::toString);
+    }
+
+    public ComboPropertyCtrl(PropertyDescriptor pd, T[] values, Function<T, String> renderer) {
         super(pd);
-        combo = new JComboBox(values);
+        combo = new JComboBox<>(values);
+        combo.setRenderer(renderObject(renderer));
     }
 
     /**
-     * Watches the comobo box for updates to the widget, setting the
+     * Watches the combo box for updates to the widget, setting the
      * corresponding value in the bean.
      */
     protected void addComponentChangeListener() {

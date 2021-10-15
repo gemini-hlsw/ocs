@@ -22,6 +22,9 @@ trait VisitorBase extends GroupInitializer[SpVisitorBlueprint] with TemplateDsl 
     def setName(n: String): Either[String, Unit] =
       ed.updateInstrument(_.setName(n))
 
+    def setVisitorConfig(c: VisitorConfig): Either[String, Unit] =
+      ed.updateInstrument(_.setVisitorConfig(c))
+
     def setWavelength(microns: Double): Either[String, Unit] =
       ed.updateInstrument(_.setWavelength(microns))
 
@@ -41,8 +44,8 @@ trait VisitorBase extends GroupInitializer[SpVisitorBlueprint] with TemplateDsl 
       this.db = None
     }
 
-  def attempt[A](a: => A) = tryFold(a) {
-    e =>
+  def attempt[A](a: => A): Either[String, A] =
+    tryFold(a) { e =>
       e.printStackTrace()
       e.getMessage
     }
@@ -51,15 +54,18 @@ trait VisitorBase extends GroupInitializer[SpVisitorBlueprint] with TemplateDsl 
   def setName: Setter[String] =
     Setter[String](blueprint.name)(_.setName(_))
 
-  private def lookupInst: Option[VisitorConfig] =
-    VisitorConfig.findByName(blueprint.name)
+  def setVisitorConfig: Setter[VisitorConfig] =
+    Setter[VisitorConfig](blueprint.visitorConfig)(_.setVisitorConfig(_))
+
+  def visitorConfig: VisitorConfig =
+    blueprint.visitorConfig
 
   override def notes: List[String] =
-    lookupInst.map(_.noteTitles).getOrElse(Nil)
+    visitorConfig.noteTitles
 
   def setWavelength: Setter[Double] =
-    Setter[Double](lookupInst.map(_.wavelength.toMicrons).getOrElse(0.0))(_.setWavelength(_))
+    Setter[Double](visitorConfig.wavelength.toMicrons)(_.setWavelength(_))
 
   def setPosAngle: Setter[Double] =
-    Setter[Double](lookupInst.map(_.positionAngle.toDegrees).getOrElse(0.0))(_.setPosAngle(_))
+    Setter[Double](visitorConfig.positionAngle.toDegrees)(_.setPosAngle(_))
 }

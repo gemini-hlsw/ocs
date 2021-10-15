@@ -4,18 +4,13 @@
 package edu.gemini.spModel.gemini.visitor
 
 import edu.gemini.pot.sp.{ISPObsComponent, SPComponentType}
-import edu.gemini.spModel.data.config.ISysConfig
-import edu.gemini.spModel.gemini.visitor.VisitorConfig.{DefaultReadoutTime, DefaultSetupTime}
-import edu.gemini.spModel.obs.plannedtime.PlannedTime.Category
+import edu.gemini.shared.util.immutable.ImOption
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator
 import edu.gemini.spModel.seqcomp.SeqRepeatObserve
-import edu.gemini.spModel.test.{InstrumentSequenceTestBase, SpModelTestBase}
-import org.junit.{Before, Test}
+import edu.gemini.spModel.test.SpModelTestBase
 import org.junit.Assert.assertEquals
 
 import java.time.Duration
-
-import scala.collection.JavaConverters._
 
 
 final class PlannedTimeTest extends SpModelTestBase {
@@ -39,13 +34,14 @@ final class PlannedTimeTest extends SpModelTestBase {
     Duration.ofMillis(PlannedTimeCalculator.instance.calc(getObs).totalTime)
 
   private def configure(
-    cfg:     Option[VisitorConfig],
+    cfg:     VisitorConfig,
     expTime: Duration,
     count:   Int
   ): Unit = {
 
     dataObj.foreach { d =>
-      d.setName(cfg.map(_.name).getOrElse("Generic"))
+      d.setName(cfg.displayValue)
+      d.setVisitorConfig(cfg)
       d.setExposureTime(expTime.toMillis.toDouble / 1000.0)
       obsComp.foreach(_.setDataObject(d))
     }
@@ -58,31 +54,31 @@ final class PlannedTimeTest extends SpModelTestBase {
   }
 
   private def exec(
-    cfg:     Option[VisitorConfig],
+    cfg:     VisitorConfig,
     expTime: Duration,
     count:   Int
   ): Unit = {
 
     configure(cfg, expTime, count)
 
-    val setup = cfg.map(_.setupTime).getOrElse(DefaultSetupTime)
-    val exp   = expTime.plus(cfg.map(_.readoutTime).getOrElse(DefaultReadoutTime)).multipliedBy(count)
+    val setup = cfg.setupTime
+    val exp   = expTime.plus(cfg.readoutTime).multipliedBy(count)
 
     assertEquals(setup.plus(exp), totalTime)
   }
 
   import VisitorConfig._
 
-  def testNoInstNoSteps(): Unit = {
-    exec(None, Duration.ofSeconds(1), 1)
+  def testGenericNoSteps(): Unit = {
+    exec(GenericVisitor, Duration.ofSeconds(1), 1)
   }
 
   def testAlopekeTwoSteps(): Unit = {
-    exec(Some(Alopeke), Duration.ofSeconds(10), 2)
+    exec(Alopeke, Duration.ofSeconds(10), 2)
   }
 
   def testIgrinsOneStep(): Unit = {
-    exec(Some(Igrins), Duration.ofSeconds(20), 1)
+    exec(Igrins, Duration.ofSeconds(20), 1)
   }
 
 }

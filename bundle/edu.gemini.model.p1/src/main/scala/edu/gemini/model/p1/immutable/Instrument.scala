@@ -1,8 +1,8 @@
 package edu.gemini.model.p1.immutable
 
-sealed abstract class Instrument(val site: Site, val id: String, val display: String, val gsa: String) {
+sealed abstract class Instrument(val site: Site, val id: String, val display: String, val gsa: String) extends Product with Serializable {
   def this(site: Site, id: String) = this(site, id, id, id)
-  override def toString = display
+  override def toString: String = display
 }
 
 import Site._
