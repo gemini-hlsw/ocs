@@ -11,7 +11,7 @@ import scalaz._
 import Scalaz._
 
 object GhostScienceAreaGeometry extends ScienceAreaGeometry {
-  val size: Angle = Angle.fromArcsecs(222)
+  val size: Angle = Angle.fromArcsecs(444)
   val radius: Angle = (size / 2).get
   val Ellipse: Shape = new Ellipse2D.Double(-radius.toArcsecs, -radius.toArcsecs, size.toArcsecs, size.toArcsecs)
 
