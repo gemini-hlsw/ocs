@@ -34,6 +34,7 @@ ocsAppManifest := {
             odbtest(v),
               gsodbtest(v),
               gnodbtest(v),
+              gnodbscheduler(v),
             odbproduction(v),
               gsodb(v),
               gnodb(v),
@@ -507,6 +508,28 @@ def gnagsodb(version: Version) = AppConfig(
     "osgi.shell.telnet.ip"                 -> "10.1.46.11"
   )
 ) extending List(odbproduction(version), gnodb_credentials(version))
+
+// GNODBSCHEDULER
+def gnodbscheduler(version: Version) = AppConfig(
+  id = "gnodbscheduler",
+  distribution = List(Linux64),
+  vmargs = List(
+    "-Dcom.cosylab.epics.caj.CAJContext.addr_list=10.2.2.255",
+    "-Dedu.gemini.site=north",
+    "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=gsagn.hi.gemini.edu",
+    "-Dcron.odbMail.SITE_SMTP_SERVER=smtp.hi.gemini.edu",
+    "-Djava.rmi.server.hostname=gnodbscheduler"
+  ),
+  props = Map(
+    "edu.gemini.auxfile.fits.dest"       -> "/gemsoft/var/data/ictd/test/GN@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.fits.host"       -> "gnconfig.gemini.edu",
+    "edu.gemini.auxfile.other.dest"      -> "/gemsoft/var/data/finder/GNqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
+    "edu.gemini.dataman.gsa.summit.host" -> "mkofits-lv1new.hi.gemini.edu",
+    "edu.gemini.oodb.mail.smtpHost"      -> "smtp.hi.gemini.edu",
+    "edu.gemini.util.trpc.name"          -> "Gemini North Scheduler ODB (Test)",
+    "osgi.shell.telnet.ip"               -> "10.1.198.192"
+  )
+) extending List(odbtest(version), gnodbtest_credentials(version))
 
 // GSODBTEST
 def gsodbtest(version: Version) = AppConfig(
