@@ -15,12 +15,15 @@ import edu.gemini.spModel.core.PointSource$;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.logging.Logger;
 import java.util.Map;
 
 /**
  * Gems AO class
  */
 public class Gems implements AOSystem {
+    private static final Logger Log = Logger.getLogger( Gems.class.getName() );
+
     /**
      * Related files will be in this subdir of lib
      */
@@ -140,7 +143,8 @@ public class Gems implements AOSystem {
     // to calculate the FWHM of the AO-corrected core for GSAOI. However, this value is smaller than
     // the measured FWHM from GSAOI data so the ITC is over-estimating the S/N.
     //
-    // Note: The IQ table should only be applied to the Point Source mode,
+    // Note: The IQ table should only be applied to the Point Source mode.
+
     public double getAOCorrectedFWHM() {
         return getAOCorrectedFWHM(false);
     }
@@ -166,7 +170,7 @@ public class Gems implements AOSystem {
     // TODO: passing a boolean is a temporary workaround in order to deal with caller that expects this method to throw an exception
     public double getAOCorrectedFWHM(boolean doThrow) {
         if (source.profile() == PointSource$.MODULE$ || source.profile() == UniformSource$.MODULE$) {
-            // point source and REL-1371, added Uniform background source to calculate AOcorrected FWHM properly
+            // point source and REL-1371, added Uniform background source to calculate AO-corrected FWHM properly
             final char band = strehlBand.charAt(0);
             if (band == 'J' || band == 'H' || band == 'K') {
 
@@ -179,17 +183,36 @@ public class Gems implements AOSystem {
                         return getAOCorrectedFWHM_oldVersion();
                     }
                 } else {
-                    return iq.biFold(
-                            ExactIq::toArcsec,
-                            enumIq -> FWHM.getOrDefault(new Pair<>(strehlBand.charAt(0), enumIq), 0.0)
-                    );
+
+                    double fwhm = 0.0;
+                    if (iq.isLeft()) {  // Exact IQ:  use linear fit to above table of FWHM values
+                        double exactiq = iq.toOptionLeft().getValue().toArcsec();
+                        switch (strehlBand.charAt(0)) {
+                            case 'J':
+                                fwhm = 0.1525 * exactiq + 0.02598;
+                                break;
+                            case 'H':
+                                fwhm = 0.1328 * exactiq + 0.01811;
+                                break;
+                            case 'K':
+                                fwhm = 0.1328 * exactiq + 0.01475;
+                                break;
+                        }
+                    } else {  // IQ bin
+                        fwhm = FWHM.getOrDefault(new Pair<>(strehlBand.charAt(0), iq.toOption().getValue()), 0.0);
+                     }
+                    Log.fine(String.format("FWHM of AO-corrected core = %.3f arcsec", fwhm));
+                    return fwhm;
                 }
+
             } else {
                 throw new IllegalArgumentException("Current ITC implementation for GeMS does not support band " + strehlBand);
             }
 
         } else if (source.profile() instanceof GaussianSource) {
-            return ((GaussianSource) source.profile()).fwhm();
+            final double fwhm = ((GaussianSource) source.profile()).fwhm();
+            Log.fine(String.format("FWHM of AO-corrected core = Gaussian source FWHM = %.3f arcsec", fwhm));
+            return fwhm;
 
         } else {
             return 0.0;
