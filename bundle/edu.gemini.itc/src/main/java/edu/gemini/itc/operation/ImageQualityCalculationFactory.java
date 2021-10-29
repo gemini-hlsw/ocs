@@ -18,28 +18,31 @@ public final class ImageQualityCalculationFactory {
             TelescopeDetails telescope,
             Instrument instrument) {
 
-        if (observingConditions.javaIq().isLeft()) {
+        if (sourceDefinition.profile() instanceof GaussianSource) {
+            // Case A: The Image quality is defined by the user
+            // who has selected a Gaussian Extended source
+            // Creates a GaussianImageQualityCalculation
+
+            final double fwhm = ((GaussianSource) sourceDefinition.profile()).fwhm();
+            return new GaussianImageQualityCalculation(fwhm);
+
+        } else if (observingConditions.javaIq().isLeft()) {
             // Case C: The exact delivered FHWM at the science wavelength is specified.
+
             final double fwhm = observingConditions.javaIq().toOptionLeft().getValue().toArcsec();
             if (fwhm <= 0.0) throw new IllegalArgumentException("Exact Image Quality must be > zero arcseconds.");
             return new GaussianImageQualityCalculation(fwhm);
 
-        } else if (sourceDefinition.profile() instanceof GaussianSource) {
-            // Case A: The Image quality is defined by the user
-            // who has selected a Gaussian Extended source
-            // Creates a GaussianImageQualityCalculation
-            final double fwhm = ((GaussianSource) sourceDefinition.profile()).fwhm();
-            return new GaussianImageQualityCalculation(fwhm);
-
         } else {
+            // Case B: The Image Quality is defined by either of the
+            // Probes in conjunction with the Atmospheric Seeing.
+            // This case creates an ImageQuality Calculation
+
             // For AOWFS the image quality files of OIWFS are used (there are currently no files for AOWFS)
             final GuideProbe.Type wfs =
                     telescope.getWFS() == GuideProbe.Type.AOWFS ? GuideProbe.Type.OIWFS : telescope.getWFS();
 
-            // Case B: The Image Quality is defined by either of the
-            // Probes in conjunction with the Atmospheric Seeing.
-            // This case creates an ImageQuality Calculation
-            return new ImageQualityCalculation(
+             return new ImageQualityCalculation(
                     wfs,
                     observingConditions.javaIq().toOption().getValue(),
                     observingConditions.airmass(),
