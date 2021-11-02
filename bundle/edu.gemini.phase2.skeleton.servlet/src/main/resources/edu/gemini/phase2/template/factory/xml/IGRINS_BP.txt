@@ -1,0 +1,34 @@
+Instrument : IGRINS
+Blueprints : VISITOR_BP.xml
+Version October 7, 2021 - updated by Bryan M
+
+Observations identified by LibraryIDs indicated with {}.
+
+Blueprint library:
+{2} Science observation (Visitor component)
+{3} Partner calibration observation (Visitor component)
+
+INCLUDE {2} and {3} IN target-specific Scheduling Group
+	FOR {2}
+		SET Exposure Time from Phase 1 Time [convert to seconds]
+
+
+Add two notes with the following properties.
+
+Regular Note (yellow)
+Title: Observing Details
+Contents:
+1. Exposure time = xxx sec per frame and Expected SNR ~XXX per ABBA sequence in H or K-band
+
+2. If the sequence is >1.5hr: Can it be interrupted or not be interrupted?
+
+3. Telluric standard needed or not needed
+
+
+Scheduling Note (blue)
+
+Title:  Scheduling Details
+Contents:
+1. Any timing constrains? Yes/No
+
+2. List timing windows in UT

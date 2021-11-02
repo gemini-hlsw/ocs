@@ -98,10 +98,7 @@ object VisitorConfig {
       Angle.fromDegrees(90.0)
 
     override val noteTitles: List[String] =
-      List(
-        "IGRINS Observing Details",
-        "IGRINS Scheduling Details"
-      )
+      Nil
 
     override val setupTime: Duration =
       Duration.ofMinutes(8L)

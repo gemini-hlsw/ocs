@@ -1,19 +1,21 @@
 package edu.gemini.phase2.template.factory.impl.visitor
 
+import edu.gemini.model.p1.immutable.Instrument.Igrins
 import edu.gemini.spModel.gemini.visitor.blueprint.SpVisitorBlueprint
 
 case class Visitor(blueprint: SpVisitorBlueprint) extends VisitorBase {
 
-  // Some groupings
-  private var sci = Seq.empty[Int]
+  private val (sci, cal) = blueprint.visitorConfig.instrument match {
+    case Igrins => (Seq(2), Seq(3))
+    case _      => (Seq(1), Nil)
+  }
 
-  //  INCLUDE {1} IN target-specific Scheduling Group
-  include(1) in TargetGroup
-    sci = Seq(1)
+  private val all = sci ++ cal
 
-  // SET Name from Phase-I
+  include(all: _*) in TargetGroup
+
   forObs(sci: _*)(setName fromPI)
-  forObs(sci: _*)(setVisitorConfig fromPI)
-  forObs(sci: _*)(setWavelength fromPI)
+  forObs(all: _*)(setVisitorConfig fromPI)
+  forObs(all: _*)(setWavelength fromPI)
   forObs(sci: _*)(setPosAngle fromPI)
 }

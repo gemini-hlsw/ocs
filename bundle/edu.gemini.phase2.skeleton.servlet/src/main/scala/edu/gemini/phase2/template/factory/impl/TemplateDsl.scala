@@ -1,9 +1,7 @@
 package edu.gemini.phase2.template.factory.impl
 
-import collection.mutable.Buffer
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.seqcomp.SeqConfigComp
-import edu.gemini.spModel.`type`.SpType
 import edu.gemini.pot.sp.{SPComponentType, ISPSeqComponent, ISPGroup, ISPObservation}
 
 trait TemplateDsl {gi:GroupInitializer[_] =>
@@ -16,20 +14,31 @@ trait TemplateDsl {gi:GroupInitializer[_] =>
   case object TopLevel extends NoteLocation
   type Mutator = ISPObservation => Maybe[Unit]
 
-  private val mutators:Buffer[(Either[Seq[Int], ObsLocation], Mutator)] = Buffer.empty
-  private var includes:Map[ObsLocation, Seq[Int]] = Map.empty
-  private var noteIncludes:Map[NoteLocation, Seq[String]] = Map.empty
+  private val mutators: collection.mutable.Buffer[(Either[Seq[Int], ObsLocation], Mutator)] =
+    collection.mutable.Buffer.empty
 
-  def notes = noteIncludes.values.toList.flatten
-  def baselineFolder = includes.get(BaseCal).getOrElse(Nil)
-  def targetGroup = includes.get(TargetGroup).getOrElse(Nil)
+  private var includes: Map[ObsLocation, Seq[Int]] =
+    Map.empty
 
-  def initialize(g:ISPGroup, db:TemplateDb):Maybe[Unit] = mutators.mapM_((mutate(g) _).tupled)
+  private var noteIncludes: Map[NoteLocation, Seq[String]] =
+    Map.empty
+
+  def notes: Seq[String] =
+    noteIncludes.values.toList.flatten
+
+  def baselineFolder: Seq[Int] =
+    includes.getOrElse(BaseCal, Nil)
+
+  def targetGroup: Seq[Int] =
+    includes.getOrElse(TargetGroup, Nil)
+
+  def initialize(g:ISPGroup, db:TemplateDb):Maybe[Unit] =
+    mutators.mapM_((mutate(g) _).tupled)
 
   private def mutate(g:ISPGroup)(e:Either[Seq[Int], ObsLocation], f:Mutator):Maybe[Unit] =
     e match {
       case Left(ns) => mutate(g, ns, f)
-      case Right(x) => mutate(g, includes.get(x).getOrElse(Nil), f)
+      case Right(x) => mutate(g, includes.getOrElse(x, Nil), f)
     }
 
   private def mutate(g:ISPGroup, ns:Seq[Int], f:Mutator):Maybe[Unit] =
@@ -37,16 +46,16 @@ trait TemplateDsl {gi:GroupInitializer[_] =>
 
   // OBS, NOTE INCLUDES
 
-  def include(ns:Int*) = new {
-    def in(g:ObsLocation) {
-      val prev = includes.get(g).getOrElse(Nil)
+  def include(ns: Int*) = new {
+    def in(g: ObsLocation): Unit = {
+      val prev = includes.getOrElse(g, Nil)
       includes = includes + (g -> (prev ++ ns))
     }
   }
 
   def addNote(ns:String*) = new {
     def in(g:NoteLocation) {
-      val prev = noteIncludes.get(g).getOrElse(Nil)
+      val prev = noteIncludes.getOrElse(g, Nil)
       noteIncludes = noteIncludes + (g -> (prev ++ ns))
     }
   }
