@@ -30,6 +30,25 @@
         <param name="NoteText" value=""/>
       </paramset>
     </container>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="fd02f63e-ab1a-471f-8efe-0e0be790a78f" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="IGRINS Observing Details"/>
+        <param name="NoteText">
+          <value>1. Exposure time = xxx sec per frame and Expected SNR ~XXX per ABBA sequence in H or K-band
+2. If the sequence is &gt;1.5hr: Can it be interrupted or not be interrupted?
+3. Telluric standard needed or not needed</value>
+        </param>
+      </paramset>
+    </container>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="schedNote" key="23324909-d6f3-4d32-b230-3cc3ae5f37ec" name="Scheduling Note">
+      <paramset name="Scheduling Note" kind="dataObj">
+        <param name="title" value="IGRINS Scheduling Details"/>
+        <param name="NoteText">
+          <value>1. Any timing constrains? Yes/No
+2. List timing windows in UT and enter them in the Observing Conditions component.</value>
+        </param>
+      </paramset>
+    </container>
     <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="0fa1a496-f07a-4f03-a032-acc8a375949b" name="">
       <paramset name="Observation" kind="dataObj">
         <param name="title" value="Visitor Instrument Observation"/>
@@ -96,25 +115,6 @@
         <param name="overrideQaState" value="false"/>
         <param name="setupTimeType" value="FULL"/>
       </paramset>
-      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="fd02f63e-ab1a-471f-8efe-0e0be790a78f" name="Note">
-        <paramset name="Note" kind="dataObj">
-          <param name="title" value="Observing Details"/>
-          <param name="NoteText">
-            <value>1. Exposure time = xxx sec per frame and Expected SNR ~XXX per ABBA sequence in H or K-band
-  2. If the sequence is &gt;1.5hr: Can it be interrupted or not be interrupted?
-  3. Telluric standard needed or not needed</value>
-          </param>
-        </paramset>
-      </container>
-      <container kind="obsComp" type="Info" version="2009A-1" subtype="schedNote" key="23324909-d6f3-4d32-b230-3cc3ae5f37ec" name="Scheduling Note">
-        <paramset name="Scheduling Note" kind="dataObj">
-          <param name="title" value="Scheduling Details"/>
-          <param name="NoteText">
-            <value>1. Any timing constrains? Yes/No
-  2. List timing windows in UT and enter them in the Observing Conditions component.</value>
-          </param>
-        </paramset>
-      </container>
       <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Visitor" key="156ed233-dfdd-4362-958d-cc7913cf3659" name="Visitor Instrument">
         <paramset name="Visitor Instrument" kind="dataObj">
           <param name="exposureTime" value="10.0"/>
