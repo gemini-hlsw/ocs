@@ -19,7 +19,7 @@
       <param name="isLibrary" value="true"/>
       <paramset name="timeAcct"/>
       <param name="awardedTime" value="0.0" units="hours"/>
-      <param name="fetched" value="yes"/>
+      <param name="fetched" value="true"/>
       <param name="completed" value="false"/>
       <param name="notifyPi" value="YES"/>
       <param name="timingWindowNotification" value="true"/>
@@ -117,7 +117,7 @@
       </paramset>
       <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Visitor" key="156ed233-dfdd-4362-958d-cc7913cf3659" name="Visitor Instrument">
         <paramset name="Visitor Instrument" kind="dataObj">
-          <param name="exposureTime" value="10.0"/>
+          <param name="exposureTime" value="60.0"/>
           <param name="posAngle" value="90"/>
           <param name="coadds" value="1"/>
           <param name="name" value=""/>
@@ -140,36 +140,41 @@
       </container>
       <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="70122df9-8fcf-41f8-816b-2cf57dbcd503" name="Sequence">
         <paramset name="Sequence" kind="dataObj"/>
-        <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="21e05792-c3d7-4d7e-95cf-bcda9abbaf06" name="Offset">
-          <paramset name="Offset" kind="dataObj">
-            <paramset name="offsets">
-              <paramset name="Offset2" sequence="0">
-                <param name="p" value="1.25"/>
-                <param name="q" value="0.0"/>
-                <param name="defaultGuideOption" value="on"/>
-              </paramset>
-              <paramset name="Offset3" sequence="1">
-                <param name="p" value="-1.25"/>
-                <param name="q" value="0.0"/>
-                <param name="defaultGuideOption" value="on"/>
-              </paramset>
-              <paramset name="Offset0" sequence="2">
-                <param name="p" value="-1.25"/>
-                <param name="q" value="0.0"/>
-                <param name="defaultGuideOption" value="on"/>
-              </paramset>
-              <paramset name="Offset6" sequence="3">
-                <param name="p" value="1.25"/>
-                <param name="q" value="0.0"/>
-                <param name="defaultGuideOption" value="on"/>
-              </paramset>
-            </paramset>
+        <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="a787f333-4fb4-4bce-820c-85785c063a2f" name="Repeat">
+          <paramset name="Repeat" kind="dataObj">
+            <param name="repeatCount" value="1"/>
           </paramset>
-          <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="f45bb208-45aa-4697-bdd2-f2e1f09b8b2c" name="Observe">
-            <paramset name="Observe" kind="dataObj">
-              <param name="repeatCount" value="1"/>
-              <param name="class" value="SCIENCE"/>
+          <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="1ba1f977-a3d2-4a23-8078-e4f042efc03c" name="Offset">
+            <paramset name="Offset" kind="dataObj">
+              <paramset name="offsets">
+                <paramset name="Offset2" sequence="0">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="1.25"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset3" sequence="1">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="-1.25"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset0" sequence="2">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="-1.25"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset6" sequence="3">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="1.25"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+              </paramset>
             </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="6d939e86-a0ac-4040-a70e-12061d38f6e7" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="PARTNER_CAL"/>
+              </paramset>
+            </container>
           </container>
         </container>
       </container>
@@ -251,23 +256,23 @@ Procedure:
           <paramset name="Offset" kind="dataObj">
             <paramset name="offsets">
               <paramset name="Offset2" sequence="0">
-                <param name="p" value="1.25"/>
-                <param name="q" value="0.0"/>
+                <param name="p" value="0.0"/>
+                <param name="q" value="1.25"/>
                 <param name="defaultGuideOption" value="on"/>
               </paramset>
               <paramset name="Offset3" sequence="1">
-                <param name="p" value="-1.25"/>
-                <param name="q" value="0.0"/>
+                <param name="p" value="0.0"/>
+                <param name="q" value="-1.25"/>
                 <param name="defaultGuideOption" value="on"/>
               </paramset>
               <paramset name="Offset0" sequence="2">
-                <param name="p" value="-1.25"/>
-                <param name="q" value="0.0"/>
+                <param name="p" value="0.0"/>
+                <param name="q" value="-1.25"/>
                 <param name="defaultGuideOption" value="on"/>
               </paramset>
               <paramset name="Offset6" sequence="3">
-                <param name="p" value="1.25"/>
-                <param name="q" value="0.0"/>
+                <param name="p" value="0.0"/>
+                <param name="q" value="1.25"/>
                 <param name="defaultGuideOption" value="on"/>
               </paramset>
             </paramset>
@@ -334,6 +339,7 @@ Procedure:
     <paramset name="node">
       <param name="key" value="266f19ac-2e25-44fd-8e14-de69113766fe"/>
       <param name="d958800d-4535-4197-88aa-25e97de4b2f0" value="1"/>
+      <param name="dbe3be4a-baec-4a53-8962-7bcbeffb2982" value="24"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="365e5d9f-66fd-43e0-b2eb-0ad9307f0806"/>
@@ -342,10 +348,19 @@ Procedure:
     <paramset name="node">
       <param name="key" value="70122df9-8fcf-41f8-816b-2cf57dbcd503"/>
       <param name="d958800d-4535-4197-88aa-25e97de4b2f0" value="3"/>
+      <param name="dbe3be4a-baec-4a53-8962-7bcbeffb2982" value="4"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a787f333-4fb4-4bce-820c-85785c063a2f"/>
+      <param name="dbe3be4a-baec-4a53-8962-7bcbeffb2982" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="16f916b2-365b-49a4-bc30-eb17bb22a118"/>
       <param name="d958800d-4535-4197-88aa-25e97de4b2f0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1ba1f977-a3d2-4a23-8078-e4f042efc03c"/>
+      <param name="dbe3be4a-baec-4a53-8962-7bcbeffb2982" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="34bfa403-57d2-4125-af7b-8f5fcd95dc6d"/>
@@ -374,6 +389,7 @@ Procedure:
     <paramset name="node">
       <param name="key" value="156ed233-dfdd-4362-958d-cc7913cf3659"/>
       <param name="d958800d-4535-4197-88aa-25e97de4b2f0" value="5"/>
+      <param name="dbe3be4a-baec-4a53-8962-7bcbeffb2982" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="21e05792-c3d7-4d7e-95cf-bcda9abbaf06"/>
@@ -394,6 +410,10 @@ Procedure:
     <paramset name="node">
       <param name="key" value="fa90c282-70c7-4f3f-9bd6-4f24fefd2fa7"/>
       <param name="d958800d-4535-4197-88aa-25e97de4b2f0" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6d939e86-a0ac-4040-a70e-12061d38f6e7"/>
+      <param name="dbe3be4a-baec-4a53-8962-7bcbeffb2982" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a601e397-6c48-44d1-bec2-8e3106e0e64f"/>
