@@ -5,7 +5,6 @@ import java.awt.geom.{AffineTransform, Area, Path2D, Point2D, Rectangle2D}
 import java.awt.image.BufferedImage
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import java.util.Collections
-
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption, Some => JSome}
 import edu.gemini.shared.util.immutable.ScalaConverters._
@@ -16,14 +15,16 @@ import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostTarget
 import edu.gemini.spModel.telescope.IssPort
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.SPInstObsComp
-import edu.gemini.spModel.target.{SPSkyObject, WatchablePos}
+import edu.gemini.spModel.target.SPSkyObject
 import edu.gemini.spModel.target.env.{Asterism, AsterismType, TargetEnvironment, TargetEnvironmentDiff}
 import javax.swing.{Icon, JLabel, JPanel, SwingConstants}
 import jsky.app.ot.tpe._
+import jsky.app.ot.tpe.feat.TpeGhostIfuFeature.{HrIfuColor, SrIfuColor, highResolutionIfuArcsec, standardResolutionIfuArcsec}
 import jsky.app.ot.util.{BasicPropertyList, OtColor, PropertyWatcher}
 
 import scala.collection.JavaConverters._
-import scala.swing.{Color, Graphics2D}
+import scala.swing.Graphics2D
+
 import scalaz._
 import Scalaz._
 
@@ -99,31 +100,32 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
           asterism match {
             case a: GhostAsterism.StandardResolution =>
               val pos1 = a.srifu1 match {
-                case Left(spCoordinates) => spCoordinates
-                case Right(GhostTarget(spTarget, guideFiberState)) => spTarget
+                case Left(spCoordinates)             => spCoordinates
+                case Right(GhostTarget(spTarget, _)) => spTarget
               }
 
               // Now draw the hexagon at the appropriate place.
               val psrIfu1: Point2D.Double = pm.getLocationFromTag(pos1)
 
               // Draw first IFU.
-              drawIFU(g2d, psrIfu1)
+              drawStandardResolutionIfu(g2d, psrIfu1)
 
               // Draw the sky fibers. These are barely visible.
-              drawSRSkyFibers(g2d, psrIfu1)
+              drawStandardResolutionSky(g2d, psrIfu1)
 
               // If SRIFU2 is in use, draw it as well.
               a.srifu2.map {
-                case Left(sPCoordinates) => sPCoordinates
-                case Right(GhostTarget(spTarget, guideFiberState)) => spTarget
-              }.map(_iw.taggedPosToScreenCoords).foreach(p => drawIFU(g2d, p))
+                case Left(sPCoordinates)             => sPCoordinates
+                case Right(GhostTarget(spTarget, _)) => spTarget
+              }.map(_iw.taggedPosToScreenCoords)
+               .foreach(drawStandardResolutionIfu(g2d, _))
 
             case a: GhostAsterism.HighResolution =>
-              val (pos1, guideFiberState) = (a.hrifu1.spTarget, a.hrifu1.guideFiberState)
+              val pos1 = a.hrifu1.spTarget
 
               // Now draw the hexagon at the appropriate place.
               val p: Point2D.Double = _iw.taggedPosToScreenCoords(pos1)
-              drawIFU(g2d, p)
+              drawHighResolutionIfu(g2d, p)
           }
         }
 
@@ -139,7 +141,13 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
   /**
    * Draw an IFU.
    */
-  private def drawIFU(g2d: Graphics2D, p: Point2D): Unit = {
+  private def drawHighResolutionIfu(g2d: Graphics2D, p: Point2D): Unit =
+    drawIfu(g2d, p, highResolutionIfuArcsec, HrIfuColor)
+
+  private def drawStandardResolutionIfu(g2d: Graphics2D, p: Point2D): Unit =
+    drawIfu(g2d, p, standardResolutionIfuArcsec, SrIfuColor)
+
+  private def drawIfu(g2d: Graphics2D, p: Point2D, a: Area, c: Color): Unit = {
     // Transform the hexagon at the appropriate place.
     val trans: AffineTransform = {
       val t = AffineTransform.getTranslateInstance(p.getX, p.getY)
@@ -147,14 +155,14 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       t
     }
 
-    g2d.setColor(TpeGhostIfuFeature.IfuColor)
-    g2d.fill(TpeGhostIfuFeature.standardResolutionIfuArcsec.createTransformedArea(trans))
+    g2d.setColor(c)
+    g2d.fill(a.createTransformedArea(trans))
   }
 
   /**
    * Draw the SR sky fibers relative to the center of SRIFU1. They are extremely small.
    */
-  private def drawSRSkyFibers(g2d: Graphics2D, p: Point2D): Unit = {
+  private def drawStandardResolutionSky(g2d: Graphics2D, p: Point2D): Unit = {
     val trans: AffineTransform = {
 
       // The numbers come from here, though I'm not sure I'm reading it correctly.
@@ -289,19 +297,8 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
     super.unloaded()
   }
 
-
-  // Implements the TelescopePosWatcher interface.
-  def telescopePosLocationUpdate(tp: WatchablePos): Unit =
-    redraw()
-
-
-  def telescopePosGenericUpdate(tp: WatchablePos): Unit =
-    redraw()
-
-
   override protected def handleTargetEnvironmentUpdate(diff: TargetEnvironmentDiff): Unit =
     redraw()
-
 
   // Schedule a redraw of the image feature.
   private def redraw(): Unit =
@@ -380,18 +377,26 @@ object TpeGhostIfuFeature {
   private val MmToArcsec: AffineTransform =
     AffineTransform.getScaleInstance(1.0/0.61, 1.0/0.61)
 
-  def standardResolutionIfuMm: Area =
-    fiberArray(0.24, 3)
+  // Actually SR and HR are the same size in this representation but it seems
+  // useful to keep them separate and match the spec.
+  private def standardResolutionIfuMm: Area = fiberArray(0.240, 3)
+  private def highResolutionIfuMm: Area     = fiberArray(0.144, 5)
+
+  private def standardResolutionSkyMm: Area = fiberArray(0.144, 3)
+  private def highResolutionSkyMm: Area     = fiberArray(0.240, 2)
+
 
   def standardResolutionIfuArcsec: Area =
     standardResolutionIfuMm.createTransformedArea(MmToArcsec)
 
-  def standardResolutionSkyMm: Area =
-    fiberArray(0.144, 3)
+  def highResolutionIfuArcsec: Area =
+    highResolutionIfuMm.createTransformedArea(MmToArcsec)
 
   def standardResolutionSkyArcsec: Area =
     standardResolutionSkyMm.createTransformedArea(MmToArcsec)
 
+  def highResolutionSkyArcsec: Area =
+    highResolutionSkyMm.createTransformedArea(MmToArcsec)
   /**
    * Calculates the current patrol field for an IFU as specified by its default patrol field.
    */
@@ -524,8 +529,8 @@ object TpeGhostIfuFeature {
 
   // 610 microns per arcsec. All dimensions in mm.
   // 0.240 face width per hexagon: three hexagons.
-  val IfuColor: Color = OtColor.makeSlightlyDarker(Color.green)
-  val HexPlateScale: Angle = Angle.fromArcsecs(0.720 / 0.61)
+  val HrIfuColor: Color    = new Color(135, 255, 135)
+  val SrIfuColor: Color    = HrIfuColor.darker
 
   // The colors of the sky fibers.
   val SkyFiberColor: Color = OtColor.makeSlightlyDarker(Color.cyan)
