@@ -142,34 +142,33 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
   private def drawIFU(g2d: Graphics2D, p: Point2D): Unit = {
     // Transform the hexagon at the appropriate place.
     val trans: AffineTransform = {
-      val t = new AffineTransform
-      t.translate(p.getX, p.getY)
-      t.scale(TpeGhostIfuFeature.HexPlateScale.toArcsecs, TpeGhostIfuFeature.HexPlateScale.toArcsecs)
+      val t = AffineTransform.getTranslateInstance(p.getX, p.getY)
       t.concatenate(scaleTransform)
       t
     }
 
     g2d.setColor(TpeGhostIfuFeature.IfuColor)
-    val hex: Area = TpeGhostIfuFeature.regularHexagon().createTransformedArea(trans)
-    g2d.fill(hex)
+    g2d.fill(TpeGhostIfuFeature.standardResolutionIfuArcsec.createTransformedArea(trans))
   }
 
   /**
-   * Draw the SR sky fibers relative to the center of SRIFU1. Thery are extremely small.
+   * Draw the SR sky fibers relative to the center of SRIFU1. They are extremely small.
    */
   private def drawSRSkyFibers(g2d: Graphics2D, p: Point2D): Unit = {
     val trans: AffineTransform = {
-      val t = new AffineTransform
-      t.translate(p.getX, p.getY + 0.12)
-      // No HexPlateScale here because everything given in arcsecs.
+
+      // The numbers come from here, though I'm not sure I'm reading it correctly.
+      // https://docs.google.com/document/d/1aN2ZPgaRMD52Rf4YG7ahwLnvQ8bpTRudc7MTBn-Lt2Y/edit#
+      val offsetInX = 3.41 * _tii.getPixelsPerArcsec
+      val offsetInY = 0.20 * _tii.getPixelsPerArcsec
+
+      val t = AffineTransform.getTranslateInstance(p.getX + offsetInX, p.getY + offsetInY)
       t.concatenate(scaleTransform)
-      t.translate(3.41 + 0.12, 0.2)
-      t.scale(0.456, 0.456)
       t
     }
+
     g2d.setColor(TpeGhostIfuFeature.SkyFiberColor)
-    val hex: Area = TpeGhostIfuFeature.regularHexagon().createTransformedArea(trans)
-    g2d.fill(hex)
+    g2d.fill(TpeGhostIfuFeature.standardResolutionSkyArcsec.createTransformedArea(trans))
   }
 
   /**
@@ -347,25 +346,51 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
 
 
 object TpeGhostIfuFeature {
+
   /**
-   * Create a regular hexagon of side 1 at (0,0).
+   * Create a regular hexagon representing an array of hexagonal fibers, count
+   * fibers across, each with the given `flatToFlat` size.
    */
-  private[feat] def regularHexagon(): Area = {
+  private[feat] def fiberArray(
+    flatToFlat: Double,
+    count: Int
+  ): Area = {
+
     // The rotation to create the edges of the hexagon.
     val path = new Path2D.Double(Path2D.WIND_EVEN_ODD)
     val rot: AffineTransform = AffineTransform.getRotateInstance(Math.PI / 3.0)
-    val x = 1
-    val y = 0
-    path.moveTo(x, y)
-    path.lineTo(x, y)
-    val p = new Point2D.Double(x, 0)
-    for (i <- 0 until 6) {
+
+    val side = (flatToFlat * count) / Math.sqrt(3.0)
+    path.moveTo(side, 0)
+    path.lineTo(side, 0)
+    val p = new Point2D.Double(side, 0)
+    (0 until 6).foreach { _ =>
       rot.transform(p, p)
       path.lineTo(p.getX, p.getY)
     }
     path.closePath()
     new Area(path)
   }
+
+  //
+  // See https://docs.google.com/document/d/1aN2ZPgaRMD52Rf4YG7ahwLnvQ8bpTRudc7MTBn-Lt2Y/edit#
+  //
+
+  // 1 arcsec = 0.61 mm
+  private val MmToArcsec: AffineTransform =
+    AffineTransform.getScaleInstance(1.0/0.61, 1.0/0.61)
+
+  def standardResolutionIfuMm: Area =
+    fiberArray(0.24, 3)
+
+  def standardResolutionIfuArcsec: Area =
+    standardResolutionIfuMm.createTransformedArea(MmToArcsec)
+
+  def standardResolutionSkyMm: Area =
+    fiberArray(0.144, 3)
+
+  def standardResolutionSkyArcsec: Area =
+    standardResolutionSkyMm.createTransformedArea(MmToArcsec)
 
   /**
    * Calculates the current patrol field for an IFU as specified by its default patrol field.
