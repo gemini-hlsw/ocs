@@ -5,12 +5,12 @@ import edu.gemini.spModel.gemini.gmos.blueprint.SpGmosSBlueprintLongslitNs
 import edu.gemini.phase2.template.factory.impl.TemplateDb
 import edu.gemini.spModel.gemini.gmos.{GmosSouthType, InstGmosSouth}
 
-case class GmosSLongslitNs(blueprint:SpGmosSBlueprintLongslitNs) extends GmosSBase[SpGmosSBlueprintLongslitNs] {
+case class GmosSLongslitNs(blueprint:SpGmosSBlueprintLongslitNs) extends GmosSBase.WithTargetFolder[SpGmosSBlueprintLongslitNs] {
 
   // IF SPECTROSCOPY MODE == LONGSLIT N&S
   //         INCLUDE FROM 'LONGSLIT N&S BP' IN
-  //             Target group: {9} - {10}
-  //             Baseline folder: {11} - {16}
+  //             Target folder: {9} - {11}
+  //             Baseline folder: {12} - {16}
   //         For spec observations: {10}, {11}, {13}-{15}
   //             SET DISPERSER FROM PI
   //             SET FILTER FROM PI
@@ -18,8 +18,8 @@ case class GmosSLongslitNs(blueprint:SpGmosSBlueprintLongslitNs) extends GmosSBa
   //         For acquisitions: {9}, {12}
   //             if FPU!=None in the OT inst. iterators, then SET FPU FROM PI
 
-  val targetGroup = 9 to 10
-  val baselineFolder = 11 to 16
+  val targetFolder = 9 to 11
+  val baselineFolder = 12 to 16
   val notes = Seq.empty
 
   def initialize(grp:ISPGroup, db:TemplateDb):Either[String, Unit] = {

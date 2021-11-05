@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2018A-1" subtype="basic" key="c313a6e9-cf0e-4a98-a2bf-192f3091d541" name="GMOS-N-BP-copy3">
+  <container kind="program" type="Program" version="2020A-1" subtype="basic" key="c313a6e9-cf0e-4a98-a2bf-192f3091d541" name="GMOS-N-BP-copy3">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="GMOS-N PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -48,8 +48,15 @@
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOS" key="87e0d018-9254-4c98-aaf3-e57152ba45bd" name="GMOS-N">
           <paramset name="GMOS-N" kind="dataObj">
@@ -62,6 +69,8 @@
             <param name="ampReadMode" value="SLOW"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
+            <param name="disperserLambda" value="550.0"/>
+            <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="FPU_NONE"/>
             <param name="filter" value="r_G0303"/>
@@ -106,18 +115,18 @@
                     <param name="defaultGuideOption" value="on"/>
                   </paramset>
                   <paramset name="Offset0" sequence="1">
-                    <param name="p" value="7.0"/>
-                    <param name="q" value="7.0"/>
+                    <param name="p" value="10.0"/>
+                    <param name="q" value="10.0"/>
                     <param name="defaultGuideOption" value="on"/>
                   </paramset>
                   <paramset name="Offset3" sequence="2">
-                    <param name="p" value="7.0"/>
+                    <param name="p" value="10.0"/>
                     <param name="q" value="0.0"/>
                     <param name="defaultGuideOption" value="on"/>
                   </paramset>
                   <paramset name="Offset2" sequence="3">
                     <param name="p" value="0.0"/>
-                    <param name="q" value="7.0"/>
+                    <param name="q" value="10.0"/>
                     <param name="defaultGuideOption" value="on"/>
                   </paramset>
                 </paramset>
@@ -146,8 +155,15 @@
           <param name="priority" value="HIGH"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="cc4f5d5a-33d4-46f9-abac-946121749b27" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -225,6 +241,8 @@ Details:
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
+            <param name="disperserLambda" value="550.0"/>
+            <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="LONGSLIT_4"/>
             <param name="filter" value="r_G0303"/>
@@ -365,8 +383,15 @@ Details:
           <param name="priority" value="HIGH"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="24d865b6-d02f-4d31-be78-bf88f67b4dab" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -550,8 +575,15 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="e8540b42-2a0e-4c3b-8b55-c1267d8eebd5" name="Targets">
           <paramset name="Targets" kind="dataObj">
@@ -693,8 +725,15 @@ time for the given instrument configuration.
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="5fdd546f-6bfd-41d4-aff7-02210eda5175" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -735,6 +774,8 @@ The FPU should match the one used for the Baseline Standard observation.
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
+            <param name="disperserLambda" value="550.0"/>
+            <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="LONGSLIT_4"/>
             <param name="filter" value="g_G0301"/>
@@ -892,8 +933,15 @@ The FPU should match the one used for the Baseline Standard observation.
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="b8837917-7c39-4400-b8a1-76bf430cd687" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -1006,8 +1054,15 @@ when conditions are convenient for observing baseline standards.
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="a111820d-e7d0-4d08-9261-0aae7313a3fe" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -1135,8 +1190,15 @@ time for the given instrument configuration.
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="b9b9b1d9-3efc-4266-b643-cd88c45e1db4" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -1270,8 +1332,15 @@ The exposure is taken on the sky so the Translation stage should be
           <param name="priority" value="HIGH"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="e1ba843a-938f-4028-8904-c5fbd45f3887" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -1340,6 +1409,8 @@ Details:
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
+            <param name="disperserLambda" value="550.0"/>
+            <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="NS_3"/>
             <param name="filter" value="r_G0303"/>
@@ -1480,8 +1551,15 @@ Details:
           <param name="priority" value="HIGH"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="a4b43a3e-98e1-4313-88f1-f1567c898d85" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -1517,9 +1595,10 @@ The exposures are the follow:
    science  at 770nm, DtaX=-4
    GCALflat at 770nm, DtaX=-4
 
-The DTAX offset dither sequence is recommended to help reduce the effect
-of charge traps in the data; see the N&amp;S web pages.  Here by using four
-GMOS-N Sequences to change central wavelength and dither the DTAX we save 
+DTA-X offsetting was implemented to aid in the suppression of linear charge traps affecting 
+Nod &amp; Shuffle data in the original EEV detectors. With the upgraded GMOS-N and GMOS-S 
+Hamamatsu detectors DTA-X offsetting is no longer as advantageous; see the N&amp;S web pages.  
+Here by using four GMOS-N Sequences to change central wavelength and dither the DTAX we save 
 on overhead with an efficient science-flat-flat-science-science-flat-flat-science 
 arrangement, minimizing the number of calibration congfiguration movements 
 required.
@@ -1552,7 +1631,7 @@ required.
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="TRUE"/>
-            <param name="nsNumCycles" value="15"/>
+            <param name="nsNumCycles" value="10"/>
             <param name="nsDetectorRows" value="1392"/>
             <param name="useElectronicOffsetting" value="false"/>
             <paramset name="nsShuffleOffset">
@@ -1775,8 +1854,15 @@ required.
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="039f6d59-a669-4cc9-be57-40e70cffadec" name="Targets">
           <paramset name="Targets" kind="dataObj">
@@ -1914,8 +2000,15 @@ time for the given instrument configuration.
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="c670d1e5-25de-4df2-a9ec-8ece19f5540e" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -1954,6 +2047,8 @@ Step 4: Copy of the third step and is used only if necessary to further
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
+            <param name="disperserLambda" value="550.0"/>
+            <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="NS_3"/>
             <param name="filter" value="i_G0302"/>
@@ -2111,8 +2206,15 @@ Step 4: Copy of the third step and is used only if necessary to further
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="8a36ea12-177f-48c4-aa3b-933ada992b06" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -2227,8 +2329,15 @@ when conditions are convenient for observing baseline standards.
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="551acb3c-4650-44b3-8ff3-6a9e68bea450" name="Targets">
           <paramset name="Targets" kind="dataObj">
@@ -2358,8 +2467,15 @@ time for the given instrument configuration.
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="b4a31bbb-9a35-4faf-acbd-c3b0459a5ee7" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -2484,13 +2600,20 @@ The exposure is taken on the sky so the Translation stage should be
       </container>
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="a1b24a11-b110-4e25-abe9-2366dd5c2da8" name="GMOS-N-BP-copy3-16">
         <paramset name="Observation" kind="dataObj">
-          <param name="title" value="N&amp;S Longslit: Baseline Dark: A=60, 15cy, 2x2, 1392pix"/>
+          <param name="title" value="N&amp;S Longslit: Baseline Dark: A=60, 10cy, 2x1, 1392row"/>
           <param name="libraryId" value="16"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="a6607511-56e7-4d5f-989a-9d1b577e07d7" name="Observing Conditions">
           <paramset name="Observing Conditions" kind="dataObj">
@@ -2548,13 +2671,13 @@ TAKEN from the GMOS-N component.
 
 Offset (shuffle distance) = 1392 rows for N&amp;S LONGSLIT darks.
 
-Number of N&amp;S cycles (same as the science exposure) = 15 in this example.
-Therefore, the total open shutter time is 1800sec per dark exposure in this example.
+Number of N&amp;S cycles (same as the science exposure) = 10 in this example.
+Therefore, the total open shutter time is 1200sec per dark exposure in this example.
 Note that the number of N&amp;S cycles IS taken from the static GMOS-N component.
 For example, setting the Dark to have an Observe 15x will take 15 N&amp;S darks, 
-each having 15 N&amp;S cycles.
+each having 10 N&amp;S cycles.
 
-Detector Binning = 2x2 in this example
+Detector Binning = 2x1 in this example
 
 The guide star has been removed from the target component since the
 telescope will be stationary at zenith for this observation.
@@ -2581,6 +2704,8 @@ Number of N&amp;S observations is 15</value>
             <param name="ampReadMode" value="SLOW"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
+            <param name="disperserLambda" value="550.0"/>
+            <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="FPU_NONE"/>
             <param name="filter" value="r_G0303"/>
@@ -2592,7 +2717,7 @@ Number of N&amp;S observations is 15</value>
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="TRUE"/>
-            <param name="nsNumCycles" value="15"/>
+            <param name="nsNumCycles" value="10"/>
             <param name="nsDetectorRows" value="1392"/>
             <param name="useElectronicOffsetting" value="false"/>
             <paramset name="nsShuffleOffset">
@@ -2605,7 +2730,7 @@ Number of N&amp;S observations is 15</value>
               </paramset>
               <paramset name="Offset1" sequence="1">
                 <param name="p" value="0.0"/>
-                <param name="q" value="10.0"/>
+                <param name="q" value="0.0"/>
                 <param name="defaultGuideOption" value="on"/>
                 <param name="GMOS OIWFS" value="park"/>
               </paramset>
@@ -2653,8 +2778,15 @@ Number of N&amp;S observations is 15</value>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="7b203573-bd09-4fd0-b222-7b9235eb7dae" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -2688,6 +2820,8 @@ can be submitted.</value>
             <param name="ampReadMode" value="SLOW"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
+            <param name="disperserLambda" value="550.0"/>
+            <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="FPU_NONE"/>
             <param name="filter" value="r_G0303"/>
@@ -2759,8 +2893,15 @@ can be submitted.</value>
           <param name="priority" value="HIGH"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOS" key="7bccbfdf-71ca-46cb-803c-e21d0ee4842e" name="GMOS-N">
           <paramset name="GMOS-N" kind="dataObj">
@@ -2773,6 +2914,8 @@ can be submitted.</value>
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
+            <param name="disperserLambda" value="550.0"/>
+            <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="CUSTOM_MASK"/>
             <param name="fpu" value="CUSTOM_MASK"/>
             <param name="fpuCustomMask" value="GNYYYYSQXXX-NN"/>
@@ -2885,8 +3028,15 @@ defined until after the mask has been designed and submitted.  The Custom ROI fi
           <param name="priority" value="HIGH"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="d5c6b572-3865-4a49-aa52-e21fab4aa4a7" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -2978,6 +3128,8 @@ gacq *filenumber*
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
+            <param name="disperserLambda" value="550.0"/>
+            <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="CUSTOM_MASK"/>
             <param name="fpu" value="CUSTOM_MASK"/>
             <param name="fpuCustomMask" value="GNYYYYSQXXX-NN"/>
@@ -3103,8 +3255,15 @@ gacq *filenumber*
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="13c0cfd1-bb01-4b0a-b79b-8a088c2e8183" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -3274,8 +3433,15 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="584a6768-6c9a-40c2-9725-7da8d73d185e" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -3287,7 +3453,7 @@ during the day (class=Daytime Calibration).
 The guide star has been removed from the target component, since the
 telescope will be stationary at zenith for this observation.
 
-The Translation Stage has been set to "Follow in Z Only" since the telescope is stationary
+The Translation Stage has been set to "Do not Follow" since the telescope is stationary
 and the Telescope Control System may not be up when this observation
 is taken.
 
@@ -3422,8 +3588,15 @@ time for the given slit width.
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="b481cf7e-4914-4b5d-97af-3c8a06b29e66" name="Targets">
           <paramset name="Targets" kind="dataObj">
@@ -3496,6 +3669,8 @@ Gemini Staff.
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
+            <param name="disperserLambda" value="550.0"/>
+            <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="CUSTOM_MASK"/>
             <param name="fpu" value="CUSTOM_MASK"/>
             <param name="fpuCustomMask" value="GNYYYYSQXXX-NN"/>
@@ -3583,8 +3758,15 @@ Gemini Staff.
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="6fe1f4d6-bbda-45f2-b765-22a3dd4be866" name="Targets">
           <paramset name="Targets" kind="dataObj">
@@ -3724,8 +3906,15 @@ masks for use, with a technical limit of 99 masks).</value>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="a121cb30-9fe1-4eff-9139-eb253ab9b0a7" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -3768,6 +3957,8 @@ The FPU, binning and exposure time are sequenced.
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
+            <param name="disperserLambda" value="550.0"/>
+            <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="LONGSLIT_4"/>
             <param name="filter" value="g_G0301"/>
@@ -3925,8 +4116,15 @@ The FPU, binning and exposure time are sequenced.
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="885d67fe-7847-44b8-a5bc-caba170d32dc" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -4084,8 +4282,15 @@ spectrophotometric baseline standards.
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="8aa5c8f5-00aa-4b35-b3b3-122295301c3c" name="Targets">
           <paramset name="Targets" kind="dataObj">
@@ -4230,8 +4435,15 @@ as used for the Baseline Standard observation.
           <param name="priority" value="HIGH"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOS" key="b79f6096-b017-4210-886e-bb1385ae8ff7" name="GMOS-N">
           <paramset name="GMOS-N" kind="dataObj">
@@ -4244,6 +4456,8 @@ as used for the Baseline Standard observation.
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
+            <param name="disperserLambda" value="550.0"/>
+            <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="CUSTOM_MASK"/>
             <param name="fpu" value="CUSTOM_MASK"/>
             <param name="fpuCustomMask" value="GNYYYYSQXXX-NN"/>
@@ -4356,8 +4570,15 @@ defined until after the mask has been designed and submitted.  The Custom ROI fi
           <param name="priority" value="HIGH"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="29eb8fd2-cc73-4d42-9280-e807fc68d7d0" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -4449,6 +4670,8 @@ gacq *filenumber*
             <param name="ampReadMode" value="SLOW"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
+            <param name="disperserLambda" value="550.0"/>
+            <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="CUSTOM_MASK"/>
             <param name="fpu" value="CUSTOM_MASK"/>
             <param name="fpuCustomMask" value="GNYYYYSQXXX-NN"/>
@@ -4574,8 +4797,15 @@ gacq *filenumber*
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="69ea82c3-9e20-49cc-8603-0ab3a02fea85" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -4599,10 +4829,11 @@ defined with respect to the slit center and should be smaller than the half the
 defined slit length.  The NODs are only in the q direction, along the slit, and not in 
 the p direction which is across the slit.
 
-The sequence dithers the DTAX in order to minimize the effect of "charge trap"
-features which appear in Nod &amp; Shuffled data.  The sequence also dithers the
-grating spectrally by by 10 nm above and below the central wavelength in order to
-fill in the information missing due to the gaps between the detectors.
+DTA-X offsetting was implemented to aid in the suppression of linear charge traps affecting 
+Nod &amp; Shuffle data in the original EEV detectors. With the upgraded GMOS-N and GMOS-S 
+Hamamatsu detectors DTA-X offsetting is no longer as advantageous; see the N&amp;S web pages.
+The sequence also dithers the grating spectrally by by 10 nm above and below the 
+central wavelength in order to fill in the information missing due to the gaps between the detectors.
 
 It is assumed that GMOS is mounted on the side-looking ISS port.
 
@@ -4615,10 +4846,10 @@ and the central wavelength.  By using nested GMOS-N Sequences to dither the DTAX
 central wavelength we save on overhead with an efficient flat-science-science-flat-flat-science 
 arrangement, minimizing the numberof calibration congfiguration movements required.
 
-Each science exposure consists of 15 N&amp;S cycles. The nods are along the 
+Each science exposure consists of 10 N&amp;S cycles. The nods are along the 
 slits, keeping the science targets in the slits at all times. The total on-target
-open shutter time is 1800sec per science exposure in this example,
-4.5hour total for the full observation.
+open shutter time is 1200sec per science exposure in this example,
+3hour total for the full observation.
 
 The other required observations for a MOS N&amp;S program are similar to 
 those for non N&amp;S MOS program.  Only the actual science observation is 
@@ -4681,7 +4912,7 @@ masks for use, with a technical limit of 99 masks).
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="TRUE"/>
-            <param name="nsNumCycles" value="15"/>
+            <param name="nsNumCycles" value="10"/>
             <param name="nsDetectorRows" value="63"/>
             <param name="useElectronicOffsetting" value="true"/>
             <paramset name="nsShuffleOffset">
@@ -4899,13 +5130,20 @@ masks for use, with a technical limit of 99 masks).
       </container>
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="606a0a71-6557-4620-ab9b-b0c4bfb7ca58" name="GMOS-N-BP-copy3-30">
         <paramset name="Observation" kind="dataObj">
-          <param name="title" value="MOS N&amp;S: Baseline Dark A=60, 15cy, 2x2, 32pix"/>
+          <param name="title" value="MOS N&amp;S: Baseline Dark A=60, 10cy, 2x1, 63row"/>
           <param name="libraryId" value="30"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="5d9d7729-7b34-4764-a541-dad7d29209a8" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -4928,12 +5166,12 @@ of *unbinned* pixels no matter what the binning is set to.  For micro-shuffling
 this number must match the slit length in the MOS mask design.  For Band 
 Shuffling this number must match the band size used in the MOS mask design.
 
-Number of N&amp;S Cycles = 15 in this example.  Note that the number 
+Number of N&amp;S Cycles = 10 in this example.  Note that the number 
 of N&amp;S cycles IS taken from the static GMOS-N component (another
 potentially confusing feature).  Setting the Dark to have an Observe 15x 
-will take 15 N&amp;S darks, each having 15 N&amp;S cycles.
+will take 15 N&amp;S darks, each having 10 N&amp;S cycles.
 
-Detector Binning = 2x2 in this example.
+Detector Binning = 2x1 in this example.
 
 These four parameters define a Nod &amp; Shuffle dark.  It is recommended
 that all PIs using Nod &amp; Shuffle define darks to match their science
@@ -4957,6 +5195,8 @@ obtained on a best effort basis.</value>
             <param name="ampReadMode" value="SLOW"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
+            <param name="disperserLambda" value="550.0"/>
+            <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="FPU_NONE"/>
             <param name="filter" value="r_G0303"/>
@@ -4968,7 +5208,7 @@ obtained on a best effort basis.</value>
             <param name="dtaXOffset" value="ZERO"/>
             <param name="builtinROI" value="FULL_FRAME"/>
             <param name="useNS" value="TRUE"/>
-            <param name="nsNumCycles" value="15"/>
+            <param name="nsNumCycles" value="10"/>
             <param name="nsDetectorRows" value="63"/>
             <param name="useElectronicOffsetting" value="false"/>
             <paramset name="nsShuffleOffset">
@@ -5059,8 +5299,15 @@ obtained on a best effort basis.</value>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="4bd30e62-a4be-4a58-8e23-fac4ae1ae354" name="Targets">
           <paramset name="Targets" kind="dataObj">
@@ -5201,8 +5448,15 @@ time for the given instrument configuration.
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="b7c0b88c-2b5b-4f02-b27f-81923fcb710f" name="Targets">
           <paramset name="Targets" kind="dataObj">
@@ -5343,8 +5597,15 @@ masks for use, with a technical limit of 99 masks).</value>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="9611ce6d-0502-4914-847d-f491bac0da54" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -5382,6 +5643,8 @@ Step 4: Another image though the slit which is used only if additional centering
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
+            <param name="disperserLambda" value="550.0"/>
+            <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="LONGSLIT_4"/>
             <param name="filter" value="i_G0302"/>
@@ -5539,8 +5802,15 @@ Step 4: Another image though the slit which is used only if additional centering
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="5a22caec-63bf-4f60-9755-e894e826a3cc" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -5702,8 +5972,15 @@ time for the given instrument configuration.
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="167d4927-425d-4203-beb3-c4c6b6514ec6" name="Targets">
           <paramset name="Targets" kind="dataObj">
@@ -5847,8 +6124,15 @@ time for the given instrument configuration.
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="79e27718-4295-4d21-8ccb-ed8eed5459aa" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -5869,7 +6153,7 @@ recommended for acquisition observations.
 
 For targets fainter than R~18mag, imaging through the IFU will take too long.  Instead a blind offset acquisition should be used.  
 For more information on blind offsetting, please see 
-http://www.gemini.edu/sciops/telescopes-and-sites/acquisition-hardware-and-techniques/acquisition-techniques.
+https://www.gemini.edu/observing/telescopes-and-sites/telescopes#Acquisition.
 For help setting up the acquistion, see the Description note for the "Longslit Acquisition (Blind Offset)" within the 
 Templates: Spectroscopy Acquisition Observations folder.  If it is not possible to find a nearby reference star with well 
 known coordinates for blind offsetting, make the 2nd step be another imaging exposure, such that the position of the target 
@@ -5891,6 +6175,8 @@ will approximately fall in the IFU field of view.
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
+            <param name="disperserLambda" value="550.0"/>
+            <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="IFU_1"/>
             <param name="filter" value="r_G0303"/>
@@ -5998,8 +6284,15 @@ will approximately fall in the IFU field of view.
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="ac78fa02-c2a6-4aee-bb25-263825886137" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -6011,7 +6304,7 @@ The instrument is configured based on the Phase I resource selections.
 It is assumed that GMOS is mounted on the side-looking ISS port.
 
 For targets fainter than R~18mag, imaging through the IFU will take too long.  Instead a blind offset acquisition should be used.  
-For more information on blind offsetting, please see http://www.gemini.edu/sciops/telescopes-and-sites/acquisition-hardware-and-techniques/acquisition-techniques.
+For more information on blind offsetting, please see https://www.gemini.edu/observing/telescopes-and-sites/telescopes#Acquisition.
 For help setting up the acquistion, see the Description note for the "Longslit Acquisition (Blind Offset)" within the Templates: Spectroscopy Acquisition Observations folder.  
 If it is not possible to find a nearby reference star with well known coordinates for blind offsetting, make the 2nd step be another imaging exposure, such that the position 
 of the target on the CCD in imaging mode can be checked after the initial telescope offset has been determined and applied. The blind offset method is preferred because 
@@ -6178,8 +6471,15 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="8c6bd666-0b7c-460d-9902-2ed3cdb93f21" name="Targets">
           <paramset name="Targets" kind="dataObj">
@@ -6313,8 +6613,15 @@ time for the given instrument configuration.
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="f45645a1-8c52-4703-8967-a62b8b23f45a" name="Targets">
           <paramset name="Targets" kind="dataObj">
@@ -6437,8 +6744,15 @@ easy for the observer to adjust it as needed for the brightness of the sky.</val
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="294bf61b-fd3a-4e3f-a565-bc0ac3289582" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -6450,7 +6764,7 @@ during the day (class=Daytime Calibration) for Baseline Standard.
 - The guide star has been removed from the target component, since the
 telescope will be stationary at zenith for this observation.
 
-- The Translation Stage has been set to "Follow in Z Only" since the telescope is stationary
+- The Translation Stage has been set to "Do not Follow" since the telescope is stationary
 and the Telescope Control System may not be up when this observation
 is taken.
 
@@ -6564,8 +6878,15 @@ time for the given instrument configuration.
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="e90d49b7-623c-4829-9af3-f2b8f23dc5a7" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -6601,6 +6922,8 @@ Step 3: Copy of step 2 to further adjust the centering of the target in the IFU.
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
             <param name="disperser" value="MIRROR"/>
+            <param name="disperserLambda" value="550.0"/>
+            <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="IFU_1"/>
             <param name="filter" value="r_G0303"/>
@@ -6720,8 +7043,15 @@ Step 3: Copy of step 2 to further adjust the centering of the target in the IFU.
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1635701400000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
         </paramset>
         <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="e35e9b79-ab14-4f2d-b73f-1f5adeecce66" name="Note">
           <paramset name="Note" kind="dataObj">
@@ -6865,6 +7195,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="606a0a71-6557-4620-ab9b-b0c4bfb7ca58"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="2c5f9d9b-dd36-43a1-985e-40b62f97c03c" value="16"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="b42e602a-51fa-4b44-85ae-c4910a679b2b"/>
@@ -6941,6 +7272,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="69ea82c3-9e20-49cc-8603-0ab3a02fea85"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="2c5f9d9b-dd36-43a1-985e-40b62f97c03c" value="18"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="31420daa-15eb-4c59-9e2f-d8efb5459989"/>
@@ -7353,10 +7685,12 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="ac78fa02-c2a6-4aee-bb25-263825886137"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="190718b9-50ad-45c9-8274-d2a9c89502c8" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="0d94736c-76b6-421f-9fcc-8744da7f9762"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="2c5f9d9b-dd36-43a1-985e-40b62f97c03c" value="12"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="8cccea12-1769-4b4c-9e83-ff70f79f1a75"/>
@@ -7694,6 +8028,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="5d9d7729-7b34-4764-a541-dad7d29209a8"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="2c5f9d9b-dd36-43a1-985e-40b62f97c03c" value="6"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="942934eb-409d-4529-baf3-3ccf8d78e2cf"/>
@@ -7838,6 +8173,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="e3cbe75a-8b3c-460f-9959-077abe9cde88"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="2c5f9d9b-dd36-43a1-985e-40b62f97c03c" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f45645a1-8c52-4703-8967-a62b8b23f45a"/>
@@ -8058,6 +8394,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="584a6768-6c9a-40c2-9725-7da8d73d185e"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="2c5f9d9b-dd36-43a1-985e-40b62f97c03c" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="300a9db0-5fb5-42fd-ae58-a8bb3167a2b3"/>
@@ -8102,6 +8439,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="294bf61b-fd3a-4e3f-a565-bc0ac3289582"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="2c5f9d9b-dd36-43a1-985e-40b62f97c03c" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="9203b1b4-4b50-4a8b-9818-561c478a1b2a"/>
@@ -8218,6 +8556,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="79e27718-4295-4d21-8ccb-ed8eed5459aa"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="190718b9-50ad-45c9-8274-d2a9c89502c8" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="1398f642-a19c-489e-82f6-1bf11a980cf9"/>
@@ -8250,6 +8589,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="a1b24a11-b110-4e25-abe9-2366dd5c2da8"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="2c5f9d9b-dd36-43a1-985e-40b62f97c03c" value="14"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a5613f95-03c2-4673-84bc-27dea85340b9"/>
@@ -8302,6 +8642,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="faf8d275-ccfa-4e22-a670-fd045cc592d4"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="2c5f9d9b-dd36-43a1-985e-40b62f97c03c" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a7502b90-dcdb-4447-9c7a-4b284e9e6329"/>
@@ -8518,6 +8859,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="31a0376c-0718-438e-b3fc-aad2b6e10172"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="2c5f9d9b-dd36-43a1-985e-40b62f97c03c" value="8"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="26032384-b381-42c0-9b2b-12321a037d9c"/>
@@ -8646,6 +8988,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="93986720-47e0-426a-b202-21844de0cb15"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="2c5f9d9b-dd36-43a1-985e-40b62f97c03c" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="50c878b3-6180-4be1-b0a5-23d0c8d781b9"/>
@@ -8786,6 +9129,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="a4b43a3e-98e1-4313-88f1-f1567c898d85"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="2c5f9d9b-dd36-43a1-985e-40b62f97c03c" value="8"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d5b33b21-7443-4fba-946f-6e28fa3791d8"/>
@@ -8870,6 +9214,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="60167289-39c1-4481-8952-8b0b6517484c"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="2c5f9d9b-dd36-43a1-985e-40b62f97c03c" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="baadf8bb-7a52-479c-93d0-6640886a0370"/>

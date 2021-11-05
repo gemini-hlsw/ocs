@@ -9,32 +9,35 @@ import GmosNorthType.FPUnitNorth._
 import GmosNorthType.FilterNorth._
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.FilterNorth
 
-case class GmosNIfu(blueprint:SpGmosNBlueprintIfu) extends GmosNBase[SpGmosNBlueprintIfu] {
+case class GmosNIfu(blueprint:SpGmosNBlueprintIfu) extends GmosNBase.WithTargetFolder[SpGmosNBlueprintIfu] {
 
-//  IF SPECTROSCOPY MODE == IFU
-//          INCLUDE FROM 'IFU BP' IN,
-//              Target group: {36}-{37}
-//              Baseline folder: {38}-{42}
-//          Where FPU!=None in BP (static and iterator), SET FPU from PI
-//              IFU acq obs have an iterator titled "Field image" with
-//                  FPU=None, the FPU must not be set here.
-//              IF FPU = 'IFU 1 SLIT' in PI then FPU='IFU Right Slit (red)'  in OT
-//          If not acq SET DISPERSER FROM PI
-//          For filter changes below, do not adjust exposure times.
-//          If acq ({36}, {41})
-//             If filter from PI != None, SET FILTER in static component
-//               to griz filter closest in central
-//               wavelength to the filter from PI
-//             else SET FILTER=r (as in BP)
-//          else SET FILTER FROM PI:
-//              IF FPU = "IFU 2 slits" in PI (IFU mode):
-//  	        IF FILTER=None, SET FILTER=r_G0303
-//                  SET CENTRAL WAVELENGTHS TO THE FILTER EFF WAVELENGTH
-//                   AND EFF WAVELENGTH +/- 10 nm (in GMOS iterators)
-//                  See http://www.gemini.edu/node/10637
+  // IF SPECTROSCOPY MODE == IFU
+  //         INCLUDE FROM 'IFU BP' IN,
+  //             Target folder: {36}-{38}
+  //             Baseline folder: {39}-{42}
+  //         Where FPU!=None in BP (static and iterator), SET FPU from PI
+  //             IFU acq obs have an iterator titled "Field image" with
+  //                 FPU=None, the FPU must not be set here.
+  //             IF FPU = 'IFU 1 SLIT' in PI then FPU='IFU Right Slit (red)'  in OT
+  //         If not acq SET DISPERSER FROM PI
+  //         For filter changes below, do not adjust exposure times.
+  //         If acq ({36}, {41})
+  //            If filter from PI != None, SET FILTER in static component
+  //              to griz filter closest in central
+  //              wavelength to the filter from PI
+  //            else SET FILTER=r (as in BP)
+  //         else SET FILTER FROM PI:
+  //             IF FPU = "IFU 2 slits" in PI (IFU mode):
+  // 	        IF FILTER=None, SET FILTER=r_G0303
+  //                 SET CENTRAL WAVELENGTHS TO THE FILTER EFF WAVELENGTH
+  //                  AND EFF WAVELENGTH +/- 10 nm (in GMOS iterators)
+  //                 See http://www.gemini.edu/node/10637
 
-  val targetGroup = 36 to 37
-  val baselineFolder = 38 to 42
+  //         IF AO in PI != None  # XBIN=YBIN=1 for AO imaging
+  //             For acquisition {36}, {41} SET XBIN=YBIN=1
+
+  val targetFolder = 36 to 38
+  val baselineFolder = 39 to 42
   val notes = Seq.empty
 
   val acq = Seq(36, 41)

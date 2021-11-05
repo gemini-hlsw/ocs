@@ -4,6 +4,8 @@ Version : 2013 October 9, Bryan Miller, set MOS slit width
 Version : 2013 October 10, AStephens, add Altair
 Version : 2013 November 10, Bryan Miller, set slit width for MOS acqs
 Version : 2014 May 9, AStephens, set AO imaging Xbin=Ybin=1 and slit spectroscopy Ybin=1
+Version : 2016 September 2, Bryan Miller, rules for MOS mask names
+Version : 2021 September 14, jscharwaechter, change target groups to folders, move science arcs into target folders, updates to xml templates
 
 Target and conditions information from the Phase I observations only
 needs to be entered into the template science observations. Daytime
@@ -31,8 +33,8 @@ INCLUDE BP{1}
 
 IF SPECTROSCOPY MODE == LONGSLIT
         INCLUDE FROM 'LONGSLIT BP' IN
-            Target group: {2} - {3}
-            Baseline folder: {4}-{8}
+            Target folder: {2} - {4}
+            Baseline folder: {5}-{8}
         For spec observations: {3}, {4}, {6}-{8}
             SET DISPERSER FROM PI
             SET FILTER FROM PI
@@ -46,8 +48,8 @@ IF SPECTROSCOPY MODE == LONGSLIT
         
 IF SPECTROSCOPY MODE == LONGSLIT N&S
         INCLUDE FROM 'LONGSLIT N&S BP' IN
-            Target group: {9} - {10}
-            Baseline folder: {11} - {16}
+            Target folder: {9} - {11}
+            Baseline folder: {12} - {16}
         For spec observations: {10}, {11}, {13}-{15}    
             SET DISPERSER FROM PI
             SET FILTER FROM PI
@@ -61,19 +63,27 @@ IF SPECTROSCOPY MODE == LONGSLIT N&S
 
 IF SPECTROSCOPY MODE == MOS
         INCLUDE FROM 'MOS BP' IN
-            Target group:   {20}, {21} - {23}
+            Target folder:   {20}, {21} - {23}
               IF PRE-IMAGING REQ == YES
                 INCLUDE {18}, {17}
               IF PRE-IMAGING REQ == NO
                 INCLUDE {19}
             Baseline folder: {24}-{26}
         For spec observations: {20}, {21}, {23}, {25}, {26}
-                SET DISPERSER FROM PI
-                SET FILTER FROM PI
-                For {20}, {21}
-                    SET MOS "Slit Width" from PI
-                For {25}, {26} 
-                    SET FPU (built-in longslit) using the width specified in PI
+            SET DISPERSER FROM PI
+            SET FILTER FROM PI
+            For {20}, {21}
+                SET MOS "Slit Width" from PI
+            For {25}, {26} 
+                SET FPU (built-in longslit) using the width specified in PI
+        For MOS observations in the target folder (not pre-image): any of {18} - {23}
+            SET "Custom Mask MDF" = G(N/S)YYYYS(Q/C/DD/SV/LP/FT)XXX-NN 
+                where: 
+                (N/S) is the site 
+                YYYYS is the semester, e.g. 2015A 
+                (Q/C/DD/SV/LP/FT) is the program type 
+                XXX is the program number, e.g. 001, or 012, or 123 
+                NN should be the string "NN" since the mask number is unknown
         For standard acquisition: {24}
             if FPU!=None in the OT inst. iterators, then SET FPU (built-in longslit) using the width specified in PI
         For acquisitions: {18}, {19}, and mask image {22}
@@ -85,19 +95,27 @@ IF SPECTROSCOPY MODE == MOS
 
 IF SPECTROSCOPY MODE == MOS N&S
         INCLUDE IN
-            Target group: {29}, {22}, {31}, {32}
+            Target folder: {29}, {22}, {31}, {32}
               IF PRE-IMAGING REQ == YES
                 INCLUDE {17}, {27}
               IF PRE-IMAGING REQ == NO
                 INCLUDE {28}
             Baseline folder: {30}, {33}-{35}
-       For spec observations: {29}, {31}, {32}, {34}, {35}
+        For spec observations: {29}, {31}, {32}, {34}, {35}
             SET DISPERSER FROM PI
             SET FILTER FROM PI
             For {29}, {31}
                 SET MOS "Slit Width" from PI
             For {34}, {35} 
                 SET FPU (built-in longslit) using the width specified in PI
+        For MOS observations in the target folder (not pre-image): any of {27} - {32}
+            SET "Custom Mask MDF" = G(N/S)YYYYS(Q/C/DD/SV/LP/FT)XXX-NN 
+                where: 
+                (N/S) is the site 
+                YYYYS is the semester, e.g. 2015A 
+                (Q/C/DD/SV/LP/FT) is the program type 
+                XXX is the program number, e.g. 001, or 012, or 123 
+                NN should be the string "NN" since the mask number is unknown
         For standard acquisition: {33}
             if FPU!=None in the OT inst. iterators, then SET FPU (built-in longslit) using the width specified in PI
         For acquisitions {27}, {28}; mask image {22}; and N&S dark {30}
@@ -109,8 +127,8 @@ IF SPECTROSCOPY MODE == MOS N&S
 
 IF SPECTROSCOPY MODE == IFU
         INCLUDE FROM 'IFU BP' IN,
-            Target group: {36}-{37}
-            Baseline folder: {38}-{42}
+            Target folder: {36}-{38}
+            Baseline folder: {39}-{42}
         Where FPU!=None in BP (static and iterator), SET FPU from PI
             IFU acq obs have an iterator titled "Field image" with
                 FPU=None, the FPU must not be set here.

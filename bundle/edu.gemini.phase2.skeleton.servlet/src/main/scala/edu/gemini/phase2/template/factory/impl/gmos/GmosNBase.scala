@@ -45,6 +45,9 @@ trait GmosNBase[B <: SpGmosNBlueprintBase] extends GmosBase[B] {
     def setFpu(fpu:GmosNorthType.FPUnitNorth):Either[String, Unit] =
       ed.updateInstrument(_.setFPUnit(fpu))
 
+    def setDefaultCustomMaskName: Either[String, Unit] =
+      ed.updateInstrument(_.setFPUnitCustomMask(defaultCustomMaskName(obs)))
+
     def getFpu:Either[String, GmosNorthType.FPUnitNorth] = for {
       i <- ed.instrumentDataObject.right
     } yield i.getFPUnit
@@ -143,4 +146,8 @@ trait GmosNBase[B <: SpGmosNBlueprintBase] extends GmosBase[B] {
         _ <- addAo(o).right
       } yield ()
   }
+}
+
+object GmosNBase {
+  trait WithTargetFolder[B <: SpGmosNBlueprintBase] extends GmosNBase[B] with TargetFolder[B]
 }

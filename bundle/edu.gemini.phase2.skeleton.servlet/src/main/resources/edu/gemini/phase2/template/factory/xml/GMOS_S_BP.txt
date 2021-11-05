@@ -1,7 +1,7 @@
 Instrument : GMOS-S
 Blueprint templates: GMOS_S_BP.xml
 
-Last update: 2013 November 10, Bryan Miller
+Last update: 2021 September 22, Julia Scharwaechter
 
 Target and conditions information from the Phase I observations only
 needs to be entered into the template science observations. Daytime
@@ -27,8 +27,8 @@ INCLUDE BP{1}
 
 IF SPECTROSCOPY MODE == LONGSLIT
         INCLUDE FROM 'LONGSLIT BP' IN
-            Target Group: {2} - {3}
-            Baseline Folder: {4} - {8}
+            Target Folder: {2} - {4}
+            Baseline Folder: {5} - {8}
         For spec observations: {3}, {4}, {6}-{8}
             SET DISPERSER FROM PI
             SET FILTER FROM PI
@@ -38,8 +38,8 @@ IF SPECTROSCOPY MODE == LONGSLIT
 
 IF SPECTROSCOPY MODE == LONGSLIT N&S
         INCLUDE FROM 'LONGSLIT N&S BP' IN
-            Target group: {9} - {10} 
-            Baseline folder: {11} - {16}
+            Target folder: {9} - {11} 
+            Baseline folder: {12} - {16}
         For spec observations: {10}, {11}, {13}-{15}    
             SET DISPERSER FROM PI
             SET FILTER FROM PI
@@ -49,19 +49,27 @@ IF SPECTROSCOPY MODE == LONGSLIT N&S
         
 IF SPECTROSCOPY MODE == MOS
         INCLUDE FROM 'MOS BP' IN
-            Target group: {20}, {21} - {23}
+            Target folder: {20}, {21} - {23}
               IF PRE-IMAGING REQ == YES
                 INCLUDE {18}, {17}
               IF PRE-IMAGING REQ == NO
                 INCLUDE {19}
             Baseline folder: {24}-{26}
         For spec observations: {20}, {21}, {23}, {25}, {26}
-                SET DISPERSER FROM PI
-                SET FILTER FROM PI
-                For {20}, {21}
-                    SET MOS "Slit Width" from PI
-                For {25}, {26} 
+            SET DISPERSER FROM PI
+            SET FILTER FROM PI
+            For {20}, {21}
+                 SET MOS "Slit Width" from PI
+            For {25}, {26} 
                     SET FPU (built-in longslit) using the width specified in PI
+        For MOS observations in the target folder (not pre-image): any of {18} - {23}
+            SET "Custom Mask MDF" = G(N/S)YYYYS(Q/C/DD/SV/LP/FT)XXX-NN 
+                where: 
+                (N/S) is the site 
+                YYYYS is the semester, e.g. 2015A 
+                (Q/C/DD/SV/LP/FT) is the program type 
+                XXX is the program number, e.g. 001, or 012, or 123 
+                NN should be the string "NN" since the mask number is unknown
         For standard acquisition: {24}
             if FPU!=None in the OT inst. iterators, then SET FPU (built-in longslit) using the width specified in PI
         For acquisitions: {18}, {19} and mask image {22}
@@ -69,7 +77,7 @@ IF SPECTROSCOPY MODE == MOS
 
 IF SPECTROSCOPY MODE == MOS N&S
         INCLUDE IN
-            Target group: {29}, {22}, {31}, {32}
+            Target folder: {29}, {22}, {31}, {32}
               IF PRE-IMAGING REQ == YES
                 INCLUDE {17}, {27}
               IF PRE-IMAGING REQ == NO
@@ -82,6 +90,14 @@ IF SPECTROSCOPY MODE == MOS N&S
                 SET MOS "Slit Width" from PI
             For {34}, {35} 
                 SET FPU (built-in longslit) using the width specified in PI
+       For MOS observations in the target folder (not pre-image): any of {27} - {32}
+            SET "Custom Mask MDF" = G(N/S)YYYYS(Q/C/DD/SV/LP/FT)XXX-NN 
+                where: 
+                (N/S) is the site 
+                YYYYS is the semester, e.g. 2015A 
+                (Q/C/DD/SV/LP/FT) is the program type 
+                XXX is the program number, e.g. 001, or 012, or 123 
+                NN should be the string "NN" since the mask number is unknown
         For standard acquisition: {33}
             if FPU!=None in the OT inst. iterators, then SET FPU (built-in longslit) using the width specified in PI
         For acquisitions: {27}, {28}; mask image {22}; and N&S dark {30}
@@ -89,8 +105,8 @@ IF SPECTROSCOPY MODE == MOS N&S
 
 IF SPECTROSCOPY MODE == IFU
         INCLUDE FROM 'IFU BP' IN,
-            Target group: {36}-{37}
-            Baseline folder: {38}-{42}
+            Target folder: {36}-{38}
+            Baseline folder: {39}-{42}
         Where FPU!=None in BP (static and iterator), SET FPU from PI
             IFU acq obs have an iterator titled "Field image" with
                 FPU=None, the FPU must not be set here.
@@ -104,15 +120,15 @@ IF SPECTROSCOPY MODE == IFU
            else SET FILTER=r (as in BP)
         else SET FILTER FROM PI
             IF FPU = "IFU 2 slits" in PI:
-	        IF FILTER=None, SET FILTER=r_G0326
+            IF FILTER=None, SET FILTER=r_G0326
                 SET CENTRAL WAVELENGTHS TO THE FILTER EFF WAVELENGTH
                  AND EFF WAVELENGTH + 5nm (if iteration over wavelength)
                 See http://www.gemini.edu/node/10637
 
 IF SPECTROSCOPY MODE == IFU N&S
         INCLUDE FROM 'IFU N&S BP' IN, 
-            Target group: {43}-{44}
-            Baseline folder: {45}-{50}
+            Target folder: {43}-{45}
+            Baseline folder: {46}-{50}
         Where FPU!=None in BP (static and iterator), SET FPU from PI
             IFU acq obs have an iterator titled "Field image" with
                 FPU=None, the FPU must not be set here.
@@ -126,7 +142,7 @@ IF SPECTROSCOPY MODE == IFU N&S
            else SET FILTER=r (as in BP)
         else SET FILTER FROM PI
             IF FPU = 'IFU 2 slits' in PI (IFU or IFU N&S mode):
-	        IF FILTER=None, SET FILTER=r_G0326
+            IF FILTER=None, SET FILTER=r_G0326
                 SET CENTRAL WAVELENGTHS TO THE FILTER EFF WAVELENGTH
                  AND EFF WAVELENGTH + 5nm (if iteration over wavelength)
                 See http://www.gemini.edu/node/10637
