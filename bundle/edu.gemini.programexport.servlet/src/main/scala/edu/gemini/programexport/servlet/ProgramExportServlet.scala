@@ -5,16 +5,14 @@ import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances
-import edu.gemini.spModel.core.{AuxFileSpectrum, BlackBody, EmissionLine, GaussianSource, LibraryNonStar, LibraryStar,
-  Magnitude, NonSiderealTarget, PointSource, PowerLaw, SPProgramID, SiderealTarget, SpatialProfile,
-  SpectralDistribution, TooTarget, UniformSource, UserDefinedSpectrum}
+import edu.gemini.spModel.core.{AuxFileSpectrum, BlackBody, EmissionLine, GaussianSource, LibraryNonStar, LibraryStar, Magnitude, NonSiderealTarget, PointSource, PowerLaw, SPProgramID, SiderealTarget, SpatialProfile, SpectralDistribution, TooTarget, UniformSource, UserDefinedSpectrum}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.TimingWindow
 import edu.gemini.spModel.gemini.obscomp.{SPProgram, SPSiteQuality}
 import edu.gemini.spModel.gemini.phase1.GsaPhase1Data
 import edu.gemini.spModel.guide._
 import edu.gemini.spModel.obs.SPObservation
-import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator
-import edu.gemini.spModel.obscomp.{SPGroup, SPNote}
+import edu.gemini.spModel.obs.plannedtime.SetupTime
+import edu.gemini.spModel.obscomp.{SPGroup, SPInstObsComp, SPNote}
 import edu.gemini.spModel.obslog._
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.seqcomp.SeqBase
@@ -22,7 +20,6 @@ import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env._
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.spModel.timeacct.{TimeAcctAllocation, TimeAcctAward, TimeAcctCategory}
-
 import argonaut.Argonaut._
 import argonaut.Json.JsonAssoc
 import argonaut._
@@ -32,12 +29,13 @@ import java.util.concurrent.TimeUnit
 import java.util.logging.{Level, Logger}
 import javax.servlet.ServletException
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
-
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-
 import scalaz._
 import Scalaz._
+import edu.gemini.spModel.util.SPTreeUtil
+
+import java.time.Duration
 
 final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Principal]) extends HttpServlet {
 
@@ -118,6 +116,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
       case t: TargetObsComp => Some((n.asInstanceOf[ISPObsComponent], t).asJson)
       case _ => None
     }
+
 
   implicit def MagnitudeEncodeJson: EncodeJson[Magnitude] =
     EncodeJson(m =>
@@ -402,11 +401,23 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         jEmptyObject
     })
 
-  implicit def ObservationFieldsEncodeJson: EncodeJson[(ISPObservation, SPObservation)] =
+  def ObservationSetupTime(ispObs: ISPObservation): Option[Duration] = {
+    val spObs = ispObs.getDataObject.asInstanceOf[SPObservation]
+    Option(SPTreeUtil.findInstrument(ispObs).asInstanceOf[SPInstObsComp]).map { i =>
+      spObs.getSetupTimeType match {
+        case SetupTime.Type.FULL => i.getSetupTime(ispObs)
+        case SetupTime.Type.REACQUISITION => i.getReacquisitionTime(ispObs)
+        case SetupTime.Type.NONE => Duration.ZERO
+      }
+    }
+  }
+
+  implicit def ObservationFieldsEncodeJson: EncodeJson[(ISPObservation, SPObservation)] = {
+    // Time / duration in ms.
     EncodeJson( { case (ispObs, spObs) =>
       ("obsLog" :=? Option(ObsLog.getIfExists(ispObs))) ->?:
-        ("totalTime" := PlannedTimeCalculator.instance.calc(ispObs).totalTime()) ->: // output in ms
         ("setupTimeType" := spObs.getSetupTimeType.toString) ->:
+        ("setupTime" :=? ObservationSetupTime(ispObs).map(_.toMillis)) ->?:
         ("tooOverrideRapid" := spObs.isOverrideRapidToo) ->:
         ("priority" := spObs.getPriority.displayValue) ->:
         ("execStatusOverride" :=? spObs.getExecStatusOverride.asScalaOpt.map(_.displayValue)) ->?:
@@ -414,8 +425,9 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         ("title" := spObs.getTitle) ->:
         jEmptyObject
     })
+  }
 
-  implicit def ObsLogEncodeJson: EncodeJson[ObsLog] = {
+    implicit def ObsLogEncodeJson: EncodeJson[ObsLog] = {
     EncodeJson(obslog => {
       jArray(obslog.getDatasetLabels.toList.map { l =>
         val rec = obslog.getDatasetRecord(l)
