@@ -21,6 +21,7 @@ import jsky.app.ot.tpe._
 import jsky.app.ot.tpe.feat.TpeGhostIfuFeature.{HrIfuTargetColor, ScaleMmToArcsec, SrIfuSkyColor, SrIfuTargetColor, highResolutionIfuArcsec, highResolutionSkyArcsec, standardResolutionIfuArcsec, standardResolutionSkyArcsec}
 import jsky.app.ot.util.{BasicPropertyList, OtColor, PropertyWatcher}
 
+import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scala.swing.Graphics2D
 
@@ -98,38 +99,38 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
             case GhostAsterism.SingleTarget(t, _) =>
               // IFU1
               val p = pm.getLocationFromTag(t.spTarget)
-              drawStandardResolutionIfu(g2d, p, AsTarget)
+              drawStandardResolutionIfu(g2d, p, Ifu1, AsTarget)
               drawStandardResolutionSky(g2d, p)
 
             case GhostAsterism.DualTarget(t1, t2, _) =>
               // IFU1
               val p1 = pm.getLocationFromTag(t1.spTarget)
-              drawStandardResolutionIfu(g2d, p1, AsTarget)
+              drawStandardResolutionIfu(g2d, p1, Ifu1, AsTarget)
               drawStandardResolutionSky(g2d, p1)
 
               // IFU2
               val p2 = pm.getLocationFromTag(t2.spTarget)
-              drawStandardResolutionIfu(g2d, p2, AsTarget)
+              drawStandardResolutionIfu(g2d, p2, Ifu2, AsTarget)
 
             case GhostAsterism.TargetPlusSky(t, s, _) =>
               // IFU1
               val p1 = pm.getLocationFromTag(t.spTarget)
-              drawStandardResolutionIfu(g2d, p1, AsTarget)
+              drawStandardResolutionIfu(g2d, p1, Ifu1, AsTarget)
               drawStandardResolutionSky(g2d, p1)
 
               // IFU2
               val p2 = pm.getLocationFromTag(s)
-              drawStandardResolutionIfu(g2d, p2, AsSky)
+              drawStandardResolutionIfu(g2d, p2, Ifu2, AsSky)
 
             case GhostAsterism.SkyPlusTarget(s, t, _) =>
               // IFU1
               val p1 = pm.getLocationFromTag(s)
-              drawStandardResolutionIfu(g2d, p1, AsSky)
+              drawStandardResolutionIfu(g2d, p1, Ifu1, AsSky)
               drawStandardResolutionSky(g2d, p1)
 
               // IFU2
               val p2 = pm.getLocationFromTag(t.spTarget)
-              drawStandardResolutionIfu(g2d, p2, AsTarget)
+              drawStandardResolutionIfu(g2d, p2, Ifu2, AsTarget)
 
             case GhostAsterism.HighResolutionTarget(t, _) =>
               // IFU1
@@ -143,7 +144,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
 
               // IFU2
               val p2 = pm.getLocationFromTag(s)
-              drawStandardResolutionIfu(g2d, p2, AsSky)
+              drawStandardResolutionIfu(g2d, p2, Ifu2, AsSky)
               drawHighResolutionSky(g2d, p2)
           }
         }
@@ -157,26 +158,34 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
     }
   }
 
-  private sealed trait IfuDisposition extends Product with Serializable
+  private sealed trait IfuNumber extends Product with Serializable {
+    def toInt: Int =
+      this match {
+        case Ifu1 => 1
+        case Ifu2 => 2
+      }
+  }
+  private case object Ifu1 extends IfuNumber
+  private case object Ifu2 extends IfuNumber
 
+  private sealed trait IfuDisposition extends Product with Serializable
   private case object AsTarget extends IfuDisposition
   private case object AsSky    extends IfuDisposition
 
-  /**
-   * Draw an IFU.
-   */
   private def drawHighResolutionIfu(g2d: Graphics2D, p: Point2D): Unit =
-    drawIfu(g2d, p, highResolutionIfuArcsec, HrIfuTargetColor)
+    drawIfu(g2d, p, "H", highResolutionIfuArcsec, HrIfuTargetColor)
 
-  private def drawStandardResolutionIfu(g2d: Graphics2D, p: Point2D, d: IfuDisposition): Unit =
+  private def drawStandardResolutionIfu(g2d: Graphics2D, p: Point2D, i: IfuNumber, d: IfuDisposition): Unit =
     drawIfu(
       g2d,
       p,
+      s"S${i.toInt}",
       standardResolutionIfuArcsec,
       if (d == AsTarget) SrIfuTargetColor else SrIfuSkyColor
     )
 
-  private def drawIfu(g2d: Graphics2D, p: Point2D, a: Area, c: Color): Unit = {
+  private def drawIfu(g2d: Graphics2D, p: Point2D, label: String, a: Area, c: Color): Unit = {
+
     // Transform the hexagon at the appropriate place.
     val trans: AffineTransform = {
       val t = AffineTransform.getTranslateInstance(p.getX, p.getY)
@@ -184,8 +193,41 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       t
     }
 
+    val aʹ = a.createTransformedArea(trans)
     g2d.setColor(c)
-    g2d.fill(a.createTransformedArea(trans))
+    g2d.fill(aʹ)
+
+    val ifuBounds = aʹ.getBounds2D
+    val origFont  = g2d.getFont
+
+    @tailrec def drawLabel(fontSize: Int): Unit = {
+
+      if (fontSize > 7) {
+        val curFont = g2d.getFont
+        g2d.setFont(curFont.deriveFont(fontSize.toFloat))
+        val fontMet = g2d.getFontMetrics
+        val iniBounds = fontMet.getStringBounds(label, g2d)
+        val strWidth = iniBounds.getWidth
+        val strHeight = iniBounds.getHeight
+        val strBounds = new Rectangle2D.Double(
+          ifuBounds.getCenterX - strWidth / 2.0,
+          ifuBounds.getCenterY - strHeight / 2.0,
+          strWidth,
+          strHeight
+        )
+
+        if (ifuBounds.contains(strBounds)) {
+          g2d.setColor(Color.black)
+          val x = strBounds.getX.toFloat
+          val y = strBounds.getY.toFloat + fontMet.getAscent
+          g2d.drawString(label, x, y)
+        } else
+          drawLabel(fontSize - 1)
+      }
+    }
+
+    drawLabel(origFont.getSize)
+    g2d.setFont(origFont)
   }
 
   /**
