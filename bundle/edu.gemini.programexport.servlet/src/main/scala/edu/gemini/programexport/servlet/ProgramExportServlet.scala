@@ -108,7 +108,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
 
   def componentFields(n: ISPNode): Option[Json] =
     n.dataObject.flatMap {
-      case p: SPProgram => Some(p.asJson)
+      case p: SPProgram => Some((n.asInstanceOf[ISPProgram], p).asJson)
       case n: SPNote => Some(n.asJson)
       case g: SPGroup => Some((n, g).asJson)
       case o: SPObservation => Some((n.asInstanceOf[ISPObservation], o).asJson)
@@ -357,22 +357,23 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         jEmptyObject
     })
 
-  implicit def ProgramFieldsEncodeJson: EncodeJson[SPProgram] =
-    EncodeJson(p =>
-      ("timeAccountAllocationCategories" := p.getTimeAcctAllocation) ->:
-        ("awardedTime" := p.getAwardedProgramTime.getMilliseconds) ->:
-        ("tooType" := p.getTooType.getDisplayValue) ->:
-        ("programMode" := p.getProgramMode.displayValue) ->:
-        ("isThesis" := p.isThesis) ->:
-        ("rolloverFlag" := p.getRolloverStatus) ->:
-        ("queueBand" := p.getQueueBand) ->:
-        ("affiliate" :=? Option(p.getPIAffiliate).map(_.displayValue)) ->?:
-        ("investigators" := p.getGsaPhase1Data.getCois.asScala.toList) ->:
-        ("piEmail" := p.getPIInfo.getEmail) ->:
-        ("piLastName" := p.getPILastName) ->:
-        ("piFirstName" := p.getPIFirstName) ->:
-        jEmptyObject
-    )
+  implicit def ProgramFieldsEncodeJson: EncodeJson[(ISPProgram, SPProgram)] =
+    EncodeJson { case (ispProg, spProg) =>
+      ("timeAccountAllocationCategories" := spProg.getTimeAcctAllocation) ->:
+        ("awardedTime" := spProg.getAwardedProgramTime.getMilliseconds) ->:
+        ("tooType" := spProg.getTooType.getDisplayValue) ->:
+        ("programMode" := spProg.getProgramMode.displayValue) ->:
+        ("isThesis" := spProg.isThesis) ->:
+        ("rolloverFlag" := spProg.getRolloverStatus) ->:
+        ("queueBand" := spProg.getQueueBand) ->:
+        ("affiliate" :=? Option(spProg.getPIAffiliate).map(_.displayValue)) ->?:
+        ("investigators" := spProg.getGsaPhase1Data.getCois.asScala.toList) ->:
+        ("piEmail" := spProg.getPIInfo.getEmail) ->:
+        ("piLastName" := spProg.getPILastName) ->:
+        ("piFirstName" := spProg.getPIFirstName) ->:
+        ("programId" := ispProg.getProgramID.toString) ->:
+      jEmptyObject
+    }
 
   implicit def NoteEncodeJson: EncodeJson[SPNote] =
     EncodeJson(n =>
@@ -423,6 +424,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         ("execStatusOverride" :=? spObs.getExecStatusOverride.asScalaOpt.map(_.displayValue)) ->?:
         ("phase2Status" := spObs.getPhase2Status.displayValue) ->:
         ("title" := spObs.getTitle) ->:
+        ("observationId" := ispObs.getObservationID.toString) ->:
         jEmptyObject
     })
   }
