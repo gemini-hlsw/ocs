@@ -6,6 +6,7 @@ import scala.collection.JavaConverters._
 import edu.gemini.spModel.gemini.gsaoi.blueprint.SpGsaoiBlueprint
 import edu.gemini.spModel.gemini.gsaoi.GsaoiSeqConfig
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi.Filter
+import edu.gemini.spModel.core.SPProgramID
 
 trait GsaoiBase extends GroupInitializer[SpGsaoiBlueprint] with TemplateDsl {
 
@@ -34,10 +35,10 @@ trait GsaoiBase extends GroupInitializer[SpGsaoiBlueprint] with TemplateDsl {
   // HACK: override superclass initialize to hang onto db reference
   var db: Option[TemplateDb] = None
 
-  override def initialize(db: TemplateDb): Maybe[ISPGroup] =
+  override def initialize(db: TemplateDb, pid: SPProgramID): Maybe[ISPGroup] =
     try {
       this.db = Some(db)
-      super.initialize(db)
+      super.initialize(db, pid)
     } finally {
       this.db = None
     }

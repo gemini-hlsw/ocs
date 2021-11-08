@@ -3,6 +3,7 @@ package edu.gemini.phase2.template.factory.impl
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.seqcomp.SeqConfigComp
 import edu.gemini.pot.sp.{SPComponentType, ISPSeqComponent, ISPGroup, ISPObservation}
+import edu.gemini.spModel.core.SPProgramID
 
 trait TemplateDsl {gi:GroupInitializer[_] =>
 
@@ -32,7 +33,7 @@ trait TemplateDsl {gi:GroupInitializer[_] =>
   def targetGroup: Seq[Int] =
     includes.getOrElse(TargetGroup, Nil)
 
-  def initialize(g:ISPGroup, db:TemplateDb):Maybe[Unit] =
+  def initialize(g:ISPGroup, db:TemplateDb, pid: SPProgramID):Maybe[Unit] =
     mutators.mapM_((mutate(g) _).tupled)
 
   private def mutate(g:ISPGroup)(e:Either[Seq[Int], ObsLocation], f:Mutator):Maybe[Unit] =

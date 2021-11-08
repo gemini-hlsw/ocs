@@ -6,6 +6,7 @@ import edu.gemini.spModel.gemini.nifs.blueprint.SpNifsBlueprintBase
 import edu.gemini.phase2.template.factory.impl._
 import edu.gemini.pot.sp.ISPGroup
 import edu.gemini.spModel.rich.pot.sp._
+import edu.gemini.spModel.core.SPProgramID
 
 trait NifsBase[B <: SpNifsBlueprintBase] extends GroupInitializer[B] with TemplateDsl2[InstNIFS] {
 
@@ -19,10 +20,10 @@ trait NifsBase[B <: SpNifsBlueprintBase] extends GroupInitializer[B] with Templa
 
   // HACK: override superclass initialize to hang onto db reference.
   var db:Option[TemplateDb] = None
-  override def initialize(db:TemplateDb):Maybe[ISPGroup] =
+  override def initialize(db:TemplateDb, pid: SPProgramID):Maybe[ISPGroup] =
     try {
       this.db = Some(db)
-      super.initialize(db)
+      super.initialize(db, pid)
     } finally {
       this.db = None
     }
@@ -44,7 +45,7 @@ trait NifsBase[B <: SpNifsBlueprintBase] extends GroupInitializer[B] with Templa
   def setExposure = mutateStatic[Double](_.setExposureTime(_))
 
   // When we set the disperser, we also set the wavelength
-  def setDisperser = mutateStatic[Disperser] { (o, d) => 
+  def setDisperser = mutateStatic[Disperser] { (o, d) =>
     o.setDisperser(d)
     o.setCentralWavelength(d.getWavelength)
   }

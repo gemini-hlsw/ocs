@@ -4,6 +4,7 @@ import edu.gemini.pot.sp.{ISPObservation, ISPGroup}
 import edu.gemini.spModel.gemini.gmos.blueprint.SpGmosSBlueprintLongslit
 import edu.gemini.phase2.template.factory.impl.TemplateDb
 import edu.gemini.spModel.gemini.gmos.{GmosSouthType, InstGmosSouth}
+import edu.gemini.spModel.core.SPProgramID
 
 case class GmosSLongslit(blueprint:SpGmosSBlueprintLongslit) extends GmosSBase.WithTargetFolder[SpGmosSBlueprintLongslit] {
 
@@ -22,7 +23,7 @@ case class GmosSLongslit(blueprint:SpGmosSBlueprintLongslit) extends GmosSBase.W
   val baselineFolder = 5 to 8
   val notes = Seq.empty
 
-  def initialize(grp:ISPGroup, db:TemplateDb):Either[String, Unit] = {
+  def initialize(grp:ISPGroup, db:TemplateDb, pid: SPProgramID):Either[String, Unit] = {
 
     def forSpecObservation(o:ISPObservation):Either[String, Unit] = for {
       _ <- o.setDisperser(blueprint.disperser).right

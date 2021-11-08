@@ -4,6 +4,7 @@ import edu.gemini.spModel.template.SpBlueprint
 import edu.gemini.phase2.template.factory.impl.GroupInitializer
 import edu.gemini.spModel.gemini.gmos.GmosCommonType
 import edu.gemini.pot.sp.ISPNode
+import edu.gemini.spModel.core.SPProgramID
 
 trait GmosBase[B <: SpBlueprint] extends GroupInitializer[B] {
 
@@ -19,9 +20,9 @@ trait GmosBase[B <: SpBlueprint] extends GroupInitializer[B] {
   //     (Q/C/DD/SV/LP/FT) is the program type
   //     XXX is the program number, e.g. 001, or 012, or 123
   //     NN should be the string "NN" since the mask number is unknown
-  def defaultCustomMaskName(n: ISPNode): String = {
+  def defaultCustomMaskName(pid: SPProgramID): String = {
     // or, in programmer-speak, delete the hyphens and add -NN
-    n.getProgramID.toString.filterNot(_ == '-') + "-NN"
+    pid.toString.filterNot(_ == '-') + "-NN"
   }
 
 }

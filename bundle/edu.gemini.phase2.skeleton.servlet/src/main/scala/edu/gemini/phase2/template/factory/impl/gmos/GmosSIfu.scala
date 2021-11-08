@@ -8,6 +8,7 @@ import GmosSouthType.FilterSouth._
 import edu.gemini.phase2.template.factory.impl.TemplateDb
 import edu.gemini.spModel.gemini.gmos.InstGmosCommon
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.FilterSouth
+import edu.gemini.spModel.core.SPProgramID
 
 case class GmosSIfu(blueprint:SpGmosSBlueprintIfu) extends GmosSBase.WithTargetFolder[SpGmosSBlueprintIfu] {
 
@@ -33,13 +34,13 @@ case class GmosSIfu(blueprint:SpGmosSBlueprintIfu) extends GmosSBase.WithTargetF
   //                  AND EFF WAVELENGTH + 5nm (if iteration over wavelength)
   //                 See http://www.gemini.edu/node/10637
 
-  val targetFolder = 36 to 39
+  val targetFolder = 36 to 38
   val baselineFolder = 39 to 42
   val notes = Seq.empty
 
   val acq = Seq(36, 41)
 
-  def initialize(group:ISPGroup, db:TemplateDb):Either[String, Unit] = forObservations(group, forAll)
+  def initialize(group:ISPGroup, db:TemplateDb, pid: SPProgramID):Either[String, Unit] = forObservations(group, forAll)
 
   def piFpu                    = if (blueprint.fpu == IFU_2) IFU_3 else blueprint.fpu
   def noneOrPiFpu(libFpu: Any) = if (libFpu == FPU_NONE) FPU_NONE else piFpu

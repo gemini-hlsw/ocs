@@ -19,6 +19,9 @@ import scala.collection.JavaConverters._
 import scalaz._, Scalaz._
 import Observation.{blueprint, target, condition, progTime}
 import Proposal.{ targets, observations }
+import edu.gemini.spModel.obscomp.SPGroup.GroupType
+import scala.collection.immutable
+import edu.gemini.spModel.template.TemplateGroup
 
 /**
  * Mixin for a specs test for template expansion. This provides code to expand a Phase 1 Proposal
@@ -54,7 +57,7 @@ abstract class TemplateSpec(xmlName: String) { this: SpecificationLike =>
       val f   = Phase1FolderFactory.create(pid.site, p).unsafeGet
       val ss  = new SkeletonShell(pid, SpProgramFactory.create(p), f)
       val tf  = TemplateFactoryImpl(templateDb)
-      val tfe = TemplateFolderExpansionFactory.expand(ss.folder, tf, preserveLibraryIds = true).unsafeGet
+      val tfe = TemplateFolderExpansionFactory.expand(ss.folder, tf, true, pid).unsafeGet
       func(p, SkeletonStoreService.store(ss, tfe, db).program)
     } catch {
 
@@ -169,5 +172,22 @@ abstract class TemplateSpec(xmlName: String) { this: SpecificationLike =>
     }
 
   }
+
+  /**
+   * Assert that there is a single TemplateGroup of the specified type.
+   */
+  def checkSingleTemplateGroupWithType(sp: ISPProgram, tpe: GroupType): Boolean =
+    groups(sp) match {
+      case g :: Nil =>
+        g.getDataObject match {
+          case tg: TemplateGroup =>
+            assert(tg.getGroupType() == tpe, s"Expected group type $tpe, found ${tg.getGroupType()}")
+            true
+          case other => sys.error(s"ISPTemplateGroup data object is a ${other.getClass.getName}; expected TemplateGroup.")
+        }
+      case gs =>
+        sys.error(s"Expected one template group, found ${gs.length}")
+    }
+
 
 }

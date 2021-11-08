@@ -17,6 +17,11 @@ import org.scalacheck.Arbitrary._
 import org.scalacheck.Prop.forAll
 import org.specs2.ScalaCheck
 import org.specs2.mutable.SpecificationLike
+import edu.gemini.spModel.obscomp.SPGroup.GroupType
+import edu.gemini.phase2.template.factory.impl.ObservationEditor
+import edu.gemini.spModel.gemini.gmos.InstGmosSouth
+import edu.gemini.spModel.obs.SPObservation
+import edu.gemini.spModel.gemini.gmos.SeqConfigGmosSouth
 
 class GmosSouthBlueprintSpec extends TemplateSpec("GMOS_S_BP.xml") with SpecificationLike with ScalaCheck {
 
@@ -99,30 +104,78 @@ class GmosSouthBlueprintSpec extends TemplateSpec("GMOS_S_BP.xml") with Specific
   // This is just a sanity check to ensure that expansion works and that referenced library
   // observations exist. It doesn't test the specifics of the blueprint logic.
 
-  "GMOS South Sanity Check" >> {
+  "GMOS South Check" >> {
 
     "Imaging Blueprint Expansion" ! forAll { (bp: GmosSBlueprintImaging) =>
-      expand(proposal(bp, List(1), MagnitudeBand.H)) { (p, sp) => true }
+      expand(proposal(bp, List(1), MagnitudeBand.H)) { (p, sp) =>
+
+        // REL-3987
+        checkSingleTemplateGroupWithType(sp, GroupType.TYPE_SCHEDULING)
+        groups(sp).flatMap(libs).toSet must_== Set(1)
+
+      }
     }
 
     "IFU Expansion" ! forAll { (bp: GmosSBlueprintIfu) =>
-      expand(proposal(bp, List(1), MagnitudeBand.H)) { (p, sp) => true }
+      expand(proposal(bp, List(1), MagnitudeBand.H)) { (p, sp) =>
+
+        // REL-3987
+        checkSingleTemplateGroupWithType(sp, GroupType.TYPE_FOLDER)
+        groups(sp).flatMap(libs).toSet must_== Set(36,37,38)
+
+      }
     }
 
     "IFU (N&S) Expansion" ! forAll { (bp: GmosSBlueprintIfuNs) =>
-      expand(proposal(bp, List(1), MagnitudeBand.H)) { (p, sp) => true }
+      expand(proposal(bp, List(1), MagnitudeBand.H)) { (p, sp) =>
+
+        // REL-3987
+        checkSingleTemplateGroupWithType(sp, GroupType.TYPE_FOLDER)
+        groups(sp).flatMap(libs).toSet must_== Set(43, 44, 45)
+
+      }
     }
 
     "Longslit Expansion" ! forAll { (bp: GmosSBlueprintLongslit) =>
-      expand(proposal(bp, List(1), MagnitudeBand.H)) { (p, sp) => true }
+      expand(proposal(bp, List(1), MagnitudeBand.H)) { (p, sp) =>
+
+        // REL-3987
+        checkSingleTemplateGroupWithType(sp, GroupType.TYPE_FOLDER)
+        groups(sp).flatMap(libs).toSet must_== Set(2, 3, 4)
+
+      }
     }
 
     "Longslit (N&S) Expansion" ! forAll { (bp: GmosSBlueprintLongslitNs) =>
-      expand(proposal(bp, List(1), MagnitudeBand.H)) { (p, sp) => true }
+      expand(proposal(bp, List(1), MagnitudeBand.H)) { (p, sp) =>
+
+        // REL-3987
+        checkSingleTemplateGroupWithType(sp, GroupType.TYPE_FOLDER)
+        groups(sp).flatMap(libs).toSet must_== Set(9, 10, 11)
+
+      }
     }
 
     "MOS Expansion" ! forAll { (bp: GmosSBlueprintMos) =>
-      expand(proposal(bp, List(1), MagnitudeBand.H)) { (p, sp) => true }
+      expand(proposal(bp, List(1), MagnitudeBand.H)) { (p, sp) =>
+
+        // REL-3987
+        checkSingleTemplateGroupWithType(sp, GroupType.TYPE_FOLDER)
+        groups(sp).flatMap(libs).toSet must_== {
+          if (bp.nodAndShuffle) Set(29, 22, 31, 32) ++ (if (bp.preImaging) Set(17, 27) else Set(28))
+          else                  Set(20, 21, 22, 23) ++ (if (bp.preImaging) Set(18, 17) else Set(19))
+        }
+        templateObservations(sp).filter { o =>
+          val ed = ObservationEditor[InstGmosSouth](o, InstGmosSouth.SP_TYPE, SeqConfigGmosSouth.SP_TYPE)
+          val om = ed.instrumentDataObject.right.toOption.map(_.getFPUnitCustomMask())
+          val exp = o.getProgramID().toString().filterNot(_ == '-') + "-NN"
+          om == Some(exp)
+        } .map(_.getDataObject.asInstanceOf[SPObservation].getLibraryId.toInt).toSet must_== {
+          if (bp.nodAndShuffle) Set(29, 22, 31, 32) ++ (if (bp.preImaging) Set(27) else Set(28))
+          else                  Set(20, 21, 22, 23) ++ (if (bp.preImaging) Set(18) else Set(19))
+        }
+
+      }
     }
 
   }

@@ -6,6 +6,7 @@ import edu.gemini.spModel.gemini.gmos.InstGmosCommon
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.Binning.ONE
 import edu.gemini.phase2.template.factory.impl.TemplateDb
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.FPUnitNorth._
+import edu.gemini.spModel.core.SPProgramID
 
 case class GmosNMos(blueprint:SpGmosNBlueprintMos) extends GmosNBase.WithTargetFolder[SpGmosNBlueprintMos] {
 
@@ -60,13 +61,13 @@ case class GmosNMos(blueprint:SpGmosNBlueprintMos) extends GmosNBase.WithTargetF
 
   val notes = Seq.empty
 
-  def initialize(group:ISPGroup, db:TemplateDb):Either[String, Unit] = {
+  def initialize(group:ISPGroup, db:TemplateDb, pid: SPProgramID):Either[String, Unit] = {
     val iniAo = withAoUpdate(db) _
     for {
       _ <- forObservations(group, spec, iniAo(forSpecObservation)).right
       _ <- forObservations(group, Seq(20, 21), _.setCustomSlitWidth(blueprint.fpu)).right
       _ <- forObservations(group, Seq(25, 26), iniAo(_.setFpu(blueprint.fpu))).right
-      _ <- forObservations(group, (18 to 23).filter(targetFolder.contains), _.setDefaultCustomMaskName).right
+      _ <- forObservations(group, (18 to 23).filter(targetFolder.contains), _.setDefaultCustomMaskName(pid)).right
       _ <- forObservations(group, Seq(24), iniAo(forStandardAcq)).right
       _ <- forObservations(group, Seq(17, 18, 19, 24).filter(all.contains), _.ifAo(_.setXyBin(ONE, ONE))).right
       _ <- forObservations(group, spec, _.ifAo(_.setYbin(ONE))).right

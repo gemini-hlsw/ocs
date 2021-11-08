@@ -8,6 +8,7 @@ import edu.gemini.spModel.gemini.gmos.GmosCommonType.Binning.ONE
 import GmosNorthType.FPUnitNorth._
 import GmosNorthType.FilterNorth._
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.FilterNorth
+import edu.gemini.spModel.core.SPProgramID
 
 case class GmosNIfu(blueprint:SpGmosNBlueprintIfu) extends GmosNBase.WithTargetFolder[SpGmosNBlueprintIfu] {
 
@@ -42,7 +43,7 @@ case class GmosNIfu(blueprint:SpGmosNBlueprintIfu) extends GmosNBase.WithTargetF
 
   val acq = Seq(36, 41)
 
-  def initialize(grp:ISPGroup, db:TemplateDb):Either[String, Unit] = forObservations(grp, withAoUpdate(db)(forAll))
+  def initialize(grp:ISPGroup, db:TemplateDb, pid: SPProgramID):Either[String, Unit] = forObservations(grp, withAoUpdate(db)(forAll))
 
   def piFpu                    = if (blueprint.fpu == IFU_2) IFU_3 else blueprint.fpu
   def noneOrPiFpu(libFpu: Any) = if (libFpu == FPU_NONE) FPU_NONE else piFpu

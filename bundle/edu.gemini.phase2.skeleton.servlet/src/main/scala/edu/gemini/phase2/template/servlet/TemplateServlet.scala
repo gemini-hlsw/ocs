@@ -16,6 +16,7 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse, HttpServlet}
 
 import scala.io.Source
 import scala.collection.JavaConverters._
+import edu.gemini.spModel.core.SPProgramID
 
 object TemplateServlet {
   val LOG = Logger.getLogger(getClass.getName)
@@ -47,14 +48,25 @@ final class TemplateServlet(templateFactory: TemplateFactory) extends HttpServle
 
   override def doPost(req: HttpServletRequest, res: HttpServletResponse) {
     send(for {
+      i <- getProgramId(req).right
       l <- items(req).right
       x <- phase1FolderXml(l).right
       f <- phase1Folder(x).right
-      p <- expandTemplates(f).right
+      p <- expandTemplates(f, i).right
     } yield p, res)
   }
 
   private val up = new ServletFileUpload(new DiskFileItemFactory)
+
+  private def getProgramId(req: HttpServletRequest): Either[Failure, SPProgramID] =
+    Option(req.getParameter("pid")) match {
+      case Some(s) =>
+        try Right(SPProgramID.toProgramID(s))
+        catch {
+          case e: Exception => Left(Failure(400, e.getMessage()))
+        }
+      case None => Left(Failure(400, "ProgramID parameter `pid` was not specified."))
+    }
 
   private def items(req: HttpServletRequest): Either[Failure, List[FileItem]] =
     if (!ServletFileUpload.isMultipartContent(req))
@@ -74,8 +86,8 @@ final class TemplateServlet(templateFactory: TemplateFactory) extends HttpServle
   private def phase1FolderXml(items: List[FileItem]): Either[Failure, String] =
     readItem("folder", items, it => Source.fromInputStream(it.getInputStream, "UTF-8").mkString)
 
-  private def expandTemplates(folder: Phase1Folder): Either[Failure, TemplateFolderExpansion] =
-    TemplateFolderExpansionFactory.expand(folder, templateFactory, false).left map { msg =>
+  private def expandTemplates(folder: Phase1Folder, pid: SPProgramID): Either[Failure, TemplateFolderExpansion] =
+    TemplateFolderExpansionFactory.expand(folder, templateFactory, false, pid).left map { msg =>
       Failure.badRequest(msg)
     }
 

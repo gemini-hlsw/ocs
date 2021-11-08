@@ -2,6 +2,7 @@ package jsky.app.ot.editor.template;
 
 import edu.gemini.phase2.core.model.TemplateFolderExpansion;
 import edu.gemini.spModel.core.Peer;
+import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioNode;
 import edu.gemini.spModel.pio.xml.PioXmlException;
@@ -96,10 +97,11 @@ public final class RegenerationClient {
         }
     }
 
-    public static Result expand(Phase1Folder folder, Peer peer, int timeoutMs) {
+    public static Result expand(Phase1Folder folder, SPProgramID pid, Peer peer, int timeoutMs) {
         // Setup to post the template folder XML.
         MultipartPostMethod post;
         post = new MultipartPostMethod(getUrl(peer));
+        post.addParameter("pid", pid.toString());
         post.addPart(makeFilePart(folder));
         post.setRequestHeader( "Accept-Encoding", ENC);
 

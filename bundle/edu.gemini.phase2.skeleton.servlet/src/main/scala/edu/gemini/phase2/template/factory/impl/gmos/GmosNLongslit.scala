@@ -7,6 +7,7 @@ import edu.gemini.spModel.gemini.gmos.{GmosNorthType, InstGmosNorth}
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.Binning.ONE
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.phase2.template.factory.impl.TargetFolder
+import edu.gemini.spModel.core.SPProgramID
 
 case class GmosNLongslit(blueprint: SpGmosNBlueprintLongslit) extends GmosNBase.WithTargetFolder[SpGmosNBlueprintLongslit] {
 
@@ -25,7 +26,7 @@ case class GmosNLongslit(blueprint: SpGmosNBlueprintLongslit) extends GmosNBase.
   val baselineFolder = 5 to 8
   val notes = Seq.empty
 
-  def initialize(grp: ISPGroup, db: TemplateDb): Either[String, Unit] = {
+  def initialize(grp: ISPGroup, db: TemplateDb, pid: SPProgramID): Either[String, Unit] = {
     val iniAo = withAoUpdate(db) _
 
     def forSpecObservation(o: ISPObservation): Either[String, Unit] = for {

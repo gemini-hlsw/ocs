@@ -6,6 +6,7 @@ import edu.gemini.phase2.template.factory.impl.TemplateDb
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.FPUnitNorth._
 import edu.gemini.spModel.gemini.gmos.InstGmosCommon
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.Binning.ONE
+import edu.gemini.spModel.core.SPProgramID
 
 case class GmosNMosNs(blueprint:SpGmosNBlueprintMos) extends GmosNBase.WithTargetFolder[SpGmosNBlueprintMos] {
 
@@ -24,7 +25,7 @@ case class GmosNMosNs(blueprint:SpGmosNBlueprintMos) extends GmosNBase.WithTarge
   //                 SET MOS "Slit Width" from PI
   //             For {34}, {35}
   //                 SET FPU (built-in longslit) using the width specified in PI
-  //         For MOS observations in the target folder (not pre-image): any of {27} - {32}
+  //         For MOS observations in the target folder (not pre-image): any of {27} - {32} ******** ALSO ADDED 22 HERE, IS THIS RIGHT?
   //             SET "Custom Mask MDF" = G(N/S)YYYYS(Q/C/DD/SV/LP/FT)XXX-NN
   //                 where:
   //                 (N/S) is the site
@@ -60,13 +61,13 @@ case class GmosNMosNs(blueprint:SpGmosNBlueprintMos) extends GmosNBase.WithTarge
 
   val notes = Seq.empty
 
-  def initialize(grp:ISPGroup, db:TemplateDb):Either[String, Unit] = {
+  def initialize(grp:ISPGroup, db:TemplateDb, pid: SPProgramID):Either[String, Unit] = {
     val iniAo = withAoUpdate(db) _
     for {
       _ <- forObservations(grp, spec, iniAo(forSpecObservation)).right
       _ <- forObservations(grp, Seq(29, 31), _.setCustomSlitWidth(blueprint.fpu)).right
       _ <- forObservations(grp, Seq(34, 35), iniAo(_.setCustomSlitWidth(blueprint.fpu))).right
-      _ <- forObservations(grp, (27 to 23).filter(targetFolder.contains), _.setDefaultCustomMaskName).right
+      _ <- forObservations(grp, (List(22) ++ (27 to 32)).filter(targetFolder.contains), _.setDefaultCustomMaskName(pid)).right
       _ <- forObservations(grp, Seq(33), iniAo(forStandardAcq)).right
       _ <- forObservations(grp, Seq(17, 27, 28, 33).filter(all.contains), _.ifAo(_.setXyBin(ONE, ONE))).right
       _ <- forObservations(grp, Seq(29, 30, 31, 32, 34, 35), _.ifAo(_.setYbin(ONE))).right

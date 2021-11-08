@@ -5,6 +5,7 @@ import edu.gemini.spModel.template.SpBlueprint
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.obscomp.SPGroup.GroupType
 import edu.gemini.spModel.obscomp.SPGroup
+import edu.gemini.spModel.core.SPProgramID
 
 /**
  * Trait for a class which knows how to find and setup an ISPGroup for a
@@ -20,10 +21,10 @@ trait GroupInitializer[B <: SpBlueprint] {
   def groupType: GroupType = GroupType.TYPE_SCHEDULING
   def instrumentType:SPComponentType = blueprint.instrumentType
 
-  def initialize(db:TemplateDb):Maybe[ISPGroup] =
+  def initialize(db:TemplateDb, pid: SPProgramID):Maybe[ISPGroup] =
     for {
       grp <- db.groups(program, (targetGroup ++ baselineFolder).map(_.toString), notes).right
-      _ <- initialize(grp, db).right
+      _ <- initialize(grp, db, pid).right
     } yield {
       grp.getDataObject() match {
         case g: SPGroup => g.setGroupType(groupType); grp.setDataObject(g)
@@ -32,7 +33,7 @@ trait GroupInitializer[B <: SpBlueprint] {
       grp
     }
 
-  def initialize(group:ISPGroup, db:TemplateDb):Maybe[Unit]
+  def initialize(group:ISPGroup, db:TemplateDb, pid: SPProgramID):Maybe[Unit]
 
   protected def forObservations(group:ISPGroup, idList:Seq[Int], ini:ISPObservation => Maybe[Unit]):Maybe[Unit] =
     for {

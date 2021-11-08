@@ -5,6 +5,7 @@ import edu.gemini.spModel.gemini.gmos.blueprint.SpGmosSBlueprintMos
 import edu.gemini.phase2.template.factory.impl.TemplateDb
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.FPUnitSouth._
 import edu.gemini.spModel.gemini.gmos.InstGmosCommon
+import edu.gemini.spModel.core.SPProgramID
 
 case class GmosSMos(blueprint:SpGmosSBlueprintMos) extends GmosSBase.WithTargetFolder[SpGmosSBlueprintMos] {
 
@@ -55,12 +56,12 @@ case class GmosSMos(blueprint:SpGmosSBlueprintMos) extends GmosSBase.WithTargetF
 
   val notes = Seq.empty
 
-  def initialize(group:ISPGroup, db:TemplateDb):Either[String, Unit] =
+  def initialize(group:ISPGroup, db:TemplateDb, pid: SPProgramID):Either[String, Unit] =
     for {
       _ <- forObservations(group, spec, forSpecObservation).right
       _ <- forObservations(group, Seq(20, 21), _.setCustomSlitWidth(blueprint.fpu)).right
       _ <- forObservations(group, Seq(25, 26), _.setFpu(blueprint.fpu)).right
-      _ <- forObservations(group, (18 to 23).filter(targetFolder.contains), _.setDefaultCustomMaskName).right
+      _ <- forObservations(group, (18 to 23).filter(targetFolder.contains), _.setDefaultCustomMaskName(pid)).right
       _ <- forObservations(group, Seq(24), forStandardAcq).right
     } yield ()
 

@@ -7,6 +7,7 @@ import edu.gemini.spModel.gemini.gmos.GmosSouthType.FilterSouth._
 import edu.gemini.phase2.template.factory.impl.TemplateDb
 import edu.gemini.spModel.gemini.gmos.InstGmosCommon
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.FilterSouth
+import edu.gemini.spModel.core.SPProgramID
 
 case class GmosSIfuNs(blueprint:SpGmosSBlueprintIfuNs) extends GmosSBase.WithTargetFolder[SpGmosSBlueprintIfuNs] {
 
@@ -38,7 +39,7 @@ case class GmosSIfuNs(blueprint:SpGmosSBlueprintIfuNs) extends GmosSBase.WithTar
 
   val acq = Seq(43, 49)
 
-  def initialize(grp:ISPGroup, db:TemplateDb):Either[String, Unit] = forObservations(grp, forAll)
+  def initialize(grp:ISPGroup, db:TemplateDb, pid: SPProgramID):Either[String, Unit] = forObservations(grp, forAll)
 
   def piFpu                    = if (blueprint.fpu == IFU_2) IFU_3 else blueprint.fpu
   def noneOrPiFpu(libFpu: Any) = if (libFpu == FPU_NONE) FPU_NONE else piFpu

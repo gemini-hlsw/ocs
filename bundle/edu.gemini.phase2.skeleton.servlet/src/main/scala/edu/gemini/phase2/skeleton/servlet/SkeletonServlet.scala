@@ -90,7 +90,7 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
       p       <- proposal(x, convert).right
       i       <- programId(l, p).right
       s       <- makeSkeleton(i, p).right
-      t       <- expandTemplates(s.folder).right
+      t       <- expandTemplates(s.folder, i.toSp).right
       a       <- pdfAttachment(l).right
     } yield SkeletonRequest(i, p, a, s, t)
 
@@ -194,8 +194,8 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
       f <- Phase1FolderFactory.create(s, p).right
     } yield new SkeletonShell(id.toSp, SpProgramFactory.create(p), f)).left map { Failure.badRequest }
 
-  private def expandTemplates(folder: Phase1Folder): Either[Failure, TemplateFolderExpansion] =
-    TemplateFolderExpansionFactory.expand(folder, templateFactory, false).left map { msg =>
+  private def expandTemplates(folder: Phase1Folder, pid: SPProgramID): Either[Failure, TemplateFolderExpansion] =
+    TemplateFolderExpansionFactory.expand(folder, templateFactory, false, pid).left map { msg =>
       Failure.badRequest(msg)
     }
 

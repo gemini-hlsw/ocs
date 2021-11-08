@@ -4,6 +4,7 @@ import edu.gemini.phase2.template.factory.impl._
 import edu.gemini.spModel.gemini.visitor.blueprint.SpVisitorBlueprint
 import edu.gemini.spModel.gemini.visitor.{VisitorConfig, VisitorInstrument}
 import edu.gemini.pot.sp.{ISPGroup, ISPObservation, SPComponentType}
+import edu.gemini.spModel.core.SPProgramID
 
 //noinspection MutatorLikeMethodIsParameterless
 trait VisitorBase extends GroupInitializer[SpVisitorBlueprint] with TemplateDsl {
@@ -36,10 +37,10 @@ trait VisitorBase extends GroupInitializer[SpVisitorBlueprint] with TemplateDsl 
   // HACK: override superclass initialize to hang onto db reference
   var db: Option[TemplateDb] = None
 
-  override def initialize(db: TemplateDb): Maybe[ISPGroup] =
+  override def initialize(db: TemplateDb, pid: SPProgramID): Maybe[ISPGroup] =
     try {
       this.db = Some(db)
-      super.initialize(db)
+      super.initialize(db, pid)
     } finally {
       this.db = None
     }

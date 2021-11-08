@@ -5,6 +5,7 @@ import edu.gemini.spModel.gemini.gmos.blueprint.SpGmosNBlueprintLongslitNs
 import edu.gemini.phase2.template.factory.impl.TemplateDb
 import edu.gemini.spModel.gemini.gmos.{GmosNorthType, InstGmosNorth}
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.Binning.ONE
+import edu.gemini.spModel.core.SPProgramID
 
 case class GmosNLongslitNs(blueprint:SpGmosNBlueprintLongslitNs) extends GmosNBase.WithTargetFolder[SpGmosNBlueprintLongslitNs] {
 
@@ -23,7 +24,7 @@ case class GmosNLongslitNs(blueprint:SpGmosNBlueprintLongslitNs) extends GmosNBa
   val baselineFolder = 12 to 16
   val notes = Seq.empty
 
-  def initialize(grp:ISPGroup, db:TemplateDb):Either[String, Unit] = {
+  def initialize(grp:ISPGroup, db:TemplateDb, pid: SPProgramID):Either[String, Unit] = {
     val iniAo = withAoUpdate(db) _
 
     def forSpecObservations(o:ISPObservation):Either[String, Unit] = for {

@@ -9,6 +9,7 @@ import edu.gemini.spModel.target.SPTarget
 
 import SpGracesBlueprint.ReadMode._
 import SpGracesBlueprint.FiberMode._
+import edu.gemini.spModel.core.SPProgramID
 
 case class Graces(blueprint: SpGracesBlueprint, exampleTarget: Option[SPTarget]) extends GroupInitializer[SpGracesBlueprint] with TemplateDsl2[VisitorInstrument] {
   val program = "GRACES PHASE I/II MAPPING BPS"
@@ -21,10 +22,10 @@ case class Graces(blueprint: SpGracesBlueprint, exampleTarget: Option[SPTarget])
 
   // This seems to be necessary, sorry.
   var db:Option[TemplateDb] = None
-  override def initialize(db:TemplateDb):Maybe[ISPGroup] =
+  override def initialize(db:TemplateDb, pid: SPProgramID):Maybe[ISPGroup] =
     try {
       this.db = Some(db)
-      super.initialize(db)
+      super.initialize(db, pid)
     } finally {
       this.db = None
     }

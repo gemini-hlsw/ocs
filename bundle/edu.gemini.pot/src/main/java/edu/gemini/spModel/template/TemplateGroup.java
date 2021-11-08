@@ -5,6 +5,7 @@ import edu.gemini.pot.sp.ISPNodeInitializer;
 import edu.gemini.pot.sp.ISPTemplateGroup;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.gemini.init.SimpleNodeInitializer;
+import edu.gemini.spModel.obscomp.SPGroup.GroupType;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
@@ -14,7 +15,7 @@ import edu.gemini.spModel.util.VersionToken;
 
 public final class TemplateGroup extends AbstractDataObject {
 
-    public static final String VERSION = "2015A-1";
+    public static final String VERSION = "2021A-1";
     public static final SPComponentType SP_TYPE = SPComponentType.TEMPLATE_GROUP;
 
     public static final ISPNodeInitializer<ISPTemplateGroup, TemplateGroup> NI =
@@ -25,10 +26,12 @@ public final class TemplateGroup extends AbstractDataObject {
     private static final String PARAM_STATUS = "status";
     private static final String PARAM_VERSION_TOKEN = "versionToken";
     private static final String PARAM_VERSION_TOKEN_NEXT = "versionTokenNext";
+    private static final String PARAM_GROUP_TYPE = "groupType";
 
     // Public property identifiers (for truly mutable stuff only)
     public static final String PROP_STATUS = PARAM_STATUS;
     public static final String PROP_SPLIT_TOKEN = PARAM_VERSION_TOKEN;
+    public static final String PROP_GROUP_TYPE = PARAM_GROUP_TYPE;
 
     /**
      * Observation status values.
@@ -72,6 +75,7 @@ public final class TemplateGroup extends AbstractDataObject {
     private String blueprintId;
     private Status status = Status.DEFAULT;
     private VersionToken versionToken = new VersionToken(1);
+    private GroupType groupType = GroupType.DEFAULT;
 
     public TemplateGroup() {
         setTitle("Untitled");
@@ -87,6 +91,16 @@ public final class TemplateGroup extends AbstractDataObject {
         if (blueprintId == null)
             throw new IllegalArgumentException("blueprintId cannot be null.");
         this.blueprintId = blueprintId;
+    }
+
+    public GroupType getGroupType() {
+        return groupType;
+    }
+
+    public void setGroupType(GroupType groupType) {
+        if (groupType == null)
+            throw new IllegalArgumentException("groupType cannot be null");
+        this.groupType = groupType;
     }
 
     public Status getStatus() {
@@ -120,6 +134,7 @@ public final class TemplateGroup extends AbstractDataObject {
         Pio.addParam(factory, ps, PARAM_STATUS, status.name());
         Pio.addParam(factory, ps, PARAM_VERSION_TOKEN, versionToken.toString());
         Pio.addIntParam(factory, ps, PARAM_VERSION_TOKEN_NEXT, versionToken.nextSegment());
+        Pio.addEnumParam(factory, ps, PARAM_GROUP_TYPE, groupType);
         return ps;
     }
 
@@ -128,7 +143,7 @@ public final class TemplateGroup extends AbstractDataObject {
         super.setParamSet(paramSet);
         blueprintId = Pio.getValue(paramSet, PARAM_BLUEPRINT);
         status = Status.valueOf(Pio.getValue(paramSet, PARAM_STATUS));
-
+        groupType = Pio.getEnumValue(paramSet, PROP_GROUP_TYPE, GroupType.DEFAULT);
         int[] segments = VersionToken.segments(Pio.getValue(paramSet, PARAM_VERSION_TOKEN, versionToken.toString()));
         int next = Pio.getIntValue(paramSet, PARAM_VERSION_TOKEN_NEXT, 1);
         versionToken = VersionToken.apply(segments, next);

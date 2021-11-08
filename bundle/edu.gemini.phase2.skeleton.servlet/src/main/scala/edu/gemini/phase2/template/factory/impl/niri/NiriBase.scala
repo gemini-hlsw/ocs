@@ -8,6 +8,7 @@ import edu.gemini.pot.sp.{ISPGroup, ISPObservation}
 import scala.collection.JavaConverters._
 import InstNIRI.{READ_MODE_PROP, FILTER_PROP, EXPOSURE_TIME_PROP, COADDS_PROP}
 import edu.gemini.spModel.seqcomp.{SeqRepeatDarkObs, SeqConfigComp}
+import edu.gemini.spModel.core.SPProgramID
 
 trait NiriBase extends GroupInitializer[SpNiriBlueprint] with TemplateDsl with AltairSupport {
 
@@ -43,10 +44,10 @@ trait NiriBase extends GroupInitializer[SpNiriBlueprint] with TemplateDsl with A
 
   // HACK: override superclass initialize to hang onto db reference
   var db:Option[TemplateDb] = None
-  override def initialize(db:TemplateDb):Maybe[ISPGroup] =
+  override def initialize(db:TemplateDb, pid: SPProgramID):Maybe[ISPGroup] =
     try {
       this.db = Some(db)
-      super.initialize(db)
+      super.initialize(db, pid)
     } finally {
       this.db = None
     }

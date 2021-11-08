@@ -5,6 +5,7 @@ import edu.gemini.spModel.gemini.gmos.blueprint.SpGmosSBlueprintMos
 import edu.gemini.phase2.template.factory.impl.TemplateDb
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.FPUnitSouth._
 import edu.gemini.spModel.gemini.gmos.InstGmosCommon
+import edu.gemini.spModel.core.SPProgramID
 
 case class GmosSMosNs(blueprint:SpGmosSBlueprintMos) extends GmosSBase.WithTargetFolder[SpGmosSBlueprintMos] {
 
@@ -23,7 +24,7 @@ case class GmosSMosNs(blueprint:SpGmosSBlueprintMos) extends GmosSBase.WithTarge
   //                 SET MOS "Slit Width" from PI
   //             For {34}, {35}
   //                 SET FPU (built-in longslit) using the width specified in PI
-  //        For MOS observations in the target folder (not pre-image): any of {27} - {32}
+  //        For MOS observations in the target folder (not pre-image): any of {27} - {32} // ALSO ADDED 22
   //             SET "Custom Mask MDF" = G(N/S)YYYYS(Q/C/DD/SV/LP/FT)XXX-NN
   //                 where:
   //                 (N/S) is the site
@@ -55,12 +56,12 @@ case class GmosSMosNs(blueprint:SpGmosSBlueprintMos) extends GmosSBase.WithTarge
 
   val notes = Seq.empty
 
-  def initialize(grp:ISPGroup, db:TemplateDb):Either[String, Unit] =
+  def initialize(grp:ISPGroup, db:TemplateDb, pid: SPProgramID):Either[String, Unit] =
     for {
       _ <- forObservations(grp, spec, forSpecObservation).right
       _ <- forObservations(grp, Seq(29, 31), _.setCustomSlitWidth(blueprint.fpu)).right
       _ <- forObservations(grp, Seq(34, 35), _.setFpu(blueprint.fpu)).right
-      _ <- forObservations(grp, (27 to 32).filter(targetFolder.contains), _.setDefaultCustomMaskName).right
+      _ <- forObservations(grp, (List(22) ++ (27 to 32)).filter(targetFolder.contains), _.setDefaultCustomMaskName(pid)).right
       _ <- forObservations(grp, Seq(33), forStandardAcq).right
     } yield ()
 

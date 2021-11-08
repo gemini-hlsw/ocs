@@ -7,6 +7,7 @@ import edu.gemini.pot.sp.{ISPObservation, ISPGroup}
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.Binning.ONE
 import edu.gemini.spModel.gemini.gmos.GmosNorthType._
 import edu.gemini.phase2.template.factory.impl.TemplateDb
+import edu.gemini.spModel.core.SPProgramID
 
 
 case class GmosNImaging(blueprint:SpGmosNBlueprintImaging) extends GmosNBase[SpGmosNBlueprintImaging] {
@@ -23,7 +24,7 @@ case class GmosNImaging(blueprint:SpGmosNBlueprintImaging) extends GmosNBase[SpG
   val baselineFolder = Seq.empty
   val notes = Seq.empty
 
-  def initialize(grp:ISPGroup, db:TemplateDb):Either[String, Unit] = {
+  def initialize(grp:ISPGroup, db:TemplateDb, pid: SPProgramID):Either[String, Unit] = {
 
     def forAll(obs:ISPObservation):Either[String, Unit] = for {
       _ <- obs.setFilters(filters.asScala).right

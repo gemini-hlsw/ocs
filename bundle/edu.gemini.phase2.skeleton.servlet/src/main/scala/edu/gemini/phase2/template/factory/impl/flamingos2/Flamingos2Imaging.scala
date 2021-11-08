@@ -6,6 +6,7 @@ import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.flamingos2.blueprint.SpFlamingos2BlueprintImaging
 
 import scala.collection.JavaConverters._
+import edu.gemini.spModel.core.SPProgramID
 
 case class Flamingos2Imaging(blueprint:SpFlamingos2BlueprintImaging) extends Flamingos2Base[SpFlamingos2BlueprintImaging] {
 
@@ -50,7 +51,7 @@ case class Flamingos2Imaging(blueprint:SpFlamingos2BlueprintImaging) extends Fla
     }
   }
 
-  def initialize(grp:ISPGroup, db:TemplateDb): Maybe[Unit] = for {
+  def initialize(grp:ISPGroup, db:TemplateDb, pid: SPProgramID): Maybe[Unit] = for {
     _ <- forObservations(grp, science, forScience).right
     _ <- forObservations(grp, cal,     forCalibrations(db)).right
   } yield ()

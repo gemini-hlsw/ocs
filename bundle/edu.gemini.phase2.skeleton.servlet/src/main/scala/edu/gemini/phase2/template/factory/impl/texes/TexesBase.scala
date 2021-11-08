@@ -5,6 +5,7 @@ import edu.gemini.spModel.gemini.texes.blueprint.SpTexesBlueprint
 import edu.gemini.spModel.gemini.texes.{TexesParams, InstTexes}
 import scala.Some
 import edu.gemini.pot.sp.{ISPObservation, ISPGroup}
+import edu.gemini.spModel.core.SPProgramID
 
 trait TexesBase extends GroupInitializer[SpTexesBlueprint] with TemplateDsl {
   val program = "TEXES PHASE I/II MAPPING BPS"
@@ -21,10 +22,10 @@ trait TexesBase extends GroupInitializer[SpTexesBlueprint] with TemplateDsl {
   // HACK: override superclass initialize to hang onto db reference
   var db: Option[TemplateDb] = None
 
-  override def initialize(db: TemplateDb): Maybe[ISPGroup] =
+  override def initialize(db: TemplateDb, pid: SPProgramID): Maybe[ISPGroup] =
     try {
       this.db = Some(db)
-      super.initialize(db)
+      super.initialize(db, pid)
     } finally {
       this.db = None
     }

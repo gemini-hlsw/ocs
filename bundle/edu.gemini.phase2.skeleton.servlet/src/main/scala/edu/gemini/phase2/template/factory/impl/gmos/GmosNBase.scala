@@ -12,6 +12,7 @@ import edu.gemini.spModel.obsclass.ObsClass
 import edu.gemini.spModel.obscomp.InstConstants
 import edu.gemini.spModel.gemini.altair.AltairParams.Mode
 import edu.gemini.spModel.rich.pot.sp.obsWrapper
+import edu.gemini.spModel.core.SPProgramID
 
 trait GmosNBase[B <: SpGmosNBlueprintBase] extends GmosBase[B] {
 
@@ -45,8 +46,8 @@ trait GmosNBase[B <: SpGmosNBlueprintBase] extends GmosBase[B] {
     def setFpu(fpu:GmosNorthType.FPUnitNorth):Either[String, Unit] =
       ed.updateInstrument(_.setFPUnit(fpu))
 
-    def setDefaultCustomMaskName: Either[String, Unit] =
-      ed.updateInstrument(_.setFPUnitCustomMask(defaultCustomMaskName(obs)))
+    def setDefaultCustomMaskName(pid: SPProgramID): Either[String, Unit] =
+      ed.updateInstrument(_.setFPUnitCustomMask(defaultCustomMaskName(pid)))
 
     def getFpu:Either[String, GmosNorthType.FPUnitNorth] = for {
       i <- ed.instrumentDataObject.right
