@@ -143,7 +143,7 @@ public class InstantiationFunctor extends DBAbstractFunctor {
         final ISPGroup group = fact.createGroup(prog, null);
         final SPGroup groupData = (SPGroup) group.getDataObject();
         groupData.setTitle(createGroupTitle(templateGroupData, targetData));
-        groupData.setGroupType(SPGroup.GroupType.TYPE_SCHEDULING);
+        groupData.setGroupType(templateGroupData.getGroupType());
         group.setDataObject(groupData);
         return group;
     }
