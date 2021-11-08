@@ -109,7 +109,7 @@ class GmosSouthBlueprintSpec extends TemplateSpec("GMOS_S_BP.xml") with Specific
       expand(proposal(bp, List(1), MagnitudeBand.H)) { (p, sp) => true }
     }
 
-    "IFU (N&S) Expansion" ! forAll { (bp: GmosSBlueprintIfu) =>
+    "IFU (N&S) Expansion" ! forAll { (bp: GmosSBlueprintIfuNs) =>
       expand(proposal(bp, List(1), MagnitudeBand.H)) { (p, sp) => true }
     }
 
