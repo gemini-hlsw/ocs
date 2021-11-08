@@ -6,6 +6,8 @@ import edu.gemini.phase2.template.factory.impl.ObservationEditor
 import edu.gemini.spModel.gemini.gmos.{SeqConfigGmosSouth, GmosSouthType, InstGmosSouth}
 import edu.gemini.spModel.obscomp.InstConstants
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.CustomSlitWidth
+import edu.gemini.phase2.template.factory.impl.TargetFolder
+import edu.gemini.spModel.core.SPProgramID
 
 
 trait GmosSBase[B <: SpBlueprint] extends GmosBase[B] {
@@ -43,6 +45,9 @@ trait GmosSBase[B <: SpBlueprint] extends GmosBase[B] {
     def setFpu(fpu:GmosSouthType.FPUnitSouth):Either[String, Unit] =
       ed.updateInstrument(_.setFPUnit(fpu))
 
+    def setDefaultCustomMaskName(pid: SPProgramID): Either[String, Unit] =
+      ed.updateInstrument(_.setFPUnitCustomMask(defaultCustomMaskName(pid)))
+
     def getFpu:Either[String, GmosSouthType.FPUnitSouth] = for {
       i <- ed.instrumentDataObject.right
     } yield i.getFPUnit
@@ -67,4 +72,8 @@ trait GmosSBase[B <: SpBlueprint] extends GmosBase[B] {
 
   val program = "GMOS-S PHASE I/II MAPPING BPS"
 
+}
+
+object GmosSBase {
+  trait WithTargetFolder[B <: SpBlueprint] extends GmosSBase[B] with TargetFolder[B]
 }

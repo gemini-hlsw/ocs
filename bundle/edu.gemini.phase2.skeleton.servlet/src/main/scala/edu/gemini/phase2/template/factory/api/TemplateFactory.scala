@@ -1,6 +1,7 @@
 package edu.gemini.phase2.template.factory.api
 
 import edu.gemini.spModel.template.{Phase1Group, SpBlueprint}
+import edu.gemini.spModel.core.SPProgramID
 
 /**
  * Provides the API for a service that creates template groups.
@@ -13,6 +14,6 @@ trait TemplateFactory {
    * erased from the generated program; if true they will be preserved, which can be helpful for
    * testing.
    */
-  def expand(blueprint: SpBlueprint, pig: Phase1Group, preserveLibraryIds: Boolean): Either[String, BlueprintExpansion]
+  def expand(blueprint: SpBlueprint, pig: Phase1Group, preserveLibraryIds: Boolean, pid: SPProgramID): Either[String, BlueprintExpansion]
 
 }

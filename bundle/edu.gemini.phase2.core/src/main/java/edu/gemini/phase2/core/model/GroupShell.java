@@ -67,6 +67,7 @@ public final class GroupShell extends BaseGroupShell {
         final TemplateGroup dataObj = new TemplateGroup();
         dataObj.setBlueprintId(blueprintId);
         dataObj.setTitle(group.getTitle());
+        dataObj.setGroupType(group.getGroupType());
         return new TemplateGroupShell(dataObj, argList, obsComponents, observations);
     }
 

@@ -6,6 +6,7 @@ import edu.gemini.phase2.template.factory.impl._
 import edu.gemini.pot.sp.{ISPGroup, ISPObservation}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams._
 import edu.gemini.spModel.telescope.PosAngleConstraint
+import edu.gemini.spModel.core.SPProgramID
 
 trait GnirsBase[B <: SpGnirsBlueprintBase] extends GroupInitializer[B] with TemplateDsl2[InstGNIRS] {
 
@@ -44,10 +45,10 @@ trait GnirsBase[B <: SpGnirsBlueprintBase] extends GroupInitializer[B] with Temp
 
   // HACK: override superclass initialize to hang onto db reference
   var db:Option[TemplateDb] = None
-  override def initialize(db:TemplateDb):Maybe[ISPGroup] =
+  override def initialize(db:TemplateDb, pid: SPProgramID):Maybe[ISPGroup] =
     try {
       this.db = Some(db)
-      super.initialize(db)
+      super.initialize(db, pid)
     } finally {
       this.db = None
     }

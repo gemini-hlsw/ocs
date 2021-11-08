@@ -8,6 +8,7 @@ import edu.gemini.spModel.core.MagnitudeBand.H
 
 import scala.collection.JavaConverters._
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
+import edu.gemini.spModel.core.SPProgramID
 
 case class Flamingos2Longslit(blueprint:SpFlamingos2BlueprintLongslit, exampleTarget: Option[SPTarget]) extends Flamingos2Base[SpFlamingos2BlueprintLongslit] {
 
@@ -53,7 +54,7 @@ case class Flamingos2Longslit(blueprint:SpFlamingos2BlueprintLongslit, exampleTa
 
   val scienceAndTellurics = Seq(12,15,16,18)
 
-  def initialize(grp:ISPGroup, db:TemplateDb): Either[String, Unit] = for {
+  def initialize(grp:ISPGroup, db:TemplateDb, pid: SPProgramID): Either[String, Unit] = for {
       _ <- forObservations(grp, forAll).right
       _ <- forObservations(grp, scienceAndTellurics, forScienceAndTellurics).right
     } yield ()

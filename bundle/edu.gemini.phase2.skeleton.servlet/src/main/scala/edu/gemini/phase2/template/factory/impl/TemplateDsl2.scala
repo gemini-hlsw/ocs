@@ -10,6 +10,7 @@ import edu.gemini.spModel.gemini.altair.InstAltair
 import edu.gemini.spModel.gemini.seqcomp.SeqRepeatOffset
 import scala.collection.JavaConverters._
 import scala.collection.{mutable => m}
+import edu.gemini.spModel.core.SPProgramID
 
 trait TemplateDsl2[I <: SPInstObsComp] { gi:GroupInitializer[_] =>
 
@@ -44,7 +45,7 @@ trait TemplateDsl2[I <: SPInstObsComp] { gi:GroupInitializer[_] =>
   def baselineFolder = includes.get(BaseCal).getOrElse(Nil)
   def targetGroup = includes.get(TargetGroup).getOrElse(Nil)
 
-  def initialize(g:ISPGroup, db:TemplateDb):Maybe[Unit] = mutators.mapM_((mutate(g) _).tupled)
+  def initialize(g:ISPGroup, db:TemplateDb, pid: SPProgramID):Maybe[Unit] = mutators.mapM_((mutate(g) _).tupled)
 
   private def mutate(g:ISPGroup)(e:Either[Seq[Int], ObsLocation], f:Mutator):Maybe[Unit] = e match {
     case Left(ns) => mutate(g, ns, f)

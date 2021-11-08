@@ -20,6 +20,7 @@ import javax.servlet.http.{HttpServletResponse, HttpServletRequest, HttpServlet}
 import scala.collection.JavaConverters._
 import scala.xml.{XML, Elem}
 import java.security.Principal
+import edu.gemini.spModel.core.SPProgramID
 
 
 object SkeletonResetServlet {
@@ -71,14 +72,14 @@ final class SkeletonResetServlet(odb: IDBDatabaseService, templateFactory: Templ
     try {
       for {
         folderShell <- Option(prog.getTemplateFolder).toRight(Failure.badRequest("Program doesn't have a template folder")).right
-        expansion   <- expandTemplates(Phase1Folder.extract(folderShell)).right
+        expansion   <- expandTemplates(Phase1Folder.extract(folderShell), prog.getProgramID()).right
       } yield expansion
     } catch {
       case ex: Exception => Left(Failure.error(ex))
     }
 
-  private def expandTemplates(folder: Phase1Folder): Either[Failure, TemplateFolderExpansion] =
-    TemplateFolderExpansionFactory.expand(folder, templateFactory, false).left map {
+  private def expandTemplates(folder: Phase1Folder, pid: SPProgramID): Either[Failure, TemplateFolderExpansion] =
+    TemplateFolderExpansionFactory.expand(folder, templateFactory, false, pid).left map {
       msg => Failure.badRequest(msg)
     }
 

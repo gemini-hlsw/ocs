@@ -8,38 +8,39 @@ import GmosSouthType.FilterSouth._
 import edu.gemini.phase2.template.factory.impl.TemplateDb
 import edu.gemini.spModel.gemini.gmos.InstGmosCommon
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.FilterSouth
+import edu.gemini.spModel.core.SPProgramID
 
-case class GmosSIfu(blueprint:SpGmosSBlueprintIfu) extends GmosSBase[SpGmosSBlueprintIfu] {
+case class GmosSIfu(blueprint:SpGmosSBlueprintIfu) extends GmosSBase.WithTargetFolder[SpGmosSBlueprintIfu] {
 
-//  IF SPECTROSCOPY MODE == IFU
-//          INCLUDE FROM 'IFU BP' IN,
-//              Target group: {36}-{37}
-//              Baseline folder: {38}-{42}
-//          Where FPU!=None in BP (static and iterator), SET FPU from PI
-//              IFU acq obs have an iterator titled "Field image" with
-//                  FPU=None, the FPU must not be set here.
-//              IF FPU = 'IFU 1 SLIT' in PI then SET FPU='IFU Right Slit (red)' in OT
-//          If not acq SET DISPERSER FROM PI
-//          For filter changes below, do not adjust exposure times.
-//          If acq ({36}, {41})
-//             If filter from PI != None, SET FILTER in static component
-//               to ugriz filter closest in central
-//               wavelength to the filter from PI
-//             else SET FILTER=r (as in BP)
-//          else SET FILTER FROM PI
-//              IF FPU = "IFU 2 slits" in PI:
-//  	        IF FILTER=None, SET FILTER=r_G0326
-//                  SET CENTRAL WAVELENGTHS TO THE FILTER EFF WAVELENGTH
-//                   AND EFF WAVELENGTH + 5nm (if iteration over wavelength)
-//                  See http://www.gemini.edu/node/10637
+  // IF SPECTROSCOPY MODE == IFU
+  //         INCLUDE FROM 'IFU BP' IN,
+  //             Target folder: {36}-{38}
+  //             Baseline folder: {39}-{42}
+  //         Where FPU!=None in BP (static and iterator), SET FPU from PI
+  //             IFU acq obs have an iterator titled "Field image" with
+  //                 FPU=None, the FPU must not be set here.
+  //             IF FPU = 'IFU 1 SLIT' in PI then SET FPU='IFU Right Slit (red)' in OT
+  //         If not acq SET DISPERSER FROM PI
+  //         For filter changes below, do not adjust exposure times.
+  //         If acq ({36}, {41})
+  //            If filter from PI != None, SET FILTER in static component
+  //              to ugriz filter closest in central
+  //              wavelength to the filter from PI
+  //            else SET FILTER=r (as in BP)
+  //         else SET FILTER FROM PI
+  //             IF FPU = "IFU 2 slits" in PI:
+  //             IF FILTER=None, SET FILTER=r_G0326
+  //                 SET CENTRAL WAVELENGTHS TO THE FILTER EFF WAVELENGTH
+  //                  AND EFF WAVELENGTH + 5nm (if iteration over wavelength)
+  //                 See http://www.gemini.edu/node/10637
 
-  val targetGroup = 36 to 37
-  val baselineFolder = 38 to 42
+  val targetFolder = 36 to 38
+  val baselineFolder = 39 to 42
   val notes = Seq.empty
 
   val acq = Seq(36, 41)
 
-  def initialize(group:ISPGroup, db:TemplateDb):Either[String, Unit] = forObservations(group, forAll)
+  def initialize(group:ISPGroup, db:TemplateDb, pid: SPProgramID):Either[String, Unit] = forObservations(group, forAll)
 
   def piFpu                    = if (blueprint.fpu == IFU_2) IFU_3 else blueprint.fpu
   def noneOrPiFpu(libFpu: Any) = if (libFpu == FPU_NONE) FPU_NONE else piFpu

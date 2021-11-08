@@ -5,6 +5,7 @@ import edu.gemini.pot.sp.{ISPObservation, ISPGroup}
 import edu.gemini.spModel.gemini.flamingos2.blueprint.SpFlamingos2BlueprintMos
 
 import scala.collection.JavaConverters._
+import edu.gemini.spModel.core.SPProgramID
 
 
 final case class Flamingos2Mos(blueprint:SpFlamingos2BlueprintMos) extends Flamingos2Base[SpFlamingos2BlueprintMos] {
@@ -56,7 +57,7 @@ final case class Flamingos2Mos(blueprint:SpFlamingos2BlueprintMos) extends Flami
   val scienceAndTellurics: Seq[Int] =
     Seq(34,36,37,39)
 
-  override def initialize(grp:ISPGroup, db:TemplateDb): Maybe[Unit] =
+  override def initialize(grp:ISPGroup, db:TemplateDb, pid: SPProgramID): Maybe[Unit] =
     forObservations(grp, scienceAndTellurics, forScienceAndTellurics)
 
   def forScienceAndTellurics(obs:ISPObservation): Maybe[Unit] =

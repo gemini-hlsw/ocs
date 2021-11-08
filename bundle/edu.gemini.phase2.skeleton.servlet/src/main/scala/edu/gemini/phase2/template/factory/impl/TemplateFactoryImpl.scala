@@ -37,12 +37,13 @@ import edu.gemini.spModel.gemini.gpi.blueprint.SpGpiBlueprint
 import edu.gemini.phase2.template.factory.impl.gpi.Gpi
 import edu.gemini.spModel.gemini.graces.blueprint.SpGracesBlueprint
 import edu.gemini.phase2.template.factory.impl.graces.Graces
+import edu.gemini.spModel.core.SPProgramID
 
 case class TemplateFactoryImpl(db: TemplateDb) extends TemplateFactory {
 
   type TargetId = String
 
-  def expand(blueprint: SpBlueprint, pig: Phase1Group, preserveLibraryIds: Boolean): Either[String, BlueprintExpansion] = {
+  def expand(blueprint: SpBlueprint, pig: Phase1Group, preserveLibraryIds: Boolean, pid: SPProgramID): Either[String, BlueprintExpansion] = {
     // template groups are editable and all arguments can be removed so there
     // may not be an example target
     def sampleTarget: Option[SPTarget] =
@@ -51,7 +52,7 @@ case class TemplateFactoryImpl(db: TemplateDb) extends TemplateFactory {
 
     for {
       ini <- initializer(blueprint, sampleTarget).right
-      grp <- ini.initialize(db).right
+      grp <- ini.initialize(db, pid).right
     } yield convert(blueprint, pig, grp, ini, preserveLibraryIds)
   }
 

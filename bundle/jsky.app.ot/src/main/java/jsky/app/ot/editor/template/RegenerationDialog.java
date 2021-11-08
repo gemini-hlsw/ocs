@@ -266,7 +266,7 @@ public final class RegenerationDialog extends JDialog {
                 publish("Could not find a peer to contact for template observation expansion.");
                 return false;
             }
-            Result res = RegenerationClient.expand(folder, p, 10000);
+            Result res = RegenerationClient.expand(folder, program.getProgramID(), p, 10000);
             if (res.isFailure()) {
                 publish(res.failure.code.message + " " + res.failure.detail);
                 return false;

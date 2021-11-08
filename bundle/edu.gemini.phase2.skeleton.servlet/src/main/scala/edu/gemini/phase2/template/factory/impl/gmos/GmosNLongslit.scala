@@ -6,13 +6,15 @@ import edu.gemini.phase2.template.factory.impl.TemplateDb
 import edu.gemini.spModel.gemini.gmos.{GmosNorthType, InstGmosNorth}
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.Binning.ONE
 import edu.gemini.spModel.rich.pot.sp._
+import edu.gemini.phase2.template.factory.impl.TargetFolder
+import edu.gemini.spModel.core.SPProgramID
 
-case class GmosNLongslit(blueprint: SpGmosNBlueprintLongslit) extends GmosNBase[SpGmosNBlueprintLongslit] {
+case class GmosNLongslit(blueprint: SpGmosNBlueprintLongslit) extends GmosNBase.WithTargetFolder[SpGmosNBlueprintLongslit] {
 
   // IF SPECTROSCOPY MODE == LONGSLIT
   //         INCLUDE FROM 'LONGSLIT BP' IN
-  //             Target group: {2} - {3}
-  //             Baseline folder: {4}-{8}
+  //             Target folder: {2} - {4}
+  //             Baseline folder: {5}-{8}
   //         For spec observations: {3}, {4}, {6}-{8}
   //             SET DISPERSER FROM PI
   //             SET FILTER FROM PI
@@ -20,11 +22,11 @@ case class GmosNLongslit(blueprint: SpGmosNBlueprintLongslit) extends GmosNBase[
   //         For acquisitions: {2}, {5}
   //             if FPU!=None in the OT inst. iterators, then SET FPU FROM PI
 
-  val targetGroup = 2 to 3
-  val baselineFolder = 4 to 8
+  val targetFolder = 2 to 4
+  val baselineFolder = 5 to 8
   val notes = Seq.empty
 
-  def initialize(grp: ISPGroup, db: TemplateDb): Either[String, Unit] = {
+  def initialize(grp: ISPGroup, db: TemplateDb, pid: SPProgramID): Either[String, Unit] = {
     val iniAo = withAoUpdate(db) _
 
     def forSpecObservation(o: ISPObservation): Either[String, Unit] = for {
