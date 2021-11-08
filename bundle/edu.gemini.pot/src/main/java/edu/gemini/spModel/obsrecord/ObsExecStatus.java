@@ -22,4 +22,5 @@ public enum ObsExecStatus implements DisplayableSpType, DescribableSpType {
 
     public String displayValue() { return displayValue; }
     public String description()  { return description;  }
-    @Override public String toString() { return displayValue; }}
+    @Override public String toString() { return displayValue; }
+}

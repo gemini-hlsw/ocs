@@ -10,8 +10,8 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.TimingWindow
 import edu.gemini.spModel.gemini.obscomp.{SPProgram, SPSiteQuality}
 import edu.gemini.spModel.gemini.phase1.GsaPhase1Data
 import edu.gemini.spModel.guide._
-import edu.gemini.spModel.obs.SPObservation
-import edu.gemini.spModel.obs.plannedtime.SetupTime
+import edu.gemini.spModel.obs.{ObsClassService, ObsQaStateService, ObservationStatus, SPObservation}
+import edu.gemini.spModel.obs.plannedtime.{PlannedTimeCalculator, SetupTime}
 import edu.gemini.spModel.obscomp.{SPGroup, SPInstObsComp, SPNote}
 import edu.gemini.spModel.obslog._
 import edu.gemini.spModel.rich.pot.sp._
@@ -99,8 +99,8 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
       // We also want to identify groups by their types in the JSON output code.
       o match {
         case _: SPProgram => t.name
-        case gp: SPGroup  => s"${t.name}_${(gp.getGroupType == SPGroup.GroupType.TYPE_FOLDER) ? "FOLDER" | "SCHEDULING"}-$i"
-        case _            => s"${t.name}-$i"
+        case gp: SPGroup => s"${t.name}_${(gp.getGroupType == SPGroup.GroupType.TYPE_FOLDER) ? "FOLDER" | "SCHEDULING"}-$i"
+        case _ => s"${t.name}-$i"
       },
       n.children.zipWithIndex.foldLeft(("key" := n.getNodeKey.toString) ->: j) { case (jp, (c, x)) => process_(c, x) ->?: jp }
     )
@@ -140,7 +140,8 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
       ("partnerTime" := TimeUnit.SECONDS.toMillis(a.getPartnerAward.getSeconds)) ->:
         ("programTime" := TimeUnit.SECONDS.toMillis(a.getProgramAward.getSeconds)) ->:
         ("category" := c.getDisplayName) ->:
-        jEmptyObject}
+        jEmptyObject
+    }
     )
 
   implicit def TimeAccountAllocationEncodeJson: EncodeJson[TimeAcctAllocation] =
@@ -250,9 +251,9 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
     EncodeJson(p => {
       val (te, sp, idx) = p
       sp.getTarget match {
-        case st: SiderealTarget     => (te, sp, st, idx).asJson
+        case st: SiderealTarget => (te, sp, st, idx).asJson
         case nst: NonSiderealTarget => (te, sp, nst, idx).asJson
-        case _: TooTarget           => jEmptyObject
+        case _: TooTarget => jEmptyObject
       }
     })
 
@@ -290,7 +291,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
   // The second last parameter is the index of the guide probe.
   // The last parameter is the index of the primary guide star.
   implicit def ManualGroupGuideProbeMapEntryEncodeJson: EncodeJson[(TargetEnvironment, GuideProbe, OptsList[SPTarget], Int, Option[Int])] =
-    EncodeJson( p => {
+    EncodeJson(p => {
       val (te, gp, oolst, gpidx, pgsidx) = p
       ("targets" := oolst.toList.zipWithIndex.map { case (sp, idx) => (te, sp, Some(idx)) }) ->:
         ("primaryGuideStarIndex" :=? pgsidx) ->?:
@@ -330,7 +331,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
   // A general encoding of a GuideGrp that has an implicit JSON encoder.
   // This works for T = UserTarget and T = ManualGroup.
   implicit def GeneralGuideGrpEncodeJson[T](implicit enc: EncodeJson[(TargetEnvironment, T)]): EncodeJson[(TargetEnvironment, List[T])] =
-    EncodeJson( { case (te, lst) =>
+    EncodeJson({ case (te, lst) =>
       lst.map(t => (te, t)).asJson
     })
 
@@ -372,7 +373,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         ("piLastName" := spProg.getPILastName) ->:
         ("piFirstName" := spProg.getPIFirstName) ->:
         ("programId" := ispProg.getProgramID.toString) ->:
-      jEmptyObject
+        jEmptyObject
     }
 
   implicit def NoteEncodeJson: EncodeJson[SPNote] =
@@ -396,7 +397,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
     )
 
   implicit def GroupEncodeJson: EncodeJson[(ISPNode, SPGroup)] =
-    EncodeJson( { case (n, g) =>
+    EncodeJson({ case (n, g) =>
       ("key" := n.getNodeKey.toString) ->:
         ("name" := g.getTitle) ->:
         jEmptyObject
@@ -404,7 +405,9 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
 
   def ObservationSetupTime(ispObs: ISPObservation): Option[Duration] = {
     val spObs = ispObs.getDataObject.asInstanceOf[SPObservation]
-    Option(SPTreeUtil.findInstrument(ispObs).asInstanceOf[SPInstObsComp]).map { i =>
+    Option(SPTreeUtil.findInstrument(ispObs))
+      .flatMap(_.dataObject)
+      .map(_.asInstanceOf[SPInstObsComp]).map { i =>
       spObs.getSetupTimeType match {
         case SetupTime.Type.FULL => i.getSetupTime(ispObs)
         case SetupTime.Type.REACQUISITION => i.getReacquisitionTime(ispObs)
@@ -415,21 +418,24 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
 
   implicit def ObservationFieldsEncodeJson: EncodeJson[(ISPObservation, SPObservation)] = {
     // Time / duration in ms.
-    EncodeJson( { case (ispObs, spObs) =>
+    EncodeJson({ case (ispObs, spObs) =>
       ("obsLog" :=? Option(ObsLog.getIfExists(ispObs))) ->?:
         ("setupTimeType" := spObs.getSetupTimeType.toString) ->:
         ("setupTime" :=? ObservationSetupTime(ispObs).map(_.toMillis)) ->?:
         ("tooOverrideRapid" := spObs.isOverrideRapidToo) ->:
         ("priority" := spObs.getPriority.displayValue) ->:
-        ("execStatusOverride" :=? spObs.getExecStatusOverride.asScalaOpt.map(_.displayValue)) ->?:
+        ("qaState" := ObsQaStateService.getObsQaState(ispObs).name) ->:
+        ("obsStatus" := ObservationStatus.computeFor(ispObs).name) ->:
         ("phase2Status" := spObs.getPhase2Status.displayValue) ->:
         ("title" := spObs.getTitle) ->:
+        // TODO: Do we want the header value here or the log value? I don't think we want the display value.
+        ("obsClass" := ObsClassService.lookupObsClass(ispObs).headerValue) ->:
         ("observationId" := ispObs.getObservationID.toString) ->:
         jEmptyObject
     })
   }
 
-    implicit def ObsLogEncodeJson: EncodeJson[ObsLog] = {
+  implicit def ObsLogEncodeJson: EncodeJson[ObsLog] = {
     EncodeJson(obslog => {
       jArray(obslog.getDatasetLabels.toList.map { l =>
         val rec = obslog.getDatasetRecord(l)
@@ -444,7 +450,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
   def sequenceNode(n: ISPNode): Option[JsonAssoc] =
     n.dataObject.flatMap {
       case _: SeqBase => Option(n.getContextObservation).map(sequence)
-      case _          => None
+      case _ => None
     }
 
   def sequence(o: ISPObservation): JsonAssoc = {
@@ -452,13 +458,16 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
       .extractSequence(o, null, ConfigValMapInstances.TO_SEQUENCE_VALUE)
       .getAllSteps.toList
 
-    "sequence" := steps.map {s =>
-      s.itemEntries.toList.foldLeft(jEmptyObject) { (j, e) =>
-        // e is an ItemEntry and the value should have been mapped to a String by TO_SEQUENCE_VALUE.
-        // I suspect this has something to do with Scala / Java Option since TO_SEQUENCE_VALUE returns a
-        // Java Option<String>.
-        (e.getKey.getPath := e.getItemValue.toString) ->: j
-      }
+    val pts = PlannedTimeCalculator.instance.calc(o).toPlannedStepSummary
+
+    "sequence" := steps.zipWithIndex.map { case (s, idx) =>
+      ("totalTime" := pts.getStepTime(idx)) ->:
+        s.itemEntries.toList.foldLeft(jEmptyObject) { (j, e) =>
+          // e is an ItemEntry and the value should have been mapped to a String by TO_SEQUENCE_VALUE.
+          // I suspect this has something to do with Scala / Java Option since TO_SEQUENCE_VALUE returns a
+          // Java Option<String>.
+          (e.getKey.getPath := e.getItemValue.toString) ->: j
+        }
     }
   }
 }
@@ -467,6 +476,7 @@ object ProgramExportServlet {
   val Log: Logger = Logger.getLogger(getClass.getName)
 
   val IdParam: String = "id"
+
   case class ParamParser(req: HttpServletRequest) {
     def id: Throwable \/ SPProgramID =
       \/.fromTryCatchNonFatal(SPProgramID.toProgramID(req.getParameter(IdParam))).leftMap { t =>
