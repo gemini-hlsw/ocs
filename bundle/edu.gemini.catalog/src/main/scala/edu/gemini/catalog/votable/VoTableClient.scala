@@ -194,7 +194,7 @@ case object ConeSearchBackend extends CachedBackend with RemoteCallBackend {
   override val catalogUrls: NonEmptyList[URL] =
     NonEmptyList(
         new URL("http://mkocatalog-lv2.hi.gemini.edu"),
-        new URL("http://sbfcatalog-lv1.hi.gemini.edu")
+        new URL("http://sbfcatalog-lv1.cl.gemini.edu")
 //      new URL("http://gscatalog.gemini.edu"),
 //      new URL("http://gncatalog.gemini.edu")
     )
@@ -294,7 +294,7 @@ case object GaiaGeminiBackend extends GaiaBackend {
   override val catalogUrls: NonEmptyList[URL] =
     NonEmptyList(
       new URL("http://mkocatalog-lv2.hi.gemini.edu/catalog/conesearch.py/tap/sync"),
-      new URL("http://sbfcatalog-lv1.hi.gemini.edu/catalog/conesearch.py/tap/sync")
+      new URL("http://sbfcatalog-lv1.cl.gemini.edu/catalog/conesearch.py/tap/sync")
     )
 //    NonEmptyList(new URL("https://gncatalog.gemini.edu/gaia"), new URL("https://gscatalog.gemini.edu/gaia"))
 
