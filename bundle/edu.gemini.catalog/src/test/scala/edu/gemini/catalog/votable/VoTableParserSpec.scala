@@ -729,6 +729,14 @@ class VoTableParserSpec extends Specification with VoTableParser {
       VoTableParser.parse(CatalogName.UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
       VoTableParser.parse(CatalogName.UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables should be size 1
     }
+    "be able to validate and parse an v1.4 xml from ucac4" in {
+      val xmlFile = "votable-ucac4-v1_4.xml"
+
+      println(VoTableParser.parse(CatalogName.UCAC4, getClass.getResourceAsStream(s"/$xmlFile")))
+
+      VoTableParser.parse(CatalogName.UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
+      VoTableParser.parse(CatalogName.UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables should be size 1
+    }
     "be able to validate and parse an xml from ppmxl" in {
       val xmlFile = "votable-ppmxl.xml"
       VoTableParser.parse(CatalogName.PPMXL, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))

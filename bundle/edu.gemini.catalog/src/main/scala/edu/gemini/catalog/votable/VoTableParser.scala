@@ -41,7 +41,7 @@ object VoTableParser extends VoTableParser {
     """<VOTABLE([^>]*)>""".r.unanchored
 
   private val MinVersion: VersionToken = VersionToken.unsafeFromIntegers(1, 2)
-  private val MaxVersion: VersionToken = VersionToken.unsafeFromIntegers(1, 3)
+  private val MaxVersion: VersionToken = VersionToken.unsafeFromIntegers(1, 4)
 
   private val VersionRegex: Regex =
     """version="(\d+\.\d+)"""".r.unanchored
