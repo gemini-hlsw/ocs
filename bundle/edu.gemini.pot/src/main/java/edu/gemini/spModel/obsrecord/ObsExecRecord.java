@@ -387,6 +387,14 @@ public final class ObsExecRecord implements Serializable {
     }
 
     /**
+     * Returns a listing of all events that have been associated with the
+     * exec log.
+     */
+    public synchronized List<ObsExecEvent> getAllEventList() {
+        return _visits.getAllEventList();
+    }
+
+    /**
      * Gets the total time used by all visits, regardless of
      * {@link edu.gemini.spModel.time.ChargeClass}.  Time between visits is
      * ignored. This value represents the real time that was spent executing
