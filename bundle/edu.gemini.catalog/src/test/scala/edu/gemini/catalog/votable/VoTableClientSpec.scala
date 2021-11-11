@@ -33,7 +33,7 @@ class VoTableClientSpec extends Specification with VoTableClient {
     }
 
     "produce query params" in {
-      ConeSearchBackend.queryParams(query) should beEqualTo(Array(("CATALOG", "ucac4"), ("RA", "10.000"), ("DEC", "20.000"), ("SR", "0.100")))
+      ConeSearchBackend.queryParams(query) should beEqualTo(Array(("CATALOG", "ucac4"), ("RA", "10.000"), ("DEC", "20.000"), ("SR", "0.100"), ("VER", "1.3")))
     }
     "make a query to a bad site" in {
       Await.result(doQuery(query, new URL("http://unknown.site.7732BFA1-9937-4D1E-8969-B02782608DAD"), ConeSearchBackend)(implicitly), 30.seconds) should throwA[UnknownHostException]
