@@ -27,6 +27,16 @@ trait VoTableBackend {
   protected [votable] def doQuery(query: CatalogQuery, url: URL)(ec: ExecutionContext): Future[QueryResult]
 }
 
+/**
+ * For the Gemini catalog server, we'll explicitly request a particular version.
+ */
+sealed trait GeminiClient {
+
+  final val GeminiVoTableRequestVersion: String =
+    "1.3"
+
+}
+
 trait CachedBackend extends VoTableBackend {
   val Log = Logger.getLogger(this.getClass.getName)
 
@@ -188,7 +198,7 @@ trait RemoteCallBackend { this: CachedBackend =>
   }
 }
 
-case object ConeSearchBackend extends CachedBackend with RemoteCallBackend {
+case object ConeSearchBackend extends CachedBackend with RemoteCallBackend with GeminiClient {
   val instance = this
 
   override val catalogUrls: NonEmptyList[URL] =
@@ -206,7 +216,8 @@ case object ConeSearchBackend extends CachedBackend with RemoteCallBackend {
       ("CATALOG", qs.catalog.id),
       ("RA",      format(qs.base.ra.toAngle)),
       ("DEC",     f"${qs.base.dec.toDegrees}%4.03f"),
-      ("SR",      format(qs.radiusConstraint.maxLimit))
+      ("SR",      format(qs.radiusConstraint.maxLimit)),
+      ("VER",     GeminiVoTableRequestVersion)
     )
     case _                          => Array.empty
   }
@@ -254,6 +265,7 @@ sealed trait GaiaBackend extends CachedBackend with RemoteCallBackend {
     q match {
 
       case cs: ConeSearchCatalogQuery =>
+        version.fold(Array.empty[(String, String)])(v => Array("VERSION" -> v)) ++
         Array(
           ("REQUEST", "doQuery"      ),
           ("LANG",    "ADQL"         ),
@@ -265,6 +277,8 @@ sealed trait GaiaBackend extends CachedBackend with RemoteCallBackend {
         Array.empty
     }
 
+  protected def version: Option[String] =
+    None
 
   override def queryUrl(e: SearchKey): String =
     e.url.toExternalForm
@@ -283,7 +297,7 @@ case object GaiaEsaBackend extends GaiaBackend {
 
 }
 
-case object GaiaGeminiBackend extends GaiaBackend {
+case object GaiaGeminiBackend extends GaiaBackend with GeminiClient {
 
   // For Java
   val instance: GaiaBackend = this
@@ -297,6 +311,9 @@ case object GaiaGeminiBackend extends GaiaBackend {
       new URL("http://sbfcatalog-lv1.cl.gemini.edu/catalog/conesearch.py/tap/sync")
     )
 //    NonEmptyList(new URL("https://gncatalog.gemini.edu/gaia"), new URL("https://gscatalog.gemini.edu/gaia"))
+
+  override protected def version: Option[String] =
+    Some(GeminiVoTableRequestVersion)
 
 }
 
