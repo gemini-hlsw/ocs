@@ -104,6 +104,15 @@ public class ObserveTimeLineNode extends DefaultTimeLineNode {
                 buf.append("<td align=\"right\"> ").append(secStr).append("</td>");
                 buf.append("</tr>");
 
+                if (ct.category != Category.CONFIG_CHANGE) {
+                    ct.detail.foreach(d -> {
+                        buf.append("<tr>");
+                        buf.append("<td></td>");
+                        buf.append("<td>").append(d).append("</td>");
+                        buf.append("</tr>");
+                    });
+                }
+
                 // Only Config changes have separate actions running in parallel.
                 if (ct.category == Category.CONFIG_CHANGE) {
                     buf.append("<tr>");
@@ -138,7 +147,7 @@ public class ObserveTimeLineNode extends DefaultTimeLineNode {
     }
 
     private static String formatCategory(CategorizedTime ct) {
-        return (ct.detail == null) ? ct.category.display : ct.detail;
+        return ct.detail.getOrElse(ct.category.display);
     }
 
     private static String formatSec(long time) {

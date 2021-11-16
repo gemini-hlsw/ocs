@@ -698,7 +698,7 @@ public final class Gsaoi extends SPInstObsComp
 
         // Predicate that leaves all CategorizedTime except for the offset overhead.
     private static final PredicateOp<CategorizedTime> RM_OFFSET_OVERHEAD = ct -> !((ct.category == Category.CONFIG_CHANGE) &&
-             (ct.detail.equals(OffsetOverheadCalculator.DETAIL)));
+             ct.detail.contains(OffsetOverheadCalculator.DETAIL));
 
     private static double getOffsetArcsec(Config c, ItemKey k) {
         final String d;

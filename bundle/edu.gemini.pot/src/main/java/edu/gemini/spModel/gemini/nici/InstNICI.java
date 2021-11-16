@@ -255,7 +255,7 @@ public final class InstNICI extends SPInstObsComp implements PropertyProvider, G
 
     // Predicate that leaves all CategorizedTime except for the offset overhead.
     private static final PredicateOp<CategorizedTime> RM_OFFSET_OVERHEAD = ct -> !((ct.category == Category.CONFIG_CHANGE) &&
-             OffsetOverheadCalculator.DETAIL.equals(ct.detail));
+             ct.detail.contains(OffsetOverheadCalculator.DETAIL));
 
     // Get correct offset overhead in the common group.  If a small offset,
     // we remove the offset overhead put there by the common step calculator

@@ -1,6 +1,5 @@
 package edu.gemini.spModel.obs.plannedtime;
 
-import edu.gemini.pot.sp.Instrument;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
@@ -77,17 +76,17 @@ public final class PlannedTime implements Serializable {
         /** Time in milliseconds. */
         public final long time;
 
-        public final String detail;
+        public final Option<String> detail;
 
         private CategorizedTime(Category cat, long time) {
-            this(cat, time, null);
+            this(cat, time, ImOption.empty());
         }
 
-        private CategorizedTime(Category cat, long time, String detail) {
+        private CategorizedTime(Category cat, long time, Option<String> detail) {
             if (cat == null) throw new IllegalArgumentException("Category is null");
             this.category = cat;
             this.time     = time;
-            this.detail   = (detail == null) ? cat.display : detail;
+            this.detail   = detail;
         }
 
         public Duration timeDuration() {
@@ -130,7 +129,7 @@ public final class PlannedTime implements Serializable {
         }
 
         public static CategorizedTime fromSeconds(Category cat, double sec, String detail) {
-            return (detail == null) ? fromSeconds(cat, sec) : new CategorizedTime(cat, toMillsec(sec), detail);
+            return (detail == null) ? fromSeconds(cat, sec) : new CategorizedTime(cat, toMillsec(sec), ImOption.apply(detail));
         }
 
         public static CategorizedTime apply(Category cat, long time) {
@@ -138,7 +137,7 @@ public final class PlannedTime implements Serializable {
         }
 
         public static CategorizedTime apply(Category cat, long time, String detail) {
-            return (detail == null) ? apply(cat, time) : new CategorizedTime(cat, time, detail);
+            return (detail == null) ? apply(cat, time) : new CategorizedTime(cat, time, ImOption.apply(detail));
         }
 
         @Override public int compareTo(CategorizedTime that) {
@@ -148,16 +147,16 @@ public final class PlannedTime implements Serializable {
             if (time < that.time) return -1;
             if (time > that.time) return 1;
 
-            return (detail == null || that.detail == null) ? 0 : detail.compareTo(that.detail);
+            return detail.getOrElse("").compareTo(that.detail.getOrElse(""));
         }
 
         @Override public String toString() {
-            return String.format("%15s - %7d - %s", category.name(), time, detail);
+            return String.format("%15s - %7d - %s", category.name(), time, detail.getOrElse(""));
         }
     }
 
     public static final class CategorizedTimeGroup implements Iterable<CategorizedTime>, Serializable {
-        public static final CategorizedTimeGroup EMPTY = new CategorizedTimeGroup(Collections.<CategorizedTime>emptySet());
+        public static final CategorizedTimeGroup EMPTY = new CategorizedTimeGroup(Collections.emptySet());
 
         public final Set<CategorizedTime> times;
 
@@ -170,8 +169,7 @@ public final class PlannedTime implements Serializable {
          * returning only those in this category.
          */
         public Set<CategorizedTime> times(Category cat) {
-            Set<CategorizedTime> res = times.stream().filter(ct -> ct.category == cat).collect(Collectors.toCollection(TreeSet::new));
-            return res;
+            return times.stream().filter(ct -> ct.category == cat).collect(Collectors.toCollection(TreeSet::new));
         }
 
         public CategorizedTimeGroup filter(PredicateOp<CategorizedTime> op) {
@@ -313,9 +311,7 @@ public final class PlannedTime implements Serializable {
             if (executed != step.executed) return false;
             if (chargeClass != step.chargeClass) return false;
             if (!obsType.equals(step.obsType)) return false;
-            if (!times.equals(step.times)) return false;
-
-            return true;
+            return times.equals(step.times);
         }
 
         private Step(CategorizedTimeGroup times) {

@@ -347,7 +347,13 @@ final class Ghost
     val times: java.util.Collection[CategorizedTime] = new java.util.ArrayList[CategorizedTime]()
 
     // TODO-GHOST: Default values
-    times.add(CategorizedTime.fromSeconds(Category.READOUT, 60))
+
+    val red   = cur.getItemValue(Ghost.RED_EXPOSURE_COUNT_KEY).asInstanceOf[Int]
+    val blue  = cur.getItemValue(Ghost.BLUE_EXPOSURE_COUNT_KEY).asInstanceOf[Int]
+    val count = Math.max(red, blue)
+    val label = if (red === blue) "" else if (red > blue) " red" else " blue"
+
+    times.add(CategorizedTime.fromSeconds(Category.READOUT, 60 * count, s"60s x $count$label"))
 
     times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, ExposureCalculator.instance.exposureTimeSec(cur)));
     CommonStepCalculator.instance.calc(cur, prev).addAll(times)
