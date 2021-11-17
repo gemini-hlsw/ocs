@@ -3,12 +3,16 @@ package edu.gemini.pot.sp.memImpl;
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.event.EndVisitEvent;
+import edu.gemini.spModel.event.ObsExecEvent;
 import edu.gemini.spModel.event.StartVisitEvent;
 import edu.gemini.spModel.obslog.ObsExecLog;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static edu.gemini.pot.sp.SPComponentType.OBS_EXEC_LOG;
 
@@ -36,22 +40,24 @@ public final class MemObsExecLog extends MemProgramNodeBase implements ISPObsExe
     @Override public MemProgram getProgram() { return program; }
 
     // Start REL-3986 ------ logging to debug an issue with missing events
-    private String formatEvents(ObsExecLog log) {
+    private String formatEvents(List<ObsExecEvent> events) {
         final StringBuilder buf = new StringBuilder();
-        log.getRecord().getAllEventList().forEach(e -> {
-            if ((e instanceof StartVisitEvent) || (e instanceof EndVisitEvent)) {
-                buf.append(String.format("\t%s\n", e));
-            }
-        });
+        events.forEach(e -> buf.append(String.format("\t%s\n", e)));
         return buf.toString();
     }
 
-    private Option<String> formatEvents(String name, Object obj) {
+    private List<ObsExecEvent> getVisitEvents(ObsExecLog log) {
+        return log.getRecord()
+                  .getAllEventList()
+                  .stream()
+                  .filter(e -> (e instanceof StartVisitEvent) || (e instanceof EndVisitEvent))
+                  .collect(Collectors.toList());
+    }
 
+    private List<ObsExecEvent> getVisitEvents(String name, Object obj) {
         return (DATA_OBJECT_KEY.equals(name) && (obj instanceof ObsExecLog)) ?
-                new Some<>(formatEvents((ObsExecLog) obj))                   :
-                ImOption.empty();
-
+                getVisitEvents((ObsExecLog) obj)                             :
+                Collections.emptyList();
     }
 
     private Option<String> getObsId() {
@@ -64,24 +70,26 @@ public final class MemObsExecLog extends MemProgramNodeBase implements ISPObsExe
         getProgramWriteLock();
 
         try {
-            final Option<String> oid = getObsId();
-            final StringBuilder  buf = new StringBuilder();
+            final Option<String>        oid = getObsId();
+            final StringBuilder         buf = new StringBuilder();
+            final List<ObsExecEvent> before = getVisitEvents(name, getDocumentData());
+            final List<ObsExecEvent>  after = getVisitEvents(name, obj);
+            final boolean         logEvents = !before.equals(after);
 
-            oid.foreach(id -> {
-                buf.append(String.format("Updating ObsExecRecord for %s\n", id));
-                buf.append(String.format("LifespanId: %s\n", getDocumentData().getLifespanId()));
+            if (logEvents) {
+                buf.append(String.format("Updating ObsExecRecord for %s (%s)\n", oid.getOrElse("<unknown>"), getDocumentData().getLifespanId()));
                 buf.append(String.format("Before....: %s\n", getDocumentData().versionVector(this.getNodeKey())));
-                buf.append(formatEvents(name, getDataObject()).getOrElse("\n"));
-            });
+                buf.append(formatEvents(before));
+            }
 
             final PropagationId propid = super.putClientData(name, obj);
 
-            oid.foreach(id -> {
+            if (logEvents) {
                 buf.append(String.format("After.....: %s\n", getDocumentData().versionVector(this.getNodeKey())));
-                buf.append(formatEvents(name, obj).getOrElse("\n"));
+                buf.append(formatEvents(after));
 
-                LOG.info(buf.toString());
-            });
+                LOG.log(Level.INFO, buf.toString(), new Throwable());
+            }
 
             return propid;
         } finally {
