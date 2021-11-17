@@ -66,7 +66,7 @@ public final class PlannedTime implements Serializable {
             this.display = display;
         }
 
-        public final CategorizedTime ZERO = new CategorizedTime(this, 0);
+        public final CategorizedTime ZERO = new CategorizedTime(this, 0, ImOption.empty());
 
     }
 
@@ -77,10 +77,6 @@ public final class PlannedTime implements Serializable {
         public final long time;
 
         public final Option<String> detail;
-
-        private CategorizedTime(Category cat, long time) {
-            this(cat, time, ImOption.empty());
-        }
 
         private CategorizedTime(Category cat, long time, Option<String> detail) {
             if (cat == null) throw new IllegalArgumentException("Category is null");
@@ -125,7 +121,7 @@ public final class PlannedTime implements Serializable {
          */
         public static CategorizedTime fromSeconds(Category cat, double sec) {
             long time = toMillsec(sec);
-            return (time == 0) ? cat.ZERO : new CategorizedTime(cat, time);
+            return (time == 0) ? cat.ZERO : new CategorizedTime(cat, time, ImOption.empty());
         }
 
         public static CategorizedTime fromSeconds(Category cat, double sec, String detail) {
@@ -133,11 +129,11 @@ public final class PlannedTime implements Serializable {
         }
 
         public static CategorizedTime apply(Category cat, long time) {
-            return (time == 0) ? cat.ZERO : new CategorizedTime(cat, time);
+            return (time == 0) ? cat.ZERO : new CategorizedTime(cat, time, ImOption.empty());
         }
 
         public static CategorizedTime apply(Category cat, long time, String detail) {
-            return (detail == null) ? apply(cat, time) : new CategorizedTime(cat, time, ImOption.apply(detail));
+            return new CategorizedTime(cat, time, ImOption.apply(detail));
         }
 
         @Override public int compareTo(CategorizedTime that) {
