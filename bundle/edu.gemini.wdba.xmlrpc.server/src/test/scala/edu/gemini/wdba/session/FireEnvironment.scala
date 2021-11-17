@@ -77,7 +77,7 @@ object FireEnvironment {
     List(Dataset)
 
   val TimeoutSec: Int =
-    1
+    10
 
   def initializeForDatabase(
     db: IDBDatabaseService
