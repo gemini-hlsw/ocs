@@ -84,8 +84,8 @@ public final class RegenerationClient {
     private static final String TEMPLATE_SERVLET = "template";
     private static final String ENC = "UTF-8";
 
-    public static String getUrl(Peer peer) {
-        return String.format("https://%s:%d/%s", peer.host, peer.port, TEMPLATE_SERVLET);
+    public static String getUrl(Peer peer, SPProgramID pid) {
+        return String.format("https://%s:%d/%s?pid=%s", peer.host, peer.port, TEMPLATE_SERVLET, pid.toString());
     }
 
     private static String decode(String msg) {
@@ -100,8 +100,7 @@ public final class RegenerationClient {
     public static Result expand(Phase1Folder folder, SPProgramID pid, Peer peer, int timeoutMs) {
         // Setup to post the template folder XML.
         MultipartPostMethod post;
-        post = new MultipartPostMethod(getUrl(peer));
-        post.addParameter("pid", pid.toString());
+        post = new MultipartPostMethod(getUrl(peer, pid));
         post.addPart(makeFilePart(folder));
         post.setRequestHeader( "Accept-Encoding", ENC);
 
