@@ -110,7 +110,7 @@ class GmosSouthBlueprintSpec extends TemplateSpec("GMOS_S_BP.xml") with Specific
       expand(proposal(bp, List(1), MagnitudeBand.H)) { (p, sp) =>
 
         // REL-3987
-        checkSingleTemplateGroupWithType(sp, GroupType.TYPE_SCHEDULING)
+        checkSingleTemplateGroupWithType(sp, GroupType.TYPE_FOLDER)
         groups(sp).flatMap(libs).toSet must_== Set(1)
 
       }

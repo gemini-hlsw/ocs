@@ -10,7 +10,7 @@ import edu.gemini.phase2.template.factory.impl.TemplateDb
 import edu.gemini.spModel.core.SPProgramID
 
 
-case class GmosNImaging(blueprint:SpGmosNBlueprintImaging) extends GmosNBase[SpGmosNBlueprintImaging] {
+case class GmosNImaging(blueprint:SpGmosNBlueprintImaging) extends GmosNBase.WithTargetFolder[SpGmosNBlueprintImaging] {
 
   import blueprint._
 
@@ -20,7 +20,7 @@ case class GmosNImaging(blueprint:SpGmosNBlueprintImaging) extends GmosNBase[SpG
   //          exposure time for each filter from
   //          http://dmt.gemini.edu/docushare/dsweb/Get/Document-333602/GMOS_img_exptimes.xlsx
 
-  val targetGroup = Seq(1)
+  val targetFolder = Seq(1)
   val baselineFolder = Seq.empty
   val notes = Seq.empty
 

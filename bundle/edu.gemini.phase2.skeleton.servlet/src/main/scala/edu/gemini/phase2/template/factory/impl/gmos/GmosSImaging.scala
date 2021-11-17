@@ -8,7 +8,7 @@ import edu.gemini.pot.sp.{ISPObservation, ISPGroup}
 import edu.gemini.spModel.gemini.gmos.GmosSouthType._
 import edu.gemini.spModel.core.SPProgramID
 
-case class GmosSImaging(blueprint:SpGmosSBlueprintImaging) extends GmosSBase[SpGmosSBlueprintImaging] {
+case class GmosSImaging(blueprint:SpGmosSBlueprintImaging) extends GmosSBase.WithTargetFolder[SpGmosSBlueprintImaging] {
 
   import blueprint._
 
@@ -18,7 +18,7 @@ case class GmosSImaging(blueprint:SpGmosSBlueprintImaging) extends GmosSBase[SpG
   //          exposure time for each filter from
   //          http://dmt.gemini.edu/docushare/dsweb/Get/Document-333602/GMOS_img_exptimes.xlsx
 
-  val targetGroup = Seq(1)
+  val targetFolder = Seq(1)
   val baselineFolder = Seq.empty
   val notes = Seq.empty
 
