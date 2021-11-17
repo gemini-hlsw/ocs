@@ -109,7 +109,7 @@ public class OverheadTablePrinter {
 
             if (cts != null) {
                 for (PlannedTime.CategorizedTime lct : cts) {
-                    if (lct.detail.equals("LGS Reacquisition")) {
+                    if (lct.detail.contains("LGS Reacquisition")) {
                         gsaoiLgsReacqNum++;
                     }
                 }
@@ -160,7 +160,7 @@ public class OverheadTablePrinter {
             if (cts != null) {
                 for (PlannedTime.CategorizedTime lct : cts) {
                     Double time = lct.time / 1000.0;
-                    if (lct.detail.equals(OffsetOverheadCalculator.DETAIL) && lct.time != 0) {
+                    if (lct.detail.contains(OffsetOverheadCalculator.DETAIL) && lct.time != 0) {
                         offsetsByOverhead.put(time, offsetsByOverhead.getOrDefault(time, 0) + 1);
                     }
                 }
@@ -245,7 +245,7 @@ public class OverheadTablePrinter {
             if (cts == null) continue;
             PlannedTime.CategorizedTime ct = cts.max(Comparator.naturalOrder());
             int coadds = p.observation().calculationMethod().coaddsOrElse(1);
-            String category = (ct.detail == null) ? ct.category.display : ct.detail;
+            String category = ct.detail.getOrElse(ct.category.display);
 
             buf.append("<tr>");
             buf.append("<td>").append(category).append("</td>");
