@@ -87,8 +87,21 @@ class FireTest extends OdbTestBase {
 
     env.foreach { e =>
       test(e)
-      val actual = toJsonString(e.buf.toList.map(FireMessage.uuid.set(Uuid)))
-      assertEquals("FireMessage comparison", expected, actual)
+      val actual  = toJsonString(e.buf.toList.map(FireMessage.uuid.set(Uuid)))
+      val message =
+        s"""
+           |FireMessage comparison failure.
+           |
+           |Expected:
+           |$expected
+           |
+           |--
+           |
+           |Actual:
+           |$actual
+           |
+           |""".stripMargin
+      assertEquals(message, expected, actual)
     }
   }
 
