@@ -1,7 +1,7 @@
 package edu.gemini.spModel.gemini.ghost
 
 import edu.gemini.shared.util.immutable.ImList
-import edu.gemini.spModel.core.{Coordinates, SiderealTarget}
+import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.target.{SPCoordinates, SPTarget}
 import edu.gemini.spModel.target.env.{TargetEnvironment, UserTarget}
 
@@ -31,10 +31,10 @@ object AsterismConverters {
             case DualTarget(t1, t2, b)                => creator(env, t1, t2.some,   None, b).some
             case TargetPlusSky(t, s, b)               => creator(env, t,     None, s.some, b).some
             case SkyPlusTarget(s, t, b)               => creator(env, t,     None, s.some, b).some
-            case HighResolutionTarget(t, b)           => creator(env, t,     None,   None, b).some
             case HighResolutionTargetPlusSky(t, s, b) => creator(env, t,     None, s.some, b).some
           }
-        case _                                              => None
+        case _                 =>
+          None
       }
 
     /** This is just a method that takes the targets / coordinates common to all GHOST asterism types so that we can
@@ -78,16 +78,6 @@ object AsterismConverters {
 
     override protected def creator(env: TargetEnvironment, t: GhostTarget, t2: Option[GhostTarget], s: SkyPosition, b: BasePosition): TargetEnvironment = {
       val asterism    = SkyPlusTarget(s.getOrElse(new SPCoordinates), t, b)
-      val userTargets = appendTarget(env.getUserTargets, gT2UT(t2))
-      TargetEnvironment.createWithClonedTargets(asterism, env.getGuideEnvironment, userTargets)
-    }
-  }
-
-  case object GhostHRTargetConverter extends GhostAsterismConverter {
-    override val name: String = "GhostAsterism.HighResolutionTarget"
-
-    override protected def creator(env: TargetEnvironment, t: GhostTarget, t2: Option[GhostTarget], s: SkyPosition, b: BasePosition): TargetEnvironment = {
-      val asterism    = HighResolutionTarget(t, b)
       val userTargets = appendTarget(env.getUserTargets, gT2UT(t2))
       TargetEnvironment.createWithClonedTargets(asterism, env.getGuideEnvironment, userTargets)
     }

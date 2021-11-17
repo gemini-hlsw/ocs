@@ -32,20 +32,8 @@ object AsterismConvertersSpec extends Specification with ScalaCheck with Arbitra
       oneWayTest(genGhostSkyPlusTargetTargetEnvironment, GhostSkyPlusTargetConverter)
     }
 
-    "Convert HighResolutionTarget to itself losslessly" in {
-      oneWayTest(genGhostHighResTargetAsterismTargetEnvironment, GhostHRTargetConverter)
-    }
-
     "Convert HighResolutionTargetPlusSky to itself losslessly" in {
       oneWayTest(genGhostHighResTargetPlusSkyAsterismTargetEnvironment, GhostHRTargetPlusSkyConverter)
-    }
-
-    "Convert between SingleTarget and HighResolutionTarget losslessly" in {
-      twoWayTest(genGhostSingleTargetTargetEnvironment, GhostHRTargetConverter, GhostSingleTargetConverter)
-    }
-
-    "Convert between HighResolutionTarget and SingleTarget losslessly" in {
-      twoWayTest(genGhostHighResTargetAsterismTargetEnvironment, GhostSingleTargetConverter, GhostHRTargetConverter)
     }
 
     "Convert between TargetPlusSky and SkyPlusTarget losslessly" in {
@@ -90,7 +78,6 @@ object AsterismConvertersSpec extends Specification with ScalaCheck with Arbitra
     GhostDualTargetConverter,
     GhostTargetPlusSkyConverter,
     GhostSkyPlusTargetConverter,
-    GhostHRTargetConverter,
     GhostHRTargetPlusSkyConverter
   )
 

@@ -8,12 +8,12 @@ import edu.gemini.spModel.target.TargetParamSetCodecs._
 
 
 object GhostParamSetCodecs {
-  private val IFU1 = "ifu1"
-  private val IFU2 = "ifu2"
-  private val Target = "target"
+  private val IFU1    = "ifu1"
+  private val IFU2    = "ifu2"
+  private val Target  = "target"
   private val GFState = "guideFiberState"
-  private val Base = "base"
-  
+  private val Base    = "base"
+
   implicit val GuideFiberStateParamCodec: ParamCodec[GuideFiberState] =
     ParamCodec[String].xmap(GuideFiberState.unsafeFromString, _.name)
 
@@ -44,12 +44,6 @@ object GhostParamSetCodecs {
       .withParamSet(IFU1, SkyPlusTargetIFU1)
       .withParamSet(IFU2, SkyPlusTargetIFU2)
       .withOptionalParamSet(Base, SkyPlusTargetOverriddenBase)
-
-  implicit val HRTargetParamSetCodec: ParamSetCodec[HighResolutionTarget] =
-    ParamSetCodec.initial(emptyHRTarget)
-      .withParamSet(IFU1, HRTargetIFU1)
-      .withOptionalParamSet(Base, HRTargetOverriddenBase)
-
 
   implicit val HRTargetPlusSkyParamSetCodec: ParamSetCodec[HighResolutionTargetPlusSky] =
     ParamSetCodec.initial(emptyHRTargetPlusSky)

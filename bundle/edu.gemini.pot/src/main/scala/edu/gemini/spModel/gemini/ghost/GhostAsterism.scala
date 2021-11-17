@@ -203,7 +203,6 @@ object GhostAsterism {
       NonEmptyList(target.spTarget)
 
     override def allSpCoordinates: List[SPCoordinates] = this match {
-      case HighResolutionTarget(_,b)          => b.toList
       case HighResolutionTargetPlusSky(_,s,b) => b.toList :+ s
     }
 
@@ -215,42 +214,29 @@ object GhostAsterism {
       Target.pm.get(target.spTarget.getTarget)
 
     override def copyWithClonedTargets: Asterism = this match {
-      case HighResolutionTarget(t,b) => HighResolutionTarget(t.copyWithClonedTarget, b.map(_.clone))
       case HighResolutionTargetPlusSky(t,s,b) => HighResolutionTargetPlusSky(t.copyWithClonedTarget, s.clone, b.map(_.clone))
     }
 
     override def resolutionMode: ResolutionMode = ResolutionMode.GhostHigh
 
     override def asterismType: AsterismType = this match {
-      case HighResolutionTarget(_,_)          => AsterismType.GhostHighResolutionTarget
       case HighResolutionTargetPlusSky(_,_,_) => AsterismType.GhostHighResolutionTargetPlusSky
     }
 
     def hrifu1: GhostTarget = this match {
-      case HighResolutionTarget(t,_)          => t
       case HighResolutionTargetPlusSky(t,_,_) => t
     }
     def hrifu2: Option[SPCoordinates] = this match {
-      case HighResolutionTarget(_,_)          => None
       case HighResolutionTargetPlusSky(_,s,_) => Some(s)
     }
   }
-
-  final case class HighResolutionTarget(target: GhostTarget,
-                                        override val overriddenBase: Option[SPCoordinates]) extends HighResolution(target)
 
   final case class HighResolutionTargetPlusSky(target: GhostTarget,
                                                sky:    SPCoordinates,
                                                override val overriddenBase: Option[SPCoordinates]) extends HighResolution(target)
 
   object HighResolution {
-    val emptyHRTarget: HighResolutionTarget = HighResolutionTarget(GhostTarget.empty, None)
     val emptyHRTargetPlusSky: HighResolutionTargetPlusSky = HighResolutionTargetPlusSky(GhostTarget.empty, new SPCoordinates, None)
-
-    val HRTargetIFU1: HighResolutionTarget @> GhostTarget =
-      Lens.lensu((a,b) => a.copy(target = b), _.target)
-    val HRTargetOverriddenBase: HighResolutionTarget @> Option[SPCoordinates] =
-      Lens.lensu((a,b) => a.copy(overriddenBase = b), _.overriddenBase)
 
     val HRTargetPlusSkyIFU1: HighResolutionTargetPlusSky @> GhostTarget =
       Lens.lensu((a,b) => a.copy(target = b), _.target)
@@ -278,10 +264,6 @@ object GhostAsterism {
     StandardResolution.emptySkyPlusTarget.copyWithClonedTargets
   }
 
-  def createEmptyHRTargetAsterism: Asterism = {
-    HighResolution.emptyHRTarget.copyWithClonedTargets
-  }
-
   def createEmptyHRTargetPlusSkyAsterism: Asterism = {
     HighResolution.emptyHRTargetPlusSky.copyWithClonedTargets
   }
@@ -289,6 +271,5 @@ object GhostAsterism {
   // Names of the IFUs.
   val SRIFU1: String = "SRIFU1"
   val SRIFU2: String = "SRIFU2"
-  val HRIFU1: String = "HRIFU1"
-  val HRIFU2: String = "HRIFU2"
+  val HRIFU:  String = "HRIFU"
 }

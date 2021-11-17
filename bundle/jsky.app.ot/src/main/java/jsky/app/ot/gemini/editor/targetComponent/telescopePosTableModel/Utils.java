@@ -41,7 +41,6 @@ final class Utils {
             case GhostDualTarget:
             case GhostTargetPlusSky:
             case GhostSkyPlusTarget:
-            case GhostHighResolutionTarget:
             case GhostHighResolutionTargetPlusSky:
                 return getCoordinates((GhostAsterism) a, when);
             default:

@@ -244,16 +244,6 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
         case TargetPlusSky(t, s, Some(bc)) => SkyPlusTarget(s, t, Some(bc))
       }
 
-    // HIGH RESOLUTION TARGET
-    val genHighResTargetNoBase: Gen[HighResolutionTarget] =
-      arbitrary[GhostTarget].map(t => HighResolutionTarget(t, None))
-
-    val genHighResTargetWithBase: Gen[HighResolutionTarget] =
-      for {
-        bc :: tc :: _ <- coordinateGen(2)
-        t <- ghostTargetWithCoords(tc)
-      } yield HighResolutionTarget(t, Some(new SPCoordinates(bc)))
-
     // HIGH RESOLUTION TARGET + SKY
     val genHighResTargetPlusSkyNoBase: Gen[HighResolutionTargetPlusSky] =
       for {
@@ -311,12 +301,6 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
       arbitrary[GhostAsterism.SkyPlusTarget]
     ))
 
-  implicit val arbGhostHighResolutionTargetAsterism: Arbitrary[GhostAsterism.HighResolutionTarget] =
-    Arbitrary(Gen.oneOf(
-      GhostGens.genHighResTargetNoBase,
-      GhostGens.genHighResTargetWithBase
-    ))
-
   implicit val arbGhostHighResolutionTargetPlusSkyAsterism: Arbitrary[GhostAsterism.HighResolutionTargetPlusSky] =
     Arbitrary(Gen.oneOf(
       GhostGens.genHighResTargetPlusSkyNoBase,
@@ -325,10 +309,9 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
 
 
   implicit val arbGhostHighResolutionAsterism: Arbitrary[GhostAsterism.HighResolution] =
-    Arbitrary(Gen.oneOf(
-      arbitrary[GhostAsterism.HighResolutionTarget],
+    Arbitrary(
       arbitrary[GhostAsterism.HighResolutionTargetPlusSky]
-    ))
+    )
 
   implicit val arbGhostAsterism: Arbitrary[GhostAsterism] =
     Arbitrary(Gen.oneOf(
@@ -352,8 +335,6 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
     createTargetEnvironmentGen(arbitrary[GhostAsterism.TargetPlusSky])
   val genGhostSkyPlusTargetTargetEnvironment: Gen[TargetEnvironment] =
     createTargetEnvironmentGen(arbitrary[GhostAsterism.SkyPlusTarget])
-  val genGhostHighResTargetAsterismTargetEnvironment: Gen[TargetEnvironment] =
-    createTargetEnvironmentGen(arbitrary[GhostAsterism.HighResolutionTarget])
   val genGhostHighResTargetPlusSkyAsterismTargetEnvironment: Gen[TargetEnvironment] =
     createTargetEnvironmentGen(arbitrary[GhostAsterism.HighResolutionTargetPlusSky])
   val genGhostAsterismTargetEnvironment: Gen[TargetEnvironment] =

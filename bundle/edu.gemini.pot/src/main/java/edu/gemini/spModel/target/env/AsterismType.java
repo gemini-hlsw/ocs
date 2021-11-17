@@ -29,11 +29,7 @@ public enum AsterismType {
             new Some<>(AsterismConverters.GhostSkyPlusTargetConverter$.MODULE$),
             GhostAsterism$.MODULE$::createEmptySkyPlusTargetAsterism),
 
-    GhostHighResolutionTarget("ghostHRTarget", "HRIFU1 Target",
-            new Some<>(AsterismConverters.GhostHRTargetConverter$.MODULE$),
-            GhostAsterism$.MODULE$::createEmptyHRTargetAsterism),
-
-    GhostHighResolutionTargetPlusSky("ghostHRTargetPlusSky", "HRIFU1 Target, HRIFU2 Sky",
+    GhostHighResolutionTargetPlusSky("ghostHRTargetPlusSky", "HRIFU Target, SRIFU2 Sky",
             new Some<>(AsterismConverters.GhostHRTargetPlusSkyConverter$.MODULE$),
             GhostAsterism$.MODULE$::createEmptyTargetPlusSkyAsterism)
 
@@ -61,18 +57,18 @@ public enum AsterismType {
     // Return the asterism types supported by the different instruments.
     // We need to do this here because we want these statically accessible.
     public static Set<AsterismType> supportedTypesForInstrument(final Instrument instType) {
-        switch (instType) {
-            case Ghost:
-                final Set<AsterismType> s = new TreeSet<>();
-                s.add(GhostSingleTarget);
-                s.add(GhostDualTarget);
-                s.add(GhostTargetPlusSky);
-                s.add(GhostSkyPlusTarget);
-                s.add(GhostHighResolutionTarget);
-                s.add(GhostHighResolutionTargetPlusSky);
-                return Collections.unmodifiableSet(s);
-            default:
-                return Collections.singleton(Single);
+        final Set<AsterismType> result;
+        if (instType == Instrument.Ghost) {
+            final Set<AsterismType> s = new TreeSet<>();
+            s.add(GhostSingleTarget);
+            s.add(GhostDualTarget);
+            s.add(GhostTargetPlusSky);
+            s.add(GhostSkyPlusTarget);
+            s.add(GhostHighResolutionTargetPlusSky);
+            result = Collections.unmodifiableSet(s);
+        } else {
+            result = Collections.singleton(Single);
         }
+        return result;
     }
 }

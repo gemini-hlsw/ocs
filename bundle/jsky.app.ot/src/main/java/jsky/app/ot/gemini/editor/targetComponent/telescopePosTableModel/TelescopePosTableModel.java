@@ -1,7 +1,6 @@
 package jsky.app.ot.gemini.editor.targetComponent.telescopePosTableModel;
 
 import edu.gemini.ags.api.AgsAnalysis;
-import edu.gemini.ags.api.AgsAnalysis$;
 import edu.gemini.ags.api.AgsGuideQuality;
 import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.ags.api.AgsRegistrar;
@@ -47,7 +46,6 @@ final public class TelescopePosTableModel extends AbstractTableModel {
 
             // A base and a target (which can be the same).
             case GhostSingleTarget:
-            case GhostHighResolutionTarget:
                 autoGroupIdx = 2;
                 break;
 
@@ -156,9 +154,6 @@ final public class TelescopePosTableModel extends AbstractTableModel {
                     case GhostSkyPlusTarget:
                         gt = ((GhostAsterism.SkyPlusTarget) a).target();
                         break;
-                    case GhostHighResolutionTarget:
-                        gt = ((GhostAsterism.HighResolutionTarget) a).target();
-                        break;
                     case GhostHighResolutionTargetPlusSky:
                         gt = ((GhostAsterism.HighResolutionTargetPlusSky) a).target();
                         break;
@@ -223,17 +218,6 @@ final public class TelescopePosTableModel extends AbstractTableModel {
         return hdr;
     }
 
-    private List<Row> createGhostHighResolutionTargetAsterismRows() {
-        // Base position, a science target, and possibly a sky position.
-        final List<Row> hdr                        = new ArrayList<>();
-        final GhostAsterism.HighResolutionTarget a = (GhostAsterism.HighResolutionTarget) env.getAsterism();
-        final GhostTarget gt                       = a.target();
-
-        hdr.add(createGhostBaseRow(a));
-        hdr.add(new GhostTargetRow(GhostAsterism$.MODULE$.HRIFU1(), gt, baseCoords, when));
-        return hdr;
-    }
-
     private List<Row> createGhostHighResolutionTargetPlusSkyAsterismRows() {
         // Base position, a science target, and possibly a sky position.
         final List<Row> hdr                               = new ArrayList<>();
@@ -242,8 +226,8 @@ final public class TelescopePosTableModel extends AbstractTableModel {
         final SPCoordinates c                             = a.sky();
 
         hdr.add(createGhostBaseRow(a));
-        hdr.add(new GhostTargetRow(GhostAsterism$.MODULE$.HRIFU1(), gt, baseCoords, when));
-        hdr.add(new GhostSkyRow(GhostAsterism$.MODULE$.HRIFU2(), c, baseCoords));
+        hdr.add(new GhostTargetRow(GhostAsterism$.MODULE$.HRIFU(), gt, baseCoords, when));
+        hdr.add(new GhostSkyRow(GhostAsterism$.MODULE$.SRIFU2(), c, baseCoords));
         return hdr;
     }
 
@@ -272,9 +256,6 @@ final public class TelescopePosTableModel extends AbstractTableModel {
                 break;
             case GhostSkyPlusTarget:
                 asterismRows = createGhostSkyPlusTargetAsterismRows();
-                break;
-            case GhostHighResolutionTarget:
-                asterismRows = createGhostHighResolutionTargetAsterismRows();
                 break;
             case GhostHighResolutionTargetPlusSky:
                 asterismRows = createGhostHighResolutionTargetPlusSkyAsterismRows();
