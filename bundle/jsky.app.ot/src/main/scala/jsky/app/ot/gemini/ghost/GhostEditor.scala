@@ -139,7 +139,6 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       GhostDualTarget,
       GhostTargetPlusSky,
       GhostSkyPlusTarget,
-      GhostHighResolutionTarget,
       GhostHighResolutionTargetPlusSky
     )
 
@@ -672,7 +671,6 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
           case a: SingleTarget => toc.setTargetEnvironment(env.setAsterism((SingleTargetIFU1 >=> GhostTarget.guideFiberState).set(a, state)))
           case a: DualTarget => toc.setTargetEnvironment(env.setAsterism((DualTargetIFU1 >=> GhostTarget.guideFiberState).set(a, state)))
           case a: TargetPlusSky => toc.setTargetEnvironment(env.setAsterism((TargetPlusSkyIFU1 >=> GhostTarget.guideFiberState).set(a, state)))
-          case a: HighResolutionTarget => toc.setTargetEnvironment(env.setAsterism((HRTargetIFU1 >=> GhostTarget.guideFiberState).set(a, state)))
           case a: HighResolutionTargetPlusSky => toc.setTargetEnvironment(env.setAsterism((HRTargetPlusSkyIFU1 >=> GhostTarget.guideFiberState).set(a, state)))
         }
         oc.setDataObject(toc)
@@ -737,7 +735,6 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
           case GhostAsterism.DualTarget(gt1, gt2, _)               => (gt1.spTarget.getName, Some(gt2.spTarget.getName))
           case GhostAsterism.TargetPlusSky(gt1, _, _)              => (gt1.spTarget.getName, Some(Sky))
           case GhostAsterism.SkyPlusTarget(_, gt2, _)              => (Sky, Some(gt2.spTarget.getName))
-          case GhostAsterism.HighResolutionTarget(gt, _)           => (gt.spTarget.getName, None)
           case GhostAsterism.HighResolutionTargetPlusSky(gt, _, _) => (gt.spTarget.getName, Some(Sky))
           case _                                                   => sys.error("illegal asterism type")
         }
@@ -752,7 +749,6 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
           case GhostAsterism.DualTarget(gt1, gt2, _)               => (gt1.guideFiberState == Enabled, true, gt2.guideFiberState == Enabled, true)
           case GhostAsterism.TargetPlusSky(gt, _, _)               => (gt.guideFiberState === Enabled, true, false, false)
           case GhostAsterism.SkyPlusTarget(_, gt2, _)              => (false, false, gt2.guideFiberState === Enabled, true)
-          case GhostAsterism.HighResolutionTarget(gt, _)           => (gt.guideFiberState === Enabled, true, false, false)
           case GhostAsterism.HighResolutionTargetPlusSky(gt, _, _) => (gt.guideFiberState === Enabled, true, false, false)
           case _                                                   => sys.error("illegal asterism type")
         }

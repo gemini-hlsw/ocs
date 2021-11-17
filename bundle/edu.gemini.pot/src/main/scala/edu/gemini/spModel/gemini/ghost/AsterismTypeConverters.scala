@@ -15,19 +15,19 @@ object AsterismTypeConverters {
    * data is maintained.
    */
   val asterismTypeConverters: ((ResolutionMode, AsterismType, ResolutionMode)) => Option[AsterismType] = Map(
-      (GhostStandard, GhostSingleTarget, GhostHigh)  -> GhostHighResolutionTarget,
-      (GhostStandard, GhostSingleTarget, GhostPRV)   -> GhostHighResolutionTarget,
-      (GhostStandard, GhostDualTarget, GhostHigh)    -> GhostHighResolutionTargetPlusSky,
-      (GhostStandard, GhostDualTarget, GhostPRV)     -> GhostHighResolutionTarget,
+      (GhostStandard, GhostSingleTarget,  GhostHigh) -> GhostHighResolutionTargetPlusSky,
+      (GhostStandard, GhostSingleTarget,  GhostPRV)  -> GhostHighResolutionTargetPlusSky,
+      (GhostStandard, GhostDualTarget,    GhostHigh) -> GhostHighResolutionTargetPlusSky,
+      (GhostStandard, GhostDualTarget,    GhostPRV)  -> GhostHighResolutionTargetPlusSky,
       (GhostStandard, GhostTargetPlusSky, GhostHigh) -> GhostHighResolutionTargetPlusSky,
-      (GhostStandard, GhostTargetPlusSky, GhostPRV)  -> GhostHighResolutionTarget,
+      (GhostStandard, GhostTargetPlusSky, GhostPRV)  -> GhostHighResolutionTargetPlusSky,
       (GhostStandard, GhostSkyPlusTarget, GhostHigh) -> GhostHighResolutionTargetPlusSky,
-      (GhostStandard, GhostSkyPlusTarget, GhostPRV)  -> GhostHighResolutionTarget,
+      (GhostStandard, GhostSkyPlusTarget, GhostPRV)  -> GhostHighResolutionTargetPlusSky,
 
-      (GhostHigh, GhostHighResolutionTarget, GhostStandard) -> GhostSingleTarget,
-      (GhostHigh, GhostHighResolutionTarget, GhostPRV)      -> GhostSingleTarget,
       (GhostHigh, GhostHighResolutionTargetPlusSky, GhostStandard) -> GhostTargetPlusSky,
-      (GhostHigh, GhostHighResolutionTargetPlusSky, GhostPRV) -> GhostHighResolutionTarget,
+      (GhostHigh, GhostHighResolutionTargetPlusSky, GhostPRV)      -> GhostHighResolutionTargetPlusSky,
 
-      (GhostPRV, GhostHighResolutionTarget, GhostStandard) -> GhostSingleTarget).lift
+      (GhostPRV, GhostHighResolutionTargetPlusSky, GhostStandard) -> GhostSingleTarget,
+      (GhostPRV, GhostHighResolutionTargetPlusSky, GhostHigh)     -> GhostHighResolutionTargetPlusSky
+  ).lift
 }

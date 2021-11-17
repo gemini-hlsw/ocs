@@ -150,7 +150,6 @@ object Asterism {
           case a: GhostAsterism.DualTarget                  => GhostParamSetCodecs.DualTargetParamSetCodec.encode(key, a)
           case a: GhostAsterism.TargetPlusSky               => GhostParamSetCodecs.TargetPlusSkyParamSetCodec.encode(key, a)
           case a: GhostAsterism.SkyPlusTarget               => GhostParamSetCodecs.SkyPlusTargetParamSetCodec.encode(key, a)
-          case a: GhostAsterism.HighResolutionTarget        => GhostParamSetCodecs.HRTargetParamSetCodec.encode(key, a)
           case a: GhostAsterism.HighResolutionTargetPlusSky => GhostParamSetCodecs.HRTargetPlusSkyParamSetCodec.encode(key, a)
         }
         Pio.addParam(pf, ps, "tag", tag)
@@ -164,7 +163,6 @@ object Asterism {
           case AsterismType.GhostDualTarget.tag                  => GhostParamSetCodecs.DualTargetParamSetCodec.decode(ps)
           case AsterismType.GhostTargetPlusSky.tag               => GhostParamSetCodecs.TargetPlusSkyParamSetCodec.decode(ps)
           case AsterismType.GhostSkyPlusTarget.tag               => GhostParamSetCodecs.SkyPlusTargetParamSetCodec.decode(ps)
-          case AsterismType.GhostHighResolutionTarget.tag        => GhostParamSetCodecs.HRTargetParamSetCodec.decode(ps)
           case AsterismType.GhostHighResolutionTargetPlusSky.tag => GhostParamSetCodecs.HRTargetPlusSkyParamSetCodec.decode(ps)
           case other                                             => UnknownTag(other, "Asterism").left
         }

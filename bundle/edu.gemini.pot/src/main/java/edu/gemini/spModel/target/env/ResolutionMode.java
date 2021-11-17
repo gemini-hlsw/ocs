@@ -15,12 +15,13 @@ public enum ResolutionMode {
                     AsterismType.GhostSkyPlusTarget)
     ),
     GhostHigh("ghostHigh", "High Resolution",
-            Arrays.asList(
-                    AsterismType.GhostHighResolutionTarget,
+            Collections.singletonList(
                     AsterismType.GhostHighResolutionTargetPlusSky
             )),
     GhostPRV("ghostPRV", "Precision Radial Velocity",
-            Collections.singletonList(AsterismType.GhostHighResolutionTarget));
+            Collections.singletonList(
+                    AsterismType.GhostHighResolutionTargetPlusSky
+            ));
 
     public final String tag;
     public final String name;

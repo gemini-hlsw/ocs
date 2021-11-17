@@ -132,11 +132,6 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
               val p2 = pm.getLocationFromTag(t.spTarget)
               drawStandardResolutionIfu(g2d, p2, Ifu2, AsTarget)
 
-            case GhostAsterism.HighResolutionTarget(t, _) =>
-              // IFU1
-              val p1 = pm.getLocationFromTag(t.spTarget)
-              drawHighResolutionIfu(g2d, p1)
-
             case GhostAsterism.HighResolutionTargetPlusSky(t, s, _) =>
               // IFU1
               val p1 = pm.getLocationFromTag(t.spTarget)
@@ -144,7 +139,9 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
 
               // IFU2
               val p2 = pm.getLocationFromTag(s)
-              drawStandardResolutionIfu(g2d, p2, Ifu2, AsSky)
+              // We don't draw the SRIFU2, apparently, even though its position
+              // determines the position of the HR sky fibers
+              // drawStandardResolutionIfu(g2d, p2, Ifu2, AsSky)
               drawHighResolutionSky(g2d, p2)
           }
         }
@@ -310,7 +307,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
    */
   private def usingIFU2(env: TargetEnvironment): Boolean = env.getAsterism.asterismType match {
     case AsterismType.GhostDualTarget | AsterismType.GhostTargetPlusSky | AsterismType.GhostSkyPlusTarget | AsterismType.GhostHighResolutionTargetPlusSky => true
-    case AsterismType.GhostSingleTarget | AsterismType.GhostHighResolutionTarget => false
+    case AsterismType.GhostSingleTarget => false
     case AsterismType.Single => sys.error("Invalid asterism type for GHOST")
   }
 

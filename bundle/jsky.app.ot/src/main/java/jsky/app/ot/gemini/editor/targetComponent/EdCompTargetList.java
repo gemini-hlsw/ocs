@@ -210,9 +210,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             case GhostSkyPlusTarget:
                 final GhostAsterism.SkyPlusTarget gsta = (GhostAsterism.SkyPlusTarget) a;
                 return ImOption.fromScalaOpt(gsta.overriddenBase()).toRight(() -> gsta.target().spTarget());
-            case GhostHighResolutionTarget:
-                final GhostAsterism.HighResolutionTarget ghta = (GhostAsterism.HighResolutionTarget) a;
-                return ImOption.fromScalaOpt(ghta.overriddenBase()).toRight(() -> ghta.target().spTarget());
             case GhostHighResolutionTargetPlusSky:
                 final GhostAsterism.HighResolutionTargetPlusSky ghtsa = (GhostAsterism.HighResolutionTargetPlusSky) a;
                 return ImOption.fromScalaOpt(ghtsa.overriddenBase()).toRight(() -> ghtsa.target().spTarget());
@@ -1219,10 +1216,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 case GhostSkyPlusTarget:
                     final GhostAsterism.SkyPlusTarget gsta = (GhostAsterism.SkyPlusTarget) oldA;
                     newA = gsta.copy(gsta.sky(), gsta.target(), coords(gsta, linked));
-                    break;
-                case GhostHighResolutionTarget:
-                    final GhostAsterism.HighResolutionTarget ghta = (GhostAsterism.HighResolutionTarget) oldA;
-                    newA = ghta.copy(ghta.target(), coords(ghta, linked));
                     break;
                 case GhostHighResolutionTargetPlusSky:
                     final GhostAsterism.HighResolutionTargetPlusSky ghtsa = (GhostAsterism.HighResolutionTargetPlusSky) oldA;
