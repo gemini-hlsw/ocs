@@ -172,7 +172,7 @@
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="6d939e86-a0ac-4040-a70e-12061d38f6e7" name="Observe">
               <paramset name="Observe" kind="dataObj">
                 <param name="repeatCount" value="1"/>
-                <param name="class" value="PARTNER_CAL"/>
+                <param name="class" value="SCIENCE"/>
               </paramset>
             </container>
           </container>
