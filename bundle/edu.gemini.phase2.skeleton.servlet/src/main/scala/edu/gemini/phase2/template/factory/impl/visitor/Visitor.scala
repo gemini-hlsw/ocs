@@ -14,7 +14,7 @@ case class Visitor(blueprint: SpVisitorBlueprint) extends VisitorBase {
 
   include(all: _*) in TargetGroup
 
-  forObs(sci: _*)(setName fromPI)
+  forObs(all: _*)(setName fromPI)
   forObs(all: _*)(setVisitorConfig fromPI)
   forObs(all: _*)(setWavelength fromPI)
   forObs(sci: _*)(setPosAngle fromPI)
