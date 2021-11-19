@@ -29,7 +29,7 @@ public enum AsterismType {
             new Some<>(AsterismConverters.GhostSkyPlusTargetConverter$.MODULE$),
             GhostAsterism$.MODULE$::createEmptySkyPlusTargetAsterism),
 
-    GhostHighResolutionTargetPlusSky("ghostHRTargetPlusSky", "HRIFU Target, SRIFU2 Sky",
+    GhostHighResolutionTargetPlusSky("ghostHRTargetPlusSky", "HRIFU Target, Sky",
             new Some<>(AsterismConverters.GhostHRTargetPlusSkyConverter$.MODULE$),
             GhostAsterism$.MODULE$::createEmptyTargetPlusSkyAsterism)
 
