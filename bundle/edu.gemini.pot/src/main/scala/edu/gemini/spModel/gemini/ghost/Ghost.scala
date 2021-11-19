@@ -348,8 +348,8 @@ final class Ghost
 
     // TODO-GHOST: Default values
 
-    val red   = cur.getItemValue(Ghost.RED_EXPOSURE_COUNT_KEY).asInstanceOf[Int]
-    val blue  = cur.getItemValue(Ghost.BLUE_EXPOSURE_COUNT_KEY).asInstanceOf[Int]
+    val red   = cur.getItemValue(Ghost.RED_EXPOSURE_COUNT_OBS_KEY).asInstanceOf[Int]
+    val blue  = cur.getItemValue(Ghost.BLUE_EXPOSURE_COUNT_OBS_KEY).asInstanceOf[Int]
     val count = Math.max(red, blue)
     val label = if (red === blue) "" else if (red > blue) " red" else " blue"
 
