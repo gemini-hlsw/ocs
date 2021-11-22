@@ -153,7 +153,6 @@ class SingleProbeStrategySpec extends Specification {
       // I thought I should just leave it once it was fixed.
 
       val base    = spTarget("21:32:48.000", "-0:06:00.000")
-      val guiders = Set[GuideProbe](GmosOiwfsGuideProbe.instance)
       val env     = TargetEnvironment.create(base)
 
       val inst    = new InstGmosNorth          <|
@@ -167,7 +166,7 @@ class SingleProbeStrategySpec extends Specification {
         ( 45,  40)
       )
 
-      val cand       = candidate("Biff", "21:32:46.960", "-0:04:51.135", (16.94, _r), (17.0, R), (20.0, UC))
+      val cand       = candidate("Biff", "21:32:46.960", "-0:04:51.135", (16.64, _r), (17.0, R), (20.0, UC))
       val voTable    = CannedBackend(List(cand))
 
       val strategy   = SingleProbeStrategy(GmosNorthOiwfsKey, SingleProbeStrategyParams.GmosOiwfsParams(Site.GN), Some(voTable))
