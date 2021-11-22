@@ -4,27 +4,25 @@ import java.beans.PropertyDescriptor
 import java.util.logging.Logger
 import java.util.{Collections, List => JList, Map => JMap, Set => JSet}
 import edu.gemini.pot.sp._
-import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption}
-import edu.gemini.skycalc.{Angle, CoordinateDiff, Coordinates}
+import edu.gemini.shared.util.immutable.{Option => JOption}
+import edu.gemini.skycalc.Angle
 import edu.gemini.spModel.config.ConfigPostProcessor
-import edu.gemini.spModel.config.injector.{ConfigInjector, ConfigInjectorCalc4}
 import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.data.config.{DefaultParameter, DefaultSysConfig, ISysConfig, StringParameter}
 import edu.gemini.spModel.data.property.{PropertyProvider, PropertySupport}
-import edu.gemini.spModel.gemini.calunit.calibration.CalDictionary
 import edu.gemini.spModel.gemini.init.{ComponentNodeInitializer, ObservationNI}
 import edu.gemini.spModel.inst.{ScienceAreaGeometry, VignettableScienceAreaInstrument}
 import edu.gemini.spModel.obs.SPObservation
-import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.obs.plannedtime.{CommonStepCalculator, ExposureCalculator, PlannedTime}
+import edu.gemini.spModel.obs.plannedtime.{CommonStepCalculator, PlannedTime}
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.{CategorizedTime, CategorizedTimeGroup, Category}
 import edu.gemini.spModel.obscomp.{InstConfigInfo, InstConstants, SPInstObsComp}
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.seqcomp.SeqConfigNames
 import edu.gemini.spModel.seqcomp.SeqConfigNames.{INSTRUMENT_KEY, OBSERVE_KEY}
+import edu.gemini.spModel.syntax.duration._
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.spModel.telescope.{IssPort, IssPortProvider}
@@ -34,7 +32,6 @@ import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 import scalaz._
 import Scalaz._
-import edu.gemini.spModel.target.SPSkyObject
 
 
 /** The GHOST instrument SP model.
@@ -142,7 +139,7 @@ final class Ghost
       // (and expected to be a Double representing seconds). It is included in
       // each sequence step here so that the sequence timeline, etc. all appear
       // correct.
-      c.putItem(InstConstants.EXPOSURE_TIME_KEY, GhostCameras.fromConfig(c).totalSeconds)
+      c.putItem(InstConstants.EXPOSURE_TIME_KEY, GhostCameras.fromConfig(c).exposure.fractionalSeconds)
 
     }
 
@@ -346,16 +343,23 @@ final class Ghost
   override def calc(cur: Config, prev: JOption[Config]): CategorizedTimeGroup = {
     val times: java.util.Collection[CategorizedTime] = new java.util.ArrayList[CategorizedTime]()
 
-    // TODO-GHOST: Default values
+    val gc = GhostCameras.fromConfig(cur)
 
-    val red   = cur.getItemValue(Ghost.RED_EXPOSURE_COUNT_OBS_KEY).asInstanceOf[Int]
-    val blue  = cur.getItemValue(Ghost.BLUE_EXPOSURE_COUNT_OBS_KEY).asInstanceOf[Int]
-    val count = Math.max(red, blue)
-    val label = if (red === blue) "" else if (red > blue) " red" else " blue"
+    def label(sec: Double): String =
+      s"${sec}s x ${gc.dominant.getOrElse(gc.red).count}${gc.dominant.map(d => s" ${d.label}").getOrElse("")}"
 
-    times.add(CategorizedTime.fromSeconds(Category.READOUT, 60 * count, s"60s x $count$label"))
+    times.add(CategorizedTime.fromSeconds(
+      Category.EXPOSURE,
+      gc.exposure.fractionalSeconds,
+      label(gc.dominant.getOrElse(gc.red).oneExposure.fractionalSeconds)
+    ))
 
-    times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, ExposureCalculator.instance.exposureTimeSec(cur)));
+    times.add(CategorizedTime.fromSeconds(
+      Category.READOUT,
+      gc.readout.fractionalSeconds,
+      label(GhostCamera.ReadoutTime.getSeconds)
+    ))
+
     CommonStepCalculator.instance.calc(cur, prev).addAll(times)
   }
 
