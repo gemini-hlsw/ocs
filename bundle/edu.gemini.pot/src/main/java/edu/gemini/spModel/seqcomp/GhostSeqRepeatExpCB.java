@@ -10,6 +10,8 @@ import edu.gemini.spModel.gemini.ghost.GhostCameras$;
 import edu.gemini.spModel.gemini.ghost.GhostExposureTimeProvider;
 import edu.gemini.spModel.obscomp.InstConstants;
 
+import edu.gemini.spModel.syntax.JavaDurationOps;
+
 import java.util.Map;
 
 /**
@@ -67,7 +69,7 @@ final public class GhostSeqRepeatExpCB extends AbstractSeqComponentCB {
         config.putParameter(SYSTEM_NAME,
             DefaultParameter.getInstance(
                 InstConstants.EXPOSURE_TIME_PROP,
-                GhostCameras$.MODULE$.fromGhostComponent(c).totalSeconds()
+                new JavaDurationOps(GhostCameras$.MODULE$.fromGhostComponent(c).exposure()).fractionalSeconds()
             )
         );
 
