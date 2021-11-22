@@ -27,12 +27,20 @@ import Scalaz._
  * ...
  */
 object ProbeLimitsParser {
-  val Log     = Logger.getLogger(getClass.getName)
+  val Log: Logger =
+    Logger.getLogger(getClass.getName)
 
-  val iqMap   = ImageQuality.values().map(iq => iq.getPercentage.toString -> iq).toMap +  ("ANY" -> ImageQuality.ANY)
-  val sbMap   = SkyBackground.values().map(sb => sb.getPercentage.toString -> sb).toMap + ("ANY" -> SkyBackground.ANY)
-  val bandMap = MagnitudeBand.all.map(b => b.name -> b).toMap
-  val idMap   = AllLimitsIds.map(g => g.name -> g).toMap
+  val iqMap: Map[String, ImageQuality] =
+    ImageQuality.values().map(iq => iq.getPercentage.toString -> iq).toMap +  ("ANY" -> ImageQuality.ANY)
+
+  val sbMap: Map[String, SkyBackground] =
+    SkyBackground.values().map(sb => sb.getPercentage.toString -> sb).toMap + ("ANY" -> SkyBackground.ANY)
+
+  val bandMap: Map[String, MagnitudeBand] =
+    MagnitudeBand.all.map(b => b.name -> b).toMap
+
+  val idMap: Map[String, MagLimitsId] =
+    AllLimitsIds.map(g => g.name -> g).toMap
 
   // The parser validates most aspects of the CalcMap, but doesn't catch missing
   // tables or duplicate faintness keys.
@@ -85,7 +93,7 @@ final class ProbeLimitsParser extends JavaTokenParsers {
 
   val limits: Parser[List[(GuideSpeed, Double)]] =
     repsep(mag, ",") ^? {
-      case l@List(f, m, s) => GuideSpeed.values().toList.zip(l)
+      case l@List(_, _, _) => GuideSpeed.values().toList.zip(l)
     }
 
   val limitsLine: Parser[FaintnessMap] =
