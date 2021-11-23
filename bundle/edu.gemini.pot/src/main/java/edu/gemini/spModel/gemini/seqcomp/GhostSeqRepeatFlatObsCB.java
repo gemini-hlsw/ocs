@@ -75,13 +75,13 @@ final public class GhostSeqRepeatFlatObsCB extends AbstractSeqComponentCB {
                 DefaultParameter.getInstance(CalUnitConstants.BASECAL_NIGHT_PROP, Boolean.FALSE));
 
         config.putParameter(SeqConfigNames.CALIBRATION_CONFIG_NAME,
-                DefaultParameter.getInstance(CalUnitConstants.LAMP_PROP, Lamp.show(c.getLamps(), Lamp::sequenceValue)));
+                DefaultParameter.getInstance(CalUnitConstants.LAMP_PROP, c.getLamps()));
         config.putParameter(SeqConfigNames.CALIBRATION_CONFIG_NAME,
-                DefaultParameter.getInstance(CalUnitConstants.SHUTTER_PROP, c.getShutter().sequenceValue()));
+                DefaultParameter.getInstance(CalUnitConstants.SHUTTER_PROP, c.getShutter()));
         config.putParameter(SeqConfigNames.CALIBRATION_CONFIG_NAME,
-                DefaultParameter.getInstance(CalUnitConstants.FILTER_PROP, c.getFilter().sequenceValue()));
+                DefaultParameter.getInstance(CalUnitConstants.FILTER_PROP, c.getFilter()));
         config.putParameter(SeqConfigNames.CALIBRATION_CONFIG_NAME,
-                DefaultParameter.getInstance(CalUnitConstants.DIFFUSER_PROP, c.getDiffuser().sequenceValue()));
+                DefaultParameter.getInstance(CalUnitConstants.DIFFUSER_PROP, c.getDiffuser()));
 
         config.putParameter(SeqConfigNames.OBSERVE_CONFIG_NAME,
               DefaultParameter.getInstance(OBSERVE_TYPE_PROP, c.getObserveType()));
