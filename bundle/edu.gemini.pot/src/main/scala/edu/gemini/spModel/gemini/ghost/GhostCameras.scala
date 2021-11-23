@@ -10,18 +10,41 @@ import java.time.Duration
 import scalaz.Equal
 
 final case class GhostCameras(
-  red: GhostCamera.Red,
+  red:  GhostCamera.Red,
   blue: GhostCamera.Blue
 ) {
 
-  val totalDuration: Duration = {
-    val r = red.totalDuration
-    val b = blue.totalDuration
-    if (r.compareTo(b) > 0) r else b
-  }
+  /**
+   * The dominant camera for the purposes of time calculation.  This is the
+   * camera with the longest total exposure plus readout (if any).
+   */
+  val dominant: Option[GhostCamera] =
+    red.totalTime.compareTo(blue.totalTime) match {
+      case i if i < 0 => Some(blue)
+      case i if i > 0 => Some(red)
+      case _          => None
+    }
 
-  val totalSeconds: Double =
-    totalDuration.toMillis.toDouble / 1000.0
+  /**
+   * Total exposure time for the dominant camera, or either camera if neither
+   * is dominant.
+   */
+  val exposure: Duration =
+    dominant.getOrElse(red).totalExposure
+
+  /**
+   * Total readout time for the dominant camera, or either camera if neither
+   * is dominant.
+   */
+  val readout: Duration =
+    dominant.getOrElse(red).totalReadout
+
+  /**
+   * Total exposure plus readout time for the dominant camera, or either camera
+   * if neither is dominant.
+   */
+  val totalTime: Duration =
+    dominant.getOrElse(red).totalTime
 
 }
 

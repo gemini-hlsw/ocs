@@ -4,6 +4,7 @@
 package edu.gemini.spModel.gemini.ghost
 
 import edu.gemini.spModel.config2.{Config, ItemKey}
+import edu.gemini.spModel.gemini.ghost.GhostCamera.ReadoutTime
 
 import java.time.Duration
 
@@ -11,27 +12,43 @@ import scalaz.Equal
 
 sealed trait GhostCamera extends Product with Serializable {
 
+  /** Exposure count for this camera. */
   def count: Int
-  def time:  Duration
 
-  def timeSeconds: Double =
-    time.toMillis.toDouble / 1000.0
+  /** Time for a single exposure. */
+  def oneExposure:  Duration
 
-  def totalDuration: Duration =
-    time.multipliedBy(count.toLong)
+  /** Total exposure time, ignoring readout. */
+  def totalExposure: Duration =
+    oneExposure.multipliedBy(count.toLong)
 
-  def totalSeconds: Double =
-    totalDuration.toMillis.toDouble / 1000.0
+  /** Total readout time, ignoring exposure time */
+  def totalReadout: Duration =
+    ReadoutTime.multipliedBy(count.toLong)
+
+  /** Total exposure + readout time. */
+  def totalTime: Duration =
+    totalExposure.plus(totalReadout)
+
+  /** Label, "red" or "blue". */
+  def label: String =
+    this match {
+      case _: GhostCamera.Red  => "red"
+      case _: GhostCamera.Blue => "blue"
+    }
 
 }
 
 object GhostCamera {
 
-  final case class Red(count: Int, time: Duration) extends GhostCamera
-  final case class Blue(count: Int, time: Duration) extends GhostCamera
+  final case class Red(count: Int, oneExposure: Duration) extends GhostCamera
+  final case class Blue(count: Int, oneExposure: Duration) extends GhostCamera
 
-  def red(count: Int, time: Duration): GhostCamera =
-    Red(count, time)
+  val ReadoutTime: Duration =
+    Duration.ofMinutes(1L)
+
+  def red(count: Int, oneExposure: Duration): GhostCamera =
+    Red(count, oneExposure)
 
   private def secondsToDuration(secs: Double): Duration =
     Duration.ofMillis(Math.round(secs * 1000.0))
@@ -71,8 +88,8 @@ object GhostCamera {
 
   }
 
-  def blue(count: Int, time: Duration): GhostCamera =
-    Blue(count, time)
+  def blue(count: Int, oneExposure: Duration): GhostCamera =
+    Blue(count, oneExposure)
 
   object Blue {
 
