@@ -346,7 +346,7 @@ final class Ghost
     val gc = GhostCameras.fromConfig(cur)
 
     def label(sec: Double): String =
-      s"${sec}s x ${gc.dominant.getOrElse(gc.red).count}${gc.dominant.map(d => s" ${d.label}").getOrElse("")}"
+      s"${gc.dominant.getOrElse(gc.red).count} x ${sec}s${gc.dominant.map(d => s" ${d.label}").getOrElse("")}"
 
     times.add(CategorizedTime.fromSeconds(
       Category.EXPOSURE,
