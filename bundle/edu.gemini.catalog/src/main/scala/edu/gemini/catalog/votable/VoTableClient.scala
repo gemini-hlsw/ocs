@@ -203,10 +203,10 @@ case object ConeSearchBackend extends CachedBackend with RemoteCallBackend with 
 
   override val catalogUrls: NonEmptyList[URL] =
     NonEmptyList(
-        new URL("http://mkocatalog-lv2.hi.gemini.edu"),
-        new URL("http://sbfcatalog-lv1.cl.gemini.edu")
-//      new URL("http://gscatalog.gemini.edu"),
-//      new URL("http://gncatalog.gemini.edu")
+      new URL("http://gscatalog.gemini.edu"),
+      new URL("http://gncatalog.gemini.edu")
+//        new URL("http://mkocatalog-lv2.hi.gemini.edu"),
+//        new URL("http://sbfcatalog-lv1.cl.gemini.edu")
     )
 
   private def format(a: Angle)= f"${a.toDegrees}%4.03f"
@@ -307,10 +307,13 @@ case object GaiaGeminiBackend extends GaiaBackend with GeminiClient {
 
   override val catalogUrls: NonEmptyList[URL] =
     NonEmptyList(
-      new URL("http://mkocatalog-lv2.hi.gemini.edu/catalog/conesearch.py/tap/sync"),
-      new URL("http://sbfcatalog-lv1.cl.gemini.edu/catalog/conesearch.py/tap/sync")
+      new URL("http://gncatalog.gemini.edu/catalog/conesearch.py/tap/sync"),
+      new URL("http://gscatalog.gemini.edu/catalog/conesearch.py/tap/sync")
     )
-//    NonEmptyList(new URL("https://gncatalog.gemini.edu/gaia"), new URL("https://gscatalog.gemini.edu/gaia"))
+//    NonEmptyList(
+//      new URL("http://mkocatalog-lv2.hi.gemini.edu/catalog/conesearch.py/tap/sync"),
+//      new URL("http://sbfcatalog-lv1.cl.gemini.edu/catalog/conesearch.py/tap/sync")
+//    )
 
   override protected def version: Option[String] =
     Some(GeminiVoTableRequestVersion)
