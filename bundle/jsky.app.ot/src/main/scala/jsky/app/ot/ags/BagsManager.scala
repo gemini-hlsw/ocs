@@ -17,6 +17,7 @@ import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.{ObsClassService, ObservationStatus}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obsclass.ObsClass
+import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.env.{AutomaticGroup, GuideEnv, GuideEnvironment, TargetEnvironment}
@@ -149,7 +150,7 @@ object BagsState {
     * since the search began since we will transition to RunningEditedState
     * if something is edited in the meantime.
     */
-  case class RunningState(k: ObsKey, ctx: ObsContext, hash: AgsHashVal) extends BagsState {
+  case class RunningState(k: ObsKey, ctx: ObsContext, preUpdateHash: AgsHashVal) extends BagsState {
     // When edited while running, we continue running but remember we were
     // edited by moving to RunningEditedState.  When the results eventually
     // come back from the AGS lookup when in RunningEditedState, we store them
@@ -160,14 +161,17 @@ object BagsState {
     // Successful AGS lookup while running (and not edited).  Apply the update
     // and move to IdleState.
     private[ags] override def succeed(results: Option[AgsStrategy.Selection]): StateTransition = {
-      val h = results.fold(hash) { r =>
-        if (r.posAngle === ctx.getPositionAngle) hash
-        else hashObs(ctx.withPositionAngle(r.posAngle))
-      }
+      val postUpdateHash =
+       for {
+          r <- results
+          e <- Option(ctx.getTargets)
+          i <- Option(ctx.getInstrument)
+          if BagsManager.requiresPosAngleUpdate(r, e, i)
+        } yield hashObs(ctx.withPositionAngle(r.posAngle))
 
-      (FinalizeUpdateState(k, h),
+      (FinalizeUpdateState(k, postUpdateHash.getOrElse(preUpdateHash)),
         for {
-          _ <- BagsManager.applyAction(k, Some(hash), results)
+          _ <- BagsManager.applyAction(k, Some(preUpdateHash), results)
           _ <- BagsManager.wakeUpAction(k, 0)
         } yield ()
       )
@@ -543,6 +547,19 @@ object BagsManager {
   private[ags] def clearAction(k: ObsKey): IO[Unit] =
     applyAction(k, None, None)
 
+  // A new AGS selection may come with a position angle required to reach the
+  // guide star that differs from the instrument's current position angle. If
+  // so, a position angle update is indicated if we're actually using the
+  // AGS guide star (as opposed to using a manual guide star).
+  private[ags] def requiresPosAngleUpdate(
+    s: AgsStrategy.Selection,
+    e: TargetEnvironment,
+    i: SPInstObsComp
+  ): Boolean =
+    e.getPrimaryGuideGroup.isAutomatic &&
+      i.getPosAngleDegrees =/= s.posAngle.toDegrees
+
+
   /**
    * Action to apply the selection to the observation.  If provided, the
    * expectedHash must match the hash of the current version of the observation
@@ -577,14 +594,10 @@ object BagsManager {
 
         // Change the pos angle as appropriate if this is the auto group.
         selOpt.foreach { sel =>
-          if (newEnv.getPrimaryGuideGroup.isAutomatic) {
-            ctx.instrument.dataObject.foreach { inst =>
-              val deg = sel.posAngle.toDegrees
-              val old = inst.getPosAngleDegrees
-              if (deg != old) {
-                inst.setPosAngleDegrees(deg)
-                ctx.instrument.commit()
-              }
+          ctx.instrument.dataObject.foreach { inst =>
+            if (requiresPosAngleUpdate(sel, newEnv, inst)) {
+              inst.setPosAngleDegrees(sel.posAngle.toDegrees)
+              ctx.instrument.commit()
             }
           }
         }
