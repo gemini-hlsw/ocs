@@ -2,7 +2,6 @@ package edu.gemini.programexport.servlet
 
 import edu.gemini.pot.sp._
 import edu.gemini.pot.spdb.IDBDatabaseService
-import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances
 import edu.gemini.spModel.core.{AuxFileSpectrum, BlackBody, EmissionLine, GaussianSource, LibraryNonStar, LibraryStar, Magnitude, NonSiderealTarget, PointSource, PowerLaw, SPProgramID, SiderealTarget, SpatialProfile, SpectralDistribution, TooTarget, UniformSource, UserDefinedSpectrum}
@@ -273,19 +272,6 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         jEmptyObject
     })
 
-  implicit def AutomaticGroupEncodeJson: EncodeJson[(TargetEnvironment, AutomaticGroup.Active)] =
-    EncodeJson(p => {
-      val (te, grp) = p
-      val gpm = grp.targetMap
-      ("guideProbe" := gpm.keys.map(gp => (gp, gpm.lookup(gp))).collect {
-        case (gp, Some(sp)) => (te, gp, sp)
-      }) ->:
-        ("primaryGroup" := (te.getGuideEnvironment.guideEnv.primaryGroup === grp)) ->:
-        ("tag" := "auto") ->:
-        ("name" := "auto") ->:
-        jEmptyObject
-    })
-
   // For manual groups, where there is a GuideProbe ==>> Options[OptsList[SPTarget]] with order.
   // This represents one guide probe and one OptsList[SPTarget]
   // The second last parameter is the index of the guide probe.
@@ -328,30 +314,43 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         jEmptyObject
     })
 
-  // A general encoding of a GuideGrp that has an implicit JSON encoder.
-  // This works for T = UserTarget and T = ManualGroup.
-  implicit def GeneralGuideGrpEncodeJson[T](implicit enc: EncodeJson[(TargetEnvironment, T)]): EncodeJson[(TargetEnvironment, List[T])] =
+  implicit def AutomaticGroupEncodeJson: EncodeJson[(TargetEnvironment, AutomaticGroup)] =
+    EncodeJson(p => {
+      val (te, grp) = p
+      val gpm = grp.targetMap
+      ("guideProbe" := gpm.keys.map(gp => (gp, gpm.lookup(gp))).collect {
+        case (gp, Some(sp)) => (te, gp, sp)
+      }) ->:
+        ("primaryGroup" := (te.getGuideEnvironment.guideEnv.primaryGroup === grp)) ->:
+        ("tag" := "auto") ->:
+        ("name" := "auto") ->:
+        jEmptyObject
+    })
+
+  implicit def UserTargetsEncodeJson: EncodeJson[(TargetEnvironment, List[UserTarget])] =
+    EncodeJson({ case (te, userTargetList) =>
+      userTargetList.map(ut => (te, ut)).asJson
+    })
+
+  implicit def GuideGrpListEncodeJson: EncodeJson[(TargetEnvironment, List[GuideGrp])] =
     EncodeJson({ case (te, lst) =>
-      lst.map(t => (te, t)).asJson
+      lst.map {
+        case mg: ManualGroup => (te, mg).asJson
+        case ag: AutomaticGroup => (te, ag).asJson
+      }.asJson
     })
 
   // We include ISPObsComponent because if we expand with GuideSpeed in the future, we need an:
   // ObsContext.create(oc.getContextObservation).
   implicit def AsterismEncodeJson: EncodeJson[(ISPObsComponent, TargetObsComp)] =
-    EncodeJson(p => {
-      val (_, targetObs) = p
-
+    EncodeJson({ case (_, targetObs) =>
       val te = targetObs.getTargetEnvironment
       val ge = te.getGuideEnvironment.guideEnv
 
       // Base information: we are only dealing with asterisms with a single target for now.
       val asterism = te.getAsterism.asInstanceOf[Asterism.Single]
 
-      ("guideGroups" := ge.groups.map {
-        case mg: ManualGroup => "guideGroup" := (te, mg)
-        case ag: AutomaticGroup.Active => "guideGroup" := (te, ag)
-        case _ => "guideGroup" := "initial"
-      }) ->:
+      ("guideGroups" := (te, ge.groups)) ->:
         ("primaryIndex" := ge.primaryIndex) ->:
         ("userTargets" := (te, te.getUserTargets.asScala.toList)) ->:
         ("base" := (te, asterism.t, None)) ->:
