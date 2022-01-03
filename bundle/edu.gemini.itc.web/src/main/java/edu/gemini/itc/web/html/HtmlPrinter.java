@@ -9,11 +9,19 @@ import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.telescope.IssPort;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.logging.Logger;
+
 /**
  * This is a temporary class that helps to collect output methods (print as html) up to the point where the code
  * is separated enough that this stuff can be moved to the web module.
  */
 public final class HtmlPrinter {
+
+    private static final Logger Log = Logger.getLogger(HtmlPrinter.class.getName());
 
     private HtmlPrinter() {}
 
@@ -47,8 +55,14 @@ public final class HtmlPrinter {
 
         sb.append(String.format("<LI> Sky transparency (water vapour): %d.00%%", ocp.wv().getPercentage()));
         sb.append(String.format("<LI> Sky background: %d.00%%", ocp.sb().getPercentage()));
-        sb.append(String.format("<LI> Airmass: %.2f", ocp.airmass()));
+        double airmass = ocp.airmass();
+        sb.append(String.format("<LI> Airmass: %.2f", airmass));
         sb.append("<BR>");
+
+        if (ocp.javaIq().isLeft()) {  // Exact IQ
+                final double zenith_iq = ocp.javaIq().toOptionLeft().getValue().toArcsec() / Math.pow(airmass, 0.6);
+                Log.fine(String.format("Zenith IQ = %.3f arcsec", zenith_iq));
+        }
 
         final Byte iq =
                 ocp.javaIq().<Byte>biFold(e -> (byte) 0, SPSiteQuality.ImageQuality::getPercentage);
@@ -67,9 +81,105 @@ public final class HtmlPrinter {
         return sb.toString();
     }
 
+    public static String printParameterSummary(final ObservingConditions ocp, final double wavelength, final double IqAtSource) {
+
+        final double airmass = ocp.airmass();
+        final double IqAtZenith = IqAtSource / Math.pow(airmass, 0.6);
+
+        final Byte iq = ocp.javaIq().<Byte>biFold(e ->
+                        iq2pct(wavelength, IqAtZenith),
+                        SPSiteQuality.ImageQuality::getPercentage);
+
+        final Byte cc = ocp.javaCc().<Byte>biFold(e ->
+                        cc2pct(ocp.javaCc().toOptionLeft().getValue().toExtinction()),
+                        SPSiteQuality.CloudCover::getPercentage);
+
+        final StringBuilder sb = new StringBuilder();
+        final String EXACT = "<span style=\"color:red;\">exact</span>";
+        sb.append("Observing Conditions:");
+        sb.append(String.format("<LI> Airmass: %.2f", airmass));
+
+        ocp.javaIq().biForEach(
+            exactIq -> sb.append(String.format("<LI> Image Quality: %d%% &nbsp; (%.2f\" at zenith, %.2f\" on-source, %s)", iq, IqAtZenith, IqAtSource, EXACT)),
+            enumIq  -> sb.append(String.format("<LI> Image Quality: %d%% &nbsp; (%.2f\" at zenith, %.2f\" on-source)", iq, IqAtZenith, IqAtSource))
+        );
+
+        ocp.javaCc().biForEach(
+            exactCc -> sb.append(String.format("<LI> Cloud Cover: %d%% &nbsp; (%.2f magnitudes, %s)", cc, exactCc.toExtinction(), EXACT)),
+            enumCc  -> sb.append(String.format("<LI> Cloud cover: %d%%", cc))
+        );
+
+        sb.append(String.format("<LI> Water Vapor: %d%%", ocp.wv().getPercentage()));
+        sb.append(String.format("<LI> Sky Background: %d%%", ocp.sb().getPercentage()));
+        sb.append("<BR>");
+
+        sb.append(String.format("<b>Likelihood of execution: %.0f%%</b><BR>",
+            (iq / 100.0) *
+            (cc / 100.0) *
+            (ocp.wv().getPercentage() / 100.0) *
+            (ocp.sb().getPercentage() / 100.0) * 100));
+
+        return sb.toString();
+    }
+
+    // Convert wavelength (nanometers) and zenith IQ (arcseconds) to the corresponding legacy IQ bin percentile
+    public static Byte iq2pct (final double wavelength, final double zenithIQ) {
+        Log.fine(String.format("Wavelength = %.3f nm", wavelength));
+        Log.fine(String.format("Zenith IQ = %.3f arcsec", zenithIQ));
+
+        List<Integer> waveBands = Arrays.asList(350, 475, 630, 780, 900, 1020, 1200, 1650, 2200, 3400, 4800, 11700);
+
+        byte[] percentile = new byte[] {20, 70, 85, 100};
+        double[][] bins = new double[][] { // Zenith IQ bins
+                {0.60, 0.90, 1.20, 2.0},   // u (0.350 µm)
+                {0.60, 0.85, 1.10, 1.90},  // g (0.475 µm)
+                {0.50, 0.75, 1.05, 1.80},  // r (0.630 µm)
+                {0.50, 0.75, 1.05, 1.70},  // i (0.780 µm)
+                {0.50, 0.70, 0.95, 1.70},  // Z (0.900 µm)
+                {0.40, 0.70, 0.95, 1.65},  // Y (1.02 µm)
+                {0.40, 0.60, 0.85, 1.55},  // J (1.2 µm)
+                {0.40, 0.60, 0.85, 1.50},  // H (1.65µm)
+                {0.35, 0.55, 0.80, 1.40},  // K (2.2 µm)
+                {0.35, 0.50, 0.75, 1.25},  // L (3.4 µm)
+                {0.35, 0.50, 0.70, 1.15},  // M (4.8 µm)
+                {0.31, 0.37, 0.45, 0.75}}; // N' (11.7 µm)
+
+        int closestWaveBand = waveBands.stream()
+            .min(Comparator.comparingDouble(w -> Math.abs(w - wavelength)))
+            .orElseThrow(() -> new NoSuchElementException("No wavelength available"));
+
+        Log.fine(String.format("Closest waveband = %d nm", closestWaveBand));
+        int idx = waveBands.indexOf(closestWaveBand);
+
+        byte iqpct = 100;  // percentile when IQ > Any
+        for (int i = 0; i < bins[idx].length; i++) {
+            if (zenithIQ <= bins[idx][i]) {
+                iqpct = percentile[i];
+                break;
+            }
+        }
+        Log.fine("IQ Bin = " + iqpct);
+        return iqpct;
+    }
+
+    // Convert extinction in magnitudes to the corresponding legacy CC bin percentile
+    public static Byte cc2pct (final double extinction) {
+        Log.fine(String.format("Extinction = %.3f mag", extinction));
+        byte[] percentile = new byte[] {50, 70, 80, 100};
+        double[] bins_edge = new double[] {0.0, 0.3, 1.0, 3.0};
+        byte ccpct = 100;  // when CC is > Any
+        for (int i = 0; i < bins_edge.length; i++) {
+            if (extinction <= bins_edge[i]) {
+                ccpct = percentile[i];
+                break;
+            }
+        }
+        Log.fine("CC Percentile = " + ccpct);
+        return ccpct;
+    }
+
     public static String printParameterSummary(final ObservationDetails odp) {
         final StringBuilder sb = new StringBuilder();
-
         sb.append("Calculation and analysis methods:\n");
         sb.append("<LI>Mode: ");
         sb.append((odp.calculationMethod() instanceof Imaging ? "imaging" : "spectroscopy"));
@@ -143,7 +253,7 @@ public final class HtmlPrinter {
         if (altair.getWFSMode().equals(AltairParams.GuideStarType.LGS)) sb.append("<LI>Laser Guide Star Mode selected");
 
         sb.append("<LI>Natural Guide Star Mode selected");
-        sb.append("<LI>Guide Star Seperation ");
+        sb.append("<LI>Guide Star Separation ");
         sb.append(altair.getGuideStarSeparation());
         sb.append("<LI>Guide Star Magnitude ");
         sb.append(altair.getGuideStarMagnitude());

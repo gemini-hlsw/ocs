@@ -58,13 +58,14 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
 
         final Gmos[] ccdArray           = mainInstrument.getDetectorCcdInstruments();
         final SpectroscopyResult result = results[0];
+        final double iqAtSource = result.iqCalc().getImageQuality();
 
         _println("Read noise: " + mainInstrument.getReadNoise());
 
         if (!mainInstrument.isIfuUsed()) {
             _printSoftwareAperture(results[0], 1 / mainInstrument.getSlitWidth());
         }
-        _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
+        _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", iqAtSource));
         _printSkyAperture(result);
         _println("");
 
@@ -140,7 +141,7 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
             }
         }
 
-        printConfiguration(results[0].parameters(), mainInstrument);
+        printConfiguration(results[0].parameters(), mainInstrument, iqAtSource);
     }
 
 
@@ -148,6 +149,7 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
         // use instrument of ccd 0 to represent GMOS (this is a design flaw: instead of using one instrument
         // with 3 ccds the current implementation uses three instruments to represent the different ccds).
         final Gmos instrument = (Gmos) results[0].instrument();
+        final double iqAtSource = results[0].iqCalc().getImageQuality();
 
         _println("");
         _print(CalculatablePrinter.getTextResult(results[0].sfCalc()));
@@ -172,9 +174,7 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
         }
 
         _print(OverheadTablePrinter.print(this, p, results[0]));
-
-
-        printConfiguration(results[0].parameters(), instrument);
+        printConfiguration(results[0].parameters(), instrument, iqAtSource);
     }
 
     private void printCcdTitle(final Gmos ccd) {
@@ -185,19 +185,16 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
         _println("");
     }
 
-    private void printConfiguration(final ItcParameters p, final Gmos mainInstrument) {
+    private void printConfiguration(final ItcParameters p, final Gmos mainInstrument, final double iqAtSource) {
         _println("");
-
         _print("<HR align=left SIZE=3>");
-
         _println(HtmlPrinter.printParameterSummary(pdp));
-
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + mainInstrument.getName() + "\n");
         _println(HtmlPrinter.printParameterSummary(p.source()));
         _println(gmosToString(mainInstrument, p, (GmosParameters) p.instrument()));
         _println(HtmlPrinter.printParameterSummary(p.telescope()));
-        _println(HtmlPrinter.printParameterSummary(p.conditions()));
+        _println(HtmlPrinter.printParameterSummary(p.conditions(), mainInstrument.getEffectiveWavelength(), iqAtSource));
         _println(HtmlPrinter.printParameterSummary(p.observation()));
     }
 
