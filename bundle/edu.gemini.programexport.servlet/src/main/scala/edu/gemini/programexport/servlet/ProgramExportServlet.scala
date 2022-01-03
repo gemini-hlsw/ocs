@@ -107,17 +107,17 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
 
   def componentFields(n: ISPNode): Option[Json] =
     n.dataObject.flatMap {
-      case p: SPProgram => Some((n.asInstanceOf[ISPProgram], p).asJson)
+      case p: SPProgram => Some(programFieldsEncodeJson(n.asInstanceOf[ISPProgram], p).asJson)
       case n: SPNote => Some(n.asJson)
-      case g: SPGroup => Some((n, g).asJson)
-      case o: SPObservation => Some((n.asInstanceOf[ISPObservation], o).asJson)
+      case g: SPGroup => Some(groupEncodeJson(n, g).asJson)
+      case o: SPObservation => Some(observationFieldsEncodeJson(n.asInstanceOf[ISPObservation], o).asJson)
       case s: SPSiteQuality => Some(s.asJson)
-      case t: TargetObsComp => Some((n.asInstanceOf[ISPObsComponent], t).asJson)
+      case t: TargetObsComp => Some(asterismEncodeJson(n.asInstanceOf[ISPObsComponent], t).asJson)
       case _ => None
     }
 
 
-  implicit def MagnitudeEncodeJson: EncodeJson[Magnitude] =
+  implicit val magnitudeEncodeJson: EncodeJson[Magnitude] =
     EncodeJson { m =>
       ("system" := m.system.name) ->:
         ("value" := m.value) ->:
@@ -125,7 +125,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         jEmptyObject
     }
 
-  implicit def InvestigatorsEncodeJson: EncodeJson[GsaPhase1Data.Investigator] =
+  implicit val investigatorsEncodeJson: EncodeJson[GsaPhase1Data.Investigator] =
     EncodeJson { i =>
       ("investigatorEmail" := i.getEmail) ->:
         ("investigatorLastName" := i.getLast) ->:
@@ -133,7 +133,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         jEmptyObject
     }
 
-  implicit def TimeAccountAward: EncodeJson[(TimeAcctCategory, TimeAcctAward)] =
+  val timeAccountAwardEncodeJson: EncodeJson[(TimeAcctCategory, TimeAcctAward)] =
     EncodeJson { case (c, a) =>
       ("partnerTime" := TimeUnit.SECONDS.toMillis(a.getPartnerAward.getSeconds)) ->:
         ("programTime" := TimeUnit.SECONDS.toMillis(a.getProgramAward.getSeconds)) ->:
@@ -142,12 +142,14 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
     }
 
 
-  implicit def TimeAccountAllocationEncodeJson: EncodeJson[TimeAcctAllocation] =
+  implicit val timeAccountAllocationEncodeJson: EncodeJson[TimeAcctAllocation] =
     EncodeJson { t =>
-      t.getCategories.asScala.toList.map(c => (c, t.getAward(c))).filter(_._2 != TimeAcctAward.ZERO).asJson
+      t.getCategories.asScala.toList.map(c => (c, t.getAward(c))).filter(_._2 != TimeAcctAward.ZERO).map {
+        case (c, a) => timeAccountAwardEncodeJson(c, a)
+      }.asJson
     }
 
-  implicit def TimingWindowEncodeJson: EncodeJson[TimingWindow] =
+  implicit val timingWindowEncodeJson: EncodeJson[TimingWindow] =
     EncodeJson { tw =>
       ("repeat" := tw.getRepeat) ->:
         ("period" := tw.getPeriod) ->:
@@ -156,7 +158,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         jEmptyObject
     }
 
-  implicit def SpatialProfileEncodeJson: EncodeJson[SpatialProfile] =
+  implicit val spatialProfileEncodeJson: EncodeJson[SpatialProfile] =
     EncodeJson {
       case PointSource =>
         ("type" := "pointSource") ->:
@@ -170,7 +172,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
           jEmptyObject
     }
 
-  implicit def SpectralDistributionEncodeJson: EncodeJson[SpectralDistribution] =
+  implicit val spectralDistributionEncodeJson: EncodeJson[SpectralDistribution] =
     EncodeJson {
       case BlackBody(t) =>
         ("temperature" := t) ->:
@@ -213,7 +215,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
       "Base"
 
   // Unfortunately, we have to pass a lot of crap to this to get everything we need.
-  implicit def SiderealTargetEncodeJson: EncodeJson[(TargetEnvironment, SPTarget, SiderealTarget, Option[Int])] =
+  val siderealTargetEncodeJson: EncodeJson[(TargetEnvironment, SPTarget, SiderealTarget, Option[Int])] =
     EncodeJson { case (te, sp, t, idx) =>
       ("spatialProfile" :=? t.spatialProfile) ->?:
         ("spectralDistribution" :=? t.spectralDistribution) ->?:
@@ -230,7 +232,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         jEmptyObject
     }
 
-  implicit def NonSiderealTargetEncodeJson: EncodeJson[(TargetEnvironment, SPTarget, NonSiderealTarget, Option[Int])] =
+  val nonSiderealTargetEncodeJson: EncodeJson[(TargetEnvironment, SPTarget, NonSiderealTarget, Option[Int])] =
     EncodeJson { case (te, sp, t, idx) =>
       ("spatialProfile" :=? t.spatialProfile) ->?:
         ("spectralDistribution" :=? t.spectralDistribution) ->?:
@@ -243,25 +245,25 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         jEmptyObject
     }
 
-  implicit def TargetEncodeJson: EncodeJson[(TargetEnvironment, SPTarget, Option[Int])] =
+  val targetEncodeJson: EncodeJson[(TargetEnvironment, SPTarget, Option[Int])] =
     EncodeJson { case (te, sp, idx) =>
       sp.getTarget match {
-        case st: SiderealTarget => (te, sp, st, idx).asJson
-        case nst: NonSiderealTarget => (te, sp, nst, idx).asJson
+        case st: SiderealTarget => siderealTargetEncodeJson(te, sp, st, idx).asJson
+        case nst: NonSiderealTarget => nonSiderealTargetEncodeJson(te, sp, nst, idx).asJson
         case _: TooTarget => jEmptyObject
       }
     }
 
   // Unfortunately, we have to pass a lot of crap to this to get everything we need.
-  implicit def UserTargetEncodeJson: EncodeJson[(TargetEnvironment, UserTarget)] =
+  val userTargetEncodeJson: EncodeJson[(TargetEnvironment, UserTarget)] =
     EncodeJson { case (te, ut) =>
-      (te, ut.target, None).asJson
+      targetEncodeJson(te, ut.target, None).asJson
     }
 
   // For automatic groups, where there is only maximum one guide probe per target.
-  implicit def AutomaticGroupGuideProbeMapEncodeJson: EncodeJson[(TargetEnvironment, GuideProbe, SPTarget)] =
+  val automaticGroupGuideProbeMapEncodeJson: EncodeJson[(TargetEnvironment, GuideProbe, SPTarget)] =
     EncodeJson { case (te, gp, sp) =>
-      ("target" := (te, sp, None).asJson) ->:
+      ("target" := targetEncodeJson(te, sp, None).asJson) ->:
         ("guideProbeKey" := gp.getKey) ->:
         jEmptyObject
     }
@@ -270,9 +272,9 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
   // This represents one guide probe and one OptsList[SPTarget]
   // The second last parameter is the index of the guide probe.
   // The last parameter is the index of the primary guide star.
-  implicit def ManualGroupGuideProbeMapEntryEncodeJson: EncodeJson[(TargetEnvironment, GuideProbe, OptsList[SPTarget], Int, Option[Int])] =
+  val manualGroupGuideProbeMapEntryEncodeJson: EncodeJson[(TargetEnvironment, GuideProbe, OptsList[SPTarget], Int, Option[Int])] =
     EncodeJson { case (te, gp, oolst, gpidx, pgsidx) =>
-      ("targets" := oolst.toList.zipWithIndex.map { case (sp, idx) => (te, sp, Some(idx)) }) ->:
+      ("targets" := oolst.toList.zipWithIndex.map { case (sp, idx) => targetEncodeJson(te, sp, Some(idx)) }) ->:
         ("primaryGuideStarIndex" :=? pgsidx) ->?:
         ("guideProbeIndex" := gpidx) ->:
         ("guideProbeKey" := gp.getKey) ->:
@@ -281,13 +283,15 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
 
   // For manual groups, where there is a GuideProbe ==>> Options[OptsList[SPTarget]] with order.
   // This represents the whole structure GuideProbe ==>> Options[OptsList[SPTarget]].
-  implicit def ManualGroupGuideProbeMapEncodeJson: EncodeJson[(TargetEnvironment, List[(GuideProbe, OptsList[SPTarget])])] =
+  val manualGroupGuideProbeMapEncodeJson: EncodeJson[(TargetEnvironment, List[(GuideProbe, OptsList[SPTarget])])] =
     EncodeJson { case (te, gpmlst) =>
-      ("guideProbe" := gpmlst.zipWithIndex.map { case ((gp, olst), gpidx) => (te, gp, olst, gpidx, olst.focusIndex) }) ->:
+      ("guideProbe" := gpmlst.zipWithIndex.map {
+        case ((gp, olst), gpidx) =>
+          manualGroupGuideProbeMapEntryEncodeJson(te, gp, olst, gpidx, olst.focusIndex) }) ->:
         jEmptyObject
     }
 
-  implicit def ManualGuideGroupEncodeJson: EncodeJson[(TargetEnvironment, ManualGroup)] =
+  val manualGuideGroupEncodeJson: EncodeJson[(TargetEnvironment, ManualGroup)] =
     EncodeJson { case (te, mg) =>
       // Convert the GuideGroup ==>> Option[OptsList[SPTarget]] to List[(GuideGroup, OptsList[SPTarget])].
       val gplst = mg.targetMap.keys.map { gp => (gp, mg.targetMap.lookup(gp)) }.collect {
@@ -298,18 +302,18 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
       // Complex translation into Some / None to invoke the implicit.
       val gplistopt = Option(gplst).filter(_.nonEmpty).map(lst => (te, lst))
 
-      ("guideProbes" :=? gplistopt) ->?:
+      ("guideProbes" :=? gplistopt.map(manualGroupGuideProbeMapEncodeJson(_))) ->?:
         ("primaryGroup" := (te.getGuideEnvironment.guideEnv.primaryGroup === mg)) ->:
         ("tag" := "manual") ->:
         ("name" := mg.name) ->:
         jEmptyObject
     }
 
-  implicit def AutomaticGroupEncodeJson: EncodeJson[(TargetEnvironment, AutomaticGroup)] =
+  val automaticGroupEncodeJson: EncodeJson[(TargetEnvironment, AutomaticGroup)] =
     EncodeJson { case (te, grp) =>
       val gpm = grp.targetMap
       ("guideProbe" := gpm.keys.map(gp => (gp, gpm.lookup(gp))).collect {
-        case (gp, Some(sp)) => (te, gp, sp)
+        case (gp, Some(sp)) => automaticGroupGuideProbeMapEncodeJson(te, gp, sp)
       }) ->:
         ("primaryGroup" := (te.getGuideEnvironment.guideEnv.primaryGroup === grp)) ->:
         ("tag" := "auto") ->:
@@ -317,22 +321,22 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         jEmptyObject
     }
 
-  implicit def UserTargetsEncodeJson: EncodeJson[(TargetEnvironment, List[UserTarget])] =
+  val userTargetsEncodeJson: EncodeJson[(TargetEnvironment, List[UserTarget])] =
     EncodeJson { case (te, userTargetList) =>
-      userTargetList.map(ut => (te, ut)).asJson
+      userTargetList.map(ut => userTargetEncodeJson(te, ut)).asJson
     }
 
-  implicit def GuideGrpListEncodeJson: EncodeJson[(TargetEnvironment, List[GuideGrp])] =
+  val guideGrpListEncodeJson: EncodeJson[(TargetEnvironment, List[GuideGrp])] =
     EncodeJson { case (te, lst) =>
       lst.map {
-        case mg: ManualGroup => (te, mg).asJson
-        case ag: AutomaticGroup => (te, ag).asJson
+        case mg: ManualGroup => manualGuideGroupEncodeJson(te, mg).asJson
+        case ag: AutomaticGroup => automaticGroupEncodeJson(te, ag).asJson
       }.asJson
     }
 
   // We include ISPObsComponent because if we expand with GuideSpeed in the future, we need an:
   // ObsContext.create(oc.getContextObservation).
-  implicit def AsterismEncodeJson: EncodeJson[(ISPObsComponent, TargetObsComp)] =
+  val asterismEncodeJson: EncodeJson[(ISPObsComponent, TargetObsComp)] =
     EncodeJson { case (_, targetObs) =>
       val te = targetObs.getTargetEnvironment
       val ge = te.getGuideEnvironment.guideEnv
@@ -340,14 +344,14 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
       // Base information: we are only dealing with asterisms with a single target for now.
       val asterism = te.getAsterism.asInstanceOf[Asterism.Single]
 
-      ("guideGroups" := (te, ge.groups)) ->:
+      ("guideGroups" := guideGrpListEncodeJson(te, ge.groups)) ->:
         ("primaryIndex" := ge.primaryIndex) ->:
-        ("userTargets" := (te, te.getUserTargets.asScala.toList)) ->:
-        ("base" := (te, asterism.t, None)) ->:
+        ("userTargets" := userTargetsEncodeJson(te, te.getUserTargets.asScala.toList)) ->:
+        ("base" := targetEncodeJson(te, asterism.t, None)) ->:
         jEmptyObject
     }
 
-  implicit def ProgramFieldsEncodeJson: EncodeJson[(ISPProgram, SPProgram)] =
+  val programFieldsEncodeJson: EncodeJson[(ISPProgram, SPProgram)] =
     EncodeJson { case (ispProg, spProg) =>
       ("timeAccountAllocationCategories" := spProg.getTimeAcctAllocation) ->:
         ("awardedTime" := spProg.getAwardedProgramTime.getMilliseconds) ->:
@@ -365,14 +369,14 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         jEmptyObject
     }
 
-  implicit def NoteEncodeJson: EncodeJson[SPNote] =
+  implicit val noteEncodeJson: EncodeJson[SPNote] =
     EncodeJson { n =>
       ("text" := n.getNote) ->:
         ("title" := n.getTitle) ->:
         jEmptyObject
     }
 
-  implicit def SiteQualityEncodeJson: EncodeJson[SPSiteQuality] =
+  implicit val siteQualityEncodeJson: EncodeJson[SPSiteQuality] =
     EncodeJson { s =>
       ("elevationConstraintMax" := s.getElevationConstraintMax) ->:
         ("elevationConstraintMin" := s.getElevationConstraintMin) ->:
@@ -385,14 +389,14 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         jEmptyObject
     }
 
-  implicit def GroupEncodeJson: EncodeJson[(ISPNode, SPGroup)] =
+  val groupEncodeJson: EncodeJson[(ISPNode, SPGroup)] =
     EncodeJson { case (n, g) =>
       ("key" := n.getNodeKey.toString) ->:
         ("name" := g.getTitle) ->:
         jEmptyObject
     }
 
-  def ObservationSetupTime(ispObs: ISPObservation): Option[Duration] = {
+  def observationSetupTime(ispObs: ISPObservation): Option[Duration] = {
     val spObs = ispObs.getDataObject.asInstanceOf[SPObservation]
     Option(SPTreeUtil.findInstrument(ispObs))
       .flatMap(_.dataObject)
@@ -405,12 +409,12 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
     }
   }
 
-  implicit def ObservationFieldsEncodeJson: EncodeJson[(ISPObservation, SPObservation)] =
+  val observationFieldsEncodeJson: EncodeJson[(ISPObservation, SPObservation)] =
     // Time / duration in ms.
     EncodeJson { case (ispObs, spObs) =>
       ("obsLog" :=? Option(ObsLog.getIfExists(ispObs))) ->?:
         ("setupTimeType" := spObs.getSetupTimeType.toString) ->:
-        ("setupTime" :=? ObservationSetupTime(ispObs).map(_.toMillis)) ->?:
+        ("setupTime" :=? observationSetupTime(ispObs).map(_.toMillis)) ->?:
         ("tooOverrideRapid" := spObs.isOverrideRapidToo) ->:
         ("priority" := spObs.getPriority.displayValue) ->:
         ("qaState" := ObsQaStateService.getObsQaState(ispObs).name) ->:
@@ -423,7 +427,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         jEmptyObject
     }
 
-  implicit def ObsLogEncodeJson: EncodeJson[ObsLog] =
+  implicit val obsLogEncodeJson: EncodeJson[ObsLog] =
     EncodeJson { obslog =>
       jArray(obslog.getDatasetLabels.toList.map { l =>
         val rec = obslog.getDatasetRecord(l)
