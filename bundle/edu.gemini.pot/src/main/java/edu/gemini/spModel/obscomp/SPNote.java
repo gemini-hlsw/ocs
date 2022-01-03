@@ -28,7 +28,7 @@ public class SPNote extends AbstractDataObject {
     public static final SPComponentType SP_TYPE = SPComponentType.INFO_NOTE;
 
     public static final ISPNodeInitializer<ISPObsComponent, SPNote> NI =
-        new SimpleNodeInitializer<>(SP_TYPE, () -> new SPNote());
+        new SimpleNodeInitializer<>(SP_TYPE, SPNote::new);
 
     // for serialization
     private static final long serialVersionUID = 1L;

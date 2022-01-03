@@ -162,6 +162,18 @@ trait OcsBundle {
       bundle_jsky_coords
     )
 
+  lazy val bundle_edu_gemini_programexport_servlet =
+    project.in(file("bundle/edu.gemini.programexport.servlet")).dependsOn(
+      bundle_edu_gemini_ags,
+      bundle_edu_gemini_shared_skyobject,
+      bundle_edu_gemini_pot,
+      bundle_edu_gemini_shared_util,
+      bundle_edu_gemini_spModel_core,
+      bundle_edu_gemini_util_osgi,
+      bundle_edu_gemini_util_security,
+      bundle_jsky_util
+    )
+
   lazy val bundle_edu_gemini_phase2_core =
     project.in(file("bundle/edu.gemini.phase2.core")).dependsOn(
       bundle_edu_gemini_pot,

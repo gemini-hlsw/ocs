@@ -74,7 +74,7 @@ public enum PlannedTimeCalculator {
             boolean executed            = isExecuted(obsExecRecord, c);
             String obsType              = getObsType(c);
             CategorizedTimeGroup gtc    = calculator(instNode).calc(c, prev);
-            prev = new Some<Config>(c);
+            prev = new Some<>(c);
 
             steps.add(Step.apply(gtc, stepChargeClass, executed, obsType));
         }

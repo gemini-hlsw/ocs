@@ -34,7 +34,7 @@ case class ObsQaRecord(qaMap: Map[DatasetLabel, DatasetQaRecord]) {
   def apply(l: DatasetLabel): DatasetQaRecord = qaMap.getOrElse(l, DatasetQaRecord.empty(l))
 
   def updated(r: DatasetQaRecord): ObsQaRecord =
-    if (qaMap.get(r.label).exists(_ == r)) this else new ObsQaRecord(qaMap.updated(r.label, r))
+    if (qaMap.get(r.label).contains(r)) this else new ObsQaRecord(qaMap.updated(r.label, r))
 
   def comment(l: DatasetLabel): String         = apply(l).comment
   def qaState(l: DatasetLabel): DatasetQaState = apply(l).qaState

@@ -22,7 +22,7 @@ public final class ObsQaLog extends AbstractDataObject {
     public static final SPComponentType SP_TYPE = SPComponentType.OBS_QA_LOG;
 
     public static final ISPNodeInitializer<ISPObsQaLog, ObsQaLog> NI =
-        new SimpleNodeInitializer<>(SP_TYPE, () -> new ObsQaLog());
+        new SimpleNodeInitializer<>(SP_TYPE, ObsQaLog::new);
 
     public static final class Event extends EventObject {
         public final DatasetQaRecord oldRec;
