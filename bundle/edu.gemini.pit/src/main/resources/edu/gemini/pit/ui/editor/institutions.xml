@@ -2952,6 +2952,19 @@
         </contact>
     </site>
     <site>
+        <institution>University of Nevada-Reno</institution>
+        <address>Physics Department</address>
+        <address>1664 N. Virginia Street</address>
+        <address>Reno</address>
+        <address>NV</address>
+        <address>89557</address>
+        <country>USA</country>
+        <contact>
+            <phone>+1 (775) 784-6792</phone>
+            <email>physreg@unr.edu</email>
+        </contact>
+    </site>
+    <site>
         <institution>University of New Hampshire</institution>
         <address>Department of Physics</address>
         <address>Demeritt Hall</address>
@@ -3441,6 +3454,19 @@
         <country>USA</country>
     </site>
     <site>
+        <institution>Texas Tech University</institution>
+        <address>Department of Physics and Astronomy</address>
+        <address>Box 41051</address>
+        <address>Lubbock</address>
+        <address>TX</address>
+        <address>79409-1051</address>
+        <country>USA</country>
+        <contact>
+            <phone>+1 (806) 742-3767</phone>
+            <email>physics.academic.advising@ttu.edu</email>
+        </contact>
+    </site>
+    <site>
         <institution>University of Toledo</institution>
         <address>Department of Physics and Astronomy</address>
         <address>Toledo</address>
@@ -3558,6 +3584,19 @@
         <country>USA</country>
         <contact>
             <email>user@wisc.edu</email>
+        </contact>
+    </site>
+    <site>
+        <institution>University of Wisconsin-Milwaukee</institution>
+        <address>Department of Physics</address>
+        <address>P.O. Box 413</address>
+        <address>Milwaukee</address>
+        <address>WI</address>
+        <address>53201</address>
+        <country>USA</country>
+        <contact>
+            <phone>414-229-4474</phone>
+            <email>physics@uwm.edu</email>
         </contact>
     </site>
     <site>
@@ -3904,6 +3943,41 @@
             <phone>520-318-8000</phone>
             <fax>520-318-8360</fax>
             <email>info@noirlab.edu</email>
+        </contact>
+    </site>
+    <site>
+        <institution>ASTRON</institution>
+        <address>Oude Hoogeveensedijk 4</address>
+        <address>7991 PD Dwingeloo</address>
+        <country>The Netherlands</country>
+        <contact>
+            <phone>+31 (0)521 595 100</phone>
+            <email>info@astron.nl</email>
+        </contact>
+    </site>
+    <site>
+        <institution>Indian Institute of Technology-Indore</institution>
+        <address>Department Of Astronomy, Astrophysics and Space Engineering (DAASE)</address>
+        <address>Khandwa Road, Simrol, Indore 453552</address>
+        <address>Madhya Pradesh</address>
+        <country>India</country>
+        <contact>
+            <phone>+91 0732-4306948</phone>
+            <email>hodastronomy@iiti.ac.in</email>
+        </contact>
+    </site>
+    <site>
+        <institution>University of Texas Rio Grande Valley</institution>
+        <address>Department of Physics and Astronomy</address>
+        <address>ESCNE 1.606</address>
+        <address>1201 W. University Dr.</address>
+        <address>Edinburg</address>
+        <address>TX</address>
+        <address>78539</address>
+        <country>USA</country>
+        <contact>
+            <phone>+1 (956) 665-3136</phone>
+            <email>Phya-Admin@utrgv.edu</email>
         </contact>
     </site>
 </institutions>
