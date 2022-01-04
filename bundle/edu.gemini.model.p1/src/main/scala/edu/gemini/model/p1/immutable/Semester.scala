@@ -7,13 +7,13 @@ import java.util.{Calendar, TimeZone}
 object Semester {
 
   lazy val year = 2022
-  lazy val semesterOption: SemesterOption = SemesterOption.A
+  lazy val semesterOption: SemesterOption = SemesterOption.B
 
   lazy val current: Semester = Semester(year, semesterOption)
 
   def apply(m: M.Semester): Semester = Semester(m.getYear, m.getHalf)
 
-  def forDate(ms: Long) {
+  def forDate(ms: Long): Unit = {
 
     val cal = Calendar.getInstance
     cal.setTimeInMillis(ms)
