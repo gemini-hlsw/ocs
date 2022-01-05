@@ -59,6 +59,9 @@ package object immutable {
     val UH = M.NgoPartner.UH
   }
 
+  type Facility = M.Facility
+  type MultiFacility = M.MultiFacility
+
   type ExchangePartner = M.ExchangePartner
   object ExchangePartner extends EnumObject[M.ExchangePartner] {
     final val KECK   = M.ExchangePartner.KECK

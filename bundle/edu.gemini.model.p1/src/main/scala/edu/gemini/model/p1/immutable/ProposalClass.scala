@@ -88,9 +88,11 @@ object QueueProposalClass {
     Option(m.getKey).map(UUID.fromString),
     GeminiNormalProposalClass.extractSubs(m),
     Option(m.getBand3Request).map(SubmissionRequest(_)),
-    m.getTooOption)
+    m.getTooOption,
+    Option(m.getMultiFacility)
+  )
 
-  val empty = apply(None, None, None, Left(Nil), None, ToOChoice.None)
+  val empty = apply(None, None, None, Left(Nil), None, ToOChoice.None, None)
 
 }
 
@@ -99,7 +101,8 @@ case class QueueProposalClass(itac:Option[Itac],
                               key:Option[UUID],
                               subs:Either[List[NgoSubmission], ExchangeSubmission],
                               band3request:Option[SubmissionRequest],
-                              tooOption:ToOChoice) extends GeminiNormalProposalClass {
+                              tooOption:ToOChoice,
+                              multiFacility: Option[MultiFacility]) extends GeminiNormalProposalClass {
 
   override val isSpecial = false
 
@@ -112,6 +115,7 @@ case class QueueProposalClass(itac:Option[Itac],
     m.getNgo.addAll(subs.left.map(lst => lst.map(_.mutable(p, n))).left.getOrElse(Nil).asJava)
     m.setBand3Request(band3request.map(_.mutable).orNull)
     m.setTooOption(tooOption)
+    m.setMultiFacility(multiFacility.orNull)
     m
   }
 
@@ -260,7 +264,8 @@ case class LargeProgramClass(itac  :Option[Itac],
                             comment:Option[String],
                             key    :Option[UUID],
                             sub    :LargeProgramSubmission,
-                            tooOption:ToOChoice) extends ProposalClass {
+                            tooOption:ToOChoice,
+                            multiFacility: Option[MultiFacility]) extends ProposalClass {
 
   def mutable:M.LargeProgramClass = {
     val m = Factory.createLargeProgramClass
@@ -269,6 +274,7 @@ case class LargeProgramClass(itac  :Option[Itac],
     m.setKey(key.map(_.toString).orNull)
     m.setSubmission(sub.mutable)
     m.setTooOption(tooOption)
+    m.setMultiFacility(multiFacility.orNull)
     m
   }
 
@@ -295,9 +301,10 @@ object LargeProgramClass {
     Option(m.getComment),
     Option(m.getKey).map(UUID.fromString),
     LargeProgramSubmission(m.getSubmission),
-    m.getTooOption)
+    m.getTooOption,
+    Option(m.getMultyFacility))
 
-  def empty = apply(None, None, None, LargeProgramSubmission.empty, ToOChoice.None)
+  def empty = apply(None, None, None, LargeProgramSubmission.empty, ToOChoice.None, None)
 
 }
 
