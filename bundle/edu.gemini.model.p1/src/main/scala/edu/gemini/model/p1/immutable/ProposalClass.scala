@@ -81,6 +81,7 @@ object QueueProposalClass {
   // Lenses
   val tooOption:Lens[QueueProposalClass, ToOChoice] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
   val band3request:Lens[QueueProposalClass, Option[SubmissionRequest]] = Lens.lensu((a, b) => a.copy(band3request = b), _.band3request)
+  val multiFacility:Lens[QueueProposalClass, Option[MultiFacility]] = Lens.lensu((a, b) => a.copy(multiFacility = b), _.multiFacility)
 
   def apply(m:M.QueueProposalClass):QueueProposalClass = apply(
     Option(m.getItac).map(Itac(_)),
@@ -295,6 +296,7 @@ object LargeProgramClass {
   // Lens
   val tooOption:Lens[LargeProgramClass, ToOChoice] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
   val sub:Lens[LargeProgramClass,LargeProgramSubmission] = Lens.lensu((a, b) => a.copy(sub = b), _.sub)
+  val multiFacility:Lens[LargeProgramClass, Option[MultiFacility]] = Lens.lensu((a, b) => a.copy(multiFacility = b), _.multiFacility)
 
   def apply(m:M.LargeProgramClass):LargeProgramClass = apply(
     Option(m.getItac).map(Itac(_)),
@@ -302,7 +304,7 @@ object LargeProgramClass {
     Option(m.getKey).map(UUID.fromString),
     LargeProgramSubmission(m.getSubmission),
     m.getTooOption,
-    Option(m.getMultyFacility))
+    Option(m.getMultiFacility))
 
   def empty = apply(None, None, None, LargeProgramSubmission.empty, ToOChoice.None, None)
 

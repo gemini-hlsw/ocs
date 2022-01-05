@@ -22,6 +22,23 @@ import javax.swing.{ComboBoxModel, DefaultComboBoxModel}
 
 import edu.gemini.model.p1.immutable.Partners.FtPartner
 
+// An enum for multi facility selection
+object MultiFacilitySelection extends Enumeration {
+  val Yes     = Value("Yes")
+  val No     = Value("No")
+}
+
+sealed abstract case class MultiFacilityWrapper(m: MultiFacilitySelection.Value) {
+  def value(): String = m.toString
+}
+
+object MultiFacilityWrapper {
+  val Yes = new MultiFacilityWrapper(MultiFacilitySelection.Yes) {}
+  val No = new MultiFacilityWrapper(MultiFacilitySelection.No) {}
+
+  val values = Seq(Yes, No)
+}
+
 // This is the proposal class editor, and it's actually kind of involved.
 class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
   implicit val boolMonoid = Monoid.instance[Boolean](_ || _,  false)
@@ -42,7 +59,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
   var localFast = FastTurnaroundProgramClass.empty
 
   // We update our local state whenever we refresh.
-  override def refresh(m:Option[Proposal]) {
+  override def refresh(m:Option[Proposal]): Unit = {
     m.map(_.proposalClass).foreach {
       case q: QueueProposalClass          => localQueue = q
       case c: ClassicalProposalClass      => localClassical = c
@@ -100,7 +117,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     border = BorderFactory.createCompoundBorder(
       (new StdToolbar).border,
       BorderFactory.createEmptyBorder(2, 4, 2, 4))
-    override def refresh(m:Option[Proposal]) {
+    override def refresh(m:Option[Proposal]): Unit = {
 
       val (reqTime, minTime) = m.map(_.proposalClass).map(r => (r.requestedTime.hours, r.minRequestedTime.hours)) | ((0.0, 0.0))
 
@@ -132,8 +149,10 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     // We have a bunch of children
     override def children = List(
       proposalClass,
+      multiFacilityLabel, multiFacilityPanel,
       band3Label, band3,
       tooLabel, tooOption,
+      multiFacilityPanel,
       visitorsLabel, visitors,
       ftReviewerLabel, reviewer,
       ftMentorLabel, mentor,
@@ -153,6 +172,8 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     // Visible only in Queue mode
     addRow(band3Label, band3)
     addRow(tooLabel, tooOption)
+
+    addRow(multiFacilityLabel, multiFacilityPanel)
 
     // Visible only in Classical mode
     addRow(visitorsLabel, visitors)
@@ -188,7 +209,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         }
       }
 
-      override def refresh(m: Option[ProposalClass]) {
+      override def refresh(m: Option[ProposalClass]): Unit = {
         enabled = canEdit
         m.foreach {
           case e: ExchangeProposalClass       =>
@@ -242,7 +263,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
       }
 
-      override def refresh(m: Option[ProposalClass]) {
+      override def refresh(m: Option[ProposalClass]): Unit = {
         enabled = canEdit
         selection.item = m.map {
           case _: QueueProposalClass          => Queue
@@ -269,7 +290,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
       val lens = Proposal.proposalClass
 
-      override def refresh(m: Option[ProposalClass]) {
+      override def refresh(m: Option[ProposalClass]): Unit = {
         enabled = canEdit
         m.foreach {
           case q: QueueProposalClass          =>
@@ -301,6 +322,94 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
     }
 
+    // Multi label and combo box
+    lazy val multiFacilityLabel = dvLabel("Multi facility:") {
+      case _: QueueProposalClass          => true
+      case _: LargeProgramClass           => true
+    }
+
+    object multiFacilityPanel extends FlowPanel(FlowPanel.Alignment.Left)() with Bound.Self[Proposal] {
+
+      // Configure the panel
+      vGap = 0
+      hGap = 0
+
+      override def children = List(multiFacility, edit)
+
+      peer.add(multiFacility.peer)
+      peer.add(edit.peer)
+
+      override def refresh(m: Option[Proposal]): Unit = {
+        enabled = canEdit
+        m.map(_.proposalClass).foreach {
+          case q: QueueProposalClass          =>
+            visible = true
+            edit.visible = q.multiFacility.isDefined
+          case l: LargeProgramClass           =>
+            visible = true
+            edit.visible = l.multiFacility.isDefined
+          case _                              =>
+            visible = false
+        }
+      }
+
+      object multiFacility extends ComboBox(MultiFacilityWrapper.values) with ValueRenderer[MultiFacilityWrapper] with Bound[Proposal, ProposalClass] {
+        val lens = Proposal.proposalClass
+
+        override def refresh(m: Option[ProposalClass]): Unit = {
+          enabled = canEdit
+          m.foreach {
+            case q: QueueProposalClass          =>
+              selection.item = q.multiFacility.fold(MultiFacilityWrapper.No)(_ => MultiFacilityWrapper.Yes)
+              visible = true
+            case l: LargeProgramClass           =>
+              selection.item = l.multiFacility.fold(MultiFacilityWrapper.No)(_ => MultiFacilityWrapper.Yes)
+              visible = true
+            case _                              =>
+              visible = false
+          }
+        }
+
+        selection.reactions += {
+          case SelectionChanged(_) => model match {
+            case Some(q: QueueProposalClass)          => model = selection.item match {
+              case MultiFacilityWrapper.Yes => Some(QueueProposalClass.multiFacility.set(q, Some(new MultiFacility())))
+              case MultiFacilityWrapper.No => Some(QueueProposalClass.multiFacility.set(q, None))
+              case _ => Some(q)
+            }
+            case Some(l: LargeProgramClass)           => model = selection.item match {
+              case MultiFacilityWrapper.Yes => Some(LargeProgramClass.multiFacility.set(l, Some(new MultiFacility())))
+              case MultiFacilityWrapper.No => Some(LargeProgramClass.multiFacility.set(l, None))
+              case _ => Some(l)
+            }
+            case _                                    => // shouldn't happen
+          }
+        }
+      }
+
+      // Facilites button
+      object edit extends Button with Bound[Proposal, ProposalClass] {
+        button =>
+
+        // A lens to allow us to set the type in one shot
+        val lens = Proposal.proposalClass
+
+        // On refresh, set our visible state
+        override def refresh(m: Option[ProposalClass]): Unit = {
+          enabled = canEdit
+          visible = ~m.map {
+            case q: QueueProposalClass => q.multiFacility.isDefined
+            case l: LargeProgramClass  => l.multiFacility.isDefined
+            case _                     => false
+          }
+        }
+
+        icon = SharedIcons.ICON_VARIANT
+
+      }
+
+    }
+
     // Band 3 Label
     lazy val band3Label = dvLabel("Consider for Band 3:") {
       case _: QueueProposalClass         => true
@@ -326,7 +435,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       peer.add(label.peer)
 
       // On refresh we update visibility and local state
-      override def refresh(m: Option[Proposal]) {
+      override def refresh(m: Option[Proposal]): Unit = {
         visible = ~m.map(_.proposalClass).map {
           case _: QueueProposalClass         => true
           //case _: FastTurnaroundProgramClass => true // REL-1896 Hide it but keep the code
@@ -344,7 +453,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
         preferredSize = (75, preferredSize.height)
 
-        override def refresh(m: Option[Proposal]) {
+        override def refresh(m: Option[Proposal]): Unit = {
           enabled = canEdit
           selection.item = m.map { p =>
             val a = p.proposalClass match {
@@ -402,7 +511,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         val lens = Proposal.proposalClass
 
         // On refresh, set our visible state
-        override def refresh(m: Option[ProposalClass]) {
+        override def refresh(m: Option[ProposalClass]): Unit = {
           enabled = canEdit
           visible = ~m.map {
             case q: QueueProposalClass         => q.band3request.isDefined
@@ -412,7 +521,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         }
 
         def queueEditor = for {
-          q @ QueueProposalClass(_, _, _, _, Some(r), _) <- model
+          q @ QueueProposalClass(_, _, _, _, Some(r), _, _) <- model
           (r, _, _) <- SubmissionRequestEditor.open(r, None, Nil, None, button)
         } yield QueueProposalClass.band3request.set(q, Some(r))
 
@@ -850,7 +959,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           } yield Some(sr.set(s, req))
 
         def lpRequest = for {
-            l @ LargeProgramClass(_, _, _, sub, _) <- model
+            l @ LargeProgramClass(_, _, _, sub, _, _) <- model
             req                                    <- LargeSubmissionRequestEditor.open(sub.request, button)
           } yield Some(lp.set(l, req))
 
@@ -949,10 +1058,10 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
         // Update local state
         m.foreach {
-          case QueueProposalClass(_, _, _, Left(ngos), _, _)                                       => localGemini = ngos
-          case QueueProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.KECK    => localKeck = e
-          case QueueProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.SUBARU  => localSubaru = e
-          case QueueProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.CFH     => localCFH = e
+          case QueueProposalClass(_, _, _, Left(ngos), _, _, _)                                       => localGemini = ngos
+          case QueueProposalClass(_, _, _, Right(e), _, _, _) if e.partner == ExchangePartner.KECK    => localKeck = e
+          case QueueProposalClass(_, _, _, Right(e), _, _, _) if e.partner == ExchangePartner.SUBARU  => localSubaru = e
+          case QueueProposalClass(_, _, _, Right(e), _, _, _) if e.partner == ExchangePartner.CFH     => localCFH = e
           case ClassicalProposalClass(_, _, _, Left(ngos), _)                                      => localGemini = ngos
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.KECK   => localKeck = e
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.SUBARU => localSubaru = e
@@ -963,10 +1072,10 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
         // Update our selected item
         selection.item = m.map {
-          case QueueProposalClass(_, _, _, Left(_), _, _)                                          => GeminiPartner
-          case QueueProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.KECK    => ExchangeKeck
-          case QueueProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.SUBARU  => ExchangeSubaru
-          case QueueProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.CFH     => ExchangeCFH
+          case QueueProposalClass(_, _, _, Left(_), _, _, _)                                          => GeminiPartner
+          case QueueProposalClass(_, _, _, Right(e), _, _, _) if e.partner == ExchangePartner.KECK    => ExchangeKeck
+          case QueueProposalClass(_, _, _, Right(e), _, _, _) if e.partner == ExchangePartner.SUBARU  => ExchangeSubaru
+          case QueueProposalClass(_, _, _, Right(e), _, _, _) if e.partner == ExchangePartner.CFH     => ExchangeCFH
           case ClassicalProposalClass(_, _, _, Left(_), _)                                         => GeminiPartner
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.KECK   => ExchangeKeck
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.SUBARU => ExchangeSubaru
@@ -1122,15 +1231,15 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       else NgoSubmission(r, None, p, i) :: subs
 
     def subs(p:ProposalClass):List[PSWrapper] = p match {
-      case QueueProposalClass(_, _, _, Left(ngos), _, _)   => all(ngos)
-      case QueueProposalClass(_, _, _, Right(exch), _, _)  => List(Real(exch))
-      case ClassicalProposalClass(_, _, _, Left(ngos), _)  => all(ngos)
-      case ClassicalProposalClass(_, _, _, Right(exch), _) => List(Real(exch))
-      case e: ExchangeProposalClass                        => all(e.subs)
-      case _: SpecialProposalClass                         => Nil
-      case _: LargeProgramClass                            => Nil
-      case _: SubaruIntensiveProgramClass                  => Nil
-      case _: FastTurnaroundProgramClass                   => Nil
+      case QueueProposalClass(_, _, _, Left(ngos), _, _, _)  => all(ngos)
+      case QueueProposalClass(_, _, _, Right(exch), _, _, _) => List(Real(exch))
+      case ClassicalProposalClass(_, _, _, Left(ngos), _)    => all(ngos)
+      case ClassicalProposalClass(_, _, _, Right(exch), _)   => List(Real(exch))
+      case e: ExchangeProposalClass                          => all(e.subs)
+      case _: SpecialProposalClass                           => Nil
+      case _: LargeProgramClass                              => Nil
+      case _: SubaruIntensiveProgramClass                    => Nil
+      case _: FastTurnaroundProgramClass                     => Nil
     }
 
     def all(ngos:List[NgoSubmission]):List[PSWrapper] = {
