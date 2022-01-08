@@ -95,17 +95,17 @@ public final class HtmlPrinter {
                         SPSiteQuality.CloudCover::getPercentage);
 
         final StringBuilder sb = new StringBuilder();
-        final String EXACT = "<span style=\"color:red;\">exact</span>";
+        final String EXACT = "<span style=\"color:red;\">exact condition specified</span>";
         sb.append("Observing Conditions:");
         sb.append(String.format("<LI> Airmass: %.2f", airmass));
 
         ocp.javaIq().biForEach(
-            exactIq -> sb.append(String.format("<LI> Image Quality: %d%% &nbsp; (%.2f\" at zenith, %.2f\" on-source, %s)", iq, IqAtZenith, IqAtSource, EXACT)),
-            enumIq  -> sb.append(String.format("<LI> Image Quality: %d%% &nbsp; (%.2f\" at zenith, %.2f\" on-source)", iq, IqAtZenith, IqAtSource))
+            exactIq -> sb.append(String.format("<LI> Image Quality: %d%% &nbsp; (&leq; %.2f\" at zenith, &leq; %.2f\" on-source, %s)", iq, IqAtZenith, IqAtSource, EXACT)),
+            enumIq  -> sb.append(String.format("<LI> Image Quality: %d%% &nbsp; (&leq; %.2f\" at zenith, &leq; %.2f\" on-source)", iq, IqAtZenith, IqAtSource))
         );
 
         ocp.javaCc().biForEach(
-            exactCc -> sb.append(String.format("<LI> Cloud Cover: %d%% &nbsp; (%.2f magnitudes, %s)", cc, exactCc.toExtinction(), EXACT)),
+            exactCc -> sb.append(String.format("<LI> Cloud Cover: %d%% &nbsp; (&leq; %.2f magnitudes, %s)", cc, exactCc.toExtinction(), EXACT)),
             enumCc  -> sb.append(String.format("<LI> Cloud cover: %d%%", cc))
         );
 
@@ -158,7 +158,7 @@ public final class HtmlPrinter {
                 break;
             }
         }
-        Log.fine("IQ Bin = " + iqpct);
+        Log.fine("IQ Percentile = " + iqpct);
         return iqpct;
     }
 
