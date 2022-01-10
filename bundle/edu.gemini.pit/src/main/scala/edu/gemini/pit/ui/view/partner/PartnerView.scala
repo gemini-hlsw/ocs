@@ -382,7 +382,8 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
               case MultiFacilityWrapper.No => Some(LargeProgramClass.multiFacility.set(l, None))
               case _ => Some(l)
             }
-            case _                                    => // shouldn't happen
+            case _                                    => 
+              model
           }
         }
       }

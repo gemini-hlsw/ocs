@@ -794,7 +794,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
         case Success(StepResult(changes, result)) =>
           changes must contain(SemesterConverter2020BTo2021A.AuSubmissionMessage)
           ProposalIo.read(result.toString()).proposalClass match {
-            case QueueProposalClass(_, _, _, Left(List(NgoSubmission(_, _, NgoPartner.US, _))), _, _) => success("ok!") // AU is gone!
+            case QueueProposalClass(_, _, _, Left(List(NgoSubmission(_, _, NgoPartner.US, _))), _, _, _) => success("ok!") // AU is gone!
             case x => failure(x.toString)
           }
         case x => failure(x.toString)
