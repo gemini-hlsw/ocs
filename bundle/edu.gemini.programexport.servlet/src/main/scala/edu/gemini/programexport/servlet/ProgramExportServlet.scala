@@ -9,7 +9,7 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.TimingWindow
 import edu.gemini.spModel.gemini.obscomp.{SPProgram, SPSiteQuality}
 import edu.gemini.spModel.gemini.phase1.GsaPhase1Data
 import edu.gemini.spModel.guide._
-import edu.gemini.spModel.obs.{ObsClassService, ObsQaStateService, ObservationStatus, SPObservation}
+import edu.gemini.spModel.obs.{ObsClassService, ObsQaStateService, ObsTimesService, ObservationStatus, SPObservation}
 import edu.gemini.spModel.obs.plannedtime.{PlannedTimeCalculator, SetupTime}
 import edu.gemini.spModel.obscomp.{SPGroup, SPInstObsComp, SPNote}
 import edu.gemini.spModel.obslog._
@@ -32,9 +32,11 @@ import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
+import edu.gemini.spModel.time.ChargeClass
 import edu.gemini.spModel.util.SPTreeUtil
 
 import java.time.Duration
+import java.util.function
 
 final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Principal]) extends HttpServlet {
 
@@ -116,7 +118,6 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
       case _ => None
     }
 
-
   implicit val magnitudeEncodeJson: EncodeJson[Magnitude] =
     EncodeJson { m =>
       ("system" := m.system.name) ->:
@@ -133,19 +134,40 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         jEmptyObject
     }
 
-  val timeAccountAwardEncodeJson: EncodeJson[(TimeAcctCategory, TimeAcctAward)] =
-    EncodeJson { case (c, a) =>
-      ("partnerTime" := TimeUnit.SECONDS.toMillis(a.getPartnerAward.getSeconds)) ->:
-        ("programTime" := TimeUnit.SECONDS.toMillis(a.getProgramAward.getSeconds)) ->:
+  val timeAccountAwardEncodeJson: EncodeJson[(TimeAcctCategory, TimeAcctAward, Long, Long)] =
+    EncodeJson { case (c, a, prog_used, part_used) =>
+      ("usedProgramTime" := prog_used) ->:
+        ("usedPartnerTime" := part_used) ->:
+        ("awardedPartnerTime" := TimeUnit.SECONDS.toMillis(a.getPartnerAward.getSeconds)) ->:
+        ("awardedProgramTime" := TimeUnit.SECONDS.toMillis(a.getProgramAward.getSeconds)) ->:
         ("category" := c.getDisplayName) ->:
         jEmptyObject
     }
 
+  val timeAccountAllocationEncodeJson: EncodeJson[(ISPProgram, TimeAcctAllocation)] =
+    EncodeJson { case (p, t) =>
+      // Get the total used program and partner time.
+      val times = ObsTimesService.getCorrectedObsTimes(p)
+      val totalProgramUsed = times.getTimeCharges.getTime(ChargeClass.PROGRAM)
+      val totalPartnerUsed = times.getTimeCharges.getTime(ChargeClass.PARTNER)
 
-  implicit val timeAccountAllocationEncodeJson: EncodeJson[TimeAcctAllocation] =
-    EncodeJson { t =>
+      // Get the ratios used by each category for program and partner time.
+      def getRatios(f: TimeAcctAward => Duration): Map[TimeAcctCategory, Double] = {
+        t.getRatios(new function.Function[TimeAcctAward, Duration] {
+          override def apply(t: TimeAcctAward): Duration = f(t)
+        }).map{ case (c,d) => (c, d.toDouble)}.toMap
+      }
+
+      val programRatios = getRatios { _.getPartnerAward }
+      val partnerRatios = getRatios { _.getProgramAward }
+
+      def calculateRatio(category: TimeAcctCategory, ratios: Map[TimeAcctCategory, Double], totalTime: Long): Long =
+        ratios.get(category).map { t => (t * totalTime).toLong }.getOrElse(0L)
+
       t.getCategories.asScala.toList.map(c => (c, t.getAward(c))).filter(_._2 != TimeAcctAward.ZERO).map {
-        case (c, a) => timeAccountAwardEncodeJson(c, a)
+        case (c, a) => timeAccountAwardEncodeJson(c, a,
+          calculateRatio(c, programRatios, totalProgramUsed),
+          calculateRatio(c, partnerRatios, totalPartnerUsed))
       }.asJson
     }
 
@@ -353,7 +375,7 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
 
   val programFieldsEncodeJson: EncodeJson[(ISPProgram, SPProgram)] =
     EncodeJson { case (ispProg, spProg) =>
-      ("timeAccountAllocationCategories" := spProg.getTimeAcctAllocation) ->:
+      ("timeAccountAllocationCategories" := timeAccountAllocationEncodeJson(ispProg, spProg.getTimeAcctAllocation)) ->:
         ("awardedTime" := spProg.getAwardedProgramTime.getMilliseconds) ->:
         ("tooType" := spProg.getTooType.getDisplayValue) ->:
         ("programMode" := spProg.getProgramMode.displayValue) ->:
