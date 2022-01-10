@@ -81,6 +81,7 @@ object QueueProposalClass {
   // Lenses
   val tooOption:Lens[QueueProposalClass, ToOChoice] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
   val band3request:Lens[QueueProposalClass, Option[SubmissionRequest]] = Lens.lensu((a, b) => a.copy(band3request = b), _.band3request)
+  val multiFacility:Lens[QueueProposalClass, Option[MultiFacility]] = Lens.lensu((a, b) => a.copy(multiFacility = b), _.multiFacility)
 
   def apply(m:M.QueueProposalClass):QueueProposalClass = apply(
     Option(m.getItac).map(Itac(_)),
@@ -88,9 +89,11 @@ object QueueProposalClass {
     Option(m.getKey).map(UUID.fromString),
     GeminiNormalProposalClass.extractSubs(m),
     Option(m.getBand3Request).map(SubmissionRequest(_)),
-    m.getTooOption)
+    m.getTooOption,
+    Option(m.getMultiFacility)
+  )
 
-  val empty = apply(None, None, None, Left(Nil), None, ToOChoice.None)
+  val empty = apply(None, None, None, Left(Nil), None, ToOChoice.None, None)
 
 }
 
@@ -99,7 +102,8 @@ case class QueueProposalClass(itac:Option[Itac],
                               key:Option[UUID],
                               subs:Either[List[NgoSubmission], ExchangeSubmission],
                               band3request:Option[SubmissionRequest],
-                              tooOption:ToOChoice) extends GeminiNormalProposalClass {
+                              tooOption:ToOChoice,
+                              multiFacility: Option[MultiFacility]) extends GeminiNormalProposalClass {
 
   override val isSpecial = false
 
@@ -112,6 +116,7 @@ case class QueueProposalClass(itac:Option[Itac],
     m.getNgo.addAll(subs.left.map(lst => lst.map(_.mutable(p, n))).left.getOrElse(Nil).asJava)
     m.setBand3Request(band3request.map(_.mutable).orNull)
     m.setTooOption(tooOption)
+    m.setMultiFacility(multiFacility.orNull)
     m
   }
 
@@ -260,7 +265,8 @@ case class LargeProgramClass(itac  :Option[Itac],
                             comment:Option[String],
                             key    :Option[UUID],
                             sub    :LargeProgramSubmission,
-                            tooOption:ToOChoice) extends ProposalClass {
+                            tooOption:ToOChoice,
+                            multiFacility: Option[MultiFacility]) extends ProposalClass {
 
   def mutable:M.LargeProgramClass = {
     val m = Factory.createLargeProgramClass
@@ -269,6 +275,7 @@ case class LargeProgramClass(itac  :Option[Itac],
     m.setKey(key.map(_.toString).orNull)
     m.setSubmission(sub.mutable)
     m.setTooOption(tooOption)
+    m.setMultiFacility(multiFacility.orNull)
     m
   }
 
@@ -289,15 +296,17 @@ object LargeProgramClass {
   // Lens
   val tooOption:Lens[LargeProgramClass, ToOChoice] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
   val sub:Lens[LargeProgramClass,LargeProgramSubmission] = Lens.lensu((a, b) => a.copy(sub = b), _.sub)
+  val multiFacility:Lens[LargeProgramClass, Option[MultiFacility]] = Lens.lensu((a, b) => a.copy(multiFacility = b), _.multiFacility)
 
   def apply(m:M.LargeProgramClass):LargeProgramClass = apply(
     Option(m.getItac).map(Itac(_)),
     Option(m.getComment),
     Option(m.getKey).map(UUID.fromString),
     LargeProgramSubmission(m.getSubmission),
-    m.getTooOption)
+    m.getTooOption,
+    Option(m.getMultiFacility))
 
-  def empty = apply(None, None, None, LargeProgramSubmission.empty, ToOChoice.None)
+  def empty = apply(None, None, None, LargeProgramSubmission.empty, ToOChoice.None, None)
 
 }
 
