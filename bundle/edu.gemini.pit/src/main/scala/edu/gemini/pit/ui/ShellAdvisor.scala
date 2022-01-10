@@ -91,7 +91,7 @@ class ShellAdvisor(
   lazy val targetExportAction = new TargetExportAction(shell)
 
   // Ok this is the lifecycle method that's called soon after instantiation.
-  def open(_context: RichShellContext[Model]) {
+  def open(_context: RichShellContext[Model]): Unit = {
     context = _context
 
     // Hook the Quit menu if we're on MacOS. This lets us catch Cmd+Q.
@@ -100,13 +100,21 @@ class ShellAdvisor(
 
     // Tell the shell about our initial model
     val wasRolled = startModel.conversion.transformed
-    // The attachment may be on the local dir, fix the model
-    /* Builds a new proposal changing the attachment */
-    def updatedAttachment(attachment:Option[File]):Proposal = {
-      startModel.proposal.copy(meta = startModel.proposal.meta.copy(attachment = attachment))
+
+    def updateAttachment(startModel: Model, i: Int): Model = {
+      // The attachment may be on the local dir, fix the model
+      /* Builds a new proposal changing the attachment */
+      def updatedAttachment(attachment: Option[File]):Proposal =
+        startModel.proposal.copy(meta = startModel.proposal.meta.copy(attachments = startModel.proposal.meta.attachments.zipWithIndex.map {
+          case (a, j) if j == i => a.copy(name = attachment)
+          case (a, _) => a
+        }))
+
+      val attachment = startModel.proposal.meta.attachments.lift(i)
+      startModel.copy(proposal = updatedAttachment(PDF.relocatedPdf(file, attachment.flatMap(_.name))))
     }
-    val attachment = startModel.proposal.meta.attachment
-    val fixedModel = startModel.copy(proposal = updatedAttachment(PDF.relocatedPdf(file, attachment)))
+
+    val fixedModel = updateAttachment(updateAttachment(startModel, 1), 2)
 
     shell.init(Some(fixedModel), file, wasRolled)
 
@@ -115,7 +123,7 @@ class ShellAdvisor(
     obsListViewB3.other = Some(obsListView)
 
     // We have some bound objects with no UI that we bind thus: // TODO: improve
-    def addRoot(boundElement: Bound[Model, _], undoable: Boolean = true) {
+    def addRoot(boundElement: Bound[Model, _], undoable: Boolean = true): Unit = {
       BoundView.bindToShell(shell, boundElement, undoable) {
         m => ()
       }
@@ -145,7 +153,7 @@ class ShellAdvisor(
     // Title and modified handler. The window title has the filename without extension (or "Untitled") and the PIT
     // version. If the document has been modified, it has the standard modification decoration on the Mac (dot in the
     // window close button) and "[*]" after the filename on other platforms.
-    def updateTitle() {
+    def updateTitle(): Unit = {
       val name = shell.file.map {
         f =>
           val n = f.getName
@@ -255,7 +263,7 @@ class ShellAdvisor(
 
   }
 
-  private def registerKeyBindings() {
+  private def registerKeyBindings(): Unit = {
     import java.awt.event.KeyEvent._
     import java.awt.event.InputEvent._
     import javax.swing.{AbstractAction, Action, KeyStroke}
@@ -285,7 +293,7 @@ class ShellAdvisor(
 
     // No built in action for this?
     val cutToEnd = new AbstractAction() {
-      def actionPerformed(e: ActionEvent) {
+      def actionPerformed(e: ActionEvent): Unit = {
         action(selectionEndLineAction).actionPerformed(e)
         action(cutAction).actionPerformed(e)
       }
@@ -310,7 +318,7 @@ class ShellAdvisor(
 
   }
 
-  private def hookMacQuitMenu(shell: RichShell[_]) {
+  private def hookMacQuitMenu(shell: RichShell[_]): Unit = {
 
     // This is what we want to do, but in order to make it buildable on Linux
     // we need to do it all with introspection.
@@ -349,58 +357,57 @@ class ShellAdvisor(
       LOGGER.log(Level.INFO, "Hooked Quit action for Mac.")
     } catch {
       case e:Exception if System.getProperty("java.version").startsWith("1.8") => LOGGER.log(Level.WARNING, "Trouble installing Quit hook for Mac.", e)
-      case _ => // Newer JVMs don't need this hack
     }
   }
 
 
   // These are some methods that make it a bit easier to do things robotically (like quick fixes).
 
-  def inOverview(body: ProposalView => Unit) {
+  def inOverview(body: ProposalView => Unit): Unit = {
     withView("proposal", proposalView, body)
   }
 
-  def inObsListView(b: Band, body: ObsListView => Unit) {
+  def inObsListView(b: Band, body: ObsListView => Unit): Unit = {
     b match {
       case Band.BAND_1_2 => withView("obs", obsListView, body)
       case Band.BAND_3   => withView("band3", obsListViewB3, body)
     }
   }
 
-  def inPartnersView(body: PartnerView => Unit) {
+  def inPartnersView(body: PartnerView => Unit): Unit = {
     withView("partners", partnerView, body)
   }
 
-  def inTargetsView(body: TargetView => Unit) {
+  def inTargetsView(body: TargetView => Unit): Unit = {
     withView("targets", targetView, body)
   }
 
-  private def withView[V](id: String, view: V, body: V => Unit) {
+  private def withView[V](id: String, view: V, body: V => Unit): Unit = {
     selectView(id)
     body(view)
   }
 
-  def showPartnersView() {
+  def showPartnersView(): Unit = {
     selectView("partners")
   }
 
-  def showObsListView() {
+  def showObsListView(): Unit = {
     selectView("obs")
   }
 
-  def showObsListView(b: Band) {
+  def showObsListView(b: Band): Unit = {
     b match {
       case Band.BAND_1_2 => selectView("obs")
       case Band.BAND_3   => selectView("band3")
     }
   }
 
-  def showTacView(partner: Any) {
+  def showTacView(partner: Any): Unit = {
     tacView.form.partner.selection.item = partner
     selectView("tac")
   }
 
-  private def selectView(n: String) {
+  private def selectView(n: String): Unit = {
     context.context.getShell.selectView(n)
   }
 

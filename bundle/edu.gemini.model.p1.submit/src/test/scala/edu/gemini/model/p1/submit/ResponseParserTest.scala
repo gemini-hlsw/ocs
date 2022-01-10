@@ -10,22 +10,22 @@ import edu.gemini.model.p1.submit.SubmitResult.{Success, ServiceError}
 
 class ResponseParserTest {
 
-  private def verifyUnexpected(input: String) {
+  private def verifyUnexpected(input: String): Unit = {
     parse(input) match {
       case ServiceError(None, _, 500, UNEXPECTED_MSG) => // ok
       case _ => fail()
     }
   }
 
-  @Test def testNotEvenXml() {
+  @Test def testNotEvenXml(): Unit = {
     verifyUnexpected("foo")
   }
 
-  @Test def testUnexpectedXml() {
+  @Test def testUnexpectedXml(): Unit = {
     parse(<unexpected></unexpected>.toString())
   }
 
-  @Test def testNonIntegerErrorCode() {
+  @Test def testNonIntegerErrorCode(): Unit = {
     verifyUnexpected(
       <body>
         <status>error</status>
@@ -40,7 +40,7 @@ class ResponseParserTest {
     FMT.parse(s).getTime
   }
 
-  @Test def testSuccess() {
+  @Test def testSuccess(): Unit = {
     parse(
       <body>
         <status>created</status>
@@ -57,7 +57,7 @@ class ResponseParserTest {
     }
   }
 
-  @Test def testNoPartnerRef() {
+  @Test def testNoPartnerRef(): Unit = {
     parse(
       <body>
         <status>created</status>
@@ -71,7 +71,7 @@ class ResponseParserTest {
     }
   }
 
-  @Test def testNoTimestamp() {
+  @Test def testNoTimestamp(): Unit = {
     parse(
       <body>
         <status>created</status>
@@ -85,7 +85,7 @@ class ResponseParserTest {
     }
   }
 
-  @Test def testBadTimestamp() {
+  @Test def testBadTimestamp(): Unit = {
     parse(
       <body>
         <status>created</status>
@@ -100,7 +100,8 @@ class ResponseParserTest {
       case _ => fail()
     }
   }
-  @Test def testValidError() {
+
+  @Test def testValidError(): Unit = {
     parse(
       <body>
         <status>error</status>

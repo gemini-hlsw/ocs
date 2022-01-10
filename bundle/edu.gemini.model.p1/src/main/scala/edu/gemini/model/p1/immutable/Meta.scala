@@ -5,29 +5,52 @@ import java.io.File
 
 import scalaz._
 import Scalaz._
+import scala.collection.JavaConverters._
 
 object Meta {
 
   // Lenses
-  val attachment:Lens[Meta,Option[File]] = Lens.lensu((a, b) => a.copy(attachment = b), _.attachment)
+  val attachments:Lens[Meta, List[Attachment]] = Lens.lensu((a, b) => a.copy(attachments = b), _.attachments)
   val band3OptionChosen:Lens[Meta,Boolean] = Lens.lensu((a, b) => a.copy(band3OptionChosen = b), _.band3OptionChosen)
   val overrideAffiliate:Lens[Meta,Boolean] = Lens.lensu((a, b) => a.copy(overrideAffiliate = b), _.overrideAffiliate)
 
-  val empty = Meta(None, band3OptionChosen = false, overrideAffiliate = false)
+  val empty = Meta(Nil, band3OptionChosen = false, overrideAffiliate = false)
   def apply(m:M.Meta):Meta = Option(m).map(new Meta(_)).getOrElse(empty)
 }
 
-case class Meta(attachment:Option[File], band3OptionChosen:Boolean, overrideAffiliate:Boolean) {
+case class Meta(attachments:List[Attachment], band3OptionChosen:Boolean, overrideAffiliate:Boolean) {
 
-  private def this(m:M.Meta) = this(Option(m.getAttachment).map(new File(_)),
+  private def this(m:M.Meta) = this(m.getAttachment.asScala.map(Attachment.apply).toList,
     Option(m.isBand3OptionChosen).exists(_.booleanValue),
     Option(m.isOverrideAffiliate).exists(_.booleanValue))
 
   def mutable = {
     val m = Factory.createMeta
-    m.setAttachment(attachment.map(_.getPath).orNull)
+    attachments.map(a => m.getAttachment().add(a.mutable))
     m.setBand3OptionChosen(band3OptionChosen)
     m.setOverrideAffiliate(overrideAffiliate)
+    m
+  }
+}
+
+object Attachment {
+
+  // Lenses
+  val name: Lens[Attachment, Option[File]] = Lens.lensu((a, b) => a.copy(name = b), _.name)
+  val index: Lens[Attachment, Int] = Lens.lensu((a, b) => a.copy(index = b), _.index)
+
+  val empty = Attachment(None, index = 0)
+  def apply(m: M.Attachment):Attachment = Option(m).map(new Attachment(_)).getOrElse(empty)
+}
+
+case class Attachment(name: Option[File], index: Int) {
+
+  private def this(m: M.Attachment) = this(Option(m.getName).map(new File(_)), m.getIndex.toInt)
+
+  def mutable = {
+    val m = Factory.createAttachment
+    m.setName(name.map(_.getPath).orNull)
+    m.setIndex(index)
     m
   }
 }

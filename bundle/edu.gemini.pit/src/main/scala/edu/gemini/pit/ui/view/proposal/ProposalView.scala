@@ -30,7 +30,7 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
   implicit val boolMonoid = Monoid.instance[Boolean](_ || _,  false)
 
   // Bound
-  override def children = List(title, abstrakt, /* scheduling, */ category, attachment, investigators)
+  override def children = List(title, abstrakt, /* scheduling, */ category,/* attachment,*/ investigators)
   val lens = Model.proposal
 
   // Our content, which is defined below
@@ -39,18 +39,18 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
     addRow(new Label("Title:"), title)
     addRow(new Label("Abstract:"), new ScrollPane(abstrakt), GridBagPanel.Fill.Both, 100)
     addRow(new Label("Category:"), category)
-    addRow(new Label("Attachment:"), attachment)
+    // addRow(new Label("Attachment:"), attachment)
     addSpacer()
   }, BorderPanel.Position.Center)
   add(investigators, BorderPanel.Position.South)
 
   // Refresh
-  override def refresh(m:Option[Proposal]) {
+  override def refresh(m:Option[Proposal]): Unit = {
     title.enabled = canEdit
     abstrakt.enabled = canEdit
     category.enabled = canEdit
-    attachment.select.enabled = canEdit
-    attachment.remove.enabled = canEdit
+    // attachment.select.enabled = canEdit
+    // attachment.remove.enabled = canEdit
   }
 
   // Title field
@@ -101,73 +101,73 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
     }
   }
 
-  // Attachment
-  object attachment extends BorderPanel with Bound[Proposal, Option[File]] {panel =>
-
-    // Bound
-    val lens = Proposal.meta andThen Meta.attachment
-    override def children = List(select, remove, label)
-
-    // Our content, defined below
-    add(selectPanel, BorderPanel.Position.West)
-    add(label, BorderPanel.Position.Center)
-    add(remove, BorderPanel.Position.East)
-
-    // Panel for the buttons
-    object selectPanel extends BorderPanel {panel =>
-      add(templatesUrl, BorderPanel.Position.West)
-      add(select, BorderPanel.Position.East)
-    }
-
-    // Select button
-    object select extends Button with Bound.Self[Option[File]] {
-      enabled = false
-      icon = SharedIcons.ICON_ATTACH
-      tooltip = "Select the PDF file of the text sections"
-      override def refresh(m:Option[Option[File]]) {
-        enabled = m.isDefined && canEdit
-      }
-      reactions += {
-        case ButtonClicked(_) => for {
-          file <- new Chooser[ProposalView]("attachment", panel.peer).chooseOpen("PDF Attachment", ".pdf")
-        } model = Some(Some(file))
-      }
-    }
-
-    // Remove button
-    object remove extends Button with Bound.Self[Option[File]] {
-      icon = SharedIcons.REMOVE
-      tooltip = "Remove attachment."
-      border = null
-      override def refresh(m:Option[Option[File]]) {
-        visible = ~m.map(_.isDefined)
-        enabled = canEdit
-      }
-      reactions += {
-        case ButtonClicked(_) => model = Some(None)
-      }
-    }
-
-    // Label
-    object label extends Label with Bound.Self[Option[File]] {
-      horizontalAlignment = Alignment.Left
-      override def refresh(f:Option[Option[java.io.File]]) {
-        f.foreach {
-          f =>
-            text = " PDF attachment goes here."
-            icon = null
-            f.foreach {
-              f =>
-                val xml = advisor.shell.file
-                val folder:Option[File] = Option(f.getParentFile).orElse(xml.map(_.getParentFile).flatMap(Option(_)))
-                text = "%s (in folder %s)".format(f.getName, folder.map(_.getName).getOrElse("<none>"))
-                icon = if (PDF.isPDF(xml, f)) SharedIcons.NOTE else new CompositeIcon(SharedIcons.NOTE, SharedIcons.OVL_ERROR)
-            }
-        }
-      }
-    }
-
-  }
+  // // Attachment
+  // object attachment extends BorderPanel with Bound[Proposal, Option[File]] {panel =>
+  //
+  //   // Bound
+  //   val lens = Proposal.meta andThen Meta.attachments
+  //   override def children = List(select, remove, label)
+  //
+  //   // Our content, defined below
+  //   add(selectPanel, BorderPanel.Position.West)
+  //   add(label, BorderPanel.Position.Center)
+  //   add(remove, BorderPanel.Position.East)
+  //
+  //   // Panel for the buttons
+  //   object selectPanel extends BorderPanel {panel =>
+  //     add(templatesUrl, BorderPanel.Position.West)
+  //     add(select, BorderPanel.Position.East)
+  //   }
+  //
+  //   // Select button
+  //   object select extends Button with Bound.Self[Option[File]] {
+  //     enabled = false
+  //     icon = SharedIcons.ICON_ATTACH
+  //     tooltip = "Select the PDF file of the text sections"
+  //     override def refresh(m:Option[Option[File]]) {
+  //       enabled = m.isDefined && canEdit
+  //     }
+  //     reactions += {
+  //       case ButtonClicked(_) => for {
+  //         file <- new Chooser[ProposalView]("attachment", panel.peer).chooseOpen("PDF Attachment", ".pdf")
+  //       } model = Some(Some(file))
+  //     }
+  //   }
+  //
+  //   // Remove button
+  //   object remove extends Button with Bound.Self[Option[File]] {
+  //     icon = SharedIcons.REMOVE
+  //     tooltip = "Remove attachment."
+  //     border = null
+  //     override def refresh(m:Option[Option[File]]) {
+  //       visible = ~m.map(_.isDefined)
+  //       enabled = canEdit
+  //     }
+  //     reactions += {
+  //       case ButtonClicked(_) => model = Some(None)
+  //     }
+  //   }
+  //
+  //   // Label
+  //   object label extends Label with Bound.Self[Option[File]] {
+  //     horizontalAlignment = Alignment.Left
+  //     override def refresh(f:Option[Option[java.io.File]]) {
+  //       f.foreach {
+  //         f =>
+  //           text = " PDF attachment goes here."
+  //           icon = null
+  //           f.foreach {
+  //             f =>
+  //               val xml = advisor.shell.file
+  //               val folder:Option[File] = Option(f.getParentFile).orElse(xml.map(_.getParentFile).flatMap(Option(_)))
+  //               text = "%s (in folder %s)".format(f.getName, folder.map(_.getName).getOrElse("<none>"))
+  //               icon = if (PDF.isPDF(xml, f)) SharedIcons.NOTE else new CompositeIcon(SharedIcons.NOTE, SharedIcons.OVL_ERROR)
+  //           }
+  //       }
+  //     }
+  //   }
+  //
+  // }
 
   // Get Templates button
   object templatesUrl extends Button {
@@ -265,7 +265,7 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
 
       // Our add button
       object add extends ToolButton(SharedIcons.ADD, SharedIcons.ADD_DISABLED, "Add Co-Investigator") with CoiBound {
-        override def refresh(m:Option[List[CoInvestigator]]) {
+        override def refresh(m:Option[List[CoInvestigator]]): Unit = {
           enabled = m.isDefined && canEdit
         }
         def apply() {

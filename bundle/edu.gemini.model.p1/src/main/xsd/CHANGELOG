@@ -3,6 +3,7 @@ Gemini Phase I Schema Changes
 # Version 2022.2.1 - 2022B
 ##########################
 * Add a MultiFacility entity to Queue proposals and Large Program proposals
+* A Proposal can contain multiple attachments. They also have an index to identify them
 
 # Version 2022.1.1 - 2022A
 ##########################
@@ -23,7 +24,7 @@ Gemini Phase I Schema Changes
   5. Resolved stellar populations and their environments
   6. Galaxy evolution
   7.Cosmology and fundamental physics
-  
+
   Old entries are mapped as follows:
   1. Solar System  -> Planetary systems
   2. Galactic      -> Stars and stellar evolution

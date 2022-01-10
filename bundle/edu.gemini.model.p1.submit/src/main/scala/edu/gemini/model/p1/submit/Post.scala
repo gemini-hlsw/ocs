@@ -14,23 +14,26 @@ private[submit] object Post {
     con.setRequestProperty("Content-Type", s"""multipart/form-data; boundary="$BOUNDARY"""")
 
     for {
-      pdf <- p.meta.attachment.toRight(ClientError("The proposal is missing the PDF attachment.")).right
-      _   <- doPost(con, p, pdf).right
+      pdf1 <- p.meta.attachments.sortBy(_.index).map(_.name).headOption.flatten.toRight(ClientError("The proposal is missing some PDF attachment.")).right
+      pdf2 <- p.meta.attachments.sortBy(_.index).map(_.name).lastOption.flatten.toRight(ClientError("The proposal is missing some PDF attachment.")).right
+      _   <- doPost(con, p, pdf1, pdf2).right
      } yield Unit
   }
 
-  private def doPost(con: HttpURLConnection, p: Proposal, pdf: File): Either[Failure, Unit] = {
+  private def doPost(con: HttpURLConnection, p: Proposal, pdf1: File, pdf2: File): Either[Failure, Unit] = {
     val before = beforePdf(p)
     val after  = afterPdf()
-    val total  = before.size + pdf.length + after.size
+    val total  = before.size + pdf1.length + after.size //pdf2.length + after.size
     if (total > Int.MaxValue)
-      Left(ClientError("PDF attachment too large"))
+      Left(ClientError("PDF attachments too large"))
     else {
       con.setFixedLengthStreamingMode(total.toInt)
       for {
         os <- open(con).right
         _  <- before.post(os).right
-        _  <- writeFile(pdf, os).right
+        _  <- writeFile(pdf1, os).right
+        _  <- betweenPdf.post(os).right
+        _  <- writeFile(pdf2, os).right
         _  <- after.post(os).right
         _  <- op(os, _.close()).right
       } yield Unit
@@ -57,7 +60,18 @@ private[submit] object Post {
 
     // Write the PDF preamble
     pw.writeBoundary()
-    pw.writeDisposition("attachment", "attachment.pdf")
+    pw.writeDisposition("attachment1", "attachment1.pdf")
+    pw.writeContentTypePdf()
+    pw.blankLine()
+    pw
+  }
+
+  private def betweenPdf: PostWriter = {
+    val pw = new PostWriter(BOUNDARY)
+
+    // Write the PDF preamble
+    pw.writeBoundary()
+    pw.writeDisposition("attachment2", "attachment2.pdf")
     pw.writeContentTypePdf()
     pw.blankLine()
     pw
@@ -112,25 +126,25 @@ import PostWriter._
 private[submit] class PostWriter(boundary: String) {
   private val baos = new ByteArrayOutputStream()
 
-  def write(s: String)        { baos.write(s.getBytes(CHARSET)) }
-  def writeLine(line: String) { write("%s%s".format(line, CRLF)) }
-  def blankLine()             { writeLine("") }
-  def writeBoundary()         { writeLine("--%s".format(boundary)) }
+  def write(s: String): Unit =        { baos.write(s.getBytes(CHARSET)) }
+  def writeLine(line: String): Unit = { write("%s%s".format(line, CRLF)) }
+  def blankLine(): Unit =             { writeLine("") }
+  def writeBoundary(): Unit =         { writeLine("--%s".format(boundary)) }
 
-  def writeDisposition(name: String, filename: String) {
+  def writeDisposition(name: String, filename: String): Unit = {
     writeLine(s"""Content-Disposition: form-data; name="$name"; filename="$filename" """)
   }
 
-  def writeContentTypeXml() {
+  def writeContentTypeXml(): Unit = {
     writeLine("""Content-Type: text/xml; charset=%s""".format(CHARSET.displayName))
   }
 
-  def writeContentTypePdf() {
+  def writeContentTypePdf(): Unit = {
     writeLine("Content-Type: application/pdf")
     writeLine("Content-Transfer-Encoding: binary")
   }
 
-  def writeClosingLine() {
+  def writeClosingLine(): Unit = {
     writeLine("--%s--".format(boundary))
   }
 

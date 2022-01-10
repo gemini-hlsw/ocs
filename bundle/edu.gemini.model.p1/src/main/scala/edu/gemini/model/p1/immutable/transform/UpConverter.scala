@@ -164,7 +164,13 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter supports migrating to 2022B.
  */
 case object SemesterConverter2022ATo2022B extends SemesterConverter {
-  override val transformers: List[TransformFunction] = Nil
+  // Model for attachments has changed
+  val upgradeAttachments: TransformFunction = {
+    case m @ <attachment>{ns}</attachment> =>
+      StepResult("Updated existing attachment value", <attachment name={ns} index="1"/>).successNel
+  }
+
+  override val transformers: List[TransformFunction] = List(upgradeAttachments)
 }
 /**
  * This converter supports migrating to 2022A.

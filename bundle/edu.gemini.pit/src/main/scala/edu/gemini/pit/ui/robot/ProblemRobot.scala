@@ -26,7 +26,7 @@ object ProblemRobot {
 
     def compare(other: Problem): Int = Some(severity.compare(other.severity)).filter(_ != 0).getOrElse(description.compareTo(other.description))
 
-    def apply() {
+    def apply(): Unit = {
       fix
     }
 
@@ -61,7 +61,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
   type State = List[Problem]
   protected[this] val initialState: List[Problem] = Nil
 
-  override protected def refresh(m: Option[Model]) {
+  override protected def refresh(m: Option[Model]): Unit = {
     state = m.map(m => new Checker(m.proposal, s.shell.file).all).getOrElse(Nil)
   }
 
@@ -100,8 +100,9 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       new Problem(Severity.Todo, "Please select a science category.", "Overview", s.inOverview(_.category.peer.setPopupVisible(true)))
     }
 
-    private lazy val attachmentCheck = when(p.meta.attachment.isEmpty) {
-      new Problem(Severity.Todo, "Please provide a PDF attachment.", "Overview", s.inOverview(_.attachment.select.doClick()))
+    // FIXME
+    private lazy val attachmentCheck = when(p.meta.attachments.forall(_.name.isEmpty)) {
+      new Problem(Severity.Todo, "Please provide PDF attachments.", "Overview", Unit)//s.inOverview(_.attachment.select.doClick()))
     }
 
     def extractInvestigator(i:PrincipalInvestigator): (String, String, String, List[String], InvestigatorStatus, String) = (i.firstName, i.lastName, i.email, i.phone, i.status, i.address.institution)
@@ -137,15 +138,17 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       None
     }
 
-    private lazy val attachmentValidityCheck = for {
-      a <- p.meta.attachment
-      if !PDF.isPDF(xml, a)
-    } yield new Problem(Severity.Error, s"File ${a.getName} does not exist or is not a PDF file.", "Overview", s.inOverview(_.attachment.select.doClick()))
+    // FIXME
+    private lazy val attachmentValidityCheck: Option[Problem] = for {
+      a <- p.meta.attachments.headOption.map(_.name)
+      if a.exists(!PDF.isPDF(xml, _))
+    } yield new Problem(Severity.Error, s"File ${a.foldMap(_.getName)} does not exist or is not a PDF file.", "Overview", Unit)//, s.inOverview(_.attachment.select.doClick()))
 
-    private lazy val attachmentSizeCheck = for {
-      a <- p.meta.attachment
-      if a.length() > MaxAttachmentSizeBytes
-    } yield new Problem(Severity.Error, s"Attachment '${a.getName}' is larger than ${MaxAttachmentSize}MB.", "Overview", s.inOverview(_.attachment.select.doClick()))
+    // FIXME
+    private lazy val attachmentSizeCheck: Option[Problem] = for {
+      a <- p.meta.attachments.headOption.map(_.name)
+      if a.exists(_.length() > MaxAttachmentSizeBytes)
+    } yield new Problem(Severity.Error, s"Attachment '${a.foldMap(_.getName)}' is larger than ${MaxAttachmentSize}MB.", "Overview", Unit)//, s.inOverview(_.attachment.select.doClick()))
 
     private lazy val emptyTargetCheck = for {
       t <- p.targets
@@ -477,7 +480,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         check("observing conditions", ObsListGrouping.Condition, _.Fixes.addConditions())).flatten
     }
 
-    private def indicateObservation(o: Observation) {
+    private def indicateObservation(o: Observation): Unit = {
       s.inObsListView(o.band, _.Fixes.indicateObservation(o))
     }
 

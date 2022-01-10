@@ -1,6 +1,7 @@
 <proposal schemaVersion="2013.2.1" tacCategory="Galactic">
     <meta band3optionChosen="true">
-        <attachment>gs_2013B_028.pdf</attachment>
+        <attachment name="ar_2012B_007.pdf" index="1"/>
+        <attachment name="ar_2012B_007.pdf" index="2"/>
     </meta>
     <semester year="2013" half="B" />
     <title>Extremely Low Mass White Dwarf Pulsators</title>
