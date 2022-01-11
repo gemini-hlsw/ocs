@@ -26,7 +26,7 @@ import edu.gemini.pit.ui.util.gface.SimpleListViewer
 import java.net.URI
 import edu.gemini.shared.gui.{Browser, Chooser}
 
-class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Proposal] {panel =>
+class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Proposal] { panel =>
   implicit val boolMonoid = Monoid.instance[Boolean](_ || _,  false)
 
   val attachment1 = attachment(1)
@@ -36,24 +36,32 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
   override def children = List(title, abstrakt, /* scheduling, */ category, attachment1, attachment2, investigators)
   val lens = Model.proposal
 
+  val attachment1Label = new Label()
+  val attachment2Label = new Label("Attachment 2:")
+
   // Our content, which is defined below
   add(new GridBagPanel with Rows {
     border = DLU4_BORDER
     addRow(new Label("Title:"), title)
     addRow(new Label("Abstract:"), new ScrollPane(abstrakt), GridBagPanel.Fill.Both, 100)
     addRow(new Label("Category:"), category)
-    addRow(new Label("Attachment 1:"), attachment1)
-    addRow(new Label("Attachment 2:"), attachment2)
+    addRow(attachment1Label, attachment1)
+    addRow(attachment2Label, attachment2)
     addSpacer()
   }, BorderPanel.Position.Center)
   add(investigators, BorderPanel.Position.South)
 
   // Refresh
-  override def refresh(m:Option[Proposal]): Unit = {
+  override def refresh(m: Option[Proposal]): Unit = {
+    val isDARP = m.forall(m => Attachment.isDARP(m.proposalClass))
+
     title.enabled = canEdit
     abstrakt.enabled = canEdit
     category.enabled = canEdit
     attachment1.select.enabled = canEdit
+    attachment2.visible = isDARP
+    attachment2Label.visible = isDARP
+    attachment1Label.text = if (isDARP) "Attachment 1:" else "Attachment:"
     attachment2.select.enabled = canEdit
     attachment1.remove.enabled = canEdit
     attachment2.remove.enabled = canEdit
@@ -151,7 +159,9 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
         enabled = canEdit
       }
       reactions += {
-        case ButtonClicked(_) => model = Some(None)
+        case ButtonClicked(_) =>
+          println("MODEL")
+          model = Some(None)
       }
     }
 
@@ -161,7 +171,7 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
       override def refresh(f: Option[Option[Attachment]]): Unit = {
         f.foreach {
           f =>
-            text = " PDF attachment goes here."
+            text = s" PDF attachment $index goes here."
             icon = null
             f.foreach {
               f =>

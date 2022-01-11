@@ -71,8 +71,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     lazy val all: List[Problem] = {
       val ps =
         List(genderNotAnsweredCheck, noObs, nonUpdatedInvestigatorName, noPIPhoneNumber, invalidPIPhoneNumber, titleCheck, band3option, abstractCheck, categoryCheck,
-          attachmentCheck, missingObsDetailsCheck,
-          duplicateInvestigatorCheck, ftParticipatingPartner, ftReviewerOrMentor, ftAffiliationMismatch, band3Obs).flatten ++
+          missingObsDetailsCheck, duplicateInvestigatorCheck, ftParticipatingPartner, ftReviewerOrMentor, ftAffiliationMismatch, band3Obs).flatten ++
+          attachmentCheck ++
           attachmentValidityCheck ++
           attachmentSizeCheck ++
           TimeProblems(p, s).all ++
@@ -90,13 +90,6 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     private def when[A](b: Boolean)(a: => A) = b option a
 
-    private lazy val isFT: Boolean = Some(p.proposalClass) match {
-      case Some(_: FastTurnaroundProgramClass) => true
-      case _                                   => false
-    }
-
-    private lazy val isDARP = !isFT
-
     private lazy val titleCheck = when(p.title.isEmpty) {
       new Problem(Severity.Todo, "Please provide a title.", "Overview", s.inOverview(_.title.requestFocus()))
     }
@@ -109,10 +102,10 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       new Problem(Severity.Todo, "Please select a science category.", "Overview", s.inOverview(_.category.peer.setPopupVisible(true)))
     }
 
-    // FIXME
-    private lazy val attachmentCheck = when(p.meta.attachments.forall(_.name.isEmpty)) {
-      new Problem(Severity.Todo, if (isDARP) "Please provide both PDF attachments." else "Please provide a PDF attachment.", "Overview", Unit)//s.inOverview(_.attachment.select.doClick()))
-    }
+    private lazy val attachmentCheck = for {
+      i <- 1 to Attachment.attachmentsForType(p.proposalClass)
+      if (p.meta.attachments.find(_.index == i).isEmpty)
+    } yield new Problem(Severity.Todo, if (Attachment.isDARP(p.proposalClass)) s"Please provide PDF attachment $i." else "Please provide a PDF attachment.", "Overview", Unit)//s.inOverview(_.attachment.select.doClick()))
 
     def extractInvestigator(i:PrincipalInvestigator): (String, String, String, List[String], InvestigatorStatus, String) = (i.firstName, i.lastName, i.email, i.phone, i.status, i.address.institution)
 

@@ -9,7 +9,7 @@
     <xsd:simpleType name="AttachmentIndex">
         <xsd:restriction base="xsd:integer">
             <xsd:minInclusive value="1"/>
-            <xsd:maxExclusive value="3"/>  <!-- TODO: is there a max? -->
+            <xsd:maxExclusive value="3"/>
         </xsd:restriction>
     </xsd:simpleType>
 
@@ -23,7 +23,7 @@
 
     <xsd:complexType name="Meta">
         <xsd:sequence>
-            <xsd:element name="attachment" type="Attachment" minOccurs ="2" maxOccurs="unbounded"/>
+            <xsd:element name="attachment" type="Attachment" minOccurs ="1" maxOccurs="unbounded"/>
         </xsd:sequence>
         <xsd:attribute name="band3optionChosen" type="xsd:boolean" use="required"/>
         <xsd:attribute name="overrideAffiliate" type="xsd:boolean" use="required"/>

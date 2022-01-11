@@ -13,8 +13,10 @@ object Meta {
   val attachments: Lens[Meta, List[Attachment]] = Lens.lensu((a, b) => a.copy(attachments = b), _.attachments)
   val band3OptionChosen: Lens[Meta,Boolean] = Lens.lensu((a, b) => a.copy(band3OptionChosen = b), _.band3OptionChosen)
   val overrideAffiliate: Lens[Meta,Boolean] = Lens.lensu((a, b) => a.copy(overrideAffiliate = b), _.overrideAffiliate)
-  val firstAttachment: Lens[Meta, Option[Attachment]] = Lens.lensu((a, b) => b.map(r => a.copy(attachments = r :: a.attachments.filterNot(_.index == 1))).getOrElse(a), _.attachments.find(_.index == 1))
-  val secondAttachment: Lens[Meta, Option[Attachment]] = Lens.lensu((a, b) => b.map(r => a.copy(attachments = r :: a.attachments.filterNot(_.index == 2))).getOrElse(a), _.attachments.find(_.index == 2))
+  val firstAttachment: Lens[Meta, Option[Attachment]] =
+    Lens.lensu((a, b) => a.copy(attachments = b.map(_ :: a.attachments.filterNot(_.index == 1)).getOrElse(a.attachments.filterNot(_.index == 1))), _.attachments.find(_.index == 1))
+  val secondAttachment: Lens[Meta, Option[Attachment]] =
+    Lens.lensu((a, b) => a.copy(attachments = b.map(_ :: a.attachments.filterNot(_.index == 2)).getOrElse(a.attachments.filterNot(_.index == 2))), _.attachments.find(_.index == 2))
 
   val empty = Meta(Nil, band3OptionChosen = false, overrideAffiliate = false)
   def apply(m: M.Meta): Meta = Option(m).map(new Meta(_)).getOrElse(empty)
@@ -42,6 +44,14 @@ object Attachment {
   val index: Lens[Attachment, Int] = Lens.lensu((a, b) => a.copy(index = b), _.index)
 
   val empty = Attachment(None, index = 0)
+
+  def isDARP(p: ProposalClass): Boolean = attachmentsForType(p) == 2
+
+  def attachmentsForType(p: ProposalClass): Int = p match {
+    case _: FastTurnaroundProgramClass => 1
+    case _                             => 2
+  }
+
   def apply(m: M.Attachment):Attachment = Option(m).map(new Attachment(_)).getOrElse(empty)
 }
 
@@ -55,5 +65,6 @@ case class Attachment(name: Option[File], index: Int) {
     m.setIndex(index)
     m
   }
+
 }
 
