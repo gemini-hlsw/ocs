@@ -40,11 +40,11 @@ object ProblemRobot {
   type Severity = Severity.Value
 
   private implicit class pimpLong(val n: Long) extends AnyVal {
-    def ms: Long = n
-    def secs: Long = ms * 1000
-    def mins: Long = secs * 60
+    def ms: Long    = n
+    def secs: Long  = ms * 1000
+    def mins: Long  = secs * 60
     def hours: Long = mins * 60
-    def days: Long = hours * 24
+    def days: Long  = hours * 24
   }
 }
 
@@ -71,8 +71,10 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     lazy val all: List[Problem] = {
       val ps =
         List(genderNotAnsweredCheck, noObs, nonUpdatedInvestigatorName, noPIPhoneNumber, invalidPIPhoneNumber, titleCheck, band3option, abstractCheck, categoryCheck,
-          attachmentCheck, attachmentValidityCheck, attachmentSizeCheck, missingObsDetailsCheck,
+          attachmentCheck, missingObsDetailsCheck,
           duplicateInvestigatorCheck, ftParticipatingPartner, ftReviewerOrMentor, ftAffiliationMismatch, band3Obs).flatten ++
+          attachmentValidityCheck ++
+          attachmentSizeCheck ++
           TimeProblems(p, s).all ++
           TimeProblems.noCFHClassical(p, s) ++
           TimeProblems.partnerZeroTimeRequest(p, s) ++
@@ -88,6 +90,13 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     private def when[A](b: Boolean)(a: => A) = b option a
 
+    private lazy val isFT: Boolean = Some(p.proposalClass) match {
+      case Some(_: FastTurnaroundProgramClass) => true
+      case _                                   => false
+    }
+
+    private lazy val isDARP = !isFT
+
     private lazy val titleCheck = when(p.title.isEmpty) {
       new Problem(Severity.Todo, "Please provide a title.", "Overview", s.inOverview(_.title.requestFocus()))
     }
@@ -102,7 +111,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     // FIXME
     private lazy val attachmentCheck = when(p.meta.attachments.forall(_.name.isEmpty)) {
-      new Problem(Severity.Todo, "Please provide PDF attachments.", "Overview", Unit)//s.inOverview(_.attachment.select.doClick()))
+      new Problem(Severity.Todo, if (isDARP) "Please provide both PDF attachments." else "Please provide a PDF attachment.", "Overview", Unit)//s.inOverview(_.attachment.select.doClick()))
     }
 
     def extractInvestigator(i:PrincipalInvestigator): (String, String, String, List[String], InvestigatorStatus, String) = (i.firstName, i.lastName, i.email, i.phone, i.status, i.address.institution)
@@ -139,14 +148,14 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     }
 
     // FIXME
-    private lazy val attachmentValidityCheck: Option[Problem] = for {
-      a <- p.meta.attachments.headOption.map(_.name)
+    private lazy val attachmentValidityCheck: List[Problem] = for {
+      a <- p.meta.attachments.map(_.name)
       if a.exists(!PDF.isPDF(xml, _))
     } yield new Problem(Severity.Error, s"File ${a.foldMap(_.getName)} does not exist or is not a PDF file.", "Overview", Unit)//, s.inOverview(_.attachment.select.doClick()))
 
     // FIXME
-    private lazy val attachmentSizeCheck: Option[Problem] = for {
-      a <- p.meta.attachments.headOption.map(_.name)
+    private lazy val attachmentSizeCheck: List[Problem] = for {
+      a <- p.meta.attachments.map(_.name)
       if a.exists(_.length() > MaxAttachmentSizeBytes)
     } yield new Problem(Severity.Error, s"Attachment '${a.foldMap(_.getName)}' is larger than ${MaxAttachmentSize}MB.", "Overview", Unit)//, s.inOverview(_.attachment.select.doClick()))
 
