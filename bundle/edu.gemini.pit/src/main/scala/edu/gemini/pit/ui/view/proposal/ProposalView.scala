@@ -160,7 +160,6 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
       }
       reactions += {
         case ButtonClicked(_) =>
-          println("MODEL")
           model = Some(None)
       }
     }

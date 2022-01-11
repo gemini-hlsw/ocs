@@ -23,7 +23,7 @@ private[submit] object Post {
   private def doPost(con: HttpURLConnection, p: Proposal, pdf1: File, pdf2: File): Either[Failure, Unit] = {
     val before = beforePdf(p)
     val after  = afterPdf()
-    val total  = before.size + pdf1.length + after.size //pdf2.length + after.size
+    val total  = before.size + pdf1.length + pdf2.length + after.size
     if (total > Int.MaxValue)
       Left(ClientError("PDF attachments too large"))
     else {

@@ -107,7 +107,7 @@ class ShellAdvisor(
       def updatedAttachment(attachment: Option[File]):Proposal =
         startModel.proposal.copy(meta = startModel.proposal.meta.copy(attachments = startModel.proposal.meta.attachments.zipWithIndex.map {
           case (a, j) if j == i => a.copy(name = attachment)
-          case (a, _) => a
+          case (a, _)           => a
         }))
 
       val attachment = startModel.proposal.meta.attachments.lift(i)
