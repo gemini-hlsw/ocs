@@ -134,16 +134,6 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         jEmptyObject
     }
 
-  val timeAccountAwardEncodeJson: EncodeJson[(TimeAcctCategory, TimeAcctAward, Long, Long)] =
-    EncodeJson { case (c, a, prog_used, part_used) =>
-      ("usedProgramTime" := prog_used) ->:
-        ("usedPartnerTime" := part_used) ->:
-        ("awardedPartnerTime" := TimeUnit.SECONDS.toMillis(a.getPartnerAward.getSeconds)) ->:
-        ("awardedProgramTime" := TimeUnit.SECONDS.toMillis(a.getProgramAward.getSeconds)) ->:
-        ("category" := c.getDisplayName) ->:
-        jEmptyObject
-    }
-
   val timeAccountAllocationEncodeJson: EncodeJson[(ISPProgram, TimeAcctAllocation)] =
     EncodeJson { case (p, t) =>
       // Get the total used program and partner time.
@@ -165,9 +155,15 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         ratios.get(category).map { t => (t * totalTime).toLong }.getOrElse(0L)
 
       t.getCategories.asScala.toList.map(c => (c, t.getAward(c))).filter(_._2 != TimeAcctAward.ZERO).map {
-        case (c, a) => timeAccountAwardEncodeJson(c, a,
-          calculateRatio(c, programRatios, totalProgramUsed),
-          calculateRatio(c, partnerRatios, totalPartnerUsed))
+        case (c, a) =>
+          val progUsed = calculateRatio(c, programRatios, totalProgramUsed)
+          val partUsed = calculateRatio(c, partnerRatios, totalPartnerUsed)
+          ("usedProgramTime" := progUsed) ->:
+            ("usedPartnerTime" := partUsed) ->:
+            ("awardedPartnerTime" := TimeUnit.SECONDS.toMillis(a.getPartnerAward.getSeconds)) ->:
+            ("awardedProgramTime" := TimeUnit.SECONDS.toMillis(a.getProgramAward.getSeconds)) ->:
+            ("category" := c.getDisplayName) ->:
+            jEmptyObject
       }.asJson
     }
 
