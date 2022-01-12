@@ -33,11 +33,11 @@ object ProposalIo {
 
   private def unmarshaller: Unmarshaller = context.createUnmarshaller
 
-  def write(p: Proposal, f: File) {
+  def write(p: Proposal, f: File): Unit = {
     marshaller.marshal(p.mutable, f)
   }
 
-  def write(p: Proposal, w: java.io.Writer) {
+  def write(p: Proposal, w: java.io.Writer): Unit = {
     marshaller.marshal(p.mutable, w)
   }
 

@@ -103,9 +103,10 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     }
 
     private lazy val attachmentCheck = for {
-      i <- 1 to Attachment.attachmentsForType(p.proposalClass)
-      if (p.meta.attachments.find(_.index == i).isEmpty)
-    } yield new Problem(Severity.Todo, if (Attachment.isDARP(p.proposalClass)) s"Please provide PDF attachment $i." else "Please provide a PDF attachment.", "Overview", if (i == 1) s.inOverview(_.attachment1.select.doClick()) else s.inOverview(_.attachment2.select.doClick()))
+      i <- 1 to Meta.attachmentsForType(p.proposalClass)
+      lens = Meta.lensForAttachment(i)
+      if lens.get(p.meta).isEmpty
+    } yield new Problem(Severity.Todo, if (Meta.isDARP(p.proposalClass)) s"Please provide PDF attachment $i." else "Please provide a PDF attachment.", "Overview", if (i == 1) s.inOverview(_.attachment1.select.doClick()) else s.inOverview(_.attachment2.select.doClick()))
 
     def extractInvestigator(i:PrincipalInvestigator): (String, String, String, List[String], InvestigatorStatus, String) = (i.firstName, i.lastName, i.email, i.phone, i.status, i.address.institution)
 
@@ -141,16 +142,16 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     }
 
     private lazy val attachmentValidityCheck = for {
-      i <- 1 to Attachment.attachmentsForType(p.proposalClass)
-      a <- p.meta.attachments.find(_.index == i)
-      if a.name.exists(!PDF.isPDF(xml, _))
-    } yield new Problem(Severity.Error, s"File ${a.name.map(_.getName).getOrElse("")} does not exist or is not a PDF file.", "Overview", if (i == 1) s.inOverview(_.attachment1.select.doClick()) else s.inOverview(_.attachment2.select.doClick()))
+      i <- 1 to Meta.attachmentsForType(p.proposalClass)
+      a <- Meta.lensForAttachment(i).get(p.meta)
+      if !PDF.isPDF(xml, a)
+    } yield new Problem(Severity.Error, s"File ${a.getName} does not exist or is not a PDF file.", "Overview", if (i == 1) s.inOverview(_.attachment1.select.doClick()) else s.inOverview(_.attachment2.select.doClick()))
 
     private lazy val attachmentSizeCheck = for {
-      i <- 1 to Attachment.attachmentsForType(p.proposalClass)
-      a <- p.meta.attachments.find(_.index == i)
-      if a.name.length > MaxAttachmentSizeBytes
-    } yield new Problem(Severity.Error, s"Attachment '${a.name.map(_.getName).getOrElse("")}' is larger than ${MaxAttachmentSize}MB.", "Overview", if (i == 1) s.inOverview(_.attachment1.select.doClick()) else s.inOverview(_.attachment2.select.doClick()))
+      i <- 1 to Meta.attachmentsForType(p.proposalClass)
+      a <- Meta.lensForAttachment(i).get(p.meta)
+      if a.length > MaxAttachmentSizeBytes
+    } yield new Problem(Severity.Error, s"Attachment '${a.getName}' is larger than ${MaxAttachmentSize}MB.", "Overview", if (i == 1) s.inOverview(_.attachment1.select.doClick()) else s.inOverview(_.attachment2.select.doClick()))
 
 
     private lazy val emptyTargetCheck = for {

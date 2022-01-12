@@ -53,7 +53,7 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
 
   // Refresh
   override def refresh(m: Option[Proposal]): Unit = {
-    val isDARP = m.forall(m => Attachment.isDARP(m.proposalClass))
+    val isDARP = m.forall(m => Meta.isDARP(m.proposalClass))
 
     title.enabled = canEdit
     abstrakt.enabled = canEdit
@@ -116,10 +116,10 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
   }
 
   // Attachment
-  def attachment(index: Int) = new BorderPanel with Bound[Proposal, Option[Attachment]] {panel =>
+  def attachment(index: Int) = new BorderPanel with Bound[Proposal, Option[File]] {panel =>
 
     // Bound
-    val lens = Proposal.meta andThen (if (index == 1) Meta.firstAttachment else Meta.secondAttachment)
+    val lens = Proposal.meta andThen Meta.lensForAttachment(index)
 
     override def children = List(select, remove, label)
 
@@ -135,26 +135,26 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
     }
 
     // Select button
-    lazy val select = new Button with Bound.Self[Option[Attachment]] {
+    lazy val select = new Button with Bound.Self[Option[File]] {
       enabled = false
       icon = SharedIcons.ICON_ATTACH
       tooltip = "Select the PDF file of the text sections"
-      override def refresh(m: Option[Option[Attachment]]): Unit = {
+      override def refresh(m: Option[Option[File]]): Unit = {
         enabled = m.isDefined && canEdit
       }
       reactions += {
         case ButtonClicked(_) => for {
           file <- new Chooser[ProposalView]("attachment", panel.peer).chooseOpen("PDF Attachment", ".pdf")
-        } model = Some(Some(Attachment(Some(file), index)))
+        } model = Some(Some(file))
       }
     }
 
     // Remove button
-    lazy val remove = new Button with Bound.Self[Option[Attachment]] {
+    lazy val remove = new Button with Bound.Self[Option[File]] {
       icon = SharedIcons.REMOVE
       tooltip = "Remove attachment."
       border = null
-      override def refresh(m: Option[Option[Attachment]]): Unit = {
+      override def refresh(m: Option[Option[File]]): Unit = {
         visible = ~m.map(_.isDefined)
         enabled = canEdit
       }
@@ -165,9 +165,9 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
     }
 
     // Label
-    lazy val label = new Label with Bound.Self[Option[Attachment]] {
+    lazy val label = new Label with Bound.Self[Option[File]] {
       horizontalAlignment = Alignment.Left
-      override def refresh(f: Option[Option[Attachment]]): Unit = {
+      override def refresh(f: Option[Option[File]]): Unit = {
         f.foreach {
           f =>
             text = s" PDF attachment $index goes here."
@@ -175,9 +175,9 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
             f.foreach {
               f =>
                 val xml = advisor.shell.file
-                val folder: Option[File] = f.name.map(_.getParentFile).orElse(xml.map(_.getParentFile).flatMap(Option(_)))
-                text = "%s (in folder %s)".format(f.name.map(_.getName).getOrElse(""), folder.map(_.getName).getOrElse("<none>"))
-                icon = if (f.name.exists(PDF.isPDF(xml, _))) SharedIcons.NOTE else new CompositeIcon(SharedIcons.NOTE, SharedIcons.OVL_ERROR)
+                val folder: Option[File] = Option(f.getParentFile).orElse(xml.map(_.getParentFile).flatMap(Option(_)))
+                text = "%s (in folder %s)".format(f.getName, folder.map(_.getName).getOrElse("<none>"))
+                icon = if (PDF.isPDF(xml, f)) SharedIcons.NOTE else new CompositeIcon(SharedIcons.NOTE, SharedIcons.OVL_ERROR)
             }
         }
       }

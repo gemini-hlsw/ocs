@@ -167,7 +167,7 @@ case object SemesterConverter2022ATo2022B extends SemesterConverter {
   // Model for attachments has changed
   val upgradeAttachments: TransformFunction = {
     case m @ <attachment>{ns}</attachment> =>
-      StepResult("Updated existing attachment value", <attachment name={ns} index="1"/>).successNel
+      StepResult("Updated existing attachment value", <firstAttachment>{ns}</firstAttachment>).successNel
   }
 
   override val transformers: List[TransformFunction] = List(upgradeAttachments)

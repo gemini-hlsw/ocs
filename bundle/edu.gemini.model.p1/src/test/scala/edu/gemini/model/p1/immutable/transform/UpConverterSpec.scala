@@ -137,12 +137,12 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           changes must contain("Updated existing attachment value")
 
           (result \\ "meta") must ==/(<meta band3optionChosen="false">
-            <attachment name="file.pdf" index="1"></attachment>
+            <firstAttachment>file.pdf</firstAttachment>
           </meta>)
 
           val proposal = ProposalIo.read(result.toString())
           proposal.meta.band3OptionChosen must beFalse
-          proposal.meta.attachments must beEqualTo(List(Attachment(Some(new File("file.pdf")), 1)))
+          proposal.meta.firstAttachment must beEqualTo(Some(new File("file.pdf")))
       }
 
       UpConverter.upConvert(xml) must beSuccessful.like {
