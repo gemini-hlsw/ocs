@@ -42,7 +42,8 @@ object SkeletonAuxfileWriter {
     val files = ProposalFiles(id, auxfileDir)
 
     // Update the proposal attachment name.  Use a path relative to the cwd.
-    val updatedProposal = (Proposal.meta andThen Meta.attachment).set(proposal, Some(new File(files.proposalAttachmentPdf.getName)))
+    // FIXME
+    val updatedProposal = proposal//(Proposal.meta andThen Meta.attachment).set(proposal, Some(new File(files.proposalAttachmentPdf.getName)))
 
     // Write the files to the auxfile dir.
     for {

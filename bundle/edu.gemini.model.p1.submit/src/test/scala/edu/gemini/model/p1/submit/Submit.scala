@@ -11,7 +11,7 @@ import edu.gemini.model.p1.submit.SubmitResult.{Failure, Success}
  * to the console.  Expects to be called with a proposal file argument.
  */
 object Submit {
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     if (args.length == 0) {
       println("specify the proposal XML to send")
       sys.exit()

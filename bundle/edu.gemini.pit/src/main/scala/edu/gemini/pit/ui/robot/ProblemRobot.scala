@@ -26,7 +26,7 @@ object ProblemRobot {
 
     def compare(other: Problem): Int = Some(severity.compare(other.severity)).filter(_ != 0).getOrElse(description.compareTo(other.description))
 
-    def apply() {
+    def apply(): Unit = {
       fix
     }
 
@@ -40,11 +40,11 @@ object ProblemRobot {
   type Severity = Severity.Value
 
   private implicit class pimpLong(val n: Long) extends AnyVal {
-    def ms: Long = n
-    def secs: Long = ms * 1000
-    def mins: Long = secs * 60
+    def ms: Long    = n
+    def secs: Long  = ms * 1000
+    def mins: Long  = secs * 60
     def hours: Long = mins * 60
-    def days: Long = hours * 24
+    def days: Long  = hours * 24
   }
 }
 
@@ -61,7 +61,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
   type State = List[Problem]
   protected[this] val initialState: List[Problem] = Nil
 
-  override protected def refresh(m: Option[Model]) {
+  override protected def refresh(m: Option[Model]): Unit = {
     state = m.map(m => new Checker(m.proposal, s.shell.file).all).getOrElse(Nil)
   }
 
@@ -71,8 +71,10 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     lazy val all: List[Problem] = {
       val ps =
         List(genderNotAnsweredCheck, noObs, nonUpdatedInvestigatorName, noPIPhoneNumber, invalidPIPhoneNumber, titleCheck, band3option, abstractCheck, categoryCheck,
-          attachmentCheck, attachmentValidityCheck, attachmentSizeCheck, missingObsDetailsCheck,
-          duplicateInvestigatorCheck, ftParticipatingPartner, ftReviewerOrMentor, ftAffiliationMismatch, band3Obs).flatten ++
+          missingObsDetailsCheck, duplicateInvestigatorCheck, ftParticipatingPartner, ftReviewerOrMentor, ftAffiliationMismatch, band3Obs).flatten ++
+          attachmentCheck ++
+          attachmentValidityCheck ++
+          attachmentSizeCheck ++
           TimeProblems(p, s).all ++
           TimeProblems.noCFHClassical(p, s) ++
           TimeProblems.partnerZeroTimeRequest(p, s) ++
@@ -100,9 +102,10 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       new Problem(Severity.Todo, "Please select a science category.", "Overview", s.inOverview(_.category.peer.setPopupVisible(true)))
     }
 
-    private lazy val attachmentCheck = when(p.meta.attachment.isEmpty) {
-      new Problem(Severity.Todo, "Please provide a PDF attachment.", "Overview", s.inOverview(_.attachment.select.doClick()))
-    }
+    private lazy val attachmentCheck = for {
+      i <- 1 to Attachment.attachmentsForType(p.proposalClass)
+      if (p.meta.attachments.find(_.index == i).isEmpty)
+    } yield new Problem(Severity.Todo, if (Attachment.isDARP(p.proposalClass)) s"Please provide PDF attachment $i." else "Please provide a PDF attachment.", "Overview", if (i == 1) s.inOverview(_.attachment1.select.doClick()) else s.inOverview(_.attachment2.select.doClick()))
 
     def extractInvestigator(i:PrincipalInvestigator): (String, String, String, List[String], InvestigatorStatus, String) = (i.firstName, i.lastName, i.email, i.phone, i.status, i.address.institution)
 
@@ -138,14 +141,17 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     }
 
     private lazy val attachmentValidityCheck = for {
-      a <- p.meta.attachment
-      if !PDF.isPDF(xml, a)
-    } yield new Problem(Severity.Error, s"File ${a.getName} does not exist or is not a PDF file.", "Overview", s.inOverview(_.attachment.select.doClick()))
+      i <- 1 to Attachment.attachmentsForType(p.proposalClass)
+      a <- p.meta.attachments.find(_.index == i)
+      if a.name.exists(!PDF.isPDF(xml, _))
+    } yield new Problem(Severity.Error, s"File ${a.name.map(_.getName).getOrElse("")} does not exist or is not a PDF file.", "Overview", if (i == 1) s.inOverview(_.attachment1.select.doClick()) else s.inOverview(_.attachment2.select.doClick()))
 
     private lazy val attachmentSizeCheck = for {
-      a <- p.meta.attachment
-      if a.length() > MaxAttachmentSizeBytes
-    } yield new Problem(Severity.Error, s"Attachment '${a.getName}' is larger than ${MaxAttachmentSize}MB.", "Overview", s.inOverview(_.attachment.select.doClick()))
+      i <- 1 to Attachment.attachmentsForType(p.proposalClass)
+      a <- p.meta.attachments.find(_.index == i)
+      if a.name.length > MaxAttachmentSizeBytes
+    } yield new Problem(Severity.Error, s"Attachment '${a.name.map(_.getName).getOrElse("")}' is larger than ${MaxAttachmentSize}MB.", "Overview", if (i == 1) s.inOverview(_.attachment1.select.doClick()) else s.inOverview(_.attachment2.select.doClick()))
+
 
     private lazy val emptyTargetCheck = for {
       t <- p.targets
@@ -477,7 +483,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         check("observing conditions", ObsListGrouping.Condition, _.Fixes.addConditions())).flatten
     }
 
-    private def indicateObservation(o: Observation) {
+    private def indicateObservation(o: Observation): Unit = {
       s.inObsListView(o.band, _.Fixes.indicateObservation(o))
     }
 

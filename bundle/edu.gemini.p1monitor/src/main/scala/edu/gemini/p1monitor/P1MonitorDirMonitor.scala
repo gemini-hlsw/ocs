@@ -17,19 +17,19 @@ class P1MonitorDirMonitor(cfg: P1MonitorConfig) extends DirListener {
     monDir => new DirScanner(monDir)
   }
 
-  def startMonitoring() {
+  def startMonitoring(): Unit = {
     dirScanner.foreach {
       _.startMonitoring(this)
     }
   }
 
-  def stopMonitoring() {
+  def stopMonitoring(): Unit = {
     dirScanner.foreach {
       _.stopMonitoring()
     }
   }
 
-  def dirChanged(evt: DirEvent) {
+  def dirChanged(evt: DirEvent): Unit = {
     // Make a original dir in not existing
     val originalsDir = new File(evt.dir.dir, "original")
     if (!originalsDir.exists()) {
@@ -40,7 +40,8 @@ class P1MonitorDirMonitor(cfg: P1MonitorConfig) extends DirListener {
       // Use just the name to avoid hardcoding the file
       val attachedFileName = attachment.getName
       LOG.info(s"Attachment file changed to $attachedFileName")
-      val p = proposal.copy(meta = proposal.meta.copy(attachment = Some(new File(attachedFileName))))
+      // FIXME
+      val p = proposal//.copy(meta = proposal.meta.copy(attachment = Some(new File(attachedFileName))))
       ProposalIo.write(p, f)
       p
     }

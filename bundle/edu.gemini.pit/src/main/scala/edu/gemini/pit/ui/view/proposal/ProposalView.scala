@@ -26,12 +26,18 @@ import edu.gemini.pit.ui.util.gface.SimpleListViewer
 import java.net.URI
 import edu.gemini.shared.gui.{Browser, Chooser}
 
-class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Proposal] {panel =>
+class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Proposal] { panel =>
   implicit val boolMonoid = Monoid.instance[Boolean](_ || _,  false)
 
+  val attachment1 = attachment(1)
+  val attachment2 = attachment(2)
+
   // Bound
-  override def children = List(title, abstrakt, /* scheduling, */ category, attachment, investigators)
+  override def children = List(title, abstrakt, /* scheduling, */ category, attachment1, attachment2, investigators)
   val lens = Model.proposal
+
+  val attachment1Label = new Label()
+  val attachment2Label = new Label("Attachment 2:")
 
   // Our content, which is defined below
   add(new GridBagPanel with Rows {
@@ -39,18 +45,26 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
     addRow(new Label("Title:"), title)
     addRow(new Label("Abstract:"), new ScrollPane(abstrakt), GridBagPanel.Fill.Both, 100)
     addRow(new Label("Category:"), category)
-    addRow(new Label("Attachment:"), attachment)
+    addRow(attachment1Label, attachment1)
+    addRow(attachment2Label, attachment2)
     addSpacer()
   }, BorderPanel.Position.Center)
   add(investigators, BorderPanel.Position.South)
 
   // Refresh
-  override def refresh(m:Option[Proposal]) {
+  override def refresh(m: Option[Proposal]): Unit = {
+    val isDARP = m.forall(m => Attachment.isDARP(m.proposalClass))
+
     title.enabled = canEdit
     abstrakt.enabled = canEdit
     category.enabled = canEdit
-    attachment.select.enabled = canEdit
-    attachment.remove.enabled = canEdit
+    attachment1.select.enabled = canEdit
+    attachment2.visible = isDARP
+    attachment2Label.visible = isDARP
+    attachment1Label.text = if (isDARP) "Attachment 1:" else "Attachment:"
+    attachment2.select.enabled = canEdit
+    attachment1.remove.enabled = canEdit
+    attachment2.remove.enabled = canEdit
   }
 
   // Title field
@@ -102,10 +116,11 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
   }
 
   // Attachment
-  object attachment extends BorderPanel with Bound[Proposal, Option[File]] {panel =>
+  def attachment(index: Int) = new BorderPanel with Bound[Proposal, Option[Attachment]] {panel =>
 
     // Bound
-    val lens = Proposal.meta andThen Meta.attachment
+    val lens = Proposal.meta andThen (if (index == 1) Meta.firstAttachment else Meta.secondAttachment)
+
     override def children = List(select, remove, label)
 
     // Our content, defined below
@@ -114,54 +129,55 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
     add(remove, BorderPanel.Position.East)
 
     // Panel for the buttons
-    object selectPanel extends BorderPanel {panel =>
+    lazy val selectPanel = new BorderPanel {panel =>
       add(templatesUrl, BorderPanel.Position.West)
       add(select, BorderPanel.Position.East)
     }
 
     // Select button
-    object select extends Button with Bound.Self[Option[File]] {
+    lazy val select = new Button with Bound.Self[Option[Attachment]] {
       enabled = false
       icon = SharedIcons.ICON_ATTACH
       tooltip = "Select the PDF file of the text sections"
-      override def refresh(m:Option[Option[File]]) {
+      override def refresh(m: Option[Option[Attachment]]): Unit = {
         enabled = m.isDefined && canEdit
       }
       reactions += {
         case ButtonClicked(_) => for {
           file <- new Chooser[ProposalView]("attachment", panel.peer).chooseOpen("PDF Attachment", ".pdf")
-        } model = Some(Some(file))
+        } model = Some(Some(Attachment(Some(file), index)))
       }
     }
 
     // Remove button
-    object remove extends Button with Bound.Self[Option[File]] {
+    lazy val remove = new Button with Bound.Self[Option[Attachment]] {
       icon = SharedIcons.REMOVE
       tooltip = "Remove attachment."
       border = null
-      override def refresh(m:Option[Option[File]]) {
+      override def refresh(m: Option[Option[Attachment]]): Unit = {
         visible = ~m.map(_.isDefined)
         enabled = canEdit
       }
       reactions += {
-        case ButtonClicked(_) => model = Some(None)
+        case ButtonClicked(_) =>
+          model = Some(None)
       }
     }
 
     // Label
-    object label extends Label with Bound.Self[Option[File]] {
+    lazy val label = new Label with Bound.Self[Option[Attachment]] {
       horizontalAlignment = Alignment.Left
-      override def refresh(f:Option[Option[java.io.File]]) {
+      override def refresh(f: Option[Option[Attachment]]): Unit = {
         f.foreach {
           f =>
-            text = " PDF attachment goes here."
+            text = s" PDF attachment $index goes here."
             icon = null
             f.foreach {
               f =>
                 val xml = advisor.shell.file
-                val folder:Option[File] = Option(f.getParentFile).orElse(xml.map(_.getParentFile).flatMap(Option(_)))
-                text = "%s (in folder %s)".format(f.getName, folder.map(_.getName).getOrElse("<none>"))
-                icon = if (PDF.isPDF(xml, f)) SharedIcons.NOTE else new CompositeIcon(SharedIcons.NOTE, SharedIcons.OVL_ERROR)
+                val folder: Option[File] = f.name.map(_.getParentFile).orElse(xml.map(_.getParentFile).flatMap(Option(_)))
+                text = "%s (in folder %s)".format(f.name.map(_.getName).getOrElse(""), folder.map(_.getName).getOrElse("<none>"))
+                icon = if (f.name.exists(PDF.isPDF(xml, _))) SharedIcons.NOTE else new CompositeIcon(SharedIcons.NOTE, SharedIcons.OVL_ERROR)
             }
         }
       }
@@ -170,7 +186,7 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
   }
 
   // Get Templates button
-  object templatesUrl extends Button {
+  def templatesUrl = new Button {
     icon = SharedIcons.ICON_TEMPLATES
     tooltip = URLConstants.GET_TEMPLATES._2
     reactions += {
@@ -184,10 +200,10 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
     override def children = List(toolbar, listViewer)
 
     // Implicit to allow swapping and replacing of elements in a list.
-    implicit def pimpList[A](as:List[A]):RichList[A] = new RichList(as)
+    implicit def pimpList[A](as:List[A]): RichList[A] = new RichList(as)
 
-    class RichList[A](as:List[A]) {
-      def swap(i:Int, j:Int):Option[List[A]] = for {
+    class RichList[A](as: List[A]) {
+      def swap(i: Int, j: Int): Option[List[A]] = for {
         ai <- as.drop(i).headOption if i >= 0
         aj <- as.drop(j).headOption if j >= 0
       } yield as.zipWithIndex.map {
@@ -196,7 +212,7 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
           case (a0, _)          => a0
         }
 
-      def replace(a:A, b:A):List[A] = as.indexOf(a) match {
+      def replace(a: A, b: A): List[A] = as.indexOf(a) match {
         case -1 => as
         case n  => as.take(n) ++ (b :: as.drop(n + 1))
       }
@@ -206,21 +222,21 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
      * Used to support demoting PIs and promoting CoIs.
      */
     object InvestigatorListView {
-      var addrMap:Map[CoInvestigator, InstitutionAddress] = Map.empty
+      var addrMap: Map[CoInvestigator, InstitutionAddress] = Map.empty
 
       // It doesn't play by the rules ...
-      val dirtyLens:Lens[Investigators, List[Investigator]] = Lens.lensu((i, lst) => set(i, lst), i => get(i) )
+      val dirtyLens: Lens[Investigators, List[Investigator]] = Lens.lensu((i, lst) => set(i, lst), i => get(i) )
 
-      def get(invs:Investigators):List[Investigator] = invs.all
+      def get(invs: Investigators): List[Investigator] = invs.all
 
-      def set(invs:Investigators, lst:List[Investigator]):Investigators = {
+      def set(invs: Investigators, lst: List[Investigator]): Investigators = {
         // Remember the addresses of any PIs in the list in case they become
         // CoIs and lose the address information.
         addrMap = (addrMap /: lst) {
           (m, inv) =>
             inv match {
-              case pi:PrincipalInvestigator => m + (pi.toCoi -> pi.address)
-              case _                        => m
+              case pi: PrincipalInvestigator => m + (pi.toCoi -> pi.address)
+              case _                         => m
             }
         }
 
@@ -265,10 +281,10 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
 
       // Our add button
       object add extends ToolButton(SharedIcons.ADD, SharedIcons.ADD_DISABLED, "Add Co-Investigator") with CoiBound {
-        override def refresh(m:Option[List[CoInvestigator]]) {
+        override def refresh(m:Option[List[CoInvestigator]]): Unit = {
           enabled = m.isDefined && canEdit
         }
-        def apply() {
+        def apply(): Unit = {
           for {
             m <- model
             i <- CoiEditor.open(CoInvestigator.empty, canEdit, panel)
@@ -284,13 +300,13 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
       // A class of buttons that manipulate the investigator list without user input
       abstract class InvListButton(icon:Icon, disabledIcon:Icon, tooltip:String) extends ToolButton(icon, disabledIcon, tooltip) with AllBound {
         listViewer.onSelectionChanged(_ => enabled = potential.isDefined && canEdit)
-        override def refresh(m:Option[List[Investigator]]) {
+        override def refresh(m: Option[List[Investigator]]): Unit = {
           enabled = potential.isDefined && canEdit
         }
         // Gets the new investigator list and the index of the investigator that
         // should get the selection.
         def potential:Option[(List[Investigator], Int)] // what's the effect of clicking, if any?
-        def apply() {
+        def apply(): Unit = {
           potential foreach {
             case (lst, sel) =>
               model = Some(lst)
@@ -330,8 +346,8 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
 
     }
 
-    def editPi() { listViewer.editPi() }
-    def editInvestigator[A <: Investigator](inv: A) { listViewer.edit(inv) }
+    def editPi(): Unit = { listViewer.editPi() }
+    def editInvestigator[A <: Investigator](inv: A): Unit = { listViewer.edit(inv) }
 
     object listViewer extends SimpleListViewer[Proposal, Investigators, Investigator] {
 

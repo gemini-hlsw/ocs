@@ -6,6 +6,7 @@ import org.specs2.scalaz.ValidationMatchers._
 
 import xml._
 import java.io.InputStreamReader
+import java.io.File
 
 import edu.gemini.model.p1.immutable._
 import scalaz.NonEmptyList
@@ -127,27 +128,28 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 8
+          changes must have length 9
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
           changes must contain("Band3 Option is missing, set as false")
           changes must contain("Affiliate override flag is missing")
+          changes must contain("Updated existing attachment value")
 
           (result \\ "meta") must ==/(<meta band3optionChosen="false">
-            <attachment>file.pdf</attachment>
+            <attachment name="file.pdf" index="1"></attachment>
           </meta>)
 
           val proposal = ProposalIo.read(result.toString())
           proposal.meta.band3OptionChosen must beFalse
-          proposal.meta.attachment must beSome(new java.io.File("file.pdf"))
+          proposal.meta.attachments must beEqualTo(List(Attachment(Some(new File("file.pdf")), 1)))
       }
 
       UpConverter.upConvert(xml) must beSuccessful.like {
         case ConversionResult(transformed, from, changes, root) =>
           transformed must beTrue
           from must beEqualTo(Semester(2012, SemesterOption.B))
-          changes must have length 8
+          changes must have length 9
       }
     }
     "add enabled attribute if missing" in {
@@ -209,7 +211,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 11
+          changes must have length 12
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
@@ -234,7 +236,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 11
+          changes must have length 12
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
@@ -260,7 +262,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 12
+          changes must have length 13
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
