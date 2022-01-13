@@ -712,7 +712,7 @@ object TimeProblems {
 
   // REL-3493: All CFH exchange time will now be done in queue.
   def noCFHClassical(p: Proposal, s: ShellAdvisor): Option[ProblemRobot.Problem] = p.proposalClass match {
-    case ClassicalProposalClass(_, _, _, Right(ExchangeSubmission(_, _, ExchangePartner.CFH, _)), _) =>
+    case ClassicalProposalClass(_, _, _, Right(ExchangeSubmission(_, _, ExchangePartner.CFH, _)), _, _) =>
       Some(new Problem(Severity.Error, "All CFH exchange time will now be done in queue.", SCHEDULING_SECTION, s.inPartnersView(_.editProposalClass())))
     case _ => None
   }

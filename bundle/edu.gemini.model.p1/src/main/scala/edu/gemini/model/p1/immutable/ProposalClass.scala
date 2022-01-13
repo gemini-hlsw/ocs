@@ -130,6 +130,7 @@ case class QueueProposalClass(itac:Option[Itac],
 }
 
 object ClassicalProposalClass {
+  val multiFacility: Lens[ClassicalProposalClass, Option[MultiFacility]] = Lens.lensu((a, b) => a.copy(multiFacility = b), _.multiFacility)
 
   def apply(m: M.ClassicalProposalClass): ClassicalProposalClass = apply(
     Option(m.getItac).map(Itac(_)),
