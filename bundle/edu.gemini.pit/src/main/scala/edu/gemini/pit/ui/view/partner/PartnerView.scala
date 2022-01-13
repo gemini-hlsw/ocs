@@ -336,8 +336,8 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
       override def children = List(multiFacility, edit)
 
-      peer.add(multiFacility.peer)
-      peer.add(edit.peer)
+      add(multiFacility)
+      add(edit)
 
       override def refresh(m: Option[Proposal]): Unit = {
         enabled = canEdit
