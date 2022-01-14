@@ -30,7 +30,7 @@ class ProblemView(shellAdvisor: ShellAdvisor) extends BorderPanel with BoundView
 
     val lens = Lens.lensId[Model]
     private var problems: List[Problem] = Nil
-    preferredSize = (preferredSize.width, 250)
+    preferredSize = (preferredSize.width, 220)
 
     // We also need to listen to the problem handler
     shellAdvisor.problemHandler.addListener { a:Any => refresh(model) }
