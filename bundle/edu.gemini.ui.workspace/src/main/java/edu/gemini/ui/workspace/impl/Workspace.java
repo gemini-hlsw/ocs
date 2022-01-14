@@ -1,6 +1,5 @@
 package edu.gemini.ui.workspace.impl;
 
-
 import java.awt.Font;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;

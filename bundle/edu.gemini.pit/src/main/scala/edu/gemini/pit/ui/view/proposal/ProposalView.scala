@@ -47,7 +47,6 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
     addRow(new Label("Category:"), category)
     addRow(attachment1Label, attachment1)
     addRow(attachment2Label, attachment2)
-    addSpacer()
   }, BorderPanel.Position.Center)
   add(investigators, BorderPanel.Position.South)
 

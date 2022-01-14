@@ -17,7 +17,7 @@ import java.awt.Color
 
 import edu.gemini.pit.ui.util._
 import edu.gemini.pit.ui.binding._
-import javax.swing.{BorderFactory, JComboBox, JLabel}
+import javax.swing.{BorderFactory, Icon, JComboBox, JLabel}
 import javax.swing.{ComboBoxModel, DefaultComboBoxModel}
 
 import edu.gemini.model.p1.immutable.Partners.FtPartner
@@ -324,7 +324,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     }
 
     // Multi label and combo box
-    lazy val multiFacilityLabel = dvLabel("Multi facility:") {
+    lazy val multiFacilityLabel = dvLabel("AEON/Multi-facility:") {
       case _: QueueProposalClass     => true
       case _: LargeProgramClass      => true
       case _: ClassicalProposalClass => true
@@ -414,7 +414,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
       val explanation = new Label()
       explanation.icon = SharedIcons.ICON_INFO
-      explanation.tooltip = "Please indicate whether the time for a site/instrument is required of a multi-facility proposal, e.g. the project is infeasible without it. This information will be used for scheduling purposes and will not be shown to the TACs."
+      explanation.tooltip = "Please indicate whether the time for a site/instrument is required of a multi-facility proposal, e.g. the project is infeasible without it.</br> This information will be used for scheduling purposes and will not be shown to the TACs."
       peer.add(geminiRequired.peer)
       peer.add(explanation.peer)
 
