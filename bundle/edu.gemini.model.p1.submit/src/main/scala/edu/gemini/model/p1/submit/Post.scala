@@ -14,8 +14,8 @@ private[submit] object Post {
     con.setRequestProperty("Content-Type", s"""multipart/form-data; boundary="$BOUNDARY"""")
 
     for {
-      pdf1 <- p.meta.firstAttachment.toRight(ClientError("The proposal is missing some PDF attachment.")).right
-      pdf2 <- p.meta.secondAttachment.toRight(ClientError("The proposal is missing some PDF attachment.")).right
+      pdf1 <- p.meta.firstAttachment.toRight(ClientError("The proposal is missing PDF attachment 1.")).right
+      pdf2 <- p.meta.secondAttachment.toRight(ClientError("The proposal is missing PDF attachment 2.")).right
       _   <- doPost(con, p, pdf1, pdf2).right
      } yield Unit
   }
