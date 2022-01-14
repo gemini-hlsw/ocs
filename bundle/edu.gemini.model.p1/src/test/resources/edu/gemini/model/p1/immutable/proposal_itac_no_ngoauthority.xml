@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <proposal tacCategory="Extragalactic" schemaVersion="1.0.0">
     <meta>
-        <attachment name="ar_2012B_007.pdf" index="1"/>
-        <attachment name="ar_2012B_007.pdf" index="2"/>
+        <firstAttachment>ar_2012B_007.pdf</firstAttachment>
+        <secondAttachment>ar_2012B_007.pdf</secondAttachment>
     </meta>
     <semester half="B" year="2012"/>
     <title>Understanding the complex gas kinematics of compact, rapidly growing galaxies in the local Universe</title>

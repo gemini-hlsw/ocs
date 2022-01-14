@@ -3,27 +3,10 @@
 -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 
-    <!--
-      There can be 1 or 2 attachments
-    -->
-    <xsd:simpleType name="AttachmentIndex">
-        <xsd:restriction base="xsd:integer">
-            <xsd:minInclusive value="1"/>
-            <xsd:maxExclusive value="3"/>
-        </xsd:restriction>
-    </xsd:simpleType>
-
-    <!--
-      An attachment has a file name and an index
-    -->
-    <xsd:complexType name="Attachment">
-        <xsd:attribute name="name"  type="xsd:string"      use="required"/>
-        <xsd:attribute name="index" type="AttachmentIndex" use="required"/>
-    </xsd:complexType>
-
     <xsd:complexType name="Meta">
         <xsd:sequence>
-            <xsd:element name="attachment" type="Attachment" minOccurs ="1" maxOccurs="unbounded"/>
+            <xsd:element name="firstAttachment" type="xsd:string" minOccurs ="1" maxOccurs="1"/>
+            <xsd:element name="secondAttachment" type="xsd:string" minOccurs ="0" maxOccurs="1"/>
         </xsd:sequence>
         <xsd:attribute name="band3optionChosen" type="xsd:boolean" use="required"/>
         <xsd:attribute name="overrideAffiliate" type="xsd:boolean" use="required"/>

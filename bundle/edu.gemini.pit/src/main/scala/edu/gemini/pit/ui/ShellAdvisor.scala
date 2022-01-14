@@ -101,17 +101,18 @@ class ShellAdvisor(
     // Tell the shell about our initial model
     val wasRolled = startModel.conversion.transformed
 
+    def attachmentLens(index: Int) =
+      Proposal.meta andThen (if (index == 1) Meta.firstAttachment else Meta.secondAttachment)
+
     def updateAttachment(startModel: Model, i: Int): Model = {
+      val lens = attachmentLens(i)
       // The attachment may be on the local dir, fix the model
       /* Builds a new proposal changing the attachment */
-      def updatedAttachment(attachment: Option[File]):Proposal =
-        startModel.proposal.copy(meta = startModel.proposal.meta.copy(attachments = startModel.proposal.meta.attachments.zipWithIndex.map {
-          case (a, j) if j == i => a.copy(name = attachment)
-          case (a, _)           => a
-        }))
+      def updatedAttachment(attachment: Option[File]): Proposal =
+        lens.set(startModel.proposal, attachment)
 
-      val attachment = startModel.proposal.meta.attachments.lift(i)
-      startModel.copy(proposal = updatedAttachment(PDF.relocatedPdf(file, attachment.flatMap(_.name))))
+      val attachment = lens.get(startModel.proposal)
+      startModel.copy(proposal = updatedAttachment(PDF.relocatedPdf(file, attachment)))
     }
 
     val fixedModel = updateAttachment(updateAttachment(startModel, 1), 2)
