@@ -50,7 +50,7 @@ class BlueprintEditor private (initialState:UIState[_, _], editable:Boolean) ext
 
   // Our editor. We delegate apply()
   def editor = Data
-  def apply(newState:UIState[_, _]) {
+  def apply(newState:UIState[_, _]): Unit = {
     Data.apply(newState)
   }
 
@@ -96,7 +96,7 @@ class BlueprintEditor private (initialState:UIState[_, _], editable:Boolean) ext
     import BorderPanel.Position._
 
     // Propagate new state to our controls
-    def apply(newState:UIState[_, _]) {
+    def apply(newState:UIState[_, _]): Unit = {
 
       // Field values
       Title.text = state.node.title
@@ -177,7 +177,7 @@ class BlueprintEditor private (initialState:UIState[_, _], editable:Boolean) ext
       // Interpret a double-click here as a single-click on a button
       peer.addMouseListener(new awt.event.MouseAdapter {
         val buttons = List(Footer.Finish, Footer.Next)
-        override def mouseClicked(me:awt.event.MouseEvent) {
+        override def mouseClicked(me:awt.event.MouseEvent): Unit = {
           if (me.getClickCount == 2)
             buttons.find(_.enabled).foreach(_.doClick(1))
         }

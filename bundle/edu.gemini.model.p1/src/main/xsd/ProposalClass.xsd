@@ -2,6 +2,8 @@
   Schema definition for proposal classes and their related submissions.
 -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" jaxb:version="1.0">
+    <xsd:include schemaLocation="Site.xsd"/>
+    <xsd:include schemaLocation="Instrument.xsd"/>
     <xsd:include schemaLocation="Submission.xsd"/>
     <xsd:include schemaLocation="Proposal.xsd"/>
     <xsd:include schemaLocation="Investigator.xsd"/>
@@ -52,11 +54,42 @@
         </xsd:complexContent>
     </xsd:complexType>
 
+    <!-- <xsd:simpleType name="MultiFacilityInstrument" final="restriction" > -->
+    <!--     <xsd:restriction base="xsd:string"> -->
+    <!--         <xsd:enumeration value="Alopeke" /> -->
+    <!--         <xsd:enumeration value="Flamingos2" /> -->
+    <!--         <xsd:enumeration value="GmosS" /> -->
+    <!--         <xsd:enumeration value="GmosN" /> -->
+    <!--         <xsd:enumeration value="Gnirs" /> -->
+    <!--         <xsd:enumeration value="Gsaoi" /> -->
+    <!--         <xsd:enumeration value="Graces" /> -->
+    <!--         <xsd:enumeration value="Gpi" /> -->
+    <!--         <xsd:enumeration value="IGRINS" /> -->
+    <!--         <xsd:enumeration value="NIFS" /> -->
+    <!--         <xsd:enumeration value="NIRI" /> -->
+    <!--         <xsd:enumeration value="DSSI" /> -->
+    <!--         <xsd:enumeration value="Texes" /> -->
+    <!--         <xsd:enumeration value="Zorro" /> -->
+    <!--         <xsd:enumeration value="MaroonX" /> -->
+    <!--         <xsd:enumeration value="Visitor" /> -->
+    <!--     </xsd:restriction> -->
+    <!-- </xsd:simpleType> -->
+    <!--  -->
+
+    <!-- Gemini time requsted for a MF proposal -->
+    <xsd:complexType name="GeminiTimeRequired">
+        <xsd:sequence>
+            <xsd:element name="site"       type="Site"        minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="instrument" type="xsd:token"   minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="required"   type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
     <!-- If multy facility adds some flags -->
     <xsd:complexType name="MultiFacility">
         <xsd:sequence>
-            <xsd:element name="geminiTimeRequired" type="xsd:boolean" minOccurs="1"/>
-            <xsd:element name="aeonMode" type="xsd:boolean" minOccurs="1"/>
+            <xsd:element name="geminiTimeRequired" type="GeminiTimeRequired" maxOccurs="unbounded"/>
+            <xsd:element name="aeonMode"           type="xsd:boolean"        minOccurs="1" maxOccurs="1"/>
         </xsd:sequence>
     </xsd:complexType>
 

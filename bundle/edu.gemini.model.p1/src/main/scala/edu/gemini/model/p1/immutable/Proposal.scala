@@ -14,17 +14,17 @@ import edu.gemini.spModel.core.Coordinates
 object Proposal {
 
   // Lenses
-  val meta:Lens[Proposal, Meta] = Lens.lensu((a, b) => a.copy(meta = b), _.meta)
-  val semester:Lens[Proposal, Semester] = Lens.lensu((a, b) => a.copy(semester = b), _.semester)
-  val title:Lens[Proposal, String] = Lens.lensu((a, b) => a.copy(title = b), _.title)
-  val abstrakt:Lens[Proposal, String] = Lens.lensu((a, b) => a.copy(abstrakt = b), _.abstrakt)
-  val scheduling:Lens[Proposal, String] = Lens.lensu((a, b) => a.copy(scheduling = b), _.scheduling)
-  val category:Lens[Proposal, Option[TacCategory]] = Lens.lensu((a, b) => a.copy(category = b), _.category)
-  val investigators:Lens[Proposal, Investigators] = Lens.lensu((a, b) => a.copy(investigators = b), _.investigators)
-  val observations:Lens[Proposal, List[Observation]] = Lens.lensu((a, b) => a.copy(observations = clean(b)), _.observations)
-  val proposalClass:Lens[Proposal, ProposalClass] = Lens.lensu((a, b) => a.copy(proposalClass = b), _.proposalClass)
+  val meta: Lens[Proposal, Meta] = Lens.lensu((a, b) => a.copy(meta = b), _.meta)
+  val semester: Lens[Proposal, Semester] = Lens.lensu((a, b) => a.copy(semester = b), _.semester)
+  val title: Lens[Proposal, String] = Lens.lensu((a, b) => a.copy(title = b), _.title)
+  val abstrakt: Lens[Proposal, String] = Lens.lensu((a, b) => a.copy(abstrakt = b), _.abstrakt)
+  val scheduling: Lens[Proposal, String] = Lens.lensu((a, b) => a.copy(scheduling = b), _.scheduling)
+  val category: Lens[Proposal, Option[TacCategory]] = Lens.lensu((a, b) => a.copy(category = b), _.category)
+  val investigators: Lens[Proposal, Investigators] = Lens.lensu((a, b) => a.copy(investigators = b), _.investigators)
+  val observations: Lens[Proposal, List[Observation]] = Lens.lensu((a, b) => a.copy(observations = clean(b)), _.observations)
+  val proposalClass: Lens[Proposal, ProposalClass] = Lens.lensu((a, b) => a.copy(proposalClass = b), _.proposalClass)
 
-  val targets:Lens[Proposal, List[Target]] = Lens.lensu((a, b) => {
+  val targets: Lens[Proposal, List[Target]] = Lens.lensu((a, b) => {
     val p = a.copy(targets = b.distinct)
     observations.set(p, p.observations) // force cleanup of empty obs
   }, _.targets)
@@ -123,11 +123,11 @@ case class Proposal(meta:Meta,
     observations.forall(_.proposal == Some(this))
   }
 
-  def fix() {
+  def fix(): Unit = {
     observations.foreach(_.proposal = Some(this)) // field is package-private
   }
 
-  def resetObservationMeta:Proposal = copy(observations = observations.map(_.copy(meta = None)))
+  def resetObservationMeta: Proposal = copy(observations = observations.map(_.copy(meta = None)))
 
   // REL-3290: Now that we always have an observation (an empty one if there are no others), when we access the
   // list of observations for processing, we want to filter this dummy observation out.

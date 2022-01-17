@@ -266,10 +266,28 @@ case class ExchangeProposalClass(itac:Option[Itac],
 
 }
 
-final case class MultiFacility(geminiTimeRequired: Boolean, aeonMode: Boolean) {
+final case class GeminiTimeRequired(site: Site, instrument: Instrument, required:Boolean) {
+  def mutable: M.GeminiTimeRequired = {
+    val m = Factory.createGeminiTimeRequired
+    m.setSite(Site.toMutable(site))
+    m.setInstrument(instrument.id)
+    m.setRequired(required)
+    m
+  }
+}
+
+object GeminiTimeRequired {
+  def apply(m: M.GeminiTimeRequired): GeminiTimeRequired = apply(
+    Site.fromMutable(m.getSite),
+    Instrument.fromMutable(m.getInstrument),
+    m.isRequired
+  )
+}
+
+final case class MultiFacility(geminiTimeRequired: List[GeminiTimeRequired], aeonMode: Boolean) {
   def mutable: M.MultiFacility = {
     val m = Factory.createMultiFacility
-    m.setGeminiTimeRequired(geminiTimeRequired)
+    geminiTimeRequired.foreach(g => m.getGeminiTimeRequired.add(g.mutable))
     m.setAeonMode(aeonMode)
     m
   }
@@ -277,7 +295,7 @@ final case class MultiFacility(geminiTimeRequired: Boolean, aeonMode: Boolean) {
 
 object MultiFacility {
   def apply(m: M.MultiFacility): MultiFacility = apply(
-    m.isGeminiTimeRequired,
+    m.getGeminiTimeRequired.asScala.map(GeminiTimeRequired(_)).toList,
     m.isAeonMode
   )
 }

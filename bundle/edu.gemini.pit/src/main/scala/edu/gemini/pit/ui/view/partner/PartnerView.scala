@@ -10,16 +10,16 @@ import swing._
 import Swing._
 import scalaz._
 import Scalaz._
-import edu.gemini.pit.ui.editor.{Institutions, LargeSubmissionRequestEditor, SubmissionRequestEditor, VisitorSelector}
+import edu.gemini.pit.ui.editor.{AEONTimeEditor, Institutions, LargeSubmissionRequestEditor, SubmissionRequestEditor, VisitorSelector}
 import edu.gemini.model.p1.immutable._
 import edu.gemini.model.p1.immutable.Partners._
-import java.awt.Color
 
+import java.awt.Color
 import edu.gemini.pit.ui.util._
 import edu.gemini.pit.ui.binding._
+
 import javax.swing.{BorderFactory, Icon, JComboBox, JLabel}
 import javax.swing.{ComboBoxModel, DefaultComboBoxModel}
-
 import edu.gemini.model.p1.immutable.Partners.FtPartner
 
 // An enum for multi facility selection
@@ -137,7 +137,6 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
     }
   }
-
 
   // Our header, which is basically everything except the partner/exchange list
   object header extends GridBagPanel with Rows with Bound.Self[Proposal] {
@@ -350,12 +349,10 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         }
       }
 
-      object multiFacility extends ComboBox(MultiFacilitySelection.values.toSeq) with Bound[Proposal, ProposalClass] {
-        val lens = Proposal.proposalClass
-
-        override def refresh(m: Option[ProposalClass]): Unit = {
+      object multiFacility extends ComboBox(MultiFacilitySelection.values.toSeq) with Bound.Self[Proposal] {
+        override def refresh(m: Option[Proposal]): Unit = {
           enabled = canEdit
-          m.foreach {
+          m.map(_.proposalClass).foreach {
             case q: QueueProposalClass          =>
               selection.item = q.multiFacility.fold(MultiFacilitySelection.No)(_ => MultiFacilitySelection.Yes)
               visible = true
@@ -371,9 +368,9 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         }
 
         renderer = new ListView.Renderer[MultiFacilitySelection.Value] {
-          val delegate = renderer
+          private val delegate = renderer
 
-          def componentFor(list: ListView[_ <: MultiFacilitySelection.Value], isSelected: Boolean, focused: Boolean, a: MultiFacilitySelection.Value, index: Int) = {
+          def componentFor(list: ListView[_ <: MultiFacilitySelection.Value], isSelected: Boolean, focused: Boolean, a: MultiFacilitySelection.Value, index: Int): Component = {
             val c = delegate.componentFor(list, isSelected, focused, a, index)
             val t = Option(a).map(_.toString).getOrElse("Select")
             c.peer.asInstanceOf[JLabel].setText(t)
@@ -381,23 +378,30 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           }
         }
 
+        val mf = ~model.map(_.observations.flatMap { o =>
+          o.blueprint.toList.collect { case b: GeminiBlueprintBase => (b.site, b.instrument) }
+        }.map{ case (s, i) => GeminiTimeRequired(s, i, false)})
+
         selection.reactions += {
-          case SelectionChanged(_) => model match {
-            case Some(q: QueueProposalClass)          => model = selection.item match {
-              case MultiFacilitySelection.Yes => Some(QueueProposalClass.multiFacility.set(q, Some(new MultiFacility(false, true))))
-              case MultiFacilitySelection.No  => Some(QueueProposalClass.multiFacility.set(q, None))
-              case _                        => Some(q)
-            }
-            case Some(l: LargeProgramClass)           => model = selection.item match {
-              case MultiFacilitySelection.Yes => Some(LargeProgramClass.multiFacility.set(l, Some(new MultiFacility(false, true))))
-              case MultiFacilitySelection.No  => Some(LargeProgramClass.multiFacility.set(l, None))
-              case _                        => Some(l)
-            }
-            case Some(c: ClassicalProposalClass)           => model = selection.item match {
-              case MultiFacilitySelection.Yes => Some(ClassicalProposalClass.multiFacility.set(c, Some(new MultiFacility(false, false))))
-              case MultiFacilitySelection.No  => Some(ClassicalProposalClass.multiFacility.set(c, None))
-              case _                        => Some(c)
-            }
+          case SelectionChanged(_) => model = model.map(_.proposalClass).flatMap {
+            case q: QueueProposalClass          =>
+              model.map(_.copy(proposalClass = selection.item match {
+                case MultiFacilitySelection.Yes => QueueProposalClass.multiFacility.set(q, Some(new MultiFacility(mf, true)))
+                case MultiFacilitySelection.No  => QueueProposalClass.multiFacility.set(q, None)
+                case _                          => q
+              }))
+            case l: LargeProgramClass           =>
+              model.map(_.copy(proposalClass = selection.item match {
+                case MultiFacilitySelection.Yes => LargeProgramClass.multiFacility.set(l, Some(new MultiFacility(mf, true)))
+                case MultiFacilitySelection.No  => LargeProgramClass.multiFacility.set(l, None)
+                case _                          => l
+              }))
+            case c: ClassicalProposalClass      =>
+              model.map(_.copy(proposalClass = selection.item match {
+                case MultiFacilitySelection.Yes => ClassicalProposalClass.multiFacility.set(c, Some(new MultiFacility(mf, false)))
+                case MultiFacilitySelection.No  => ClassicalProposalClass.multiFacility.set(c, None)
+                case _                          => c
+              }))
             case _                                    =>
               model
           }
@@ -444,6 +448,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       }
 
       object geminiRequired extends ComboBox(GeminiRequired.values.toSeq) with Bound[Proposal, ProposalClass] {
+        comboBox =>
         // A lens to allow us to set the type in one shot
         val lens = Proposal.proposalClass
 
@@ -464,18 +469,44 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           m.foreach {
             case q: QueueProposalClass     =>
               visible = q.multiFacility.isDefined
-              selection.item = q.multiFacility.map(_.geminiTimeRequired.fold(GeminiRequired.Yes, GeminiRequired.No)).getOrElse(GeminiRequired.No)
+              selection.item = q.multiFacility.isDefined.fold(GeminiRequired.Yes, GeminiRequired.No)
             case l: LargeProgramClass      =>
               visible =  l.multiFacility.isDefined
-              selection.item = l.multiFacility.map(_.geminiTimeRequired.fold(GeminiRequired.Yes, GeminiRequired.No)).getOrElse(GeminiRequired.No)
+              selection.item = l.multiFacility.isDefined.fold(GeminiRequired.Yes, GeminiRequired.No)
             case c: ClassicalProposalClass =>
               visible = c.multiFacility.isDefined
-              selection.item = c.multiFacility.map(_.geminiTimeRequired.fold(GeminiRequired.Yes, GeminiRequired.No)).getOrElse(GeminiRequired.No)
+              selection.item = c.multiFacility.isDefined.fold(GeminiRequired.Yes, GeminiRequired.No)
             case _                         => false
           }
         }
 
-      }
+        selection.reactions += {
+          case SelectionChanged(_) =>
+            //selection.item match {
+             // cg
+            //}
+            AEONTimeEditor.open(comboBox)
+            //model match {
+            // case Some(q: QueueProposalClass)          => model = selection.item match {
+            //   case MultiFacilitySelection.Yes => Some(QueueProposalClass.multiFacility.set(q, Some(new MultiFacility(false, true))))
+            //   case MultiFacilitySelection.No  => Some(QueueProposalClass.multiFacility.set(q, None))
+            //   case _                        => Some(q)
+            // }
+            // case Some(l: LargeProgramClass)           => model = selection.item match {
+            //   case MultiFacilitySelection.Yes => Some(LargeProgramClass.multiFacility.set(l, Some(new MultiFacility(false, true))))
+            //   case MultiFacilitySelection.No  => Some(LargeProgramClass.multiFacility.set(l, None))
+            //   case _                        => Some(l)
+            // }
+            // case Some(c: ClassicalProposalClass)           => model = selection.item match {
+            //   case MultiFacilitySelection.Yes => Some(ClassicalProposalClass.multiFacility.set(c, Some(new MultiFacility(false, false))))
+            //   case MultiFacilitySelection.No  => Some(ClassicalProposalClass.multiFacility.set(c, None))
+            //   case _                        => Some(c)
+            // }
+            // case _                                    =>
+            //   model
+          }
+        }
+
     }
 
     // Band 3 Label
@@ -617,7 +648,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         minimumSize = (270, preferredSize.height)
 
         // On refresh, set our text
-        override def refresh(m: Option[ProposalClass]) {
+        override def refresh(m: Option[ProposalClass]): Unit = {
           text = ~m.map {
             case q: QueueProposalClass => ~q.band3request.map { r =>
               "%1.2f %s (%1.2f %s minimum) requested".format(
@@ -647,7 +678,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       add(button, West)
       add(label, Center)
 
-      override def refresh(m: Option[Proposal]) {
+      override def refresh(m: Option[Proposal]): Unit = {
         visible = ~m.map(_.proposalClass).map {
           case _: ClassicalProposalClass => true
           case _                         => false
