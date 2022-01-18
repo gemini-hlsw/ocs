@@ -229,9 +229,23 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           model.foreach {
 
             // Q <=> C (all cases)
-            case q: QueueProposalClass if selection.item == Classical => localClassical = localClassical.copy(subs = q.subs)
-            case c: ClassicalProposalClass if selection.item == Queue => localQueue = localQueue.copy(subs = c.subs)
+            case q: QueueProposalClass if selection.item == Classical =>
+              localClassical = localClassical.copy(subs = q.subs, multiFacility = q.multiFacility)
+            case c: ClassicalProposalClass if selection.item == Queue => localQueue = localQueue.copy(subs = c.subs, multiFacility = c.multiFacility)
 
+            // Q <=> L (all cases)
+            case q: QueueProposalClass if selection.item == Large =>
+              localLarge = localLarge.copy(multiFacility = q.multiFacility)
+
+            case l: LargeProgramClass if selection.item == Queue =>
+              localQueue = localQueue.copy(multiFacility = l.multiFacility)
+
+            // C <=> L (all cases)
+            case c: ClassicalProposalClass if selection.item == Large =>
+              localLarge = localLarge.copy(multiFacility = c.multiFacility)
+
+            case l: LargeProgramClass if selection.item == Classical =>
+              localClassical = localClassical.copy(multiFacility = l.multiFacility)
             // {Q,C} => E when Q/C is NGO
             case g: GeminiNormalProposalClass if selection.item == Exchange => g.subs match {
               case Left(ns) => localExchange = localExchange.copy(subs = ns)
@@ -339,13 +353,13 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         m.map(_.proposalClass).foreach {
           case q: QueueProposalClass          =>
             visible = true
-            geminiTimeRequiredButton.visible = q.multiFacility.isDefined
+            geminiTimeRequiredButton.visible = q.multiFacility.exists(_.aeonMode)
           case l: LargeProgramClass           =>
             visible = true
-            geminiTimeRequiredButton.enabled = l.multiFacility.isDefined
+            geminiTimeRequiredButton.enabled = l.multiFacility.exists(_.aeonMode)
           case c: ClassicalProposalClass      =>
             visible = true
-            geminiTimeRequiredButton.enabled = c.multiFacility.isDefined
+            geminiTimeRequiredButton.enabled = c.multiFacility.exists(_.aeonMode)
           case _                              =>
             visible = false
         }
