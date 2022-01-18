@@ -13,33 +13,28 @@ abstract class SimpleListViewer[A, B, C <: Object](implicit ev: Null <:< B, ev2:
   with Bound[A, B] {
 
   // Bound
-  override def refresh(m: Option[B]) {
+  override def refresh(m: Option[B]): Unit =
     viewer.setModel(m.orNull)
-  }
 
   // General refresh
-  def refresh() {
+  def refresh(): Unit =
     viewer.refresh()
-  }
 
   // Viewer Delegates
   def selection = viewer.selection
-  def selection_=(c: Option[C]) {
+  def selection_=(c: Option[C]): Unit = {
     val gs = c.map(new GSelection(_)).getOrElse(GSelection.emptySelection[C])
     viewer.setSelection(gs)
   }
 
-  def onDoubleClick(f: C => Unit) {
+  def onDoubleClick(f: C => Unit): Unit =
     viewer.onDoubleClick(f)
-  }
 
-  def onClick(f: C => Unit) {
+  def onClick(f: C => Unit): Unit =
     viewer.onClick(f)
-  }
 
-  def onSelectionChanged(f: Option[C] => Unit) {
+  def onSelectionChanged(f: Option[C] => Unit): Unit =
     viewer.onSelectionChanged(f)
-  }
 
   protected val columns: Enumeration
   type Column = columns.Value

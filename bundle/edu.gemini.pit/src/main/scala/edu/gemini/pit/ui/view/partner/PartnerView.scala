@@ -426,10 +426,15 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           enabled = canEdit
         }
 
+        def queueRequest = for {
+            s @ QueueProposalClass(_, _, _, _, _, _, Some(mf)) <- model
+            l <- AEONTimeEditor.open(mf.geminiTimeRequired, button)
+          } yield QueueProposalClass.multiFacility.set(s, mf.copy(geminiTimeRequired = l).some)
+
         action = Action("") {
           model match {
             case Some(q: QueueProposalClass) =>
-              AEONTimeEditor.open(geminiTimeRequired, button)
+              queueRequest.foreach(r => model = r.some)
           }
         }
 
@@ -673,6 +678,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           if !phDRequired || i.status == InvestigatorStatus.PH_D
         } yield i)
 
+    // FIXME
     def currentPi(m: Option[Proposal]):PrincipalInvestigator = (for {
         p <- m
       } yield p.investigators.pi).get
@@ -858,7 +864,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         case _                             => None
       }
 
-      override def refresh(m:Option[Proposal]) {
+      override def refresh(m:Option[Proposal]): Unit = {
         enabled = canEdit
         visible = ~m.map(_.proposalClass).map {
           case _: FastTurnaroundProgramClass => true
@@ -897,7 +903,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         }
       }
 
-      def updateP1Model(partner: FtPartner) {
+      def updateP1Model(partner: FtPartner): Unit = {
         model.foreach {p => p.proposalClass match {
           case f: FastTurnaroundProgramClass =>
             val pc = FastTurnaroundProgramClass.affiliation.set(f, partner)
