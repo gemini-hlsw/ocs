@@ -1,32 +1,23 @@
 package edu.gemini.pit.ui.editor
 
-import edu.gemini.pit.ui.view.partner.PartnersFlags
 import edu.gemini.model.p1.immutable._
-import edu.gemini.shared.gui.textComponent.NumberField
-import com.jgoodies.forms.factories.Borders._
 
 import swing._
-import event.ValueChanged
-import Swing._
-import edu.gemini.pit.ui.util.{Rows, SharedIcons, StdModalEditor, ValueRenderer}
+import edu.gemini.pit.ui.util.{Rows, SharedIcons, StdModalEditor}
 import scalaz._
 import Scalaz._
-import edu.gemini.pit.ui.binding.Bound
 import edu.gemini.pit.ui.util.gface.SimpleListViewer
-import edu.gemini.ui.gface.{GSubElementDecorator, GViewer}
-import scalaz.Reducer.AnyReducer.monoid
 
-import java.awt.{BorderLayout, Color}
-import javax.swing.{BorderFactory, JLabel, SwingConstants}
-import javax.swing.border.Border
+import java.awt.Color
+import javax.swing.{BorderFactory, SwingConstants}
 
-object AEONTimeEditor {
+object GeminiTimeRequiredEditor {
 
-  def open[A](model: List[GeminiTimeRequired], parent: UIElement) = new AEONTimeEditor(model).open(parent)
+  def open[A](model: List[GeminiTimeRequired], parent: UIElement): Option[List[GeminiTimeRequired]] = new GeminiTimeRequiredEditor(model).open(parent)
 
 }
 
-class AEONTimeEditor[A] private (model: List[GeminiTimeRequired]) extends StdModalEditor[List[GeminiTimeRequired]]("Gemini Time Required") {
+class GeminiTimeRequiredEditor[A] private(model: List[GeminiTimeRequired]) extends StdModalEditor[List[GeminiTimeRequired]]("Gemini Time Required") {
 
   lazy val table = GeminiTimeRequiredTable(model)
   // Editor component

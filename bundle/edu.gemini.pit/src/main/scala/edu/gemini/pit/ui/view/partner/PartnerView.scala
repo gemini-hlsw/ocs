@@ -10,7 +10,7 @@ import swing._
 import Swing._
 import scalaz._
 import Scalaz._
-import edu.gemini.pit.ui.editor.{AEONTimeEditor, Institutions, LargeSubmissionRequestEditor, SubmissionRequestEditor, VisitorSelector}
+import edu.gemini.pit.ui.editor.{GeminiTimeRequiredEditor, Institutions, LargeSubmissionRequestEditor, SubmissionRequestEditor, VisitorSelector}
 import edu.gemini.model.p1.immutable._
 import edu.gemini.model.p1.immutable.Partners._
 
@@ -463,23 +463,23 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
         def qp  = for {
             s @ QueueProposalClass(_, _, _, _, _, _,Some(mf)) <- model.map(_.proposalClass)
-            l <- AEONTimeEditor.open(mf.geminiTimeRequired, button)
+            l <- GeminiTimeRequiredEditor.open(mf.geminiTimeRequired, button)
           } yield QueueProposalClass.multiFacility.set(s, mf.copy(geminiTimeRequired = l).some)
 
         def lp = for {
             s @ LargeProgramClass(_, _, _, _, _,Some(mf)) <- model.map(_.proposalClass)
-            l <- AEONTimeEditor.open(mf.geminiTimeRequired, button)
+            l <- GeminiTimeRequiredEditor.open(mf.geminiTimeRequired, button)
           } yield LargeProgramClass.multiFacility.set(s, mf.copy(geminiTimeRequired = l).some)
 
         def cp = for {
             s @ ClassicalProposalClass(_, _, _, _, _,Some(mf)) <- model.map(_.proposalClass)
-            l <- AEONTimeEditor.open(mf.geminiTimeRequired, button)
+            l <- GeminiTimeRequiredEditor.open(mf.geminiTimeRequired, button)
           } yield ClassicalProposalClass.multiFacility.set(s, mf.copy(geminiTimeRequired = l).some)
         action = Action("") {
           qp.orElse(lp).orElse(cp).foreach(r => model = model.map(_.copy(proposalClass = r)))
         }
 
-        icon = SharedIcons.ICON_INFO
+        icon = SharedIcons.ICON_VARIANT
 
       }
     }
