@@ -66,26 +66,6 @@ package object immutable {
     final val CFH    = M.ExchangePartner.CFH
   }
 
-  type MultiFacilityInstrument = M.MultiFacilityInstrument
-  object MultiFacilityInstrument extends EnumObject[M.MultiFacilityInstrument] {
-    final val ALOPEKE     = M.MultiFacilityInstrument.ALOPEKE
-    final val FLAMINGOS_2 = M.MultiFacilityInstrument.FLAMINGOS_2
-    final val GMOS_S      = M.MultiFacilityInstrument.GMOS_S
-    final val GMOS_N      = M.MultiFacilityInstrument.GMOS_N
-    final val GNIRS       = M.MultiFacilityInstrument.GNIRS
-    final val GSAOI       = M.MultiFacilityInstrument.GSAOI
-    final val GRACES      = M.MultiFacilityInstrument.GRACES
-    final val GPI         = M.MultiFacilityInstrument.GPI
-    final val IGRINS      = M.MultiFacilityInstrument.IGRINS
-    final val NIFS        = M.MultiFacilityInstrument.NIFS
-    final val NIRI        = M.MultiFacilityInstrument.NIRI
-    final val DSSI        = M.MultiFacilityInstrument.DSSI
-    final val TEXES       = M.MultiFacilityInstrument.TEXES
-    final val ZORRO       = M.MultiFacilityInstrument.ZORRO
-    final val MAROON_X    = M.MultiFacilityInstrument.MAROON_X
-    final val VISITOR     = M.MultiFacilityInstrument.VISITOR
-  }
-
   // Singleton used to represent a Large Program "Partner"
   object LargeProgramPartner
 
