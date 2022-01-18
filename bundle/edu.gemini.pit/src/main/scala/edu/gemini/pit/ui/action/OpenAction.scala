@@ -18,7 +18,7 @@ import swing.{Component, Dialog, UIElement}
 
 class OpenAction(shell: RichShell[Model], handler: ((Model, Option[File]) => Unit)) extends ShellAction(shell, "Open", Some(KeyEvent.VK_O)) {
 
-  override def apply() {
+  override def apply(): Unit = {
     val of = new Chooser[OpenAction]("defaultDir", shell.peer).chooseOpen("Proposal Documents", ".xml")
     of.map(Model.fromFile).foreach {
       case Success(model @ Model(_, ModelConversion(false, _, _))) =>
@@ -50,7 +50,7 @@ class OpenAction(shell: RichShell[Model], handler: ((Model, Option[File]) => Uni
     }
   }
 
-  private def alert(s: String) {
+  private def alert(s: String): Unit = {
     JOptionPane.showMessageDialog(shell.peer, s, "Open Failed", JOptionPane.ERROR_MESSAGE)
   }
 

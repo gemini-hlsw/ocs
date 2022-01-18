@@ -26,6 +26,16 @@ trait SingleSelectViewerHelpers[A] {
     })
   }
 
+  def onClick(f: A => Unit) {
+    getTable.addMouseListener(new MouseAdapter {
+      override def mouseClicked(e: MouseEvent) {
+        for {
+          z <- selection if e.getClickCount == 1
+        } f(z)
+      }
+    })
+  }
+
   def onSelectionChanged(f: Option[A] => Unit) {
     addPropertyChangeListener(GSelectionBroker.PROP_SELECTION, new PropertyChangeListener {
       def propertyChange(e: PropertyChangeEvent) {

@@ -15,7 +15,7 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
   val LOG = Logger.getLogger(this.getClass.getName)
   val sender = new InternetAddress("noreply@gemini.edu")
 
-  def notify(dirName: String, files: ProposalFileGroup) {
+  def notify(dirName: String, files: ProposalFileGroup): Unit = {
     val proposal = files.xml.map(ProposalIo.read)
 
     //construct email subject
@@ -59,7 +59,7 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
 
   }
 
-  private def sendMail(dirName: String, subject: String, body: String) {
+  private def sendMail(dirName: String, subject: String, body: String): Unit = {
 
     // Log the email we will send.
     LOG.log(Level.INFO, s"Sending email:\n\nSubject:\n$subject \n\nBody: \n$body")
@@ -88,7 +88,7 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
     new MimeMessage(session)
   }
 
-  private def addAddresses(msg: MimeMessage, recType: Message.RecipientType, addrs: Traversable[InternetAddress]) {
+  private def addAddresses(msg: MimeMessage, recType: Message.RecipientType, addrs: Traversable[InternetAddress]): Unit = {
     for (addr <- addrs) {
       msg.addRecipient(recType, addr)
     }
@@ -100,14 +100,14 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
 
   private def getReferenceString(propClass: ProposalClass): String = {
     val string = propClass match {
-      case pc: SpecialProposalClass                           => pc.sub.response.map(_.receipt.id).mkString(" ")
-      case ft: FastTurnaroundProgramClass                     => ft.sub.response.map(_.receipt.id).mkString(" ")
-      case sip: SubaruIntensiveProgramClass                   => sip.sub.response.map(_.receipt.id).mkString(" ")
-      case lp: LargeProgramClass                              => lp.sub.response.map(_.receipt.id).mkString(" ")
-      case t @ QueueProposalClass(_, _, _, Right(p), _, _, _) => t.subs.right.get.response.map(_.receipt.id).mkString(" ")
-      case t @ ClassicalProposalClass(_, _, _, Right(p), _)   => t.subs.right.get.response.map(_.receipt.id).mkString(" ")
-      case q:  GeminiNormalProposalClass                      => ~q.subs.left.getOrElse(Nil).flatMap(_.response.map(_.receipt.id)).headOption
-      case _                                                  => ""
+      case pc: SpecialProposalClass                            => pc.sub.response.map(_.receipt.id).mkString(" ")
+      case ft: FastTurnaroundProgramClass                      => ft.sub.response.map(_.receipt.id).mkString(" ")
+      case sip: SubaruIntensiveProgramClass                    => sip.sub.response.map(_.receipt.id).mkString(" ")
+      case lp: LargeProgramClass                               => lp.sub.response.map(_.receipt.id).mkString(" ")
+      case t @ QueueProposalClass(_, _, _, Right(p), _, _, _)  => t.subs.right.get.response.map(_.receipt.id).mkString(" ")
+      case t @ ClassicalProposalClass(_, _, _, Right(p), _, _) => t.subs.right.get.response.map(_.receipt.id).mkString(" ")
+      case q:  GeminiNormalProposalClass                       => ~q.subs.left.getOrElse(Nil).flatMap(_.response.map(_.receipt.id)).headOption
+      case _                                                   => ""
     }
     string.trim
   }
@@ -119,7 +119,7 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
       case _:  LargeProgramClass                                     => "Large Program"
       case QueueProposalClass(_, _, _, Right(_), _, _, _)            => "Exchange"
       case _:  QueueProposalClass                                    => "Queue"
-      case ClassicalProposalClass(_, _, _, Right(_), _)              => "Exchange"
+      case ClassicalProposalClass(_, _, _, Right(_), _, _)           => "Exchange"
       case _:  ClassicalProposalClass                                => "Classical"
       case ExchangeProposalClass(_, _, _, ExchangePartner.SUBARU, _) => "Subaru"
       case _                                                         => ""

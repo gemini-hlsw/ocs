@@ -6,10 +6,10 @@ class RichShellContext[A](val context:IShellContext) {
   def shell:RichShell[A] = context.getShell
  
   def title:String = sys.error("Not implemented")
-  def title_=(s:String) = context.setTitle(s)
+  def title_=(s:String): Unit = context.setTitle(s)
   
-  def actionManager = context.getActionManager // for now
+  def actionManager: IActionManager = context.getActionManager
  
-  def workspace = context.getWorkspace()
+  def workspace: IWorkspace = context.getWorkspace()
   
 }

@@ -30,6 +30,29 @@ object Instrument {
   case object Zorro      extends Instrument(GS, "Zorro")
   case object MaroonX    extends Instrument(GN, "MAROON-X")
 
-//  case object Keck extends Instrument(Site.Keck, "Keck")
-//  case object Subaru extends Instrument(Site.Subaru, "Subaru")
+  def fromMutable(id: String): Instrument = id match {
+    case "GMOS"       => GmosNorth
+    case "GNIRS"      => Gnirs
+    case "Michelle"   => Michelle
+    case "NIFS"       => Nifs
+    case "NIRI"       => Niri
+    case "DSSI"       => Dssi
+    case "Texes"      => Texes
+    case "Alopeke"    => Alopeke
+
+    case "Flamingos2" => Flamingos2
+    case "GMOSSouth"  => GmosSouth
+    case "GPI"        => Gpi
+    case "GRACES"     => Graces
+    case "GSAOI"      => Gsaoi
+    case "IGRINS"     => Igrins
+    case "NICI"       => Nici
+    case "Phoenix"    => Phoenix
+    case "TReCS"      => Trecs
+    case "Visitor"    => Visitor
+    case "Zorro"      => Zorro
+    case "MAROON-X"   => MaroonX
+    case _            => sys.error("Unsupported instrument")
+  }
+
 }

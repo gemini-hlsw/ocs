@@ -26,12 +26,12 @@ abstract class StdModalEditor[A](theTitle: String) extends ModalEditor[A] { dial
   /** Override this, then call validate() to update Ok button. */
   def editorValid:Boolean = true
 
-  final def validateEditor() {
+  final def validateEditor(): Unit = {
     Contents.Footer.OkButton.enabled = editorValid
   }
 
   // REL-1131 This is necessary to avoid a bug that shows in certain Linux systems on Sun's JDK
-  def setDropTarget(c:JComponent) {
+  def setDropTarget(c:JComponent): Unit = {
     c match {
       case _:JTextComponent => c.setDropTarget(null)
       case _                =>
@@ -54,7 +54,7 @@ abstract class StdModalEditor[A](theTitle: String) extends ModalEditor[A] { dial
     add(Footer, BorderPanel.Position.South)
 
     // Footer is a standard widget
-    lazy val Footer = OkCancelFooter(dialog) {
+    lazy val Footer: OkCancelFooter = OkCancelFooter(dialog) {
       close(value)
     }
 

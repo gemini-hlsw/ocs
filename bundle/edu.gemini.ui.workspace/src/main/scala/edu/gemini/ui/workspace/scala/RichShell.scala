@@ -157,5 +157,3 @@ class RichShell[A](shell:IShell) {
 
 }
 
-
-

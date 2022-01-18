@@ -30,7 +30,7 @@ object PITLauncher extends App {
   val workspace = new Workspace(null)
   workspace.open()
 
-  def newShell(model: Model, file: Option[File]) {
+  def newShell(model: Model, file: Option[File]): Unit = {
     val adv = new ShellAdvisor(version, model, file, newShell, locale)
     val shell = workspace.createShell(adv)
     shell.open()

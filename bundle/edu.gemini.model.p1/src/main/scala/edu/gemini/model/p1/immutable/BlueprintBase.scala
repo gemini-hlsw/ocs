@@ -34,7 +34,7 @@ object BlueprintBase {
     // GSOAI
     case b: M.GsaoiBlueprint                => GsaoiBlueprint(b)
 
-    // GPI
+    // GRACES
     case b: M.GracesBlueprint               => GracesBlueprint(b)
 
     // GPI
@@ -55,7 +55,7 @@ object BlueprintBase {
     case b: M.NifsBlueprint                 => NifsBlueprint(b)
     case b: M.NifsBlueprintAo               => NifsBlueprintAo(b)
 
-    // NIFS
+    // NIRI
     case b: M.NiriBlueprint                 => NiriBlueprint(b)
 
     // Phoenix

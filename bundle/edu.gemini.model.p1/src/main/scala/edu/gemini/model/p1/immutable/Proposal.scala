@@ -1,12 +1,11 @@
 package edu.gemini.model.p1.immutable
 
 import scalaz.Lens
+import edu.gemini.model.p1.{schema, mutable => M}
 
-import edu.gemini.model.p1.{mutable => M, schema}
 import scala.collection.JavaConverters._
-import java.util.logging.{Logger, Level}
+import java.util.logging.{Level, Logger}
 import org.xml.sax.SAXException
-
 import scalaz.{Band => SBand, _}
 import Scalaz._
 import edu.gemini.spModel.core.Coordinates
@@ -14,23 +13,23 @@ import edu.gemini.spModel.core.Coordinates
 object Proposal {
 
   // Lenses
-  val meta:Lens[Proposal, Meta] = Lens.lensu((a, b) => a.copy(meta = b), _.meta)
-  val semester:Lens[Proposal, Semester] = Lens.lensu((a, b) => a.copy(semester = b), _.semester)
-  val title:Lens[Proposal, String] = Lens.lensu((a, b) => a.copy(title = b), _.title)
-  val abstrakt:Lens[Proposal, String] = Lens.lensu((a, b) => a.copy(abstrakt = b), _.abstrakt)
-  val scheduling:Lens[Proposal, String] = Lens.lensu((a, b) => a.copy(scheduling = b), _.scheduling)
-  val category:Lens[Proposal, Option[TacCategory]] = Lens.lensu((a, b) => a.copy(category = b), _.category)
-  val investigators:Lens[Proposal, Investigators] = Lens.lensu((a, b) => a.copy(investigators = b), _.investigators)
-  val observations:Lens[Proposal, List[Observation]] = Lens.lensu((a, b) => a.copy(observations = clean(b)), _.observations)
-  val proposalClass:Lens[Proposal, ProposalClass] = Lens.lensu((a, b) => a.copy(proposalClass = b), _.proposalClass)
+  val meta: Lens[Proposal, Meta] = Lens.lensu((a, b) => a.copy(meta = b), _.meta)
+  val semester: Lens[Proposal, Semester] = Lens.lensu((a, b) => a.copy(semester = b), _.semester)
+  val title: Lens[Proposal, String] = Lens.lensu((a, b) => a.copy(title = b), _.title)
+  val abstrakt: Lens[Proposal, String] = Lens.lensu((a, b) => a.copy(abstrakt = b), _.abstrakt)
+  val scheduling: Lens[Proposal, String] = Lens.lensu((a, b) => a.copy(scheduling = b), _.scheduling)
+  val category: Lens[Proposal, Option[TacCategory]] = Lens.lensu((a, b) => a.copy(category = b), _.category)
+  val investigators: Lens[Proposal, Investigators] = Lens.lensu((a, b) => a.copy(investigators = b), _.investigators)
+  val observations: Lens[Proposal, List[Observation]] = Lens.lensu((a, b) => a.copy(observations = clean(b)), _.observations)
+  val proposalClass: Lens[Proposal, ProposalClass] = Lens.lensu((a, b) => a.copy(proposalClass = b), _.proposalClass)
 
-  val targets:Lens[Proposal, List[Target]] = Lens.lensu((a, b) => {
+  val targets: Lens[Proposal, List[Target]] = Lens.lensu((a, b) => {
     val p = a.copy(targets = b.distinct)
     observations.set(p, p.observations) // force cleanup of empty obs
   }, _.targets)
 
   // Remove [partial] duplicates from appearing in the observation list
-  def clean(os:List[Observation]) = {
+  def clean(os:List[Observation]): List[Observation] = {
     // Calculate what's a partial obs of what. O(N^2) sadly
     val partial:Map[(Observation, Observation), Boolean] = (for {
       o0 <- os
@@ -60,12 +59,12 @@ object Proposal {
   // Read schema version from a system property which in turn is set from
   // the Bundle Context on the activator. The bundle will not start if the property is missing
   // but I'll add this check anyway for unit testing and non-OSGi usage
-  lazy val currentSchemaVersion = Option(System.getProperty("edu.gemini.model.p1.schemaVersion")) match {
+  lazy val currentSchemaVersion: String = Option(System.getProperty("edu.gemini.model.p1.schemaVersion")) match {
     case Some(x:String) => x
     case x              => sys.error("Should set schemaVersion property")
   }
 
-  lazy val empty = apply(
+  lazy val empty: Proposal = apply(
     Meta.empty,
     Semester.current,
     "",
@@ -117,17 +116,16 @@ case class Proposal(meta:Meta,
   // localized; the public API is entirely immutable and this little tapdance is the only true nugget of evil.
   observations.foreach(_.proposal = Some(this)) // field is package-private
 
-  def isSubmitted = proposalClass.key.isDefined
+  def isSubmitted: Boolean = proposalClass.key.isDefined
 
-  def check = {
+  def check: Boolean =
     observations.forall(_.proposal == Some(this))
-  }
 
-  def fix() {
+  def fix(): Unit = {
     observations.foreach(_.proposal = Some(this)) // field is package-private
   }
 
-  def resetObservationMeta:Proposal = copy(observations = observations.map(_.copy(meta = None)))
+  def resetObservationMeta: Proposal = copy(observations = observations.map(_.copy(meta = None)))
 
   // REL-3290: Now that we always have an observation (an empty one if there are no others), when we access the
   // list of observations for processing, we want to filter this dummy observation out.
@@ -135,6 +133,14 @@ case class Proposal(meta:Meta,
 
   // REL-3290: Check to see if there are observations that are non-empty.
   def hasNonEmptyObservations: Boolean = nonEmptyObservations.nonEmpty
+
+  def defaultMultiFacilityGeminiTime: List[GeminiTimeRequired] =
+    observations.flatMap { o =>
+      o.blueprint.toList.collect { case b: GeminiBlueprintBase => (b.site, b.instrument) }
+    }.groupBy(_._2).map { case (_, l) => GeminiTimeRequired(l.head._1, l.head._2, required = false)}.toList
+
+  def multiFacilityGeminiTime: List[GeminiTimeRequired] =
+    proposalClass.multiFacilityGeminiTime
 
   // see companion apply for explanation of `referenceCoordinates`
   private def this(m:M.Proposal, referenceCoordinates: Map[String, Coordinates]) = this(
@@ -150,8 +156,8 @@ case class Proposal(meta:Meta,
     Option(m.getProposalClass).map(ProposalClass(_)).getOrElse(ProposalClass.empty),  // TODO: get rid of the empty case
     m.getSchemaVersion)
 
-  def conditions = observations.flatMap(_.condition).distinct
-  def blueprints = observations.flatMap(_.blueprint).distinct
+  def conditions: List[Condition] = observations.flatMap(_.condition).distinct
+  def blueprints: List[BlueprintBase] = observations.flatMap(_.blueprint).distinct
 
   def mutable = {
     val n = new Namer

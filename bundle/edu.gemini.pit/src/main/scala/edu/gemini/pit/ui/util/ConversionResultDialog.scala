@@ -40,7 +40,7 @@ class ConversionResultDialog(m: Model) extends StdModalEditor[ModelConversion]("
 
   }
 
-  override def refresh(m: Option[Model]) {
+  override def refresh(m: Option[Model]): Unit = {
     DetailsArea.bind(m, _ => ())
   }
 
@@ -56,7 +56,7 @@ class ConversionResultDialog(m: Model) extends StdModalEditor[ModelConversion]("
     sp.preferredSize = new Dimension(200, 150)
     add(sp, BorderPanel.Position.Center)
 
-    override def refresh(m: Option[ModelConversion]) {
+    override def refresh(m: Option[ModelConversion]): Unit = {
       text.text = ~m.map(_.changes.map(l => s"\u2022 $l").mkString("\n"))
     }
 

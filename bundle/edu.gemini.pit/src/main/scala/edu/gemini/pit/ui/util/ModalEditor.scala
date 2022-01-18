@@ -18,7 +18,7 @@ class ModalEditor[A] extends Dialog with CloseOnEsc {
   private var result: Option[A] = None
 
   /** Closes this dialog with a successful result. */
-  def close(a: A) {
+  def close(a: A): Unit = {
     result = Some(a)
     close()
   }

@@ -2,6 +2,8 @@
   Schema definition for proposal classes and their related submissions.
 -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" jaxb:version="1.0">
+    <xsd:include schemaLocation="Site.xsd"/>
+    <xsd:include schemaLocation="Instrument.xsd"/>
     <xsd:include schemaLocation="Submission.xsd"/>
     <xsd:include schemaLocation="Proposal.xsd"/>
     <xsd:include schemaLocation="Investigator.xsd"/>
@@ -52,17 +54,20 @@
         </xsd:complexContent>
     </xsd:complexType>
 
-    <xsd:complexType name="Facility">
+    <!-- Gemini time requsted for a MF proposal -->
+    <xsd:complexType name="GeminiTimeRequired">
         <xsd:sequence>
-            <xsd:element name="name" type="xsd:string" minOccurs="0" maxOccurs="1"/>
-            <xsd:element name="aeonCompatible" type="xsd:boolean" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="site"       type="Site"        minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="instrument" type="xsd:token"   minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="required"   type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
         </xsd:sequence>
     </xsd:complexType>
 
-    <!-- Indicates what other facilities are included in this proposal -->
+    <!-- If multi facility adds some flags -->
     <xsd:complexType name="MultiFacility">
         <xsd:sequence>
-            <xsd:element name="facility" type="Facility" minOccurs="1"/>
+            <xsd:element name="geminiTimeRequired" type="GeminiTimeRequired" maxOccurs="unbounded"/>
+            <xsd:element name="aeonMode"           type="xsd:boolean"        minOccurs="1" maxOccurs="1"/>
         </xsd:sequence>
     </xsd:complexType>
 
@@ -92,6 +97,7 @@
         <xsd:complexContent>
             <xsd:extension base="GeminiNormalProposalClass">
                 <xsd:sequence>
+                    <xsd:element name="multiFacility" type="MultiFacility" minOccurs="0" maxOccurs="1"/>
                     <xsd:element name="visitor" type="Visitor" minOccurs="0" maxOccurs="unbounded"/>
                 </xsd:sequence>
             </xsd:extension>

@@ -56,6 +56,15 @@ sealed trait ProposalClass {
   def isSpecial: Boolean
 
   def classLabel: String
+
+  def multiFacilityGeminiTime: List[GeminiTimeRequired] =
+    this match {
+      case q: QueueProposalClass     => q.multiFacility.toList.flatMap(_.geminiTimeRequired)
+      case l: LargeProgramClass      => l.multiFacility.toList.flatMap(_.geminiTimeRequired)
+      case c: ClassicalProposalClass => c.multiFacility.toList.flatMap(_.geminiTimeRequired)
+      case _                         => Nil
+    }
+
 }
 
 sealed trait GeminiNormalProposalClass extends ProposalClass {
@@ -81,7 +90,7 @@ object QueueProposalClass {
   // Lenses
   val tooOption:Lens[QueueProposalClass, ToOChoice] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
   val band3request:Lens[QueueProposalClass, Option[SubmissionRequest]] = Lens.lensu((a, b) => a.copy(band3request = b), _.band3request)
-  val multiFacility:Lens[QueueProposalClass, Option[MultiFacility]] = Lens.lensu((a, b) => a.copy(multiFacility = b), _.multiFacility)
+  val multiFacility: Lens[QueueProposalClass, Option[MultiFacility]] = Lens.lensu((a, b) => a.copy(multiFacility = b), _.multiFacility)
 
   def apply(m:M.QueueProposalClass):QueueProposalClass = apply(
     Option(m.getItac).map(Itac(_)),
@@ -90,7 +99,7 @@ object QueueProposalClass {
     GeminiNormalProposalClass.extractSubs(m),
     Option(m.getBand3Request).map(SubmissionRequest(_)),
     m.getTooOption,
-    Option(m.getMultiFacility)
+    Option(m.getMultiFacility).map(MultiFacility(_))
   )
 
   val empty = apply(None, None, None, Left(Nil), None, ToOChoice.None, None)
@@ -116,11 +125,11 @@ case class QueueProposalClass(itac:Option[Itac],
     m.getNgo.addAll(subs.left.map(lst => lst.map(_.mutable(p, n))).left.getOrElse(Nil).asJava)
     m.setBand3Request(band3request.map(_.mutable).orNull)
     m.setTooOption(tooOption)
-    m.setMultiFacility(multiFacility.orNull)
+    m.setMultiFacility(multiFacility.map(_.mutable).orNull)
     m
   }
 
-  def reset = subs match {
+  def reset: QueueProposalClass = subs match {
     case Left(ss) => copy(key = None, subs = Left(ss.map(_.reset)))
     case Right(s) => copy(key = None, subs = Right(s.reset))
   }
@@ -130,15 +139,18 @@ case class QueueProposalClass(itac:Option[Itac],
 }
 
 object ClassicalProposalClass {
+  val multiFacility: Lens[ClassicalProposalClass, Option[MultiFacility]] = Lens.lensu((a, b) => a.copy(multiFacility = b), _.multiFacility)
 
-  def apply(m:M.ClassicalProposalClass):ClassicalProposalClass = apply(
+  def apply(m: M.ClassicalProposalClass): ClassicalProposalClass = apply(
     Option(m.getItac).map(Itac(_)),
     Option(m.getComment),
     Option(m.getKey).map(UUID.fromString),
     GeminiNormalProposalClass.extractSubs(m),
-    m.getVisitor.asScala.map(_.getRef).map(Investigator(_).ref).toList)
+    m.getVisitor.asScala.map(_.getRef).map(Investigator(_).ref).toList,
+    Option(MultiFacility(m.getMultiFacility))
+  )
 
-  val empty = apply(None, None, None, Left(Nil), Nil)
+  val empty = apply(None, None, None, Left(Nil), Nil, None)
 
 }
 
@@ -146,12 +158,12 @@ object ClassicalProposalClass {
  * Note that in the immutable model each Investigator has a visitor bit that indicates whether or not he/she is a
  * classical visitor. So when converting to/from the mutable model we have to do a bit of extra work.
  */
-case class ClassicalProposalClass(itac:Option[Itac],
-                                  comment:Option[String],
-                                  key:Option[UUID],
-                                  subs:Either[List[NgoSubmission], ExchangeSubmission],
-                                  visitors:List[InvestigatorRef])
-
+case class ClassicalProposalClass(itac: Option[Itac],
+                                  comment: Option[String],
+                                  key: Option[UUID],
+                                  subs: Either[List[NgoSubmission], ExchangeSubmission],
+                                  visitors: List[InvestigatorRef],
+                                  multiFacility: Option[MultiFacility])
   extends GeminiNormalProposalClass {
 
   def mutable(p:Proposal, n:Namer) = {
@@ -168,6 +180,7 @@ case class ClassicalProposalClass(itac:Option[Itac],
       v.setRef(i.mutable(n))
       v
     }.asJava)
+    m.setMultiFacility(multiFacility.map(_.mutable).orNull)
 
     m
   }
@@ -187,11 +200,12 @@ object SpecialProposalClass {
   // Lens
   val sub:Lens[SpecialProposalClass,SpecialSubmission] = Lens.lensu((a, b) => a.copy(sub = b), _.sub)
 
-  def apply(m:M.SpecialProposalClass):SpecialProposalClass = apply(
+  def apply(m: M.SpecialProposalClass): SpecialProposalClass = apply(
     Option(m.getItac).map(Itac(_)),
     Option(m.getComment),
     Option(m.getKey).map(UUID.fromString),
-    SpecialSubmission(m.getSubmission))
+    SpecialSubmission(m.getSubmission)
+  )
 
   val empty = apply(None, None, None, SpecialSubmission.empty)
 
@@ -261,11 +275,48 @@ case class ExchangeProposalClass(itac:Option[Itac],
 
 }
 
-case class LargeProgramClass(itac  :Option[Itac],
-                            comment:Option[String],
-                            key    :Option[UUID],
-                            sub    :LargeProgramSubmission,
-                            tooOption:ToOChoice,
+final case class GeminiTimeRequired(site: Site, instrument: Instrument, required: Boolean) {
+  def mutable: M.GeminiTimeRequired = {
+    val m = Factory.createGeminiTimeRequired
+    m.setSite(Site.toMutable(site))
+    m.setInstrument(instrument.id)
+    m.setRequired(required)
+    m
+  }
+}
+
+object GeminiTimeRequired {
+  def apply(m: M.GeminiTimeRequired): GeminiTimeRequired = apply(
+    Site.fromMutable(m.getSite),
+    Instrument.fromMutable(m.getInstrument),
+    m.isRequired
+  )
+}
+
+final case class MultiFacility(geminiTimeRequired: List[GeminiTimeRequired], aeonMode: Boolean) {
+  def mutable: M.MultiFacility = {
+    val m = Factory.createMultiFacility
+    geminiTimeRequired.foreach(g => m.getGeminiTimeRequired.add(g.mutable))
+    m.setAeonMode(aeonMode)
+    m
+  }
+}
+
+object MultiFacility {
+  val geminiTimeRequired: Lens[MultiFacility, List[GeminiTimeRequired]] = Lens.lensu((a, b) => a.copy(geminiTimeRequired = b), _.geminiTimeRequired)
+  val aeonMode: Lens[MultiFacility, Boolean] = Lens.lensu((a, b) => a.copy(aeonMode = b), _.aeonMode)
+
+  def apply(m: M.MultiFacility): MultiFacility = apply(
+    m.getGeminiTimeRequired.asScala.map(GeminiTimeRequired(_)).toList,
+    m.isAeonMode
+  )
+}
+
+final case class LargeProgramClass(itac:   Option[Itac],
+                            comment:       Option[String],
+                            key:           Option[UUID],
+                            sub:           LargeProgramSubmission,
+                            tooOption:     ToOChoice,
                             multiFacility: Option[MultiFacility]) extends ProposalClass {
 
   def mutable:M.LargeProgramClass = {
@@ -275,7 +326,7 @@ case class LargeProgramClass(itac  :Option[Itac],
     m.setKey(key.map(_.toString).orNull)
     m.setSubmission(sub.mutable)
     m.setTooOption(tooOption)
-    m.setMultiFacility(multiFacility.orNull)
+    m.setMultiFacility(multiFacility.map(_.mutable).orNull)
     m
   }
 
@@ -294,17 +345,18 @@ case class LargeProgramClass(itac  :Option[Itac],
 object LargeProgramClass {
 
   // Lens
-  val tooOption:Lens[LargeProgramClass, ToOChoice] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
-  val sub:Lens[LargeProgramClass,LargeProgramSubmission] = Lens.lensu((a, b) => a.copy(sub = b), _.sub)
-  val multiFacility:Lens[LargeProgramClass, Option[MultiFacility]] = Lens.lensu((a, b) => a.copy(multiFacility = b), _.multiFacility)
+  val tooOption: Lens[LargeProgramClass, ToOChoice] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
+  val sub: Lens[LargeProgramClass,LargeProgramSubmission] = Lens.lensu((a, b) => a.copy(sub = b), _.sub)
+  val multiFacility: Lens[LargeProgramClass, Option[MultiFacility]] = Lens.lensu((a, b) => a.copy(multiFacility = b), _.multiFacility)
 
-  def apply(m:M.LargeProgramClass):LargeProgramClass = apply(
+  def apply(m: M.LargeProgramClass): LargeProgramClass = apply(
     Option(m.getItac).map(Itac(_)),
     Option(m.getComment),
     Option(m.getKey).map(UUID.fromString),
     LargeProgramSubmission(m.getSubmission),
     m.getTooOption,
-    Option(m.getMultiFacility))
+    Option(MultiFacility(m.getMultiFacility))
+  )
 
   def empty = apply(None, None, None, LargeProgramSubmission.empty, ToOChoice.None, None)
 
