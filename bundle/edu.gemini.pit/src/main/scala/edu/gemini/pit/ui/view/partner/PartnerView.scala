@@ -41,7 +41,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
   // Bound
   val lens = Model.proposal
-  override def children = List(header, list, footer, geminiTimeRequired)
+  override def children = List(header, list, footer)
 
   // We have local state that allows us to go back to the previous proposal class. This is really just a convenience
   // for the user so you can change proposal class and not lose what you had entered earlier. It's all forgotten when
@@ -415,26 +415,37 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         }
       }
 
-      object geminiTimeRequiredButton extends Button with Bound[Proposal, ProposalClass] {
+      object geminiTimeRequiredButton extends Button with Bound.Self[Proposal] {
         button =>
 
-        // A lens to allow us to set the type in one shot
-        val lens = Proposal.proposalClass
-
         // On refresh, set our visible state
-        override def refresh(m: Option[ProposalClass]): Unit = {
+        override def refresh(m: Option[Proposal]): Unit = {
           enabled = canEdit
+          val existing = m.toList.flatMap(_.multiFacilityGeminiTime)
+          val onObservations = m.toList.flatMap(_.defaultMultiFacilityGeminiTime)
+          val toAdd = m.toList.flatMap(_.defaultMultiFacilityGeminiTime.filterNot { d =>
+            existing.find(t => t.site == d.site && t.instrument == d.instrument).isDefined
+          })
+          val toRemove = (existing.filterNot { d =>
+            m.toList.flatMap(_.defaultMultiFacilityGeminiTime).find(t => t.site == d.site && t.instrument == d.instrument).isDefined
+          })
+
+          model = model.map(_.copy(proposalClass = (model.map(_.proposalClass) match {
+            case Some(q: QueueProposalClass) =>
+              QueueProposalClass.multiFacility.mod(_.map(x => x.copy(geminiTimeRequired = toAdd ::: x.geminiTimeRequired.filterNot(toRemove.contains))), q)
+              }
+          )))
         }
 
         def queueRequest = for {
-            s @ QueueProposalClass(_, _, _, _, _, _, Some(mf)) <- model
+            s @ QueueProposalClass(_, _, _, _, _, _, Some(mf)) <- model.map(_.proposalClass)
             l <- AEONTimeEditor.open(mf.geminiTimeRequired, button)
           } yield QueueProposalClass.multiFacility.set(s, mf.copy(geminiTimeRequired = l).some)
 
         action = Action("") {
-          model match {
+          model.map(_.proposalClass) match {
             case Some(q: QueueProposalClass) =>
-              queueRequest.foreach(r => model = r.some)
+              queueRequest.foreach(r => model = model.map(_.copy(proposalClass = r)))
           }
         }
 
@@ -1159,80 +1170,6 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
     }
 
-  }
-
-  object geminiTimeRequired extends SimpleListViewer[Proposal, Proposal, GeminiTimeRequired] {
-
-    // Bound
-    val lens = Lens.lensId[Proposal]
-
-    border = BorderFactory.createLineBorder(Color.lightGray)
-
-    object columns extends Enumeration {
-      val Site, Instrument, Required = Value
-    }
-
-    import columns._
-
-    def columnWidth = {
-      case Site        => (160, Int.MaxValue)
-      case Instrument  => (160, 160)
-      case Required    => (70, 70)
-    }
-
-    def size(p: Proposal): Int = {
-      p.multiFacilityGeminiTime.length
-    }
-
-    override def refresh(m: Option[Proposal]): Unit = {
-      super.refresh(m)
-      val existing = m.toList.flatMap(_.multiFacilityGeminiTime)
-      val onObservations = m.toList.flatMap(_.defaultMultiFacilityGeminiTime)
-      val toAdd = m.toList.flatMap(_.defaultMultiFacilityGeminiTime.filterNot { d =>
-        existing.find(t => t.site == d.site && t.instrument == d.instrument).isDefined
-      })
-      val toRemove = (existing.filterNot { d =>
-        m.toList.flatMap(_.defaultMultiFacilityGeminiTime).find(t => t.site == d.site && t.instrument == d.instrument).isDefined
-      })
-
-      model = model.map(_.copy(proposalClass = (model.map(_.proposalClass) match {
-        case Some(q: QueueProposalClass) =>
-          QueueProposalClass.multiFacility.mod(_.map(x => x.copy(geminiTimeRequired = toAdd ::: x.geminiTimeRequired.filterNot(toRemove.contains))), q)
-          }
-      )))
-    }
-
-    def elementAt(p: Proposal, i:Int): GeminiTimeRequired = p.multiFacilityGeminiTime(i)
-
-    override def alignment(s: GeminiTimeRequired) = {
-      case Required => SwingConstants.CENTER
-      case _        => SwingConstants.LEFT
-    }
-
-    def icon(s: GeminiTimeRequired) = {
-      case Required       =>
-        if (s.required) SharedIcons.CHECK_SELECTED else SharedIcons.CHECK_UNSELECTED
-    }
-
-    def text(s: GeminiTimeRequired) = {
-       case Site       => s.site.name
-       case Instrument => s.instrument.display
-       case Required   => ""
-    }
-
-    onClick { ed =>
-      model = model.map(_.copy(proposalClass =
-        (model.map(_.proposalClass) match {
-          case Some(q: QueueProposalClass) =>
-            QueueProposalClass.multiFacility.mod(_.map(x => x.copy(geminiTimeRequired = x.geminiTimeRequired.collect {
-              case GeminiTimeRequired(s, i, r) if s == ed.site && i == ed.instrument =>
-                GeminiTimeRequired(s, i, !ed.required)
-              case g => g
-            })), q)
-          }
-        )
-      ))
-    }
   }
 
   sealed trait PSWrapper {
