@@ -31,7 +31,7 @@ trait Bound[A, M] {
    * This method binds a new model and provides a method for pushing a new model back out. It is
    * called by the framework and generally should not be used in client code.
    */
-  final def bind(a: Option[A], p: Option[A] => Unit) {
+  final def bind(a: Option[A], p: Option[A] => Unit): Unit = {
     mutex.synchronized {
       cachedModel = None
       this.a = a
@@ -46,12 +46,12 @@ trait Bound[A, M] {
   // TODO: this is a hack only used for some warning logging in BoundView. Fix it
   private[binding] def outer = a
 
-  def rebind() {
+  def rebind(): Unit = {
     p.foreach(bind(a, _))
   }
 
   /** Returns the model, if any. */
-  protected def model = (if (cachedModel == null) None else cachedModel) orElse (for {
+  protected def model: Option[M] = (if (cachedModel == null) None else cachedModel) orElse (for {
     a <- Option(a) // sadly this can be null for a moment, I think
     m <- a.map(lens.get)
   } yield { cachedModel = Some(m); m })
@@ -60,7 +60,7 @@ trait Bound[A, M] {
    * Sets the model, pushing it out through the lens if possible; if this method is called prior
    * to bind() then this method has no effect.
    */
-  protected def model_=(m: Option[M]) {
+  protected def model_=(m: Option[M]): Unit = {
     p.foreach(_(for {a <- a; m <- m} yield lens.set(a, m)))
   }
 
@@ -68,7 +68,7 @@ trait Bound[A, M] {
   protected def lens: Lens[A, M]
 
   /** Implementors must provide a method to react to model changes. */
-  protected def refresh(m: Option[M]) {
+  protected def refresh(m: Option[M]): Unit = {
     ()
   }
 

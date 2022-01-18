@@ -32,6 +32,11 @@ abstract class SimpleListViewer[A, B, C <: Object](implicit ev: Null <:< B, ev2:
   def onDoubleClick(f: C => Unit) {
     viewer.onDoubleClick(f)
   }
+
+  def onClick(f: C => Unit) {
+    viewer.onClick(f)
+  }
+
   def onSelectionChanged(f: Option[C] => Unit) {
     viewer.onSelectionChanged(f)
   }
@@ -79,15 +84,15 @@ abstract class SimpleListViewer[A, B, C <: Object](implicit ev: Null <:< B, ev2:
   }
 
   private object controller extends GTableController[B, C, Column] {
-    def modelChanged(v: GViewer[B, C], old: B, m: B) {}
-    def getElementAt(i: Int) = model.map(elementAt(_, i)).orNull
-    def getElementCount = model.map(size).getOrElse(0)
-    def getSubElement(c: C, col: Column) = c
+    def modelChanged(v: GViewer[B, C], old: B, m: B): Unit = {}
+    def getElementAt(i: Int): C = model.map(elementAt(_, i)).orNull
+    def getElementCount: Int = model.map(size).getOrElse(0)
+    def getSubElement(c: C, col: Column): AnyRef = c
   }
 
   object decorator extends GSubElementDecorator[B, C, Column] {
-    def modelChanged(v: GViewer[B, C], old: B, m: B) {}
-    def decorate(label: JLabel, c: C, col: Column, value: AnyRef) {
+    def modelChanged(v: GViewer[B, C], old: B, m: B): Unit = {}
+    def decorate(label: JLabel, c: C, col: Column, value: AnyRef): Unit = {
       label.setIcon(icon(c).lift(col).orNull)
       label.setText(text(c).lift(col).orNull)
       label.setHorizontalAlignment(alignment(c).lift(col).getOrElse(SwingConstants.LEFT))
@@ -97,10 +102,10 @@ abstract class SimpleListViewer[A, B, C <: Object](implicit ev: Null <:< B, ev2:
     }
   }
 
-  def setFilter(f: C => Boolean) {
+  def setFilter(f: C => Boolean): Unit = {
     viewer.setFilter(new GFilter[B, C] {
-      def accept(c: C) = f(c)
-      def modelChanged(v: GViewer[B, C], old: B, m: B) {}
+      def accept(c: C): Boolean = f(c)
+      def modelChanged(v: GViewer[B, C], old: B, m: B): Unit = {}
     })
   }
 

@@ -34,7 +34,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
   // HACK: there will be two instances of this view, each referencing the other. Because we can't construct this stuff
   // recursively we must set it after construction. No harm if it's not set; it just means we can't sync up the reorder
   // bars, which is a good usability hack because it makes copy/paste legal in general.
-  var other:Option[ObsListView] = None
+  var other: Option[ObsListView] = None
 
   // An indication of whether this tab is enabled or not, calculated in refresh()
   var tabEnabled = false
@@ -44,7 +44,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
   override val children = List(toolbar, viewer, Fixes, viewer.transferHandler.PasteAction)
 
   // A lens we can use elsewhere to get an ObsListModel
-  lazy val olmLens:Lens[Proposal, ObsListModel] = Lens.lensu(
+  lazy val olmLens: Lens[Proposal, ObsListModel] = Lens.lensu(
     (a, b) => Proposal.observations.set(a, b.all),
     a => ObsListModel(a.observations, band, bar.reorder.gs, a.semester))
 
@@ -505,10 +505,10 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
 
 
       // The selected item may or may not be draggable, but if it is we can either move or copy
-      override def getSourceActions(c:JComponent) = selection match {
+      override def getSourceActions(c: JComponent): Int = selection match {
         case _ if !canEdit => NONE
         case Some(e) if ~model.map(_.isDraggable(e)) => COPY_OR_MOVE
-        case Some(e)                                 => COPY
+        case Some(_)                                 => COPY
         case _                                       => NONE
       }
 

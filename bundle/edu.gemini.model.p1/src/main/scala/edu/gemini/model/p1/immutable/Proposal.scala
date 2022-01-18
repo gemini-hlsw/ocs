@@ -1,12 +1,11 @@
 package edu.gemini.model.p1.immutable
 
 import scalaz.Lens
+import edu.gemini.model.p1.{schema, mutable => M}
 
-import edu.gemini.model.p1.{mutable => M, schema}
 import scala.collection.JavaConverters._
-import java.util.logging.{Logger, Level}
+import java.util.logging.{Level, Logger}
 import org.xml.sax.SAXException
-
 import scalaz.{Band => SBand, _}
 import Scalaz._
 import edu.gemini.spModel.core.Coordinates
@@ -30,7 +29,7 @@ object Proposal {
   }, _.targets)
 
   // Remove [partial] duplicates from appearing in the observation list
-  def clean(os:List[Observation]) = {
+  def clean(os:List[Observation]): List[Observation] = {
     // Calculate what's a partial obs of what. O(N^2) sadly
     val partial:Map[(Observation, Observation), Boolean] = (for {
       o0 <- os
@@ -60,12 +59,12 @@ object Proposal {
   // Read schema version from a system property which in turn is set from
   // the Bundle Context on the activator. The bundle will not start if the property is missing
   // but I'll add this check anyway for unit testing and non-OSGi usage
-  lazy val currentSchemaVersion = Option(System.getProperty("edu.gemini.model.p1.schemaVersion")) match {
+  lazy val currentSchemaVersion: String = Option(System.getProperty("edu.gemini.model.p1.schemaVersion")) match {
     case Some(x:String) => x
     case x              => sys.error("Should set schemaVersion property")
   }
 
-  lazy val empty = apply(
+  lazy val empty: Proposal = apply(
     Meta.empty,
     Semester.current,
     "",
@@ -117,11 +116,10 @@ case class Proposal(meta:Meta,
   // localized; the public API is entirely immutable and this little tapdance is the only true nugget of evil.
   observations.foreach(_.proposal = Some(this)) // field is package-private
 
-  def isSubmitted = proposalClass.key.isDefined
+  def isSubmitted: Boolean = proposalClass.key.isDefined
 
-  def check = {
+  def check: Boolean =
     observations.forall(_.proposal == Some(this))
-  }
 
   def fix(): Unit = {
     observations.foreach(_.proposal = Some(this)) // field is package-private
@@ -135,6 +133,20 @@ case class Proposal(meta:Meta,
 
   // REL-3290: Check to see if there are observations that are non-empty.
   def hasNonEmptyObservations: Boolean = nonEmptyObservations.nonEmpty
+
+  def defaultMultiFacilityGeminiTime: List[GeminiTimeRequired] =
+    observations.flatMap { o =>
+      o.blueprint.toList.collect { case b: GeminiBlueprintBase => (b.site, b.instrument) }
+    }.groupBy(_._2).map { case (_, l) => GeminiTimeRequired(l.head._1, l.head._2, required = false)}.toList
+
+  def multiFacilityGeminiTime: List[GeminiTimeRequired] = {
+    proposalClass match {
+      case q: QueueProposalClass     => q.multiFacility.toList.flatMap(_.geminiTimeRequired)
+      case l: LargeProgramClass      => l.multiFacility.toList.flatMap(_.geminiTimeRequired)
+      case c: ClassicalProposalClass => c.multiFacility.toList.flatMap(_.geminiTimeRequired)
+      case _                         => Nil
+    }
+  }
 
   // see companion apply for explanation of `referenceCoordinates`
   private def this(m:M.Proposal, referenceCoordinates: Map[String, Coordinates]) = this(
@@ -150,8 +162,8 @@ case class Proposal(meta:Meta,
     Option(m.getProposalClass).map(ProposalClass(_)).getOrElse(ProposalClass.empty),  // TODO: get rid of the empty case
     m.getSchemaVersion)
 
-  def conditions = observations.flatMap(_.condition).distinct
-  def blueprints = observations.flatMap(_.blueprint).distinct
+  def conditions: List[Condition] = observations.flatMap(_.condition).distinct
+  def blueprints: List[BlueprintBase] = observations.flatMap(_.blueprint).distinct
 
   def mutable = {
     val n = new Namer

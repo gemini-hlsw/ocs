@@ -60,7 +60,7 @@ class SubmissionRequestEditor[A] private (s:SubmissionRequest, partner:Option[A]
 
   // Add a "remove" box (we have to use the peer directly because add is protected in Scala)
   partner match {
-    case Some(n:NgoPartner) => Contents.Footer.peer.add(remove.peer, BorderLayout.CENTER)
+    case Some(_: NgoPartner) => Contents.Footer.peer.add(remove.peer, BorderLayout.CENTER)
     case _ => ()
   }
 
@@ -103,7 +103,7 @@ class SubmissionRequestEditor[A] private (s:SubmissionRequest, partner:Option[A]
 
   }
 
-  def value = {
+  def value: (SubmissionRequest, Investigator, Boolean) = {
     val s0 = timeLens.set(s, editor.time.value)
     val s1 = minTimeLens.set(s0, editor.minTime.value)
     // REL-2032 Consider a request with 0 times the same as remove
@@ -115,7 +115,7 @@ class SubmissionRequestEditor[A] private (s:SubmissionRequest, partner:Option[A]
 
 object LargeSubmissionRequestEditor {
 
-  def open[A](s:SubmissionRequest, parent:UIElement) = new LargeSubmissionRequestEditor(s).open(parent)
+  def open[A](s:SubmissionRequest, parent:UIElement): Option[SubmissionRequest] = new LargeSubmissionRequestEditor(s).open(parent)
 }
 
 class LargeSubmissionRequestEditor[A] private (s:SubmissionRequest) extends StdModalEditor[SubmissionRequest]("Edit Request") {

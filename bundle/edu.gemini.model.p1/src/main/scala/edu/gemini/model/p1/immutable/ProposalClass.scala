@@ -56,6 +56,15 @@ sealed trait ProposalClass {
   def isSpecial: Boolean
 
   def classLabel: String
+
+  def multiFacilityGeminiTime: List[GeminiTimeRequired] =
+    this match {
+      case q: QueueProposalClass     => q.multiFacility.toList.flatMap(_.geminiTimeRequired)
+      case l: LargeProgramClass      => l.multiFacility.toList.flatMap(_.geminiTimeRequired)
+      case c: ClassicalProposalClass => c.multiFacility.toList.flatMap(_.geminiTimeRequired)
+      case _                         => Nil
+    }
+
 }
 
 sealed trait GeminiNormalProposalClass extends ProposalClass {
@@ -120,7 +129,7 @@ case class QueueProposalClass(itac:Option[Itac],
     m
   }
 
-  def reset = subs match {
+  def reset: QueueProposalClass = subs match {
     case Left(ss) => copy(key = None, subs = Left(ss.map(_.reset)))
     case Right(s) => copy(key = None, subs = Right(s.reset))
   }
@@ -266,7 +275,7 @@ case class ExchangeProposalClass(itac:Option[Itac],
 
 }
 
-final case class GeminiTimeRequired(site: Site, instrument: Instrument, required:Boolean) {
+final case class GeminiTimeRequired(site: Site, instrument: Instrument, required: Boolean) {
   def mutable: M.GeminiTimeRequired = {
     val m = Factory.createGeminiTimeRequired
     m.setSite(Site.toMutable(site))
@@ -294,6 +303,9 @@ final case class MultiFacility(geminiTimeRequired: List[GeminiTimeRequired], aeo
 }
 
 object MultiFacility {
+  val geminiTimeRequired: Lens[MultiFacility, List[GeminiTimeRequired]] = Lens.lensu((a, b) => a.copy(geminiTimeRequired = b), _.geminiTimeRequired)
+  val aeonMode: Lens[MultiFacility, Boolean] = Lens.lensu((a, b) => a.copy(aeonMode = b), _.aeonMode)
+
   def apply(m: M.MultiFacility): MultiFacility = apply(
     m.getGeminiTimeRequired.asScala.map(GeminiTimeRequired(_)).toList,
     m.isAeonMode
