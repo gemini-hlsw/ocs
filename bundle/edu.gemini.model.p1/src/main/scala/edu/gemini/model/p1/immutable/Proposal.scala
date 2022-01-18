@@ -139,14 +139,8 @@ case class Proposal(meta:Meta,
       o.blueprint.toList.collect { case b: GeminiBlueprintBase => (b.site, b.instrument) }
     }.groupBy(_._2).map { case (_, l) => GeminiTimeRequired(l.head._1, l.head._2, required = false)}.toList
 
-  def multiFacilityGeminiTime: List[GeminiTimeRequired] = {
-    proposalClass match {
-      case q: QueueProposalClass     => q.multiFacility.toList.flatMap(_.geminiTimeRequired)
-      case l: LargeProgramClass      => l.multiFacility.toList.flatMap(_.geminiTimeRequired)
-      case c: ClassicalProposalClass => c.multiFacility.toList.flatMap(_.geminiTimeRequired)
-      case _                         => Nil
-    }
-  }
+  def multiFacilityGeminiTime: List[GeminiTimeRequired] =
+    proposalClass.multiFacilityGeminiTime
 
   // see companion apply for explanation of `referenceCoordinates`
   private def this(m:M.Proposal, referenceCoordinates: Map[String, Coordinates]) = this(

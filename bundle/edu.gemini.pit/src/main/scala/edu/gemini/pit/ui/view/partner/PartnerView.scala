@@ -418,35 +418,51 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       object geminiTimeRequiredButton extends Button with Bound.Self[Proposal] {
         button =>
 
-        // On refresh, set our visible state
+        // On refresh, sync the observation resources with the gemini required list
         override def refresh(m: Option[Proposal]): Unit = {
           enabled = canEdit
+
           val existing = m.toList.flatMap(_.multiFacilityGeminiTime)
+
           val onObservations = m.toList.flatMap(_.defaultMultiFacilityGeminiTime)
+
           val toAdd = m.toList.flatMap(_.defaultMultiFacilityGeminiTime.filterNot { d =>
             existing.find(t => t.site == d.site && t.instrument == d.instrument).isDefined
           })
+
           val toRemove = (existing.filterNot { d =>
             m.toList.flatMap(_.defaultMultiFacilityGeminiTime).find(t => t.site == d.site && t.instrument == d.instrument).isDefined
           })
 
-          model = model.map(_.copy(proposalClass = (model.map(_.proposalClass) match {
-            case Some(q: QueueProposalClass) =>
-              QueueProposalClass.multiFacility.mod(_.map(x => x.copy(geminiTimeRequired = toAdd ::: x.geminiTimeRequired.filterNot(toRemove.contains))), q)
-              }
-          )))
+          val mod = Functor[Option].lift((x: MultiFacility) => x.copy(geminiTimeRequired = toAdd ::: x.geminiTimeRequired.filterNot(toRemove.contains)))
+          val newPC = (model.map(_.proposalClass).map {
+              case q: QueueProposalClass =>
+                QueueProposalClass.multiFacility.mod(mod, q)
+              case l: LargeProgramClass =>
+                LargeProgramClass.multiFacility.mod(mod, l)
+              case c: ClassicalProposalClass =>
+                ClassicalProposalClass.multiFacility.mod(mod, c)
+              case x => x
+            })
+          newPC.foreach(pc => model = model.map(_.copy(proposalClass = pc)))
         }
 
-        def queueRequest = for {
-            s @ QueueProposalClass(_, _, _, _, _, _, Some(mf)) <- model.map(_.proposalClass)
+        def qp  = for {
+            s @ QueueProposalClass(_, _, _, _, _, _,Some(mf)) <- model.map(_.proposalClass)
             l <- AEONTimeEditor.open(mf.geminiTimeRequired, button)
           } yield QueueProposalClass.multiFacility.set(s, mf.copy(geminiTimeRequired = l).some)
 
+        def lp = for {
+            s @ LargeProgramClass(_, _, _, _, _,Some(mf)) <- model.map(_.proposalClass)
+            l <- AEONTimeEditor.open(mf.geminiTimeRequired, button)
+          } yield LargeProgramClass.multiFacility.set(s, mf.copy(geminiTimeRequired = l).some)
+
+        def cp = for {
+            s @ ClassicalProposalClass(_, _, _, _, _,Some(mf)) <- model.map(_.proposalClass)
+            l <- AEONTimeEditor.open(mf.geminiTimeRequired, button)
+          } yield ClassicalProposalClass.multiFacility.set(s, mf.copy(geminiTimeRequired = l).some)
         action = Action("") {
-          model.map(_.proposalClass) match {
-            case Some(q: QueueProposalClass) =>
-              queueRequest.foreach(r => model = model.map(_.copy(proposalClass = r)))
-          }
+          qp.orElse(lp).orElse(cp).foreach(r => model = model.map(_.copy(proposalClass = r)))
         }
 
         icon = SharedIcons.ICON_INFO
