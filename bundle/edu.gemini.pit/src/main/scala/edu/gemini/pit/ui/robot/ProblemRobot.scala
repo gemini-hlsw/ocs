@@ -597,7 +597,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     }
 
     private lazy val ftParticipatingPartner = for {
-      FastTurnaroundProgramClass(_, _, _, _, _, _, _, _, Some(-\/(a))) <- Some(p.proposalClass)
+      FastTurnaroundProgramClass(_, _, _, _, _, _, _, _, Some(-\/(a)), _) <- Some(p.proposalClass)
       if a == NgoPartner.CL
     } yield new Problem(Severity.Error,
       "The PI's partner affiliation is not participating in the fast turnaround process.", TimeProblems.SCHEDULING_SECTION, {
@@ -605,7 +605,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       })
 
     private lazy val ftReviewerOrMentor = for {
-        f @ FastTurnaroundProgramClass(_, _, _, _, _, _, r, m, _) <- Some(p.proposalClass)
+        f @ FastTurnaroundProgramClass(_, _, _, _, _, _, r, m, _, _) <- Some(p.proposalClass)
         if r.isEmpty || (~r.map(_.status != InvestigatorStatus.PH_D) && m.isEmpty)
       } yield new Problem(Severity.Error,
             "A Fast Turnaround program must select a reviewer or a mentor with PhD degree.", TimeProblems.SCHEDULING_SECTION, {
@@ -613,10 +613,10 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
             })
 
     private lazy val ftAffiliationMismatch = for {
-        pi                                                                   <- Option(p.investigators.pi)
-        piNgo                                                                <- Option(Institutions.institution2Ngo(pi.address))
-        f @ FastTurnaroundProgramClass(_, _, _, _, _, _, _, _, affiliateNgo) <- Option(p.proposalClass)
-        samePartner                                                          <- (affiliateNgo |@| piNgo){_ === _}
+        pi                                                                      <- Option(p.investigators.pi)
+        piNgo                                                                   <- Option(Institutions.institution2Ngo(pi.address))
+        f @ FastTurnaroundProgramClass(_, _, _, _, _, _, _, _, affiliateNgo, _) <- Option(p.proposalClass)
+        samePartner                                                             <- (affiliateNgo |@| piNgo){_ === _}
         if !samePartner // Show a warning if the PI's institution partner isn't the same as the partner affiliation
       } yield new Problem(Severity.Info,
             s"The Fast Turnaround affiliation, '${~Partners.nameOfFTPartner(affiliateNgo)}', is different from the PI's default affiliation, '${~Partners.nameOfFTPartner(piNgo)}'.", TimeProblems.SCHEDULING_SECTION, {
@@ -712,7 +712,7 @@ object TimeProblems {
 
   // REL-3493: All CFH exchange time will now be done in queue.
   def noCFHClassical(p: Proposal, s: ShellAdvisor): Option[ProblemRobot.Problem] = p.proposalClass match {
-    case ClassicalProposalClass(_, _, _, Right(ExchangeSubmission(_, _, ExchangePartner.CFH, _)), _, _) =>
+    case ClassicalProposalClass(_, _, _, Right(ExchangeSubmission(_, _, ExchangePartner.CFH, _)), _, _, _) =>
       Some(new Problem(Severity.Error, "All CFH exchange time will now be done in queue.", SCHEDULING_SECTION, s.inPartnersView(_.editProposalClass())))
     case _ => None
   }

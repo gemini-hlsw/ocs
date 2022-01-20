@@ -84,7 +84,8 @@
                     <xsd:element name="multiFacility" type="MultiFacility" minOccurs="0" maxOccurs="1"/>
                     <xsd:element name="band3request" type="SubmissionRequest" minOccurs="0" maxOccurs="1"/>
                 </xsd:sequence>
-                <xsd:attribute name="tooOption" type="TooOption" use="required"/>
+                <xsd:attribute name="tooOption"   type="TooOption" use="required"/>
+                <xsd:attribute name="jwstSynergy" type="xsd:boolean" use="required"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
@@ -100,6 +101,7 @@
                     <xsd:element name="multiFacility" type="MultiFacility" minOccurs="0" maxOccurs="1"/>
                     <xsd:element name="visitor" type="Visitor" minOccurs="0" maxOccurs="unbounded"/>
                 </xsd:sequence>
+                <xsd:attribute name="jwstSynergy" type="xsd:boolean" use="required"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
@@ -115,6 +117,7 @@
                 <xsd:sequence>
                     <xsd:element name="submission" type="SpecialSubmission"/>
                 </xsd:sequence>
+                <xsd:attribute name="jwstSynergy" type="xsd:boolean" use="required"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
@@ -146,6 +149,7 @@
                     <xsd:element name="submission" type="LargeProgramSubmission"/>
                 </xsd:sequence>
                 <xsd:attribute name="tooOption" type="TooOption" use="required"/>
+                <xsd:attribute name="jwstSynergy" type="xsd:boolean" use="required"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
@@ -180,6 +184,7 @@
                     </xsd:choice>
                 </xsd:sequence>
                 <xsd:attribute name="tooOption" type="TooOption" use="required"/>
+                <xsd:attribute name="jwstSynergy" type="xsd:boolean" use="required"/>
                 <xsd:attribute name="reviewer" type="InvestigatorRef" use="optional">
                     <xsd:annotation>
                         <xsd:appinfo>
