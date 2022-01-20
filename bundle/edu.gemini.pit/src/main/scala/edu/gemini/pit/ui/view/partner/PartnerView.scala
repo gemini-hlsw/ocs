@@ -509,7 +509,6 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
     object jwstSynergyPanel extends FlowPanel(FlowPanel.Alignment.Left)() with Bound.Self[Proposal] {
 
-
       // Configure the panel
       vGap = 0
       hGap = 0
