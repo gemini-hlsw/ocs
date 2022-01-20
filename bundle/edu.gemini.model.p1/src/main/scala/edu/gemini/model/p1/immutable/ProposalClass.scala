@@ -99,20 +99,22 @@ object QueueProposalClass {
     GeminiNormalProposalClass.extractSubs(m),
     Option(m.getBand3Request).map(SubmissionRequest(_)),
     m.getTooOption,
-    Option(m.getMultiFacility).map(MultiFacility(_))
+    Option(m.getMultiFacility).map(MultiFacility(_)),
+    m.isJwstSynergy
   )
 
-  val empty = apply(None, None, None, Left(Nil), None, ToOChoice.None, None)
+  val empty: QueueProposalClass = apply(None, None, None, Left(Nil), None, ToOChoice.None, None, false)
 
 }
 
-case class QueueProposalClass(itac:Option[Itac],
-                              comment:Option[String],
-                              key:Option[UUID],
-                              subs:Either[List[NgoSubmission], ExchangeSubmission],
-                              band3request:Option[SubmissionRequest],
-                              tooOption:ToOChoice,
-                              multiFacility: Option[MultiFacility]) extends GeminiNormalProposalClass {
+case class QueueProposalClass(itac: Option[Itac],
+                              comment: Option[String],
+                              key: Option[UUID],
+                              subs: Either[List[NgoSubmission], ExchangeSubmission],
+                              band3request: Option[SubmissionRequest],
+                              tooOption: ToOChoice,
+                              multiFacility: Option[MultiFacility],
+                              jwstSynergy: Boolean) extends GeminiNormalProposalClass {
 
   override val isSpecial = false
 
@@ -126,6 +128,7 @@ case class QueueProposalClass(itac:Option[Itac],
     m.setBand3Request(band3request.map(_.mutable).orNull)
     m.setTooOption(tooOption)
     m.setMultiFacility(multiFacility.map(_.mutable).orNull)
+    m.setJwstSynergy(jwstSynergy)
     m
   }
 
@@ -147,10 +150,11 @@ object ClassicalProposalClass {
     Option(m.getKey).map(UUID.fromString),
     GeminiNormalProposalClass.extractSubs(m),
     m.getVisitor.asScala.map(_.getRef).map(Investigator(_).ref).toList,
-    Option(MultiFacility(m.getMultiFacility))
+    Option(MultiFacility(m.getMultiFacility)),
+    m.isJwstSynergy
   )
 
-  val empty = apply(None, None, None, Left(Nil), Nil, None)
+  val empty: ClassicalProposalClass = apply(None, None, None, Left(Nil), Nil, None, false)
 
 }
 
@@ -163,7 +167,8 @@ case class ClassicalProposalClass(itac: Option[Itac],
                                   key: Option[UUID],
                                   subs: Either[List[NgoSubmission], ExchangeSubmission],
                                   visitors: List[InvestigatorRef],
-                                  multiFacility: Option[MultiFacility])
+                                  multiFacility: Option[MultiFacility],
+                                  jwstSynergy: Boolean)
   extends GeminiNormalProposalClass {
 
   def mutable(p:Proposal, n:Namer) = {
@@ -181,6 +186,7 @@ case class ClassicalProposalClass(itac: Option[Itac],
       v
     }.asJava)
     m.setMultiFacility(multiFacility.map(_.mutable).orNull)
+    m.setJwstSynergy(jwstSynergy)
 
     m
   }
@@ -198,23 +204,25 @@ case class ClassicalProposalClass(itac: Option[Itac],
 object SpecialProposalClass {
 
   // Lens
-  val sub:Lens[SpecialProposalClass,SpecialSubmission] = Lens.lensu((a, b) => a.copy(sub = b), _.sub)
+  val sub: Lens[SpecialProposalClass,SpecialSubmission] = Lens.lensu((a, b) => a.copy(sub = b), _.sub)
 
   def apply(m: M.SpecialProposalClass): SpecialProposalClass = apply(
     Option(m.getItac).map(Itac(_)),
     Option(m.getComment),
     Option(m.getKey).map(UUID.fromString),
-    SpecialSubmission(m.getSubmission)
+    SpecialSubmission(m.getSubmission),
+    m.isJwstSynergy
   )
 
-  val empty = apply(None, None, None, SpecialSubmission.empty)
+  val empty: SpecialProposalClass = apply(None, None, None, SpecialSubmission.empty, false)
 
 }
 
 case class SpecialProposalClass(itac:Option[Itac],
                                 comment:Option[String],
                                 key:Option[UUID],
-                                sub:SpecialSubmission) extends ProposalClass {
+                                sub:SpecialSubmission,
+                                jwstSynergy: Boolean) extends ProposalClass {
 
   def mutable:M.SpecialProposalClass = {
     val m = Factory.createSpecialProposalClass
@@ -222,6 +230,7 @@ case class SpecialProposalClass(itac:Option[Itac],
     m.setComment(comment.orNull)
     m.setKey(key.map(_.toString).orNull)
     m.setSubmission(sub.mutable)
+    m.setJwstSynergy(jwstSynergy)
     m
   }
 
@@ -317,7 +326,8 @@ final case class LargeProgramClass(itac:   Option[Itac],
                             key:           Option[UUID],
                             sub:           LargeProgramSubmission,
                             tooOption:     ToOChoice,
-                            multiFacility: Option[MultiFacility]) extends ProposalClass {
+                            multiFacility: Option[MultiFacility],
+                            jwstSynergy:   Boolean) extends ProposalClass {
 
   def mutable:M.LargeProgramClass = {
     val m = Factory.createLargeProgramClass
@@ -327,6 +337,7 @@ final case class LargeProgramClass(itac:   Option[Itac],
     m.setSubmission(sub.mutable)
     m.setTooOption(tooOption)
     m.setMultiFacility(multiFacility.map(_.mutable).orNull)
+    m.setJwstSynergy(jwstSynergy)
     m
   }
 
@@ -355,18 +366,20 @@ object LargeProgramClass {
     Option(m.getKey).map(UUID.fromString),
     LargeProgramSubmission(m.getSubmission),
     m.getTooOption,
-    Option(MultiFacility(m.getMultiFacility))
+    Option(MultiFacility(m.getMultiFacility)),
+    m.isJwstSynergy
   )
 
-  def empty = apply(None, None, None, LargeProgramSubmission.empty, ToOChoice.None, None)
+  def empty: LargeProgramClass = apply(None, None, None, LargeProgramSubmission.empty, ToOChoice.None, None, false)
 
 }
 
-case class SubaruIntensiveProgramClass(itac  :Option[Itac],
-                            comment  : Option[String],
-                            key      : Option[UUID],
-                            tooOption: ToOChoice,
-                            sub      : SubaruIntensiveProgramSubmission) extends ProposalClass {
+case class SubaruIntensiveProgramClass(itac: Option[Itac],
+                            comment:         Option[String],
+                            key:             Option[UUID],
+                            tooOption:       ToOChoice,
+                            sub:             SubaruIntensiveProgramSubmission)
+  extends ProposalClass {
 
   def mutable: M.SubaruIntensiveProgramClass = {
     val m = Factory.createSubaruIntensiveProgramClass
@@ -407,15 +420,16 @@ object SubaruIntensiveProgramClass {
 
 }
 
-case class FastTurnaroundProgramClass(itac               : Option[Itac],
-                                      comment            : Option[String],
-                                      key                : Option[UUID],
-                                      sub                : FastTurnaroundSubmission,
-                                      band3request       : Option[SubmissionRequest],
-                                      tooOption          : ToOChoice,
-                                      reviewer           : Option[Investigator],
-                                      mentor             : Option[Investigator],
-                                      partnerAffiliation : FtPartner) extends ProposalClass {
+case class FastTurnaroundProgramClass(itac:               Option[Itac],
+                                      comment:            Option[String],
+                                      key:                Option[UUID],
+                                      sub:                FastTurnaroundSubmission,
+                                      band3request:       Option[SubmissionRequest],
+                                      tooOption:          ToOChoice,
+                                      reviewer:           Option[Investigator],
+                                      mentor:             Option[Investigator],
+                                      partnerAffiliation: FtPartner,
+                                      jwstSynergy:        Boolean) extends ProposalClass {
   def mutable(n: Namer):M.FastTurnaroundProgramClass = {
     val m = Factory.createFastTurnaroundProgramClass
     m.setItac(itac.map(_.mutable).orNull)
@@ -437,6 +451,7 @@ case class FastTurnaroundProgramClass(itac               : Option[Itac],
         m.setPartnerAffiliation(null)
         m.setExchangeAffiliation(null)
     }
+    m.setJwstSynergy(jwstSynergy)
     m
   }
 
@@ -479,8 +494,10 @@ object FastTurnaroundProgramClass {
     m.getTooOption,
     Option(m.getReviewer).map(Investigator.apply),
     Option(m.getMentor).map(Investigator.apply),
-    affiliation(m))
+    affiliation(m),
+    m.isJwstSynergy
+  )
 
-  def empty = apply(None, None, None, FastTurnaroundSubmission.empty, None, ToOChoice.None, None, None, None)
+  def empty: FastTurnaroundProgramClass = apply(None, None, None, FastTurnaroundSubmission.empty, None, ToOChoice.None, None, None, None, false)
 
 }

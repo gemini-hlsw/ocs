@@ -462,17 +462,17 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         }
 
         def qp  = for {
-            s @ QueueProposalClass(_, _, _, _, _, _,Some(mf)) <- model.map(_.proposalClass)
+            s @ QueueProposalClass(_, _, _, _, _, _,Some(mf), _) <- model.map(_.proposalClass)
             l <- GeminiTimeRequiredEditor.open(mf.geminiTimeRequired, button)
           } yield QueueProposalClass.multiFacility.set(s, mf.copy(geminiTimeRequired = l).some)
 
         def lp = for {
-            s @ LargeProgramClass(_, _, _, _, _,Some(mf)) <- model.map(_.proposalClass)
+            s @ LargeProgramClass(_, _, _, _, _,Some(mf), _) <- model.map(_.proposalClass)
             l <- GeminiTimeRequiredEditor.open(mf.geminiTimeRequired, button)
           } yield LargeProgramClass.multiFacility.set(s, mf.copy(geminiTimeRequired = l).some)
 
         def cp = for {
-            s @ ClassicalProposalClass(_, _, _, _, _,Some(mf)) <- model.map(_.proposalClass)
+            s @ ClassicalProposalClass(_, _, _, _, _,Some(mf), _) <- model.map(_.proposalClass)
             l <- GeminiTimeRequiredEditor.open(mf.geminiTimeRequired, button)
           } yield ClassicalProposalClass.multiFacility.set(s, mf.copy(geminiTimeRequired = l).some)
         action = Action("") {
@@ -601,12 +601,12 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         }
 
         def queueEditor: Option[QueueProposalClass] = for {
-          q @ QueueProposalClass(_, _, _, _, Some(r), _, _) <- model
+          q @ QueueProposalClass(_, _, _, _, Some(r), _, _, _) <- model
           (r, _, _) <- SubmissionRequestEditor.open(r, None, Nil, None, button)
         } yield QueueProposalClass.band3request.set(q, Some(r))
 
         def ftEditor: Option[FastTurnaroundProgramClass] = for {
-          ft @ FastTurnaroundProgramClass(_, _, _, _, Some(r), _, _, _, _) <- model
+          ft @ FastTurnaroundProgramClass(_, _, _, _, Some(r), _, _, _, _, _) <- model
           (r, _, _) <- SubmissionRequestEditor.open(r, None, Nil, None, button)
         } yield FastTurnaroundProgramClass.band3request.set(ft, Some(r))
 
@@ -769,7 +769,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
       def currentReviewer(m: Option[Proposal]): Option[Investigator] = for {
           p <- m
-          f @ FastTurnaroundProgramClass(_, _, _, _, _, _, Some(r), _, _) <- Some(p.proposalClass)
+          f @ FastTurnaroundProgramClass(_, _, _, _, _, _, Some(r), _, _, _) <- Some(p.proposalClass)
         } yield r
 
       override def refresh(m:Option[Proposal]): Unit = {
@@ -840,7 +840,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
       def currentMentor(m: Option[Proposal]): Option[Investigator] = for {
           p                                                                  <- m
-          f @ FastTurnaroundProgramClass(_, _, _, _, _, _, _, Some(m), _) <- Some(p.proposalClass)
+          f @ FastTurnaroundProgramClass(_, _, _, _, _, _, _, Some(m), _, _) <- Some(p.proposalClass)
         } yield m
 
       def updateP1Model(selection: Option[Investigator]): Unit = {
@@ -1035,12 +1035,12 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         val ft = FastTurnaroundProgramClass.sub andThen FastTurnaroundSubmission.request
 
         def spRequest = for {
-            s @ SpecialProposalClass(_, _, _, sub) <- model
+            s @ SpecialProposalClass(_, _, _, sub, _) <- model
             (req, _, _)                            <- SubmissionRequestEditor.open(sub.request, None, Nil, None, button)
           } yield Some(sr.set(s, req))
 
         def lpRequest = for {
-            l @ LargeProgramClass(_, _, _, sub, _, _) <- model
+            l @ LargeProgramClass(_, _, _, sub, _, _, _) <- model
             req                                    <- LargeSubmissionRequestEditor.open(sub.request, button)
           } yield Some(lp.set(l, req))
 
@@ -1050,7 +1050,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           } yield Some(sip.set(l, req))
 
         def ftRequest = for {
-            l @ FastTurnaroundProgramClass(_, _, _, sub, _, _, _, _, _) <- model
+            l @ FastTurnaroundProgramClass(_, _, _, sub, _, _, _, _, _, _) <- model
             req                                                         <- SubmissionRequestEditor.open(sub.request, None, Nil, None, button)
           } yield Some(ft.set(l, req._1))
 
@@ -1139,33 +1139,33 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
         // Update local state
         m.foreach {
-          case QueueProposalClass(_, _, _, Left(ngos), _, _, _)                                       => localGemini = ngos
-          case QueueProposalClass(_, _, _, Right(e), _, _, _) if e.partner == ExchangePartner.KECK    => localKeck = e
-          case QueueProposalClass(_, _, _, Right(e), _, _, _) if e.partner == ExchangePartner.SUBARU  => localSubaru = e
-          case QueueProposalClass(_, _, _, Right(e), _, _, _) if e.partner == ExchangePartner.CFH     => localCFH = e
-          case ClassicalProposalClass(_, _, _, Left(ngos), _, _)                                      => localGemini = ngos
-          case ClassicalProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.KECK   => localKeck = e
-          case ClassicalProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.SUBARU => localSubaru = e
-          case ClassicalProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.CFH    => localGemini = Nil
-          case e: ExchangeProposalClass                                                               => localGemini = e.subs
-          case _                                                                                      => // ignore
+          case QueueProposalClass(_, _, _, Left(ngos), _, _, _, _)                                       => localGemini = ngos
+          case QueueProposalClass(_, _, _, Right(e), _, _, _, _) if e.partner == ExchangePartner.KECK    => localKeck = e
+          case QueueProposalClass(_, _, _, Right(e), _, _, _, _) if e.partner == ExchangePartner.SUBARU  => localSubaru = e
+          case QueueProposalClass(_, _, _, Right(e), _, _, _, _) if e.partner == ExchangePartner.CFH     => localCFH = e
+          case ClassicalProposalClass(_, _, _, Left(ngos), _, _, _)                                      => localGemini = ngos
+          case ClassicalProposalClass(_, _, _, Right(e), _, _, _) if e.partner == ExchangePartner.KECK   => localKeck = e
+          case ClassicalProposalClass(_, _, _, Right(e), _, _, _) if e.partner == ExchangePartner.SUBARU => localSubaru = e
+          case ClassicalProposalClass(_, _, _, Right(e), _, _, _) if e.partner == ExchangePartner.CFH    => localGemini = Nil
+          case e: ExchangeProposalClass                                                                  => localGemini = e.subs
+          case _                                                                                         => // ignore
         }
 
         // Update our selected item
         selection.item = m.map {
-          case QueueProposalClass(_, _, _, Left(_), _, _, _)                                          => GeminiPartner
-          case QueueProposalClass(_, _, _, Right(e), _, _, _) if e.partner == ExchangePartner.KECK    => ExchangeKeck
-          case QueueProposalClass(_, _, _, Right(e), _, _, _) if e.partner == ExchangePartner.SUBARU  => ExchangeSubaru
-          case QueueProposalClass(_, _, _, Right(e), _, _, _) if e.partner == ExchangePartner.CFH     => ExchangeCFH
-          case ClassicalProposalClass(_, _, _, Left(_), _, _)                                         => GeminiPartner
-          case ClassicalProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.KECK   => ExchangeKeck
-          case ClassicalProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.SUBARU => ExchangeSubaru
-          case ClassicalProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.CFH    => GeminiPartner
-          case _: ExchangeProposalClass                                                               => GeminiPartner
-          case _: SpecialProposalClass                                                                => GeminiPartner
-          case _: LargeProgramClass                                                                   => GeminiPartner
-          case _: SubaruIntensiveProgramClass                                                         => ExchangeSubaru
-          case _: FastTurnaroundProgramClass                                                          => GeminiPartner
+          case QueueProposalClass(_, _, _, Left(_), _, _, _, _)                                          => GeminiPartner
+          case QueueProposalClass(_, _, _, Right(e), _, _, _, _) if e.partner == ExchangePartner.KECK    => ExchangeKeck
+          case QueueProposalClass(_, _, _, Right(e), _, _, _, _) if e.partner == ExchangePartner.SUBARU  => ExchangeSubaru
+          case QueueProposalClass(_, _, _, Right(e), _, _, _, _) if e.partner == ExchangePartner.CFH     => ExchangeCFH
+          case ClassicalProposalClass(_, _, _, Left(_), _, _, _)                                         => GeminiPartner
+          case ClassicalProposalClass(_, _, _, Right(e), _, _, _) if e.partner == ExchangePartner.KECK   => ExchangeKeck
+          case ClassicalProposalClass(_, _, _, Right(e), _, _, _) if e.partner == ExchangePartner.SUBARU => ExchangeSubaru
+          case ClassicalProposalClass(_, _, _, Right(e), _, _, _) if e.partner == ExchangePartner.CFH    => GeminiPartner
+          case _: ExchangeProposalClass                                                                  => GeminiPartner
+          case _: SpecialProposalClass                                                                   => GeminiPartner
+          case _: LargeProgramClass                                                                      => GeminiPartner
+          case _: SubaruIntensiveProgramClass                                                            => ExchangeSubaru
+          case _: FastTurnaroundProgramClass                                                             => GeminiPartner
         }.getOrElse(PartnerType.GeminiPartner)
 
         listenTo(selection)
@@ -1311,15 +1311,15 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       else NgoSubmission(r, None, p, i) :: subs
 
     def subs(p: ProposalClass): List[PSWrapper] = p match {
-      case QueueProposalClass(_, _, _, Left(ngos), _, _, _)   => all(ngos)
-      case QueueProposalClass(_, _, _, Right(exch), _, _, _)  => List(Real(exch))
-      case ClassicalProposalClass(_, _, _, Left(ngos), _, _)  => all(ngos)
-      case ClassicalProposalClass(_, _, _, Right(exch), _, _) => List(Real(exch))
-      case e: ExchangeProposalClass                           => all(e.subs)
-      case _: SpecialProposalClass                            => Nil
-      case _: LargeProgramClass                               => Nil
-      case _: SubaruIntensiveProgramClass                     => Nil
-      case _: FastTurnaroundProgramClass                      => Nil
+      case QueueProposalClass(_, _, _, Left(ngos), _, _, _, _)   => all(ngos)
+      case QueueProposalClass(_, _, _, Right(exch), _, _, _, _)  => List(Real(exch))
+      case ClassicalProposalClass(_, _, _, Left(ngos), _, _, _)  => all(ngos)
+      case ClassicalProposalClass(_, _, _, Right(exch), _, _, _) => List(Real(exch))
+      case e: ExchangeProposalClass                              => all(e.subs)
+      case _: SpecialProposalClass                               => Nil
+      case _: LargeProgramClass                                  => Nil
+      case _: SubaruIntensiveProgramClass                        => Nil
+      case _: FastTurnaroundProgramClass                         => Nil
     }
 
     def all(ngos:List[NgoSubmission]):List[PSWrapper] = {
