@@ -218,10 +218,10 @@ object SpecialProposalClass {
 
 }
 
-case class SpecialProposalClass(itac:Option[Itac],
-                                comment:Option[String],
-                                key:Option[UUID],
-                                sub:SpecialSubmission,
+case class SpecialProposalClass(itac: Option[Itac],
+                                comment: Option[String],
+                                key: Option[UUID],
+                                sub: SpecialSubmission,
                                 jwstSynergy: Boolean) extends ProposalClass {
 
   def mutable:M.SpecialProposalClass = {

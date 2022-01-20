@@ -93,6 +93,13 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     type Band3Option = Value
   }
 
+  // An enum for JWST Synergy
+  object JWSTSynergyOption extends Enumeration {
+    val Yes = Value("Yes")
+    val No  = Value("No")
+    type JWSTSynergyOption = Value
+  }
+
   // Bring the above enums into scope
 
   import ProposalClassSelection._
@@ -145,6 +152,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     override def children = List(
       proposalClass,
       multiFacilityLabel, multiFacilityPanel,
+      jwstSynergyLabel, jwstSynergyPanel,
       band3Label, band3,
       tooLabel, tooOption,
       visitorsLabel, visitors,
@@ -168,6 +176,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     addRow(tooLabel, tooOption)
 
     addRow(multiFacilityLabel, multiFacilityPanel)
+    addRow(jwstSynergyLabel, jwstSynergyPanel)
 
     // Visible only in Classical mode
     addRow(visitorsLabel, visitors)
@@ -488,6 +497,68 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       case q: QueueProposalClass     => q.multiFacility.isDefined
       case l: LargeProgramClass      => l.multiFacility.isDefined
       case c: ClassicalProposalClass => c.multiFacility.isDefined
+    }
+
+    lazy val jwstSynergyLabel = dvLabel("JWST Synergy:") {
+      case _: QueueProposalClass                                                                         => true
+      case _: LargeProgramClass                                                                          => true
+      case _: ClassicalProposalClass                                                                     => true
+      case _: FastTurnaroundProgramClass                                                                 => true
+      case SpecialProposalClass(_, _, _, SpecialSubmission(_, _, SpecialProposalType.DIRECTORS_TIME), _) => true
+    }
+
+    object jwstSynergyPanel extends FlowPanel(FlowPanel.Alignment.Left)() with Bound.Self[Proposal] {
+
+
+      // Configure the panel
+      vGap = 0
+      hGap = 0
+
+      override def children = List(jwstSynergyCombo)
+
+      peer.add(jwstSynergyCombo.peer)
+
+      object jwstSynergyCombo extends ComboBox(JWSTSynergyOption.values.toSeq) with Bound[Proposal, ProposalClass] {
+        // A lens to allow us to set the type in one shot
+        val lens = Proposal.proposalClass
+
+        override def refresh(m: Option[ProposalClass]): Unit = m.foreach {
+          case q: QueueProposalClass                                                                                   =>
+            visible = true
+            selection.item = q.jwstSynergy.fold(JWSTSynergyOption.No, JWSTSynergyOption.Yes)
+          case l: LargeProgramClass                                                                                    =>
+            visible = true
+            selection.item = l.jwstSynergy.fold(JWSTSynergyOption.No, JWSTSynergyOption.Yes)
+          case c: ClassicalProposalClass                                                                               =>
+            visible = true
+            selection.item = c.jwstSynergy.fold(JWSTSynergyOption.No, JWSTSynergyOption.Yes)
+          case f: FastTurnaroundProgramClass                                                                           =>
+            visible = true
+            selection.item = f.jwstSynergy.fold(JWSTSynergyOption.No, JWSTSynergyOption.Yes)
+          case SpecialProposalClass(_, _, _, SpecialSubmission(_, _, SpecialProposalType.DIRECTORS_TIME), jwstSynergy) =>
+            visible = true
+            selection.item = jwstSynergy.fold(JWSTSynergyOption.No, JWSTSynergyOption.Yes)
+          case _                                                                                                       =>
+            visible = false
+        }
+
+        selection.reactions += {
+          case SelectionChanged(_) => model  = model match {
+            case Some(q: QueueProposalClass) =>
+              q.copy(jwstSynergy = selection.item == JWSTSynergyOption.Yes).some
+            case Some(l: LargeProgramClass) =>
+              l.copy(jwstSynergy = selection.item == JWSTSynergyOption.Yes).some
+            case Some(c: ClassicalProposalClass) =>
+              c.copy(jwstSynergy = selection.item == JWSTSynergyOption.Yes).some
+            case Some(f: FastTurnaroundProgramClass) =>
+              f.copy(jwstSynergy = selection.item == JWSTSynergyOption.Yes).some
+            case Some(s: SpecialProposalClass) =>
+              s.copy(jwstSynergy = selection.item == JWSTSynergyOption.Yes).some
+            case x => x
+          }
+        }
+
+      }
     }
 
     // Band 3 Label
