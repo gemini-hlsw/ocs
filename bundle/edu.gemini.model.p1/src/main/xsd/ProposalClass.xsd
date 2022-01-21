@@ -117,6 +117,7 @@
                 <xsd:sequence>
                     <xsd:element name="submission" type="SpecialSubmission"/>
                 </xsd:sequence>
+                <xsd:attribute name="tooOption"   type="TooOption" use="required"/>
                 <xsd:attribute name="jwstSynergy" type="xsd:boolean" use="required"/>
             </xsd:extension>
         </xsd:complexContent>

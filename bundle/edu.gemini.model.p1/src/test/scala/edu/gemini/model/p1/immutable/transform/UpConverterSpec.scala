@@ -293,6 +293,15 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           e.head must beEqualTo("I don't know how to handle a proposal with version 0.0.0")
       }
     }
+    "check new flags on the special proosal" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_special.xml")))
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          ProposalIo.read(result.toString())
+          result \\ "proposalClass" \\ "special" must \\("special", "key" -> "59df5571-e836-4652-ac4b-68c05d1c13a2", "tooOption" -> "None", "jwstSynergy" -> "false")
+      }
+    }
     "reject proposals with a missing version" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_ver_missing.xml")))
       val converted = UpConverter.convert(xml)

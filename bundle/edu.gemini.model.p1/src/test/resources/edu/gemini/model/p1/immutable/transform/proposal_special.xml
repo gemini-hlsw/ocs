@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2021.1.1" tacCategory="Resolved stellar populations and their environments">
+    <meta band3optionChosen="true" overrideAffiliate="false">
+        <attachment>/Users/cquiroz/Documents/au_2014A_004.pdf</attachment>
+    </meta>
+    <semester year="2021" half="A"/>
+    <title>BAc</title>
+    <abstract>test </abstract>
+    <scheduling></scheduling>
+    <keywords>
+        <keyword>Black hole physics</keyword>
+    </keywords>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Carlo</firstName>
+            <lastName>Q</lastName>
+            <status>PhD</status>
+            <gender>Prefer not to say</gender>
+            <email>carlos.m.quiroz@gmail.com</email>
+            <address>
+                <institution>Instituto de Astronomia y Ciencias Planetarias de Atacama (INCT)</institution>
+                <address>Universidad de Atacama
+Copayapu 485
+Copiapó</address>
+                <country>Chile</country>
+            </address>
+        </pi>
+    </investigators>
+    <targets>
+        <sidereal epoch="J2000" id="target-0">
+            <name>* alf Lyr</name>
+            <degDeg>
+                <ra>279.23473478999994767946191132068634033203125</ra>
+                <dec>38.78368896000000631829607300460338592529296875</dec>
+            </degDeg>
+            <properMotion deltaRA="200.94" deltaDec="286.23"/>
+            <magnitudes>
+                <magnitude band="U" system="Vega">0.029999999329447746</magnitude>
+                <magnitude band="B" system="Vega">0.029999999329447746</magnitude>
+                <magnitude band="V" system="Vega">0.029999999329447746</magnitude>
+                <magnitude band="R" system="Vega">0.07000000029802322</magnitude>
+                <magnitude band="J" system="Vega">-0.1770000010728836</magnitude>
+                <magnitude band="H" system="Vega">-0.028999999165534973</magnitude>
+                <magnitude band="K" system="Vega">0.1289999932050705</magnitude>
+            </magnitudes>
+        </sidereal>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC Any, IQ Any, SB Any/Bright, WV Any</name>
+            <cc>Any</cc>
+            <iq>Any</iq>
+            <sb>Any/Bright</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <alopeke>
+            <Alopeke id="blueprint-0">
+                <name>'Alopeke Wide Field (0.0725"/pix, 60" FoV)</name>
+                <visitor>true</visitor>
+                <mode>Wide Field (0.0725"/pix, 60" FoV)</mode>
+            </Alopeke>
+        </alopeke>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" target="target-0" condition="condition-0" blueprint="blueprint-0">
+            <progTime units="hr">1.0</progTime>
+            <partTime units="hr">0.0</partTime>
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+    </observations>
+    <proposalClass>
+        <special key="59df5571-e836-4652-ac4b-68c05d1c13a2">
+            <submission>
+                <request>
+                    <time units="hr">1.0</time>
+                    <minTime units="hr">1.0</minTime>
+                </request>
+                <response>
+                    <receipt>
+                        <timestamp>2020-08-08T04:14:07.000Z</timestamp>
+                        <id>GT-2021A-003</id>
+                        <contact>phase1help@gemini.edu</contact>
+                    </receipt>
+                </response>
+                <type>Guaranteed Time</type>
+            </submission>
+        </special>
+    </proposalClass>
+</proposal>
