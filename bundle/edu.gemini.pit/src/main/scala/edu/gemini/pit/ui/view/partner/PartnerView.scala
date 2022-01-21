@@ -300,6 +300,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       case _: LargeProgramClass           => true
       case _: FastTurnaroundProgramClass  => true
       case _: SubaruIntensiveProgramClass => true
+      case _: SpecialProposalClass        => true
     }
 
     // TOO option combo box
@@ -322,6 +323,9 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           case s: SubaruIntensiveProgramClass =>
             selection.item = s.tooOption
             visible = true
+          case s: SpecialProposalClass =>
+            selection.item = s.tooOption
+            visible = true
           case _                              =>
             visible = false
         }
@@ -333,6 +337,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           case Some(l: LargeProgramClass)           => model = Some(LargeProgramClass.tooOption.set(l, selection.item))
           case Some(f: FastTurnaroundProgramClass)  => model = Some(FastTurnaroundProgramClass.tooOption.set(f, selection.item))
           case Some(s: SubaruIntensiveProgramClass) => model = Some(SubaruIntensiveProgramClass.tooOption.set(s, selection.item))
+          case Some(s: SpecialProposalClass)        => model = Some(SpecialProposalClass.tooOption.set(s, selection.item))
           case _                                    => // shouldn't happen
         }
       }
@@ -500,11 +505,11 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     }
 
     lazy val jwstSynergyLabel = dvLabel("JWST Synergy:") {
-      case _: QueueProposalClass                                                                         => true
-      case _: LargeProgramClass                                                                          => true
-      case _: ClassicalProposalClass                                                                     => true
-      case _: FastTurnaroundProgramClass                                                                 => true
-      case SpecialProposalClass(_, _, _, SpecialSubmission(_, _, SpecialProposalType.DIRECTORS_TIME), _) => true
+      case _: QueueProposalClass                                                                            => true
+      case _: LargeProgramClass                                                                             => true
+      case _: ClassicalProposalClass                                                                        => true
+      case _: FastTurnaroundProgramClass                                                                    => true
+      case SpecialProposalClass(_, _, _, SpecialSubmission(_, _, SpecialProposalType.DIRECTORS_TIME), _, _) => true
     }
 
     object jwstSynergyPanel extends FlowPanel(FlowPanel.Alignment.Left)() with Bound.Self[Proposal] {
@@ -522,22 +527,22 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         val lens = Proposal.proposalClass
 
         override def refresh(m: Option[ProposalClass]): Unit = m.foreach {
-          case q: QueueProposalClass                                                                                   =>
+          case q: QueueProposalClass                                                                                      =>
             visible = true
             selection.item = q.jwstSynergy.fold(JWSTSynergyOption.No, JWSTSynergyOption.Yes)
-          case l: LargeProgramClass                                                                                    =>
+          case l: LargeProgramClass                                                                                       =>
             visible = true
             selection.item = l.jwstSynergy.fold(JWSTSynergyOption.No, JWSTSynergyOption.Yes)
-          case c: ClassicalProposalClass                                                                               =>
+          case c: ClassicalProposalClass                                                                                  =>
             visible = true
             selection.item = c.jwstSynergy.fold(JWSTSynergyOption.No, JWSTSynergyOption.Yes)
-          case f: FastTurnaroundProgramClass                                                                           =>
+          case f: FastTurnaroundProgramClass                                                                              =>
             visible = true
             selection.item = f.jwstSynergy.fold(JWSTSynergyOption.No, JWSTSynergyOption.Yes)
-          case SpecialProposalClass(_, _, _, SpecialSubmission(_, _, SpecialProposalType.DIRECTORS_TIME), jwstSynergy) =>
+          case SpecialProposalClass(_, _, _, SpecialSubmission(_, _, SpecialProposalType.DIRECTORS_TIME), _, jwstSynergy) =>
             visible = true
             selection.item = jwstSynergy.fold(JWSTSynergyOption.No, JWSTSynergyOption.Yes)
-          case _                                                                                                       =>
+          case _                                                                                                          =>
             visible = false
         }
 
@@ -1105,7 +1110,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         val ft = FastTurnaroundProgramClass.sub andThen FastTurnaroundSubmission.request
 
         def spRequest = for {
-            s @ SpecialProposalClass(_, _, _, sub, _) <- model
+            s @ SpecialProposalClass(_, _, _, sub, _, _) <- model
             (req, _, _)                            <- SubmissionRequestEditor.open(sub.request, None, Nil, None, button)
           } yield Some(sr.set(s, req))
 

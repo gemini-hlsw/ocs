@@ -204,6 +204,7 @@ case class ClassicalProposalClass(itac: Option[Itac],
 object SpecialProposalClass {
 
   // Lens
+  val tooOption: Lens[SpecialProposalClass,ToOChoice] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
   val sub: Lens[SpecialProposalClass,SpecialSubmission] = Lens.lensu((a, b) => a.copy(sub = b), _.sub)
 
   def apply(m: M.SpecialProposalClass): SpecialProposalClass = apply(
@@ -211,10 +212,11 @@ object SpecialProposalClass {
     Option(m.getComment),
     Option(m.getKey).map(UUID.fromString),
     SpecialSubmission(m.getSubmission),
+    m.getTooOption,
     m.isJwstSynergy
   )
 
-  val empty: SpecialProposalClass = apply(None, None, None, SpecialSubmission.empty, false)
+  val empty: SpecialProposalClass = apply(None, None, None, SpecialSubmission.empty, ToOChoice.None, false)
 
 }
 
@@ -222,6 +224,7 @@ case class SpecialProposalClass(itac: Option[Itac],
                                 comment: Option[String],
                                 key: Option[UUID],
                                 sub: SpecialSubmission,
+                                tooOption: ToOChoice,
                                 jwstSynergy: Boolean) extends ProposalClass {
 
   def mutable:M.SpecialProposalClass = {
@@ -230,6 +233,7 @@ case class SpecialProposalClass(itac: Option[Itac],
     m.setComment(comment.orNull)
     m.setKey(key.map(_.toString).orNull)
     m.setSubmission(sub.mutable)
+    m.setTooOption(tooOption)
     m.setJwstSynergy(jwstSynergy)
     m
   }

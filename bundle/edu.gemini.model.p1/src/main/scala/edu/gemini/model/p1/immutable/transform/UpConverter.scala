@@ -170,7 +170,25 @@ case object SemesterConverter2022ATo2022B extends SemesterConverter {
       StepResult("Updated existing attachment value", <firstAttachment>{ns}</firstAttachment>).successNel
   }
 
-  override val transformers: List[TransformFunction] = List(upgradeAttachments)
+  // REL-2527 Support ToO on special proposals
+  val specialToo: TransformFunction = {
+    case p @ <proposalClass>{ns @ _*}</proposalClass> if (p \ "special").nonEmpty =>
+      object SpecialToOTransformer extends BasicTransformer {
+        override def transform(n : xml.Node): xml.NodeSeq = n match {
+          case s @ <special>{ex @ _*}</special>
+             if s.attribute("key").isDefined    =>
+            <special key={s.attribute("key")} tooOption="None" jwstSynergy="false">{ex}</special>
+          case s @ <special>{ex @ _*}</special> =>
+            <special tooOption="None" jwstSynergy="false">{ex}</special>
+          case elem: xml.Elem                   =>
+            elem.copy(child = elem.child.flatMap(transform))
+          case _                                => n
+        }
+      }
+      StepResult("Updated jwstSynergy and ToO choice", <proposalClass>{SpecialToOTransformer.transform(ns)}</proposalClass>).successNel
+  }
+
+  override val transformers: List[TransformFunction] = List(upgradeAttachments, specialToo)
 }
 /**
  * This converter supports migrating to 2022A.

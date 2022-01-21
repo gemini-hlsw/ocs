@@ -2,6 +2,8 @@ Gemini Phase I Schema Changes
 
 # Version 2022.2.1 - 2022B
 ##########################
+* Support ToO choice on special proposals
+* Add a jwstSynergy flag to Queue/Large/FastTuranaround/Special proposal
 * Add a MultiFacility entity to Queue proposals and Large Program proposals
 * A Proposal can contain multiple attachments. They also have an index to identify them
 
