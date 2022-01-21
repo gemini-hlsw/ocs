@@ -55,7 +55,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
     Paste -> viewer.transferHandler.PasteAction)
 
   // When we get a new model, adjust the set of visible controls
-  override def refresh(m:Option[Proposal]) {
+  override def refresh(m:Option[Proposal]): Unit = {
     m.foreach {p =>
 
       tabEnabled = band == Band.BAND_1_2 || (p.proposalClass match {
@@ -156,7 +156,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
       border = BorderFactory.createCompoundBorder(
         tools.border,
         BorderFactory.createEmptyBorder(2, 4, 2, 4))
-      override def refresh(m:Option[List[Observation]]) {
+      override def refresh(m:Option[List[Observation]]): Unit = {
         text = ~panel.model.map {p =>
           val b1 = p.observations.filter(_.band == Band.BAND_1_2).flatMap(_.totalTime).map(_.hours).sum
           p.proposalClass match {
@@ -177,7 +177,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
 
     val lens = olmLens
 
-    override def refresh(m:Option[ObsListModel]) {
+    override def refresh(m:Option[ObsListModel]): Unit = {
       addBlueprint.enabled = canEdit
       addCondition.enabled = canEdit
       addTarget.enabled = canEdit
@@ -238,7 +238,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
           })
       }
 
-      def apply() {
+      def apply(): Unit = {
         for (m <- model; e <- viewer.selection)
           model = Some(m.cut(e))
       }
@@ -254,7 +254,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
         }
       }
 
-      def apply() {
+      def apply(): Unit = {
         viewer.selection.flatMap {
           case ObsElem(o) => GsaParams.get(o).map(p => GsaUrl(p))
           case _          => None
@@ -276,7 +276,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
     val lens = olmLens
 
     // D&D support disablement if not editable
-    override def refresh(m:Option[ObsListModel]) {
+    override def refresh(m:Option[ObsListModel]): Unit = {
       super.refresh(m)
       this.viewer.getTable.setDragEnabled(canEdit)
     }
@@ -286,7 +286,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
     GsaRobot.addListener {_:Any => refresh()}
 
     // A generic edit action for an obs group (used in the double-click handler)
-    def edit[A](g:ObsGroup[A], f: Proposal => Option[A], lens:Lens[Observation, Option[A]]) {
+    def edit[A](g:ObsGroup[A], f: Proposal => Option[A], lens:Lens[Observation, Option[A]]): Unit = {
       for (p <- panel.model; a <- f(p)) {
         val included = ~model.map(_.childrenOf(g))
         model = model.map(_.map {
@@ -569,7 +569,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
       object CutAction extends Action("Cut - Ignored") {
         enabled = false
         onSelectionChanged(sel => enabled = canEdit && sel.isDefined)
-        def apply() {
+        def apply(): Unit = {
           for {
             m <- model
             e <- selection
@@ -584,7 +584,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
       object CopyAction extends Action("Copy - Ignored") {
         enabled = false
         onSelectionChanged(sel => enabled = sel.isDefined)
-        def apply() {
+        def apply(): Unit = {
           transferHandler.exportToClipboard(myViewer.getTable, HackClipboard, COPY)
         }
       }
@@ -600,22 +600,22 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
         private def ts = new TransferSupport(myViewer.getTable, HackClipboard.getContents(null))
 
         // React to clipboard events
-        def flavorsChanged(e:FlavorEvent) {
+        def flavorsChanged(e:FlavorEvent): Unit = {
           updateEnabledState()
         }
 
-        override def refresh(m:Option[Proposal]) {
+        override def refresh(m:Option[Proposal]): Unit = {
           updateEnabledState()
         }
 
-        def updateEnabledState() {
+        def updateEnabledState(): Unit = {
           enabled = canEdit && tabEnabled &&
             (HackClipboard.getAvailableDataFlavors.contains(TargetFlavor) ||
               HackClipboard.getAvailableDataFlavors.contains(TargetListFlavor) ||
               HackClipboard.getAvailableDataFlavors.contains(ObsListElemFlavor))
         }
 
-        def apply() {
+        def apply(): Unit = {
             importData(ts)
         }
       }
