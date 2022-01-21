@@ -74,7 +74,7 @@ object OverheadsSpec {
       ),
     (("phoenix", "long"), (
       () => PhoenixBlueprint(Site.GS, PhoenixFocalPlaneUnit.values.apply(0), PhoenixFilter.values.apply(0)),
-      obsTimes(1.7, 0.425))
+      obsTimes(1.7, 0.3334))
       ),
     (("visitor", "any"), (
       () => VisitorBlueprint(Site.GS, ""),
@@ -98,7 +98,7 @@ object OverheadsSpec {
       ),
     (("nifs", "ifu"), (
       () => NifsBlueprint(NifsDisperser.Z),
-      obsTimes(1.7, 0.425))
+      obsTimes(1.7, 0.5))
       ),
     (("texes", "long"), (
       () => TexesBlueprint(Site.GS, TexesDisperser.values.apply(0)),
@@ -118,7 +118,7 @@ object OverheadsSpec {
       ),
     (("gnirs", "long"), (
       () => GnirsBlueprintSpectroscopy(AltairNone, GnirsPixelScale.PS_005, GnirsDisperser.D_10, GnirsCrossDisperser.LXD, GnirsFpu.values.apply(0), GnirsCentralWavelength.values.apply(0)),
-      obsTimes(1.7, 0.425))
+      obsTimes(1.7, 0.5))
       ),
     (("niri", "imagingngs"), (
       () => NiriBlueprint(AltairNGS(false), NiriCamera.F6, Nil),

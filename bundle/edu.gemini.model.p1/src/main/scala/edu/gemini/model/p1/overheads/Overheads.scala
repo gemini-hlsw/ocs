@@ -13,13 +13,9 @@ import scala.annotation.tailrec
 // it is needed in the future by ITC and also because of time constraints.
 sealed trait Overheads {
   // REL-2985 -> REL-2926: acquisitionOverhead and otherOverheadFraction are no longer used.
-  def partnerOverheadFraction: Double // fpart
+  // def partnerOverheadFraction: Double // fpart
 
-  def calculate(progTime: TimeAmount): ObservationTimes = {
-    val progTimeHrs = progTime.toHours.value
-    val partTimeHrs = progTimeHrs * partnerOverheadFraction
-    ObservationTimes(TimeAmount(progTimeHrs, TimeUnit.HR), TimeAmount(partTimeHrs, TimeUnit.HR))
-  }
+  def calculate(progTime: TimeAmount): ObservationTimes
 
 }
 
@@ -27,11 +23,23 @@ sealed trait Overheads {
 // to determine the overheads, it seems infeasible to read this information from a file, so for now it is hard-coded
 // and will require changing here if these values change.
 object Overheads extends (BlueprintBase => Option[Overheads]) {
-  // t_vis as per REL-2985. No longer needed by switch to REL-2926.
-//  lazy val visTime    = Hours(2)
-//  lazy val visTimeHrs = Overheads.visTime.toHours
 
-  private case class SimpleOverheads(partnerOverheadFraction: Double) extends Overheads
+  private case class SimpleOverheads(partnerOverheadFraction: Double) extends Overheads {
+    def calculate(progTime: TimeAmount): ObservationTimes = {
+      val progTimeHrs = progTime.toHours.value
+      val partTimeHrs = progTimeHrs * partnerOverheadFraction
+      ObservationTimes(TimeAmount(progTimeHrs, TimeUnit.HR), TimeAmount(partTimeHrs, TimeUnit.HR))
+    }
+  }
+  private case class TelluricOverheads(telluricTime: TimeAmount) extends Overheads {
+    val VisitLength = 1.5
+    override def calculate(progTime: TimeAmount): ObservationTimes = {
+      val progTimeHrs: Double = progTime.toHours.value
+      val nTelluric = math.ceil(progTimeHrs / VisitLength)
+      val partTimeHrs = nTelluric * telluricTime.toHours.value
+      ObservationTimes(TimeAmount(progTimeHrs, TimeUnit.HR), TimeAmount(partTimeHrs, TimeUnit.HR))
+    }
+  }
 
   // Empty overheads for instruments from exchange partners, e.g. Keck and Subaru.
   private lazy val EmptyOverheads          = SimpleOverheads(0.00).some
@@ -51,20 +59,20 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
     case _: Flamingos2BlueprintMos                                 => SimpleOverheads(0.25).some
 
     case _: GnirsBlueprintImaging                                  => SimpleOverheads(0.10).some
-    case _: GnirsBlueprintSpectroscopy                             => SimpleOverheads(0.25).some
+    case _: GnirsBlueprintSpectroscopy                             => TelluricOverheads(TimeAmount(0.25, TimeUnit.HR)).some
 
-    case _: NifsBlueprintBase                                      => SimpleOverheads(0.25).some
+    case _: NifsBlueprintBase                                      => TelluricOverheads(TimeAmount(0.25, TimeUnit.HR)).some
     case _: GsaoiBlueprint                                         => SimpleOverheads(0.00).some
     case _: GracesBlueprint                                        => SimpleOverheads(0.00).some
     case _: GpiBlueprint                                           => SimpleOverheads(0.05).some
-    case _: PhoenixBlueprint                                       => SimpleOverheads(0.25).some
+    case _: PhoenixBlueprint                                       => TelluricOverheads(TimeAmount(0.1667, TimeUnit.HR)).some
     case _: TexesBlueprint                                         => SimpleOverheads(0.00).some
 
     case _: DssiBlueprint                                          => SimpleOverheads(0.00).some
     case _: VisitorBlueprint                                       => SimpleOverheads(0.00).some
     case _: AlopekeBlueprint                                       => SimpleOverheads(0.00).some
     case _: ZorroBlueprint                                         => SimpleOverheads(0.00).some
-    case _: IgrinsBlueprint                                        => SimpleOverheads(0.20).some
+    case _: IgrinsBlueprint                                        => TelluricOverheads(TimeAmount(0.1667, TimeUnit.HR)).some
     case _: MaroonXBlueprint                                       => SimpleOverheads(0.00).some
 
     // NIRI relies on whether or not AO is being used.
