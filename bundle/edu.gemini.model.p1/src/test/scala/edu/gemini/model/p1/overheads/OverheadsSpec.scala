@@ -5,21 +5,20 @@ import edu.gemini.model.p1.immutable._
 import scala.collection.immutable.HashMap
 
 // None of this is applicable anymore in light of the change from REL-2985 to REL-2926.
-//class OverheadsSpec extends org.specs2.mutable.Specification {
-//  "Overheads" should {
-//    "calculate all times properly in both directions" in {
-//      forall(OverheadsSpec.instMap) { case ((_, _), (blueprint, expected)) =>
-//        val overheads = Overheads(blueprint())
-//        val results = for (o <- Overheads(blueprint())) yield {
-//          val calculated = o.calculate(OverheadsSpec.intTime)
-//          val intTime    = o.intTimeFromProgTime(calculated.progTime)
-//          (calculated, intTime)
-//        }
-//        results shouldNotEqual None and(OverheadsSpec.almostEqual(results.get._1, expected) shouldEqual true) and(OverheadsSpec.almostEqual(results.get._2, OverheadsSpec.intTime) shouldEqual true)
-//      }
-//    }
-//  }
-//}
+class OverheadsSpec extends org.specs2.mutable.Specification {
+ "Overheads" should {
+   "calculate all times properly in both directions" in {
+     forall(OverheadsSpec.instMap) { case ((k, v), (blueprint, expected)) =>
+       val overheads = Overheads(blueprint())
+       val results = for (o <- Overheads(blueprint())) yield {
+         val calculated = o.calculate(OverheadsSpec.intTime)
+         calculated
+       }
+       results.map(r => OverheadsSpec.almostEqual(r, expected)) should beSome(true)
+     }
+   }
+ }
+}
 
 object OverheadsSpec {
   private val precision = 0.01
@@ -47,91 +46,91 @@ object OverheadsSpec {
   val instMap = HashMap(
     (("gmos", "ifu"), (
       () => GmosSBlueprintIfu(GmosSDisperser.B600, GmosSFilter.None, GmosSFpuIfu.values.apply(0)),
-      obsTimes(2.44, 0.24))
+      obsTimes(1.7, 0.17))
       ),
     (("gmos", "longns"), (
       () => GmosSBlueprintLongslitNs(GmosSDisperser.B600, GmosSFilter.None, GmosSFpuNs.values.apply(0)),
-      obsTimes(2.69, 0.27))
+      obsTimes(1.7, 0.17))
       ),
     (("gmos", "mos"), (
       () => GmosSBlueprintMos(GmosSDisperser.B600, GmosSFilter.None, GmosSMOSFpu.values.apply(0), false, false),
-      obsTimes(2.35, 0.23))
+      obsTimes(1.7, 0.17))
       ),
     (("gmos", "long"), (
       () => GmosSBlueprintLongslit(GmosSDisperser.B600, GmosSFilter.None, GmosSFpu.values.apply(0)),
-      obsTimes(2.29, 0.23))
+      obsTimes(1.7, 0.17))
       ),
     (("gmos", "ifuns"), (
       () => GmosSBlueprintIfuNs(GmosSDisperser.B600, GmosSFilter.None, GmosSFpuIfuNs.values.apply(0)),
-      obsTimes(2.83, 0.28))
+      obsTimes(1.7, 0.17))
       ),
     (("gmos", "imaging"), (
       () => GmosSBlueprintImaging(Nil),
-      obsTimes(2.14, 0.00))
+      obsTimes(1.7, 0.00))
       ),
     (("gmos", "mosns"), (
       () => GmosSBlueprintMos(GmosSDisperser.B600, GmosSFilter.None, GmosSMOSFpu.values.apply(0), true, false),
-      obsTimes(2.76, 0.28))
+      obsTimes(1.7, 0.17))
       ),
     (("phoenix", "long"), (
       () => PhoenixBlueprint(Site.GS, PhoenixFocalPlaneUnit.values.apply(0), PhoenixFilter.values.apply(0)),
-      obsTimes(2.40, 0.60))
+      obsTimes(1.7, 0.425))
       ),
     (("visitor", "any"), (
       () => VisitorBlueprint(Site.GS, ""),
-      obsTimes(2.20, 0.00))
+      obsTimes(1.7, 0.00))
       ),
     (("f2", "mos"), (
       () => Flamingos2BlueprintMos(Flamingos2Disperser.R1200JH, Nil, false),
-      obsTimes(3.18, 0.80))
+      obsTimes(1.7, 0.425))
       ),
     (("f2", "imaging"), (
       () => Flamingos2BlueprintImaging(Nil),
-      obsTimes(2.73, 0.28))
+      obsTimes(1.7, 0.17))
       ),
     (("f2", "long"), (
       () => Flamingos2BlueprintLongslit(Flamingos2Disperser.R1200JH, Nil, Flamingos2Fpu.values.apply(0)),
-      obsTimes(2.85, 0.71))
+      obsTimes(1.7, 0.425))
       ),
     (("gsaoi", "imaging"), (
       () => GsaoiBlueprint(Nil),
-      obsTimes(4.69, 0.00))
+      obsTimes(1.7, 0.00))
       ),
     (("nifs", "ifu"), (
       () => NifsBlueprint(NifsDisperser.Z),
-      obsTimes(2.36, 0.59))
+      obsTimes(1.7, 0.425))
       ),
     (("texes", "long"), (
       () => TexesBlueprint(Site.GS, TexesDisperser.values.apply(0)),
-      obsTimes(2.40, 0.00))
+      obsTimes(1.7, 0.00))
       ),
     (("gpi", "ifu"), (
       () => GpiBlueprint(GpiObservingMode.HDirect, GpiDisperser.values.apply(0)),
-      obsTimes(2.60, 0.13))
+      obsTimes(1.7, 0.085))
       ),
     (("dssi", "ifu"), (
       () => DssiBlueprint(Site.GS),
-      obsTimes(1.88, 0.00))
+      obsTimes(1.7, 0.00))
       ),
     (("gnirs", "imaging"), (
       () => GnirsBlueprintImaging(AltairNone, GnirsPixelScale.PS_005, GnirsFilter.values.apply(0)),
-      obsTimes(2.36, 0.24))
+      obsTimes(1.7, 0.17))
       ),
     (("gnirs", "long"), (
       () => GnirsBlueprintSpectroscopy(AltairNone, GnirsPixelScale.PS_005, GnirsDisperser.D_10, GnirsCrossDisperser.LXD, GnirsFpu.values.apply(0), GnirsCentralWavelength.values.apply(0)),
-      obsTimes(2.34, 0.58))
+      obsTimes(1.7, 0.425))
       ),
     (("niri", "imagingngs"), (
       () => NiriBlueprint(AltairNGS(false), NiriCamera.F6, Nil),
-      obsTimes(2.36, 0.24))
+      obsTimes(1.7, 0.17))
       ),
     (("niri", "imaging"), (
       () => NiriBlueprint(AltairNone, NiriCamera.F6, Nil),
-      obsTimes(2.23, 0.22))
+      obsTimes(1.7, 0.17))
       ),
     (("graces", "spec"), (
       () => GracesBlueprint(GracesFiberMode.values.apply(0), GracesReadMode.values.apply(0)),
-      obsTimes(1.93, 0.00))
+      obsTimes(1.7, 0.00))
       ),
     (("keck", "all"), (
       () => KeckBlueprint(KeckInstrument.values.apply(0)),
