@@ -31,11 +31,11 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
       ObservationTimes(TimeAmount(progTimeHrs, TimeUnit.HR), TimeAmount(partTimeHrs, TimeUnit.HR))
     }
   }
-  private case class TelluricOverheads(telluricTime: TimeAmount) extends Overheads {
-    val VisitLength = 1.5
+  private case class ScienceHoursPerTelluric(telluricTime: TimeAmount) extends Overheads {
+    val VisitLength = TimeAmount(1.5, TimeUnit.HR)
     override def calculate(progTime: TimeAmount): ObservationTimes = {
       val progTimeHrs: Double = progTime.toHours.value
-      val nTelluric = math.ceil(progTimeHrs / VisitLength)
+      val nTelluric = math.ceil(progTimeHrs / VisitLength.toHours.value)
       val partTimeHrs = nTelluric * telluricTime.toHours.value
       ObservationTimes(TimeAmount(progTimeHrs, TimeUnit.HR), TimeAmount(partTimeHrs, TimeUnit.HR))
     }
@@ -59,20 +59,20 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
     case _: Flamingos2BlueprintMos                                 => SimpleOverheads(0.25).some
 
     case _: GnirsBlueprintImaging                                  => SimpleOverheads(0.10).some
-    case _: GnirsBlueprintSpectroscopy                             => TelluricOverheads(TimeAmount(0.25, TimeUnit.HR)).some
+    case _: GnirsBlueprintSpectroscopy                             => ScienceHoursPerTelluric(TimeAmount(0.25, TimeUnit.HR)).some
 
-    case _: NifsBlueprintBase                                      => TelluricOverheads(TimeAmount(0.25, TimeUnit.HR)).some
+    case _: NifsBlueprintBase                                      => ScienceHoursPerTelluric(TimeAmount(0.25, TimeUnit.HR)).some
     case _: GsaoiBlueprint                                         => SimpleOverheads(0.00).some
     case _: GracesBlueprint                                        => SimpleOverheads(0.00).some
     case _: GpiBlueprint                                           => SimpleOverheads(0.05).some
-    case _: PhoenixBlueprint                                       => TelluricOverheads(TimeAmount(0.1667, TimeUnit.HR)).some
+    case _: PhoenixBlueprint                                       => ScienceHoursPerTelluric(TimeAmount(0.1667, TimeUnit.HR)).some
     case _: TexesBlueprint                                         => SimpleOverheads(0.00).some
 
     case _: DssiBlueprint                                          => SimpleOverheads(0.00).some
     case _: VisitorBlueprint                                       => SimpleOverheads(0.00).some
     case _: AlopekeBlueprint                                       => SimpleOverheads(0.00).some
     case _: ZorroBlueprint                                         => SimpleOverheads(0.00).some
-    case _: IgrinsBlueprint                                        => TelluricOverheads(TimeAmount(0.1667, TimeUnit.HR)).some
+    case _: IgrinsBlueprint                                        => ScienceHoursPerTelluric(TimeAmount(0.1667, TimeUnit.HR)).some
     case _: MaroonXBlueprint                                       => SimpleOverheads(0.00).some
 
     // NIRI relies on whether or not AO is being used.
