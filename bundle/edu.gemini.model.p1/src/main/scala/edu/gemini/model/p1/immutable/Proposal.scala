@@ -151,6 +151,7 @@ case class Proposal(meta:Meta,
     .mapValues {
       b => TimeAmount.sum(b.map(_._2))
     }
+    .toMap
 
   // see companion apply for explanation of `referenceCoordinates`
   private def this(m:M.Proposal, referenceCoordinates: Map[String, Coordinates]) = this(
