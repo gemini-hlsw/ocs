@@ -107,7 +107,7 @@ object P1PDF {
    * Creates a pdf from a given xml file and template and writes the resulting pdf file to the output folder.
    * This method also merges the attached pdf file to the end of the resulting pdf.
    */
-  def createFromFile (xmlFile: File, template: Template, pdfFile: File) {
+  def createFromFile(xmlFile: File, template: Template, pdfFile: File): Unit = {
     Try(createFromNode(XML.loadFile(xmlFile), template, pdfFile, Option(xmlFile.getParentFile)))
       .getOrElse {
         val source = Source.fromFile(xmlFile, "latin1")
@@ -120,7 +120,7 @@ object P1PDF {
    * Creates a pdf from a given xml element and template and writes the resulting pdf file to the output folder.
    * This method also merges the attached pdf file to the end of the resulting pdf.
    */
-  def createFromNode (xml: Node, template: Template, pdfFile: File, workingDir:Option[File] = None) {
+  def createFromNode(xml: Node, template: Template, pdfFile: File, workingDir:Option[File] = None): Unit = {
     val attachment = {
       val f = new File((xml \ "meta" \ "attachment").text)
       if (f.isAbsolute) f else workingDir.map(new File(_, f.getPath)).getOrElse(f)
@@ -129,7 +129,7 @@ object P1PDF {
   }
 
 
-  def createFromNode(xml: Node, attachment: File, template: Template, out: File, workingDir: Option[File]) {
+  def createFromNode(xml: Node, attachment: File, template: Template, out: File, workingDir: Option[File]): Unit = {
     val pdf = new PDF(Some(P1PdfUriResolver))
 
     def using[A, B](resource: => A)(cleanup: A => Unit)(code: A => B): Option[B] = {
@@ -192,11 +192,11 @@ object P1PDF {
     }
   }
 
-  def main(args:Array[String]) {
+  def main(args:Array[String]): Unit = {
     val home = System.getProperty("user.home")
     val in = new File(s"$home/pitsource.xml")
     val out = new File(s"$home/pittarget.pdf")
-    createFromFile(in, NOIRLabListAtTheEnd, out)
+    createFromFile(in, GeminiDefault, out)
 
     val ok = Runtime.getRuntime.exec(Array("open", out.getAbsolutePath)).waitFor
     println("Exec returned " + ok)

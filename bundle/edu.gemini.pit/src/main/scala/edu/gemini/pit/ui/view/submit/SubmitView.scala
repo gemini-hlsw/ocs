@@ -168,10 +168,11 @@ class SubmitView(ph: ProblemRobot, newShellHandler: (Model,Option[File]) => Unit
 
     object reopen extends Button("Open an Editable Copy") with Bound[Proposal, SubmitStatus] {
       val lens = Proposal.proposalClass andThen statusLens
-      val rolledLens = Model.rolled
+      val rolledLens = Model.transformed
       minimumSize = (200, minimumSize.height)
       enabled = false
-      override def refresh(m:Option[SubmitStatus]) {
+
+      override def refresh(m:Option[SubmitStatus]): Unit = {
         val wasRolled = panel.model map rolledLens.get
         enabled = ~m.map {
           case _ if tac => false
@@ -181,6 +182,7 @@ class SubmitView(ph: ProblemRobot, newShellHandler: (Model,Option[File]) => Unit
           case _        => ~wasRolled
         }
       }
+
       reactions += {
         case ButtonClicked(_) =>
           for (m <- panel.model) {

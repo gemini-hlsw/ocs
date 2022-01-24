@@ -146,8 +146,7 @@ case class Proposal(meta:Meta,
     observations.collect {
       case Observation(Some(bp: GeminiBlueprintBase), _, _, Some(t), _) =>
         (bp.site, bp.instrument) -> t
-    }
-    .groupBy(_._1)
+    }.groupBy(_._1)
     .mapValues {
       b => TimeAmount.sum(b.map(_._2))
     }
