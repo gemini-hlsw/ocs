@@ -88,8 +88,8 @@ object GeminiNormalProposalClass {
 object QueueProposalClass {
 
   // Lenses
-  val tooOption:Lens[QueueProposalClass, ToOChoice] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
-  val band3request:Lens[QueueProposalClass, Option[SubmissionRequest]] = Lens.lensu((a, b) => a.copy(band3request = b), _.band3request)
+  val tooOption: Lens[QueueProposalClass, ToOChoice] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
+  val band3request: Lens[QueueProposalClass, Option[SubmissionRequest]] = Lens.lensu((a, b) => a.copy(band3request = b), _.band3request)
   val multiFacility: Lens[QueueProposalClass, Option[MultiFacility]] = Lens.lensu((a, b) => a.copy(multiFacility = b), _.multiFacility)
 
   def apply(m:M.QueueProposalClass):QueueProposalClass = apply(

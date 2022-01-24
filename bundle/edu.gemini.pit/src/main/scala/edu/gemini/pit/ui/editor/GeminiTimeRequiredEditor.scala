@@ -13,11 +13,11 @@ import javax.swing.{BorderFactory, SwingConstants}
 
 object GeminiTimeRequiredEditor {
 
-  def open[A](model: List[GeminiTimeRequired], parent: UIElement): Option[List[GeminiTimeRequired]] = new GeminiTimeRequiredEditor(model).open(parent)
+  def open[A](model: List[(Option[TimeAmount], GeminiTimeRequired)], parent: UIElement): Option[List[GeminiTimeRequired]] = new GeminiTimeRequiredEditor(model).open(parent)
 
 }
 
-class GeminiTimeRequiredEditor[A] private(model: List[GeminiTimeRequired]) extends StdModalEditor[List[GeminiTimeRequired]]("Gemini Time Required") {
+class GeminiTimeRequiredEditor[A] private(model: List[(Option[TimeAmount], GeminiTimeRequired)]) extends StdModalEditor[List[GeminiTimeRequired]]("Gemini Time Required") {
 
   lazy val table = GeminiTimeRequiredTable(model)
   // Editor component
@@ -28,13 +28,13 @@ class GeminiTimeRequiredEditor[A] private(model: List[GeminiTimeRequired]) exten
     addRow(table)
   }
   //
-  def value: List[GeminiTimeRequired] = table.currentModel.getOrElse(Nil)
+  def value: List[GeminiTimeRequired] = table.currentModel.map(_.map(_._2)).getOrElse(Nil)
 
 }
 
-final case class GeminiTimeRequiredTable(initial: List[GeminiTimeRequired]) extends SimpleListViewer[List[GeminiTimeRequired], List[GeminiTimeRequired], GeminiTimeRequired] {
+final case class GeminiTimeRequiredTable(initial: List[(Option[TimeAmount], GeminiTimeRequired)]) extends SimpleListViewer[List[(Option[TimeAmount], GeminiTimeRequired)], List[(Option[TimeAmount], GeminiTimeRequired)], (Option[TimeAmount], GeminiTimeRequired)] {
   // Lens
-  val lens = Lens.lensId[List[GeminiTimeRequired]]
+  val lens = Lens.lensId[List[(Option[TimeAmount], GeminiTimeRequired)]]
 
   // Initial binding
   bind(initial.some, _ => ())
@@ -42,45 +42,47 @@ final case class GeminiTimeRequiredTable(initial: List[GeminiTimeRequired]) exte
   border = BorderFactory.createLineBorder(Color.lightGray)
 
   object columns extends Enumeration {
-    val Site, Instrument, Required = Value
+    val Site, Instrument, Time, Required = Value
   }
 
   import columns._
 
   def columnWidth = {
-    case Site        => (160, Int.MaxValue)
-    case Instrument  => (160, 160)
+    case Site        => (140, Int.MaxValue)
+    case Instrument  => (110, 110)
+    case Time        => (70, 70)
     case Required    => (70, 70)
   }
 
-  def size(p: List[GeminiTimeRequired]): Int = {
+  def size(p: List[(Option[TimeAmount], GeminiTimeRequired)]): Int = {
     p.length
   }
 
   def currentModel = model
 
-  def elementAt(p: List[GeminiTimeRequired], i: Int): GeminiTimeRequired = p(i)
+  def elementAt(p: List[(Option[TimeAmount], GeminiTimeRequired)], i: Int): (Option[TimeAmount], GeminiTimeRequired) = p(i)
 
-  override def alignment(s: GeminiTimeRequired) = {
+  override def alignment(s: (Option[TimeAmount], GeminiTimeRequired)) = {
     case Required => SwingConstants.CENTER
     case _        => SwingConstants.LEFT
   }
 
-  def icon(s: GeminiTimeRequired) = {
+  def icon(s: (Option[TimeAmount], GeminiTimeRequired)) = {
     case Required       =>
-      if (s.required) SharedIcons.CHECK_SELECTED else SharedIcons.CHECK_UNSELECTED
+      if (s._2.required) SharedIcons.CHECK_SELECTED else SharedIcons.CHECK_UNSELECTED
   }
 
-  def text(s: GeminiTimeRequired) = {
-      case Site       => s.site.name
-      case Instrument => s.instrument.display
+  def text(s: (Option[TimeAmount], GeminiTimeRequired)) = {
+      case Site       => s._2.site.name
+      case Instrument => s._2.instrument.display
+      case Time       => s._1.foldMap(t => s"${t.toHours.value} h")
       case Required   => ""
   }
 
   onClick { ed =>
-    val newModel = model.map(_.collect {
-              case GeminiTimeRequired(s, i, r) if s == ed.site && i == ed.instrument =>
-                GeminiTimeRequired(s, i, !ed.required)
+    val newModel = model.map(_.map {
+              case (t, GeminiTimeRequired(s, i, r)) if s == ed._2.site && i == ed._2.instrument =>
+                (t, GeminiTimeRequired(s, i, !ed._2.required))
               case g => g
             })
     // Tricky, this actually sets the new model

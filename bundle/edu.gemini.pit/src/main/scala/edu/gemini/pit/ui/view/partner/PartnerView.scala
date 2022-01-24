@@ -475,19 +475,24 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           newPC.foreach(pc => model = model.map(_.copy(proposalClass = pc)))
         }
 
+        def pairTime(tr: List[GeminiTimeRequired]): List[(Option[TimeAmount], GeminiTimeRequired)] =
+          tr.map { t =>
+            (model.flatMap(_.timePerInstrument.get((t.site, t.instrument))), t)
+          }
+
         def qp  = for {
             s @ QueueProposalClass(_, _, _, _, _, _,Some(mf), _) <- model.map(_.proposalClass)
-            l <- GeminiTimeRequiredEditor.open(mf.geminiTimeRequired, button)
+            l <- GeminiTimeRequiredEditor.open(pairTime(mf.geminiTimeRequired), button)
           } yield QueueProposalClass.multiFacility.set(s, mf.copy(geminiTimeRequired = l).some)
 
         def lp = for {
             s @ LargeProgramClass(_, _, _, _, _,Some(mf), _) <- model.map(_.proposalClass)
-            l <- GeminiTimeRequiredEditor.open(mf.geminiTimeRequired, button)
+            l <- GeminiTimeRequiredEditor.open(pairTime(mf.geminiTimeRequired), button)
           } yield LargeProgramClass.multiFacility.set(s, mf.copy(geminiTimeRequired = l).some)
 
         def cp = for {
             s @ ClassicalProposalClass(_, _, _, _, _,Some(mf), _) <- model.map(_.proposalClass)
-            l <- GeminiTimeRequiredEditor.open(mf.geminiTimeRequired, button)
+            l <- GeminiTimeRequiredEditor.open(pairTime(mf.geminiTimeRequired), button)
           } yield ClassicalProposalClass.multiFacility.set(s, mf.copy(geminiTimeRequired = l).some)
         action = Action("") {
           qp.orElse(lp).orElse(cp).foreach(r => model = model.map(_.copy(proposalClass = r)))
@@ -1012,7 +1017,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           if (model.exists(_.meta.overrideAffiliate != overrideAffiliate)) updateP1ModelOverrideAffiliate(overrideAffiliate)
       }
 
-      def updateP1ModelOverrideAffiliate(overrideAffiliate: Boolean) {
+      def updateP1ModelOverrideAffiliate(overrideAffiliate: Boolean): Unit = {
         model.foreach { p =>
           val p0 = (Proposal.meta andThen Meta.overrideAffiliate).set(p, overrideAffiliate)
           model = Some(p0)
