@@ -239,6 +239,15 @@
                     </xsl:choose>
                 </xsl:variable>
 
+                <xsl:variable name="obs-mode-aeon">
+                    <xsl:choose>
+                        <xsl:when test="proposalClass/queue/multiFacility">&#160; - AEON/multi-facility</xsl:when>
+                        <xsl:when test="proposalClass/classical/multiFacility">&#160; - AEON/multi-facility</xsl:when>
+                        <xsl:when test="proposalClass/large/multiFacility">&#160; - AEON/multi-facility</xsl:when>
+                        <xsl:otherwise></xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+
                 <fo:table table-layout="fixed" space-after="1cm">
                     <fo:table-column column-width="11.5cm"/>
                     <fo:table-column column-width="4.5cm"/>
@@ -251,6 +260,7 @@
                                         Observing Mode:
                                     </fo:inline>
                                     <xsl:value-of select="$obs-mode"/>
+                                    <xsl:value-of select="$obs-mode-aeon"/>
                                 </fo:block>
                                 <!-- END observing mode -->
                             </fo:table-cell>
@@ -283,6 +293,7 @@
                                         <xsl:otherwise>&#160;</xsl:otherwise>
                                     </xsl:choose>
                                 </xsl:variable>
+
                                 <fo:block space-after="12pt">
                                     <fo:inline font-weight="bold">
                                         <xsl:value-of select="$jwst-synergy-label"/>

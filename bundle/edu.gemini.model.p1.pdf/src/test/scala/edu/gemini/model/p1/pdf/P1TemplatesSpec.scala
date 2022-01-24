@@ -371,7 +371,7 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
       val ftMode = (proposalXml \\ "table-cell" \ "block") collect {
         case e if e.text.contains("""Fast Turnaround""") => true
       }
-      ftMode must be size 1
+      ftMode must be size 2
     }
     "calculate the total time for all observations for GN and GS, REL-1298" in {
       val result = transformProposal("proposal_with_gn_and_gs.xml", P1PDF.NOIRLabNoInvestigatorsList)
