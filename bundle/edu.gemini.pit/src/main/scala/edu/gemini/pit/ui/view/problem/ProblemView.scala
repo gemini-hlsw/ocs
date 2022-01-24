@@ -37,7 +37,7 @@ class ProblemView(shellAdvisor: ShellAdvisor) extends BorderPanel with BoundView
 
     onDoubleClick(_())
 
-    override def refresh(m: Option[Model]) {
+    override def refresh(m: Option[Model]): Unit = {
       problems = shellAdvisor.problemHandler.state
       refresh()
     }

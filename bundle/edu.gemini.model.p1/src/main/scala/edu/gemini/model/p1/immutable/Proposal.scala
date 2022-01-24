@@ -142,6 +142,17 @@ case class Proposal(meta:Meta,
   def multiFacilityGeminiTime: List[GeminiTimeRequired] =
     proposalClass.multiFacilityGeminiTime
 
+  def timePerInstrument: Map[(Site, Instrument), TimeAmount] =
+    observations.collect {
+      case Observation(Some(bp: GeminiBlueprintBase), _, _, Some(t), _) =>
+        (bp.site, bp.instrument) -> t
+    }
+    .groupBy(_._1)
+    .mapValues {
+      b => TimeAmount.sum(b.map(_._2))
+    }
+    .toMap
+
   // see companion apply for explanation of `referenceCoordinates`
   private def this(m:M.Proposal, referenceCoordinates: Map[String, Coordinates]) = this(
     Meta(m.getMeta),
