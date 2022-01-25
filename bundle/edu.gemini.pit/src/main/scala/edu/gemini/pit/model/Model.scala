@@ -22,7 +22,7 @@ object Model {
   // Lenses
   val proposal: Lens[Model, Proposal]           = Lens.lensu((a, b) => a.copy(proposal = b), _.proposal)
   val conversion: Lens[Model, ModelConversion]  = Lens.lensu((a, b) => a.copy(conversion = b), _.conversion)
-  val rolled: Lens[Model, Boolean]              = conversion >=> Lens.lensu((a, b) => a.copy(transformed = b), _.transformed)
+  val transformed: Lens[Model, Boolean]              = conversion >=> Lens.lensu((a, b) => a.copy(transformed = b), _.transformed)
   val fromSemester: Lens[Model, Semester]       = conversion >=> Lens.lensu((a, b) => a.copy(from = b), _.from)
   val schemaVersion: Lens[Model, String]        = proposal >=> Lens.lensu((a, b) => a.copy(schemaVersion = b), _.schemaVersion)
 

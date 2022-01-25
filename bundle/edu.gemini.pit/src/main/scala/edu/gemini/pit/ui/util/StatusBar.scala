@@ -9,14 +9,16 @@ import scalaz._
 import Scalaz._
 
 class StatusBar(shellAdvisor: ShellAdvisor) extends Label with BoundView[Boolean] { panel =>
-  val lens = Model.rolled
+  val lens = Model.transformed
   val fromSemester = Model.fromSemester
 
   horizontalAlignment = Alignment.Left
 
   def readyText: String = {
     shellAdvisor.context.shell.model.map {
-      case m: Model if lens.get(m) => val semester = fromSemester.get(m);s"Ready - This proposal has been converted from the semester ${semester.display}"
+      case m: Model if lens.get(m) =>
+        val semester = fromSemester.get(m)
+        s"Ready - This proposal has been converted from the semester ${semester.display}"
       case _                       => "Ready"
     }.getOrElse("Ready")
   }

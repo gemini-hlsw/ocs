@@ -223,8 +223,6 @@
                     </fo:block>
                 </fo:block>
                 <!-- END abstract -->
-
-                <!-- BEGIN observing mode -->
                 <xsl:variable name="obs-mode">
                     <xsl:choose>
                         <xsl:when test="proposalClass/classical">Classical</xsl:when>
@@ -240,13 +238,75 @@
                         <xsl:otherwise><xsl:value-of select="name(proposalClass/*)"/></xsl:otherwise>
                     </xsl:choose>
                 </xsl:variable>
-                <fo:block space-after="12pt">
-                    <fo:inline font-weight="bold">
-                        Observing Mode:
-                    </fo:inline>
-                    <xsl:value-of select="$obs-mode"/>
-                </fo:block>
-                <!-- END observing mode -->
+
+                <xsl:variable name="obs-mode-aeon">
+                    <xsl:choose>
+                        <xsl:when test="proposalClass/queue/multiFacility">&#160; - AEON/multi-facility</xsl:when>
+                        <xsl:when test="proposalClass/classical/multiFacility">&#160; - AEON/multi-facility</xsl:when>
+                        <xsl:when test="proposalClass/large/multiFacility">&#160; - AEON/multi-facility</xsl:when>
+                        <xsl:otherwise></xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+
+                <fo:table table-layout="fixed" space-after="1cm">
+                    <fo:table-column column-width="11.5cm"/>
+                    <fo:table-column column-width="4.5cm"/>
+                    <fo:table-body>
+                        <fo:table-row>
+                            <fo:table-cell>
+                                <!-- BEGIN observing mode -->
+                                <fo:block space-after="12pt">
+                                    <fo:inline font-weight="bold">
+                                        Observing Mode:
+                                    </fo:inline>
+                                    <xsl:value-of select="$obs-mode"/>
+                                    <xsl:value-of select="$obs-mode-aeon"/>
+                                </fo:block>
+                                <!-- END observing mode -->
+                            </fo:table-cell>
+
+                            <fo:table-cell>
+                                <!-- BEGIN jwst synergy-->
+                                <xsl:variable name="jwst-synergy-label">
+                                    <xsl:choose>
+                                        <xsl:when test="proposalClass/classical">JWST Synergy:</xsl:when>
+                                        <xsl:when test="proposalClass/queue">JWST Synergy:</xsl:when>
+                                        <xsl:when test="proposalClass/fastTurnaround">JWST Synergy:</xsl:when>
+                                        <xsl:when test="proposalClass/large">JWST Synergy:</xsl:when>
+                                        <xsl:when test="proposalClass/special/submission/type[contains(text(), 'Directors Time')]">JWST Synergy:</xsl:when>
+                                        <xsl:otherwise>&#160;</xsl:otherwise>
+                                    </xsl:choose>
+                                </xsl:variable>
+
+                                <xsl:variable name="jwst-synergy">
+                                    <xsl:choose>
+                                        <xsl:when test="proposalClass/classical[@jwstSynergy='true']">&#160;Yes</xsl:when>
+                                        <xsl:when test="proposalClass/classical[@jwstSynergy='false']">&#160;No</xsl:when>
+                                        <xsl:when test="proposalClass/queue[@jwstSynergy='true']">&#160;Yes</xsl:when>
+                                        <xsl:when test="proposalClass/queue[@jwstSynergy='false']">&#160;No</xsl:when>
+                                        <xsl:when test="proposalClass/fastTurnaround[@jwstSynergy='true']">&#160;Yes</xsl:when>
+                                        <xsl:when test="proposalClass/fastTurnaround[@jwstSynergy='false']">&#160;No</xsl:when>
+                                        <xsl:when test="proposalClass/large[@jwstSynergy='true']">&#160;Yes</xsl:when>
+                                        <xsl:when test="proposalClass/large[@jwstSynergy='false']">&#160;No</xsl:when>
+                                        <xsl:when test="proposalClass/special[@jwstSynergy='true']/submission/type[contains(text(), 'Directors Time')]">&#160;Yes</xsl:when>
+                                        <xsl:when test="proposalClass/special[@jwstSynergy='false']/submission/type[contains(text(), 'Directors Time')]">&#160;No</xsl:when>
+                                        <xsl:otherwise>&#160;</xsl:otherwise>
+                                    </xsl:choose>
+                                </xsl:variable>
+
+                                <fo:block space-after="12pt">
+                                    <fo:inline font-weight="bold">
+                                        <xsl:value-of select="$jwst-synergy-label"/>
+                                    </fo:inline>
+                                    <xsl:value-of select="$jwst-synergy"/>
+                                </fo:block>
+                                <!-- END jwst mode-->
+
+                            </fo:table-cell>
+                        </fo:table-row>
+                    </fo:table-body>
+                </fo:table>
+
 
                 <!-- BEGIN time request -->
                 <fo:block space-after="12pt">

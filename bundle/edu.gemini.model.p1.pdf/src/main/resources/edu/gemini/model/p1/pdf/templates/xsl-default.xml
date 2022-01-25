@@ -71,6 +71,33 @@
                 </xsl:choose>
             </xsl:variable>
 
+            <xsl:variable name="jwst-synergy-label">
+                <xsl:choose>
+                    <xsl:when test="proposalClass/classical">JWST Synergy:</xsl:when>
+                    <xsl:when test="proposalClass/queue">JWST Synergy:</xsl:when>
+                    <xsl:when test="proposalClass/fastTurnaround">JWST Synergy:</xsl:when>
+                    <xsl:when test="proposalClass/large">JWST Synergy:</xsl:when>
+                    <xsl:when test="proposalClass/special/submission/type[contains(text(), 'Directors Time')]">JWST Synergy:</xsl:when>
+                    <xsl:otherwise>&#160;</xsl:otherwise>
+                </xsl:choose>
+            </xsl:variable>
+
+            <xsl:variable name="jwst-synergy">
+                <xsl:choose>
+                    <xsl:when test="proposalClass/classical[@jwstSynergy='true']">&#160;Yes</xsl:when>
+                    <xsl:when test="proposalClass/classical[@jwstSynergy='false']">&#160;No</xsl:when>
+                    <xsl:when test="proposalClass/queue[@jwstSynergy='true']">&#160;Yes</xsl:when>
+                    <xsl:when test="proposalClass/queue[@jwstSynergy='false']">&#160;No</xsl:when>
+                    <xsl:when test="proposalClass/fastTurnaround[@jwstSynergy='true']">&#160;Yes</xsl:when>
+                    <xsl:when test="proposalClass/fastTurnaround[@jwstSynergy='false']">&#160;No</xsl:when>
+                    <xsl:when test="proposalClass/large[@jwstSynergy='true']">&#160;Yes</xsl:when>
+                    <xsl:when test="proposalClass/large[@jwstSynergy='false']">&#160;No</xsl:when>
+                    <xsl:when test="proposalClass/special[@jwstSynergy='true']/submission/type[contains(text(), 'Directors Time')]">&#160;Yes</xsl:when>
+                    <xsl:when test="proposalClass/special[@jwstSynergy='false']/submission/type[contains(text(), 'Directors Time')]">&#160;No</xsl:when>
+                    <xsl:otherwise>&#160;</xsl:otherwise>
+                </xsl:choose>
+            </xsl:variable>
+
             <!-- Is the thesis work of one of the investigators? -->
             <xsl:variable name="thesis">
                 <xsl:choose>
@@ -216,6 +243,15 @@
 
                             <fo:block space-after="8pt"/>
 
+                            <xsl:variable name="obs-mode-aeon">
+                                <xsl:choose>
+                                    <xsl:when test="proposalClass/queue/multiFacility">&#160; - AEON/multi-facility</xsl:when>
+                                    <xsl:when test="proposalClass/classical/multiFacility">&#160; - AEON/multi-facility</xsl:when>
+                                    <xsl:when test="proposalClass/large/multiFacility">&#160; - AEON/multi-facility</xsl:when>
+                                    <xsl:otherwise></xsl:otherwise>
+                                </xsl:choose>
+                            </xsl:variable>
+
                             <!-- BEGIN data block -->
                             <fo:table table-layout="fixed" space-before="8pt"
                                       space-after="8pt">
@@ -236,6 +272,7 @@
                                                 <fo:inline font-weight="bold">Observing Mode:</fo:inline>
                                                 <xsl:text>&#160;</xsl:text>
                                                 <xsl:value-of select="$obs-mode"/>
+                                                <xsl:value-of select="$obs-mode-aeon"/>
                                             </fo:block>
                                         </fo:table-cell>
                                         <fo:table-cell>
@@ -298,7 +335,9 @@
 
                                         <fo:table-cell>
                                             <fo:block>
+                                                <fo:inline font-weight="bold"><xsl:value-of select="$jwst-synergy-label"/></fo:inline>
                                                 <xsl:text>&#160;</xsl:text>
+                                                <xsl:value-of select="$jwst-synergy"/>
                                             </fo:block>
                                         </fo:table-cell>
                                     </fo:table-row>
