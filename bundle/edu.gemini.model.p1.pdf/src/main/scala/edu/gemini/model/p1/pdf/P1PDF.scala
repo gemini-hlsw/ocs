@@ -30,7 +30,7 @@ object P1PDF {
       val param = "no"
     }
   }
-  
+
   sealed trait AttachmentId {
     def xmlName: String
   }
@@ -61,11 +61,11 @@ object P1PDF {
     }
   }
 
-  sealed case class Template(name: String, 
-                             location: String, 
-                             pageSize: PDF.PageSize, 
-                             investigatorsList: InvestigatorsListOption, 
-                             partnerLead: PartnerLeadDisplayOption, 
+  sealed case class Template(name: String,
+                             location: String,
+                             pageSize: PDF.PageSize,
+                             investigatorsList: InvestigatorsListOption,
+                             partnerLead: PartnerLeadDisplayOption,
                              params: Map[String, String],
                              attachments: List[AttachmentId]) {
     def value(): String = name
@@ -125,8 +125,8 @@ object P1PDF {
   object NOIRLabDARP extends Template(
     "NOIRLab DARP",
     "templates/xsl-NOIRLAB.xml",
-    PDF.Letter, 
-    InvestigatorsListOption.DefaultList, 
+    PDF.Letter,
+    InvestigatorsListOption.DefaultList,
     PartnerLeadDisplayOption.DefaultDisplay,
     Map("partner"->"us", "pageLayout" -> "default-us-letter"),
     List(AttachmentId.FirstAttachment)

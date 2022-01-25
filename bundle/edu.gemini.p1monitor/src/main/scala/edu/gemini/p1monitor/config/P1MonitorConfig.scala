@@ -106,9 +106,8 @@ class P1MonitorConfig(ctx: BundleContext) {
     case "ar" | "br" | "kr" | "uh" => P1PDF.GeminiDefault
     case "cfh" | "subaru" | "keck" => P1PDF.GeminiDefault
     case "dt" | "pw" | "gt"        => P1PDF.GeminiDefault
-    case "au"                      => P1PDF.AU
     case "cl"                      => P1PDF.CL
-    case "us" | "lp" | "sip"       => P1PDF.NOIRLabListAtTheEnd
+    case "us" | "lp" | "sip"       => P1PDF.NOIRLabDARP
     case "ca"                      => P1PDF.GeminiDefaultListAtTheEnd
     case _                         => P1PDF.GeminiDefaultListAtTheEnd
   }
