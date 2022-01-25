@@ -1584,15 +1584,20 @@
                                 <fo:block>
                                     <fo:inline font-weight="bold">Non-sidereal target</fo:inline>
                                     &#160;(coordinates valid at:&#160;
-                                    <xsl:variable name="date" select="$target/ephemeris/@validAt"/>
-                                    <xsl:value-of select="substring($date, 0, 11)"/>
-                                    <xsl:variable name="horizonsQuery" select="$target/@horizonsQuery"/>
-                                    <xsl:if test="$horizonsQuery != ''">
-                                        <fo:inline>
-                                            <xsl:text>; query: </xsl:text>
-                                            <xsl:value-of select="$horizonsQuery"/>
-                                        </fo:inline>
-                                    </xsl:if>)
+                                    <xsl:variable name="middle" select="ceiling(count($target/ephemeris) div 2)"/>
+                                    <xsl:for-each select="$target/ephemeris">
+                                        <xsl:if test= "position()=$middle">
+                                            <xsl:variable name="date" select="@validAt"/>
+                                            <xsl:value-of select="substring($date, 0, 11)"/>
+                                            <xsl:variable name="horizonsQuery" select="$target/@horizonsQuery"/>
+                                            <xsl:if test="$horizonsQuery != ''">
+                                                <fo:inline>
+                                                    <xsl:text>; query: </xsl:text>
+                                                    <xsl:value-of select="$horizonsQuery"/>
+                                                </fo:inline>
+                                            </xsl:if>)
+                                        </xsl:if>
+                                    </xsl:for-each>
                                 </fo:block>
                             </xsl:if>
 
