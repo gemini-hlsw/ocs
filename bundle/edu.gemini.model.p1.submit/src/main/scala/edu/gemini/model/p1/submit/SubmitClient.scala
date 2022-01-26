@@ -27,23 +27,23 @@ class SubmitClient(name:String, url: Map[SubmitDestination, String]) {
    * Removes the proposal key and all responses and then does a normal
    * submit.
    */
-  def resubmit(proposal: Proposal)(callback: ProposalSubmitResult => Unit) {
+  def resubmit(proposal: Proposal)(callback: ProposalSubmitResult => Unit): Unit = {
     asyncSubmit(proposal, SubContainer(proposal).reset, callback)
   }
 
-  def submit(proposal: Proposal)(callback: ProposalSubmitResult => Unit) {
+  def submit(proposal: Proposal)(callback: ProposalSubmitResult => Unit): Unit = {
     asyncSubmit(proposal, SubContainer(proposal), callback)
   }
 
   // Do the submissions in a separate thread, calling the callback with the
   // results.
-  private def asyncSubmit(proposal: Proposal, sc: SubContainer, callback: ProposalSubmitResult => Unit) {
+  private def asyncSubmit(proposal: Proposal, sc: SubContainer, callback: ProposalSubmitResult => Unit): Unit = {
     val scWithKey       = sc.withKey
     val proposalWithKey = scWithKey.update(proposal)
     syncSubmit(proposalWithKey, scWithKey).map(callback)
   }
 
-  private def logValidation(proposal: Proposal) {
+  private def logValidation(proposal: Proposal): Unit = {
     ProposalIo.validate(proposal) match {
       case Right(_)  => LOG.fine("Validated proposal '%s'.".format(proposal.title))
       case Left(msg) => LOG.warning("Proposal does not validate: " + msg)

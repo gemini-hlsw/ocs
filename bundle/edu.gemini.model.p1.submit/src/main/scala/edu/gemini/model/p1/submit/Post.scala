@@ -15,15 +15,16 @@ private[submit] object Post {
 
     for {
       pdf1 <- p.meta.firstAttachment.toRight(ClientError("The proposal is missing PDF attachment 1.")).right
-      pdf2 <- p.meta.secondAttachment.toRight(ClientError("The proposal is missing PDF attachment 2.")).right
-      _   <- doPost(con, p, pdf1, pdf2).right
+      pdf2 <- Right(p.meta.secondAttachment).right
+      _    <- doPost(con, p, pdf1, pdf2).right
      } yield Unit
   }
 
-  private def doPost(con: HttpURLConnection, p: Proposal, pdf1: File, pdf2: File): Either[Failure, Unit] = {
+  private def doPost(con: HttpURLConnection, p: Proposal, pdf1: File, pdf2: Option[File]): Either[Failure, Unit] = {
     val before = beforePdf(p)
     val after  = afterPdf()
-    val total  = before.size + pdf1.length + pdf2.length + after.size
+    val between  = betweenPdf()
+    val total  = before.size + pdf1.length + (if (pdf2.isDefined) between.size else 0L) + pdf2.map(_.length).getOrElse(0L) + after.size
     if (total > Int.MaxValue)
       Left(ClientError("PDF attachments too large"))
     else {
@@ -32,8 +33,8 @@ private[submit] object Post {
         os <- open(con).right
         _  <- before.post(os).right
         _  <- writeFile(pdf1, os).right
-        _  <- betweenPdf.post(os).right
-        _  <- writeFile(pdf2, os).right
+        _  <- Right(pdf2.map(_ => betweenPdf.post(os))).right
+        _  <- Right(pdf2.map(p => writeFile(p, os))).right
         _  <- after.post(os).right
         _  <- op(os, _.close()).right
       } yield Unit
@@ -66,7 +67,7 @@ private[submit] object Post {
     pw
   }
 
-  private def betweenPdf: PostWriter = {
+  private def betweenPdf(): PostWriter = {
     val pw = new PostWriter(BOUNDARY)
 
     // Write the PDF preamble
