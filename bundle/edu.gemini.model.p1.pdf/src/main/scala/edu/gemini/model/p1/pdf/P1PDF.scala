@@ -9,6 +9,8 @@ import javax.xml.transform.stream.StreamSource
 import edu.gemini.util.pdf.PDF
 
 import io.Source
+import scalaz._
+import Scalaz._
 
 /**
  * Creator object for pdf creation for Phase1 documents.
@@ -29,6 +31,19 @@ object P1PDF {
     }
   }
 
+  sealed trait AttachmentId {
+    def xmlName: String
+  }
+
+  object AttachmentId {
+    case object FirstAttachment extends AttachmentId {
+      override val xmlName = "firstAttachment"
+    }
+    case object SecondAttachment extends AttachmentId {
+      override val xmlName = "secondAttachment"
+    }
+  }
+
   sealed trait InvestigatorsListOption {
     def param: String
   }
@@ -46,62 +61,94 @@ object P1PDF {
     }
   }
 
-  sealed case class Template(name: String, location: String, pageSize: PDF.PageSize, investigatorsList: InvestigatorsListOption, partnerLead: PartnerLeadDisplayOption, params: Map[String, String]) {
+  sealed case class Template(name: String,
+                             location: String,
+                             pageSize: PDF.PageSize,
+                             investigatorsList: InvestigatorsListOption,
+                             partnerLead: PartnerLeadDisplayOption,
+                             params: Map[String, String],
+                             attachments: List[AttachmentId]) {
     def value(): String = name
     val parameters: Map[String, String] = params + (InvestigatorsListOption.InvestigatorsListParam -> investigatorsList.param) + (PartnerLeadDisplayOption.PartnerLeadParam -> partnerLead.param)
   }
 
+  object GeminiDARP extends Template(
+    "Gemini DARP",
+    "templates/xsl-default.xml",
+    PDF.Letter,
+    InvestigatorsListOption.DefaultList,
+    PartnerLeadDisplayOption.DefaultDisplay,
+    Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"),
+    List(AttachmentId.FirstAttachment)
+  )
+
   object GeminiDefault extends Template(
-    "Gemini Default", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.DefaultList, PartnerLeadDisplayOption.DefaultDisplay,
-    Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
+    "Gemini Default",
+    "templates/xsl-default.xml",
+    PDF.Letter,
+    InvestigatorsListOption.DefaultList,
+    PartnerLeadDisplayOption.DefaultDisplay,
+    Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"),
+    List(AttachmentId.FirstAttachment, AttachmentId.SecondAttachment)
+  )
 
   object GeminiDefaultNoInvestigatorsList extends Template(
-    "Gemini No CoIs", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.NoList, PartnerLeadDisplayOption.NoDisplay,
-    Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
+    "Gemini No CoIs",
+    "templates/xsl-default.xml",
+    PDF.Letter,
+    InvestigatorsListOption.NoList,
+    PartnerLeadDisplayOption.NoDisplay,
+    Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"),
+    List(AttachmentId.FirstAttachment, AttachmentId.SecondAttachment)
+  )
 
   object GeminiDefaultListAtTheEnd extends Template(
-    "Gemini CoIs at End", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.AtTheEndList, PartnerLeadDisplayOption.NoDisplay,
-    Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
-
-  object AU extends Template(
-    "Australian NGO", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.AtTheEndList, PartnerLeadDisplayOption.NoDisplay,
-    Map("partner"->"au", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"))
+    "Gemini CoIs at End",
+    "templates/xsl-default.xml",
+    PDF.Letter,
+    InvestigatorsListOption.AtTheEndList,
+    PartnerLeadDisplayOption.NoDisplay,
+    Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"),
+    List(AttachmentId.FirstAttachment, AttachmentId.SecondAttachment)
+  )
 
   object CL extends Template(
-    "Chilean NGO", "templates/xsl-default.xml", PDF.Letter, InvestigatorsListOption.DefaultList, PartnerLeadDisplayOption.DefaultDisplay,
-    Map("partner"->"cl", "pageLayout" -> "default-us-letter", "title" -> "PROPUESTA CONICYT-Gemini"))
+    "Chilean NGO",
+    "templates/xsl-default.xml",
+    PDF.Letter,
+    InvestigatorsListOption.DefaultList,
+    PartnerLeadDisplayOption.DefaultDisplay,
+    Map("partner"->"cl", "pageLayout" -> "default-us-letter", "title" -> "PROPUESTA CONICYT-Gemini"),
+    List(AttachmentId.FirstAttachment, AttachmentId.SecondAttachment)
+  )
 
-  object NOIRLab extends Template(
-    "NOIRLab",   "templates/xsl-NOIRLAB.xml", PDF.Letter, InvestigatorsListOption.DefaultList, PartnerLeadDisplayOption.DefaultDisplay,
-    Map("partner"->"us", "pageLayout" -> "default-us-letter"))
-
-  object NOIRLabListAtTheEnd extends Template(
-    "NOIRLab CoIs at End",   "templates/xsl-NOIRLAB.xml", PDF.Letter, InvestigatorsListOption.AtTheEndList, PartnerLeadDisplayOption.DefaultDisplay,
-    Map("partner"->"us", "pageLayout" -> "default-us-letter"))
-
-  object NOIRLabNoInvestigatorsList extends Template(
-    "NOIRLab No CoIs",   "templates/xsl-NOIRLAB.xml", PDF.Letter, InvestigatorsListOption.NoList, PartnerLeadDisplayOption.DefaultDisplay,
-    Map("partner"->"us", "pageLayout" -> "default-us-letter"))
+  object NOIRLabDARP extends Template(
+    "NOIRLab DARP",
+    "templates/xsl-NOIRLAB.xml",
+    PDF.Letter,
+    InvestigatorsListOption.DefaultList,
+    PartnerLeadDisplayOption.DefaultDisplay,
+    Map("partner"->"us", "pageLayout" -> "default-us-letter"),
+    List(AttachmentId.FirstAttachment)
+  )
 
   /** Gets a list with all templates that are currently available. */
-  def templates = List(GeminiDefault, GeminiDefaultNoInvestigatorsList, GeminiDefaultListAtTheEnd, AU, CL, NOIRLab, NOIRLabListAtTheEnd, NOIRLabNoInvestigatorsList)
+  def templates = List(GeminiDARP, GeminiDefault, GeminiDefaultNoInvestigatorsList, GeminiDefaultListAtTheEnd,  CL, NOIRLabDARP)
 
   def templatesMap: Map[String, Template] = templatesList.toMap
 
   def templatesList = List(
     "ar"     -> GeminiDefault,
-    "au"     -> AU,
     "br"     -> GeminiDefault,
     "ca"     -> GeminiDefaultListAtTheEnd,
     "cl"     -> CL,
     "kr"     -> GeminiDefault,
     "uh"     -> GeminiDefault,
+    "gsdarp" -> GeminiDARP,
     "gs"     -> GeminiDefault,
     "gsiend" -> GeminiDefaultListAtTheEnd,
     "gsnoi"  -> GeminiDefaultNoInvestigatorsList,
-    "us"     -> NOIRLab,
-    "usend"  -> NOIRLabListAtTheEnd,
-    "usnoi"  -> NOIRLabNoInvestigatorsList)
+    "us"     -> NOIRLabDARP)
 
   /**
    * Creates a pdf from a given xml file and template and writes the resulting pdf file to the output folder.
@@ -120,16 +167,16 @@ object P1PDF {
    * Creates a pdf from a given xml element and template and writes the resulting pdf file to the output folder.
    * This method also merges the attached pdf file to the end of the resulting pdf.
    */
-  def createFromNode(xml: Node, template: Template, pdfFile: File, workingDir:Option[File] = None): Unit = {
-    val attachment = {
-      val f = new File((xml \ "meta" \ "attachment").text)
+  def createFromNode(xml: Node, template: Template, pdfFile: File, workingDir: Option[File] = None): Unit = {
+    val attachments = template.attachments.map { a =>
+      val f = new File((xml \ "meta" \ a.xmlName).text)
       if (f.isAbsolute) f else workingDir.map(new File(_, f.getPath)).getOrElse(f)
     }
-    createFromNode(xml, attachment, template, pdfFile, workingDir)
+    createFromNode(xml, attachments, template, pdfFile, workingDir)
   }
 
 
-  def createFromNode(xml: Node, attachment: File, template: Template, out: File, workingDir: Option[File]): Unit = {
+  def createFromNode(xml: Node, attachments: List[File], template: Template, out: File, workingDir: Option[File]): Unit = {
     val pdf = new PDF(Some(P1PdfUriResolver))
 
     def using[A, B](resource: => A)(cleanup: A => Unit)(code: A => B): Option[B] = {
@@ -157,17 +204,17 @@ object P1PDF {
     val intermediateOutputFile = new File(parentFilePath + File.separator + "_" + out.getName)
     val intermediateILFile = new File(parentFilePath + File.separator + "_" + out.getName + "_il")
 
-    val maybeAttachment = if (attachment.isFile) Some(attachment) else None
-    val filesToMerge = template.investigatorsList match {
+    val maybeAttachment = attachments.filter(_.isFile)
+    val filesToMerge: Option[List[File]] = template.investigatorsList match {
       case InvestigatorsListOption.AtTheEndList =>
         val main = runTransformation(intermediateOutputFile, template.copy(investigatorsList = InvestigatorsListOption.NoList))
         val investigatorsList = runTransformation(intermediateILFile, template)
-        List(main, maybeAttachment, investigatorsList).flatten
+        (investigatorsList |@| main)((m, i) => m :: (maybeAttachment :+ i))
       case _                                   =>
         val main = runTransformation(intermediateOutputFile, template)
-        List(main, maybeAttachment).flatten
+        main.map(_ :: maybeAttachment)
     }
-    pdf.merge(filesToMerge, out, template.pageSize)
+    pdf.merge(filesToMerge.getOrElse(Nil), out, template.pageSize)
     intermediateOutputFile.delete()
     intermediateILFile.delete()
   }
@@ -196,7 +243,7 @@ object P1PDF {
     val home = System.getProperty("user.home")
     val in = new File(s"$home/pitsource.xml")
     val out = new File(s"$home/pittarget.pdf")
-    createFromFile(in, GeminiDefault, out)
+    createFromFile(in, GeminiDARP, out)
 
     val ok = Runtime.getRuntime.exec(Array("open", out.getAbsolutePath)).waitFor
     println("Exec returned " + ok)

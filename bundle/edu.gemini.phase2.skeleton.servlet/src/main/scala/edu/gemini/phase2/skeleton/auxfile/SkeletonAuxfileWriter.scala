@@ -99,7 +99,8 @@ object SkeletonAuxfileWriter {
     writeTo(out) { tmp =>
       try {
         val xml = ProposalIo.writeToXml(p)
-        P1PDF.createFromNode(xml, attachment, P1PDF.GeminiDefault, tmp, None)
+        // FIXME: Support multiple attachmens
+        P1PDF.createFromNode(xml, List(attachment), P1PDF.GeminiDefault, tmp, None)
         Right(())
       } catch {
         case ex: Exception => Left(FileError(out, ex))
