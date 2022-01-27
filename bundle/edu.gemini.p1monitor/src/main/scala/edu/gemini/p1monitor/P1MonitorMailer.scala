@@ -44,9 +44,20 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
           |
           |Download the proposal's attachment from:
           |https://${cfg.getHost}/fetch/${getTypeName(dirName, prop.proposalClass)}/${Semester.current.display}/fetch?dir=$dirName&type=${getTypeName(dirName, prop.proposalClass)}&proposal=$proposalVariable&format=attachment
-          |
         """.stripMargin
     }
+
+    val secondAttachment = proposal.flatMap { prop =>
+      val proposalVariable = getReferenceString(prop.proposalClass).split("-").tail.mkString("_")
+      prop.meta.secondAttachment.map { at =>
+         s"""
+              |Download the proposal's second attachment from:
+              |https://${cfg.getHost}/fetch/${getTypeName(dirName, prop.proposalClass)}/${Semester.current.display}/fetch?dir=$dirName&type=${getTypeName(dirName, prop.proposalClass)}&proposal=$proposalVariable&format=attachment2
+              |
+          """.stripMargin
+        }
+    }
+
     val body = files.xml.map { x =>
         s"""
           |Find it in the backend server at:
@@ -55,7 +66,7 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
       }
 
     //send email
-    (body |+| preBody).foreach(sendMail(dirName, subject, _))
+    (body |+| preBody |+| secondAttachment).foreach(sendMail(dirName, subject, _))
 
   }
 

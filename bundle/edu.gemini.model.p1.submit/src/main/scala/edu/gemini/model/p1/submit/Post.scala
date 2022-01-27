@@ -34,7 +34,7 @@ private[submit] object Post {
         _  <- before.post(os).right
         _  <- writeFile(pdf1, os).right
         _  <- Right(pdf2.map(_ => betweenPdf.post(os))).right
-        _  <- Right(pdf2.map(p => writeFile(p, os))).right
+        _  <- pdf2.map(p => writeFile(p, os)).getOrElse(Right(())).right
         _  <- after.post(os).right
         _  <- op(os, _.close()).right
       } yield Unit
@@ -45,7 +45,7 @@ private[submit] object Post {
     try {
       Right(con.getOutputStream)
     } catch {
-      case e:Exception => Left(Offline(None))
+      case e: Exception => Left(Offline(None))
     }
 
   private def beforePdf(p: Proposal): PostWriter = {
