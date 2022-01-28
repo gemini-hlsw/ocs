@@ -27,7 +27,7 @@ class DirScanner(dir: MonitoredDirectory) {
     }, 5000, 10000)
   }
 
-  def stopMonitoring()= {
+  def stopMonitoring(): Unit = {
     timer.cancel()
   }
 

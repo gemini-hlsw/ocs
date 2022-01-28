@@ -48,7 +48,8 @@ class P1MonitorConfig(ctx: BundleContext) {
   val getHost: String = getProp(HOST_TAG)
   val translations: Map[String, String] = getTranslations
 
-  LOG.info(s"P1Monitor starting, monitoring $map")
+  LOG.info(s"P1Monitor starting")
+  map.foreach(l => LOG.info(s"monitoring $l"))
 
   private def getTranslations:Map[String, String] = (xmlConf \\ "translation").map { x =>
       (x \ "from").text -> (x \ "to").text
@@ -103,13 +104,14 @@ class P1MonitorConfig(ctx: BundleContext) {
   }
 
   private def toTemplate(s: String): P1PDF.Template = s match {
-    case "ar" | "br" | "kr" | "uh" => P1PDF.GeminiDefault
-    case "cfh" | "subaru" | "keck" => P1PDF.GeminiDefault
-    case "dt" | "pw" | "gt"        => P1PDF.GeminiDefault
-    case "cl"                      => P1PDF.CL
-    case "us" | "lp" | "sip"       => P1PDF.NOIRLabDARP
-    case "ca"                      => P1PDF.GeminiDefaultListAtTheEnd
-    case _                         => P1PDF.GeminiDefaultListAtTheEnd
+    case "ar" | "br" | "ca" | "us"        => P1PDF.GeminiDARP
+    case "kr" | "uh"                      => P1PDF.GeminiDefault
+    case "cfh" | "subaru" | "keck"        => P1PDF.GeminiDefault
+    case "ds" | "dt" | "pw" | "gt" | "lp" => P1PDF.GeminiDefault
+    case "cl"                             => P1PDF.CL
+    case "sip"                            => P1PDF.NOIRLabDARP
+    case "ft"                             => P1PDF.GeminiDefaultNoInvestigatorsList
+    case _                                => P1PDF.GeminiDefaultListAtTheEnd
   }
 
   def getDirectories: Traversable[MonitoredDirectory] = map.values
