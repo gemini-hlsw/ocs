@@ -170,7 +170,6 @@ case object SemesterConverter2022ATo2022B extends SemesterConverter {
       StepResult("Updated existing attachment value", <firstAttachment>{ns}</firstAttachment><secondAttachment></secondAttachment>).successNel
   }
 
-  // REL-2527 Support ToO on special proposals
   val specialToo: TransformFunction = {
     case p @ <proposalClass>{ns @ _*}</proposalClass> if (p \ "special").nonEmpty =>
       object SpecialToOTransformer extends BasicTransformer {

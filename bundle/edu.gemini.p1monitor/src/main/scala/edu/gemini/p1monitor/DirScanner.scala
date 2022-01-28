@@ -18,7 +18,7 @@ class DirScanner(dir: MonitoredDirectory) {
 
   val timer = new Timer
 
-  def startMonitoring(listener: DirListener) {
+  def startMonitoring(listener: DirListener): Unit = {
     fullScan(listener)
     timer.schedule(new TimerTask {
       override def run(): Unit = {
@@ -27,11 +27,11 @@ class DirScanner(dir: MonitoredDirectory) {
     }, 5000, 10000)
   }
 
-  def stopMonitoring() {
+  def stopMonitoring(): Unit = {
     timer.cancel()
   }
 
-  private def fullScan(listener: DirListener) {
+  private def fullScan(listener: DirListener): Unit = {
     createDirIfNeeded()
     LOG.info(s"Run a full scan on directory ${dir.dir}")
     files.clear()
@@ -54,7 +54,7 @@ class DirScanner(dir: MonitoredDirectory) {
     Some(cmd.mkString(" ").!).filter(_ != 0).foreach(_ => LOG.warning(errorMsg))
   }
 
-  def createDirIfNeeded() {
+  def createDirIfNeeded(): Unit = {
     if (!dir.dir.exists()) {
       LOG.info(s"Directory ${dir.dir} is not present, attempt to create and set permissions")
       if (!dir.dir.mkdirs()) {
@@ -68,7 +68,7 @@ class DirScanner(dir: MonitoredDirectory) {
     }
   }
 
-  private def update(listener: DirListener) {
+  private def update(listener: DirListener): Unit = {
     var updatedFiles: List[File] = Nil
     var deletedFiles: List[File] = Nil
     var newFiles: List[File] = Nil

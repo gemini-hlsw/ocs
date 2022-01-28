@@ -370,7 +370,7 @@ object LargeProgramClass {
     Option(m.getKey).map(UUID.fromString),
     LargeProgramSubmission(m.getSubmission),
     m.getTooOption,
-    Option(MultiFacility(m.getMultiFacility)),
+    Option(m.getMultiFacility).map(MultiFacility(_)),
     m.isJwstSynergy
   )
 

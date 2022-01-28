@@ -6,5 +6,6 @@ package edu.gemini.p1monitor.fetch;
 public enum FetchFormat {
     pdf,
     xml,
-    attachment
+    attachment,
+    attachment2
 }

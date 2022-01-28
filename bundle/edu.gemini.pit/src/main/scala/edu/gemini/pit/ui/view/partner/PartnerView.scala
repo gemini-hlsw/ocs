@@ -227,15 +227,13 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     }
 
     // The proposal class combo is always visible
-    object proposalClass extends ComboBox(ProposalClassSelection.values.toSeq) with Bound[Proposal, ProposalClass] {
-
-      val lens = Proposal.proposalClass
+    object proposalClass extends ComboBox(ProposalClassSelection.values.toSeq) with Bound.Self[Proposal] {
 
       selection.reactions += {
         case SelectionChanged(_) =>
 
           // [UX-1113] Use the same partner time requests when switching between queue/classical proposals
-          model.foreach {
+          model.map(_.proposalClass).foreach {
 
             // Q <=> C (all cases)
             case q: QueueProposalClass if selection.item == Classical =>
@@ -265,24 +263,26 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
             case e: ExchangeProposalClass if selection.item == Classical && localClassical.subs.isLeft => localClassical = localClassical.copy(subs = Left(e.subs))
             case e: ExchangeProposalClass if selection.item == Queue && localQueue.subs.isLeft => localQueue = localQueue.copy(subs = Left(e.subs))
 
+            case _ if selection.item == Fast => model = model.map(m =>m .copy(meta = m.meta.copy(secondAttachment = none)))
+
             case _ => // nop
           }
 
           selection.item match {
-            case Queue     => model = Some(localQueue)
-            case Classical => model = Some(localClassical)
-            case Exchange  => model = Some(localExchange)
-            case Special   => model = Some(localSpecial)
-            case Large     => model = Some(localLarge)
-            case SIP       => model = Some(localSip)
-            case Fast      => model = Some(localFast)
+            case Queue     => model = model.map(_.copy(proposalClass = localQueue))
+            case Classical => model = model.map(_.copy(proposalClass = localClassical))
+            case Exchange  => model = model.map(_.copy(proposalClass = localExchange))
+            case Special   => model = model.map(_.copy(proposalClass = localSpecial))
+            case Large     => model = model.map(_.copy(proposalClass = localLarge))
+            case SIP       => model = model.map(_.copy(proposalClass = localSip))
+            case Fast      => model = model.map(_.copy(proposalClass = localFast))
           }
 
       }
 
-      override def refresh(m: Option[ProposalClass]): Unit = {
+      override def refresh(m: Option[Proposal]): Unit = {
         enabled = canEdit
-        selection.item = m.map {
+        selection.item = m.map(_.proposalClass).map {
           case _: QueueProposalClass          => Queue
           case _: ClassicalProposalClass      => Classical
           case _: ExchangeProposalClass       => Exchange
@@ -531,24 +531,27 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         // A lens to allow us to set the type in one shot
         val lens = Proposal.proposalClass
 
-        override def refresh(m: Option[ProposalClass]): Unit = m.foreach {
-          case q: QueueProposalClass                                                                                      =>
-            visible = true
-            selection.item = if (q.jwstSynergy) JWSTSynergyOption.Yes else JWSTSynergyOption.No
-          case l: LargeProgramClass                                                                                       =>
-            visible = true
-            selection.item = if (l.jwstSynergy) JWSTSynergyOption.Yes else JWSTSynergyOption.No
-          case c: ClassicalProposalClass                                                                                  =>
-            visible = true
-            selection.item = if (c.jwstSynergy) JWSTSynergyOption.Yes else JWSTSynergyOption.No
-          case f: FastTurnaroundProgramClass                                                                              =>
-            visible = true
-            selection.item = if (f.jwstSynergy) JWSTSynergyOption.Yes else JWSTSynergyOption.No
-          case SpecialProposalClass(_, _, _, SpecialSubmission(_, _, SpecialProposalType.DIRECTORS_TIME), _, jwstSynergy) =>
-            visible = true
-            selection.item = if (jwstSynergy) JWSTSynergyOption.Yes else JWSTSynergyOption.No
-          case _                                                                                                          =>
-            visible = false
+        override def refresh(m: Option[ProposalClass]): Unit = {
+          enabled = canEdit
+          m.foreach {
+            case q: QueueProposalClass                                                                                      =>
+              visible = true
+              selection.item = if (q.jwstSynergy) JWSTSynergyOption.Yes else JWSTSynergyOption.No
+            case l: LargeProgramClass                                                                                       =>
+              visible = true
+              selection.item = if (l.jwstSynergy) JWSTSynergyOption.Yes else JWSTSynergyOption.No
+            case c: ClassicalProposalClass                                                                                  =>
+              visible = true
+              selection.item = if (c.jwstSynergy) JWSTSynergyOption.Yes else JWSTSynergyOption.No
+            case f: FastTurnaroundProgramClass                                                                              =>
+              visible = true
+              selection.item = if (f.jwstSynergy) JWSTSynergyOption.Yes else JWSTSynergyOption.No
+            case SpecialProposalClass(_, _, _, SpecialSubmission(_, _, SpecialProposalType.DIRECTORS_TIME), _, jwstSynergy) =>
+              visible = true
+              selection.item = if (jwstSynergy) JWSTSynergyOption.Yes else JWSTSynergyOption.No
+            case _                                                                                                          =>
+              visible = false
+          }
         }
 
         selection.reactions += {

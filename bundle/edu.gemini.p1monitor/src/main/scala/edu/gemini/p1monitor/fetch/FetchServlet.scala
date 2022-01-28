@@ -14,7 +14,7 @@ import java.io._
 class FetchServlet(val config: P1MonitorConfig) extends HttpServlet {
   require(config != null)
 
-  protected override def doGet(sreq: HttpServletRequest, sres: HttpServletResponse) {
+  protected override def doGet(sreq: HttpServletRequest, sres: HttpServletResponse): Unit = {
     val req = try {
       new FetchRequest(sreq)
     } catch {
@@ -46,6 +46,7 @@ class FetchServlet(val config: P1MonitorConfig) extends HttpServlet {
       case FetchFormat.xml => new File(dir, fileName + ".xml")
       case FetchFormat.pdf => new File(dir, fileName + "_summary.pdf")
       case FetchFormat.attachment => new File(dir, fileName + ".pdf")
+      case FetchFormat.attachment2 => new File(dir, fileName + "_stage2.pdf")
     }
     if (!(res.exists && res.canRead)) {
       throw new FileNotFoundException("Could not find '" + fileName + "'")
@@ -60,7 +61,7 @@ class FetchServlet(val config: P1MonitorConfig) extends HttpServlet {
     }
   }
 
-  private def sendFile(req: FetchRequest, res: HttpServletResponse) {
+  private def sendFile(req: FetchRequest, res: HttpServletResponse): Unit = {
     val f = getRequestedFile(req)
     val format = req.format
     val proposalPrefix:String = req.proposalType
@@ -77,7 +78,10 @@ class FetchServlet(val config: P1MonitorConfig) extends HttpServlet {
       case FetchFormat.xml =>
         res.setContentType("application/xml")
         "attachment; filename=" + filename
-         case FetchFormat.attachment =>
+      case FetchFormat.attachment =>
+        res.setContentType("application/pdf")
+        "inline; filename=" + filename
+      case FetchFormat.attachment2 =>
         res.setContentType("application/pdf")
         "inline; filename=" + filename
     }
