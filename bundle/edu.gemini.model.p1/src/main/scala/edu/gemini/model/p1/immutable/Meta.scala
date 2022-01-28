@@ -44,8 +44,8 @@ case class Meta(firstAttachment: Option[File], secondAttachment: Option[File], b
 
   def mutable = {
     val m = Factory.createMeta
-    m.setFirstAttachment(firstAttachment.map(_.getName).orNull)
-    m.setSecondAttachment(secondAttachment.map(_.getName).orNull)
+    m.setFirstAttachment(firstAttachment.map(_.getPath).orNull)
+    m.setSecondAttachment(secondAttachment.map(_.getPath).orNull)
     m.setBand3OptionChosen(band3OptionChosen)
     m.setOverrideAffiliate(overrideAffiliate)
     m
