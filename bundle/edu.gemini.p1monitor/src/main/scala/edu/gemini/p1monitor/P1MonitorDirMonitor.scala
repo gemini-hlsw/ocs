@@ -85,7 +85,7 @@ class P1MonitorDirMonitor(cfg: P1MonitorConfig) extends DirListener {
             val r: Option[ProposalFileGroup] = try {
               val summaryFile = new File(f.getAbsolutePath.substring(0, f.getAbsolutePath.length - 4) + "_summary.pdf")
               // Find the template to use
-              val template = cfg.map.find(_._2.dir == f.getParentFile.getAbsoluteFile).map(_._2.template).getOrElse(P1PDF.GeminiDefault)
+              val template = cfg.map.find(_._2.dir == f.getParentFile.getAbsoluteFile).map(_._2.template).getOrElse(P1PDF.GeminiStandard)
               // REL-3772: Do not display PI information for FT proposals.
               val workingTemplate = if (isFT) template.copy(investigatorsList = InvestigatorsListOption.NoList) else template
               P1PDF.createFromFile(f, workingTemplate, summaryFile)

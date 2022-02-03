@@ -23,7 +23,7 @@ object PdfAction {
   }
 
   // Set to true to prompt the user for a PDF template.
-  def ask_=(b: Boolean) {
+  def ask_=(b: Boolean): Unit = {
     userNodeForPackage(getClass).putBoolean(ASK_PREF, b)
   }
 
@@ -42,11 +42,11 @@ class PdfAction(shell: RichShell[Model]) extends ShellAction(shell, "Export as P
   object TemplatePref {
     def current: TemplatePref = {
       val ap = AppPreferences.current
-      val tmpl = ap.pdf.getOrElse(P1PDF.GeminiDefault)
+      val tmpl = ap.pdf.getOrElse(P1PDF.GeminiDARP)
       TemplatePref(tmpl, ask)
     }
 
-    def current_=(tp: TemplatePref) {
+    def current_=(tp: TemplatePref): Unit = {
       ask = tp.ask
       AppPreferences.current = AppPreferences.current.copy(pdf = Some(tp.template))
     }
@@ -91,7 +91,7 @@ class PdfAction(shell: RichShell[Model]) extends ShellAction(shell, "Export as P
     else
       Some(TemplatePref.current.template)
 
-  override def apply() {
+  override def apply(): Unit = {
     for {
       m <- shell.model
       t <- templatePreference(UIElement.wrap(shell.peer))

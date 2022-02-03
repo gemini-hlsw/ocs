@@ -97,7 +97,7 @@ class P1MonitorConfig(ctx: BundleContext) {
         val cc = (elementContent(_type, CC_TAG) ++ global_cc).map(new InternetAddress(_))
         val bcc = (elementContent(_type, BCC_TAG) ++ global_bcc).map(new InternetAddress(_))
         val template = elementContent(_type, TEMPLATE_TAG).headOption.orElse(Some(name)).map(toTemplate)
-        (name, MonitoredDirectory(name, rootDir.head, username, group, to, cc, bcc, template.getOrElse(P1PDF.GeminiDefault)))
+        (name, MonitoredDirectory(name, rootDir.head, username, group, to, cc, bcc, template.getOrElse(P1PDF.GeminiStandard)))
       }
     }
 
@@ -105,9 +105,9 @@ class P1MonitorConfig(ctx: BundleContext) {
 
   private def toTemplate(s: String): P1PDF.Template = s match {
     case "ar" | "br" | "ca" | "us"        => P1PDF.GeminiDARP
-    case "kr" | "uh"                      => P1PDF.GeminiDefault
-    case "cfh" | "subaru" | "keck"        => P1PDF.GeminiDefault
-    case "ds" | "dt" | "pw" | "gt" | "lp" => P1PDF.GeminiDefault
+    case "kr" | "uh"                      => P1PDF.GeminiStandard
+    case "cfh" | "subaru" | "keck"        => P1PDF.GeminiStandard
+    case "ds" | "dt" | "pw" | "gt" | "lp" => P1PDF.GeminiStandard
     case "cl"                             => P1PDF.CL
     case "sip"                            => P1PDF.NOIRLabDARP
     case "ft"                             => P1PDF.GeminiDefaultNoInvestigatorsList

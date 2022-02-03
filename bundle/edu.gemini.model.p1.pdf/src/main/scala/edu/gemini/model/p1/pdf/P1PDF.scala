@@ -76,14 +76,14 @@ object P1PDF {
     "Gemini DARP",
     "templates/xsl-default.xml",
     PDF.Letter,
-    InvestigatorsListOption.DefaultList,
-    PartnerLeadDisplayOption.DefaultDisplay,
+    InvestigatorsListOption.NoList,
+    PartnerLeadDisplayOption.NoDisplay,
     Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"),
     List(AttachmentId.FirstAttachment)
   )
 
-  object GeminiDefault extends Template(
-    "Gemini Default",
+  object GeminiStandard extends Template(
+    "Gemini Standard",
     "templates/xsl-default.xml",
     PDF.Letter,
     InvestigatorsListOption.DefaultList,
@@ -133,19 +133,19 @@ object P1PDF {
   )
 
   /** Gets a list with all templates that are currently available. */
-  def templates = List(GeminiDARP, GeminiDefault, GeminiDefaultNoInvestigatorsList, GeminiDefaultListAtTheEnd,  CL, NOIRLabDARP)
+  def templates = List(GeminiDARP, GeminiStandard, GeminiDefaultNoInvestigatorsList, GeminiDefaultListAtTheEnd,  CL, NOIRLabDARP)
 
   def templatesMap: Map[String, Template] = templatesList.toMap
 
   def templatesList = List(
-    "ar"     -> GeminiDefault,
-    "br"     -> GeminiDefault,
+    "ar"     -> GeminiStandard,
+    "br"     -> GeminiStandard,
     "ca"     -> GeminiDefaultListAtTheEnd,
     "cl"     -> CL,
-    "kr"     -> GeminiDefault,
-    "uh"     -> GeminiDefault,
+    "kr"     -> GeminiStandard,
+    "uh"     -> GeminiStandard,
     "da"     -> GeminiDARP,
-    "gs"     -> GeminiDefault,
+    "gs"     -> GeminiStandard,
     "gsiend" -> GeminiDefaultListAtTheEnd,
     "gsnoi"  -> GeminiDefaultNoInvestigatorsList,
     "us"     -> NOIRLabDARP)
