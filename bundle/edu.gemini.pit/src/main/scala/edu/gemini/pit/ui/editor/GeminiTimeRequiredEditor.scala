@@ -22,8 +22,8 @@ class GeminiTimeRequiredEditor[A] private(model: List[(Option[TimeAmount], Gemin
   lazy val table = GeminiTimeRequiredTable(model)
   // Editor component
   object editor extends GridBagPanel with Rows {
-    addRow(new Label("""<html>Please indicate whether the time for a site/instrument is required<br/>of a multi-facility proposal, e.g. the project is infeasible without it.</html>"""))
-    addRow(new Label("""<html>This information will be used for scheduling purposes<br/> and will not be shown to the TACs.</html>"""))
+    addRow(new Label("""<html>Please indicate whether the time for each site/instrument is a required<br/> part of a multi-facility proposal, e.g. the project is infeasible without it.</html>"""))
+    addRow(new Label("""<html>This information will be used for scheduling purposes and will not be<br/> shown to the TACs</html>"""))
     addSpacer()
     addRow(table)
   }

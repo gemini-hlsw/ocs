@@ -150,7 +150,7 @@ object ClassicalProposalClass {
     Option(m.getKey).map(UUID.fromString),
     GeminiNormalProposalClass.extractSubs(m),
     m.getVisitor.asScala.map(_.getRef).map(Investigator(_).ref).toList,
-    Option(MultiFacility(m.getMultiFacility)),
+    Option(m.getMultiFacility).map(MultiFacility(_)),
     m.isJwstSynergy
   )
 
