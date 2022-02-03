@@ -237,22 +237,22 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
             // Q <=> C (all cases)
             case q: QueueProposalClass if selection.item == Classical =>
-              localClassical = localClassical.copy(subs = q.subs, multiFacility = q.multiFacility)
-            case c: ClassicalProposalClass if selection.item == Queue => localQueue = localQueue.copy(subs = c.subs, multiFacility = c.multiFacility)
+              localClassical = localClassical.copy(subs = q.subs, multiFacility = q.multiFacility.map(_.copy(aeonMode = false)))
+            case c: ClassicalProposalClass if selection.item == Queue => localQueue = localQueue.copy(subs = c.subs, multiFacility = c.multiFacility.map(_.copy(aeonMode = true)))
 
             // Q <=> L (all cases)
             case q: QueueProposalClass if selection.item == Large =>
-              localLarge = localLarge.copy(multiFacility = q.multiFacility)
+              localLarge = localLarge.copy(multiFacility = q.multiFacility.map(_.copy(aeonMode = true)))
 
             case l: LargeProgramClass if selection.item == Queue =>
-              localQueue = localQueue.copy(multiFacility = l.multiFacility)
+              localQueue = localQueue.copy(multiFacility = l.multiFacility.map(_.copy(aeonMode = true)))
 
             // C <=> L (all cases)
             case c: ClassicalProposalClass if selection.item == Large =>
-              localLarge = localLarge.copy(multiFacility = c.multiFacility)
+              localLarge = localLarge.copy(multiFacility = c.multiFacility.map(_.copy(aeonMode = true)))
 
             case l: LargeProgramClass if selection.item == Classical =>
-              localClassical = localClassical.copy(multiFacility = l.multiFacility)
+              localClassical = localClassical.copy(multiFacility = l.multiFacility.map(_.copy(aeonMode = false)))
             // {Q,C} => E when Q/C is NGO
             case g: GeminiNormalProposalClass if selection.item == Exchange => g.subs match {
               case Left(ns) => localExchange = localExchange.copy(subs = ns)
@@ -432,7 +432,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
             case c: ClassicalProposalClass      =>
               model.map(_.copy(proposalClass = selection.item match {
                 case MultiFacilitySelection.Yes =>
-                  ClassicalProposalClass.multiFacility.mod(_.orElse(Some(new MultiFacility(defaultMf, true))), c)
+                  ClassicalProposalClass.multiFacility.mod(_.orElse(Some(new MultiFacility(defaultMf, false))), c)
                 case MultiFacilitySelection.No  =>
                   ClassicalProposalClass.multiFacility.set(c, None)
                 case _                          => c
