@@ -38,8 +38,7 @@ object Flamingos2 {
   class ModeNode extends SingleSelectNode[Unit, F2Mode, Unit](()) {
     val title       = "Select Instrument Mode"
     val description = "Flamingos2 can be used for both imaging and spectroscopy."
-    // REL-3485: MOS is not available in 2019A.
-    def choices     = F2Mode.values.toList.filterNot(_ === Mos)
+    def choices     = F2Mode.values.toList
 
     def apply(m: F2Mode) = m match {
       case Imaging   => Left(new ImagingFilterNode)
