@@ -76,8 +76,8 @@ object P1PDF {
     "Gemini DARP",
     "templates/xsl-default.xml",
     PDF.Letter,
-    InvestigatorsListOption.DefaultList,
-    PartnerLeadDisplayOption.DefaultDisplay,
+    InvestigatorsListOption.NoList,
+    PartnerLeadDisplayOption.NoDisplay,
     Map("partner"->"gs", "pageLayout" -> "default-us-letter", "title" -> "GEMINI OBSERVATORY"),
     List(AttachmentId.FirstAttachment)
   )
