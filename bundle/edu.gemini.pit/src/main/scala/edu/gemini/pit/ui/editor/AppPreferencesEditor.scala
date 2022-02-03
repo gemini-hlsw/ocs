@@ -18,7 +18,7 @@ class AppPreferencesEditor private (ps:AppPreferences) extends StdModalEditor[Ap
   }
 
   object PdfTemplateCombo extends ComboBox(P1PDF.templates) with ValueRenderer[P1PDF.Template] {
-    selection.item = ps.pdf.getOrElse(P1PDF.GeminiDefault)
+    selection.item = ps.pdf.getOrElse(P1PDF.GeminiDARP)
   }
 
   object PitModeCombo extends ComboBox(AppPreferences.PITMode.values.toSeq) {

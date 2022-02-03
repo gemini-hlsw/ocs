@@ -287,7 +287,7 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
     }
   }
 
-  def transformProposal(proposal: String, template: Template = P1PDF.GeminiDefault) = {
+  def transformProposal(proposal: String, template: Template = P1PDF.GeminiStandard) = {
     val xslStream = getClass.getResourceAsStream(template.location)
 
     val xslSource = new StreamSource(xslStream)
