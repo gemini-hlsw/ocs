@@ -55,8 +55,8 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
 
   def apply(b: BlueprintBase): Option[Overheads] = b match {
     case _: Flamingos2BlueprintImaging                             => SimpleOverheads(0.10).some
-    case _: Flamingos2BlueprintLongslit                            => SimpleOverheads(0.25).some
-    case _: Flamingos2BlueprintMos                                 => SimpleOverheads(0.25).some
+    case _: Flamingos2BlueprintLongslit                            => NIRSpectroscopyOverheads(TimeAmount(0.25, TimeUnit.HR)).some
+    case _: Flamingos2BlueprintMos                                 => NIRSpectroscopyOverheads(TimeAmount(0.25, TimeUnit.HR)).some
 
     case _: GnirsBlueprintImaging                                  => SimpleOverheads(0.10).some
     case _: GnirsBlueprintSpectroscopy                             => NIRSpectroscopyOverheads(TimeAmount(0.25, TimeUnit.HR)).some
