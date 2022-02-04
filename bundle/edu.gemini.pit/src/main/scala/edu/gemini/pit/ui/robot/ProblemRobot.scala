@@ -84,7 +84,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           List(incompleteInvestigator, missingObsElementCheck, emptyTargetCheck,
             emptyEphemerisCheck, singlePointEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
             badGuiding, cwfsCorrectionsIssue, badVisibility, iffyVisibility, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsIQ70Check, lgsGemsIQ85Check,
-            lgsCC50Check, texesCCCheck, texesWVCheck, gmosWVCheck, gmosR600Check, f2MOSCheck, dssiObsolete, band3IQ, band3LGS, band3RapidToO, sbIrObservation).flatten
+            lgsCC50Check, texesCCCheck, texesWVCheck, gmosWVCheck, gmosR600Check, dssiObsolete, band3IQ, band3LGS, band3RapidToO, sbIrObservation).flatten
       ps.sorted
     }
 
@@ -290,11 +290,6 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           if gmosNDisperser(b, GmosNDisperser.R600) || gmosSDisperser(b, GmosSDisperser.R600)
         } yield new Problem(Severity.Warning, s"The R600 is little used and may be difficult to schedule.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
     }
-
-    private val f2MOSCheck = for {
-      o <- p.nonEmptyObservations
-      b <- o.blueprint.collect { case mos: Flamingos2BlueprintMos => mos }
-    } yield new Problem(Severity.Error, "Flamingos2 Multi-Object Spectroscopy is not offered.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
 
     private val dssiObsolete = for {
       o <- p.nonEmptyObservations
