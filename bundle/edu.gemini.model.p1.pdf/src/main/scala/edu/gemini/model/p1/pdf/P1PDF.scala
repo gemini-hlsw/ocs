@@ -126,7 +126,7 @@ object P1PDF {
     "NOIRLab DARP",
     "templates/xsl-NOIRLAB.xml",
     PDF.Letter,
-    InvestigatorsListOption.DefaultList,
+    InvestigatorsListOption.NoList,
     PartnerLeadDisplayOption.DefaultDisplay,
     Map("partner"->"us", "pageLayout" -> "default-us-letter"),
     List(AttachmentId.FirstAttachment)
@@ -209,7 +209,7 @@ object P1PDF {
       case InvestigatorsListOption.AtTheEndList =>
         val main = runTransformation(intermediateOutputFile, template.copy(investigatorsList = InvestigatorsListOption.NoList))
         val investigatorsList = runTransformation(intermediateILFile, template)
-        (investigatorsList |@| main)((m, i) => m :: (maybeAttachment :+ i))
+        (investigatorsList |@| main)((i, m) => (m :: maybeAttachment) :+ i)
       case _                                   =>
         val main = runTransformation(intermediateOutputFile, template)
         main.map(_ :: maybeAttachment)
@@ -243,7 +243,7 @@ object P1PDF {
     val home = System.getProperty("user.home")
     val in = new File(s"$home/pitsource.xml")
     val out = new File(s"$home/pittarget.pdf")
-    createFromFile(in, GeminiDARP, out)
+    createFromFile(in, GeminiDefaultListAtTheEnd, out)
 
     val ok = Runtime.getRuntime.exec(Array("open", out.getAbsolutePath)).waitFor
     println("Exec returned " + ok)
