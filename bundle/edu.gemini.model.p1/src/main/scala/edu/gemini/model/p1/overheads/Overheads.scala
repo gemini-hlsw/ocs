@@ -72,7 +72,7 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
     case _: VisitorBlueprint                                       => SimpleOverheads(0.00).some
     case _: AlopekeBlueprint                                       => SimpleOverheads(0.00).some
     case _: ZorroBlueprint                                         => SimpleOverheads(0.00).some
-    case _: IgrinsBlueprint                                        => NIRSpectroscopyOverheads(TimeAmount(0.1667, TimeUnit.HR)).some
+    case _: IgrinsBlueprint                                        => NIRSpectroscopyOverheads(TimeAmount(0.25, TimeUnit.HR)).some
     case _: MaroonXBlueprint                                       => SimpleOverheads(0.00).some
 
     // NIRI relies on whether or not AO is being used.
