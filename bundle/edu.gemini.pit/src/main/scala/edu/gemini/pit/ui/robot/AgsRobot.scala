@@ -17,7 +17,7 @@ object AgsRobot extends ObservationMetaRobot[URL, GuidingEstimation] {
   private val _agsLock = new Object
   private var _ags: Option[AgsClient] = None
   def ags = _ags
-  def ags_=(client: Option[AgsClient]) {
+  def ags_=(client: Option[AgsClient]): Unit = {
     _agsLock.synchronized {
       logger.info("AGS Client is now " + client)
       _ags = client

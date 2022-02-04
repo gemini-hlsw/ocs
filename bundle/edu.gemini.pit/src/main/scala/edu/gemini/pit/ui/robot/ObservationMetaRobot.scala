@@ -62,7 +62,7 @@ trait ObservationMetaRobot[K, V] extends Robot {
   // period in ms.
   private lazy val refreshTimer = new Timer(s"ObservationMetaHandlerRefresh ${getClass.getName}", true)
   private var rebindTask: Option[TimerTask] = None
-  def setAutoRefresh(ms: Long) {
+  def setAutoRefresh(ms: Long): Unit = {
     rebindTask foreach {
       _.cancel()
     }
@@ -71,7 +71,7 @@ trait ObservationMetaRobot[K, V] extends Robot {
       rebindTask = None
     } else {
       val t = new TimerTask() {
-        def run() {
+        def run(): Unit = {
           Swing.onEDT(rebind())
         }
       }
@@ -100,7 +100,7 @@ trait ObservationMetaRobot[K, V] extends Robot {
 
   // Removes all the state entries for which the value doesn't correspond to
   // at least one observation in the list or which failed in the past.
-  protected def cleanState(m: Model) {
+  protected def cleanState(m: Model): Unit = {
     val keys = obsKeys(m)
     state = state.filter {
       case (k, v) => keys.contains(k) && !v.isFailure
@@ -131,7 +131,7 @@ trait ObservationMetaRobot[K, V] extends Robot {
 
   // Updates the model to match the current state, if there is anything new
   // in it.
-  protected def updateModel(m: Model) {
+  protected def updateModel(m: Model) : Unit ={
     // We're mapping over the list essentially but keeping up with whether
     // any obs was actually updated.
     val init: (List[Observation], Boolean) = (Nil, false)
@@ -163,14 +163,14 @@ trait ObservationMetaRobot[K, V] extends Robot {
         mlens.get(o).isEmpty && state.get(k).forall(r => !r.isPending)
     }
 
-  override protected def refresh(m: Option[Model]) {
+  override protected def refresh(m: Option[Model]): Unit = {
     for {
       m <- model
       if !m.proposal.isSubmitted // don't do this once we have submitted
     } doRefresh(m)
   }
 
-  protected def doRefresh(m: Model) {
+  protected def doRefresh(m: Model): Unit = {
     cleanState(m)
 
     // Get a map from key to observation for all observations that need
@@ -193,7 +193,7 @@ trait ObservationMetaRobot[K, V] extends Robot {
 
   // This callback can come from anywhere, so route it onto the UI thread. This
   // ensures that updates are serial and always operate on the current model.
-  private def callback(k: K, v: Option[V]) {
+  private def callback(k: K, v: Option[V]): Unit = {
     Swing.onEDT {
       model.foreach {
         m =>
