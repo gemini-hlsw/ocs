@@ -7,7 +7,7 @@ organization in Global := "edu.gemini.ocs"
 // true indicates a test release, and false indicates a production release
 ocsVersion in ThisBuild := OcsVersion("2021B", true, 1, 1, 2)
 
-pitVersion in ThisBuild := OcsVersion("2022B", true, 2, 1, 3)
+pitVersion in ThisBuild := OcsVersion("2022B", true, 2, 1, 4)
 
 // Bundles by default use the ocsVersion; this is overridden in bundles used only by the PIT
 version in ThisBuild := ocsVersion.value.toOsgiVersion
