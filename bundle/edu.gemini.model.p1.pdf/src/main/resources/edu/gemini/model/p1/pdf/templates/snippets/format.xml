@@ -342,28 +342,33 @@
                 </xsl:choose>
             </xsl:when>
             <xsl:when test="name($target)='nonsidereal'">
-                <xsl:choose>
-                    <xsl:when test="$target/ephemeris/hmsDms">
-                        <xsl:value-of select="$target/ephemeris/hmsDms/*[name()=$coord-part]"/>
-                    </xsl:when>
-                    <xsl:when test="$target/ephemeris/degDeg">
-                        <xsl:choose>
-                            <xsl:when test="$coord-part='ra'">
-                                <xsl:call-template name="deg-to-hms">
-                                    <xsl:with-param name="degrees"><xsl:value-of select="$target/ephemeris/degDeg/ra"/></xsl:with-param>
-                                </xsl:call-template>
-                            </xsl:when>
-                            <xsl:when test="$coord-part='dec'">
-                                <xsl:call-template name="deg-to-dms">
-                                    <xsl:with-param name="degrees"><xsl:value-of select="$target/ephemeris/degDeg/dec"/></xsl:with-param>
-                                </xsl:call-template>
-                            </xsl:when>
-                        </xsl:choose>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        ???
-                    </xsl:otherwise>
-                </xsl:choose>
+               <xsl:variable name="middle" select="ceiling(count($target/ephemeris) div 2)"/>
+               <xsl:for-each select="$target/ephemeris">
+                  <xsl:if test= "position()=$middle">
+                      <xsl:choose>
+                          <xsl:when test="hmsDms">
+                              <xsl:value-of select="hmsDms/*[name()=$coord-part]"/>
+                          </xsl:when>
+                          <xsl:when test="degDeg">
+                              <xsl:choose>
+                                  <xsl:when test="$coord-part='ra'">
+                                      <xsl:call-template name="deg-to-hms">
+                                          <xsl:with-param name="degrees"><xsl:value-of select="degDeg/ra"/></xsl:with-param>
+                                      </xsl:call-template>
+                                  </xsl:when>
+                                  <xsl:when test="$coord-part='dec'">
+                                      <xsl:call-template name="deg-to-dms">
+                                          <xsl:with-param name="degrees"><xsl:value-of select="degDeg/dec"/></xsl:with-param>
+                                      </xsl:call-template>
+                                  </xsl:when>
+                              </xsl:choose>
+                          </xsl:when>
+                          <xsl:otherwise>
+                              ???
+                          </xsl:otherwise>
+                      </xsl:choose>
+                 </xsl:if>
+               </xsl:for-each>
             </xsl:when>
             <xsl:when test="name($target)='too'">
                 <!-- no coordinates for too, blank -->
