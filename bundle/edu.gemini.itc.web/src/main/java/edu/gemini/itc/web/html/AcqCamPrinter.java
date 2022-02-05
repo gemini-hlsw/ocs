@@ -36,6 +36,7 @@ public final class AcqCamPrinter extends PrinterBase {
 
         // we know this is the acq cam
         final AcquisitionCamera instrument = (AcquisitionCamera) result.instrument();
+        final double iqAtSource = result.iqCalc().getImageQuality();
 
         _println("");
 
@@ -47,19 +48,20 @@ public final class AcqCamPrinter extends PrinterBase {
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
-        printConfiguration(result);
+        printConfiguration(result, instrument, iqAtSource);
 
     }
 
 
-    private void printConfiguration(final ImagingResult result) {
+    private void printConfiguration(final ImagingResult result, final AcquisitionCamera instrument, double iqAtSource){
+
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + result.instrument().getName() + "\n");
         _println(HtmlPrinter.printParameterSummary(result.parameters().source()));
         _println(acqCamToString(result.instrument()));
         _println(HtmlPrinter.printParameterSummary(result.parameters().telescope()));
-        _println(HtmlPrinter.printParameterSummary(result.parameters().conditions()));
+        _println(HtmlPrinter.printParameterSummary(result.parameters().conditions(), instrument.getEffectiveWavelength(), iqAtSource));
         _println(HtmlPrinter.printParameterSummary(result.parameters().observation()));
     }
 

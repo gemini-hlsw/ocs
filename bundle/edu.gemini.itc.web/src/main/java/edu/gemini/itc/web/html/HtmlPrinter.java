@@ -40,47 +40,6 @@ public final class HtmlPrinter {
 
     }
 
-    public static String printParameterSummary(final ObservingConditions ocp) {
-        final StringBuilder sb = new StringBuilder();
-
-        sb.append("Observing Conditions:");
-        ocp.javaIq().biForEach(
-            exactIq -> sb.append(String.format("<LI> Exact Image Quality fwhm: %.2f arcsec", exactIq.toArcsec())),
-            enumIq  -> sb.append(String.format("<LI> Image Quality: %d.00%%", enumIq.getPercentage()))
-        );
-        ocp.javaCc().biForEach(
-            exactCc -> sb.append(String.format("<LI> Exact Sky Transparency (cloud cover) extinction: %.2f", exactCc.toExtinction())),
-            enumCc  -> sb.append(String.format("<LI> Sky Transparency (cloud cover): %d.00%%", enumCc.getPercentage()))
-        );
-
-        sb.append(String.format("<LI> Sky transparency (water vapour): %d.00%%", ocp.wv().getPercentage()));
-        sb.append(String.format("<LI> Sky background: %d.00%%", ocp.sb().getPercentage()));
-        double airmass = ocp.airmass();
-        sb.append(String.format("<LI> Airmass: %.2f", airmass));
-        sb.append("<BR>");
-
-        if (ocp.javaIq().isLeft()) {  // Exact IQ
-                final double zenith_iq = ocp.javaIq().toOptionLeft().getValue().toArcsec() / Math.pow(airmass, 0.6);
-                Log.fine(String.format("Zenith IQ = %.3f arcsec", zenith_iq));
-        }
-
-        final Byte iq =
-                ocp.javaIq().<Byte>biFold(e -> (byte) 0, SPSiteQuality.ImageQuality::getPercentage);
-
-        final Byte cc =
-                ocp.javaCc().<Byte>biFold(e -> (byte) 0, SPSiteQuality.CloudCover::getPercentage);
-
-        if ((iq != 0) && (cc != 0)) {
-            sb.append(String.format("<b>Likelihood of execution:</b> %.2f%%<BR>",
-                    (iq / 100.0) *
-                    (cc / 100.0) *
-                    (ocp.wv().getPercentage() / 100.0) *
-                    (ocp.sb().getPercentage() / 100.0) * 100));
-        }
-
-        return sb.toString();
-    }
-
     public static String printParameterSummary(final ObservingConditions ocp, final double wavelength, final double IqAtSource) {
 
         final double airmass = ocp.airmass();

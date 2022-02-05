@@ -58,6 +58,7 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
 
         // we know this is Flamingos
         final Flamingos2 instrument = (Flamingos2) result.instrument();
+        final double iqAtSource = result.iqCalc().getImageQuality();
 
         _println("");
 
@@ -92,7 +93,7 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
         _printFileLink(id, SingleS2NData.instance());
         _printFileLink(id, FinalS2NData.instance());
 
-        printConfiguration((Flamingos2) result.instrument(), result.parameters());
+        printConfiguration((Flamingos2) result.instrument(), result.parameters(), iqAtSource);
 
         _println(HtmlPrinter.printParameterSummary(pdp));
 
@@ -103,6 +104,7 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
 
         // we know this is Flamingos
         final Flamingos2 instrument = (Flamingos2) result.instrument();
+        final double iqAtSource = result.iqCalc().getImageQuality();
 
         _println("");
 
@@ -117,17 +119,17 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
 
         _print(OverheadTablePrinter.print(this, p, result));
 
-        printConfiguration((Flamingos2) result.instrument(), result.parameters());
+        printConfiguration((Flamingos2) result.instrument(), result.parameters(), iqAtSource);
     }
 
-    private void printConfiguration(final Flamingos2 instrument, final ItcParameters p) {
+    private void printConfiguration(final Flamingos2 instrument, final ItcParameters p, final double iqAtSource) {
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
         _println("Instrument: Flamingos 2\n");
         _println(HtmlPrinter.printParameterSummary(p.source()));
         _println(flamingos2ToString(instrument));
         _println(HtmlPrinter.printParameterSummary(p.telescope()));
-        _println(HtmlPrinter.printParameterSummary(p.conditions()));
+        _println(HtmlPrinter.printParameterSummary(p.conditions(), instrument.getEffectiveWavelength(), iqAtSource));
         _println(HtmlPrinter.printParameterSummary(p.observation()));
     }
 

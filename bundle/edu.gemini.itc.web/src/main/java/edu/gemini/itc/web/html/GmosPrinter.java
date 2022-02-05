@@ -174,6 +174,7 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
         }
 
         _print(OverheadTablePrinter.print(this, p, results[0]));
+
         printConfiguration(results[0].parameters(), instrument, iqAtSource);
     }
 
@@ -187,8 +188,11 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
 
     private void printConfiguration(final ItcParameters p, final Gmos mainInstrument, final double iqAtSource) {
         _println("");
+
         _print("<HR align=left SIZE=3>");
+
         _println(HtmlPrinter.printParameterSummary(pdp));
+
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + mainInstrument.getName() + "\n");
         _println(HtmlPrinter.printParameterSummary(p.source()));

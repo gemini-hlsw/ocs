@@ -14,7 +14,6 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
 import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 import scala.Option;
 
-
 import java.io.PrintWriter;
 import java.util.UUID;
 
@@ -57,6 +56,7 @@ public final class NiriPrinter extends PrinterBase implements OverheadTablePrint
     private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result, final ItcSpectroscopyResult s) {
 
         final Niri instrument = (Niri) result.instrument();
+        final double iqAtSource = result.iqCalc().getImageQuality();
 
         _println("");
 
@@ -67,7 +67,7 @@ public final class NiriPrinter extends PrinterBase implements OverheadTablePrint
 
         _printSoftwareAperture(result, 1 / instrument.getSlitWidth());
 
-        _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", result.iqCalc().getImageQuality()));
+        _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", iqAtSource));
 
         _println("");
 
@@ -94,7 +94,7 @@ public final class NiriPrinter extends PrinterBase implements OverheadTablePrint
         _printFileLink(id,  SingleS2NData.instance());
         _printFileLink(id,  FinalS2NData.instance());
 
-        printConfiguration(result.parameters(), instrument, result.aoSystem());
+        printConfiguration(result.parameters(), instrument, result.aoSystem(), iqAtSource);
 
         _println(HtmlPrinter.printParameterSummary(pdp));
 
@@ -103,6 +103,7 @@ public final class NiriPrinter extends PrinterBase implements OverheadTablePrint
     private void writeImagingOutput(final ImagingResult result, final ItcImagingResult s) {
 
         final Niri instrument = (Niri) result.instrument();
+        final double iqAtSource = result.iqCalc().getImageQuality();
 
         _println("");
 
@@ -110,7 +111,7 @@ public final class NiriPrinter extends PrinterBase implements OverheadTablePrint
         if (result.aoSystem().isDefined()) {
             _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
             _print(CalculatablePrinter.getTextResult(result.sfCalc(), false));
-            _println(String.format("derived image halo size (FWHM) for a point source = %.2f arcsec.\n", result.iqCalc().getImageQuality()));
+            _println(String.format("derived image halo size (FWHM) for a point source = %.2f arcsec.\n", iqAtSource));
         } else {
             _print(CalculatablePrinter.getTextResult(result.sfCalc()));
             _println(CalculatablePrinter.getTextResult(result.iqCalc()));
@@ -126,11 +127,11 @@ public final class NiriPrinter extends PrinterBase implements OverheadTablePrint
 
         _print(OverheadTablePrinter.print(this, p, getReadoutTimePerCoadd(), result));
 
-        printConfiguration(result.parameters(), instrument, result.aoSystem());
+        printConfiguration(result.parameters(), instrument, result.aoSystem(), iqAtSource);
 
     }
 
-    private void printConfiguration(final ItcParameters p, final Niri instrument, final Option<AOSystem> ao) {
+    private void printConfiguration(final ItcParameters p, final Niri instrument, final Option<AOSystem> ao, final double iqAtSource) {
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + instrument.getName() + "\n");
@@ -143,7 +144,7 @@ public final class NiriPrinter extends PrinterBase implements OverheadTablePrint
             _println(HtmlPrinter.printParameterSummary(p.telescope()));
         }
 
-        _println(HtmlPrinter.printParameterSummary(p.conditions()));
+        _println(HtmlPrinter.printParameterSummary(p.conditions(), instrument.getEffectiveWavelength(), iqAtSource));
         _println(HtmlPrinter.printParameterSummary(p.observation()));
     }
 
@@ -157,7 +158,6 @@ public final class NiriPrinter extends PrinterBase implements OverheadTablePrint
             s += "<LI>Focal Plane Mask: " + instr.mask().displayValue() + "\n";
         s += "<LI>Read Mode: " + instr.readMode().displayValue() + "\n";
         s += "<LI>Detector Bias: " + instr.wellDepth().displayValue() + "\n";
-
         s += "<BR>Pixel Size: " + instrument.getPixelSize() + "<BR>";
 
         return s;

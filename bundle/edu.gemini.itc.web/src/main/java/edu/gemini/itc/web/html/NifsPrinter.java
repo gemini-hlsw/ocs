@@ -46,6 +46,7 @@ public final class NifsPrinter extends PrinterBase implements OverheadTablePrint
     private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result, final ItcSpectroscopyResult s) {
 
         final Nifs instrument = (Nifs) result.instrument();
+        final double iqAtSource = result.iqCalc().getImageQuality();
 
         _println("");
 
@@ -53,7 +54,7 @@ public final class NifsPrinter extends PrinterBase implements OverheadTablePrint
             _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
         }
 
-        _println(String.format("derived image halo size (FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
+        _println(String.format("derived image halo size (FWHM) for a point source = %.2f arcsec\n", iqAtSource));
 
         _printRequestedIntegrationTime(result);
 
@@ -90,7 +91,7 @@ public final class NifsPrinter extends PrinterBase implements OverheadTablePrint
             _println(HtmlPrinter.printParameterSummary((Altair) result.aoSystem().get()));
         }
         _println(HtmlPrinter.printParameterSummary(result.telescope()));
-        _println(HtmlPrinter.printParameterSummary(result.conditions()));
+        _println(HtmlPrinter.printParameterSummary(result.conditions(), instrument.getEffectiveWavelength(), iqAtSource));
         _println(HtmlPrinter.printParameterSummary(result.observation()));
         _println(HtmlPrinter.printParameterSummary(pdp));
 
