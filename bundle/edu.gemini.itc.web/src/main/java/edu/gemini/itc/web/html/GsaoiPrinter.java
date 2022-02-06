@@ -42,13 +42,14 @@ public final class GsaoiPrinter extends PrinterBase
     private void writeImagingOutput(final ImagingResult result, final ItcImagingResult s) {
 
         final Gsaoi instrument = (Gsaoi) result.instrument();
+        final double iqAtSource = result.iqCalc().getImageQuality();
 
         _println("");
 
         _println((HtmlPrinter.printSummary((Gems) result.aoSystem().get())));
 
         _print(CalculatablePrinter.getTextResult(result.sfCalc(), false));
-        _println(String.format("derived image halo size (FWHM) for a point source = %.2f arcsec.\n", result.iqCalc().getImageQuality()));
+        _println(String.format("derived image halo size (FWHM) for a point source = %.2f arcsec.\n", iqAtSource));
         _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
 
         //_println(CalculatablePrinter.getBackgroundLimitResult(result.is2nCalc()));
@@ -67,7 +68,7 @@ public final class GsaoiPrinter extends PrinterBase
         _println(gsaoiToString(instrument));
         _println(printTeleParametersSummary(result));
         _println(HtmlPrinter.printParameterSummary((Gems) result.aoSystem().get()));
-        _println(HtmlPrinter.printParameterSummary(result.conditions()));
+        _println(HtmlPrinter.printParameterSummary(result.conditions(), instrument.getEffectiveWavelength(), iqAtSource));
         _println(HtmlPrinter.printParameterSummary(result.observation()));
 
     }

@@ -19,7 +19,7 @@ public final class CalculatablePrinter {
     }
 
     private static String getTextResult(final GaussianImageQualityCalculation iq) {
-        return String.format("derived image size for source = %.2f\n", iq.getImageQuality());
+        return String.format("derived image size for Gaussian source = %.2f\n", iq.getImageQuality());
     }
 
     private static String getTextResult(final ImageQualityCalculation iq) {

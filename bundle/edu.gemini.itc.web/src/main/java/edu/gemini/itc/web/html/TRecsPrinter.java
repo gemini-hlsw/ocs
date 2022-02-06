@@ -42,12 +42,13 @@ public final class TRecsPrinter extends PrinterBase {
     private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result, final ItcSpectroscopyResult s) {
 
         final TRecs instrument = (TRecs) result.instrument();
+        final double iqAtSource = result.iqCalc().getImageQuality();
 
         _println("");
 
         _printSoftwareAperture(result, 1 / instrument.getSlitWidth());
 
-        _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
+        _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", iqAtSource));
 
         _printSkyAperture(result);
 
@@ -85,7 +86,7 @@ public final class TRecsPrinter extends PrinterBase {
         _println(HtmlPrinter.printParameterSummary(result.source()));
         _println(trecsToString(instrument, result.parameters()));
         _println(HtmlPrinter.printParameterSummary(result.telescope()));
-        _println(HtmlPrinter.printParameterSummary(result.conditions()));
+        _println(HtmlPrinter.printParameterSummary(result.conditions(), instrument.getEffectiveWavelength(), iqAtSource));
         _println(HtmlPrinter.printParameterSummary(result.observation()));
         _println(HtmlPrinter.printParameterSummary(pdp));
 
@@ -94,6 +95,7 @@ public final class TRecsPrinter extends PrinterBase {
     private void writeImagingOutput(final ImagingResult result, final ItcImagingResult s) {
 
         final TRecs instrument = (TRecs) result.instrument();
+        final double iqAtSource = result.iqCalc().getImageQuality();
 
         _println("");
 
@@ -113,7 +115,7 @@ public final class TRecsPrinter extends PrinterBase {
         _println(HtmlPrinter.printParameterSummary(result.source()));
         _println(trecsToString(instrument, result.parameters()));
         _println(HtmlPrinter.printParameterSummary(result.telescope()));
-        _println(HtmlPrinter.printParameterSummary(result.conditions()));
+        _println(HtmlPrinter.printParameterSummary(result.conditions(), instrument.getEffectiveWavelength(), iqAtSource));
         _println(HtmlPrinter.printParameterSummary(result.observation()));
     }
 

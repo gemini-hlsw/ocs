@@ -54,6 +54,7 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
     private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result, final ItcSpectroscopyResult s) {
 
         final Gnirs instrument = (Gnirs) result.instrument();
+        final double iqAtSource = result.iqCalc().getImageQuality();
 
         _println("");
 
@@ -62,9 +63,9 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
         // Altair specific section
         if (result.aoSystem().isDefined()) {
             _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
-            _println(String.format("derived image halo size (FWHM) for a point source = %.2f arcsec.\n", result.iqCalc().getImageQuality()));
+            _println(String.format("derived image halo size (FWHM) for a point source = %.2f arcsec.\n", iqAtSource));
         } else {
-            _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
+            _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", iqAtSource));
         }
 
         _printSkyAperture(result);
@@ -105,7 +106,6 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
 
             }
 
-
         } else {
 
             _printImageLink(id, SignalChart.instance(), pdp);
@@ -118,25 +118,9 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
 
             _printFileLink(id, SingleS2NData.instance());
             _printFileLink(id, FinalS2NData.instance());
-
-           // printConfiguration(result.parameters(), instrument, result.aoSystem());
-
-           // _println(HtmlPrinter.printParameterSummary(pdp));
         }
-// in separate method now
-        /*_println("");
 
-        _print("<HR align=left SIZE=3>");
-
-        _println("<b>Input Parameters:</b>");
-        _println("Instrument: " + instrument.getName() + "\n");
-        _println(HtmlPrinter.printParameterSummary(result.source()));
-        _println(gnirsToString(instrument, result.parameters()));
-        _println(HtmlPrinter.printParameterSummary(result.telescope()));
-        _println(HtmlPrinter.printParameterSummary(result.conditions()));
-        _println(HtmlPrinter.printParameterSummary(result.observation()));
-        _println(HtmlPrinter.printParameterSummary(pdp)); */
-        printConfiguration(result.parameters(), instrument, result.aoSystem());
+        printConfiguration(result.parameters(), instrument, result.aoSystem(), iqAtSource);
 
         _println(HtmlPrinter.printParameterSummary(pdp));
 
@@ -146,6 +130,7 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
     private void writeImagingOutput(final ImagingResult result, final ItcImagingResult s) {
 
         final Gnirs instrument = (Gnirs) result.instrument();
+        final double iqAtSource = result.iqCalc().getImageQuality();
 
         _println("");
 
@@ -153,7 +138,7 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
         if (result.aoSystem().isDefined()) {
             _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
             _print(CalculatablePrinter.getTextResult(result.sfCalc(), false));
-            _println(String.format("derived image halo size (FWHM) for a point source = %.2f arcsec.\n", result.iqCalc().getImageQuality()));
+            _println(String.format("derived image halo size (FWHM) for a point source = %.2f arcsec.\n", iqAtSource));
         } else {
             _print(CalculatablePrinter.getTextResult(result.sfCalc()));
             _println(CalculatablePrinter.getTextResult(result.iqCalc()));
@@ -167,15 +152,13 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
-
         _print(OverheadTablePrinter.print(this, p, getReadoutTimePerCoadd(),result));
 
-
-        printConfiguration(result.parameters(), instrument, result.aoSystem());
+        printConfiguration(result.parameters(), instrument, result.aoSystem(), iqAtSource);
 
     }
 
-    private void printConfiguration(final ItcParameters p, final Gnirs instrument, final Option<AOSystem> ao) {
+    private void printConfiguration(final ItcParameters p, final Gnirs instrument, final Option<AOSystem> ao, final double iqAtSource) {
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + instrument.getName() + "\n");
@@ -188,7 +171,7 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
             _println(HtmlPrinter.printParameterSummary(p.telescope()));
         }
 
-        _println(HtmlPrinter.printParameterSummary(p.conditions()));
+        _println(HtmlPrinter.printParameterSummary(p.conditions(), instrument.getEffectiveWavelength(), iqAtSource));
         _println(HtmlPrinter.printParameterSummary(p.observation()));
     }
 

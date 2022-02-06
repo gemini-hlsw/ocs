@@ -42,12 +42,13 @@ public final class MichellePrinter extends PrinterBase {
     private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result, final ItcSpectroscopyResult s) {
 
         final Michelle instrument = (Michelle) result.instrument();
+        final double iqAtSource = result.iqCalc().getImageQuality();
 
         _println("");
 
         _printSoftwareAperture(result, 1 / instrument.getSlitWidth());
 
-        _println(String.format("derived image size(FWHM) for a point source = %.2farcsec\n", result.iqCalc().getImageQuality()));
+        _println(String.format("derived image size(FWHM) for a point source = %.2farcsec\n", iqAtSource));
 
         _printSkyAperture(result);
 
@@ -91,7 +92,7 @@ public final class MichellePrinter extends PrinterBase {
         _println(HtmlPrinter.printParameterSummary(result.source()));
         _println(michelleToString(instrument, result.parameters()));
         _println(HtmlPrinter.printParameterSummary(result.telescope()));
-        _println(HtmlPrinter.printParameterSummary(result.conditions()));
+        _println(HtmlPrinter.printParameterSummary(result.conditions(), instrument.getEffectiveWavelength(), iqAtSource));
         _println(HtmlPrinter.printParameterSummary(result.observation()));
         _println(HtmlPrinter.printParameterSummary(pdp));
 
@@ -100,6 +101,7 @@ public final class MichellePrinter extends PrinterBase {
     private void writeImagingOutput(final ImagingResult result, final ItcImagingResult s) {
 
         final Michelle instrument = (Michelle) result.instrument();
+        final double iqAtSource = result.iqCalc().getImageQuality();
 
         _println("");
 
@@ -143,7 +145,7 @@ public final class MichellePrinter extends PrinterBase {
         _println(HtmlPrinter.printParameterSummary(result.source()));
         _println(michelleToString(instrument, result.parameters()));
         _println(HtmlPrinter.printParameterSummary(result.telescope()));
-        _println(HtmlPrinter.printParameterSummary(result.conditions()));
+        _println(HtmlPrinter.printParameterSummary(result.conditions(), instrument.getEffectiveWavelength(), iqAtSource));
 
         // Michelle polarimetry calculations include a x4 overhead of observing into the calculation
         // the following code applies this factor to all the needed values
