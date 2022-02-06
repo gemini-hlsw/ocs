@@ -40,13 +40,13 @@ public final class HtmlPrinter {
 
     }
 
-    public static String printParameterSummary(final ObservingConditions ocp, final double wavelength, final double IqAtSource) {
+    public static String printParameterSummary(final ObservingConditions ocp, final double wavelength, final double iqAtSource) {
 
         final double airmass = ocp.airmass();
-        final double IqAtZenith = IqAtSource / Math.pow(airmass, 0.6);
+        final double iqAtZenith = iqAtSource / Math.pow(airmass, 0.6);
 
         final Byte iq = ocp.javaIq().<Byte>biFold(e ->
-                        iq2pct(wavelength, IqAtZenith),
+                        iq2pct(wavelength, iqAtZenith),
                         SPSiteQuality.ImageQuality::getPercentage);
 
         final Byte cc = ocp.javaCc().<Byte>biFold(e ->
@@ -59,8 +59,8 @@ public final class HtmlPrinter {
         sb.append(String.format("<LI> Airmass: %.2f", airmass));
 
         ocp.javaIq().biForEach(
-            exactIq -> sb.append(String.format("<LI> Image Quality: %d%% &nbsp; (&leq; %.2f\" at zenith, &leq; %.2f\" on-source, %s)", iq, IqAtZenith, IqAtSource, EXACT)),
-            enumIq  -> sb.append(String.format("<LI> Image Quality: %d%% &nbsp; (&leq; %.2f\" at zenith, &leq; %.2f\" on-source)", iq, IqAtZenith, IqAtSource))
+            exactIq -> sb.append(String.format("<LI> Image Quality: %d%% &nbsp; (&leq; %.2f\" at zenith, &leq; %.2f\" on-source, %s)", iq, iqAtZenith, iqAtSource, EXACT)),
+            enumIq  -> sb.append(String.format("<LI> Image Quality: %d%% &nbsp; (&leq; %.2f\" at zenith, &leq; %.2f\" on-source)", iq, iqAtZenith, iqAtSource))
         );
 
         ocp.javaCc().biForEach(
@@ -82,9 +82,9 @@ public final class HtmlPrinter {
     }
 
     // Convert wavelength (nanometers) and zenith IQ (arcseconds) to the corresponding legacy IQ bin percentile
-    public static Byte iq2pct (final double wavelength, final double zenithIQ) {
+    public static Byte iq2pct (final double wavelength, final double iqAtZenith) {
         Log.fine(String.format("Wavelength = %.3f nm", wavelength));
-        Log.fine(String.format("Zenith IQ = %.3f arcsec", zenithIQ));
+        Log.fine(String.format("Zenith IQ = %.3f arcsec", iqAtZenith));
 
         List<Integer> waveBands = Arrays.asList(350, 475, 630, 780, 900, 1020, 1200, 1650, 2200, 3400, 4800, 11700);
 
@@ -112,7 +112,7 @@ public final class HtmlPrinter {
 
         byte iqpct = 100;  // percentile when IQ > Any
         for (int i = 0; i < bins[idx].length; i++) {
-            if (zenithIQ <= bins[idx][i]) {
+            if (iqAtZenith <= bins[idx][i]) {
                 iqpct = percentile[i];
                 break;
             }
