@@ -161,7 +161,7 @@ class ShellAdvisor(
         case versionRegex(_, s, m) => s"$s.$m"
         case x                        => x
       }
-      context.title = s"$name$mod - Gemini PIT ${Semester.current.year}${Semester.current.half}.$minorVersion.2$tac$test"
+      context.title = s"$name$mod - Gemini PIT ${Semester.current.year}${Semester.current.half}.$minorVersion.3$tac$test"
       if (Platform.IS_MAC)
         shell.peer.getRootPane.putClientProperty("Window.documentModified", shell.isModified)
     }
