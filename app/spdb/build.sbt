@@ -291,8 +291,8 @@ def jluhrs(version: Version) = AppConfig(
     "-Dedu.gemini.site=south"
   ),
   props = Map(
-    "edu.gemini.spdb.dir"                -> "/home1/jluhrs/.spdb/",
-    "edu.gemini.auxfile.root"            -> "/home1/jluhrs/.auxfile",
+    "edu.gemini.spdb.dir"                -> "/Users/jluhrs/.spdb/",
+    "edu.gemini.auxfile.root"            -> "/Users/jluhrs/.auxfile",
     "edu.gemini.dataman.gsa.summit.host" -> "cpofits-lv1new.cl.gemini.edu",
     "edu.gemini.util.trpc.name"          -> "Javier's ODB (Test)",
     "edu.gemini.auxfile.fits.dest"       -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
