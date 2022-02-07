@@ -88,7 +88,7 @@ public final class MemObsExecLog extends MemProgramNodeBase implements ISPObsExe
                 buf.append(String.format("After.....: %s\n", getDocumentData().versionVector(this.getNodeKey())));
                 buf.append(formatEvents(after));
 
-                LOG.log(Level.INFO, buf.toString(), new Throwable());
+                LOG.log(Level.INFO, buf.toString());
             }
 
             return propid;
