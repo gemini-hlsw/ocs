@@ -161,7 +161,7 @@ class ShellAdvisor(
         case versionRegex(_, s, m) => s"$s.$m"
         case x                        => x
       }
-      context.title = s"$name$mod - Gemini PIT ${Semester.current.year}${Semester.current.half}.$minorVersion.2$tac$test"
+      context.title = s"$name$mod - Gemini PIT ${Semester.current.year}${Semester.current.half}.$minorVersion.3$tac$test"
       if (Platform.IS_MAC)
         shell.peer.getRootPane.putClientProperty("Window.documentModified", shell.isModified)
     }
@@ -175,13 +175,13 @@ class ShellAdvisor(
     // Add our views. Note that the ordering is significant; the underlying GFace code isn't very good so it can take
     // some fiddling around to make things look the way you want.
     context.context.addView(new BoundView.Advisor("Problems", problemView), "problems", null, null)
-    context.context.addView(new BoundView.Advisor("Overview", proposalView), "proposal", NorthOf, "problems", helpAction("http://www.gemini.edu/node/11761"))
-    context.context.addView(new BoundView.Advisor("Band 3", obsListViewB3), "band3", EastOf, "proposal", helpAction("http://www.gemini.edu/node/11774"))
-    context.context.addView(new BoundView.Advisor("Time Requests", partnerView), "partners", Beneath, "proposal", helpAction("http://www.gemini.edu/node/11762"))
-    context.context.addView(new BoundView.Advisor("Scheduling", schedulingView), "scheduling", Beneath, "proposal", helpAction("http://www.gemini.edu/node/11884"))
-    context.context.addView(new BoundView.Advisor("Submit", submitView), "submit", Beneath, "partners", helpAction("http://www.gemini.edu/node/11765"))
-    context.context.addView(new BoundView.Advisor("Observations", obsListView), "obs", Above, "band3", helpAction("http://www.gemini.edu/node/11763"))
-    context.context.addView(new BoundView.Advisor("Targets", targetView), "targets", Above, "obs", helpAction("http://www.gemini.edu/node/11764"))
+    context.context.addView(new BoundView.Advisor("Overview", proposalView), "proposal", NorthOf, "problems", helpAction("https://www.gemini.edu/observing/phase-i/pit/pit-description#Overview"))
+    context.context.addView(new BoundView.Advisor("Band 3", obsListViewB3), "band3", EastOf, "proposal", helpAction("https://www.gemini.edu/observing/phase-i/pit/pit-description#Band3"))
+    context.context.addView(new BoundView.Advisor("Time Requests", partnerView), "partners", Beneath, "proposal", helpAction("https://www.gemini.edu/observing/phase-i/pit/pit-description#Time"))
+    context.context.addView(new BoundView.Advisor("Scheduling", schedulingView), "scheduling", Beneath, "proposal", helpAction("https://www.gemini.edu/observing/phase-i/pit/pit-description#Scheduling"))
+    context.context.addView(new BoundView.Advisor("Submit", submitView), "submit", Beneath, "partners", helpAction("https://www.gemini.edu/observing/phase-i/pit/pit-description#Submit"))
+    context.context.addView(new BoundView.Advisor("Observations", obsListView), "obs", Above, "band3", helpAction("https://www.gemini.edu/observing/phase-i/pit/pit-description#Observations"))
+    context.context.addView(new BoundView.Advisor("Targets", targetView), "targets", Above, "obs", helpAction("https://www.gemini.edu/observing/phase-i/pit/pit-description#Targets"))
     context.context.addView(new BoundView.Advisor("TAC", tacView), "tac", Beneath, "partners")
 
     // Add our status bar, which requires some secret knowledge
@@ -239,7 +239,7 @@ class ShellAdvisor(
 
 
     context.actionManager.add(helpMenu,
-      Some(new BrowseAction("http://www.gemini.edu/node/11760", "Phase I Tool Help")),
+      Some(new BrowseAction("https://www.gemini.edu/observing/phase-i/pit/pit-help", "Phase I Tool Help")),
       Some(new BrowseAction(URLConstants.GET_TEMPLATES._1, URLConstants.GET_TEMPLATES._2)),
       Some(new BrowseAction(URLConstants.OPEN_ITC._1, URLConstants.OPEN_ITC._2))
     )
