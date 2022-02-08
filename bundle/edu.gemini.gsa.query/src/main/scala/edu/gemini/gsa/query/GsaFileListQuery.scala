@@ -3,8 +3,10 @@ package edu.gemini.gsa.query
 import JsonCodecs._
 
 import java.net.URL
+import java.net.URLEncoder
 
 import edu.gemini.spModel.core.{Coordinates, Site}
+import java.nio.charset.StandardCharsets
 
 /** A synchronous GSA query that obtains listings of GSA file entries. */
 sealed trait GsaFileListQuery {
@@ -40,6 +42,6 @@ object GsaFileListQuery {
 
       override def url(c: Coordinates, instrumentName: String): URL = siderealUrl(s"ra=${c.ra.toAngle.toDegrees}/dec=${c.dec.toDegrees}/sr=60", instrumentName)
 
-      override def url(n: String, instrumentName: String): URL = nonSiderealUrl(s"object=$n/sr=60", instrumentName)
+      override def url(n: String, instrumentName: String): URL = nonSiderealUrl(s"object=${URLEncoder.encode(n, StandardCharsets.UTF_8.toString)}/sr=60", instrumentName)
     }
 }

@@ -9,11 +9,11 @@ import java.util.UUID
 import edu.gemini.spModel.core.{Declination, Angle, RightAscension, Coordinates}
 
 object GsaQueryExample extends App {
-  private def query(p: GsaParams) {
+  private def query(p: GsaParams): Unit = {
     println(GsaClientImpl.query(p))
   }
 
-  override def main(args: Array[String]) {
+  override def main(args: Array[String]): Unit = {
     // Query from an observation.  GsaParams extracts the information it needs
     // from the observation.
     println("NGC1407")
@@ -31,6 +31,6 @@ object GsaQueryExample extends App {
 
     // A non-sidereal target search.  Searches by name.
     println("\nA non-sidereal target")
-    query(GsaNonSiderealParams("Jupiter", GSAInstrument(Instrument.Niri).get))
+    query(GsaNonSiderealParams("1971 UC1", GSAInstrument(Instrument.Niri).get))
   }
 }
