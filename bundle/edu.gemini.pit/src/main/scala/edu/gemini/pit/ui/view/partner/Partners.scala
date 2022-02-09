@@ -24,7 +24,7 @@ object PartnersFlags {
         // Scooch the icon over a couple px
         def getIconWidth = i.getIconWidth + 2
         def getIconHeight = i.getIconHeight
-        def paintIcon(c:Component, g:Graphics, x:Int, y:Int) {
+        def paintIcon(c:Component, g:Graphics, x:Int, y:Int): Unit = {
           i.paintIcon(c, g, x + 2, y)
         }
       })

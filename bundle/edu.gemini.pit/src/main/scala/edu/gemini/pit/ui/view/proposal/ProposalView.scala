@@ -167,9 +167,10 @@ class ProposalView(advisor:ShellAdvisor) extends BorderPanel with BoundView[Prop
     lazy val label = new Label with Bound.Self[Option[File]] {
       horizontalAlignment = Alignment.Left
       override def refresh(f: Option[Option[File]]): Unit = {
+        val msg = Map(1 -> "(science case and design)", 2 -> "(team info, previous use, etc...)") 
         f.foreach {
           f =>
-            text = s" PDF attachment $index goes here."
+            text = s" PDF attachment $index ${msg.getOrElse(index, "")}."
             icon = null
             f.foreach {
               f =>
