@@ -20,8 +20,8 @@ object Meta {
   def isDARP(p: ProposalClass): Boolean = attachmentsForType(p) == 2
 
   def attachmentsForType(p: ProposalClass): Int = p match {
-    case _: FastTurnaroundProgramClass | ExchangeProposalClass(_, _, _, ExchangePartner.SUBARU, _) => 1
-    case _                                                                                         => 2
+    case _: FastTurnaroundProgramClass => 1
+    case _                             => 2
   }
 
   def lensForAttachment(i: Int): Lens[Meta, Option[File]] = i match {
