@@ -513,8 +513,6 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       case _: QueueProposalClass                                                                            => true
       case _: LargeProgramClass                                                                             => true
       case _: ClassicalProposalClass                                                                        => true
-      case _: FastTurnaroundProgramClass                                                                    => true
-      case SpecialProposalClass(_, _, _, SpecialSubmission(_, _, SpecialProposalType.DIRECTORS_TIME), _, _) => true
     }
 
     object jwstSynergyPanel extends FlowPanel(FlowPanel.Alignment.Left)() with Bound.Self[Proposal] {
@@ -543,12 +541,6 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
             case c: ClassicalProposalClass                                                                                  =>
               visible = true
               selection.item = if (c.jwstSynergy) JWSTSynergyOption.Yes else JWSTSynergyOption.No
-            case f: FastTurnaroundProgramClass                                                                              =>
-              visible = true
-              selection.item = if (f.jwstSynergy) JWSTSynergyOption.Yes else JWSTSynergyOption.No
-            case SpecialProposalClass(_, _, _, SpecialSubmission(_, _, SpecialProposalType.DIRECTORS_TIME), _, jwstSynergy) =>
-              visible = true
-              selection.item = if (jwstSynergy) JWSTSynergyOption.Yes else JWSTSynergyOption.No
             case _                                                                                                          =>
               visible = false
           }
