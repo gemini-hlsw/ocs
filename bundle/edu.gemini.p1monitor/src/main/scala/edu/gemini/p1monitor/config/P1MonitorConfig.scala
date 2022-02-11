@@ -104,9 +104,9 @@ class P1MonitorConfig(ctx: BundleContext) {
   }
 
   private def toTemplate(s: String): P1PDF.Template = s match {
-    case "ar" | "br" | "ca" | "lp"               => P1PDF.GeminiDARP
+    case "ar" | "br" | "ca" | "lp" | "sip"       => P1PDF.GeminiDARP
     case "kr" | "uh"                             => P1PDF.GeminiStandard
-    case "cfh" | "subaru" | "sip" | "keck"       => P1PDF.GeminiStandard
+    case "cfh" | "subaru" | "keck"               => P1PDF.GeminiStandard
     case "ds" | "dt" | "sv" | "pw" | "gt" | "lp" => P1PDF.GeminiStandard
     case "cl"                                    => P1PDF.CL
     case "us"                                    => P1PDF.NOIRLabDARP
