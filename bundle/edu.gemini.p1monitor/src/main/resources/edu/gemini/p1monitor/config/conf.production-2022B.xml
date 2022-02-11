@@ -7,93 +7,93 @@
     <bcc>rnorris@gemini.edu</bcc>
 
     <type name="FastTurnaround">
-        <dir>/home/software/test_proposals/fast_turnaround/proposals/2022B</dir>
+        <dir>/home/software/proposals/fast_turnaround/proposals/2022B</dir>
         <to>pitft@gemini.edu</to>
     </type>
 
     <type name="DirectorTime">
-        <dir>/home/software/test_proposals/directors_time/proposals/2022B</dir>
+        <dir>/home/software/proposals/directors_time/proposals/2022B</dir>
         <to>pitdd@gemini.edu</to>
         <template>dt</template>
     </type>
 
     <type name="PoorWeather">
-        <dir>/home/software/test_proposals/poor_weather/proposals/2022B</dir>
+        <dir>/home/software/proposals/poor_weather/proposals/2022B</dir>
         <to>pitpw@gemini.edu</to>
         <template>pw</template>
     </type>
 
     <type name="DemoScience">
-        <dir>/home/software/test_proposals/demo_science/proposals/2022B</dir>
+        <dir>/home/software/proposals/demo_science/proposals/2022B</dir>
         <to>pitds@gemini.edu</to>
     </type>
 
     <type name="SystemVerification">
-        <dir>/home/software/test_proposals/system_verification/proposals/2022B</dir>
+        <dir>/home/software/proposals/system_verification/proposals/2022B</dir>
         <to>pitsv@gemini.edu</to>
     </type>
 
     <type name="GuaranteedTime">
-        <dir>/home/software/test_proposals/guaranteed_time/proposals/2022B</dir>
+        <dir>/home/software/proposals/guaranteed_time/proposals/2022B</dir>
         <to>pitgt@gemini.edu</to>
         <template>gt</template>
     </type>
 
     <type name="LargeProgram">
-        <dir>/home/software/test_proposals/large_program/proposals/2022B</dir>
+        <dir>/home/software/proposals/large_program/proposals/2022B</dir>
         <to>pitlp@gemini.edu</to>
         <template>lp</template>
     </type>
 
     <type name="SIP">
-        <dir>/home/software/test_proposals/subaru_intensive_program/proposals/2022B</dir>
+        <dir>/home/software/proposals/subaru_intensive_program/proposals/2022B</dir>
         <to>pitlp@gemini.edu</to>
         <template>sip</template>
     </type>
 
     <type name="ar">
-        <dir>/home/software/test_proposals/ar/proposals/2022B</dir>
+        <dir>/home/software/proposals/ar/proposals/2022B</dir>
         <to>pit.ar@gemini.edu</to>
     </type>
 
     <type name="br">
-        <dir>/home/software/test_proposals/br/proposals/2022B</dir>
+        <dir>/home/software/proposals/br/proposals/2022B</dir>
         <to>pit.br@gemini.edu</to>
     </type>
 
     <type name="ca">
-        <dir>/home/software/test_proposals/ca/proposals/2022B</dir>
+        <dir>/home/software/proposals/ca/proposals/2022B</dir>
         <to>pit.ca@gemini.edu</to>
     </type>
 
     <type name="cfh">
-        <dir>/home/software/test_proposals/cfh/proposals/2022B</dir>
+        <dir>/home/software/proposals/cfh/proposals/2022B</dir>
         <to>pit.cfh@gemini.edu</to>
     </type>
 
     <type name="cl">
-        <dir>/home/software/test_proposals/cl/proposals/2022B</dir>
+        <dir>/home/software/proposals/cl/proposals/2022B</dir>
         <to>pit.cl@gemini.edu</to>
         <template>cl</template>
     </type>
 
     <type name="kr">
-        <dir>/home/software/test_proposals/kr/proposals/2022B</dir>
+        <dir>/home/software/proposals/kr/proposals/2022B</dir>
         <to>pit.kr@gemini.edu</to>
     </type>
 
     <type name="uh">
-        <dir>/home/software/test_proposals/uh/proposals/2022B</dir>
+        <dir>/home/software/proposals/uh/proposals/2022B</dir>
         <to>pit.uh@gemini.edu</to>
     </type>
 
     <type name="us">
-        <dir>/home/software/test_proposals/us/proposals/2022B</dir>
+        <dir>/home/software/proposals/us/proposals/2022B</dir>
         <to>pit.us@gemini.edu</to>
     </type>
 
     <type name="subaru">
-        <dir>/home/software/test_proposals/subaru/proposals/2022B</dir>
+        <dir>/home/software/proposals/subaru/proposals/2022B</dir>
         <to>pit.subaru@gemini.edu</to>
     </type>
 
