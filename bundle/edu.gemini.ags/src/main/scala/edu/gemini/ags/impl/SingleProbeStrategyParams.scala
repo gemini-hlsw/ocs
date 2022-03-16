@@ -4,7 +4,7 @@ import edu.gemini.ags.api.AgsMagnitude
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.ags.conf.{FaintnessKey, ProbeLimitsCalc}
 import edu.gemini.catalog.api._
-import edu.gemini.catalog.api.CatalogName.UCAC4
+import edu.gemini.catalog.api.CatalogName.GaiaGemini
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider
@@ -27,7 +27,7 @@ sealed trait SingleProbeStrategyParams {
   def guideProbe: ValidatableGuideProbe
   def stepSize: Angle                        = Angle.fromDegrees(10)
   def minDistance: Option[Angle]             = Some(Angle.fromArcsecs(20))
-  def catalogName: CatalogName               = UCAC4
+  def catalogName: CatalogName               = GaiaGemini
 
   final def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): Option[CatalogQuery] =
     for {
