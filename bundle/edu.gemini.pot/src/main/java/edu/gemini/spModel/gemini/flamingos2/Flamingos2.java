@@ -233,8 +233,12 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         },
         GEMS_UNDER("f/33 (GeMS under-sized)", "GeMS under", 0.784, 0.09),
         GEMS_OVER("f/33 (GeMS over-sized)", "GeMS over", 0.784, 0.09),
-        H1("Hartmann A (H1)"),
-        H2("Hartmann B (H2)");
+        H1("Hartmann A (H1)") {
+            @Override public boolean isObsolete() { return true; }
+        },
+        H2("Hartmann B (H2)") {
+            @Override public boolean isObsolete() { return true; }
+        };
 
         /** The default LyotWheel value **/
         public static LyotWheel DEFAULT = OPEN;
