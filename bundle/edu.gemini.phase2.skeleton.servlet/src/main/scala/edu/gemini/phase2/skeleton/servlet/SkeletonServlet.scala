@@ -1,38 +1,38 @@
 package edu.gemini.phase2.skeleton.servlet
 
-import edu.gemini.phase2.core.model.{TemplateFolderExpansion, SkeletonStatus, SkeletonShell}
+import edu.gemini.phase2.core.model.{SkeletonShell, SkeletonStatus, TemplateFolderExpansion}
 import edu.gemini.phase2.core.odb.SkeletonStoreResult._
-import edu.gemini.phase2.core.odb.SkeletonStoreService
-import edu.gemini.phase2.skeleton.factory.{SpProgramFactory, Phase1FolderFactory}
-import edu.gemini.phase2.template.factory.api.{TemplateFolderExpansionFactory, TemplateFactory}
+import edu.gemini.phase2.core.odb.{SkeletonStoreResult, SkeletonStoreService}
+import edu.gemini.phase2.skeleton.factory.{Phase1FolderFactory, SpProgramFactory}
+import edu.gemini.phase2.template.factory.api.{TemplateFactory, TemplateFolderExpansionFactory}
 import edu.gemini.pot.spdb.IDBDatabaseService
-import edu.gemini.spModel.core.{StandardProgramId, ProgramId, SPProgramID}
+import edu.gemini.spModel.core.{ProgramId, SPProgramID, StandardProgramId}
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.rich.pot.spdb._
 import edu.gemini.spModel.template.Phase1Folder
-
 import org.apache.commons.fileupload.FileItem
 import org.apache.commons.fileupload.disk.DiskFileItemFactory
 import org.apache.commons.fileupload.servlet.ServletFileUpload
 
-import java.io.{File, BufferedOutputStream, OutputStreamWriter}
+import java.io.{BufferedOutputStream, File, OutputStreamWriter}
 import java.util.logging.{Level, Logger}
-import javax.servlet.http.{HttpServletResponse, HttpServletRequest, HttpServlet}
+import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 import scala.collection.JavaConverters._
 import scala.io.Source
-import scala.xml.{XML, Elem}
-import edu.gemini.model.p1.immutable.{ProposalConversion, ProposalIo, Proposal}
+import scala.xml.{Elem, XML}
+import edu.gemini.model.p1.immutable.{Proposal, ProposalConversion, ProposalIo}
 import edu.gemini.phase2.skeleton.auxfile.SkeletonAuxfileWriter
 import edu.gemini.spModel.obscomp.SPNote
 import edu.gemini.auxfile.copier.AuxFileCopier
 import edu.gemini.auxfile.api.AuxFile
+
 import scalaz.NonEmptyList
 import java.security.Principal
 
 
 object SkeletonServlet {
-  val LOG = Logger.getLogger(getClass.getName)
+  val LOG: Logger = Logger.getLogger(getClass.getName)
 }
 
 import Result._
@@ -53,11 +53,11 @@ import SkeletonServlet.LOG
  * Result.scala.
  */
 final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFactory, auxfileRoot: File, noteText: Option[String], copier:AuxFileCopier, user: java.util.Set[Principal]) extends HttpServlet {
-  override def doPut(req: HttpServletRequest, res: HttpServletResponse) {
+  override def doPut(req: HttpServletRequest, res: HttpServletResponse): Unit = {
     doPost(req, res)
   }
 
-  override def doPost(req: HttpServletRequest, res: HttpServletResponse) {
+  override def doPost(req: HttpServletRequest, res: HttpServletResponse): Unit = {
 
     // Get the requested information (which generates a PDF attachment file as
     // a side-effect)
@@ -67,7 +67,7 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
       // Try to store the skeleton and write out the pdfs
       val e = for {
         s <- eSkeleton.right
-        a <- writeAuxfiles(s).right
+        _ <- writeAuxfiles(s).right
         r <- storeSkeleton(s.shell, s.templates).right
       } yield r
 
@@ -164,22 +164,23 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
 
 
   // Note, this is sent to the ODB and executed there.
-  def storeFunctor(s: SkeletonShell, t: TemplateFolderExpansion, note: Option[String]) = (odb: IDBDatabaseService) => {
-    val rap = SkeletonStoreService.store(s, t, odb)
-    val (result, program) = (rap.result, rap.program)
+  def storeFunctor(s: SkeletonShell, t: TemplateFolderExpansion, note: Option[String]): IDBDatabaseService => SkeletonStoreResult =
+    (odb: IDBDatabaseService) => {
+      val rap = SkeletonStoreService.store(s, t, odb)
+      val (result, program) = (rap.result, rap.program)
 
-    // Add a welcome note.
-    note foreach { txt =>
-      val noteComp = odb.getFactory.createObsComponent(program, SPNote.SP_TYPE, null)
-      val dobj = new SPNote()
-      dobj.setNote(txt)
-      dobj.setTitle("COMPLETING PHASE II")
-      noteComp.dataObject = dobj
-      program.addObsComponent(0, noteComp)
+      // Add a welcome note.
+      note foreach { txt =>
+        val noteComp = odb.getFactory.createObsComponent(program, SPNote.SP_TYPE, null)
+        val dobj = new SPNote()
+        dobj.setNote(txt)
+        dobj.setTitle("COMPLETING PHASE II")
+        noteComp.dataObject = dobj
+        program.addObsComponent(0, noteComp)
+      }
+
+      result
     }
-
-    result
-  }
 
   private def storeSkeleton(s: SkeletonShell, t: TemplateFolderExpansion): Either[Failure, (Success, StatusReport)] =
     odb.apply(user)(storeFunctor(s, t, noteText)).left.map(err => Failure.error(err.msg)).right flatMap {
@@ -195,7 +196,7 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
     } yield new SkeletonShell(id.toSp, SpProgramFactory.create(p), f)).left map { Failure.badRequest }
 
   private def expandTemplates(folder: Phase1Folder, pid: SPProgramID): Either[Failure, TemplateFolderExpansion] =
-    TemplateFolderExpansionFactory.expand(folder, templateFactory, false, pid).left map { msg =>
+    TemplateFolderExpansionFactory.expand(folder, templateFactory, preserveLibraryIds = false, pid).left map { msg =>
       Failure.badRequest(msg)
     }
 
@@ -229,14 +230,14 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
 
   import edu.gemini.phase2.core.odb.SkeletonStatusService.getStatus
 
-  override def doGet(req: HttpServletRequest, res: HttpServletResponse) {
+  override def doGet(req: HttpServletRequest, res: HttpServletResponse): Unit = {
     send(for {
       id     <- idParameter(req).right
       status <- odb.apply(user)(getStatus(_, id)).left.map(err => Failure.error(err.msg)).right
     } yield (Success.OK, StatusReport(id, status)), req, res)
   }
 
-  private def send(e: Either[Failure, (Success, StatusReport)], req: HttpServletRequest, res: HttpServletResponse) {
+  private def send(e: Either[Failure, (Success, StatusReport)], req: HttpServletRequest, res: HttpServletResponse): Unit = {
     e.left foreach {
       failure =>
         val msg = failure.display + failure.msg.map(m => ": " + m).getOrElse("")
@@ -253,7 +254,7 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
     }
   }
 
-  private def send(xml: Elem, res: HttpServletResponse) {
+  private def send(xml: Elem, res: HttpServletResponse): Unit = {
     res.setContentType("text/xml; charset=UTF-8")
     val w = new OutputStreamWriter(new BufferedOutputStream(res.getOutputStream), "UTF-8")
     try {

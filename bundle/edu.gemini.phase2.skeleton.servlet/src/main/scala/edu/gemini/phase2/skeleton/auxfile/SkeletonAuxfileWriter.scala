@@ -2,7 +2,7 @@ package edu.gemini.phase2.skeleton.auxfile
 
 import edu.gemini.auxfile.api.AuxFile
 import edu.gemini.auxfile.copier.AuxFileCopier
-import edu.gemini.model.p1.immutable.{Meta, ProposalIo, Proposal}
+import edu.gemini.model.p1.immutable.{ProposalIo, Proposal}
 import edu.gemini.model.p1.pdf.P1PDF
 import edu.gemini.shared.util.immutable.ImOption
 import edu.gemini.spModel.core.SPProgramID
@@ -13,10 +13,10 @@ import scala.xml.XML
 
 object SkeletonAuxfileWriter {
 
-  case class ProposalFiles(progId: SPProgramID, auxfileDir: File) {
-    val proposalXml           = mkFile("proposal",   "xml")
-    val proposalAttachmentPdf = mkFile("attachment", "pdf")
-    val proposalSummaryPdf    = mkFile("summary",    "pdf")
+  final case class ProposalFiles(progId: SPProgramID, auxfileDir: File) {
+    val proposalXml: File           = mkFile("proposal",   "xml")
+    val proposalAttachmentPdf: File = mkFile("attachment", "pdf")
+    val proposalSummaryPdf: File    = mkFile("summary",    "pdf")
 
     def proposalAuxfile: AuxFile =
       auxfile(proposalXml, "Proposal Document")
