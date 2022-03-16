@@ -110,7 +110,7 @@ public class VisitorEditor extends ComponentEditor<ISPObsComponent, VisitorInstr
     }
 
     private void adjustStaffOnlyFields() {
-        configCtrl.getComponent().setEnabled(StaffBean.isStaff());
+        // Do nothing for now.
     }
 
 }
