@@ -12,7 +12,7 @@ object VisitorPosAngleMode {
   /**
    * Indicates that the position angle cannot be set for this visitor instrument.
    */
-  case object Fixed   extends VisitorPosAngleMode
+  case object Fixed0  extends VisitorPosAngleMode
 
   /**
    * Indicates that the position angle is settable for this visitor instrument.

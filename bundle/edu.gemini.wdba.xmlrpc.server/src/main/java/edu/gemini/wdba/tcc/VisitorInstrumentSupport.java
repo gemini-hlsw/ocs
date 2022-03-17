@@ -52,7 +52,7 @@ public class VisitorInstrumentSupport implements ITccInstrumentSupport {
         // visitors other than MaroonX in the future.  If so, we might need a
         // bit more `VisitorConfig` information.
 
-        return (inst.getVisitorConfig().positionAngleMode() == VisitorPosAngleMode.Fixed$.MODULE$) ?
+        return (inst.getVisitorConfig().positionAngleMode() == VisitorPosAngleMode.Fixed0$.MODULE$) ?
                 TccNames.IPA0 : null;
 
     }

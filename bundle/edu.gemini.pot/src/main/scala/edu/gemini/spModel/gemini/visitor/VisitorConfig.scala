@@ -129,7 +129,7 @@ object VisitorConfig {
       Duration.ofSeconds(100L)
 
     override val positionAngleMode: VisitorPosAngleMode =
-      VisitorPosAngleMode.Fixed
+      VisitorPosAngleMode.Fixed0
 
   }
 

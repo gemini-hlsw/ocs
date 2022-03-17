@@ -117,7 +117,7 @@ public class VisitorEditor extends ComponentEditor<ISPObsComponent, VisitorInstr
     private void updatePosAngleEnabledState(final boolean editorEnabledState) {
         posAngleCtrl.getComponent().setEnabled(
             editorEnabledState &&
-                (getDataObject().getVisitorConfig().positionAngleMode() != VisitorPosAngleMode.Fixed$.MODULE$)
+                (getDataObject().getVisitorConfig().positionAngleMode() != VisitorPosAngleMode.Fixed0$.MODULE$)
         );
     }
 
