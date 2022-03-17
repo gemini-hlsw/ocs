@@ -130,5 +130,5 @@ fi
 # Finally add the skeleton host and arguments.
 CURL+=" http://${HOST}:8442/skeleton?convert=true"
 
-eval $CURLXS
+eval $CURL
 
