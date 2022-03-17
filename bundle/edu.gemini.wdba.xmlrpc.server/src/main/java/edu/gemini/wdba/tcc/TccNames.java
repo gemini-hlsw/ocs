@@ -56,6 +56,7 @@ public final class TccNames {
     public static final String GUIDE_GROUP = "guideGroup";
     public static final String IAA = "iaa";
     public static final String IPA = "ipa";
+    public static final String IPA0 = "IPA0";
     public static final String ISS_PORT = "issPort";
     public static final String INSTRUMENT = "instrument";
     public static final String LONGASCNODE = "longascnode";

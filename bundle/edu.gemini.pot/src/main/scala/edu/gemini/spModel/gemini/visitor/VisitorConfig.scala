@@ -32,6 +32,9 @@ sealed trait VisitorConfig extends Product with Serializable {
   def positionAngle: Angle =
     DefaultPositionAngle
 
+  def positionAngleMode: VisitorPosAngleMode =
+    VisitorPosAngleMode.Mutable
+
   def noteTitles: List[String] =
     Nil
 
@@ -124,6 +127,9 @@ object VisitorConfig {
 
     override val readoutTime: Duration =
       Duration.ofSeconds(100L)
+
+    override val positionAngleMode: VisitorPosAngleMode =
+      VisitorPosAngleMode.Fixed
 
   }
 

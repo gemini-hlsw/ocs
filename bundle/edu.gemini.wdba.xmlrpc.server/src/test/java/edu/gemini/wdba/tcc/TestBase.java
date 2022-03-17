@@ -100,7 +100,14 @@ public abstract class TestBase {
     }
 
     protected Element getSubconfig(Document doc, String type) {
-        return (Element) doc.selectSingleNode("/" + TccNames.ROOT + "/paramset[@type='" + type + "']");
+        return (Element) doc.selectSingleNode("/" + TccNames.ROOT + "//paramset[@type='" + type + "']");
+    }
+
+    protected Optional<String> getParam(Document doc, String name) {
+        final Optional<Element> elem = Optional.ofNullable(
+            (Element) doc.selectSingleNode("/" + TccNames.ROOT + "//param[@name='" + name + "']")
+        );
+        return elem.map(e -> e.attributeValue("value"));
     }
 
     protected Element getTccFieldConfig(Document doc) {
@@ -125,15 +132,10 @@ public abstract class TestBase {
         return res;
     }
 
-    protected Element getTcsConfiguration(Document doc) {
-        return getSubconfig(doc, TccNames.TCS_CONFIGURATION);
-    }
-
-    protected Map<String, String> getTcsConfigurationMap(Document doc) {
+    protected Map<String, String> configMap(Element e) {
         final Map<String, String> res = new HashMap<>();
 
-        final Element psetElement = getTcsConfiguration(doc);
-        @SuppressWarnings({"unchecked"}) List<Element> params = (List<Element>) psetElement.elements();
+        @SuppressWarnings({"unchecked"}) List<Element> params = (List<Element>) e.elements();
         for (Element paramElement : params) {
             final String name  = paramElement.attributeValue("name");
             final String value = paramElement.attributeValue("value");
@@ -141,5 +143,13 @@ public abstract class TestBase {
         }
 
         return Collections.unmodifiableMap(res);
+    }
+
+    protected Element getTcsConfiguration(Document doc) {
+        return getSubconfig(doc, TccNames.TCS_CONFIGURATION);
+    }
+
+    protected Map<String, String> getTcsConfigurationMap(Document doc) {
+        return configMap(getTcsConfiguration(doc));
     }
 }

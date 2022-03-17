@@ -1,13 +1,13 @@
 package edu.gemini.wdba.tcc;
 
-import edu.gemini.spModel.gemini.gpi.Gpi;
 import edu.gemini.spModel.gemini.visitor.VisitorInstrument;
+import edu.gemini.spModel.gemini.visitor.VisitorPosAngleMode;
 
 /**
  * TCC support for Visitor Instruments
  */
 public class VisitorInstrumentSupport implements ITccInstrumentSupport {
-    private ObservationEnvironment _oe;
+    private final ObservationEnvironment _oe;
 
     private VisitorInstrumentSupport(ObservationEnvironment oe) {
         if (oe == null) throw new IllegalArgumentException("Observation environment can not be null");
@@ -45,7 +45,16 @@ public class VisitorInstrumentSupport implements ITccInstrumentSupport {
 
     @Override
     public String getFixedRotatorConfigName() {
-        return null;
+
+        final VisitorInstrument inst = (VisitorInstrument) _oe.getInstrument();
+
+        // Assuming IPA0 here, which theoretically might not be the case for
+        // visitors other than MaroonX in the future.  If so, we might need a
+        // bit more `VisitorConfig` information.
+
+        return (inst.getVisitorConfig().positionAngleMode() == VisitorPosAngleMode.Fixed$.MODULE$) ?
+                TccNames.IPA0 : null;
+
     }
 
     @Override
