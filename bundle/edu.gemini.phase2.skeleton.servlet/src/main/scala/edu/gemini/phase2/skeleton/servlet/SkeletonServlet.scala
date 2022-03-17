@@ -30,6 +30,8 @@ import edu.gemini.auxfile.api.AuxFile
 import scalaz.NonEmptyList
 import java.security.Principal
 
+import scala.annotation.tailrec
+
 
 object SkeletonServlet {
   val LOG: Logger = Logger.getLogger(getClass.getName)
@@ -75,12 +77,12 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
 
     } finally {
       // Cleanup PDF attachment file.
-      eSkeleton.right foreach { s => s.attachment.delete() }
+      eSkeleton.right foreach { s => s.attachments.foreach(_.delete()) }
     }
   }
 
   // Contains all the information required to make the requested skeleton.
-  case class SkeletonRequest(id: StandardProgramId, prop: Proposal, attachment: File, shell: SkeletonShell, templates: TemplateFolderExpansion)
+  case class SkeletonRequest(id: StandardProgramId, prop: Proposal, attachments: List[File], shell: SkeletonShell, templates: TemplateFolderExpansion)
 
   private def skeletonRequest(req: HttpServletRequest): Either[Failure, SkeletonRequest] =
     for {
@@ -91,8 +93,8 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
       i       <- programId(l, p).right
       s       <- makeSkeleton(i, p).right
       t       <- expandTemplates(s.folder, i.toSp).right
-      a       <- pdfAttachment(l).right
-    } yield SkeletonRequest(i, p, a, s, t)
+      as      <- pdfAttachments(l).right
+    } yield SkeletonRequest(i, p, as, s, t)
 
   private val up = new ServletFileUpload(new DiskFileItemFactory)
 
@@ -148,12 +150,35 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
       p <- ProgramId.parseStandardId(s)
     } yield p
 
-  private def pdfAttachment(items: List[FileItem]): Either[Failure, File] =
-    readItem("attachment", items, it => {
-      val tmp = File.createTempFile("pdfattachment", ".pdf")
+  private def pdfAttachments(items: List[FileItem]): Either[Failure, List[File]] =
+    // There seems to be no Either `orElse` in this version of scala.  So just match.
+    // We want either "attachment" (old style) or else "attachment1", "attachment2", ...
+    pdfAttachment(items, None) match {
+      case Left(_)  => numberedAttachments(items)
+      case Right(f) => Right(List(f))
+    }
+
+  private def numberedAttachments(items: List[FileItem]): Either[Failure, List[File]] = {
+    @tailrec
+    def go(index: Int, results: List[File]): List[File] =
+      pdfAttachment(items, Some(index)) match {
+        case Left(_)  => results
+        case Right(f) => go(index+1, f :: results)
+      }
+
+    val results = go(1, Nil)
+    if (results.isEmpty) Left(Failure.badRequest("No numbered attachment parameters (e.g. attachment1)"))
+    else Right(results.reverse)
+  }
+
+  private def pdfAttachment(items: List[FileItem], index: Option[Int]): Either[Failure, File] = {
+    val idxString = index.map(_.toString).getOrElse("")
+    readItem(s"attachment$idxString", items, it => {
+      val tmp = File.createTempFile(s"attachment$idxString", ".pdf")
       it.write(tmp)
       tmp
     })
+  }
 
   private def readItem[T](paramName: String, items: List[FileItem], map: FileItem => T): Either[Failure, T] =
     for {
@@ -223,7 +248,7 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
 
   private def writeAuxfiles(req: SkeletonRequest): Either[Failure, List[AuxFile]] = {
     val dir = new File(auxfileRoot, req.id.toString)
-    SkeletonAuxfileWriter.write(req.id.toSp, req.prop, req.attachment, dir, copier).left map { err =>
+    SkeletonAuxfileWriter.write(req.id.toSp, req.prop, req.attachments, dir, copier).left map { err =>
       Failure.error(s"Problem writing auxiliary file ${err.file.getName}: ${err.exception.getMessage}")
     }
   }
