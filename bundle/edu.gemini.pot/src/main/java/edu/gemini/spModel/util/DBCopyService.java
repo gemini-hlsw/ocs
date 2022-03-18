@@ -131,7 +131,7 @@ public class DBCopyService {
             ISPGroup group = _factory.createGroupCopy(_targetProg, existingGroup, false);
             // need to reset the observations in the group
             for (ISPObservation o : group.getObservations()) {
-                ObservationNI.reset(o, sameProgram(group, _targetProg));
+                ObservationNI.reset(o, sameProgram(existingGroup, _targetProg));
             }
             return group;
         }
