@@ -2,7 +2,7 @@ package edu.gemini.phase2.skeleton.auxfile
 
 import edu.gemini.auxfile.api.AuxFile
 import edu.gemini.auxfile.copier.AuxFileCopier
-import edu.gemini.model.p1.immutable.{Meta, ProposalIo, Proposal}
+import edu.gemini.model.p1.immutable.{ProposalIo, Proposal}
 import edu.gemini.model.p1.pdf.P1PDF
 import edu.gemini.shared.util.immutable.ImOption
 import edu.gemini.spModel.core.SPProgramID
@@ -11,24 +11,43 @@ import java.io.File
 import java.time.Instant
 import scala.xml.XML
 
+import scalaz._
+import Scalaz._
+
 object SkeletonAuxfileWriter {
 
-  case class ProposalFiles(progId: SPProgramID, auxfileDir: File) {
-    val proposalXml           = mkFile("proposal",   "xml")
-    val proposalAttachmentPdf = mkFile("attachment", "pdf")
-    val proposalSummaryPdf    = mkFile("summary",    "pdf")
+  final case class Pdf(in: File, out: File, aux: AuxFile)
+
+  final case class ProposalFiles(progId: SPProgramID, attachments: List[File], auxfileDir: File) {
+
+    val proposalXml: File  =
+      mkFile("proposal",   "xml")
+
+    val proposalAttachmentPdfs: List[Pdf] =
+      attachments match {
+
+        case in :: Nil =>
+          val out = mkFile("attachment", "pdf")
+          List(Pdf(in, out, auxfile(out, "Proposal Attachment")))
+
+        case _        =>
+          attachments.zipWithIndex.map { case (in, i) =>
+            val out = mkFile(s"attachment${i+1}", "pdf")
+            Pdf(in, out, auxfile(out, s"Proposal Attachment ${i+1}"))
+          }
+      }
+
+    val proposalSummaryPdf: File =
+      mkFile("summary",    "pdf")
 
     def proposalAuxfile: AuxFile =
       auxfile(proposalXml, "Proposal Document")
-
-    def proposalAttachmentAuxfile: AuxFile =
-      auxfile(proposalAttachmentPdf, "Proposal Attachment")
 
     def proposalSummaryAuxfile: AuxFile =
       auxfile(proposalSummaryPdf, "Proposal Summary")
 
     def auxfiles: List[AuxFile] =
-      List(proposalAuxfile, proposalAttachmentAuxfile, proposalSummaryAuxfile)
+      proposalAuxfile :: (proposalAttachmentPdfs.map(_.aux) :+ proposalSummaryAuxfile)
 
     private def auxfile(f: File, desc: String): AuxFile =
       new AuxFile(progId, f.getName, desc, f.length(), f.lastModified(), false, ImOption.empty[Instant])
@@ -37,9 +56,9 @@ object SkeletonAuxfileWriter {
       new File(auxfileDir, "%s_%s.%s".format(progId.toString, suffix, extension))
   }
 
-  def write(id: SPProgramID, proposal: Proposal, pdfAttachment: File, auxfileDir: File, copier:AuxFileCopier): Either[FileError, List[AuxFile]] = {
+  def write(id: SPProgramID, proposal: Proposal, pdfAttachments: List[File], auxfileDir: File, copier:AuxFileCopier): Either[FileError, List[AuxFile]] = {
     // Get the proposal files that will be written.
-    val files = ProposalFiles(id, auxfileDir)
+    val files = ProposalFiles(id, pdfAttachments, auxfileDir)
 
     // Update the proposal attachment name.  Use a path relative to the cwd.
     // FIXME
@@ -53,10 +72,14 @@ object SkeletonAuxfileWriter {
       _ <- writeProposal(updatedProposal, files.proposalXml).right
       _ <- writeMeta(files.proposalXml, files.proposalAuxfile).right
 
-      _ <- writeAttachment(pdfAttachment, files.proposalAttachmentPdf).right
-      _ <- writeMeta(files.proposalAttachmentPdf, files.proposalAttachmentAuxfile).right
+      _ <- files.proposalAttachmentPdfs.traverseU_ { pdf =>
+        for {
+          _ <- writeAttachment(pdf.in, pdf.out).right
+          _ <- writeMeta(pdf.out, pdf.aux).right
+        } yield ()
+      }
 
-      _ <- writeSummary(updatedProposal, pdfAttachment, files.proposalSummaryPdf).right
+      _ <- writeSummary(updatedProposal, pdfAttachments, files.proposalSummaryPdf).right
       _ <- writeMeta(files.proposalSummaryPdf, files.proposalSummaryAuxfile).right
 
       _ <- sftp(id,files,copier).right
@@ -68,7 +91,7 @@ object SkeletonAuxfileWriter {
   private def sftp(id: SPProgramID, files: ProposalFiles, copier: AuxFileCopier): Either[FileError, Unit] = {
     for {
       _ <- sftp(id, files.proposalXml, copier).right
-      _ <- sftp(id, files.proposalAttachmentPdf, copier).right
+      _ <- files.proposalAttachmentPdfs.traverseU_(pdf => sftp(id, pdf.out, copier).right)
       _ <- sftp(id, files.proposalSummaryPdf, copier).right
     } yield Unit
   }
@@ -95,12 +118,11 @@ object SkeletonAuxfileWriter {
   private def writeAttachment(in: File, out: File): Either[FileError, File] =
     writeTo(out) { tmp => in.eCopyTo(tmp) }
 
-  private def writeSummary(p: Proposal, attachment: File, out: File): Either[FileError, File] = {
+  private def writeSummary(p: Proposal, attachments: List[File], out: File): Either[FileError, File] = {
     writeTo(out) { tmp =>
       try {
         val xml = ProposalIo.writeToXml(p)
-        // FIXME: Support multiple attachmens
-        P1PDF.createFromNode(xml, List(attachment), P1PDF.GeminiDARP, tmp, None)
+        P1PDF.createFromNode(xml, attachments, P1PDF.GeminiDARP, tmp, None)
         Right(())
       } catch {
         case ex: Exception => Left(FileError(out, ex))
