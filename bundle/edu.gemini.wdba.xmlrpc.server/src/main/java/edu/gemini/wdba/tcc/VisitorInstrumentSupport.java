@@ -48,12 +48,12 @@ public class VisitorInstrumentSupport implements ITccInstrumentSupport {
 
         final VisitorInstrument inst = (VisitorInstrument) _oe.getInstrument();
 
-        // Assuming IPA0 here, which theoretically might not be the case for
+        // Assuming fixed here, which theoretically might not be the case for
         // visitors other than MaroonX in the future.  If so, we might need a
         // bit more `VisitorConfig` information.
 
         return (inst.getVisitorConfig().positionAngleMode() == VisitorPosAngleMode.Fixed0$.MODULE$) ?
-                TccNames.IPA0 : null;
+                TccNames.FIXED.toLowerCase() : null;
 
     }
 
