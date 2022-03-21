@@ -966,13 +966,13 @@ public class ImprovedSkyCalcMethods {
         if (mZD <= 90.8) {
             moondist /= 60.27;    // divide by the mean Earth-Moon distance
             istar = Math.pow(10, (-0.4d*(3.84d + 0.026d*abs(mpa) + (4.e-9)* Math.pow(mpa, 4)))) / (moondist * moondist);
-        	if(abs(mpa) < 7.) {  // crude accounting for opposition effect
+            if(abs(mpa) < 7.) {  // crude accounting for opposition effect
                 /* 35 per cent brighter at full, effect tapering linearly to
                 zero at 7 degrees away from full. mentioned peripherally in
                 Krisciunas and Scheafer, p. 1035. */
                 istar *= (1.35 - 0.05 * abs(mpa));
             }
-		    frho = 229087.0 * (1.06 + cos(mdist/degrad) * cos(mdist/degrad));
+            frho = 229087.0 * (1.06 + cos(mdist/degrad) * cos(mdist/degrad));
             if (abs(mdist) >= 10.) {
                 fp = frho + Math.pow(10, (6.15d - mdist/40.0d));
             } else if (abs(mdist) > 0.25) {
@@ -985,9 +985,7 @@ public class ImprovedSkyCalcMethods {
 
         // sky brightness in Vmag/arcsec^2
         double ret = Q - Math.log10((Bmoon + Bsky) / 0.263) / Math.log10(a);
-
-       // System.out.printf("sb(%1.2f, %1.2f, %1.2f, %1.2f, %1.2f) => %1.3f\n", mpa, mdist, mZD, ZD, sZD, ret);
-
+        // System.out.printf("sb(%1.2f, %1.2f, %1.2f, %1.2f, %1.2f) => %1.3f\n", mpa, mdist, mZD, ZD, sZD, ret);
         return ret;
         }
 
