@@ -126,7 +126,7 @@ public final class ImprovedSkyCalc extends ImprovedSkyCalcMethods {
                         altitude,distmoon.d);
                 }
             }
-            totalSkyBrightness = sb(180. - lunarPhaseAngle, lunarDistance, 90 - lunarElevation, 90 - altitude, 90 - sunAltitude);
+            totalSkyBrightness = sb(180. - lunarPhaseAngle, lunarDistance, 90 - lunarElevation, 90 - altitude, 90 - sunAltitude, distmoon.d);
             lunarIlluminatedFraction=(float) (0.5*(1.-cos(subtend(ramoon.d,decmoon.d,rasun.d,decsun.d))));
 
         }
