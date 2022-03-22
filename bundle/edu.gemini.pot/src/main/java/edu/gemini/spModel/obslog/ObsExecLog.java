@@ -16,7 +16,9 @@ import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.dataset.DatasetLabel;
+import edu.gemini.spModel.event.EndVisitEvent;
 import edu.gemini.spModel.event.ObsExecEvent;
+import edu.gemini.spModel.event.StartVisitEvent;
 import edu.gemini.spModel.gemini.calunit.calibration.CalConfigFactory;
 import edu.gemini.spModel.gemini.calunit.calibration.CalConfigPio;
 import edu.gemini.spModel.gemini.init.SimpleNodeInitializer;
@@ -28,6 +30,7 @@ import edu.gemini.spModel.pio.PioParseException;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 
 /**
@@ -266,6 +269,27 @@ public final class ObsExecLog extends AbstractDataObject implements ISPMergeable
                 LOG.info(String.format("%s completed obslog update (label=%s, evt=%s)", obsId, label.getOrNull(), evt.getOrNull()));
             }
         });
+    }
+
+    // REL-4013: Extracts all start/end visit events, if any.
+    public List<ObsExecEvent> getVisitEvents() {
+        return getRecord()
+                 .getAllEventList()
+                 .stream()
+                 .filter(e -> (e instanceof StartVisitEvent) || (e instanceof EndVisitEvent))
+                 .collect(Collectors.toList());
+    }
+
+    // REL-4013: Extracts all start/end visit events, if any.
+    public static String formatEvents(List<ObsExecEvent> events) {
+        final StringBuilder buf = new StringBuilder();
+        events.forEach(e -> buf.append(String.format("\t%s\n", e)));
+        return buf.toString();
+    }
+
+    // REL-4013
+    public String getFormattedVisitEvents() {
+        return formatEvents(getVisitEvents());
     }
 
 }

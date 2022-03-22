@@ -2,6 +2,7 @@ package edu.gemini.pot.sp;
 
 import edu.gemini.pot.sp.version.LifespanId;
 import edu.gemini.shared.util.VersionVector;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.data.ISPDataObject;
 
@@ -100,6 +101,12 @@ public interface ISPNode {
      * <code>null</code> otherwise
      */
     ISPObservation getContextObservation();
+
+    /**
+     * Gets the observation ID associated with this node (if any).
+     * @return the observation in which this node lives, if any
+     */
+    Option<SPObservationID> getContextObservationId();
 
     /**
      * Returns <code>true</code> if events are enabled, <code>false</code>
