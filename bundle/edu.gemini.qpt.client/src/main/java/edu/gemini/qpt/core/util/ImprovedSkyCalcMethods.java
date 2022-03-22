@@ -934,9 +934,10 @@ public class ImprovedSkyCalcMethods {
      * @param mZD moon zenith distance [deg]
      * @param ZD object zenith distance [deg]
      * @param sZD Sun zenith distance [deg]
+     * @param moondist Earth-Moon distance
      */
-    protected static double sb(double mpa, double mdist, double mZD, double ZD, double sZD) {
-                
+    protected static double sb(double mpa, double mdist, double mZD, double ZD, double sZD, double moondist) {
+
         final double degrad  =   57.2957795130823d; 
         final double k=0.172d; // ; mag/airmass for Hale Pohaku
         final double a=2.51189d;
@@ -948,49 +949,43 @@ public class ImprovedSkyCalcMethods {
         //    Vzen = dblarr(n_elements(ZD))
         //    Vzen[*] = 21.587d
         double Vzen = 21.587d;
-        
-        
+
         //    ; Correct for brightening due to twilight
         //    ii = where(saltit gt -18.5)
         //    if (ii[0] ne -1) then Vzen[ii] = Vzen[ii] - ztwilight(saltit[ii])
         if (saltit > -18.5) {
             Vzen -= ztwilight(saltit);
         }
-        
-        //     Bzen = 0.263d *          a^(Q-Vzen)     ; zenith sky brightness
-        double Bzen = 0.263d * Math.pow(a, Q-Vzen); 
-    
-        // ; sky constribution
-        //     Bsky =Bzen*xair(ZD)*          10.^(-0.4d*k*(xair(ZD)-1.0d))
+
+        // Sky contribution
+        double Bzen = 0.263d * Math.pow(a, Q-Vzen);   // zenith sky brightness
         double Bsky= Bzen*xair(ZD)* Math.pow(10, (-0.4d*k*(xair(ZD)-1.0d)));
-    
-        // ; moon contribution
-        // n=n_elements(Bsky)
-        //     istar=0.0d & fp=0.0d & Bmoon=dblarr(n)
-        double istar=0.0d,  fp=0.0d,  Bmoon=0.;
+
+        // Moon contribution
+        double istar=0.0d,  fp=0.0d,  Bmoon=0.0d, frho=0.0d;
         if (mZD <= 90.8) {
-    //      istar=         10^ (-0.4d*(3.84d + 0.026d*abs(mpa) + (4.d-9)*          mpa^ 4))
-            istar=Math.pow(10, (-0.4d*(3.84d + 0.026d*abs(mpa) + (4.e-9)* Math.pow(mpa, 4))));
-            if (mdist >= 10.) {
-    //        fp=(1.06d +          cos(mdist[j]/degrad)^ 2) *         10^ 5.36d  +          10^ (6.15d - mdist[j]/40.0d) $
-              fp=(1.06d + Math.pow(cos(mdist   /degrad), 2))*Math.pow(10, 5.36d) + Math.pow(10, (6.15d - mdist   /40.0d));
-            } else {
-    //          fp=6.2d7/         mdist^ 2;
-                fp=6.2e7/Math.pow(mdist, 2);
+            moondist /= 60.27;    // divide by the mean Earth-Moon distance
+            istar = Math.pow(10, (-0.4d*(3.84d + 0.026d*abs(mpa) + (4.e-9)* Math.pow(mpa, 4)))) / (moondist * moondist);
+            if(abs(mpa) < 7.) {  // crude accounting for opposition effect
+                /* 35 per cent brighter at full, effect tapering linearly to
+                zero at 7 degrees away from full. mentioned peripherally in
+                Krisciunas and Scheafer, p. 1035. */
+                istar *= (1.35 - 0.05 * abs(mpa));
             }
-    //      Bmoon[j]=fp*istar*         10^ (-0.4d*k*xair(mZD[j]))*(1.0d -          10^ (-0.4d*k*xair(ZD[j])))
-            Bmoon=   fp*istar*Math.pow(10, (-0.4d*k*xair(mZD)))  *(1.0d - Math.pow(10, (-0.4d*k*xair(ZD))));
+            frho = 229087.0 * (1.06 + cos(mdist/degrad) * cos(mdist/degrad));
+            if (abs(mdist) >= 10.) {
+                fp = frho + Math.pow(10, (6.15d - mdist/40.0d));
+            } else if (abs(mdist) > 0.25) {
+                fp = frho + 6.2e7/Math.pow(mdist, 2);
+            } else {
+            	fp = frho + 9.9e8;
+            }
+            Bmoon = fp * istar * Math.pow(10, -0.4d * k * xair(mZD)) * (1.0d - Math.pow(10, -0.4d * k * xair(ZD)));
         }
-        //    ;print,istar,fp,Bmoon,Bsky
-        //    ;print,Q-alog10((Bsky)/0.263)/alog10(a),Q-alog10((Bmoon)/0.263)/alog10(a)
-    
-    //    ; sky brightness in Vmag/arcsec^2
-    //  return Q-    alog10((Bmoon+Bsky)/0.263)/    alog10(a);
-        double ret = Q-Math.log10((Bmoon+Bsky)/0.263)/Math.log10(a);
-    
-        
-    //    System.out.printf("sb(%1.2f, %1.2f, %1.2f, %1.2f, %1.2f) => %1.3f\n", mpa, mdist, mZD, ZD, sZD, ret);
-    
+
+        // sky brightness in Vmag/arcsec^2
+        double ret = Q - Math.log10((Bmoon + Bsky) / 0.263) / Math.log10(a);
+        // System.out.printf("sb(%1.2f, %1.2f, %1.2f, %1.2f, %1.2f) => %1.3f\n", mpa, mdist, mZD, ZD, sZD, ret);
         return ret;
         }
 
@@ -1015,11 +1010,12 @@ public class ImprovedSkyCalcMethods {
     
         istar = -0.4*(3.84 + 0.026*abs(alpha) + 4.0e-9*pow(alpha,4.)); /*eqn 20*/
         istar =  pow(10.,istar)/(moondist * moondist);
-        if(abs(alpha) < 7.)   /* crude accounting for opposition effect */
-        istar = istar * (1.35 - 0.05 * abs(istar));
-        /* 35 per cent brighter at full, effect tapering linearly to
-           zero at 7 degrees away from full. mentioned peripherally in
-           Krisciunas and Scheafer, p. 1035. */
+        if(abs(alpha) < 7.) {  // crude accounting for opposition effect
+            /* 35 per cent brighter at full, effect tapering linearly to
+            zero at 7 degrees away from full. mentioned peripherally in
+            Krisciunas and Scheafer, p. 1035. */
+            istar *= (1.35 - 0.05 * abs(alpha));
+        }
         fofrho = 229087. * (1.06 + cos(rho_rad)*cos(rho_rad));
         if(abs(rho) > 10.)
            fofrho=fofrho+pow(10.,(6.15 - rho/40.));            /* eqn 21 */
