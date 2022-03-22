@@ -4,10 +4,15 @@ import edu.gemini.pot.sp._
 import edu.gemini.pot.sp.version._
 import edu.gemini.shared.util._
 import edu.gemini.shared.util.IntegerIsIntegral._
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.sp.vcs2.NodeDetail.Obs
 import edu.gemini.sp.vcs2.VcsFailure._
+import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.gemini.init.ObservationNI
+import edu.gemini.spModel.obslog.ObsExecLog
 import edu.gemini.spModel.rich.pot.sp._
+
+import java.util.logging.{Level, Logger}
 
 import scalaz._
 import Scalaz._
@@ -95,10 +100,36 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
           Unexpected(s"Unmodified node with key $k not found in program ${p.getProgramID}.").left
       }
 
+    // REL-4013: logging
+    def logRel4013(
+      node:          ISPNode,
+      nodeVersions:  NodeVersions,
+      newDataObject: ISPDataObject
+    ): Unit =
+      (node.getDataObject, newDataObject) match {
+        case (o: ObsExecLog, n: ObsExecLog) =>
+          val before = o.getFormattedVisitEvents
+          val after  = n.getFormattedVisitEvents
+
+          if (before =/= after) {
+            val msg =
+              s"""
+                 |Merging an update to ObsExecLog for obs ${node.getContextObservationId.asScalaOpt.map(_.stringValue()).getOrElse("<unknown>")}
+                 |Versions: $nodeVersions
+                 |Before..: $before
+                 |After...: $after
+               """.stripMargin
+            MergePlan.Log.log(Level.WARNING, msg)
+          }
+
+        case _ =>
+          // do nothing
+      }
+
     // Edit the ISPNode, applying the changes in the MergeNode if any.
     def edit(t: Tree[(MergeNode, ISPNode)]): ISPNode = {
       t.rootLabel match {
-        case (Modified(_, _, dob, det, con), n) =>
+        case (Modified(_, nv, dob, det, con), n) =>
           // If it is an observation, set the observation number.
           val n2 = (det, n) match {
             case (Obs(num), o: ISPObservation) =>
@@ -110,6 +141,8 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
             case _                             => // not an observation
               n
           }
+
+          logRel4013(n, nv, dob)
 
           n2.setDataObject(dob)
           n2.setConflicts(con)
@@ -144,6 +177,8 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
 }
 
 object MergePlan {
+
+  final val Log: Logger = Logger.getLogger(classOf[MergePlan].getName)
 
   /** A serializable Tree[MergeNode].  Sadly scalaz.Tree is not serializable. */
   case class TreeTransport(mn: MergeNode, children: List[TreeTransport]) {
