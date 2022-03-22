@@ -6,6 +6,7 @@ import edu.gemini.shared.gui.bean.TextFieldPropertyCtrl;
 import edu.gemini.spModel.gemini.visitor.VisitorConfig;
 import edu.gemini.spModel.gemini.visitor.VisitorConfig$;
 import edu.gemini.spModel.gemini.visitor.VisitorInstrument;
+import edu.gemini.spModel.gemini.visitor.VisitorPosAngleMode;
 import jsky.app.ot.StaffBean;
 import jsky.app.ot.gemini.editor.ComponentEditor;
 
@@ -112,5 +113,22 @@ public class VisitorEditor extends ComponentEditor<ISPObsComponent, VisitorInstr
     private void adjustStaffOnlyFields() {
         // Do nothing for now.
     }
+
+    private void updatePosAngleEnabledState(final boolean editorEnabledState) {
+        posAngleCtrl.getComponent().setEnabled(
+            editorEnabledState &&
+                (getDataObject().getVisitorConfig().positionAngleMode() != VisitorPosAngleMode.Fixed0$.MODULE$)
+        );
+    }
+
+     protected void updateEnabledState(final boolean enabled) {
+        super.updateEnabledState(enabled);
+        updatePosAngleEnabledState(enabled);
+     }
+
+     public void afterApply() {
+        super.afterApply();
+        updatePosAngleEnabledState(isEnabled());
+     }
 
 }

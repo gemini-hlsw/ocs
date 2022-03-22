@@ -117,6 +117,10 @@ public class VisitorInstrument extends SPInstObsComp
         }
     }
 
+    public boolean isFixed0() {
+        return visitorConfig.positionAngleMode() == VisitorPosAngleMode.Fixed0$.MODULE$;
+    }
+
     public VisitorConfig getVisitorConfig() {
         return visitorConfig;
     }
@@ -125,8 +129,14 @@ public class VisitorInstrument extends SPInstObsComp
         final VisitorConfig oldValue = getVisitorConfig();
         if (!oldValue.equals(newValue)) {
             visitorConfig = newValue;
+            if (isFixed0()) setPosAngleDegrees(0);
             firePropertyChange(CONFIG_PROP.getName(), oldValue, newValue);
         }
+    }
+
+    @Override public void setPosAngleDegrees(double newValue) {
+        if (isFixed0()) newValue = 0.0;
+        super.setPosAngleDegrees(newValue);
     }
 
     /**
