@@ -3,16 +3,13 @@ package edu.gemini.pot.sp.memImpl;
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.spModel.event.EndVisitEvent;
 import edu.gemini.spModel.event.ObsExecEvent;
-import edu.gemini.spModel.event.StartVisitEvent;
 import edu.gemini.spModel.obslog.ObsExecLog;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static edu.gemini.pot.sp.SPComponentType.OBS_EXEC_LOG;
 
@@ -40,30 +37,14 @@ public final class MemObsExecLog extends MemProgramNodeBase implements ISPObsExe
     @Override public MemProgram getProgram() { return program; }
 
     // Start REL-3986 ------ logging to debug an issue with missing events
-    private String formatEvents(List<ObsExecEvent> events) {
-        final StringBuilder buf = new StringBuilder();
-        events.forEach(e -> buf.append(String.format("\t%s\n", e)));
-        return buf.toString();
-    }
-
-    private List<ObsExecEvent> getVisitEvents(ObsExecLog log) {
-        return log.getRecord()
-                  .getAllEventList()
-                  .stream()
-                  .filter(e -> (e instanceof StartVisitEvent) || (e instanceof EndVisitEvent))
-                  .collect(Collectors.toList());
-    }
-
-    private List<ObsExecEvent> getVisitEvents(String name, Object obj) {
+    private static List<ObsExecEvent> getVisitEvents(String name, Object obj) {
         return (DATA_OBJECT_KEY.equals(name) && (obj instanceof ObsExecLog)) ?
-                getVisitEvents((ObsExecLog) obj)                             :
+                ((ObsExecLog) obj).getVisitEvents()                          :
                 Collections.emptyList();
     }
 
     private Option<String> getObsId() {
-        return ImOption.apply(getContextObservation())
-                       .flatMap(o -> ImOption.apply(o.getObservationID()))
-                       .map(SPObservationID::stringValue);
+        return getContextObservationId().map(SPObservationID::stringValue);
     }
 
     @Override public PropagationId putClientData(String name, Object obj) {
@@ -72,21 +53,21 @@ public final class MemObsExecLog extends MemProgramNodeBase implements ISPObsExe
         try {
             final Option<String>        oid = getObsId();
             final StringBuilder         buf = new StringBuilder();
-            final List<ObsExecEvent> before = getVisitEvents(name, getDocumentData());
+            final List<ObsExecEvent> before = getVisitEvents(name, getDataObject());
             final List<ObsExecEvent>  after = getVisitEvents(name, obj);
             final boolean         logEvents = !before.equals(after);
 
             if (logEvents) {
                 buf.append(String.format("Updating ObsExecRecord for %s (%s)\n", oid.getOrElse("<unknown>"), getDocumentData().getLifespanId()));
                 buf.append(String.format("Before....: %s\n", getDocumentData().versionVector(this.getNodeKey())));
-                buf.append(formatEvents(before));
+                buf.append(ObsExecLog.formatEvents(before));
             }
 
             final PropagationId propid = super.putClientData(name, obj);
 
             if (logEvents) {
                 buf.append(String.format("After.....: %s\n", getDocumentData().versionVector(this.getNodeKey())));
-                buf.append(formatEvents(after));
+                buf.append(ObsExecLog.formatEvents(after));
 
                 LOG.log(Level.INFO, buf.toString(), new Throwable());
             }

@@ -3,7 +3,7 @@ package jsky.app.ot.vcs
 import edu.gemini.pot.client.SPDB
 import edu.gemini.pot.sp._
 import edu.gemini.pot.sp.version._
-import edu.gemini.pot.spdb.{ IDBDatabaseService, IDBQueryRunner }
+import edu.gemini.pot.spdb.IDBQueryRunner
 import edu.gemini.spModel.core.{Peer, SPProgramID}
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.util.trpc.client.TrpcClient
@@ -11,7 +11,7 @@ import jsky.app.ot.shared.progstate.{LeafNodeData, LeafNodeFetchFunctor}
 import jsky.app.ot.vcs.vm.{VmUpdateEvent, VmStore}
 
 import java.net.{ConnectException, SocketTimeoutException}
-import java.util.logging.Level
+import java.util.logging.{ Logger, Level }
 
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
@@ -34,7 +34,7 @@ import jsky.app.ot.OT
  * they'll always just get applied automatically.
  */
 case class ProgramUpdater(id: SPProgramID, loc: Peer) extends VmStore.Sub with mutable.Publisher[VmUpdateEvent] {
-  val Log = java.util.logging.Logger.getLogger(getClass.getName)
+  val Log: Logger = Logger.getLogger(getClass.getName)
 
   private def prog: Option[ISPProgram] = Option(SPDB.get().lookupProgramByID(id))
 
@@ -80,15 +80,17 @@ case class ProgramUpdater(id: SPProgramID, loc: Peer) extends VmStore.Sub with m
 
     // Apply an update to a single exec log, making sure that the version
     // information ends up matching the values on the server.
-    def applyUpdate(n: ISPObsExecLog, up: LeafNodeData) {
+    def applyUpdate(n: ISPObsExecLog, up: LeafNodeData): Unit = {
       n.setDataObjectAndVersion(up.dataObject, up.versions)
     }
 
     // Apply all the updates with the program write lock held.
-    def applyUpdates() {
+    def applyUpdates(): Unit = {
       program.getProgramWriteLock()
       try {
-        updates foreach { case (key, update) => applyUpdate(execLogMap(key), update) }
+        updates.foreach { case (key, update) =>
+          applyUpdate(execLogMap(key), update)
+        }
       } finally {
         program.returnProgramWriteLock()
       }
@@ -97,7 +99,7 @@ case class ProgramUpdater(id: SPProgramID, loc: Peer) extends VmStore.Sub with m
     // Do the actual updating in the event loop and pass along the updated
     // version map to any subscribers.
     Swing.onEDT {
-      if (updates.size > 0) applyUpdates()
+      if (updates.nonEmpty) applyUpdates()
       publish(VmUpdateEvent(id, Some(newRemoteJvm)))
     }
   }

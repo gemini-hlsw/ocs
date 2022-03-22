@@ -46,7 +46,7 @@ class VcsServer(odb: IDBDatabaseService) { vs =>
     * version of the program in the database.
     *
     * The caller provides three functions, `evaluate`, `filter`, and `update`.
-    * Evaluate should not modify anything in the progrm but rather calculate
+    * Evaluate should not modify anything in the program but rather calculate
     * a value.  The value is handed to `filter` to decide whether to continue
     * with the write operation (and make the program copy).  In either case,
     * the value is returned as the result of the action.  The `update` takes a

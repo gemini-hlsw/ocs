@@ -3,6 +3,8 @@ package edu.gemini.pot.sp.memImpl;
 import edu.gemini.pot.sp.*;
 import edu.gemini.pot.sp.version.LifespanId;
 import edu.gemini.shared.util.VersionVector;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.util.ReadableNodeName;
@@ -182,6 +184,11 @@ public abstract class MemAbstractBase implements ISPNode, Serializable {
             obs = (_parent == null) ? null : _parent.getContextObservation();
         }
         return obs;
+    }
+
+    public Option<SPObservationID> getContextObservationId() {
+        return ImOption.apply(getContextObservation())
+               .flatMap(o -> ImOption.apply(o.getObservationID()));
     }
 
     /**
