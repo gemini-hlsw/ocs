@@ -138,6 +138,8 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
   //           SET FPU FROM PI IN STATIC COMPONENT AND ITERATORS \
   //                 EXCEPT WHERE FPU == acquisition #in 2nd iterator in ACQ.
   //           IF PIXEL SCALE == 0.05"/pix :
+  //                 IF Central Wavelength < 2.5um:  SET IN FIRST ITERATOR CALLED 'GNIRS: Slit Image' Exposure Time = 15
+  //                 ELSE :                          SET IN FIRST ITERATOR CALLED 'GNIRS: Slit Image' Exposure Time = 40
   //                 SET IN FIRST ITERATOR CALLED 'GNIRS: Slit Image' Exposure Time = 15
   //                 IF CROSS-DISPERSED == LXD OR SXD IN ITERATORS SET DECKER = long camera x-disp \
   //                         EXCEPT WHERE FPU == acquisition
@@ -167,11 +169,19 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
     }),
 
     ifTrue(pixelScale == PS_005)(
-      mutateSeq.withTitleIfExists("GNIRS: Slit image")(
-        mapSteps(_ + (EXPOSURE_TIME_PROP -> 15.0))),
+
+      ifTrue(!wavelengthGe2_5)(
+        mutateSeq.withTitleIfExists("GNIRS: Slit image")(
+          mapSteps(_ + (EXPOSURE_TIME_PROP -> 15.0)))),
+
+      ifTrue(wavelengthGe2_5)(
+        mutateSeq.withTitleIfExists("GNIRS: Slit image")(
+          mapSteps(_ + (EXPOSURE_TIME_PROP -> 40.0)))),
+
       ifTrue(xd == SXD || xd == LXD)(
         mutateSeq(
           updateDecker(Decker.LONG_CAM_X_DISP))),
+
       ifTrue(xd == CrossDispersed.NO)(
         mutateSeq(
           updateDecker(Decker.LONG_CAM_LONG_SLIT)))),
