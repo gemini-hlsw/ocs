@@ -72,7 +72,7 @@ public final class MemObsExecLog extends MemProgramNodeBase implements ISPObsExe
         try {
             final Option<String>        oid = getObsId();
             final StringBuilder         buf = new StringBuilder();
-            final List<ObsExecEvent> before = getVisitEvents(name, getDocumentData());
+            final List<ObsExecEvent> before = getVisitEvents(name, getDataObject());
             final List<ObsExecEvent>  after = getVisitEvents(name, obj);
             final boolean         logEvents = !before.equals(after);
 
