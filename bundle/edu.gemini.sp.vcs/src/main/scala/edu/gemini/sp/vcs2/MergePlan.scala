@@ -68,7 +68,7 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
     * considered in the calculation. */
   def compare(vm: VersionMap): VersionComparison = {
     val vm0 = vm.withDefaultValue(EmptyNodeVersions)
-    val up  = update.foldMap {
+    val up  = update.sFoldMap {
       case Modified(k, nv, _, _, _) => VersionComparison.compare(nv, vm0(k))
       case Unmodified(_)            => VersionComparison.Same
     }
@@ -161,9 +161,18 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
     val mergeTree: VcsAction[Tree[(MergeNode, ISPNode)]] = {
       val nodeMap = p.nodeMap
 
-      update.traverseU { mn =>
-        nodeMap.get(mn.key).fold(create(mn)) { _.right }.strengthL(mn)
+      def traverse(up: Tree[MergeNode]): TryVcs[Tree[(MergeNode, ISPNode)]] = {
+        val mn = up.rootLabel
+        val r  = nodeMap.get(mn.key).fold(create(mn)) { _.right }.strengthL(mn)
+        val cs = up.subForest.toList.traverseU(traverse)
+        r.flatMap(r0 => cs.map(cs0 => Tree.Node(r0, cs0.toStream)))
       }
+
+//      update.traverseU { mn =>
+//        nodeMap.get(mn.key).fold(create(mn)) { _.right }.strengthL(mn)
+//      }
+
+      traverse(update)
     }.liftVcs
 
     def doEdit(mt: Tree[(MergeNode, ISPNode)]): VcsAction[Unit] =

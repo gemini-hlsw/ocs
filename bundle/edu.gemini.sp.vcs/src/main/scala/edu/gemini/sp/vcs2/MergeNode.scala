@@ -92,12 +92,15 @@ object MergeNode {
       @tailrec
       def go(rem: List[Tree[A]], res: B): B =
         rem match {
-          case Nil        => res
-          case (t2 :: ts) => go(t2.subForest.toList ++ ts, f(t2, res))
+          case Nil      => res
+          case t2 :: ts => go(t2.subForest.toList ++ ts, f(t2, res))
         }
 
       go(List(t), z)
     }
+
+    def sFoldMap[B: Monoid](f: A => B): B =
+      sFoldRight(Monoid[B].zero) { (a, b) => f(a) |+| b }
   }
 
   implicit class TreeLocOps[A](tl: TreeLoc[A]) {

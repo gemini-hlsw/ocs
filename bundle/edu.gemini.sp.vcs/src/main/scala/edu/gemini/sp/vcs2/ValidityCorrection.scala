@@ -36,8 +36,8 @@ class ValidityCorrection(lifespanId: LifespanId, nodeMap: Map[SPNodeKey, ISPNode
 
       case Modified(k, _, dob, _, _) =>
         NodeType.forComponentType(dob.getType).toTryVcs(s"Unusable node type: ${dob.getType}").flatMap { nt =>
-          t.subForest.traverseU(toTypeTree).map { cs =>
-            TypeTree(nt, Some(k), cs.toList)
+          t.subForest.toList.traverseU(toTypeTree).map { cs =>
+            TypeTree(nt, Some(k), cs)
           }
         }
     }
