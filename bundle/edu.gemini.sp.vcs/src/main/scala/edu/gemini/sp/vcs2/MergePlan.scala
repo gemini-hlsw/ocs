@@ -168,6 +168,7 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
         r.flatMap(r0 => cs.map(cs0 => Tree.Node(r0, cs0.toStream)))
       }
 
+      // original implementation blows up the stack for large programs
 //      update.traverseU { mn =>
 //        nodeMap.get(mn.key).fold(create(mn)) { _.right }.strengthL(mn)
 //      }
