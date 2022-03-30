@@ -304,48 +304,50 @@ class VoTableParserSpec extends Specification with VoTableParser {
         </DATA>
        </TABLE>
 
+        // <FIELD arraysize="*" datatype="char" name="designation" ucd="meta.id;meta.main">
+        //<FIELD ucd="meta.id;meta.main" name="designation" datatype="char" arraysize="*" ID="DESIGNATION">
     val gaia =
       <TABLE>
-        <FIELD arraysize="*" datatype="char" name="designation" ucd="meta.id;meta.main">
+        <FIELD ucd="meta.id;meta.main" name="designation" datatype="char" arraysize="*" ID="DESIGNATION">
           <DESCRIPTION>Unique source designation (unique across all Data Releases)</DESCRIPTION>
         </FIELD>
-        <FIELD datatype="double" name="ra" ref="GAIADR2" ucd="pos.eq.ra;meta.main" unit="deg" utype="Char.SpatialAxis.Coverage.Location.Coord.Position2D.Value2.C1">
+        <FIELD utype="Char.SpatialAxis.Coverage.Location.Coord.Position2D.Value2.C1" unit="deg" ucd="pos.eq.ra;meta.main" ref="t1820521-coosys-1" name="ra" datatype="double">
           <DESCRIPTION>Right ascension</DESCRIPTION>
         </FIELD>
         <FIELD datatype="double" name="ra_error" ucd="stat.error;pos.eq.ra" unit="mas">
           <DESCRIPTION>Standard error of right ascension</DESCRIPTION>
         </FIELD>
-        <FIELD datatype="double" name="dec" ref="GAIADR2" ucd="pos.eq.dec;meta.main" unit="deg" utype="Char.SpatialAxis.Coverage.Location.Coord.Position2D.Value2.C2">
+        <FIELD utype="Char.SpatialAxis.Coverage.Location.Coord.Position2D.Value2.C2" unit="deg" ucd="pos.eq.dec;meta.main" ref="t1820521-coosys-1" name="dec" datatype="double">
           <DESCRIPTION>Declination</DESCRIPTION>
         </FIELD>
         <FIELD datatype="double" name="dec_error" ucd="stat.error;pos.eq.dec" unit="mas">
           <DESCRIPTION>Standard error of declination</DESCRIPTION>
         </FIELD>
-        <FIELD datatype="double" name="parallax" ucd="pos.parallax" unit="mas">
+        <FIELD unit="mas" ucd="pos.parallax" name="parallax" datatype="double">
           <DESCRIPTION>Parallax</DESCRIPTION>
         </FIELD>
-        <FIELD datatype="double" name="pmra" ucd="pos.pm;pos.eq.ra" unit="mas.yr**-1">
+        <FIELD unit="mas.yr**-1" ucd="pos.pm;pos.eq.ra" name="pmra" datatype="double">
           <DESCRIPTION>Proper motion in right ascension direction</DESCRIPTION>
         </FIELD>
         <FIELD datatype="double" name="pmra_error" ucd="stat.error;pos.pm;pos.eq.ra" unit="mas.yr**-1">
           <DESCRIPTION>Standard error of proper motion in right ascension direction</DESCRIPTION>
         </FIELD>
-        <FIELD datatype="double" name="pmdec" ucd="pos.pm;pos.eq.dec" unit="mas.yr**-1">
+        <FIELD unit="mas.yr**-1" ucd="pos.pm;pos.eq.dec" name="pmdec" datatype="double">
           <DESCRIPTION>Proper motion in declination direction</DESCRIPTION>
         </FIELD>
         <FIELD datatype="double" name="pmdec_error" ucd="stat.error;pos.pm;pos.eq.dec" unit="mas.yr**-1">
           <DESCRIPTION>Standard error of proper motion in declination direction</DESCRIPTION>
         </FIELD>
-        <FIELD datatype="double" name="ref_epoch" ucd="meta.ref;time.epoch" unit="yr">
+        <FIELD unit="yr" ucd="meta.ref;time.epoch" name="ref_epoch" datatype="double">
           <DESCRIPTION>Reference epoch</DESCRIPTION>
         </FIELD>
-        <FIELD datatype="float" name="phot_g_mean_mag" ucd="phot.mag;stat.mean;em.opt" unit="mag">
+        <FIELD unit="mag" ucd="phot.mag;stat.mean;em.opt" name="phot_g_mean_mag" datatype="float">
           <DESCRIPTION>G-band mean magnitude</DESCRIPTION>
         </FIELD>
-        <FIELD datatype="float" name="bp_rp" ucd="phot.color" unit="mag">
+        <FIELD unit="mag" ucd="phot.color" name="bp_rp" datatype="float">
           <DESCRIPTION>BP - RP colour</DESCRIPTION>
         </FIELD>
-        <FIELD datatype="double" name="radial_velocity" ucd="spect.dopplerVeloc.opt" unit="km.s**-1">
+        <FIELD unit="km.s**-1" ucd="spect.dopplerVeloc.opt" name="radial_velocity" datatype="double">
           <DESCRIPTION>Radial velocity</DESCRIPTION>
         </FIELD>
         <DATA>
@@ -474,76 +476,76 @@ class VoTableParserSpec extends Specification with VoTableParser {
     }
     "be able to parse a field definition" in {
       val fieldXml = <FIELD ID="gmag_err" datatype="double" name="gmag_err" ucd="stat.error;phot.mag;em.opt.g"/>
-      parseFieldDescriptor(fieldXml) should beSome(FieldDescriptor(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "gmag_err"))
+      parseFieldDescriptor(CatalogAdapter.GaiaEsa, fieldXml) should beSome(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")))
       // Empty field
-      parseFieldDescriptor(<FIELD/>) should beNone
+      parseFieldDescriptor(CatalogAdapter.GaiaEsa, <FIELD/>) should beNone
       // non field xml
-      parseFieldDescriptor(<TAG/>) should beNone
+      parseFieldDescriptor(CatalogAdapter.GaiaEsa, <TAG/>) should beNone
       // missing attributes
-      parseFieldDescriptor(<FIELD ID="abc"/>) should beNone
+      parseFieldDescriptor(CatalogAdapter.GaiaEsa, <FIELD ID="abc"/>) should beNone
     }
     "swap in name for ID if missing in a field definition" in {
       val fieldXml = <FIELD datatype="double" name="ref_epoch" ucd="meta.ref;time.epoch" unit="yr"/>
-      parseFieldDescriptor(fieldXml) should beSome(FieldDescriptor(FieldId("ref_epoch", Ucd("meta.ref;time.epoch")), "ref_epoch"))
+      parseFieldDescriptor(CatalogAdapter.GaiaEsa, fieldXml) should beSome(FieldId("ref_epoch", Ucd("meta.ref;time.epoch")))
     }
     "be able to parse a list of fields" in {
       val result =
-        FieldDescriptor(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "gmag_err") ::
-        FieldDescriptor(FieldId("rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "rmag_err") ::
-        FieldDescriptor(FieldId("flags1", Ucd("meta.code")), "flags1") ::
-        FieldDescriptor(FieldId("ppmxl", Ucd("meta.id;meta.main")), "ppmxl") :: Nil
+        FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")) ::
+        FieldId("rmag_err", Ucd("stat.error;phot.mag;em.opt.r")) ::
+        FieldId("flags1", Ucd("meta.code")) ::
+        FieldId("ppmxl", Ucd("meta.id;meta.main")) :: Nil
 
-      parseFields(fieldsNode) should beEqualTo(result)
+      parseFields(CatalogAdapter.GaiaEsa, fieldsNode) should beEqualTo(result)
     }
     "be able to parse a data  row with a list of fields" in {
-      val fields = parseFields(fieldsNode)
+      val fields = parseFields(CatalogAdapter.GaiaEsa, fieldsNode)
 
       val result = TableRow(
-        TableRowItem(FieldDescriptor(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "gmag_err"), "0.0960165") ::
-        TableRowItem(FieldDescriptor(FieldId("rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "rmag_err"), "0.0503736") ::
-        TableRowItem(FieldDescriptor(FieldId("flags1", Ucd("meta.code")), "flags1"), "268435728") ::
-        TableRowItem(FieldDescriptor(FieldId("ppmxl", Ucd("meta.id;meta.main")), "ppmxl"), "-2140405448") :: Nil
+        TableRowItem(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "0.0960165") ::
+        TableRowItem(FieldId("rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "0.0503736") ::
+        TableRowItem(FieldId("flags1", Ucd("meta.code")), "268435728") ::
+        TableRowItem(FieldId("ppmxl", Ucd("meta.id;meta.main")), "-2140405448") :: Nil
       )
       parseTableRow(fields, tableRow) should beEqualTo(result)
     }
     "be able to parse a list of rows with a list of fields" in {
-      val fields = parseFields(fieldsNode)
+      val fields = parseFields(CatalogAdapter.GaiaEsa, fieldsNode)
 
       val result = List(
         TableRow(
-          TableRowItem(FieldDescriptor(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "gmag_err"), "0.0960165") ::
-          TableRowItem(FieldDescriptor(FieldId("rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "rmag_err"), "0.0503736") ::
-          TableRowItem(FieldDescriptor(FieldId("flags1", Ucd("meta.code")), "flags1"), "268435728") ::
-          TableRowItem(FieldDescriptor(FieldId("ppmxl", Ucd("meta.id;meta.main")), "ppmxl"), "-2140405448") :: Nil
+          TableRowItem(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "0.0960165") ::
+          TableRowItem(FieldId("rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "0.0503736") ::
+          TableRowItem(FieldId("flags1", Ucd("meta.code")), "268435728") ::
+          TableRowItem(FieldId("ppmxl", Ucd("meta.id;meta.main")), "-2140405448") :: Nil
         ),
         TableRow(
-          TableRowItem(FieldDescriptor(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "gmag_err"), "0.51784") ::
-          TableRowItem(FieldDescriptor(FieldId("rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "rmag_err"), "0.252201") ::
-          TableRowItem(FieldDescriptor(FieldId("flags1", Ucd("meta.code")), "flags1"), "536871168") ::
-          TableRowItem(FieldDescriptor(FieldId("ppmxl", Ucd("meta.id;meta.main")), "ppmxl"), "-2140404569") :: Nil
+          TableRowItem(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "0.51784") ::
+          TableRowItem(FieldId("rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "0.252201") ::
+          TableRowItem(FieldId("flags1", Ucd("meta.code")), "536871168") ::
+          TableRowItem(FieldId("ppmxl", Ucd("meta.id;meta.main")), "-2140404569") :: Nil
         ))
       parseTableRows(fields, dataNode) should beEqualTo(result)
     }
     "be able to convert a TableRow into a SiderealTarget" in {
-      val fields = parseFields(fieldsNode)
+      val fields = parseFields(CatalogAdapter.GaiaEsa, fieldsNode)
 
       val validRow = TableRow(
-                TableRowItem(FieldDescriptor(FieldId("ppmxl", Ucd("meta.id;meta.main")), "ppmxl"), "123456") ::
-                TableRowItem(FieldDescriptor(FieldId("decj2000", Ucd("pos.eq.dec;meta.main")),"dej2000"), "0.209323681906") ::
-                TableRowItem(FieldDescriptor(FieldId("raj2000", Ucd("pos.eq.ra;meta.main")), "raj2000"), "359.745951955") :: Nil
+                TableRowItem(FieldId("ppmxl", Ucd("meta.id;meta.main")), "123456") ::
+                TableRowItem(FieldId("decj2000", Ucd("pos.eq.dec;meta.main")), "0.209323681906") ::
+                TableRowItem(FieldId("raj2000", Ucd("pos.eq.ra;meta.main")), "359.745951955") :: Nil
               )
       tableRow2Target(CatalogAdapter.PPMXL, fields)(validRow) should beEqualTo(\/-(SiderealTarget.empty.copy(name = "123456", coordinates = Coordinates(RightAscension.fromAngle(Angle.parseDegrees("359.745951955").getOrElse(Angle.zero)), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)))))
 
       val rowWithMissingId = TableRow(
-                TableRowItem(FieldDescriptor(FieldId("decj2000", Ucd("pos.eq.dec;meta.main")), "dej2000"), "0.209323681906") ::
-                TableRowItem(FieldDescriptor(FieldId("raj2000", Ucd("pos.eq.ra;meta.main")), "raj2000"), "359.745951955") :: Nil
+                TableRowItem(FieldId("decj2000", Ucd("pos.eq.dec;meta.main")), "0.209323681906") ::
+                TableRowItem(FieldId("raj2000", Ucd("pos.eq.ra;meta.main")), "359.745951955") :: Nil
               )
       tableRow2Target(CatalogAdapter.PPMXL, fields)(rowWithMissingId) should beEqualTo(-\/(MissingValue(FieldId("ppmxl", VoTableParser.UCD_OBJID))))
 
       val rowWithBadRa = TableRow(
-                TableRowItem(FieldDescriptor(FieldId("ppmxl", Ucd("meta.id;meta.main")), "ppmxl"), "123456") ::
-                TableRowItem(FieldDescriptor(FieldId("decj2000", Ucd("pos.eq.dec;meta.main")), "dej2000"), "0.209323681906") ::
-                TableRowItem(FieldDescriptor(FieldId("raj2000", Ucd("pos.eq.ra;meta.main")), "raj2000"), "ABC") :: Nil
+                TableRowItem(FieldId("ppmxl", Ucd("meta.id;meta.main")), "123456") ::
+                TableRowItem(FieldId("decj2000", Ucd("pos.eq.dec;meta.main")), "0.209323681906") ::
+                TableRowItem(FieldId("raj2000", Ucd("pos.eq.ra;meta.main")), "ABC") :: Nil
             )
       tableRow2Target(CatalogAdapter.PPMXL, fields)(rowWithBadRa) should beEqualTo(-\/(FieldValueProblem(VoTableParser.UCD_RA, "ABC")))
     }

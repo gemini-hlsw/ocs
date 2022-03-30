@@ -183,6 +183,7 @@ sealed trait CatalogAdapter {
     } yield (fieldId, b, v)
   }
 
+  def postProcessFieldDescriptor(fieldId: FieldId): FieldId = fieldId
 
   private def combineWithErrorsSystemAndFilter(
     m: List[(FieldId, MagnitudeBand, Double)],
@@ -392,6 +393,9 @@ object CatalogAdapter {
 
     }
 
+    override def postProcessFieldDescriptor(fieldId: FieldId): FieldId =
+      if (fieldId.id == "DESIGNATION") fieldId.copy(id = fieldId.id.toLowerCase) else fieldId
+
     val conversions: List[Conversion] =
       List(
         Conversion(MagnitudeBand.V,   0.017600,  0.00686, 0.173200,  0.000000),
@@ -544,23 +548,24 @@ trait VoTableParser {
 
   import scala.xml.Node
 
-  protected def parseFieldDescriptor(xml: Node): Option[FieldDescriptor] = xml match {
+  protected def parseFieldDescriptor(adapter: CatalogAdapter, xml: Node): Option[FieldId] = xml match {
     case f @ <FIELD>{_*}</FIELD> =>
       def attr(n: String) = (f \ s"@$n").headOption.map(_.text)
 
       val name = attr("name")
-      ^^(attr("ID") orElse name, attr("ucd"), name) { (i, u, n) =>
-        FieldDescriptor(FieldId(i, Ucd(u)), n)
+      val id = attr("ID")
+      ^^(id.orElse(name), attr("ucd"), name) { (i, u, _) =>
+        adapter.postProcessFieldDescriptor(FieldId(i, Ucd(u)))
       }
 
     case _                       => None
   }
 
-  protected def parseFields(xml: Node): List[FieldDescriptor] = (for {
+  protected def parseFields(adapter: CatalogAdapter, xml: Node): List[FieldId] = (for {
       f <- xml \\ "FIELD"
-    } yield parseFieldDescriptor(f)).flatten.toList
+    } yield parseFieldDescriptor(adapter, f)).flatten.toList
 
-  protected def parseTableRow(fields: List[FieldDescriptor], xml: Node): TableRow = {
+  protected def parseTableRow(fields: List[FieldId], xml: Node): TableRow = {
     val rows = for {
       tr <-  xml \\ "TR"
       td =   tr  \  "TD"
@@ -571,7 +576,7 @@ trait VoTableParser {
     TableRow(rows.flatten.toList)
   }
 
-  protected def parseTableRows(fields: List[FieldDescriptor], xml: Node): immutable.Seq[TableRow] =
+  protected def parseTableRows(fields: List[FieldId], xml: Node): immutable.Seq[TableRow] =
     for {
       table <-  xml   \\ "TABLEDATA"
       tr    <-  table \\ "TR"
@@ -584,7 +589,7 @@ trait VoTableParser {
     ParsedVoResource(
       (xml \\ "TABLE").toList.map { table =>
 
-        val fields = parseFields(table)
+        val fields = parseFields(adapter, table)
         val rows   = parseTableRows(fields, table).toList
 
         ParsedTable(rows.map(tableRow2Target(adapter, fields)))
@@ -594,7 +599,7 @@ trait VoTableParser {
   /**
    * Convert a table row to a sidereal target or CatalogProblem
    */
-  protected def tableRow2Target(adapter: CatalogAdapter, fields: List[FieldDescriptor])(row: TableRow): CatalogProblem \/ SiderealTarget = {
+  protected def tableRow2Target(adapter: CatalogAdapter, fields: List[FieldId])(row: TableRow): CatalogProblem \/ SiderealTarget = {
     val entries = row.itemsMap
 
     def parseEpoch(e: Option[String]): CatalogProblem \/ Epoch =
