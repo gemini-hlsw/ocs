@@ -186,6 +186,7 @@ def rnorris(version: Version) = AppConfig(
     "-Dcron.reports.edu.gemini.spdb.reports.public.host=gnconfig.gemini.edu",
     "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/gemsoft/var/data/www/public/reports/test",
     "-Dedu.gemini.site=south",
+    "-Xss1536K",
     "-Xmx1024M"
   ),
   props = Map(
@@ -206,6 +207,7 @@ def swalker(version: Version) = AppConfig(
   id = "swalker",
   distribution = List(TestDistro),
   vmargs = List(
+    "-Xss1536K",
     "-Xmx1024M",
     "-Dcom.cosylab.epics.caj.CAJContext.addr_list=172.17.2.255",
     "-Dedu.gemini.site=south",
@@ -238,6 +240,7 @@ def sraaphorst(version: Version) = AppConfig(
   id = "sraaphorst",
   distribution = List(TestDistro),
    vmargs = List(
+     "-Xss1536K",
      "-Xmx1024M",
      "-Dedu.gemini.site=south",
      "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
@@ -266,6 +269,7 @@ def cquiroz(version: Version) = AppConfig(
   id = "cquiroz",
   distribution = List(TestDistro),
   vmargs = List(
+    "-Xss1536K",
     "-Xmx1024M",
     "-Dedu.gemini.site=south"
   ),
@@ -287,6 +291,7 @@ def jluhrs(version: Version) = AppConfig(
   id = "jluhrs",
   distribution = List(TestDistro),
   vmargs = List(
+    "-Xss1536K",
     "-Xmx1024M",
     "-Dedu.gemini.site=south"
   ),
@@ -306,6 +311,7 @@ def anunez(version: Version) = AppConfig(
   id = "anunez",
   distribution = List(TestDistro),
   vmargs = List(
+    "-Xss1536K",
     "-Xmx1024M",
     "-Dcom.cosylab.epics.caj.CAJContext.addr_list=172.17.2.255",
     "-Dedu.gemini.site=south",
@@ -328,6 +334,7 @@ def astephens(version: Version) = AppConfig(
   id = "astephens",
   distribution = List(TestDistro),
   vmargs = List(
+    "-Xss1536K",
     "-Xmx2048M",
     "-Dedu.gemini.site=north",
     "-Djava.util.logging.config.file=/home/astephens/ocs/logging.properties",
@@ -356,6 +363,7 @@ def osmirnova(version: Version) = AppConfig(
   id = "osmirnova",
   distribution = List(TestDistro),
   vmargs = List(
+    "-Xss1536K",
     "-Xmx2000M",
     "-Dedu.gemini.site=north",
     "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
@@ -389,6 +397,7 @@ def odbtest(version: Version) = AppConfig(
     "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=TODO",
     "-Dcron.reports.edu.gemini.spdb.reports.public.host=gnconfig.gemini.edu",
     "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/gemsoft/var/data/www/public/reports/test",
+    "-Xss1536K",
     "-Xms6G",
     "-Xmx14G",
     "-XX:+UseConcMarkSweepGC"
@@ -418,6 +427,7 @@ def odbproduction(version: Version) = AppConfig(
     "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=TODO",
     "-Dcron.reports.edu.gemini.spdb.reports.public.host=gnconfig.gemini.edu",
     "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/gemsoft/var/data/www/public/reports",
+    "-Xss1536K",
     "-Xms6G",
     "-Xmx14G",
     "-XX:+UseConcMarkSweepGC"
