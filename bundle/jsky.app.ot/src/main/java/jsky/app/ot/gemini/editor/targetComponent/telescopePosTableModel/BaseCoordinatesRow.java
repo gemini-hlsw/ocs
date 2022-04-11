@@ -10,10 +10,13 @@ import edu.gemini.spModel.target.env.TargetEnvironment;
  */
 final class BaseCoordinatesRow extends CoordinatesRow {
     BaseCoordinatesRow(final SPCoordinates coordinates, boolean enabled) {
+        this(coordinates, enabled, "Sky");
+    }
+    BaseCoordinatesRow(final SPCoordinates coordinates, boolean enabled, String name) {
         super(enabled,
                 true,
                 TargetEnvironment.BASE_NAME,
-                "Sky",
+                name,
                 coordinates,
                 None.instance());
     }

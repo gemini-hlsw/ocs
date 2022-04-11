@@ -127,11 +127,11 @@ final public class TelescopePosTableModel extends AbstractTableModel {
         // coordinates into an SPCoordinates.
         if (a.asterismType() == AsterismType.GhostDualTarget) {
             if (a.overriddenBase().isDefined()) {
-                row = new BaseCoordinatesRow(a.overriddenBase().get(), true);
+                row = new BaseCoordinatesRow(a.overriddenBase().get(), true, "Base");
             }
             else {
                 final Coordinates c = Utils.getCoordinates(a, when).getOrElse(Coordinates.zero());
-                row = new BaseCoordinatesRow(new SPCoordinates(c), false);
+                row = new BaseCoordinatesRow(new SPCoordinates(c), false, "Base");
             }
         }
         else {
