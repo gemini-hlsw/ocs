@@ -39,7 +39,7 @@ public class SPTreeEditUtil {
     private static final Logger LOG = Logger.getLogger(SPTreeEditUtil.class.getName());
 
     // Used to mark the initialized state of the dialog asking the user to confirm an operation
-     private static final int USER_CONFIRMATION_INITAL_STATE = -37;
+     private static final int USER_CONFIRMATION_INITIAL_STATE = -37;
 
     /**
      * Set the ISPFactory object used to create new science program components
@@ -187,8 +187,8 @@ public class SPTreeEditUtil {
             return false;
         }
 
-        ISPObservationContainer parent = (ISPObservationContainer)target.getParent();
-        List l = parent.getObservations();
+        final ISPObservationContainer parent = (ISPObservationContainer)target.getParent();
+        final List<ISPObservation> l = parent.getObservations();
         int i = l.indexOf(target);
         if (i == -1) {
             parent.addObservation(obs);
@@ -244,24 +244,10 @@ public class SPTreeEditUtil {
         return !wouldCreateCycleIfAdded(prog, node, parent) && isEditableAddLocation(prog, parent);
     }
 
-    /*
-    public static boolean isOkayToAdd(ISPProgram prog, ISPNode[] nodes, ISPNode parent) {
-        if (!isValidUpdateLocation(prog, nodes, parent)) return false;
-
-        // Cardinality check: does it makes sense to add node to parent?
-        if (!Validator$.MODULE$.canAdd(prog, nodes, parent)) {
-            LOG.fine("Cardinality failure");
-            return false;
-        }
-
-        return true;
-    }
-    */
-
     public static boolean isOkayToAdd(ISPProgram prog, ISPNode[] nodes, ISPNode parent, ISPNode context) {
         if (!isValidUpdateLocation(prog, nodes, parent)) return false;
 
-        // Cardinality check: does it makes sense to add node to parent?
+        // Cardinality check: does it make sense to add node to parent?
         if (!Validator$.MODULE$.canAdd(prog, nodes, parent, Option.apply(context))) {
             LOG.fine("Cardinality failure");
             return false;
@@ -273,15 +259,6 @@ public class SPTreeEditUtil {
     public static boolean isOkayToAdd(ISPProgram prog, ISPNode node, ISPNode parent, ISPNode context) {
         return isOkayToAdd(prog, new ISPNode[] { node }, parent, context);
     }
-
-    /**
-     * Return true if it is okay to add the given node to the given parent node.
-     */
-//    public static boolean isOkayToAdd(ISPProgram prog, ISPNode node, ISPNode parent) {
-//        LOG.fine("Can we add " + node + " to " + parent);
-//        return isOkayToAdd(prog, new ISPNode[] { node }, parent);
-//    }
-
 
     /**
      *
@@ -330,7 +307,7 @@ public class SPTreeEditUtil {
     public static boolean copyProg(ISPProgram targetProg, ISPProgram sourceProg) {
 
         // check if overwrite is needed
-        List childList = targetProg.getChildren();
+        List<ISPNode> childList = targetProg.getChildren();
         if (childList.size() != 0) {
             int ans = DialogUtil.confirm(
                     "Do you want to overwrite the contents of this program?");
@@ -395,7 +372,7 @@ public class SPTreeEditUtil {
      * @param index an index in the list
      * @param up    true if the node should be moved up in the tree, otherwise down
      */
-    private static int _getNextVisibleIndex(List l, int index, boolean up) {
+    private static <T extends ISPNode> int _getNextVisibleIndex(List<T> l, int index, boolean up) {
         int incr = (up ? -1 : 1);
         int i = index + incr;
         int n = l.size();
@@ -406,7 +383,7 @@ public class SPTreeEditUtil {
             return 0;
         }
         while (true) {
-            ISPNode nextNode = (ISPNode)l.get(i);
+            ISPNode nextNode = l.get(i);
             UIInfo uiInfo = UIInfoXML.getUIInfo(nextNode);
             if (uiInfo != null && uiInfo.isVisible()) {
                 break;
@@ -563,7 +540,7 @@ public class SPTreeEditUtil {
                 ISPObsComponent obsComp = SPTreeUtil.findObsComponentByNarrowType((ISPObservation) parent, compType.narrowType);
                 ISPSeqComponent seqComp = SPTreeUtil.findSeqComponent((ISPObservation) parent, compType);
                 if (obsComp != null || seqComp != null) { //the parent has a node present already, ask the user
-                    if (answer == USER_CONFIRMATION_INITAL_STATE) {
+                    if (answer == USER_CONFIRMATION_INITIAL_STATE) {
                         //ask the user for confirmation
                         answer = DialogUtil.confirm(null, "A node of the same type already exists in this location.\n" +
                                 "Do you want to replace it with the one you're moving?");
@@ -627,8 +604,8 @@ public class SPTreeEditUtil {
     }
 
     public static List<PendingUpdate> getUpdates(ISPProgram prog, ISPNode parent, ISPNode[] nodes) {
-        final List<PendingUpdate> ups = new ArrayList<PendingUpdate>();
-        final List<ISPNode> other = new ArrayList<ISPNode>(Arrays.asList(nodes));
+        final List<PendingUpdate> ups = new ArrayList<>();
+        final List<ISPNode> other = new ArrayList<>(Arrays.asList(nodes));
 
         // Okay, separate out any ISPObsComponents that have cardinality 1 and
         // that already exist in the parent.  These will be pasted in. :/
@@ -707,10 +684,10 @@ public class SPTreeEditUtil {
      * @param parent new parent of the nodes to be moved
      */
     public static void moveOrReplaceTo(SPTree tree, ISPNode[] rnodes, ISPNode parent) throws SPTreeStateException, SPNodeNotLocalException, SPUnknownIDException {
-        int answer = USER_CONFIRMATION_INITAL_STATE;
+        int answer = USER_CONFIRMATION_INITIAL_STATE;
         for (ISPNode node : rnodes) {
             answer = _removeExistingNode(node, parent, answer);
-            if (answer == JOptionPane.OK_OPTION || answer == USER_CONFIRMATION_INITAL_STATE) {
+            if (answer == JOptionPane.OK_OPTION || answer == USER_CONFIRMATION_INITIAL_STATE) {
                 tree.moveNode(node, parent);
             }
         }
