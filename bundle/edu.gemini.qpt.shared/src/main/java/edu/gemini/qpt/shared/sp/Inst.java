@@ -8,6 +8,7 @@ import edu.gemini.spModel.gemini.altair.AltairAowfsGuider;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.bhros.InstBHROS;
+import edu.gemini.spModel.gemini.ghost.Ghost;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe;
 import edu.gemini.spModel.gemini.gems.CanopusWfs;
@@ -69,6 +70,8 @@ public enum Inst {
             join(Flamingos2.FPUnit.values(), Flamingos2.Filter.values(), new Enum<?>[]{Flamingos2OiwfsGuideProbe.instance}),
             join(arrayOf(Flamingos2.FPUnit.FPU_NONE, Flamingos2.FPUnit.CUSTOM_MASK), Flamingos2.Filter.values(), new Enum<?>[]{Flamingos2OiwfsGuideProbe.instance}),
             join(Flamingos2.Disperser.values(), PreImagingType.values())),
+
+    GHOST(Ghost.SP_TYPE, false, true, false), // for now, not normally avalable
 
     GMOS_NORTH(InstGmosNorth.SP_TYPE, true, false, true,
             join(FPUnitNorth.values(),
