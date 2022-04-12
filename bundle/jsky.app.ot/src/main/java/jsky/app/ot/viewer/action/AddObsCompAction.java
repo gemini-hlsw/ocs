@@ -1,6 +1,10 @@
 package jsky.app.ot.viewer.action;
 
 import edu.gemini.pot.sp.*;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.data.ISPDataObject;
+import edu.gemini.spModel.gemini.init.NodeInitializers;
 import jsky.app.ot.nsp.SPTreeEditUtil;
 import jsky.app.ot.viewer.SPViewer;
 import jsky.util.gui.DialogUtil;
@@ -34,11 +38,26 @@ public class AddObsCompAction extends AbstractViewerAction implements Comparable
     public void actionPerformed(ActionEvent evt) {
         try {
             final ISPObsComponentContainer parent = getContextNode(ISPObsComponentContainer.class);
-            final ISPObsComponent toAdd = viewer.getFactory().createObsComponent(getProgram(), componentType, null);
+            final Option<ISPNodeInitializer<ISPObsComponent, ? extends ISPDataObject>> init = customInitializer(parent);
+
+            final ISPObsComponent toAdd =
+                viewer.getFactory().createObsComponent(getProgram(), componentType, init.getOrNull(), null);
+
             parent.addObsComponent(toAdd);
         } catch (Exception ex) {
             DialogUtil.error(ex);
         }
+    }
+
+    /**
+     * Provides a hook for subclasses to return a custom initializer for the
+     * component depending on context.  By default, no custom initializer is
+     * assumed.
+     */
+    protected Option<ISPNodeInitializer<ISPObsComponent, ? extends ISPDataObject>> customInitializer(
+        ISPObsComponentContainer container
+    ) {
+        return ImOption.empty();
     }
 
     public int compareTo(AddObsCompAction action) {
