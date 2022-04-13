@@ -24,7 +24,7 @@ import edu.gemini.spModel.seqcomp.SeqConfigNames
 import edu.gemini.spModel.seqcomp.SeqConfigNames.{INSTRUMENT_KEY, OBSERVE_KEY}
 import edu.gemini.spModel.syntax.duration._
 import edu.gemini.spModel.target.env.TargetEnvironment
-import edu.gemini.spModel.target.obsComp.TargetObsComp
+import edu.gemini.spModel.target.obsComp.{TargetObsComp, TargetObsCompCB}
 import edu.gemini.spModel.telescope.{IssPort, IssPortProvider}
 
 import scala.collection.immutable.TreeMap
@@ -387,19 +387,30 @@ object Ghost {
   val NI: ISPNodeInitializer[ISPObsComponent, Ghost] =
     new ComponentNodeInitializer(SPComponentType.INSTRUMENT_GHOST, GhostSupplier, GhostCbFactory)
 
+  // Targets in a GHOST observation need a "special" initializer that sets a
+  // GHOST asterism.
+  val TARGET_NI: ISPNodeInitializer[ISPObsComponent, TargetObsComp] =
+    new ComponentNodeInitializer(
+      SPComponentType.TELESCOPE_TARGETENV,
+      new java.util.function.Supplier[TargetObsComp] {
+        override def get(): TargetObsComp = {
+          val toc = new TargetObsComp
+          val   a = GhostAsterism.createEmptySingleTargetAsterism
+          toc.setTargetEnvironment(TargetEnvironment.create(a))
+          toc
+        }
+      },
+      new java.util.function.Function[ISPObsComponent, TargetObsCompCB] {
+        def apply(oc: ISPObsComponent): TargetObsCompCB =
+          new TargetObsCompCB(oc)
+      }
+    )
+
   val OBSERVATION_NI: ISPNodeInitializer[ISPObservation, SPObservation] = new ObservationNI(Instrument.Ghost.some()) {
     override protected def addTargetEnv(factory: ISPFactory, obsNode: ISPObservation): Unit = {
       Try {
         val p   = obsNode.getProgram
-        val oc  = factory.createObsComponent(p, TargetObsComp.SP_TYPE, null)
-        val toc = oc.getDataObject.asInstanceOf[TargetObsComp]
-
-        // Create a single target GHOST asterism as the default.
-        val a   = GhostAsterism.createEmptySingleTargetAsterism
-        val env = TargetEnvironment.create(a)
-
-        toc.setTargetEnvironment(env)
-        oc.setDataObject(toc)
+        val oc  = factory.createObsComponent(p, TargetObsComp.SP_TYPE, TARGET_NI, null)
         obsNode.addObsComponent(oc)
       } match {
         case Success(_)               =>
@@ -410,6 +421,14 @@ object Ghost {
           // This should never happen.
           throw new RuntimeException("Unknown failure in creating GHOST target environment")
       }
+    }
+  }
+
+  def isGhostObservation(c: ISPObsComponentContainer): Boolean = {
+    import edu.gemini.spModel.rich.pot.sp.obsWrapper
+    c match {
+      case o: ISPObservation => o.findObsComponentByType(GhostMixin.SP_TYPE).isDefined
+      case _                 => false
     }
   }
 

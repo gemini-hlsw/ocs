@@ -154,7 +154,7 @@ public abstract class SPAbstractFactory implements ISPFactory {
                                               SPNodeKey key)
             throws SPUnknownIDException {
 
-        return createObsComponent(prog, type, NodeInitializers.instance.obsComp.get(type), key);
+        return createObsComponent(prog, type, null, key);
     }
 
     /**
@@ -166,11 +166,14 @@ public abstract class SPAbstractFactory implements ISPFactory {
                                               SPNodeKey key)
             throws SPUnknownIDException {
 
+        final ISPNodeInitializer<ISPObsComponent, ? extends ISPDataObject> init0 =
+                (init == null) ? NodeInitializers.instance.obsComp.get(type) : init;
+
         final ISPObsComponent oc = doCreateObsComponent(prog, type, key);
-        if (init == null) {
+        if (init0 == null) {
             throw new RuntimeException("Missing initializer for " + type);
         } else {
-            init.initNode(this, oc);
+            init0.initNode(this, oc);
         }
         return oc;
     }

@@ -1,13 +1,18 @@
 package jsky.app.ot.viewer;
 
-import edu.gemini.pot.sp.SPComponentType;
-import edu.gemini.pot.sp.Instrument;
+import edu.gemini.pot.sp.*;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.spModel.data.ISPDataObject;
+import edu.gemini.spModel.gemini.ghost.Ghost$;
+import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obscomp.SPGroup;
 import edu.gemini.spModel.seqcomp.SeqBase;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.None;
+import edu.gemini.spModel.target.obsComp.TargetObsCompCB;
+import edu.gemini.spModel.util.SPTreeUtil;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.nsp.UIInfo;
 import jsky.app.ot.util.History;
@@ -198,7 +203,19 @@ public final class SPViewerActions {
         setSchedulingBlockAction = new SchedulingBlockAction(viewer);
         setExecStatusAction   = new ExecStatusAction(viewer);
         addSiteQualityAction = new AddObsCompAction(viewer, SPSiteQuality.SP_TYPE);
-        addTargetListAction = new AddObsCompAction(viewer, TargetObsComp.SP_TYPE);
+
+        // When adding a target component, check if we need a non-default
+        // asterism type.
+        addTargetListAction = new AddObsCompAction(viewer, TargetObsComp.SP_TYPE) {
+            @Override protected Option<ISPNodeInitializer<ISPObsComponent, ? extends ISPDataObject>> customInitializer(
+                ISPObsComponentContainer container
+            ) {
+                return Ghost$.MODULE$.isGhostObservation(container) ?
+                         ImOption.apply(Ghost$.MODULE$.TARGET_NI()) :
+                         ImOption.empty();
+            }
+        };
+
         showTPEAction = new ShowTPEAction(viewer);
         showElevationPlotAction = new ShowElevationPlotAction(viewer);
 //        enqueueAction = new EnqueueAction(viewer);
