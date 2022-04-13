@@ -91,7 +91,7 @@ abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPa
     *
     * @param before set to true before the image is loaded and false afterwards
     */
-  protected override def newImage(before: Boolean) {
+  protected override def newImage(before: Boolean): Unit = {
     super.newImage(before)
     if (!before) {
       // replot
@@ -103,7 +103,7 @@ abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPa
     * Transform the image graphics using the given AffineTransform.
     */
   @Deprecated
-  protected override def transformGraphics(trans: AffineTransform) {
+  protected override def transformGraphics(trans: AffineTransform): Unit = {
     super.transformGraphics(trans)
     plotter.transformGraphics(trans)
   }

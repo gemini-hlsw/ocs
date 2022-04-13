@@ -38,3 +38,5 @@ OsgiKeys.additionalHeaders +=
 OsgiKeys.dynamicImportPackage := Seq("*") // hmm
 
 OsgiKeys.exportPackage := Seq()
+
+fork := true
