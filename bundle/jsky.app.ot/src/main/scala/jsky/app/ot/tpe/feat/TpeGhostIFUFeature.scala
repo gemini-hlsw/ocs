@@ -322,6 +322,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
 
   override def isEnabled(ctx: TpeContext): Boolean = super.isEnabled(ctx) && ctx.instrument.is(SPComponentType.INSTRUMENT_GHOST)
 
+  override def isEnabledByDefault: Boolean = true
 
   // A property has changed.
   override def propertyChange(propName: String): Unit = _iw.repaint()
