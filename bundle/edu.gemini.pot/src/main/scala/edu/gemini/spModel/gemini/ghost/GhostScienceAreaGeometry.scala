@@ -11,12 +11,19 @@ import scalaz._
 import Scalaz._
 
 object GhostScienceAreaGeometry extends ScienceAreaGeometry {
-  val size: Angle = Angle.fromArcsecs(444)
-  val radius: Angle = (size / 2).get
-  val Ellipse: Shape = new Ellipse2D.Double(-radius.toArcsecs, -radius.toArcsecs, size.toArcsecs, size.toArcsecs)
+  val Size: Angle   = Angle.fromArcsecs(444)
+  val Radius: Angle = (Size / 2).get
+
+  val Fov: Shape    =
+    new Ellipse2D.Double(
+      -Radius.toArcsecs,
+      -Radius.toArcsecs,
+      Size.toArcsecs,
+      Size.toArcsecs
+    )
 
   /** Create the shape for the science area based on the instrument configuration.
    * This shape is not adjusted for position angle or offsets. */
   override def unadjustedGeometry(ctx: ObsContext): Option[Shape] =
-    Ellipse.some
+    Fov.some
 }

@@ -180,7 +180,7 @@ object Angle {
    */
   def fromDegrees(d: Double): Angle =
     new Angle {
-      override val toDegrees = ((d % 360) + 360) % 360
+      override val toDegrees: Double = ((d % 360) + 360) % 360
     }
 
   /**
@@ -246,7 +246,12 @@ object Angle {
    * The `Angle` of zero degrees/radians.
    * @group Constructors
    */
-  lazy val zero = fromDegrees(0.0)
+  lazy val zero: Angle = fromDegrees(0.0)
+
+  /**
+   * The `Angle` of 90 degrees.
+   */
+  lazy val angle90: Angle = fromDegrees(90)
 
   /**
    * Additive monoid for `Angle`. Note that this is not a strictly lawful monoid as no floating
@@ -256,7 +261,7 @@ object Angle {
    */
   implicit val AngleMonoid: Monoid[Angle] =
     new Monoid[Angle] {
-      val zero = Angle.zero
+      val zero: Angle = Angle.zero
       def append(a: Angle, b: => Angle): Angle = a + b
     }
 

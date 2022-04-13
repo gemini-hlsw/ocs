@@ -8,10 +8,7 @@ import java.util.Collections
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption, Some => JSome}
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.skycalc.Offset
-import edu.gemini.spModel.core.Angle
-import edu.gemini.spModel.gemini.ghost.{Ghost, GhostAsterism, GhostScienceAreaGeometry}
-import edu.gemini.spModel.telescope.IssPort
+import edu.gemini.spModel.gemini.ghost.{Ghost, GhostAsterism, GhostIfuPatrolField}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.target.SPSkyObject
@@ -22,7 +19,6 @@ import jsky.app.ot.tpe.feat.TpeGhostIfuFeature.{HrIfuTargetColor, ScaleMmToArcse
 import jsky.app.ot.util.{BasicPropertyList, OtColor, PropertyWatcher}
 
 import scala.annotation.tailrec
-import scala.collection.JavaConverters._
 import scala.swing.Graphics2D
 
 
@@ -72,8 +68,8 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
         return
 
       if (drawPatrolFields) {
-        val ifu1PatrolField: Area = new Area(flipArea(TpeGhostIfuFeature.ifu1Arc(ctx))).createTransformedArea(ifuTransform)
-        val ifu2PatrolField: Area = new Area(flipArea(TpeGhostIfuFeature.ifu2Arc(ctx))).createTransformedArea(ifuTransform)
+        val ifu1PatrolField: Area = new Area(flipArea(GhostIfuPatrolField.ifu1(ctx).area)).createTransformedArea(ifuTransform)
+        val ifu2PatrolField: Area = new Area(flipArea(GhostIfuPatrolField.ifu2(ctx).area)).createTransformedArea(ifuTransform)
 
         g2d.setColor(TpeGhostIfuFeature.PatrolFieldBorderColor)
 
@@ -493,42 +489,6 @@ object TpeGhostIfuFeature {
 
   def highResolutionSkyArcsec: Area =
     highResolutionSkyMm.createTransformedArea(TransformMmToArcsec)
-
-  /**
-   * Calculates the current patrol field for an IFU as specified by its default patrol field.
-   */
-  private def ifuPatrolField(ctx: ObsContext, patrol: Rectangle2D.Double): Area = {
-    val rot = if (ctx.getIssPort == IssPort.SIDE_LOOKING) Angle.fromDegrees(90) else Angle.fromDegrees(0)
-    val t: Double = ctx.getPositionAngle.toRadians + rot.toRadians
-
-    val rects = ctx.getSciencePositions.asScala.toSet.map { pos: Offset =>
-      val fov = new Area(GhostScienceAreaGeometry.Ellipse)
-      val offsetPatrol = new Area(patrol)
-
-      val p = pos.p.toArcsecs.getMagnitude
-      val q = pos.q.toArcsecs.getMagnitude
-      val xform = new AffineTransform
-      if (t != 0.0) xform.rotate(-t)
-      xform.translate(-p, -q)
-
-      fov.transform(xform)
-      offsetPatrol.transform(xform)
-      offsetPatrol.intersect(fov)
-      offsetPatrol
-    }
-
-    rects.reduceOption { (a, b) =>
-      val c = new Area(a)
-      c.intersect(b)
-      c
-    }.getOrElse(new Area)
-  }
-
-  // The patrol fields for IFU1 and IFU2 relative to the base position.
-  private val ifu1PatrolField = new Rectangle2D.Double(-222, -222, 222 + 3.28, 444)
-  private val ifu2PatrolField = new Rectangle2D.Double(-3.28, -222, 222 + 3.28, 444)
-  private def ifu1Arc(ctx: ObsContext): Area = ifuPatrolField(ctx, ifu1PatrolField)
-  private def ifu2Arc(ctx: ObsContext): Area = ifuPatrolField(ctx, ifu2PatrolField)
 
 
   // Color for IFU limts.

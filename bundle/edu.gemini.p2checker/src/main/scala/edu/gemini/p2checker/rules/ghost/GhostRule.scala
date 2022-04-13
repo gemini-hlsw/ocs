@@ -24,7 +24,7 @@ object GhostRule extends IRule {
         env <- Option(ctx.getTargets)
         base <- ctx.getBaseCoordinates.asScalaOpt
         c <- env.getCoordinates.asScalaList
-        if Coordinates.difference(base.toNewModel, c.coordinates).distance.toArcsecs > GhostScienceAreaGeometry.radius.toArcsecs
+        if Coordinates.difference(base.toNewModel, c.coordinates).distance.toArcsecs > GhostScienceAreaGeometry.Radius.toArcsecs
       } problems.addError(GhostRule.Prefix + "CoordinatesOutOfRange", String.format(CoordinatesOutOfRange, c.getName), toc)
 
       // TARGETS
@@ -35,7 +35,7 @@ object GhostRule extends IRule {
         base <- env.getAsterism.basePosition(None) //ctx.getBaseCoordinates.asScalaOpt
         t <- env.getAsterism.allTargets
         c <- t.coords(ctx.getSchedulingBlockStart.asScalaOpt.map(Long2long))
-        if Coordinates.difference(base, c).distance.toArcsecs > GhostScienceAreaGeometry.radius.toArcsecs
+        if Coordinates.difference(base, c).distance.toArcsecs > GhostScienceAreaGeometry.Radius.toArcsecs
       } problems.addError(GhostRule.Prefix + "CoordinatesOutOfRange", String.format(CoordinatesOutOfRange, t.name), toc)
 
       problems
