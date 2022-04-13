@@ -49,8 +49,24 @@ public interface IP2Problems {
      */
     void append(Problem problem);
 
+    /**
+     * Creates a new IP2Problems containing all of this collection's problems
+     * plus the given problem.
+     *
+     * @param problem new problem to include
+     *
+     * @return copy of this IP2Problems with the additional problem
+     */
     IP2Problems appended(Problem problem);
 
+    /**
+     * Creates a new IP2Problems containing all of this collection's problems
+     * plus the given problems.
+     *
+     * @param problems new problems to include
+     *
+     * @return copy of this IP2Problems with the additional problems
+     */
     IP2Problems appended(IP2Problems problems);
 
     /**
@@ -72,8 +88,8 @@ public interface IP2Problems {
     Problem.Type getSeverity();
 
     /**
-     * Return the ammount of warnings found in this container of problems.
-     * @return the ammount of warnings found in this container of problems. The
+     * Return the count of warnings in this container of problems.
+     * @return the count of warnings in this container of problems. The
      * result will take into account both regular
      * {@link Problem} (counted as 1) as well as
      * {@link ProblemRollup} objects
@@ -82,8 +98,8 @@ public interface IP2Problems {
     int getWarningCount();
 
     /**
-     * Return the amount of errors in this container of problems.
-     * @return the amount of errors in this container of problems.
+     * Return the count of errors in this container of problems.
+     * @return the count of errors in this container of problems.
      * The result will take into account both regular
      * {@link Problem} (counted as 1) as
      * well as {@link ProblemRollup} objects
