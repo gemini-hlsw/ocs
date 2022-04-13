@@ -4,6 +4,7 @@
 
 package edu.gemini.p2checker.api;
 
+import edu.gemini.p2checker.util.UnmodifiableP2Problems;
 import edu.gemini.pot.sp.ISPProgramNode;
 
 import java.util.List;
@@ -12,6 +13,9 @@ import java.util.List;
  *
  */
 public interface IP2Problems {
+
+    IP2Problems EMPTY = new UnmodifiableP2Problems(new P2Problems());
+
     /**
      * Adds a Problem with <code>ProblemType.WARNING</code> type set
      * @param id the unique problem id
@@ -45,6 +49,10 @@ public interface IP2Problems {
      */
     void append(Problem problem);
 
+    IP2Problems appended(Problem problem);
+
+    IP2Problems appended(IP2Problems problems);
+
     /**
      * Get the problems in this container.
      * @return a List of <code>Problem</code>. If no problems are found, and empty valid list
@@ -74,8 +82,8 @@ public interface IP2Problems {
     int getWarningCount();
 
     /**
-     * Return the ammount of errors found in this container of problems.
-     * @return the ammount of errors found in this container of problems.
+     * Return the amount of errors in this container of problems.
+     * @return the amount of errors in this container of problems.
      * The result will take into account both regular
      * {@link Problem} (counted as 1) as
      * well as {@link ProblemRollup} objects
