@@ -35,6 +35,20 @@ public class P2Problems implements Serializable, IP2Problems {
         }
     }
 
+    public static P2Problems singleton(Problem problem) {
+        final Set<Problem> ps = new HashSet<>();
+        ps.add(problem);
+        return new P2Problems(ps);
+    }
+
+    public static P2Problems fromProblems(Collection<Problem> problems) {
+        return new P2Problems(new HashSet<>(problems));
+    }
+
+    private P2Problems(Set<Problem> problems) {
+        _problemSet = problems;
+    }
+
     /**
      * Adds a Problem with <code>ProblemType.WARNING</code> type set
      * @param description the description of the problem
@@ -81,6 +95,33 @@ public class P2Problems implements Serializable, IP2Problems {
         _getProblems().add(problem);
     }
 
+    public IP2Problems appended(Problem problem) {
+        final IP2Problems result;
+
+        if (_problemSet == null) {
+            result = singleton(problem);
+        } else {
+           final HashSet<Problem> copy = new HashSet<>(_problemSet);
+           copy.add(problem);
+           result = new P2Problems(copy);
+        }
+
+        return result;
+    }
+
+    public IP2Problems appended(IP2Problems problems) {
+        final IP2Problems result;
+
+        if (_problemSet == null) {
+            result = fromProblems(problems.getProblems());
+        } else {
+           final HashSet<Problem> copy = new HashSet<>(_problemSet);
+           copy.addAll(problems.getProblems());
+           result = new P2Problems(copy);
+        }
+
+        return result;
+    }
 
     /**
      * Get the problems in this container.

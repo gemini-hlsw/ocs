@@ -1,12 +1,16 @@
 package edu.gemini.p2checker.rules.ghost
 
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.p2checker.api.{IP2Problems, IRule, ObservationElements, P2Problems}
+import edu.gemini.p2checker.api.{IConfigRule, IP2Problems, IRule, ObservationElements, P2Problems, Problem}
+import edu.gemini.p2checker.util.{AbstractConfigRule, SequenceRule}
 import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.spModel.config2.{Config, ItemKey}
 import edu.gemini.spModel.core.Coordinates
-import edu.gemini.spModel.gemini.ghost.GhostScienceAreaGeometry
+import edu.gemini.spModel.gemini.ghost.{Ghost, GhostScienceAreaGeometry}
 import edu.gemini.spModel.target.env.AsterismType
 import edu.gemini.spModel.target.offset.OffsetUtil
+
+import scala.collection.JavaConverters._
 
 object GhostRule extends IRule {
   object CoordinatesOutOfFOVRule extends IRule {
@@ -56,12 +60,48 @@ object GhostRule extends IRule {
     }
   }
 
-  override def check(elems: ObservationElements): IP2Problems = {
-    val probs: P2Problems = new P2Problems()
-    probs.append(CoordinatesOutOfFOVRule.check(elems))
-    probs.append(OffsetsRule.check(elems))
-    probs
+  object CosmicRayExposureRule extends AbstractConfigRule {
+
+    val id: String =
+      GhostRule.Prefix + "CosmicRayExposureTime"
+
+    val limitSeconds: Int =
+      1800
+
+    val message: String =
+      s"Exposure time exceeds the recommended maximum ($limitSeconds seconds) due to cosmic ray contamination";
+
+    override def check(config: Config, step: Int, elements: ObservationElements, state: Any): Problem = {
+      def checkTime(key: ItemKey): Option[Problem] =
+        Option(SequenceRule.getItem(config, classOf[Double], key)).collect {
+          case d: java.lang.Double if d > limitSeconds =>
+            new Problem(
+              Problem.Type.WARNING,
+              id,
+              message,
+              SequenceRule.getInstrumentOrSequenceNode(step, elements)
+            )
+        }
+
+      checkTime(Ghost.RED_EXPOSURE_TIME_KEY)
+        .orElse(checkTime(Ghost.BLUE_EXPOSURE_TIME_KEY))
+        .orNull
+    }
+
   }
+
+  val ConfigRules: java.util.Collection[IConfigRule] =
+    List[IConfigRule](CosmicRayExposureRule).asJava
+
+  val Rules: List[IRule] = List(
+    CoordinatesOutOfFOVRule,
+    OffsetsRule
+  )
+
+  override def check(elems: ObservationElements): IP2Problems =
+    (new SequenceRule(ConfigRules, null) :: Rules).foldLeft(IP2Problems.EMPTY) { (ps, rule) =>
+      ps.appended(rule.check(elems))
+    }
 
   val Prefix: String = "GhostRule_"
 }

@@ -37,6 +37,6 @@ public interface IRule {
      * components needed by the rule to perform the checking.
      * @return Problems found while validating the observation
      */
-    public IP2Problems check(ObservationElements elements) ;
+    IP2Problems check(ObservationElements elements) ;
 
 }

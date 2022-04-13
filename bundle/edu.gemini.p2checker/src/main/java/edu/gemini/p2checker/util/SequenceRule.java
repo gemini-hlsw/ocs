@@ -223,7 +223,7 @@ public class SequenceRule implements IRule {
     public IP2Problems check(ObservationElements elements)  {
         IP2Problems probs = new P2Problems();
 
-        // Walk through ever config in the sequence, checking each rule.  If
+        // Walk through every config in the sequence, checking each rule.  If
         // a rule matches, remove it from the set so it won't be reported twice.
         int step = 0;
         ConfigSequence seq = elements.getSequence();

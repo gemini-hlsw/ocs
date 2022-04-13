@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class UnmodifiableP2Problems implements IP2Problems {
 
-    private IP2Problems _delegate;
+    private final IP2Problems _delegate;
 
     public UnmodifiableP2Problems(IP2Problems delegate) {
         _delegate = delegate;
@@ -36,6 +36,14 @@ public class UnmodifiableP2Problems implements IP2Problems {
 
     public void append(Problem problem) {
         throw new UnsupportedOperationException();
+    }
+
+    public IP2Problems appended(Problem problem) {
+        return new UnmodifiableP2Problems(_delegate.appended(problem));
+    }
+
+    public IP2Problems appended(IP2Problems problems) {
+        return new UnmodifiableP2Problems(_delegate.appended(problems));
     }
 
     public List<Problem> getProblems() {

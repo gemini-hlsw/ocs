@@ -4,6 +4,7 @@
 
 package edu.gemini.p2checker.api;
 
+import edu.gemini.p2checker.util.UnmodifiableP2Problems;
 import edu.gemini.pot.sp.ISPProgramNode;
 
 import java.util.List;
@@ -12,6 +13,9 @@ import java.util.List;
  *
  */
 public interface IP2Problems {
+
+    IP2Problems EMPTY = new UnmodifiableP2Problems(new P2Problems());
+
     /**
      * Adds a Problem with <code>ProblemType.WARNING</code> type set
      * @param id the unique problem id
@@ -46,6 +50,26 @@ public interface IP2Problems {
     void append(Problem problem);
 
     /**
+     * Creates a new IP2Problems containing all of this collection's problems
+     * plus the given problem.
+     *
+     * @param problem new problem to include
+     *
+     * @return copy of this IP2Problems with the additional problem
+     */
+    IP2Problems appended(Problem problem);
+
+    /**
+     * Creates a new IP2Problems containing all of this collection's problems
+     * plus the given problems.
+     *
+     * @param problems new problems to include
+     *
+     * @return copy of this IP2Problems with the additional problems
+     */
+    IP2Problems appended(IP2Problems problems);
+
+    /**
      * Get the problems in this container.
      * @return a List of <code>Problem</code>. If no problems are found, and empty valid list
      * is returned.
@@ -64,8 +88,8 @@ public interface IP2Problems {
     Problem.Type getSeverity();
 
     /**
-     * Return the ammount of warnings found in this container of problems.
-     * @return the ammount of warnings found in this container of problems. The
+     * Return the count of warnings in this container of problems.
+     * @return the count of warnings in this container of problems. The
      * result will take into account both regular
      * {@link Problem} (counted as 1) as well as
      * {@link ProblemRollup} objects
@@ -74,8 +98,8 @@ public interface IP2Problems {
     int getWarningCount();
 
     /**
-     * Return the ammount of errors found in this container of problems.
-     * @return the ammount of errors found in this container of problems.
+     * Return the count of errors in this container of problems.
+     * @return the count of errors in this container of problems.
      * The result will take into account both regular
      * {@link Problem} (counted as 1) as
      * well as {@link ProblemRollup} objects
