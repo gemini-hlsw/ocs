@@ -555,7 +555,6 @@ object Ghost {
     Collections.unmodifiableMap(TreeMap(Properties: _*).asJava)
   }
 
-  /** Currently, the instrument has no queryable configuration parameters. */
   val getInstConfigInfo: JList[InstConfigInfo] = List[InstConfigInfo](new InstConfigInfo(RED_BINNING_PROP), new InstConfigInfo(BLUE_BINNING_PROP)).asJava
 
   val GhostExposureTimeErrorMessage: String = "Error: tried to access single exposure time for GHOST."
