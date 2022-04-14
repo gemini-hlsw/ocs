@@ -223,6 +223,7 @@ public final class ObsCatalogInfo {
             InstAcqCam.SP_TYPE.readableStr,
             InstBHROS.SP_TYPE.readableStr,
             Flamingos2.SP_TYPE.readableStr,
+            Ghost.SP_TYPE.readableStr,
             InstGmosNorth.SP_TYPE.readableStr,
             InstGmosSouth.SP_TYPE.readableStr,
             InstGNIRS.SP_TYPE.readableStr,
