@@ -60,7 +60,7 @@ object GhostIfuPatrolField {
       offsetPatrol
     }
 
-   rects.reduceOption { (a, b) =>
+    rects.reduceOption { (a, b) =>
       val c = new Area(a)
       c.intersect(b)
       c
