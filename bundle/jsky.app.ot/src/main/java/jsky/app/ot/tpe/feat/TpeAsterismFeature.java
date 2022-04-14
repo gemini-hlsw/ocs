@@ -100,7 +100,7 @@ public class TpeAsterismFeature extends TpePositionFeature {
         ImOption.apply(loc).foreach(p -> {
             final int r = MARKER_SIZE;
             final int d = 2 * r;
-            g.setColor(OtColor.HONEY_DEW);
+            g.setColor(Color.cyan);
             g.drawOval((int) (p.x - r), (int) (p.y - r), d, d);
             g.fillOval((int) (p.x - r/2), (int) (p.y - r/2), r, r);
         });
