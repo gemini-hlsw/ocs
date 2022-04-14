@@ -20,6 +20,11 @@ import java.util.stream.Stream;
 public interface Option<T> extends Iterable<T>, Serializable {
 
     /**
+     * Converts this option to a Scala Option.
+     */
+    scala.Option<T> toScalaOpt();
+
+    /**
      * Gets the value assuming there is one.
      *
      * @return value associated with this Option

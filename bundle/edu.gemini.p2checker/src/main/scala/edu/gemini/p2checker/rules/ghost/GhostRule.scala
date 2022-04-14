@@ -1,42 +1,78 @@
 package edu.gemini.p2checker.rules.ghost
 
-import edu.gemini.pot.ModelConverters._
 import edu.gemini.p2checker.api.{IConfigRule, IP2Problems, IRule, ObservationElements, P2Problems, Problem}
 import edu.gemini.p2checker.util.{AbstractConfigRule, SequenceRule}
+import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.config2.{Config, ItemKey}
 import edu.gemini.spModel.core.Coordinates
-import edu.gemini.spModel.gemini.ghost.{Ghost, GhostScienceAreaGeometry}
-import edu.gemini.spModel.target.env.AsterismType
+import edu.gemini.spModel.gemini.ghost.{Ghost, GhostAsterism, GhostIfuPatrolField}
+import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.target.env.{Asterism, AsterismType}
 import edu.gemini.spModel.target.offset.OffsetUtil
+
+import java.time.Instant
 
 import scala.collection.JavaConverters._
 
 object GhostRule extends IRule {
   object CoordinatesOutOfFOVRule extends IRule {
+    val id: String = GhostRule.Prefix + "CoordinatesOutOfRange"
+
+    def checkOne(
+      name:  String,
+      node:  ISPObsComponent,
+      base:  Coordinates,
+      ifu:   Option[Coordinates],
+      field: => GhostIfuPatrolField
+    ): List[Problem] =
+      ifu.flatMap { p =>
+        if (field.inRange(Coordinates.difference(base, p).offset)) None
+        else Some(new Problem(Problem.Type.ERROR, id, String.format(CoordinatesOutOfRange, name), node))
+      }.toList
+
+    def checkBoth(
+      ctx:  ObsContext,
+      node: ISPObsComponent,
+      base: Coordinates,
+      ifu1: Option[Coordinates],
+      ifu2: Option[Coordinates]
+    ): List[Problem] =
+      checkOne("IFU1", node, base, ifu1, GhostIfuPatrolField.ifu1(ctx)) ++
+      checkOne("IFU2", node, base, ifu2, GhostIfuPatrolField.ifu2(ctx))
+
+    def checkAsterism(
+      ast:  Asterism,
+      ctx:  ObsContext,
+      node: ISPObsComponent,
+      base: Coordinates,
+      when: Option[Instant]
+    ): List[Problem] =
+      ast match {
+        case GhostAsterism.SingleTarget(t, _)                   =>
+          checkOne("IFU1", node, base, t.coordinates(when), GhostIfuPatrolField.ifu1(ctx))
+        case GhostAsterism.DualTarget(t1, t2, _)                =>
+          checkBoth(ctx, node, base, t1.coordinates(when), t2.coordinates(when))
+        case GhostAsterism.TargetPlusSky(t, s, _)               =>
+          checkBoth(ctx, node, base, t.coordinates(when), Some(s.coordinates))
+        case GhostAsterism.SkyPlusTarget(s, t, _)               =>
+          checkBoth(ctx, node, base, Some(s.coordinates), t.coordinates(when))
+        case GhostAsterism.HighResolutionTargetPlusSky(t, s, _) =>
+          checkBoth(ctx, node, base, t.coordinates(when), Some(s.coordinates))
+        case _                                                  =>
+          Nil
+      }
+
     override def check(elems: ObservationElements): IP2Problems = {
       val problems = new P2Problems()
 
-      // COORDINATES, i.e. sky positions
       for {
-        toc <- elems.getTargetObsComponentNode.asScalaOpt
-        ctx <- elems.getObsContext.asScalaOpt
-        env <- Option(ctx.getTargets)
-        base <- ctx.getBaseCoordinates.asScalaOpt
-        c <- env.getCoordinates.asScalaList
-        if Coordinates.difference(base.toNewModel, c.coordinates).distance.toArcsecs > GhostScienceAreaGeometry.radius.toArcsecs
-      } problems.addError(GhostRule.Prefix + "CoordinatesOutOfRange", String.format(CoordinatesOutOfRange, c.getName), toc)
-
-      // TARGETS
-      for {
-        toc <- elems.getTargetObsComponentNode.asScalaOpt
-        ctx <- elems.getObsContext.asScalaOpt
-        env <- Option(ctx.getTargets)
-        base <- env.getAsterism.basePosition(None) //ctx.getBaseCoordinates.asScalaOpt
-        t <- env.getAsterism.allTargets
-        c <- t.coords(ctx.getSchedulingBlockStart.asScalaOpt.map(Long2long))
-        if Coordinates.difference(base, c).distance.toArcsecs > GhostScienceAreaGeometry.radius.toArcsecs
-      } problems.addError(GhostRule.Prefix + "CoordinatesOutOfRange", String.format(CoordinatesOutOfRange, t.name), toc)
+        toc  <- elems.getTargetObsComponentNode.asScalaOpt
+        ctx  <- elems.getObsContext.asScalaOpt
+        env  <- Option(ctx.getTargets)
+        when = ctx.getSchedulingBlockStart.asScalaOpt.map(t => Instant.ofEpochMilli(t))
+        base <- env.getAsterism.basePosition(when)
+      } checkAsterism(env.getAsterism, ctx, toc, base, when).foreach(problems.append)
 
       problems
     }

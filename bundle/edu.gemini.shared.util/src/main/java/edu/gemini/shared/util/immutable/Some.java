@@ -19,6 +19,11 @@ public final class Some<T> implements Option<T> {
     }
 
     @Override
+    public scala.Option<T> toScalaOpt() {
+        return scala.Option.apply(val);
+    }
+
+    @Override
     public T getValue() {
         return val;
     }

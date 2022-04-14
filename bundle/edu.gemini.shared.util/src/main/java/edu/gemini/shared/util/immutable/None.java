@@ -63,6 +63,12 @@ public final class None<T> implements Option<T>, Serializable {
     }
 
     @Override
+    public scala.Option<T> toScalaOpt() {
+        return scala.Option.empty();
+    }
+
+
+    @Override
     public T getValue() {
         throw new NoSuchElementException();
     }
