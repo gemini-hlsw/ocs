@@ -107,21 +107,38 @@ object Asterism {
 
   // N.B. most members must be defs because `t` is mutable.
   final case class Single(t: SPTarget) extends Asterism {
-    override def allSpTargets = NonEmptyList(t) // def because Nel isn't serializable
-    override def allTargets = NonEmptyList(t.getTarget)
-    override def allSpCoordinates: List[SPCoordinates] = Nil
-    override def basePosition(time: Option[Instant]) = t.getCoordinates(time.map(_.toEpochMilli))
-    override def copyWithClonedTargets() = Single(t.clone)
-    override def basePositionProperMotion = Target.pm.get(t.getTarget)
-    override def resolutionMode: ResolutionMode = ResolutionMode.Standard
-    override def asterismType: AsterismType = AsterismType.Single
+
+    override def allSpTargets: NonEmptyList[SPTarget] =
+      NonEmptyList(t) // def because Nel isn't serializable
+
+    override def allTargets: NonEmptyList[Target] =
+      NonEmptyList(t.getTarget)
+
+    override def allSpCoordinates: List[SPCoordinates] =
+      Nil
+
+    override def basePosition(time: Option[Instant]): Option[Coordinates] =
+      t.getCoordinates(time.map(_.toEpochMilli))
+
+    override def copyWithClonedTargets: Asterism =
+      Single(t.clone)
+
+    override def basePositionProperMotion: Option[ProperMotion] =
+      Target.pm.get(t.getTarget)
+
+    override def resolutionMode: ResolutionMode =
+      ResolutionMode.Standard
+
+    override def asterismType: AsterismType =
+      AsterismType.Single
   }
 
   object Single {
     import TargetParamSetCodecs._
 
     /** Construct a new "empty" Single with an "empty" target. */
-    def empty = apply(new SPTarget(SiderealTarget.empty))
+    def empty: Single =
+      apply(new SPTarget(SiderealTarget.empty))
 
     // Lenses
     val spTarget: Single @> SPTarget = Lens.lensu((a, b) => a.copy(t = b), _.t)

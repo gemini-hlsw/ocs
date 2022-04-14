@@ -3,8 +3,7 @@
 
 package edu.gemini.spModel.gemini.ghost
 
-import edu.gemini.skycalc.Offset
-import edu.gemini.spModel.core.Angle
+import edu.gemini.spModel.core.{Angle, Coordinates, Offset}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.telescope.IssPort
 
@@ -18,10 +17,13 @@ sealed trait GhostIfuPatrolField {
   def area: Area
 
   def inRange(offset: Offset): Boolean = {
-    val x = -offset.p.toArcsecs.getMagnitude
-    val y = -offset.q.toArcsecs.getMagnitude
+    val x = -offset.p.toAngle.toSignedArcsecs
+    val y = -offset.q.toAngle.toSignedArcsecs
     area.contains(x, y)
   }
+
+  def ifuInRange(base: Coordinates, ifu: Coordinates): Boolean =
+    inRange(Coordinates.difference(base, ifu).offset)
 
 }
 
@@ -42,7 +44,7 @@ object GhostIfuPatrolField {
     val θ: Double =
       ctx.getPositionAngle.toRadians + rot.toRadians
 
-    val rects = ctx.getSciencePositions.asScala.toSet.map { pos: Offset =>
+    val rects = ctx.getSciencePositions.asScala.toSet.map { pos: edu.gemini.skycalc.Offset =>
       val fov          = new Area(GhostScienceAreaGeometry.Fov)
       val offsetPatrol = new Area(rect)
 

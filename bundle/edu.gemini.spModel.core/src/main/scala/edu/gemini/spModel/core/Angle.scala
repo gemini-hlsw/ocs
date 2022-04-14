@@ -41,6 +41,9 @@ sealed trait Angle extends java.io.Serializable {
   def toArcsecs: Double =
     toDegrees * 3600
 
+  def toSignedArcsecs: Double =
+    toSignedDegrees * 3600
+
   /**
    * This `Angle` as an `HourAngle`.
    * @group Conversions
