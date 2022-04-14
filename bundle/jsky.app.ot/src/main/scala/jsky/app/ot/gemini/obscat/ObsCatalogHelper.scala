@@ -56,7 +56,6 @@ object ObsCatalogHelper {
   private def databases(includeRemote: Boolean): List[DB] = {
     val remote = if (includeRemote) OT.getKeyChain.peers.map(_.toList.map(Remote.apply)).unsafeRun.fold(e => List(), identity)
                  else List.empty[DB]
-    println(remote)
     Local :: remote
   }
 

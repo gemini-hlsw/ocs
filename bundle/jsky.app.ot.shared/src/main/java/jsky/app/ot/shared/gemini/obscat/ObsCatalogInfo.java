@@ -223,6 +223,7 @@ public final class ObsCatalogInfo {
             InstAcqCam.SP_TYPE.readableStr,
             InstBHROS.SP_TYPE.readableStr,
             Flamingos2.SP_TYPE.readableStr,
+            Ghost.SP_TYPE.readableStr,
             InstGmosNorth.SP_TYPE.readableStr,
             InstGmosSouth.SP_TYPE.readableStr,
             InstGNIRS.SP_TYPE.readableStr,
@@ -287,6 +288,8 @@ public final class ObsCatalogInfo {
             instConfigInfoList = Flamingos2.getInstConfigInfo();
         else if (instName.equals(InstNICI.SP_TYPE.readableStr))
             instConfigInfoList = InstNICI.getInstConfigInfo();
+        else if (instName.equals(Ghost.SP_TYPE.readableStr))
+            instConfigInfoList = Ghost.getInstConfigInfo();
         else if (instName.equals(InstGmosNorth.SP_TYPE.readableStr))
             instConfigInfoList = InstGmosNorth.getInstConfigInfo();
         else if (instName.equals(InstGmosSouth.SP_TYPE.readableStr))
