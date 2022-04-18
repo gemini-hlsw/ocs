@@ -72,7 +72,7 @@ object BagsState {
     (ErrorState, ioUnit)  // Default transition for unexpected events
 
   def hashObs(ctx: ObsContext): AgsHashVal = {
-    val when = ctx.getSchedulingBlockStart.asScalaOpt | Instant.now.toEpochMilli
+    val when = ctx.getSchedulingBlockStart.asScalaOpt.map(t => Instant.ofEpochMilli(t)) | Instant.now
     AgsHash.hash(ctx, when)
   }
 

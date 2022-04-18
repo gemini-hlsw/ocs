@@ -27,7 +27,7 @@ import scalaz._
 import Scalaz._
 
 class AgsHashSpec extends Specification with ScalaCheck with edu.gemini.spModel.test.SpModelArbitraries {
-  val now = Instant.now()
+  val now: Instant = Instant.now()
 
   def hashSame(ctx0: ObsContext, ctx1: ObsContext): Boolean =
     AgsHash.hash(ctx0, now) == AgsHash.hash(ctx1, now)

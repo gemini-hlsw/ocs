@@ -1,6 +1,6 @@
 package jsky.app.ot.tpe.feat
 
-import edu.gemini.ags.api.{AgsRegistrar, AgsHash}
+import edu.gemini.ags.api.{AgsHash, AgsRegistrar}
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api.ConeSearchCatalogQuery
 import edu.gemini.catalog.ui.adapters.TableQueryResultAdapter
@@ -12,7 +12,9 @@ import edu.gemini.spModel.obs.context.ObsContext
 import jsky.app.ot.tpe._
 import jsky.app.ot.tpe.feat.TpeCatalogFeature.PlotState._
 import jsky.catalog.gui.TablePlotter
+
 import java.awt.Graphics
+import java.time.Instant
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing.Swing
@@ -111,7 +113,7 @@ object TpeCatalogFeature {
     val when = c.getSchedulingBlockStart.asScalaOpt.map(_.toLong).getOrElse {
       new ObservingNight(c.getSite.getOrElse(Site.GN)).getStartTime
     }
-    AgsHash.hash(c, when)
+    AgsHash.hash(c, Instant.ofEpochMilli(when))
   }
 
   /** PlotState contains all relevant information for the catalog plot. */
