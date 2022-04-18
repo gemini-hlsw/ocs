@@ -108,52 +108,95 @@ public class TpeAsterismFeature extends TpePositionFeature {
         return ctx.getBaseCoordinates().flatMap(edu.gemini.skycalc.Coordinates::toCoreCoordinates);
     }
 
-    private Option<Coordinates> ghostCoordinates(
-      ImEither<SPCoordinates, GhostAsterism.GhostTarget> ifu,
-      Option<Instant> when
+    private Option<Point2D.Double> explicitBaseLocation(
+        scala.Option<SPCoordinates> base,
+        TpePositionMap pm
     ) {
-       return ifu.biFold(
-           coords -> ImOption.apply(coords.getCoordinates()),
-           target -> ImOption.fromScalaOpt(target.coordinates(when.toScalaOpt()))
-       );
+        return ImOption.fromScalaOpt(base).map(pm::getLocationFromTag);
+    }
+
+    /**
+     *  Position information extracted from a Ghost asterism used to facilitate
+     *  drawing.
+     */
+    static final class GhostPosition {
+
+        // Coordinates where the IFU should be placed.
+        private final Coordinates    ifuPosition;
+
+        // Screen location where to draw the feature associated with the IFU.
+        // This might not correspond 1:1 to where the IFU is located.  HRIFU
+        // sky fibers are about 3.28 arcsec above the SRIFU2.
+        private final Point2D.Double drawingLocation;
+
+        // Is this a target (or a sky position).
+        private final boolean        isTarget;
+
+        public GhostPosition(
+            Coordinates ifuPosition,
+            Point2D     drawingLocation,
+            boolean     isTarget
+        ) {
+            this.ifuPosition     = ifuPosition;
+            this.drawingLocation = new Point2D.Double(drawingLocation.getX(), drawingLocation.getY());
+            this.isTarget        = isTarget;
+        }
+
+        public static Option<GhostPosition> fromTarget(
+            GhostAsterism.GhostTarget target,
+            Option<Instant> when,
+            TpePositionMap  pm
+        ) {
+            return ImOption.fromScalaOpt(target.coordinates(when.toScalaOpt())).map(c ->
+                new GhostPosition(
+                    c,
+                    pm.getLocationFromTag(target.spTarget()),
+                    true
+                )
+            );
+        }
+
+        public static GhostPosition fromSky(
+            Coordinates    ifuPosition,
+            SPCoordinates  skyPosition,
+            TpePositionMap pm
+        ) {
+            return new GhostPosition(
+                ifuPosition,
+                pm.getLocationFromTag(skyPosition),
+                false
+            );
+        }
     }
 
     private void drawGhostIfu(
-      Graphics        g,
-      TpePositionMap  pm,
-      Option<Instant> when,
-      Coordinates     base,
-      ImEither<SPCoordinates, GhostAsterism.GhostTarget> ifu,
-      GhostIfuPatrolField patrolField
+      final Graphics            g,
+      final GhostPosition       pos,
+      final Coordinates         base,
+      final GhostIfuPatrolField patrolField
     ) {
-        ghostCoordinates(ifu, when).foreach(pos -> {
-            final Color color =
-                patrolField.inRange(Coordinates.difference(base, pos).offset()) ?
-                        ifu.biFold(c -> Color.cyan, t -> Color.yellow)          :
-                        Color.red;
+        final Color color =
+            patrolField.inRange(Coordinates.difference(base, pos.ifuPosition).offset()) ?
+                    (pos.isTarget ? Color.yellow : Color.cyan)                          :
+                    Color.red;
 
-            final Point2D.Double loc =
-                ifu.biFold(pm::getLocationFromTag, t -> pm.getLocationFromTag(t.spTarget()));
-
-            markPosition(g, color, loc);
-        });
+        markPosition(g, color, pos.drawingLocation);
     }
 
     private void drawGhostAsterism(
-      final Graphics g,
-      Option<ImEither<SPCoordinates, GhostAsterism.GhostTarget>> ifu1,
-      Option<ImEither<SPCoordinates, GhostAsterism.GhostTarget>> ifu2,
-      Option<SPCoordinates> explicitBase
+      final Graphics              g,
+      final Option<ObsContext>    ctx,
+      final Option<GhostPosition> ifu1,
+      final Option<GhostPosition> ifu2,
+      Option<Point2D.Double>      explicitBase
     ) {
-        final TpePositionMap pm = TpePositionMap.getMap(_iw);
-        getContext().obsContextJavaWithConditions(SPSiteQuality.Conditions.NOMINAL).foreach(ctx -> {
-            final Option<Instant> when = ctx.getSchedulingBlockStart().map(Instant::ofEpochMilli);
-            explicitBase.foreach(c -> markBase(g, pm.getLocationFromTag(c)));
-            baseCoordinates(ctx).foreach(base -> {
-                ifu1.foreach(ifu -> drawGhostIfu(g, pm, when, base, ifu, GhostIfuPatrolField$.MODULE$.ifu1(ctx)));
-                ifu2.foreach(ifu -> drawGhostIfu(g, pm, when, base, ifu, GhostIfuPatrolField$.MODULE$.ifu2(ctx)));
-            });
-        });
+        explicitBase.foreach(p -> markBase(g, p));
+        ctx.foreach(c ->
+            baseCoordinates(c).foreach(base -> {
+                ifu1.foreach(ifu -> drawGhostIfu(g, ifu, base, GhostIfuPatrolField$.MODULE$.ifu1(c)));
+                ifu2.foreach(ifu -> drawGhostIfu(g, ifu, base, GhostIfuPatrolField$.MODULE$.ifu2(c)));
+            })
+        );
     }
 
     public void draw(final Graphics g, final TpeImageInfo tii) {
@@ -161,15 +204,21 @@ public class TpeAsterismFeature extends TpePositionFeature {
         final TargetEnvironment env = getTargetEnvironment();
         if (env == null) return;
 
+        final TpePositionMap     pm  = TpePositionMap.getMap(_iw);
+        final Option<ObsContext> ctx = getContext().obsContextJavaWithConditions(SPSiteQuality.Conditions.NOMINAL);
+        final Option<Instant>   when = ctx.flatMap(ObsContext::getSchedulingBlockStart).map(Instant::ofEpochMilli);
+
         final Asterism a = env.getAsterism();
         switch (a.asterismType()) {
             case GhostSingleTarget:
                 final GhostAsterism.SingleTarget st = ((GhostAsterism.SingleTarget) a);
+
                 drawGhostAsterism(
                     g,
-                    ImOption.apply(new Right<>(st.target())),
+                    ctx,
+                    GhostPosition.fromTarget(st.target(), when, pm),
                     ImOption.empty(),
-                    ImOption.fromScalaOpt(st.overriddenBase())
+                    explicitBaseLocation(st.overriddenBase(), pm)
                 );
                 break;
 
@@ -177,9 +226,10 @@ public class TpeAsterismFeature extends TpePositionFeature {
                 final GhostAsterism.DualTarget dt = ((GhostAsterism.DualTarget) a);
                 drawGhostAsterism(
                     g,
-                    ImOption.apply(new Right<>(dt.target1())),
-                    ImOption.apply(new Right<>(dt.target2())),
-                    ImOption.fromScalaOpt(dt.overriddenBase())
+                    ctx,
+                    GhostPosition.fromTarget(dt.target1(), when, pm),
+                    GhostPosition.fromTarget(dt.target2(), when, pm),
+                    explicitBaseLocation(dt.overriddenBase(), pm)
                 );
 
                 // Draw the base position if it is not explicitly overridden
@@ -196,9 +246,10 @@ public class TpeAsterismFeature extends TpePositionFeature {
                 final GhostAsterism.TargetPlusSky tps = ((GhostAsterism.TargetPlusSky) a);
                 drawGhostAsterism(
                     g,
-                    ImOption.apply(new Right<>(tps.target())),
-                    ImOption.apply(new Left<>(tps.sky())),
-                    ImOption.fromScalaOpt(tps.overriddenBase())
+                    ctx,
+                    GhostPosition.fromTarget(tps.target(), when, pm),
+                    ImOption.apply(GhostPosition.fromSky(tps.sky().coordinates(), tps.sky(), pm)),
+                    explicitBaseLocation(tps.overriddenBase(), pm)
                 );
                 break;
 
@@ -206,9 +257,10 @@ public class TpeAsterismFeature extends TpePositionFeature {
                 final GhostAsterism.SkyPlusTarget spt = ((GhostAsterism.SkyPlusTarget) a);
                 drawGhostAsterism(
                     g,
-                    ImOption.apply(new Left<>(spt.sky())),
-                    ImOption.apply(new Right<>(spt.target())),
-                    ImOption.fromScalaOpt(spt.overriddenBase())
+                    ctx,
+                    ImOption.apply(GhostPosition.fromSky(spt.sky().coordinates(), spt.sky(), pm)),
+                    GhostPosition.fromTarget(spt.target(), when, pm),
+                    explicitBaseLocation(spt.overriddenBase(), pm)
                 );
                 break;
 
@@ -216,14 +268,14 @@ public class TpeAsterismFeature extends TpePositionFeature {
                 final GhostAsterism.HighResolutionTargetPlusSky hrtps = ((GhostAsterism.HighResolutionTargetPlusSky) a);
                 drawGhostAsterism(
                     g,
-                    ImOption.apply(new Right<>(hrtps.target())),
-                    ImOption.apply(new Left<>(hrtps.sky())),
-                    ImOption.fromScalaOpt(hrtps.overriddenBase())
+                    ctx,
+                    GhostPosition.fromTarget(hrtps.target(), when, pm),
+                    ImOption.apply(GhostPosition.fromSky(hrtps.srifu2().coordinates(), hrtps.sky(), pm)),
+                    explicitBaseLocation(hrtps.overriddenBase(), pm)
                 );
                 break;
 
             default:
-                final TpePositionMap pm = TpePositionMap.getMap(_iw);
 
                 // Draw the sky positions first, so that overlapping targets will take precedence.
                 a.allSpCoordinatesJava().foreach(spc ->

@@ -577,7 +577,7 @@ object TpeGhostIfuFeature {
 
   private[feat] def objectInIFU2(env: TargetEnvironment, skyObject: SPSkyObject): Boolean = env.getAsterism match {
     case a: GhostAsterism.StandardResolution => a.srifu2.exists(_.fold(skyObject == _, skyObject == _.spTarget))
-    case a: GhostAsterism.HighResolution => a.hrifu2.contains(skyObject)
+    case a: GhostAsterism.HighResolution => a.hrsky == skyObject
     case _ => false
   }
 

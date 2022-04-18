@@ -223,12 +223,26 @@ object GhostAsterism {
       case HighResolutionTargetPlusSky(_,_,_) => AsterismType.GhostHighResolutionTargetPlusSky
     }
 
-    def hrifu1: GhostTarget = this match {
-      case HighResolutionTargetPlusSky(t,_,_) => t
-    }
-    def hrifu2: Option[SPCoordinates] = this match {
-      case HighResolutionTargetPlusSky(_,s,_) => Some(s)
-    }
+    def hrifu1: GhostTarget =
+      this match {
+        case HighResolutionTargetPlusSky(t,_,_) => t
+      }
+
+    def hrsky: SPCoordinates =
+      this match {
+        case HighResolutionTargetPlusSky(_,s,_) => s
+      }
+
+    def srifu2: SPCoordinates =
+      this match {
+        case HighResolutionTargetPlusSky(_,s,_) =>
+          // The coordinates entered by the user are exactly where the HRIFU
+          // sky fibers should be placed. To get the SRIFU2 at that location we
+          // have to correct these coordinates.
+          new SPCoordinates(
+            s.coordinates.offset(Angle.zero, GhostIfuPatrolField.HrSkyFiberOffset * -1.0)
+          )
+      }
   }
 
   final case class HighResolutionTargetPlusSky(target: GhostTarget,
