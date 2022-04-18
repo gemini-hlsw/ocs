@@ -16,13 +16,11 @@ import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
 import jsky.app.ot.tpe.*;
-import jsky.app.ot.util.OtColor;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.time.Instant;
 
-// TODO:ASTERISM: Draw base position … right now we only draw the targets
 public class TpeAsterismFeature extends TpePositionFeature {
 
     public TpeAsterismFeature() {
@@ -102,7 +100,7 @@ public class TpeAsterismFeature extends TpePositionFeature {
             final int d = 2 * r;
             g.setColor(Color.cyan);
             g.drawOval((int) (p.x - r), (int) (p.y - r), d, d);
-            g.fillOval((int) (p.x - r/2), (int) (p.y - r/2), r, r);
+            g.fillOval((int) (p.x - r/2), (int) (p.y - r/2), r+1, r+1);
         });
     }
 
