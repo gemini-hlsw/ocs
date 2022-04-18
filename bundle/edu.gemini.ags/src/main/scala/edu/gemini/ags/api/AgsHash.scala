@@ -1,7 +1,7 @@
 package edu.gemini.ags.api
 
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.shared.util.immutable.{Option => GemOption}
+import edu.gemini.shared.util.immutable.{ImOption, Option => GemOption}
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.gemini.altair.InstAltair
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
@@ -12,7 +12,6 @@ import java.time.Instant
 
 import scala.collection.mutable.ListBuffer
 import scala.util.hashing.{MurmurHash3 => M3}
-
 import scala.collection.JavaConverters._
 
 /** Computes an `Int` hash value that corresponds to the set of inputs to the
@@ -34,14 +33,7 @@ object AgsHash {
   /** Calculates the AGS hash for this context, calculating the base position
     * corresponding to the given time.
     */
-  def hash(ctx: ObsContext, when: Instant): Int =
-    hash(ctx, when.toEpochMilli)
-
-
-  /** Calculates the AGS hash for this context, calculating the base position
-    * corresponding to the given time expressed in milliseconds since 1970.
-    */
-  def hash(ctx: ObsContext, when: Long): Int = {
+  def hash(ctx: ObsContext, when: Instant): Int = {
 
     val buf = ListBuffer.empty[Int]
 
@@ -58,7 +50,7 @@ object AgsHash {
 
     // Asterism
     Option(ctx.getTargets).foreach { t =>
-      val time = Some(new java.lang.Long(when)).asGeminiOpt
+      val time = Some(new java.lang.Long(when.toEpochMilli)).asGeminiOpt
       val asterism = t.getAsterism
 
       def toData(coord: GemOption[java.lang.Double]): Int =
@@ -70,6 +62,13 @@ object AgsHash {
         ra +=: dec +=: buf
       }
 
+      // Include the base position.  In the case of GHOST, the base may not
+      // correspond to any particular target in the asterism.
+      asterism.basePosition(Some(when)).map { c =>
+        val ra  = toData(ImOption.apply(c.ra.toDegrees))
+        val dec = toData(ImOption.apply(c.dec.toDegrees))
+        ra +=: dec +=: buf
+      }
     }
 
     // Offset Positions, which are returned in a Set.  Order is not important
