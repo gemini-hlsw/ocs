@@ -8,6 +8,7 @@ import java.util.Collections
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption, Some => JSome}
 import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.spModel.gemini.ghost.GhostIfuPatrolField.{ScaleMmToArcsec, TransformMmToArcsec}
 import edu.gemini.spModel.gemini.ghost.{Ghost, GhostAsterism, GhostIfuPatrolField}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.SPInstObsComp
@@ -15,7 +16,7 @@ import edu.gemini.spModel.target.SPSkyObject
 import edu.gemini.spModel.target.env.{Asterism, AsterismType, TargetEnvironment, TargetEnvironmentDiff}
 import javax.swing.{Icon, JLabel, JPanel, SwingConstants}
 import jsky.app.ot.tpe._
-import jsky.app.ot.tpe.feat.TpeGhostIfuFeature.{HrIfuTargetColor, ScaleMmToArcsec, SrIfuSkyColor, SrIfuTargetColor, highResolutionIfuArcsec, highResolutionSkyArcsec, standardResolutionIfuArcsec, standardResolutionSkyArcsec}
+import jsky.app.ot.tpe.feat.TpeGhostIfuFeature.{HrIfuTargetColor, SrIfuSkyColor, SrIfuTargetColor, highResolutionIfuArcsec, highResolutionSkyArcsec, standardResolutionIfuArcsec, standardResolutionSkyArcsec}
 import jsky.app.ot.util.{BasicPropertyList, OtColor, PropertyWatcher}
 
 import scala.annotation.tailrec
@@ -251,7 +252,9 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       p,
       highResolutionSkyArcsec,
       0.0,
-      -2.0
+      // IFU2 is positioned 2 mm below sky position (the demand coordinates sent
+      // are corrected by 2 mm) but we display the actual coordinates.
+      0.0
     )
   }
 
@@ -465,10 +468,6 @@ object TpeGhostIfuFeature {
   //
   // See https://docs.google.com/document/d/1aN2ZPgaRMD52Rf4YG7ahwLnvQ8bpTRudc7MTBn-Lt2Y/edit#
   //
-
-  private val ScaleMmToArcsec: Double              = 1.0 / 0.61  // arcsec / mm
-  private val TransformMmToArcsec: AffineTransform =
-    AffineTransform.getScaleInstance(ScaleMmToArcsec, ScaleMmToArcsec)
 
   // Actually SR and HR are the same size in this representation but it seems
   // useful to keep them separate and match the spec.

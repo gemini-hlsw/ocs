@@ -4,6 +4,7 @@ import java.time.{Duration, Instant}
 import java.util.{Map => JMap}
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.spModel.config.AbstractObsComponentCB
+import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.data.config._
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostTarget
 import edu.gemini.spModel.obscomp.InstConstants
@@ -150,9 +151,26 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
               guiding(Ghost.HRIFU1_GUIDING, ghr.hrifu1)
 
               // Always sky, if it exists.
-              ghr.hrifu2.foreach(c => coordParam(c, Some(Ghost.HRIFU2_NAME),
-                Ghost.HRIFU2_RA_DEG, Ghost.HRIFU2_DEC_DEG,
-                Ghost.HRIFU2_RA_HMS, Ghost.HRIFU2_DEC_DMS))
+              ghr.hrifu2.foreach { c =>
+
+                // We have been requested inconsistent treatment of HRIFU sky
+                // positions.  In particular, the coordinates entered by the
+                // user are exactly where the HRIFU sky fibers should be placed.
+                // To get the SRIFU2 at that location we have to correct these
+                // coordinates.
+                val cʹ = new SPCoordinates(
+                  c.coordinates.offset(Angle.zero, GhostIfuPatrolField.HrSkyFiberOffset * -1.0)
+                )
+
+                coordParam(
+                  cʹ,
+                  Some(Ghost.HRIFU2_NAME),
+                  Ghost.HRIFU2_RA_DEG,
+                  Ghost.HRIFU2_DEC_DEG,
+                  Ghost.HRIFU2_RA_HMS,
+                  Ghost.HRIFU2_DEC_DMS
+                )
+              }
 
             case _ =>
               // The asterism may not have been configured by this point.
