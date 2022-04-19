@@ -286,4 +286,9 @@ object GhostAsterism {
   val SRIFU1: String = "SRIFU1"
   val SRIFU2: String = "SRIFU2"
   val HRIFU:  String = "HRIFU"
+
+  // In HR mode, the sky coordinates are not the coordinates of SRIFU2 so it is
+  // misleading to tag the sky position as SRIFU2.  Instead we'll invent a new
+  // tag that indicates they are the sky coordinates.
+  val HRSKY:  String = "HRSKY"
 }
