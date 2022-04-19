@@ -7,6 +7,7 @@ import edu.gemini.shared.util.immutable.Option;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -25,11 +26,33 @@ public final class InstConfigInfo {
     // This is an optional property.
     private final boolean _optional;
 
-    // The list of posible values for the parameter, or null if not known
-    private final Class<?> _enumType;
+    // The list of possible values for the parameter, or null if not known
+    private final Class<?>  _enumType;
+    private final Enum<?>[] _allEnumValues;
+    private final Enum<?>[] _validEnumValues;
 
     // If true, item can be used as a query parameter, otherwise only in the results
     private final boolean _queryable;
+
+    public <T extends Enum<T>> InstConfigInfo(
+      String    name,
+      String    propertyName,
+      String    description,
+      boolean   optional,
+      Class<T>  enumType,
+      T[]       allEnumValues,
+      T[]       validEnumValues,
+      boolean   queryable
+    ) {
+        _name            = name;
+        _propertyName    = propertyName;
+        _description     = description;
+        _optional        = optional;
+        _enumType        = enumType;
+        _allEnumValues   = allEnumValues;
+        _validEnumValues = validEnumValues;
+        _queryable       = queryable;
+    }
 
     /**
      * Initializes the InstInfoConfig taking all the values from the provided
@@ -41,9 +64,11 @@ public final class InstConfigInfo {
         _description  = pd.getShortDescription();
 
         Class<?> c = pd.getPropertyType();
-        _optional     = Option.class.isAssignableFrom(c);
-        _enumType     = getEnumType(pd);
-        _queryable    = queryable;
+        _optional        = Option.class.isAssignableFrom(c);
+        _enumType        = getEnumType(pd);
+        _allEnumValues   = allEnumValues(_enumType);
+        _validEnumValues = validEnumValues(_enumType);
+        _queryable       = queryable;
     }
 
     /**
@@ -82,18 +107,25 @@ public final class InstConfigInfo {
     }
 
     public Enum<?>[] getAllTypes() {
-        if (_enumType == null) return null;
-        return (Enum<?>[]) _enumType.getEnumConstants();
+        return _allEnumValues == null ? null : Arrays.copyOf(_allEnumValues, _allEnumValues.length);
+    }
+
+    private static Enum<?>[] allEnumValues(Class<?> enumType) {
+        return (enumType == null) ? null : (Enum<?>[]) enumType.getEnumConstants();
     }
 
     public Enum<?>[] getValidTypes() {
-        if (_enumType == null) return null;
+        return _validEnumValues == null ? null : Arrays.copyOf(_validEnumValues, _validEnumValues.length);
+    }
 
-        if (!ObsoletableSpType.class.isAssignableFrom(_enumType)) {
-            return getAllTypes();
+    public static Enum<?>[] validEnumValues(Class<?> enumType) {
+        if (enumType == null) return null;
+
+        if (!ObsoletableSpType.class.isAssignableFrom(enumType)) {
+            return allEnumValues(enumType);
         }
 
-        Enum<?>[] consts = (Enum<?>[]) _enumType.getEnumConstants();
+        Enum<?>[] consts = (Enum<?>[]) enumType.getEnumConstants();
         List<Enum<?>> res = new ArrayList<>(consts.length);
 
         for (Enum<?> val : consts) {
@@ -101,11 +133,11 @@ public final class InstConfigInfo {
             res.add(val);
         }
 
-        return res.toArray((Enum<?>[]) Array.newInstance(_enumType, res.size()));
+        return res.toArray((Enum<?>[]) Array.newInstance(enumType, res.size()));
     }
 
     /**
-     * Returnd true if the item can be used as a query parameter, otherwise it is only used
+     * Return true if the item can be used as a query parameter, otherwise it is only used
      * in the results
      */
     public boolean isQueryable() {

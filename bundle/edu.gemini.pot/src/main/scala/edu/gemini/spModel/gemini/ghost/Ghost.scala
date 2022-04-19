@@ -12,6 +12,7 @@ import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.data.config.{DefaultParameter, DefaultSysConfig, ISysConfig, StringParameter}
 import edu.gemini.spModel.data.property.{PropertyProvider, PropertySupport}
+import edu.gemini.spModel.gemini.ghost.Ghost.{AsterismTypeConfigInfo, ResolutionModeConfigInfo}
 import edu.gemini.spModel.gemini.init.{ComponentNodeInitializer, ObservationNI}
 import edu.gemini.spModel.inst.{ScienceAreaGeometry, VignettableScienceAreaInstrument}
 import edu.gemini.spModel.obs.SPObservation
@@ -23,7 +24,7 @@ import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.seqcomp.SeqConfigNames
 import edu.gemini.spModel.seqcomp.SeqConfigNames.{INSTRUMENT_KEY, OBSERVE_KEY}
 import edu.gemini.spModel.syntax.duration._
-import edu.gemini.spModel.target.env.TargetEnvironment
+import edu.gemini.spModel.target.env.{AsterismType, ResolutionMode, TargetEnvironment}
 import edu.gemini.spModel.target.obsComp.{TargetObsComp, TargetObsCompCB}
 import edu.gemini.spModel.telescope.{IssPort, IssPortProvider}
 
@@ -85,6 +86,29 @@ final class Ghost
     Pio.addParam(factory, paramSet, Ghost.BLUE_READ_NOISE_GAIN_PROP, blueReadNoiseGain.name)
     paramSet
   }
+
+  /**
+   * Overrides the default implementation to add resolution and asterism type
+   * parameters for matching.
+   */
+  override def getBrowserMatchingParamSet(
+    f: PioFactory,
+    o: ISPObservation
+  ): ParamSet = {
+
+    import edu.gemini.spModel.rich.pot.sp._
+
+    val result = getParamSet(f)
+
+    o.findTargetObsComp.foreach { toc =>
+      val a = toc.getTargetEnvironment.getAsterism
+      Pio.addParam(f, result, ResolutionModeConfigInfo.getPropertyName, a.resolutionMode.name())
+      Pio.addParam(f, result, AsterismTypeConfigInfo.getPropertyName, a.asterismType.name())
+    }
+
+    result
+  }
+
 
   override def setParamSet(paramSet: ParamSet): Unit = {
     Option(Pio.getValue(paramSet, Ghost.PORT_PROP)).map(IssPort.valueOf).foreach(setIssPort)
@@ -555,7 +579,52 @@ object Ghost {
     Collections.unmodifiableMap(TreeMap(Properties: _*).asJava)
   }
 
-  val getInstConfigInfo: JList[InstConfigInfo] = List[InstConfigInfo](new InstConfigInfo(RED_BINNING_PROP), new InstConfigInfo(BLUE_BINNING_PROP)).asJava
+  private val ResolutionModeConfigInfo: InstConfigInfo = {
+    val modes: Array[ResolutionMode] =
+      Array(ResolutionMode.GhostStandard, ResolutionMode.GhostHigh, ResolutionMode.GhostPRV)
+
+    new InstConfigInfo(
+      "Resolution Mode",
+      "resolutionMode",
+      "Resolution mode",
+      false,
+      classOf[ResolutionMode],
+      modes,
+      modes,
+      true
+    )
+  }
+
+  private val AsterismTypeConfigInfo: InstConfigInfo = {
+    val types: Array[AsterismType] =
+      Array(AsterismType.supportedTypesForInstrument(Instrument.Ghost).asScala.toList: _*)
+
+    new InstConfigInfo(
+      "Asterism Type",
+      "asterismType",
+      "Asterism Type",
+      false,
+      classOf[AsterismType],
+      types,
+      types,
+      true
+    )
+  }
+
+  // Note, by listing the query parameters in this order, the 3-column OT
+  // Browser will display the resolution mode and asterism type one on top of
+  // the other with the binning properties side-by-side.
+
+  val getInstConfigInfo: JList[InstConfigInfo] =
+    List[InstConfigInfo](
+      // Row 1
+      ResolutionModeConfigInfo,
+      new InstConfigInfo(RED_BINNING_PROP),
+      new InstConfigInfo(BLUE_BINNING_PROP),
+      // Row 2
+      AsterismTypeConfigInfo
+    ).asJava
+
 
   val GhostExposureTimeErrorMessage: String = "Error: tried to access single exposure time for GHOST."
   val GhostCoaddsErrorMessage: String = "Error: GHOST does not support coadds."
