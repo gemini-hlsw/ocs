@@ -611,12 +611,18 @@ object Ghost {
     )
   }
 
+  // Note, by listing the query parameters in this order, the 3-column OT
+  // Browser will display the resolution mode and asterism type one on top of
+  // the other with the binning properties side-by-side.
+
   val getInstConfigInfo: JList[InstConfigInfo] =
     List[InstConfigInfo](
+      // Row 1
       ResolutionModeConfigInfo,
-      AsterismTypeConfigInfo,
       new InstConfigInfo(RED_BINNING_PROP),
-      new InstConfigInfo(BLUE_BINNING_PROP)
+      new InstConfigInfo(BLUE_BINNING_PROP),
+      // Row 2
+      AsterismTypeConfigInfo
     ).asJava
 
 
