@@ -87,6 +87,10 @@ final class Ghost
     paramSet
   }
 
+  /**
+   * Overrides the default implementation to add resolution and asterism type
+   * parameters for matching.
+   */
   override def getBrowserMatchingParamSet(
     f: PioFactory,
     o: ISPObservation

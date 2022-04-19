@@ -300,14 +300,15 @@ public abstract class SPInstObsComp extends AbstractDataObject {
     /**
      * The OT "browser" works by extracting a ParamSet representation of the
      * instrument component and comparing against chosen values in the
-     * InstConfigInfo list above.  By default, the ParamSet is created by
-     * calling getParamSet.  Sometimes however, additional context (in the
-     * form of the containing observation) is needed to match query parameters.
-     * This method provides an opportunity for an instrument implementation to
-     * obtain that context and create the necessary matching ParamSet.
+     * InstConfigInfo list (see getInstConfigInfo in the various instruments).
+     * By default, the ParamSet is created by calling getParamSet.  Sometimes
+     * however, additional context (in the form of the containing observation)
+     * is needed to match query parameters. This method provides an opportunity
+     * for an instrument implementation to obtain that context and create the
+     * necessary matching ParamSet.
      */
     public ParamSet getBrowserMatchingParamSet(
-        PioFactory factory,
+        PioFactory     factory,
         ISPObservation observation
     ) {
         return getParamSet(factory);
