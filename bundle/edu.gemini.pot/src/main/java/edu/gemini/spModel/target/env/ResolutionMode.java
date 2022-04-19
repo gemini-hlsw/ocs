@@ -1,8 +1,10 @@
 package edu.gemini.spModel.target.env;
 
+import edu.gemini.spModel.type.DisplayableSpType;
+
 import java.util.*;
 
-public enum ResolutionMode {
+public enum ResolutionMode implements DisplayableSpType {
     // This will be used by every instrument other than GHOST and thus can be considered disjoint;
     // the overlapping name should not make a difference.
     Standard("standard", "Standard Resolution", Collections.emptyList()),
@@ -24,19 +26,24 @@ public enum ResolutionMode {
             ));
 
     public final String tag;
-    public final String name;
+    public final String displayName;
     public final List<AsterismType> asterismTypes;
 
     ResolutionMode(final String tag,
-                   final String name,
+                   final String displayName,
                    final List<AsterismType> asterismTypes) {
-        this.tag = tag;
-        this.name = name;
+        this.tag           = tag;
+        this.displayName   = displayName;
         this.asterismTypes = asterismTypes;
     }
 
     @Override
     public String toString() {
-        return name;
+        return displayName;
+    }
+
+    @Override
+    public String displayValue() {
+        return displayName;
     }
 }

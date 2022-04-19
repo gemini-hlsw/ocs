@@ -344,7 +344,7 @@ public class GeneralRule implements IRule {
             final Set<AsterismType> supportedAsterismTypes = AsterismType.supportedTypesForInstrument(instType);
             if (!supportedAsterismTypes.contains(at))
                 problems.addError(PREFIX + "ASTERISM_TYPE_RULE",
-                        instType.componentType.readableStr + " observation is configured to use an unsupported asterism of type " + at.name + ".",
+                        instType.componentType.readableStr + " observation is configured to use an unsupported asterism of type " + at.displayName + ".",
                         elems.getTargetObsComponentNode().getValue());
         });
 

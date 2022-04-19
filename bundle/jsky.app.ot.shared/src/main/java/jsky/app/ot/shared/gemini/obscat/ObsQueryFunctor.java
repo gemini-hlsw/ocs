@@ -4,7 +4,6 @@ import edu.gemini.pot.sp.*;
 import edu.gemini.pot.spdb.DBAbstractQueryFunctor;
 import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.pot.spdb.IDBQueryRunner;
-import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.ao.AOConstants;
 import edu.gemini.spModel.ao.AOTreeUtil;
@@ -16,6 +15,8 @@ import edu.gemini.spModel.dataset.DataflowStatus;
 import edu.gemini.spModel.dataset.DataflowStatus$;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
+import edu.gemini.spModel.gemini.ghost.Ghost;
+import edu.gemini.spModel.gemini.ghost.Ghost$;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obs.*;
@@ -24,6 +25,7 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummaryService;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.obscomp.SPGroup;
+import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
@@ -235,7 +237,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
         while (it.hasNext()) {
             final ISPDataObject inst = it.next();
             final List<InstConfigInfo> instConfigInfoList = ObsCatalogInfo.getInstConfigInfoList(inst.getType().readableStr);
-            final ParamSet instParamSet = inst.getParamSet(factory);
+            final ParamSet instParamSet = getInstParamSet(inst, factory, o);
             if (_match(o, inst, instConfigInfoList, instParamSet)) {
                 final ISPDataObject mainInst = instruments.get(0);
                 _result.add(_makeRow(prog, o, mainInst, instConfigInfoList, instParamSet));
@@ -243,6 +245,20 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
                 break;
             }
         }
+    }
+
+    private ParamSet getInstParamSet(
+       ISPDataObject  inst,
+       PioFactory     f,
+       ISPObservation o
+    ) {
+        final ParamSet result;
+        if (inst instanceof SPInstObsComp) {
+            result = ((SPInstObsComp) inst).getBrowserMatchingParamSet(f, o);
+        } else {
+            result = inst.getParamSet(f);
+        }
+        return result;
     }
 
     /**

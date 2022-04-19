@@ -597,7 +597,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
           // If we find ourselves in an inconsistent state with regards to resolution mode and asterism type, default back to standard mode, ghost single
           // target to try to preserve as much information as possible and log a severe error message.
           if (newAsterismType.isEmpty) {
-            LOG.severe(s"GHOST observation has incompatible resolution type ${originalResolutionMode.name} and asterism type ${asterismType.name}." +
+            LOG.severe(s"GHOST observation has incompatible resolution type ${originalResolutionMode.displayName} and asterism type ${asterismType.displayName}." +
               "\n\tResetting to standard mode with single target.")
             resolutionModeComboBox.selection.item = GhostStandard
           }
