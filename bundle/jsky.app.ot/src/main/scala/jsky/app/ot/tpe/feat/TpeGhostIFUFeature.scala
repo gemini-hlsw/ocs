@@ -259,19 +259,21 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
   }
 
   private def drawSky(g2d: Graphics2D, p: Point2D, a: Area, xOffMm: Double, yOffMm: Double): Unit = {
-    val trans: AffineTransform = {
+    val xOff = xOffMm * ScaleMmToArcsec
+    val yOff = yOffMm * ScaleMmToArcsec
+    val θ    = _tii.getCorrectedPosAngleRadians
 
-      val t = AffineTransform.getTranslateInstance(
-        p.getX + xOffMm * ScaleMmToArcsec * _tii.getPixelsPerArcsec,
-        p.getY + yOffMm * ScaleMmToArcsec * _tii.getPixelsPerArcsec
-      )
-
-      t.concatenate(scaleTransform)
-      t
-    }
+    val t = new AffineTransform()
+    t.translate(p.getX, p.getY)
+    t.rotate(-θ)
+    t.translate(
+      xOff * _tii.getPixelsPerArcsec,
+      yOff * _tii.getPixelsPerArcsec
+    )
+    t.concatenate(scaleTransform)
 
     g2d.setColor(TpeGhostIfuFeature.SkyFiberColor)
-    g2d.fill(a.createTransformedArea(trans))
+    g2d.fill(a.createTransformedArea(t))
   }
 
   /**
@@ -285,7 +287,8 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
    * Called when an item is dragged in the TPE: select the IFU to display.
    * We should only be able to drag sky objects (targets and coordinates).
    */
-  override def handleDragStarted(dragObject: Any, context: ObsContext): Unit = dragObject match {
+  override def handleDragStarted(dragObject: Any, context: ObsContext): Unit =
+    dragObject match {
       case o: SPSkyObject =>
         val env: TargetEnvironment = context.getTargets
         if (env != null) {
@@ -571,13 +574,13 @@ object TpeGhostIfuFeature {
   // Determine which IFU a sky object belongs to.
   private[feat] def objectInIFU1(env: TargetEnvironment, skyObject: SPSkyObject): Boolean = env.getAsterism match {
     case a: GhostAsterism.StandardResolution => a.srifu1.fold(skyObject == _, skyObject == _.spTarget)
-    case a: GhostAsterism.HighResolution => skyObject == a.hrifu1.spTarget
+    case a: GhostAsterism.HighResolution     => skyObject == a.hrifu.spTarget
     case _ => false
   }
 
   private[feat] def objectInIFU2(env: TargetEnvironment, skyObject: SPSkyObject): Boolean = env.getAsterism match {
     case a: GhostAsterism.StandardResolution => a.srifu2.exists(_.fold(skyObject == _, skyObject == _.spTarget))
-    case a: GhostAsterism.HighResolution => a.hrsky == skyObject
+    case a: GhostAsterism.HighResolution     => a.hrsky == skyObject
     case _ => false
   }
 

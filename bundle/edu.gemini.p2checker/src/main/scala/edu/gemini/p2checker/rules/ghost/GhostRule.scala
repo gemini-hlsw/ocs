@@ -61,7 +61,7 @@ object GhostRule extends IRule {
           // The sky position is taken from the user configuration, but the
           // actual SRIFU2 is positioned just south of that.  For the range
           // check we need to use the actual SRIFU2 location.
-          checkBoth(ctx, node, base, t.coordinates(when), Some(hr.srifu2.coordinates))
+          checkBoth(ctx, node, base, t.coordinates(when), Some(hr.srifu2(ctx.getPositionAngle)))
         case _                                                  =>
           Nil
       }

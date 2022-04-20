@@ -223,7 +223,7 @@ object GhostAsterism {
       case HighResolutionTargetPlusSky(_,_,_) => AsterismType.GhostHighResolutionTargetPlusSky
     }
 
-    def hrifu1: GhostTarget =
+    def hrifu: GhostTarget =
       this match {
         case HighResolutionTargetPlusSky(t,_,_) => t
       }
@@ -233,16 +233,20 @@ object GhostAsterism {
         case HighResolutionTargetPlusSky(_,s,_) => s
       }
 
-    def srifu2: SPCoordinates =
+    def srifu2(posAngle: Angle): Coordinates = {
+      // Sky is at offset (0, HrSkyFiberOffset) from SRIFU1 at pos angle 0.  We
+      // hold the sky coordinates as fixed gospel, coming from the user, and
+      // figure out where SRIFU1 would have to be to get those sky coordinates.
+      val θ = -posAngle.toSignedDegrees.toRadians
+      val y = -GhostIfuPatrolField.HrSkyFiberOffset.toSignedArcsecs
+      val p = Angle.fromArcsecs(-y * Math.sin(θ))
+      val q = Angle.fromArcsecs( y * Math.cos(θ))
+
       this match {
-        case HighResolutionTargetPlusSky(_,s,_) =>
-          // The coordinates entered by the user are exactly where the HRIFU
-          // sky fibers should be placed. To get the SRIFU2 at that location we
-          // have to correct these coordinates.
-          new SPCoordinates(
-            s.coordinates.offset(Angle.zero, GhostIfuPatrolField.HrSkyFiberOffset * -1.0)
-          )
+        case HighResolutionTargetPlusSky(_, s, _) =>
+          s.coordinates.offset(p, q)
       }
+    }
   }
 
   final case class HighResolutionTargetPlusSky(target: GhostTarget,

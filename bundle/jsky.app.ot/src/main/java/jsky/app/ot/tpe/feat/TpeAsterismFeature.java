@@ -169,6 +169,15 @@ public class TpeAsterismFeature extends TpePositionFeature {
         }
     }
 
+    private void drawGhostIfuPosition(
+        final Graphics    g,
+        final Coordinates pos
+    ) {
+        final SPCoordinates spC = new SPCoordinates(pos);
+        final Point2D.Double  p = _iw.taggedPosToScreenCoords(spC);
+        markPosition(g, Color.magenta, p);
+    }
+
     private void drawGhostIfu(
       final Graphics            g,
       final GhostPosition       pos,
@@ -179,6 +188,12 @@ public class TpeAsterismFeature extends TpePositionFeature {
             patrolField.inRange(Coordinates.difference(base, pos.ifuPosition).offset()) ?
                     (pos.isTarget ? Color.yellow : Color.cyan)                          :
                     Color.red;
+
+        // For debugging, it can be useful to turn on IFU position.  For HR
+        // the IFU position is SRIFU2 and the drawing location is the sky
+        // position itself.  Normally we don't draw the IFU position though in
+        // this case.
+        //drawGhostIfuPosition(g, pos.ifuPosition);
 
         markPosition(g, color, pos.drawingLocation);
     }
@@ -270,7 +285,9 @@ public class TpeAsterismFeature extends TpePositionFeature {
                     g,
                     ctx,
                     GhostPosition.fromTarget(hrtps.target(), when, pm),
-                    ImOption.apply(GhostPosition.fromSky(hrtps.srifu2().coordinates(), hrtps.sky(), pm)),
+                    ctx.map(ObsContext::getPositionAngle).map(posAngle ->
+                       GhostPosition.fromSky(hrtps.srifu2(posAngle), hrtps.sky(), pm)
+                    ),
                     explicitBaseLocation(hrtps.overriddenBase(), pm)
                 );
                 break;
