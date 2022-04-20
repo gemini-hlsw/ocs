@@ -1,6 +1,6 @@
 package edu.gemini.spModel.gemini.ghost
 
-import java.time.{Duration, Instant}
+import java.time.Instant
 import java.util.{Map => JMap}
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.spModel.config.AbstractObsComponentCB
@@ -8,7 +8,6 @@ import edu.gemini.spModel.data.config._
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostTarget
 import edu.gemini.spModel.obscomp.InstConstants
 import edu.gemini.spModel.seqcomp.SeqConfigNames
-import edu.gemini.spModel.seqcomp.SeqConfigNames.OBSERVE_CONFIG_NAME
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.spModel.target.{SPCoordinates, SPSkyObject, SPTarget}
 
@@ -144,15 +143,20 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
                 Ghost.BASE_RA_HMS, Ghost.BASE_DEC_DMS))
 
               // Always target.
-              coordParam(ghr.hrifu1.spTarget, Some(Ghost.HRIFU1_NAME),
+              coordParam(ghr.hrifu.spTarget, Some(Ghost.HRIFU1_NAME),
                 Ghost.HRIFU1_RA_DEG, Ghost.HRIFU1_DEC_DEG,
                 Ghost.HRIFU1_RA_HMS, Ghost.HRIFU1_DEC_DMS)
-              guiding(Ghost.HRIFU1_GUIDING, ghr.hrifu1)
+              guiding(Ghost.HRIFU1_GUIDING, ghr.hrifu)
 
-              // Always sky, if it exists.
-              ghr.hrifu2.foreach(c => coordParam(c, Some(Ghost.HRIFU2_NAME),
-                Ghost.HRIFU2_RA_DEG, Ghost.HRIFU2_DEC_DEG,
-                Ghost.HRIFU2_RA_HMS, Ghost.HRIFU2_DEC_DMS))
+              // Always sky.
+              coordParam(
+                ghr.hrsky,  // switch to ghr.srifu2 if we're supposed to send IFU2 coords
+                Some(Ghost.HRIFU2_NAME),
+                Ghost.HRIFU2_RA_DEG,
+                Ghost.HRIFU2_DEC_DEG,
+                Ghost.HRIFU2_RA_HMS,
+                Ghost.HRIFU2_DEC_DMS
+              )
 
             case _ =>
               // The asterism may not have been configured by this point.

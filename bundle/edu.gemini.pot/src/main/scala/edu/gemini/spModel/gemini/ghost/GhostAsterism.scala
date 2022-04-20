@@ -223,11 +223,29 @@ object GhostAsterism {
       case HighResolutionTargetPlusSky(_,_,_) => AsterismType.GhostHighResolutionTargetPlusSky
     }
 
-    def hrifu1: GhostTarget = this match {
-      case HighResolutionTargetPlusSky(t,_,_) => t
-    }
-    def hrifu2: Option[SPCoordinates] = this match {
-      case HighResolutionTargetPlusSky(_,s,_) => Some(s)
+    def hrifu: GhostTarget =
+      this match {
+        case HighResolutionTargetPlusSky(t,_,_) => t
+      }
+
+    def hrsky: SPCoordinates =
+      this match {
+        case HighResolutionTargetPlusSky(_,s,_) => s
+      }
+
+    def srifu2(posAngle: Angle): Coordinates = {
+      // Sky is at offset (0, HrSkyFiberOffset) from SRIFU1 at pos angle 0.  We
+      // hold the sky coordinates as fixed gospel, coming from the user, and
+      // figure out where SRIFU1 would have to be to get those sky coordinates.
+      val θ = -posAngle.toSignedDegrees.toRadians
+      val y = -GhostIfuPatrolField.HrSkyFiberOffset.toSignedArcsecs
+      val p = Angle.fromArcsecs(-y * Math.sin(θ))
+      val q = Angle.fromArcsecs( y * Math.cos(θ))
+
+      this match {
+        case HighResolutionTargetPlusSky(_, s, _) =>
+          s.coordinates.offset(p, q)
+      }
     }
   }
 
@@ -272,4 +290,9 @@ object GhostAsterism {
   val SRIFU1: String = "SRIFU1"
   val SRIFU2: String = "SRIFU2"
   val HRIFU:  String = "HRIFU"
+
+  // In HR mode, the sky coordinates are not the coordinates of SRIFU2 so it is
+  // misleading to tag the sky position as SRIFU2.  Instead we'll invent a new
+  // tag that indicates they are the sky coordinates.
+  val HRSKY:  String = "HRSKY"
 }

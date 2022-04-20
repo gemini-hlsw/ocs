@@ -57,8 +57,11 @@ object GhostRule extends IRule {
           checkBoth(ctx, node, base, t.coordinates(when), Some(s.coordinates))
         case GhostAsterism.SkyPlusTarget(s, t, _)               =>
           checkBoth(ctx, node, base, Some(s.coordinates), t.coordinates(when))
-        case GhostAsterism.HighResolutionTargetPlusSky(t, s, _) =>
-          checkBoth(ctx, node, base, t.coordinates(when), Some(s.coordinates))
+        case hr@GhostAsterism.HighResolutionTargetPlusSky(t, _, _) =>
+          // The sky position is taken from the user configuration, but the
+          // actual SRIFU2 is positioned just south of that.  For the range
+          // check we need to use the actual SRIFU2 location.
+          checkBoth(ctx, node, base, t.coordinates(when), Some(hr.srifu2(ctx.getPositionAngle)))
         case _                                                  =>
           Nil
       }
@@ -105,7 +108,7 @@ object GhostRule extends IRule {
       1800
 
     val message: String =
-      s"Exposure time exceeds the recommended maximum ($limitSeconds seconds) due to cosmic ray contamination";
+      s"Exposure time exceeds the recommended maximum ($limitSeconds seconds) due to cosmic ray contamination"
 
     override def check(config: Config, step: Int, elements: ObservationElements, state: Any): Problem = {
       def checkTime(key: ItemKey): Option[Problem] =

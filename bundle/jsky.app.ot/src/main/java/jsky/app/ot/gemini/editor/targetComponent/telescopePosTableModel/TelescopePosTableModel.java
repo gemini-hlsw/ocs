@@ -227,7 +227,7 @@ final public class TelescopePosTableModel extends AbstractTableModel {
 
         hdr.add(createGhostBaseRow(a));
         hdr.add(new GhostTargetRow(GhostAsterism$.MODULE$.HRIFU(), gt, baseCoords, when));
-        hdr.add(new GhostSkyRow(GhostAsterism$.MODULE$.SRIFU2(), c, baseCoords));
+        hdr.add(new GhostSkyRow(GhostAsterism$.MODULE$.HRSKY(), c, baseCoords));
         return hdr;
     }
 

@@ -29,6 +29,13 @@ sealed trait GhostIfuPatrolField {
 
 object GhostIfuPatrolField {
 
+  val ScaleMmToArcsec: Double = 1.0 / 0.61  // arcsec / mm
+  val TransformMmToArcsec: AffineTransform =
+    AffineTransform.getScaleInstance(ScaleMmToArcsec, ScaleMmToArcsec)
+
+  val HrSkyFiberOffset: Angle =
+    Angle.fromArcsecs(2.0 * ScaleMmToArcsec)
+
     // The patrol fields for IFU1 and IFU2 relative to the base position.
   private val ifu1PatrolFieldRectangle = new Rectangle2D.Double(-222, -222, 222 + 3.28, 444)
   private val ifu2PatrolFieldRectangle = new Rectangle2D.Double(-3.28, -222, 222 + 3.28, 444)
