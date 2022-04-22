@@ -74,7 +74,7 @@ case class GnirsSpectroscopyIfu(blueprint:SpGnirsBlueprintSpectroscopy, exampleT
   // SET CONDITIONS FROM PI
   // SET PIXEL SCALE FROM PI
   // SET DISPERSER FROM PI
-  forObs(targetGroup: _*)( // ???
+  forObs(targetGroup: _*)(
     setPixelScale(pixelScale),
     setDisperser(disperser)
   )
