@@ -1,7 +1,7 @@
 package edu.gemini.phase2.skeleton.factory
 
 import edu.gemini.model.p1.immutable.GnirsBlueprintSpectroscopy
-import edu.gemini.model.p1.mutable.{GnirsCentralWavelength, GnirsCrossDisperser, GnirsPixelScale }
+import edu.gemini.model.p1.mutable.{GnirsCentralWavelength, GnirsCrossDisperser, GnirsPixelScale, GnirsFpu }
 import edu.gemini.model.p1.mutable.GnirsCentralWavelength._
 import edu.gemini.pot.sp.{ISPObservation, SPComponentType}
 import edu.gemini.spModel.core.MagnitudeBand
@@ -31,7 +31,7 @@ class REL_3376_Test extends TemplateSpec("GNIRS_BP.xml") with SpecificationLike 
 
   // Gen for non-cross-dispersed GnirsBlueprintSpectroscopy with the given GnirsCentralWavelength
   private def nonXD(λ: GnirsCentralWavelength, ps: GnirsPixelScale): Gen[GnirsBlueprintSpectroscopy] =
-    GnirsBlueprintSpec.ArbitraryBlueprintSpectroscopy.arbitrary.map { bp =>
+    GnirsBlueprintSpec.ArbitraryBlueprintSpectroscopy.arbitrary.filter(b => b.fpu != GnirsFpu.LR_IFU && b.fpu != GnirsFpu.HR_IFU).map { bp =>
       bp.copy(centralWavelength = λ, crossDisperser = GnirsCrossDisperser.NO, pixelScale = ps)
     }
 
