@@ -120,6 +120,8 @@
             <xsd:enumeration value="0.45 arcsec"/>
             <xsd:enumeration value="0.675 arcsec"/>
             <xsd:enumeration value="1.0 arcsec"/>
+            <xsd:enumeration value="LR-IFU"/>
+            <xsd:enumeration value="HR-IFU"/>
          </xsd:restriction>
     </xsd:simpleType>
 

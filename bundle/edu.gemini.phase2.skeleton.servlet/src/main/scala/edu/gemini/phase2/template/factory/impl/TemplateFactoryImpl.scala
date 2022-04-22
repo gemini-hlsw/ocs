@@ -21,6 +21,7 @@ import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.UseNS
 import edu.gemini.spModel.gemini.flamingos2.blueprint.{SpFlamingos2BlueprintMos, SpFlamingos2BlueprintLongslit, SpFlamingos2BlueprintImaging}
 import edu.gemini.spModel.gemini.gnirs.blueprint.{SpGnirsBlueprintSpectroscopy, SpGnirsBlueprintImaging}
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams.SlitWidth
 import edu.gemini.spModel.gemini.michelle.blueprint.{SpMichelleBlueprintSpectroscopy, SpMichelleBlueprintImaging}
 import edu.gemini.spModel.gemini.nici.blueprint.{SpNiciBlueprintStandard, SpNiciBlueprintCoronagraphic}
 import edu.gemini.spModel.gemini.nifs.blueprint.{SpNifsBlueprint, SpNifsBlueprintAo}
@@ -38,6 +39,7 @@ import edu.gemini.phase2.template.factory.impl.gpi.Gpi
 import edu.gemini.spModel.gemini.graces.blueprint.SpGracesBlueprint
 import edu.gemini.phase2.template.factory.impl.graces.Graces
 import edu.gemini.spModel.core.SPProgramID
+import edu.gemini.phase2.template.factory.impl.gnirs.GnirsSpectroscopyIfu
 
 case class TemplateFactoryImpl(db: TemplateDb) extends TemplateFactory {
 
@@ -83,7 +85,9 @@ case class TemplateFactoryImpl(db: TemplateDb) extends TemplateFactory {
 
       // GNIRS
       case b: SpGnirsBlueprintImaging => Right(GnirsImaging(b))
-      case b: SpGnirsBlueprintSpectroscopy => Right(GnirsSpectroscopy(b, sampleTarget))
+      case b: SpGnirsBlueprintSpectroscopy =>
+        if (b.fpu.isIfu) Right(GnirsSpectroscopyIfu(b, sampleTarget))
+        else Right(GnirsSpectroscopy(b, sampleTarget))
 
       // GPI
       case b: SpGpiBlueprint => Right(Gpi(b))
