@@ -80,16 +80,16 @@ case class GnirsSpectroscopyIfu(blueprint:SpGnirsBlueprintSpectroscopy, exampleT
   )
 
   // # Set the FPU and Decker in the acquisitions:
-  // FOR {27-31} SET FPU FROM PI IN ITERATORS EXCEPT WHERE FPU == acquisition
-  forObs(more: _*)(
+  // FOR {24, 27-31} SET FPU FROM PI IN ITERATORS EXCEPT WHERE FPU == acquisition
+  forObs((24 +: more): _*)(
     mutateSeq(mapStepsByKey(PARAM_FPU) {
       case FPU.ACQUISITION => FPU.ACQUISITION
       case _ => fpu
     })
   )
 
-  // FOR {27-31} SET DECKER FROM PI IN ITERATORS EXCEPT WHERE DECKER == acquisition
-  forObs(more: _*)(
+  // FOR {24, 27-31} SET DECKER FROM PI IN ITERATORS EXCEPT WHERE DECKER == acquisition
+  forObs((24 +: more): _*)(
     ifTrue(fpu == LR_IFU)(mutateSeq(updateDecker(Decker.LR_IFU))),
     ifTrue(fpu == HR_IFU)(mutateSeq(updateDecker(Decker.HR_IFU)))
   )
