@@ -2986,7 +2986,7 @@ GNIRS configuration:
             <param name="centralWavelength" value="1.65"/>
             <param name="acquisitionMirror" value="OUT"/>
             <param name="camera" value="SHORT_BLUE"/>
-            <param name="decker" value="ACQUISITION"/>
+            <param name="decker" value="LR_IFU"/>
             <param name="filter" value="H2"/>
             <param name="posAngleConstraint" value="FIXED"/>
             <param name="hartmannMask" value="OUT"/>
@@ -3084,7 +3084,7 @@ GNIRS configuration:
             <param name="centralWavelength" value="1.65"/>
             <param name="acquisitionMirror" value="OUT"/>
             <param name="camera" value="SHORT_BLUE"/>
-            <param name="decker" value="ACQUISITION"/>
+            <param name="decker" value="HR_IFU"/>
             <param name="filter" value="H2"/>
             <param name="posAngleConstraint" value="FIXED"/>
             <param name="hartmannMask" value="OUT"/>
@@ -3829,7 +3829,7 @@ Note that the target component in the associated spectroscopy observation must b
             <param name="centralWavelength" value="2.2"/>
             <param name="acquisitionMirror" value="OUT"/>
             <param name="camera" value="SHORT_BLUE"/>
-            <param name="decker" value="ACQUISITION"/>
+            <param name="decker" value="LR_IFU"/>
             <param name="filter" value="ORDER_5"/>
             <param name="posAngleConstraint" value="FIXED"/>
             <param name="hartmannMask" value="OUT"/>
@@ -3854,41 +3854,47 @@ Note that the target component in the associated spectroscopy observation must b
         </container>
         <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="f97c9acb-eb21-400b-8e0e-746080ada370" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="4b90f4d4-b9e2-469e-9fb3-f8e2756aec7c" name="Repeat">
-            <paramset name="Repeat" kind="dataObj">
-              <param name="repeatCount" value="1"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="81c0fdcf-ca04-480a-b047-e21767c19faa" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="60.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="de6b5fc8-d165-4488-aa19-46c9d86b2846" name="Offset">
-              <paramset name="Offset" kind="dataObj">
-                <param name="title" value="Point Source Offsets"/>
-                <paramset name="offsets">
-                  <paramset name="Offset0" sequence="0">
-                    <param name="p" value="0.75"/>
-                    <param name="q" value="1.5"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset2" sequence="1">
-                    <param name="p" value="-0.75"/>
-                    <param name="q" value="-1.5"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset1" sequence="2">
-                    <param name="p" value="-0.75"/>
-                    <param name="q" value="1.5"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset3" sequence="3">
-                    <param name="p" value="0.75"/>
-                    <param name="q" value="-1.5"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                </paramset>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="4b90f4d4-b9e2-469e-9fb3-f8e2756aec7c" name="Repeat">
+              <paramset name="Repeat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="d95e1357-3a5b-49b6-a808-92390141f499" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="de6b5fc8-d165-4488-aa19-46c9d86b2846" name="Offset">
+                <paramset name="Offset" kind="dataObj">
+                  <param name="title" value="Point Source Offsets"/>
+                  <paramset name="offsets">
+                    <paramset name="Offset0" sequence="0">
+                      <param name="p" value="0.75"/>
+                      <param name="q" value="1.5"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset2" sequence="1">
+                      <param name="p" value="-0.75"/>
+                      <param name="q" value="-1.5"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset1" sequence="2">
+                      <param name="p" value="-0.75"/>
+                      <param name="q" value="1.5"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset3" sequence="3">
+                      <param name="p" value="0.75"/>
+                      <param name="q" value="-1.5"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                  </paramset>
                 </paramset>
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="d95e1357-3a5b-49b6-a808-92390141f499" name="Observe">
+                  <paramset name="Observe" kind="dataObj">
+                    <param name="repeatCount" value="1"/>
+                    <param name="class" value="SCIENCE"/>
+                  </paramset>
+                </container>
               </container>
             </container>
           </container>
@@ -3926,7 +3932,7 @@ Note that the target component in the associated spectroscopy observation must b
             <param name="centralWavelength" value="2.2"/>
             <param name="acquisitionMirror" value="OUT"/>
             <param name="camera" value="SHORT_BLUE"/>
-            <param name="decker" value="ACQUISITION"/>
+            <param name="decker" value="LR_IFU"/>
             <param name="filter" value="ORDER_5"/>
             <param name="posAngleConstraint" value="FIXED"/>
             <param name="hartmannMask" value="OUT"/>
@@ -3951,40 +3957,46 @@ Note that the target component in the associated spectroscopy observation must b
         </container>
         <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="8721f42e-7f75-403f-93c1-4d153017a318" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="1e5b34fb-8934-4f59-b80b-83235464e740" name="Repeat">
-            <paramset name="Repeat" kind="dataObj">
-              <param name="repeatCount" value="1"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="dad104f8-850c-47b0-acb8-a3fd0cf26c98" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="60.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="4e8dea53-c4bc-497b-8be6-f6ea72eff401" name="Offset">
-              <paramset name="Offset" kind="dataObj">
-                <paramset name="offsets">
-                  <paramset name="Offset2" sequence="0">
-                    <param name="p" value="0.15"/>
-                    <param name="q" value="0.15"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset0" sequence="1">
-                    <param name="p" value="10.0"/>
-                    <param name="q" value="10.0"/>
-                    <param name="defaultGuideOption" value="off"/>
-                  </paramset>
-                  <paramset name="Offset3" sequence="2">
-                    <param name="p" value="-0.15"/>
-                    <param name="q" value="-0.15"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset1" sequence="3">
-                    <param name="p" value="-10.0"/>
-                    <param name="q" value="-10.0"/>
-                    <param name="defaultGuideOption" value="off"/>
-                  </paramset>
-                </paramset>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="1e5b34fb-8934-4f59-b80b-83235464e740" name="Repeat">
+              <paramset name="Repeat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="c6aeaaee-d8de-443c-973d-3f1600e7d8ff" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="4e8dea53-c4bc-497b-8be6-f6ea72eff401" name="Offset">
+                <paramset name="Offset" kind="dataObj">
+                  <paramset name="offsets">
+                    <paramset name="Offset2" sequence="0">
+                      <param name="p" value="0.15"/>
+                      <param name="q" value="0.15"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset0" sequence="1">
+                      <param name="p" value="10.0"/>
+                      <param name="q" value="10.0"/>
+                      <param name="defaultGuideOption" value="off"/>
+                    </paramset>
+                    <paramset name="Offset3" sequence="2">
+                      <param name="p" value="-0.15"/>
+                      <param name="q" value="-0.15"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset1" sequence="3">
+                      <param name="p" value="-10.0"/>
+                      <param name="q" value="-10.0"/>
+                      <param name="defaultGuideOption" value="off"/>
+                    </paramset>
+                  </paramset>
                 </paramset>
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="c6aeaaee-d8de-443c-973d-3f1600e7d8ff" name="Observe">
+                  <paramset name="Observe" kind="dataObj">
+                    <param name="repeatCount" value="1"/>
+                    <param name="class" value="SCIENCE"/>
+                  </paramset>
+                </container>
               </container>
             </container>
           </container>
@@ -4022,7 +4034,7 @@ Note that the target component in the associated spectroscopy observation must b
             <param name="centralWavelength" value="2.2"/>
             <param name="acquisitionMirror" value="OUT"/>
             <param name="camera" value="SHORT_BLUE"/>
-            <param name="decker" value="ACQUISITION"/>
+            <param name="decker" value="HR_IFU"/>
             <param name="filter" value="ORDER_5"/>
             <param name="posAngleConstraint" value="FIXED"/>
             <param name="hartmannMask" value="OUT"/>
@@ -4047,35 +4059,41 @@ Note that the target component in the associated spectroscopy observation must b
         </container>
         <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="c0b0292f-3f02-42e2-b39c-993635a55f27" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="cbf9230a-0d96-410b-a5ce-42e81f9a419b" name="Repeat">
-            <paramset name="Repeat" kind="dataObj">
-              <param name="repeatCount" value="3"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="2658d74f-6007-4d48-83a9-908680e11bed" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="60.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="3eade09d-335f-4150-9f0f-77a32ffa6e29" name="Offset">
-              <paramset name="Offset" kind="dataObj">
-                <paramset name="offsets">
-                  <paramset name="Offset0" sequence="0">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="0.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                  <paramset name="Offset1" sequence="1">
-                    <param name="p" value="30.0"/>
-                    <param name="q" value="30.0"/>
-                    <param name="defaultGuideOption" value="off"/>
-                  </paramset>
-                  <paramset name="Offset3" sequence="2">
-                    <param name="p" value="0.0"/>
-                    <param name="q" value="0.0"/>
-                    <param name="defaultGuideOption" value="on"/>
-                  </paramset>
-                </paramset>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="cbf9230a-0d96-410b-a5ce-42e81f9a419b" name="Repeat">
+              <paramset name="Repeat" kind="dataObj">
+                <param name="repeatCount" value="3"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="92b596c3-6b82-406f-af8b-c28bfaa6861a" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="3eade09d-335f-4150-9f0f-77a32ffa6e29" name="Offset">
+                <paramset name="Offset" kind="dataObj">
+                  <paramset name="offsets">
+                    <paramset name="Offset0" sequence="0">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="0.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                    <paramset name="Offset1" sequence="1">
+                      <param name="p" value="30.0"/>
+                      <param name="q" value="30.0"/>
+                      <param name="defaultGuideOption" value="off"/>
+                    </paramset>
+                    <paramset name="Offset3" sequence="2">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="0.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                  </paramset>
                 </paramset>
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="92b596c3-6b82-406f-af8b-c28bfaa6861a" name="Observe">
+                  <paramset name="Observe" kind="dataObj">
+                    <param name="repeatCount" value="1"/>
+                    <param name="class" value="SCIENCE"/>
+                  </paramset>
+                </container>
               </container>
             </container>
           </container>
@@ -4229,7 +4247,7 @@ Note that the target component in the associated spectroscopy observation must b
             <param name="centralWavelength" value="1.65"/>
             <param name="acquisitionMirror" value="OUT"/>
             <param name="camera" value="SHORT_BLUE"/>
-            <param name="decker" value="ACQUISITION"/>
+            <param name="decker" value="LR_IFU"/>
             <param name="filter" value="ORDER_5"/>
             <param name="posAngleConstraint" value="FIXED"/>
             <param name="hartmannMask" value="OUT"/>
@@ -4327,7 +4345,7 @@ Note that the target component in the associated spectroscopy observation must b
             <param name="centralWavelength" value="1.65"/>
             <param name="acquisitionMirror" value="OUT"/>
             <param name="camera" value="SHORT_BLUE"/>
-            <param name="decker" value="ACQUISITION"/>
+            <param name="decker" value="HR_IFU"/>
             <param name="filter" value="H2"/>
             <param name="posAngleConstraint" value="FIXED"/>
             <param name="hartmannMask" value="OUT"/>
@@ -4412,6 +4430,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="1802200e-14f5-4fcd-ad9e-320373652421"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="f3472cdf-b619-4a6d-adc4-6b459f20fab7" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="673f3447-6de0-4235-84ee-7082379807ea"/>
@@ -4484,6 +4503,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="b1653c99-4475-42fc-999d-e570733e4dc3"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="f3472cdf-b619-4a6d-adc4-6b459f20fab7" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="51a769a8-8f6c-4fdf-adf4-922adc2d40ca"/>
@@ -4516,6 +4536,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="c7fbe80e-b7d1-4622-94a6-b3ac291a5e17"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="f3472cdf-b619-4a6d-adc4-6b459f20fab7" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="53bed7ba-cc68-497d-a25c-2d42b3112652"/>
@@ -4668,6 +4689,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="9a97d5c3-67df-4b56-8714-b54d9bb4e35a"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="f3472cdf-b619-4a6d-adc4-6b459f20fab7" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="b4988a02-f2a5-4ed9-a42f-4b29eabb7790"/>
@@ -4676,6 +4698,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="3d90d9b9-7487-42f1-a290-20843785a1f7"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="f3472cdf-b619-4a6d-adc4-6b459f20fab7" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5f58f4a5-08bc-493b-a20c-9b1af880bacc"/>
@@ -4734,6 +4757,10 @@ Note that the target component in the associated spectroscopy observation must b
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="dbef794b-0962-4a6e-808b-a14c290d99c9"/>
+      <param name="f3472cdf-b619-4a6d-adc4-6b459f20fab7" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="76ecc408-5d8f-418c-bfe3-345589a8e357"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
     </paramset>
@@ -4778,6 +4805,10 @@ Note that the target component in the associated spectroscopy observation must b
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="2658d74f-6007-4d48-83a9-908680e11bed"/>
+      <param name="f3472cdf-b619-4a6d-adc4-6b459f20fab7" value="7"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="fa7aa675-a758-4bd8-86ba-d80bc1d36bf6"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
     </paramset>
@@ -4812,6 +4843,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="4b90f4d4-b9e2-469e-9fb3-f8e2756aec7c"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="f3472cdf-b619-4a6d-adc4-6b459f20fab7" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e5e4bb51-82f4-4b19-a233-d5e19fb7e53e"/>
@@ -4828,6 +4860,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="01ddf7ff-22ba-4d1e-853a-472e16dcb41a"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="f3472cdf-b619-4a6d-adc4-6b459f20fab7" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="2f313c49-fae0-4536-be32-036f354a290b"/>
@@ -4844,6 +4877,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="d1f70191-5ec5-4b45-8a8e-65155e816684"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="f3472cdf-b619-4a6d-adc4-6b459f20fab7" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e02c7c84-ddb1-4d95-9320-bc3ee9bfb880"/>
@@ -5132,6 +5166,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="035135e9-7c6f-47ff-ba20-763437a9b4ea"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="f3472cdf-b619-4a6d-adc4-6b459f20fab7" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="93ff9cf0-c8cc-42ff-847a-1871582f44fd"/>
@@ -5164,6 +5199,10 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="0716ee36-a88b-4c6f-b439-7265171e29b4"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="dbd89fd2-9328-4bcd-9795-4cff5c6fe26a"/>
+      <param name="f3472cdf-b619-4a6d-adc4-6b459f20fab7" value="9"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="effe337e-7901-4e2f-ab52-97f6b97e1e88"/>
@@ -5232,6 +5271,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="c0b0292f-3f02-42e2-b39c-993635a55f27"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="f3472cdf-b619-4a6d-adc4-6b459f20fab7" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e07b9b29-2cff-4d76-ad3f-f17b82a97051"/>
@@ -5288,6 +5328,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="8721f42e-7f75-403f-93c1-4d153017a318"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="f3472cdf-b619-4a6d-adc4-6b459f20fab7" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="ae90abaf-b2c7-4503-b9cf-c06bb92b9524"/>
@@ -5320,6 +5361,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="f97c9acb-eb21-400b-8e0e-746080ada370"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="f3472cdf-b619-4a6d-adc4-6b459f20fab7" value="8"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="df67e192-f271-443e-ae5f-65fd33700aa2"/>
@@ -5440,6 +5482,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="aa4c532d-a794-4588-a55d-0a7cda61da4a"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="f3472cdf-b619-4a6d-adc4-6b459f20fab7" value="5"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="ce11571d-d91e-4681-b1db-5e0a8afbaef3"/>
@@ -5644,6 +5687,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="7031b7cd-0417-4ec9-a201-87a25bea5a4e"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="f3472cdf-b619-4a6d-adc4-6b459f20fab7" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="661f8211-132d-4f56-8f82-9b26c7ae532d"/>
@@ -5728,6 +5772,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="87dd4cde-a720-4280-bae1-2cca55c3010d"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="f3472cdf-b619-4a6d-adc4-6b459f20fab7" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="8449cae6-c41a-43c2-a729-db1df70d1704"/>
@@ -5824,6 +5869,14 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="b62b323c-ad7e-41c5-b419-7af8e4b9d9e3"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="81c0fdcf-ca04-480a-b047-e21767c19faa"/>
+      <param name="f3472cdf-b619-4a6d-adc4-6b459f20fab7" value="6"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="dad104f8-850c-47b0-acb8-a3fd0cf26c98"/>
+      <param name="f3472cdf-b619-4a6d-adc4-6b459f20fab7" value="11"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="ccbe4cdd-826a-4752-9131-43164bce07fc"/>
