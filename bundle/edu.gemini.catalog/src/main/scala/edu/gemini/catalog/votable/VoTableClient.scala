@@ -230,9 +230,8 @@ sealed trait GaiaBackend extends CachedBackend with RemoteCallBackend {
   def gaia: CatalogAdapter.GaiaAdapter
 
   val MaxResultCount: Int         = 50000  // Arbitrary max limit -- for a crowded field this needs to be largish
-  val BrightLimit: Int            =     9  // g GAIA bright limit
   val FaintLimit: Int             =    19  // g GAIA faint limit
-  val ProperMotionLimitMasYr: Int =   100
+  val ProperMotionLimitMasYr: Int =  1000
 
   // Override the cache `widen` to widen significantly less for Gaia because it
   // is so deep. Instead of 10', use 0.5' (which is roughly half the AO port size).
@@ -253,8 +252,7 @@ sealed trait GaiaBackend extends CachedBackend with RemoteCallBackend {
     f"""|SELECT TOP $MaxResultCount $fields
         |      FROM gaiadr2.gaia_source
         |     WHERE CONTAINS(POINT('ICRS',${gaia.raField.id},${gaia.decField.id}),CIRCLE('ICRS', ${cs.base.ra.toDegrees}%9.8f, ${cs.base.dec.toDegrees}%9.8f, ${cs.radiusConstraint.maxLimit.toDegrees}%9.8f))=1
-        |       AND (${gaia.plxField.id} > 0)
-        |       AND (${gaia.gMagField.id} BETWEEN $BrightLimit AND $FaintLimit)
+        |       AND (${gaia.gMagField.id} < $FaintLimit)
         |       AND (${gaia.bpRpField.id} IS NOT NULL)
         |       AND (SQRT(POWER(${gaia.pmRaField.id}, 2.0) + POWER(${gaia.pmDecField.id}, 2.0)) < ${ProperMotionLimitMasYr})
         |  ORDER BY ${gaia.gMagField.id}
