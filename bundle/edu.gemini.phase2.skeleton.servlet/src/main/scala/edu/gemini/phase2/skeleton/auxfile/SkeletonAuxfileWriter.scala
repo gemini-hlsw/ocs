@@ -122,7 +122,7 @@ object SkeletonAuxfileWriter {
     writeTo(out) { tmp =>
       try {
         val xml = ProposalIo.writeToXml(p)
-        P1PDF.createFromNode(xml, attachments, P1PDF.GeminiDARP, tmp, None)
+        P1PDF.createFromNode(xml, attachments, P1PDF.GeminiStandard, tmp, None)
         Right(())
       } catch {
         case ex: Exception => Left(FileError(out, ex))
