@@ -186,7 +186,7 @@ public class TpeAsterismFeature extends TpePositionFeature {
     ) {
         final Color color =
             patrolField.inRange(Coordinates.difference(base, pos.ifuPosition).offset()) ?
-                    (pos.isTarget ? Color.yellow : Color.cyan)                          :
+                    (pos.isTarget ? Color.magenta : Color.cyan)                          :
                     Color.red;
 
         // For debugging, it can be useful to turn on IFU position.  For HR
