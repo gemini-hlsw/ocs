@@ -103,20 +103,25 @@ object VoTableParser extends VoTableParser {
       // Load in memory (Could be a problem for large responses)
       val xmlText = Source.fromInputStream(is, "UTF-8").getLines().mkString
 
-      catalog match {
-        case CatalogName.SIMBAD =>
-          // Simbad is a special case as it is not fully votable-compliant.
-          // We want to catch some errors at this level to simplify the parse method
-          // that assumes we are votable compliant
-          val xml = XML.loadString(xmlText)
-          if (CatalogAdapter.Simbad.containsExceptions(xml)) {
-            \/.left(ValidationError(catalog))
-          } else {
-            \/.right(parse(adapter, xml))
-          }
+      // See FR-42171 and REL-4126.  Our code doesn't appear to explicitly
+      // mutate or lock anything, but unless the XML processing is synchronized
+      // we end up in a bad place. :-/
+      VoTableParser.synchronized {
+        catalog match {
+          case CatalogName.SIMBAD =>
+            // Simbad is a special case as it is not fully votable-compliant.
+            // We want to catch some errors at this level to simplify the parse method
+            // that assumes we are votable compliant
+            val xml = XML.loadString(xmlText)
+            if (CatalogAdapter.Simbad.containsExceptions(xml)) {
+              \/.left(ValidationError(catalog))
+            } else {
+              \/.right(parse(adapter, xml))
+            }
 
-        case _                  =>
-          validate(catalog, xmlText).as(parse(adapter, XML.loadString(xmlText)))
+          case _ =>
+            validate(catalog, xmlText).as(parse(adapter, XML.loadString(xmlText)))
+        }
       }
     }
 }
