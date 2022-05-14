@@ -520,10 +520,10 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         case SelectionChanged(_) =>
           // REL-2910 Set the radius range to the selected guider settings
           selection.item.query.headOption.foreach {
-            case ConeSearchCatalogQuery(_, _, rc, _, _) =>
+            case ConeSearchCatalogQuery(_, _, rc, _, _, _) =>
               radiusStart.updateAngle(rc.minLimit)
               radiusEnd.updateAngle(rc.maxLimit)
-            case _                                      =>
+            case _                                         =>
           }
           updateGuideSpeedText()
           magnitudeFiltersFromControls(selection.item.query.headOption)
@@ -737,7 +737,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       */
     def magnitudeFiltersFromControls(query: Option[CatalogQuery]): Unit = {
       query.collect {
-        case ConeSearchCatalogQuery(_, _, _, mc, _) =>
+        case ConeSearchCatalogQuery(_, _, _, mc, _, _) =>
           magnitudeControls.clear()
           magnitudeControls ++= mc.zipWithIndex.flatMap(Function.tupled(filterControls))
       }
@@ -863,7 +863,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
         val coordinates = Coordinates(ra.value, dec.value)
         val info = observationInfoFromForm
-        val defaultQuery = ConeSearchCatalogQuery(None, coordinates, radiusConstraint, currentFilters, selectedCatalog)
+        val defaultQuery = ConeSearchCatalogQuery(None, coordinates, radiusConstraint, currentFilters, selectedCatalog, isLgs = true)
 
         // Start with the guider's query and update it with the values on the UI
         val calculatedQuery = guider.selection.item.query.headOption.collect {

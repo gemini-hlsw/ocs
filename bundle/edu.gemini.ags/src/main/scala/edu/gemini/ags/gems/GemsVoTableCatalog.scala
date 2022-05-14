@@ -151,7 +151,8 @@ object GemsVoTableCatalog {
       b1,
       radiusConstraint(ctx),
       magnitudeConstraints(ctx, mt),
-      catalog
+      catalog,
+      lgs = true
     )
 
 }

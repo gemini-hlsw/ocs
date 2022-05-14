@@ -46,10 +46,10 @@ public class GemsGuideStarSearchDialog extends JFrame {
         SELECTION("Select asterisms to add to the target list.", 1);
 
         // Message to display at top
-        private String _message;
+        private final String _message;
 
         // Index of tab to show in tabbed pane
-        private int _tabIndex;
+        private final int _tabIndex;
 
         State(String message, int tabIndex) {
             _message = message;
@@ -65,7 +65,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         }
     }
 
-    private AbstractAction _useDefaultsAction = new AbstractAction("Use Defaults") {
+    private final AbstractAction _useDefaultsAction = new AbstractAction("Use Defaults") {
         {
             setEnabled(false);
         }
@@ -76,7 +76,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         }
     };
 
-    private AbstractAction _queryAction = new AbstractAction("Query") {
+    private final AbstractAction _queryAction = new AbstractAction("Query") {
         public void actionPerformed(ActionEvent evt) {
             try {
                 query();
@@ -86,19 +86,19 @@ public class GemsGuideStarSearchDialog extends JFrame {
         }
     };
 
-    private AbstractAction _cancelAction = new AbstractAction("Cancel") {
+    private final AbstractAction _cancelAction = new AbstractAction("Cancel") {
         public void actionPerformed(ActionEvent evt) {
             cancel();
         }
     };
 
-    private AbstractAction _stopAction = new AbstractAction("Stop") {
+    private final AbstractAction _stopAction = new AbstractAction("Stop") {
         public void actionPerformed(ActionEvent evt) {
             stop();
         }
     };
 
-    private AbstractAction _analyzeAction = new AbstractAction("Analyze") {
+    private final AbstractAction _analyzeAction = new AbstractAction("Analyze") {
         public void actionPerformed(ActionEvent evt) {
             try {
                 analyze();
@@ -108,7 +108,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         }
     };
 
-    private AbstractAction _addAction = new AbstractAction("Add") {
+    private final AbstractAction _addAction = new AbstractAction("Add") {
         public void actionPerformed(ActionEvent evt) {
             try {
                 add();
@@ -118,7 +118,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         }
     };
 
-    private static NumberFormat NF = NumberFormat.getInstance(Locale.US);
+    private static final NumberFormat NF = NumberFormat.getInstance(Locale.US);
 
     static {
         NF.setMaximumFractionDigits(1);

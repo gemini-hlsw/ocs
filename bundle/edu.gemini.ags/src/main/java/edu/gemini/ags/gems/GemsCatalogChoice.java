@@ -13,7 +13,7 @@ public enum GemsCatalogChoice {
     UCAC4_GEMINI(UCAC4$.MODULE$, "UCAC4 at Gemini"),
     ;
 
-    public static final GemsCatalogChoice DEFAULT = GAIA_ESA;
+    public static final GemsCatalogChoice DEFAULT = GAIA_Gemini;
 
     private final CatalogName _catalogName;
     private final String      _displayValue;
