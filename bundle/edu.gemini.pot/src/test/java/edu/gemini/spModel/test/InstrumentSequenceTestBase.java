@@ -107,6 +107,11 @@ public abstract class InstrumentSequenceTestBase<I extends SPInstObsComp, S exte
         assertEquals(expectedTime, time.getExecTime()/1000.0, 0.001);
     }
 
+    protected void verifyMs(int expectedTimeMs) {
+        PlannedTimeSummary time = PlannedTimeSummaryService.getTotalTime(getObs());
+        assertEquals(expectedTimeMs, time.getExecTime());
+    }
+
     /**
      * Creates a parameter value suitable for storage in an instrument sequence
      * data object.

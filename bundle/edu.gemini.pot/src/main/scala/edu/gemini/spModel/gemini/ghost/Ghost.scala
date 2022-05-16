@@ -28,6 +28,8 @@ import edu.gemini.spModel.target.env.{AsterismType, ResolutionMode, TargetEnviro
 import edu.gemini.spModel.target.obsComp.{TargetObsComp, TargetObsCompCB}
 import edu.gemini.spModel.telescope.{IssPort, IssPortProvider}
 
+import java.time.Duration
+
 import scala.collection.immutable.TreeMap
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
@@ -364,14 +366,17 @@ final class Ghost
     }
   }
 
+  override def getSetupTime(obs: ISPObservation): Duration =
+    Duration.ofMinutes(20)
+
   override def calc(cur: Config, prev: JOption[Config]): CategorizedTimeGroup = {
-    val times: java.util.Collection[CategorizedTime] = new java.util.ArrayList[CategorizedTime]()
+    val times = new java.util.ArrayList[CategorizedTime]()
 
     val ghostCameras   = GhostCameras.fromConfig(cur)
     val cameraLabel    = ghostCameras.dominant.map(d => s" ${d.label}").getOrElse("")
     val dominantCamera = ghostCameras.dominantOrRed
 
-    def label(sec: Double): String =
+    def label(sec: Double) =
       s"${dominantCamera.count} x ${sec}s$cameraLabel"
 
     times.add(CategorizedTime.fromSeconds(
