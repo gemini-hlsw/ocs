@@ -85,7 +85,7 @@ public interface IConfigBuilder extends ISPCloneable, Serializable {
      * parameters in "next" step
      *
      * @param prevFull configuration containing the state of the system in
-     * the previous step which is often required to determine whether or not
+     * the previous step which is often required to determine whether
      * a dependent value has changed in the current step
      */
     void applyNext(IConfig current, IConfig prevFull);

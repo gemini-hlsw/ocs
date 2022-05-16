@@ -3,12 +3,8 @@ package edu.gemini.spModel.gemini.ghost;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
-import edu.gemini.spModel.config2.ItemKey;
-import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.type.SpTypeUtil;
 import edu.gemini.spModel.type.StandardSpType;
-
-import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
 
 public enum GhostReadNoiseGain implements StandardSpType {
     SLOW_LOW("Slow / Low", "Slow Read / Low Gain: Standard Science Mode"),

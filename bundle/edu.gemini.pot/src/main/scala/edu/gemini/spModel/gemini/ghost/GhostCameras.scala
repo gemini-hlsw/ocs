@@ -25,26 +25,29 @@ final case class GhostCameras(
       case _          => None
     }
 
+  val dominantOrRed: GhostCamera =
+    dominant.getOrElse(red)
+
   /**
    * Total exposure time for the dominant camera, or either camera if neither
    * is dominant.
    */
   val exposure: Duration =
-    dominant.getOrElse(red).totalExposure
+    dominantOrRed.totalExposure
 
   /**
    * Total readout time for the dominant camera, or either camera if neither
    * is dominant.
    */
   val readout: Duration =
-    dominant.getOrElse(red).totalReadout
+    dominantOrRed.totalReadout
 
   /**
    * Total exposure plus readout time for the dominant camera, or either camera
    * if neither is dominant.
    */
   val totalTime: Duration =
-    dominant.getOrElse(red).totalTime
+    dominantOrRed.totalTime
 
 }
 
@@ -52,12 +55,6 @@ object GhostCameras {
 
   implicit val EqualGhostCameras: Equal[GhostCameras] =
     Equal.equalA
-
-  def fromGhostComponent(g: GhostExposureTimeProvider): GhostCameras =
-    GhostCameras(
-      GhostCamera.Red.fromGhostComponent(g),
-      GhostCamera.Blue.fromGhostComponent(g)
-    )
 
   /**
    * Reads the exposure time parameters from the "observe" system and creates

@@ -4,7 +4,6 @@
 package edu.gemini.spModel.gemini.ghost
 
 import edu.gemini.spModel.config2.{Config, ItemKey}
-import edu.gemini.spModel.gemini.ghost.GhostCamera.ReadoutTime
 
 import java.time.Duration
 
@@ -22,9 +21,25 @@ sealed trait GhostCamera extends Product with Serializable {
   def totalExposure: Duration =
     oneExposure.multipliedBy(count.toLong)
 
+  /** Read gain. */
+  def gain: GhostReadNoiseGain
+
+  /** Binning. */
+  def binning: GhostBinning
+
+  /** Cost for a single 1x1 readout for this camera at the associated speed. */
+  protected def oneByOneReadout: Duration
+
+  /** Cost for the a single exposure readout using the associated speed and binning. */
+  def oneReadout: Duration =
+    //The readout time scales with the binning so,
+    //readout = readout(1x1) / (xbin * ybin)
+    oneByOneReadout
+      .dividedBy((binning.getSpatialBinning * binning.getSpectralBinning).toLong)
+
   /** Total readout time, ignoring exposure time */
   def totalReadout: Duration =
-    ReadoutTime.multipliedBy(count.toLong)
+    oneReadout.multipliedBy(count.toLong)
 
   /** Total exposure + readout time. */
   def totalTime: Duration =
@@ -41,14 +56,43 @@ sealed trait GhostCamera extends Product with Serializable {
 
 object GhostCamera {
 
-  final case class Red(count: Int, oneExposure: Duration) extends GhostCamera
-  final case class Blue(count: Int, oneExposure: Duration) extends GhostCamera
+  private def duration(sec: Int, deciSeconds: Int): Duration =
+    Duration.ofSeconds(sec.toLong, deciSeconds.toLong * 100000000L)
 
-  val ReadoutTime: Duration =
-    Duration.ofMinutes(1L)
+  final case class Red(
+    count:       Int,
+    oneExposure: Duration,
+    gain:        GhostReadNoiseGain,
+    binning:     GhostBinning
+  ) extends GhostCamera {
 
-  def red(count: Int, oneExposure: Duration): GhostCamera =
-    Red(count, oneExposure)
+    // Red camera, 1x1 binning
+    // Slow readout: 95.1 sec
+    // Fast readout: 20.7 sec
+    override protected def oneByOneReadout: Duration =
+      gain match {
+        case GhostReadNoiseGain.SLOW_LOW  => duration(95, 1)
+        case GhostReadNoiseGain.FAST_LOW |
+             GhostReadNoiseGain.FAST_HIGH => duration(20, 7)
+      }
+  }
+
+  final case class Blue(
+    count:       Int,
+    oneExposure: Duration,
+    gain:        GhostReadNoiseGain,
+    binning:     GhostBinning
+  ) extends GhostCamera {
+    // Blue camera, 1x1 binning
+    // Slow readout: 45.6 sec
+    // Fast readout: 10.3 sec
+    override protected def oneByOneReadout: Duration =
+      gain match {
+        case GhostReadNoiseGain.SLOW_LOW  => duration(45, 6)
+        case GhostReadNoiseGain.FAST_LOW |
+             GhostReadNoiseGain.FAST_HIGH => duration(10, 3)
+      }
+  }
 
   private def secondsToDuration(secs: Double): Duration =
     Duration.ofMillis(Math.round(secs * 1000.0))
@@ -69,43 +113,40 @@ object GhostCamera {
   private def configToCount(config: Config, key: ItemKey): Int =
     anyToCount(Option(config.getItemValue(key)))
 
+  private def configToA[A](config: Config, key: ItemKey, default: => A)(pf: PartialFunction[AnyRef, A]): A =
+    Option(config.getItemValue(key)).collect(pf).getOrElse(default)
+
+  private def configToGain(config: Config, key: ItemKey): GhostReadNoiseGain =
+    configToA(config, key, GhostReadNoiseGain.DEFAULT) {
+      case g: GhostReadNoiseGain => g
+    }
+
+  private def configToBinning(config: Config, key: ItemKey): GhostBinning =
+    configToA(config, key, GhostBinning.DEFAULT) {
+      case g: GhostBinning => g
+    }
+
+
   object Red {
-
-    def fromCountAndSeconds(count: Int, seconds: Double): Red =
-      Red(
-        if (count < 0) 0 else count,
-        Duration.ofMillis(Math.round((if (seconds < 0.0) 0.0 else seconds) * 1000.0))
-      )
-
-    def fromGhostComponent(g: GhostExposureTimeProvider): Red =
-      Red(g.getRedExposureCount, secondsToDuration(g.getRedExposureTime))
 
     def fromConfig(c: Config): Red =
       Red(
         configToCount(c, Ghost.RED_EXPOSURE_COUNT_OBS_KEY),
-        configToDuration(c, Ghost.RED_EXPOSURE_TIME_OBS_KEY)
+        configToDuration(c, Ghost.RED_EXPOSURE_TIME_OBS_KEY),
+        configToGain(c, Ghost.RED_READ_NOISE_GAIN_KEY),
+        configToBinning(c, Ghost.RED_BINNING_KEY)
       )
 
   }
 
-  def blue(count: Int, oneExposure: Duration): GhostCamera =
-    Blue(count, oneExposure)
-
   object Blue {
-
-    def fromCountAndSeconds(count: Int, seconds: Double): Blue =
-      Blue(
-        if (count < 0) 0 else count,
-        Duration.ofMillis(Math.round((if (seconds < 0.0) 0.0 else seconds) * 1000.0))
-      )
-
-    def fromGhostComponent(g: GhostExposureTimeProvider): Blue =
-      Blue(g.getBlueExposureCount, secondsToDuration(g.getBlueExposureTime))
 
     def fromConfig(c: Config): Blue =
       Blue(
         configToCount(c, Ghost.BLUE_EXPOSURE_COUNT_OBS_KEY),
-        configToDuration(c, Ghost.BLUE_EXPOSURE_TIME_OBS_KEY)
+        configToDuration(c, Ghost.BLUE_EXPOSURE_TIME_OBS_KEY),
+        configToGain(c, Ghost.BLUE_READ_NOISE_GAIN_KEY),
+        configToBinning(c, Ghost.BLUE_BINNING_KEY)
       )
 
   }
