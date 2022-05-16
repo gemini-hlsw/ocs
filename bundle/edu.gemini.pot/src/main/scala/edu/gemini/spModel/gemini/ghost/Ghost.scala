@@ -367,22 +367,26 @@ final class Ghost
   override def calc(cur: Config, prev: JOption[Config]): CategorizedTimeGroup = {
     val times: java.util.Collection[CategorizedTime] = new java.util.ArrayList[CategorizedTime]()
 
-    val gc = GhostCameras.fromConfig(cur)
+    val ghostCameras   = GhostCameras.fromConfig(cur)
+    val cameraLabel    = ghostCameras.dominant.map(d => s" ${d.label}").getOrElse("")
+    val dominantCamera = ghostCameras.dominantOrRed
 
     def label(sec: Double): String =
-      s"${gc.dominant.getOrElse(gc.red).count} x ${sec}s${gc.dominant.map(d => s" ${d.label}").getOrElse("")}"
+      s"${dominantCamera.count} x ${sec}s$cameraLabel"
 
     times.add(CategorizedTime.fromSeconds(
       Category.EXPOSURE,
-      gc.exposure.fractionalSeconds,
-      label(gc.dominant.getOrElse(gc.red).oneExposure.fractionalSeconds)
+      dominantCamera.totalExposure.fractionalSeconds,
+      label(dominantCamera.oneExposure.fractionalSeconds)
     ))
 
     times.add(CategorizedTime.fromSeconds(
       Category.READOUT,
-      gc.readout.fractionalSeconds,
-      label(GhostCamera.ReadoutTime.getSeconds)
+      dominantCamera.totalReadout.fractionalSeconds,
+      label(dominantCamera.oneReadout.fractionalSeconds)
     ))
+
+    times.add(getDhsWriteTime)
 
     CommonStepCalculator.instance.calc(cur, prev).addAll(times)
   }
@@ -548,6 +552,12 @@ object Ghost {
   val RED_EXPOSURE_COUNT_OBS_KEY: ItemKey =
     new ItemKey(OBSERVE_KEY, RED_EXPOSURE_COUNT_PROP.getName)
 
+  val RED_READ_NOISE_GAIN_KEY: ItemKey =
+    new ItemKey(INSTRUMENT_KEY, RED_READ_NOISE_GAIN_PROP.getName)
+
+  val RED_BINNING_KEY: ItemKey =
+    new ItemKey(INSTRUMENT_KEY, RED_BINNING_PROP.getName)
+
   val BLUE_EXPOSURE_TIME_KEY: ItemKey =
     new ItemKey(INSTRUMENT_KEY, BLUE_EXPOSURE_TIME_PROP.getName)
 
@@ -559,6 +569,12 @@ object Ghost {
 
   val BLUE_EXPOSURE_COUNT_OBS_KEY: ItemKey =
     new ItemKey(OBSERVE_KEY, BLUE_EXPOSURE_COUNT_PROP.getName)
+
+  val BLUE_READ_NOISE_GAIN_KEY: ItemKey =
+    new ItemKey(INSTRUMENT_KEY, BLUE_READ_NOISE_GAIN_PROP.getName)
+
+  val BLUE_BINNING_KEY: ItemKey =
+    new ItemKey(INSTRUMENT_KEY, BLUE_BINNING_PROP.getName)
 
   private val Properties: List[(String, PropertyDescriptor)] = List(
     POS_ANGLE_PROP,

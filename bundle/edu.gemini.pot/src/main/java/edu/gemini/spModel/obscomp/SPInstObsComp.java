@@ -441,6 +441,7 @@ public abstract class SPInstObsComp extends AbstractDataObject {
             Arrays.stream(Instrument.values()).collect(Collectors.toMap(Function.identity(), i -> Duration.ofSeconds(7)));
 
         m.put(Instrument.Flamingos2, Duration.ofSeconds(10));
+        m.put(Instrument.Ghost,      Duration.ofSeconds(10));
         m.put(Instrument.GmosNorth,  Duration.ofSeconds(10));
         m.put(Instrument.GmosSouth,  Duration.ofSeconds(10));
         m.put(Instrument.Gnirs,      Duration.ofMillis(8500));
