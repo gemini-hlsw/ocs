@@ -23,11 +23,11 @@ INCLUDE  {16}, {17}, {18} - {21} (in this order) in a Target Group
         FOR {16}, {20} (acqs for standards) IF PIXEL SCALE = 0.05 \
           SET EXPOSURE TIME=15.0 in the first GNIRS iterator: Image of keyhole
 
-        FOR ALL OBS in Group :     
+        FOR ALL OBS in Group :
             SET FILTER FROM PI IN ALL GNIRS ITERATORS
                 The GNIRS filters are changing in the 12B OT (see
                 REL-444 in JIRA). Here is the new mapping:
- 		Y (1.03um) => Y-MK: 1.03um 
+ 		Y (1.03um) => Y-MK: 1.03um
                 X (1.10um) => order 6 (X)
                 J (1.25um) => J-MK: 1.25um
                 H (1.65um) => order 4 (H-MK)
@@ -55,9 +55,9 @@ INCLUDE {5}, {6}, {12}-{14} in a target-specific Scheduling Group
             SET PIXEL SCALE FROM PI
             SET FPU from PI
             SET DISPERSER FROM PI
-            SET CROSS-DISPERSED FROM PI 
+            SET CROSS-DISPERSED FROM PI
                 IF CROSS-DISPERSED == SXD OR CROSS-DISPERSED == LXD SET Central Wavelength (FILTER) == Cross-dispersed
-            SET DISPERSER FROM PI 
+            SET DISPERSER FROM PI
 
 # Cross-dispersed offsets are -1/+2 for the science and +1/-2 for the standard (short and long cameras).
 
@@ -97,7 +97,7 @@ ELSE INCLUDE {7} - {11}, {22}, {23}                      # no H-magnitude provid
 
           IF PIXEL SCALE == 0.05"/pix :
                 IF Central Wavelength < 2.5um:  SET IN FIRST ITERATOR CALLED 'GNIRS: Slit Image' Exposure Time = 15
-                ELSE :                          SET IN FIRST ITERATOR CALLED 'GNIRS: Slit Image' Exposure Time = 40 
+                ELSE :                          SET IN FIRST ITERATOR CALLED 'GNIRS: Slit Image' Exposure Time = 40
                 IF CROSS-DISPERSED == LXD OR SXD IN ITERATORS SET DECKER = long camera x-disp \
                         EXCEPT WHERE FPU == acquisition
                 IF CROSS-DISPERSED == None SET DECKER IN ITERATORS = long camera long slit \
@@ -177,8 +177,8 @@ SET PIXEL SCALE FROM PI
 SET DISPERSER FROM PI
 
 # Set the FPU and Decker in the acquisitions:
-FOR {24,27-31} SET FPU FROM PI IN ITERATORS EXCEPT WHERE FPU == acquisition
-FOR {24,27-31} SET DECKER FROM PI IN ITERATORS EXCEPT WHERE DECKER == acquisition
+FOR {24,27-31,35} SET FPU FROM PI IN ITERATORS EXCEPT WHERE FPU == acquisition
+FOR {24,27-31,35} SET DECKER FROM PI IN ITERATORS EXCEPT WHERE DECKER == acquisition
 
 IF PI Central Wavelength > 2.5um
     SET Well Depth == Deep
@@ -188,7 +188,7 @@ IF AO mode != None:
     ADD an Altair Adaptive Optics component to all observations
     IF PI AO == "Altair Natural Guidestar":  SET the Guide Star Type = Natural Guide Star
     IF PI AO == "Altair Natural Guidestar w/ Field Lens": SET the Guide Star Type = Natural Guide Star with Field Lens
-    IF PI AO includes "Laser Guide Star":    
+    IF PI AO includes "Laser Guide Star":
          FOR ACQ and SCI:
             IF PI AO == "Altair Laser Guidestar": SET Guide Star Type = Laser Guide Star + AOWFS
             IF PI AO == "Altair Laser Guidestar w/ PWFS1": SET Guide Star Type = Laser Guide Star + PWFS1
