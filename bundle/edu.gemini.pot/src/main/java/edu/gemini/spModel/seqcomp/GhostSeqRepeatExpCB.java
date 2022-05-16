@@ -64,16 +64,14 @@ final public class GhostSeqRepeatExpCB extends AbstractSeqComponentCB {
     }
 
     private static <A> A lookup(IConfig config, Option<IConfig> prev, String name, A defaultValue) {
-        final Option<Object> a0 = ImOption.apply(
+        // noinspection unchecked
+        return (A) ImOption.apply(
             config.getParameterValue(SeqConfigNames.INSTRUMENT_CONFIG_NAME, name)
-        );
-
-        final Option<Object> a1 = a0.orElse(prev.flatMap(p -> ImOption.apply(
-            p.getParameterValue(SeqConfigNames.INSTRUMENT_CONFIG_NAME, name)
-        )));
-
-        //noinspection unchecked
-        return (A) a1.getOrElse(defaultValue);
+        ).orElse(
+            prev.flatMap(p -> ImOption.apply(
+                p.getParameterValue(SeqConfigNames.INSTRUMENT_CONFIG_NAME, name)
+            ))
+        ).getOrElse(defaultValue);
     }
 
     private static GhostReadNoiseGain getGain(IConfig config, Option<IConfig> prev, PropertyDescriptor prop) {
