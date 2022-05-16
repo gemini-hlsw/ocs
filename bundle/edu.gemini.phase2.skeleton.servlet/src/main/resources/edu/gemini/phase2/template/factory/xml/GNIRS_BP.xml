@@ -3045,7 +3045,7 @@ GNIRS configuration:
               <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="e5799b71-a80f-43b0-95c5-4a9c479aada7" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
+                  <param name="class" value="PARTNER_CAL"/>
                 </paramset>
               </container>
             </container>
@@ -3356,7 +3356,7 @@ GNIRS configuration:
               <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="caab8d1d-9143-4296-a664-f840caef6a9d" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
-                  <param name="class" value="ACQ_CAL"/>
+                  <param name="class" value="ACQ"/>
                 </paramset>
               </container>
             </container>
@@ -3384,7 +3384,7 @@ GNIRS configuration:
               <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="12912461-5140-4c1b-b3b7-a070d68a6009" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="2"/>
-                  <param name="class" value="ACQ_CAL"/>
+                  <param name="class" value="ACQ"/>
                 </paramset>
               </container>
             </container>
@@ -3472,7 +3472,7 @@ GNIRS configuration:
               <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="716c7105-769a-4103-b468-032e14e24040" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
-                  <param name="class" value="ACQ_CAL"/>
+                  <param name="class" value="ACQ"/>
                 </paramset>
               </container>
             </container>
@@ -3500,7 +3500,7 @@ GNIRS configuration:
               <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="e149d495-0574-4d1c-904a-3c858ee910c7" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="2"/>
-                  <param name="class" value="ACQ_CAL"/>
+                  <param name="class" value="ACQ"/>
                 </paramset>
               </container>
             </container>
@@ -4333,7 +4333,7 @@ Note that the target component in the associated spectroscopy observation must b
               <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="c81016f5-3d8a-4bdd-9459-2ee2e78af6cd" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
+                  <param name="class" value="PARTNER_CAL"/>
                 </paramset>
               </container>
             </container>
@@ -4528,6 +4528,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="e149d495-0574-4d1c-904a-3c858ee910c7"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="02659d04-2d4e-4245-affb-341a4bed6291" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="b1653c99-4475-42fc-999d-e570733e4dc3"/>
@@ -4783,6 +4784,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="12912461-5140-4c1b-b3b7-a070d68a6009"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="02659d04-2d4e-4245-affb-341a4bed6291" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="c2c94e36-45de-4aaa-a565-f66958d70584"/>
@@ -4960,6 +4962,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="716c7105-769a-4103-b468-032e14e24040"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="02659d04-2d4e-4245-affb-341a4bed6291" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="2726500e-1361-41c3-8716-c6b9a5a626dd"/>
@@ -5044,6 +5047,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="caab8d1d-9143-4296-a664-f840caef6a9d"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="02659d04-2d4e-4245-affb-341a4bed6291" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="9da8ce47-1c25-4e68-9c1b-cae50deb3c71"/>
@@ -5568,6 +5572,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="c81016f5-3d8a-4bdd-9459-2ee2e78af6cd"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="02659d04-2d4e-4245-affb-341a4bed6291" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="7389db6e-0a65-49d8-b08e-7bbeadba3dd9"/>
@@ -6090,6 +6095,7 @@ Note that the target component in the associated spectroscopy observation must b
     <paramset name="node">
       <param name="key" value="e5799b71-a80f-43b0-95c5-4a9c479aada7"/>
       <param name="ec35434a-607f-474a-abf1-e2b56b6f880a" value="1"/>
+      <param name="02659d04-2d4e-4245-affb-341a4bed6291" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="92d6a353-924c-48c4-80c6-f8ab1802ba24"/>
