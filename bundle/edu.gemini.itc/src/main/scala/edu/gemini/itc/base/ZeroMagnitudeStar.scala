@@ -39,13 +39,9 @@ object ZeroMagnitudeStar {
     case `_i` => 93600000
     case `_z` => 79800000
 
-    // Gaia values derived from synphot:
-    case `GB` => 103400000
-    case `G`  =>  79500000
-    case `GR` =>  50390000
-
     // Other bands are not supported, in particular AP and UC
     case _ => sys.error("unsupported waveband " + band.name)
+
 
   }
 }

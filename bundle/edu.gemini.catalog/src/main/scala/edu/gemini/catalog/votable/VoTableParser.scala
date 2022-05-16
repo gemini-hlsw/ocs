@@ -331,15 +331,6 @@ object CatalogAdapter {
     override def parseAngularVelocity(ucd: Ucd, v: String): CatalogProblem \/ AngularVelocity =
       CatalogAdapter.parseDoubleValue(ucd, v).map(AngularVelocity.fromDegreesPerYear)
 
-    // PPXML g mag is mapped to Sloan 'g
-    override def parseBand(id: FieldId, band: String): Option[MagnitudeBand] =
-      (id.id, id.ucd) match {
-        case ("gmag" | "gmag_err", ucd) if ucd.includes(UcdWord("em.opt.g")) =>
-          Some(MagnitudeBand._g)
-        case _                                                               =>
-          super.parseBand(id, band)
-      }
-
     override def filterAndDeduplicateMagnitudes(magnitudeFields: List[(FieldId, Magnitude)]): List[Magnitude] = {
       // Read all magnitudes, including duplicates
       val magMap1 = (Map.empty[String, Magnitude]/:magnitudeFields) {
