@@ -70,8 +70,9 @@ case class ObservationInfo(ctx: Option[ObsContext],
                            offsets: Set[Offset],
                            catalog: CatalogName,
                            mt: MagnitudeTable) {
-  def catalogQuery:List[CatalogQuery] = validStrategies.collect {
-      case SupportedStrategy(s, query, _) if s == strategy => query
+  def catalogQuery: List[CatalogQuery] =
+    validStrategies.collect {
+      case SupportedStrategy(s, query, _) if strategy.map(_.strategy).contains(s) => query
     }.flatten
 
   /**

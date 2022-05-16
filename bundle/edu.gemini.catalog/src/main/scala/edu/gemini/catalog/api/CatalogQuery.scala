@@ -96,7 +96,8 @@ final case class ConeSearchCatalogQuery(
   base:                 Coordinates,
   radiusConstraint:     RadiusConstraint,
   magnitudeConstraints: List[MagnitudeConstraints],
-  catalog:              CatalogName
+  catalog:              CatalogName,
+  isLgs:                Boolean
 ) extends CatalogQuery {
 
   val filters: NonEmptyList[QueryResultsFilter] =
@@ -171,12 +172,13 @@ case class NameCatalogQuery(search: String, catalog: CatalogName) extends Catalo
 object CatalogQuery {
 
   def coneSearch(
-    c: edu.gemini.spModel.core.Coordinates,
-    r: RadiusConstraint,
-    m: MagnitudeConstraints,
-    n: CatalogName
+    c:   edu.gemini.spModel.core.Coordinates,
+    r:   RadiusConstraint,
+    m:   MagnitudeConstraints,
+    n:   CatalogName,
+    lgs: Boolean = false
   ): CatalogQuery =
-    ConeSearchCatalogQuery(None, c, r, List(m), n)
+    ConeSearchCatalogQuery(None, c, r, List(m), n, lgs)
 
   def nameSearch(search: String): CatalogQuery =
     NameCatalogQuery(search, CatalogName.SIMBAD)
