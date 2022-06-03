@@ -23,6 +23,23 @@ $ curl --data @req.xml http://gsodbtest:8442/wdba
 <?xml version="1.0" encoding="UTF-8"?><methodResponse xmlns:ex="http://ws.apache.org/xmlrpc/namespaces/extensions"><params><param><value><array><data><value><struct><member><name>OBS_ID</name><value>GS-ENG20210827-5</value></member><member><name>TITLE</name><value>GMOS Grating tilt LUT check</value></member></struct></value></data></array></value></param></params></methodResponse>
 ```
 
+### Example TCC configuration fetch
+
+```commandline
+$ cat GetCoordinates.xml 
+<?xml version="1.0"?>
+<methodCall>
+  <methodName>WDBA_Tcc.getCoordinates</methodName>
+  <params>
+    <param>
+      <value><string>GN-2022A-LP-202-54</string></value>
+    </param>
+  </params>
+</methodCall>
+
+$ curl --data @GetCoordinates.xml http://gnodb:8442/wdba | python3 -c 'import html, sys; [print(html.unescape(l), end="") for l in sys.stdin]'
+```
+
 ### Provenance
 
 This bundle originated from `edu.gemini.wdba.xmlrpc.server` in the OCS 1.5 build. It subsumes the following OCS 1.5 bundles, which no longer exist on their own.
