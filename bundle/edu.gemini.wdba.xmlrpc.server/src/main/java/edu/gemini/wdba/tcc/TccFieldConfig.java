@@ -53,21 +53,16 @@ public class TccFieldConfig extends ParamSet {
         putParameter(TccNames.GUIDE_GROUP, getPrimaryGuideGroupName());
 
         // Add a rotator parameter and then create the config
-        // Note: If the config name contains "Fixed" in some way, it's assumed to be a Fixed rotator config
-        RotatorConfig rc = new RotatorConfig(_oe);
+        final RotatorConfig rc = new RotatorConfig(_oe);
         if (rc.build()) {
-            String rotConfigName = rc.getConfigName();
-            if (rotConfigName.equals(TccNames.ALTAIR_FIXED)) {
-                putParameter(TccNames.ROTATOR, rotConfigName);
-            } else
             // If the instrument adds something, create a rotator config and add it in
-            if (rotConfigName.contains(TccNames.FIXED)) {
-                putParameter(TccNames.ROTATOR, rotConfigName);
-                add(rc);
-            } else {
-                putParameter(TccNames.POSANGLE, rotConfigName);
-                add(rc);
-            }
+            ImOption.apply(rc.attributeValue(TYPE)).foreach(t -> {
+                final String name = rc.getConfigName();
+                putParameter(t, name);
+                if (!TccNames.ALTAIR_FIXED.equals(name)) {
+                    add(rc);
+                }
+            });
         }
 
         GuideConfig gc = new GuideConfig(_oe);
