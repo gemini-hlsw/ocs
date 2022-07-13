@@ -199,6 +199,8 @@ trait ItcService {
    */
   def calculate(p: ItcParameters, headless: Boolean): Result
 
+  def calculateCharts(p: ItcParameters): Result
+
 }
 
 sealed trait ItcMessage
