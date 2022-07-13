@@ -1,24 +1,25 @@
 package edu.gemini.sp.vcs2
 
-import edu.gemini.pot.sp.{ISPFactory, SPNodeKeyLocks, ISPProgram, SPNodeKey}
+import edu.gemini.pot.sp.{ISPFactory, ISPProgram, SPNodeKey, SPNodeKeyLocks}
 import edu.gemini.pot.sp.version.VersionMap
 import edu.gemini.pot.spdb.{DBIDClashException, IDBDatabaseService}
-import edu.gemini.shared.util.VersionComparison.{Same, Newer}
+import edu.gemini.shared.util.VersionComparison.{Newer, Same}
 import edu.gemini.sp.vcs2.VcsAction._
 import edu.gemini.sp.vcs2.VcsFailure._
-import edu.gemini.sp.vcs.log.{OpStore, OpFetch, VcsEventSet, VcsLog}
+import edu.gemini.sp.vcs.log.{OpFetch, OpStore, VcsEventSet, VcsLog}
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.util.security.permission.ProgramPermission
 import edu.gemini.util.security.policy.ImplicitPolicy
 
 import java.security.{Permission, Principal}
-
 import edu.gemini.util.security.principal.GeminiPrincipal
 
+import java.util.concurrent.atomic.AtomicLong
 import java.util.logging.Logger
 
 import scalaz._
 import Scalaz._
+import scalaz.concurrent.Task
 
 /** VcsServer provides access-controlled locked read/write methods to generate
   * actions that read from and write to programs in the database. It also
@@ -179,7 +180,7 @@ class VcsServer(odb: IDBDatabaseService) { vs =>
     }
 
   private def accessControlled[A](id: SPProgramID, user: Set[Principal])(body: => VcsAction[A]): VcsAction[A] =
-    hasPermission(new ProgramPermission.Read(id), user) >>= { hp =>
+    hasPermission(ProgramPermission.Read(id), user) >>= { hp =>
       if (hp) body
       else {
         VcsServer.Log.info(s"VCS op forbidden: pid=$id, user=[${user.toList.mkString(", ")}]")
@@ -187,8 +188,32 @@ class VcsServer(odb: IDBDatabaseService) { vs =>
       }
     }
 
-  private def locked[A](k: SPNodeKey, lock: SPNodeKey => Unit, unlock: SPNodeKey => Unit)(body: => VcsAction[A]): VcsAction[A] =
-    VcsAction(lock(k)) >> { try { body} finally { unlock(k) } }
+  private def locked[A](k: SPNodeKey, lock: SPNodeKey => Unit, unlock: SPNodeKey => Unit)(body: => VcsAction[A]): VcsAction[A] = {
+    // Run the `body` while a lock is held.  If the releasing thread differs
+    // from the locking thread, at least warn about it before it blows up.
+    val a = new AtomicLong()
+
+    def recordAndLock(): Unit = {
+      a.set(Thread.currentThread.getId)
+      lock(k)
+    }
+
+    def checkAndUnlock(): Unit = {
+      val lockingThreadId   = a.get
+      val unlockingThreadId = Thread.currentThread.getId
+      if (lockingThreadId != unlockingThreadId) {
+        VcsServer.Log.severe(s"Unlocking thread ($unlockingThreadId) differs from locking thread ($lockingThreadId).  This will fail.")
+      }
+      unlock(k)
+    }
+
+    VcsAction(recordAndLock()) >>
+      // catch exceptions in the calculation of `body` itself
+      (try { body } catch { case e: Throwable => VcsFailure.vcsException(e).liftVcs[A] })
+        .run
+        .onFinish(_ => Task.delay(checkAndUnlock()))
+        .liftVcs
+  }
 
   private  def putProg(p: ISPProgram): TryVcs[Unit] =
     \/.fromTryCatchNonFatal(odb.put(p)).leftMap {

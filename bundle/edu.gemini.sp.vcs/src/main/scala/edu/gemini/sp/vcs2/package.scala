@@ -87,7 +87,11 @@ package object vcs2 {
     def liftVcs: VcsAction[A] = EitherT(Task.delay(e))
   }
 
-  implicit val ShowConflicts = Show.shows[Conflicts] { c =>
+  implicit class VcsFailureOps(f: => VcsFailure) {
+    def liftVcs[A]: VcsAction[A] = f.left[A].liftVcs
+  }
+
+  implicit val ShowConflicts: Show[Conflicts] = Show.shows[Conflicts] { c =>
     def showNote(cn: Conflict.Note): String =
       cn match {
         case n: Conflict.Moved                  => s"Move(${n.nodeKey}, ${n.to})"
