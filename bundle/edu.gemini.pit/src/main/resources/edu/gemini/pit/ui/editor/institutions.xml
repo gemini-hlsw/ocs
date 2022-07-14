@@ -3980,4 +3980,23 @@
             <email>Phya-Admin@utrgv.edu</email>
         </contact>
     </site>
+    <site>
+        <institution>European Southern Observatory (Garching)</institution>
+        <address>Karl-Schwarzschild-Str. 2</address>
+        <address>85748 Garching bei München</address>
+        <country>Germany</country>
+        <contact>
+            <phone>+49 89 32006 0</phone>
+        </contact>
+    </site>
+    <site>
+        <institution>European Southern Observatory (Santiago)</institution>
+        <address>Alonso de Córdova 3107</address>
+        <address>Vitacura, Casilla 19001</address>
+        <address>Santiago de Chile</address>
+        <country>Chile</country>
+        <contact>
+            <phone>+56 2 2463 3000</phone>
+        </contact>
+    </site>
 </institutions>
