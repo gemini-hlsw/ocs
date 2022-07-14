@@ -56,8 +56,9 @@ object Institutions {
   def institution2Ngo(address: InstitutionAddress): FtPartner = {
     val geminiRegex = "Gemini.Observatory.*".r
     address.institution match {
-      case geminiRegex() => Some(-\/(NgoPartner.US)) // Gemini Staff always go as US
-      case _             => alternateAffiliates.getOrElse(address.institution, country2Ngo(address.country))
+      case geminiRegex()                              => Some(-\/(NgoPartner.US)) // Gemini Staff always go as US
+      case "European Southern Observatory (Santiago)" => None
+      case _                                          => alternateAffiliates.getOrElse(address.institution, country2Ngo(address.country))
     }
   }
 
