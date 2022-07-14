@@ -1,6 +1,6 @@
 package edu.gemini.model.p1.immutable
 
 trait SemesterProperties {
-  System.setProperty("edu.gemini.model.p1.schemaVersion", "2022.2.1")
+  System.setProperty("edu.gemini.model.p1.schemaVersion", "2023.1.1")
 }
 
