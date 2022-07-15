@@ -291,6 +291,20 @@ package object immutable {
   type GpiDisperser = M.GpiDisperser
   object GpiDisperser extends EnumObject[M.GpiDisperser]
 
+  type GhostResolutionMode = M.GhostResolutionMode
+  object GhostResolutionMode extends EnumObject[M.GhostResolutionMode] {
+    val Standard                = M.GhostResolutionMode.STANDARD
+    val High                    = M.GhostResolutionMode.HIGH
+    val PrecisionRadialVelocity = M.GhostResolutionMode.PRECISION_RADIAL_VELOCITY
+  }
+
+  type GhostTargetMode = M.GhostTargetMode
+  object GhostTargetMode extends EnumObject[M.GhostTargetMode] {
+    val Single       = M.GhostTargetMode.SINGLE
+    val Dual         = M.GhostTargetMode.DUAL
+    val TargetAndSky = M.GhostTargetMode.TARGET_AND_SKY
+  }
+
   type GuidingEvaluation = M.GuidingEvaluation
   object GuidingEvaluation extends EnumObject[M.GuidingEvaluation] {
     final val SUCCESS = M.GuidingEvaluation.SUCCESS

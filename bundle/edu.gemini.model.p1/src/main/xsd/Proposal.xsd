@@ -3,6 +3,7 @@
     <xsd:include schemaLocation="Investigator.xsd"/>
     <xsd:include schemaLocation="Target.xsd"/>
     <xsd:include schemaLocation="Flamingos2.xsd"/>
+    <xsd:include schemaLocation="Ghost.xsd"/>
     <xsd:include schemaLocation="GmosS.xsd"/>
     <xsd:include schemaLocation="GmosN.xsd"/>
     <xsd:include schemaLocation="Gnirs.xsd"/>
@@ -143,6 +144,7 @@
             <xsd:element name="gnirs"      type="GnirsBlueprintChoice"/>
             <xsd:element name="gsaoi"      type="GsaoiBlueprintChoice"/>
             <xsd:element name="graces"     type="GracesBlueprintChoice"/>
+            <xsd:element name="ghost"      type="GhostBlueprintChoice"/>
             <xsd:element name="gpi"        type="GpiBlueprintChoice"/>
             <xsd:element name="keck"       type="KeckBlueprint"/>
             <xsd:element name="igrins"     type="IgrinsBlueprintChoice"/>
