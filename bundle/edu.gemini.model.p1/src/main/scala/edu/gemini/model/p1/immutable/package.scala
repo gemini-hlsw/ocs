@@ -233,6 +233,7 @@ package object immutable {
 
   type GnirsCrossDisperser = M.GnirsCrossDisperser
   object GnirsCrossDisperser extends EnumObject[M.GnirsCrossDisperser] {
+    val No  = M.GnirsCrossDisperser.NO
     val LXD = M.GnirsCrossDisperser.LXD
   }
 
@@ -245,7 +246,17 @@ package object immutable {
   object GnirsFilter extends EnumObject[M.GnirsFilter]
 
   type GnirsFpu = M.GnirsFpu
-  object GnirsFpu extends EnumObject[M.GnirsFpu]
+  object GnirsFpu extends EnumObject[M.GnirsFpu] {
+    val SW1    = M.GnirsFpu.SW_1
+    val SW2    = M.GnirsFpu.SW_2
+    val SW3    = M.GnirsFpu.SW_3
+    val SW4    = M.GnirsFpu.SW_4
+    val SW5    = M.GnirsFpu.SW_5
+    val SW6    = M.GnirsFpu.SW_6
+    val SW7    = M.GnirsFpu.SW_7
+    val LR_IFU = M.GnirsFpu.LR_IFU
+    val HR_IFU = M.GnirsFpu.HR_IFU
+  }
 
   type GnirsPixelScale = M.GnirsPixelScale
   object GnirsPixelScale extends EnumObject[M.GnirsPixelScale] {
