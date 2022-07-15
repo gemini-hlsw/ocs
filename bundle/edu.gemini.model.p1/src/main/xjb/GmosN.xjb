@@ -13,6 +13,9 @@
             <jxb:bindings node="./xsd:enumeration[@value='R831']">
                 <jxb:typesafeEnumMember name="R831_G5302"/>
             </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='B480']">
+                <jxb:typesafeEnumMember name="B480_G5309"/>
+            </jxb:bindings>
             <jxb:bindings node="./xsd:enumeration[@value='B600']">
                 <jxb:typesafeEnumMember name="B600_G5307"/>
             </jxb:bindings>
