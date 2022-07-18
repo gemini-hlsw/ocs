@@ -4,6 +4,7 @@ Gemini Phase I Schema Changes
 ##########################
 * Support GMOS B480 Grating
 * Support GHOST Blueprints
+* Special proposal class can have band3 requests
 
 # Version 2022.2.1 - 2022B
 ##########################
