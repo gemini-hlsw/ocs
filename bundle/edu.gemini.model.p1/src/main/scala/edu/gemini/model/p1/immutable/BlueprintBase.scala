@@ -37,6 +37,9 @@ object BlueprintBase {
     // GRACES
     case b: M.GracesBlueprint               => GracesBlueprint(b)
 
+    // GHOST
+    case b: M.GhostBlueprint                => GhostBlueprint(b)
+
     // GPI
     case b: M.GpiBlueprint                  => GpiBlueprint(b)
 

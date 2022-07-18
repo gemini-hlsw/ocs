@@ -193,6 +193,11 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
       // Check that we use the proper public name of GPI
       XML.loadString(result) must (\\("table-cell") \ "block" \> "GPI")
     }
+    "present the correct name when using GHOST, REL-4141" in {
+      val result = transformProposal("proposal_with_ghost.xml")
+      // Check that we use the proper public name of GHOST
+      XML.loadString(result) must (\\("table-cell") \ "block" \> "GHOST")
+    }
     "present the correct name when using GRACES, REL-1356" in {
       val result = transformProposal("proposal_with_graces.xml")
       // Check that we use the proper public name of GPI
