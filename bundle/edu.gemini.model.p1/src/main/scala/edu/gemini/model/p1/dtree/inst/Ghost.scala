@@ -21,11 +21,11 @@ object Ghost {
     }
   }
 
-  class TargetModeNode(om: GhostResolutionMode) extends SingleSelectNode[GhostResolutionMode, GhostTargetMode, GhostBlueprint](om){
+  class TargetModeNode(rm: GhostResolutionMode) extends SingleSelectNode[GhostResolutionMode, GhostTargetMode, GhostBlueprint](rm){
     def title = "TargetMode"
     def description = "Select a target mode for your configuration."
 
-    def apply(d: GhostTargetMode) = Right(GhostBlueprint(om, d))
+    def apply(d: GhostTargetMode) = Right(GhostBlueprint(rm, d))
 
     override def default = Some(GhostTargetMode.forName("SINGLE"))
 
@@ -33,7 +33,7 @@ object Ghost {
       case b: GhostBlueprint => b.targetMode
     }
 
-    def choices = GhostTargetMode.values.toList
+    def choices = if (rm == GhostResolutionMode.Standard) GhostTargetMode.values.toList else List(GhostTargetMode.Single)
   }
 
 }
