@@ -219,6 +219,7 @@
         <xsl:choose>
             <xsl:when test="$inst = 'alopeke'">'Alopeke</xsl:when>
             <xsl:when test="$inst = 'flamingos2'">Flamingos2</xsl:when>
+            <xsl:when test="$inst = 'ghost'">GHOST</xsl:when>
             <xsl:when test="$inst = 'gmosN'">GMOS North</xsl:when>
             <xsl:when test="$inst = 'gmosS'">GMOS South</xsl:when>
             <xsl:when test="$inst = 'gnirs'">GNIRS</xsl:when>
@@ -254,6 +255,7 @@
         <xsl:choose>
             <xsl:when test="$inst = 'alopeke'">Gemini North</xsl:when>
             <xsl:when test="$inst = 'flamingos2'">Gemini South</xsl:when>
+            <xsl:when test="$inst = 'ghost'">Gemini South</xsl:when>
             <xsl:when test="$inst = 'gmosN'">Gemini North</xsl:when>
             <xsl:when test="$inst = 'gmosS'">Gemini South</xsl:when>
             <xsl:when test="$inst = 'gnirs'">Gemini North</xsl:when>
