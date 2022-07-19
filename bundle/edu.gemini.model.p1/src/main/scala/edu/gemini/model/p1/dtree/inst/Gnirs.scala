@@ -87,7 +87,9 @@ object Gnirs {
     extends SingleSelectNode[(Altair, GnirsPixelScale, GnirsDisperser, GnirsCrossDisperser), GnirsFpu, (Altair, GnirsPixelScale, GnirsDisperser, GnirsCrossDisperser, GnirsFpu)](s) {
     val title = "Focal Plane Unit"
     val description = "Please select a focal plane unit."
-    val choices = GnirsFpu.values.toList
+    // REL-4149 Allow LR_IFU only for pixel scale 0.15 and No crossdisperser
+    // Hide HR_IFU in all cases
+    val choices = GnirsFpu.values.filterNot(f => (!(s._2 == GnirsPixelScale.PS_015 && s._4 == GnirsCrossDisperser.No) && f == GnirsFpu.LR_IFU) || f == GnirsFpu.HR_IFU).toList
     def apply(f:GnirsFpu) = Left(new CentralWavelengthNode((s._1, s._2, s._3, s._4, f)))
     def unapply = {
       case b:GnirsBlueprintSpectroscopy => b.fpu
