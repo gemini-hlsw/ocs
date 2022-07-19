@@ -313,9 +313,9 @@
                     <fo:inline font-weight="bold">
                         Request from this partner:
                     </fo:inline>
-                    <xsl:value-of select="format-number(proposalClass/*/ngo[partner=$this-partner]/request/time, '0.0')"/><xsl:text>&#160;</xsl:text>
+                    <xsl:value-of select="format-number(proposalClass/*/ngo[partner=$this-partner]/request/time, '0.00')"/><xsl:text>&#160;</xsl:text>
                     <xsl:value-of select="proposalClass/*/ngo[partner=$this-partner]/request/time/@units"/>
-                    / <xsl:value-of select="format-number(proposalClass/*/ngo[partner=$this-partner]/request/minTime, '0.0')"/><xsl:text>&#160;</xsl:text>
+                    / <xsl:value-of select="format-number(proposalClass/*/ngo[partner=$this-partner]/request/minTime, '0.00')"/><xsl:text>&#160;</xsl:text>
                     <xsl:value-of select="proposalClass/*/ngo[partner=$this-partner]/request/minTime/@units"/> minimum
                 </fo:block>
                 <!-- END time request -->
@@ -537,7 +537,7 @@
                             <fo:table-cell>
                                 <fo:block text-align="center">
                                     <xsl:variable name="totalObsTime"><xsl:call-template name="get-total-observation-time"/></xsl:variable>
-                                    <xsl:value-of select="format-number($totalObsTime, '#.#')"/>
+                                    <xsl:value-of select="format-number($totalObsTime, '0.00')"/>
                                 </fo:block>
                             </fo:table-cell>
                         </fo:table-row>
@@ -554,11 +554,11 @@
                         <xsl:for-each select="proposalClass/*/ngo">
                             <xsl:call-template name="get-partner-name"><xsl:with-param name="partner" select="partner"/></xsl:call-template>
                             <xsl:text>&#160;</xsl:text>
-                            (<xsl:value-of select="format-number(request/time, '0.0')"/>
+                            (<xsl:value-of select="format-number(request/time, '0.00')"/>
                             <xsl:text>&#160;</xsl:text>
                             <xsl:value-of  select="request/time/@units"/>
                             /
-                            <xsl:value-of select="format-number(request/minTime, '0.0')"/>
+                            <xsl:value-of select="format-number(request/minTime, '0.00')"/>
                             <xsl:text>&#160;</xsl:text>
                             <xsl:value-of select="request/minTime/@units"/>),
                         </xsl:for-each>
@@ -578,10 +578,10 @@
                             Band 3:&#160;
                         </fo:inline>
                         Proposal can be used in Band 3 (
-                        <xsl:value-of select="format-number(/proposal/proposalClass/*/band3request/time, '0.0')"/>&#160;
+                        <xsl:value-of select="format-number(/proposal/proposalClass/*/band3request/time, '0.00')"/>&#160;
                         <xsl:value-of select="/proposal/proposalClass/*/band3request/time/@units"/>
                         /
-                        <xsl:value-of select="format-number(/proposal/proposalClass/*/band3request/minTime, '0.0')"/>&#160;
+                        <xsl:value-of select="format-number(/proposal/proposalClass/*/band3request/minTime, '0.00')"/>&#160;
                         <xsl:value-of select="/proposal/proposalClass/*/band3request/minTime/@units"/>)
                     </fo:block>
                 </xsl:if>
@@ -1500,13 +1500,13 @@
                         </fo:table-cell>
                         <fo:table-cell>
                             <fo:block>
-                                <xsl:value-of select="format-number(time, '0.0')"/>&#160;<xsl:value-of select="time/@units"/>
+                                <xsl:value-of select="format-number(time, '0.00')"/>&#160;<xsl:value-of select="time/@units"/>
                             </fo:block>
                             <fo:block>
-                                <xsl:value-of select="format-number(progTime, '0.0')"/>&#160;<xsl:value-of select="progTime/@units"/>
+                                <xsl:value-of select="format-number(progTime, '0.00')"/>&#160;<xsl:value-of select="progTime/@units"/>
                             </fo:block>
                             <fo:block>
-                                <xsl:value-of select="format-number(partTime, '0.0')"/>&#160;<xsl:value-of select="partTime/@units"/>
+                                <xsl:value-of select="format-number(partTime, '0.00')"/>&#160;<xsl:value-of select="partTime/@units"/>
                             </fo:block>
                         </fo:table-cell>
                     </fo:table-row>

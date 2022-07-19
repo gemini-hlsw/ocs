@@ -84,7 +84,7 @@
         <xsl:variable name="minutes" select="sum(/proposal/observations/observation[@band !='Band 3']/time[@units='min'])"/>
         <xsl:variable name="hours"   select="sum(/proposal/observations/observation[@band !='Band 3']/time[@units='hr'])"/>
         <xsl:variable name="nights"  select="sum(/proposal/observations/observation[@band !='Band 3']/time[@units='night'])"/>
-        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 8), '0.0')"/>
+        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 8), '0.00')"/>
     </xsl:template>
 
     <!-- Calculates total observation time for a given blueprint in hrs -->
@@ -93,7 +93,7 @@
         <xsl:variable name="minutes" select="sum(/proposal/observations/observation[@blueprint=$blueprintRef and @band !='Band 3']/time[@units='min'])"/>
         <xsl:variable name="hours"   select="sum(/proposal/observations/observation[@blueprint=$blueprintRef and @band !='Band 3']/time[@units='hr'])"/>
         <xsl:variable name="nights"  select="sum(/proposal/observations/observation[@blueprint=$blueprintRef and @band !='Band 3']/time[@units='night'])"/>
-        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 8), '0.0')"/>
+        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 8), '0.00')"/>
     </xsl:template>
 
     <!-- Calculates total observation time for a given blueprint in hrs -->
@@ -118,7 +118,7 @@
                         <xsl:with-param name="blueprintRef" select="$blueprintList[1]/@id"/>
                     </xsl:call-template>
                 </xsl:variable>
-                <xsl:value-of select="format-number($this_result + $recursive_result, '0.0')"/>
+                <xsl:value-of select="format-number($this_result + $recursive_result, '0.00')"/>
             </xsl:when>
             <xsl:otherwise><xsl:value-of select="0"/></xsl:otherwise>
         </xsl:choose>
@@ -129,7 +129,7 @@
         <xsl:variable name="minutes" select="sum(/proposal/proposalClass//request/time[@units='min'])"/>
         <xsl:variable name="hours"   select="sum(/proposal/proposalClass//request/time[@units='hr'])"/>
         <xsl:variable name="nights"  select="sum(/proposal/proposalClass//request/time[@units='night'])"/>
-        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 10), '0.0')"/>
+        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 10), '0.00')"/>
     </xsl:template>
 
     <!-- Calculates total minimal requested time for all ngos in hours -->
@@ -137,7 +137,7 @@
         <xsl:variable name="minutes" select="sum(/proposal/proposalClass//request/minTime[@units='min'])"/>
         <xsl:variable name="hours"   select="sum(/proposal/proposalClass//request/minTime[@units='hr'])"/>
         <xsl:variable name="nights"  select="sum(/proposal/proposalClass//request/minTime[@units='night'])"/>
-        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 10), '0.0')"/>
+        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 10), '0.00')"/>
     </xsl:template>
 
     <!-- Calculates total accepted/recommended time for all ngos in hours -->
@@ -145,7 +145,7 @@
         <xsl:variable name="minutes" select="sum(/proposal/proposalClass//accept/recommend[@units='min'])"/>
         <xsl:variable name="hours"   select="sum(/proposal/proposalClass//accept/recommend[@units='hr'])"/>
         <xsl:variable name="nights"  select="sum(/proposal/proposalClass//accept/recommend[@units='night'])"/>
-        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 10), '0.0')"/>
+        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 10), '0.00')"/>
     </xsl:template>
 
     <!-- Calculates total minimal accepted/recommended time for all ngos in hours -->
@@ -153,7 +153,7 @@
         <xsl:variable name="minutes" select="sum(/proposal/proposalClass//accept/minRecommend[@units='min'])"/>
         <xsl:variable name="hours"   select="sum(/proposal/proposalClass//accept/minRecommend[@units='hr'])"/>
         <xsl:variable name="nights"  select="sum(/proposal/proposalClass//accept/minRecommend[@units='night'])"/>
-        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 10), '0.0')"/>
+        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 10), '0.00')"/>
     </xsl:template>
 
     <!-- Calculates total time requested for an LP -->
@@ -161,7 +161,7 @@
         <xsl:variable name="minutes" select="sum(/proposal/proposalClass//request/totalLPTime[@units='min'])"/>
         <xsl:variable name="hours"   select="sum(/proposal/proposalClass//request/totalLPTime[@units='hr'])"/>
         <xsl:variable name="nights"  select="sum(/proposal/proposalClass//request/totalLPTime[@units='night'])"/>
-        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 10), '0.0')"/>
+        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 10), '0.00')"/>
     </xsl:template>
 
     <!-- Calculates min total time requested for an LP -->
@@ -169,7 +169,7 @@
         <xsl:variable name="minutes" select="sum(/proposal/proposalClass//request/minTotalLPTime[@units='min'])"/>
         <xsl:variable name="hours"   select="sum(/proposal/proposalClass//request/minTotalLPTime[@units='hr'])"/>
         <xsl:variable name="nights"  select="sum(/proposal/proposalClass//request/minTotalLPTime[@units='night'])"/>
-        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 10), '0.0')"/>
+        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 10), '0.00')"/>
     </xsl:template>
 
     <!-- Calculates observation per site-->
@@ -209,7 +209,7 @@
         <xsl:variable name="minutes" select="sum($observations/time[@units='min'])"/>
         <xsl:variable name="hours"   select="sum($observations/time[@units='hr'])"/>
         <xsl:variable name="nights"  select="sum($observations/time[@units='night'])"/>
-        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 8), '0.0')"/>
+        <xsl:value-of select="format-number($hours + ($minutes div 60) + ($nights * 8), '0.00')"/>
     </xsl:template>
 
     <!-- Creates a nice name for the instrument names used in the xml blueprints -->
