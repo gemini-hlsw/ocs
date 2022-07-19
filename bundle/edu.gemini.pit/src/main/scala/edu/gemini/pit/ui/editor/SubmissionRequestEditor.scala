@@ -31,7 +31,7 @@ object SubmissionRequestEditor {
 
     def value = TimeAmount(Time.text.toDouble, Units.selection.item)
 
-    override def enabled_=(b:Boolean) {
+    override def enabled_=(b:Boolean): Unit = {
       super.enabled = b
       Time.enabled = b
       Units.enabled = b

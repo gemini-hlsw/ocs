@@ -567,7 +567,8 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
     // Band 3 Label
     lazy val band3Label = dvLabel("Consider for Band 3:") {
-      case _: QueueProposalClass         => true
+      case _: QueueProposalClass   => true
+      case s: SpecialProposalClass => s.sub.specialType == SpecialProposalType.GUARANTEED_TIME
       // case _: FastTurnaroundProgramClass => true // REL-1896
     }
 
@@ -593,12 +594,14 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       override def refresh(m: Option[Proposal]): Unit = {
         visible = ~m.map(_.proposalClass).map {
           case _: QueueProposalClass         => true
+          case s: SpecialProposalClass       => s.sub.specialType == SpecialProposalType.GUARANTEED_TIME
           //case _: FastTurnaroundProgramClass => true // REL-1896 Hide it but keep the code
           case _                             => false
         }
         m.map(_.proposalClass).foreach {
           case q: QueueProposalClass         => q.band3request.foreach(r => localRequest = r)
           case f: FastTurnaroundProgramClass => f.band3request.foreach(r => localRequest = r)
+          case s: SpecialProposalClass       => s.band3request.foreach(r => localRequest = r)
           case _                             => // ignore
         }
       }
@@ -614,6 +617,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
             val a = p.proposalClass match {
               case q: QueueProposalClass         => q.band3request.map(_ => Band123).getOrElse(Band12)
               case f: FastTurnaroundProgramClass => f.band3request.map(_ => Band123).getOrElse(Band12)
+              case s: SpecialProposalClass       => s.band3request.map(_ => Band123).getOrElse(Band12)
               case _                             => Band12
             }
             if (a == Band12 && !p.meta.band3OptionChosen) null else a
@@ -645,6 +649,10 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
                   case Band12  => Some(FastTurnaroundProgramClass.band3request.set(f, None))
                   case Band123 => Some(FastTurnaroundProgramClass.band3request.set(f, Some(localRequest)))
                 }
+                case s: SpecialProposalClass => sel match {
+                  case Band12  => Some(SpecialProposalClass.band3request.set(s, None))
+                  case Band123 => Some(SpecialProposalClass.band3request.set(s, Some(localRequest)))
+                }
                 case _                             => None
               }
             } {
@@ -670,6 +678,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           enabled = canEdit
           visible = ~m.map {
             case q: QueueProposalClass         => q.band3request.isDefined
+            case s: SpecialProposalClass       => s.band3request.isDefined
             // case f: FastTurnaroundProgramClass => f.band3request.isDefined //REL-1896
             case _                             => false
           }
@@ -685,9 +694,15 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           (r, _, _) <- SubmissionRequestEditor.open(r, None, Nil, None, button)
         } yield FastTurnaroundProgramClass.band3request.set(ft, Some(r))
 
+        
+        def stEditor: Option[SpecialProposalClass] = for {
+          sp @ SpecialProposalClass(_, _, _, _, Some(r), _, _) <- model
+          (r, _, _) <- SubmissionRequestEditor.open(r, None, Nil, None, button)
+        } yield SpecialProposalClass.band3request.set(sp, Some(r))
+
         // Our action
         action = Action("") {
-          model = queueEditor.orElse(ftEditor).orElse(model)
+          model = queueEditor.orElse(ftEditor).orElse(stEditor).orElse(model)
         }
 
         icon = SharedIcons.ICON_CLOCK
@@ -1083,7 +1098,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       add(label, Center)
 
       // On refresh we update visibility
-      override def refresh(m:Option[ProposalClass]) {
+      override def refresh(m:Option[ProposalClass]): Unit = {
         edit.enabled = canEdit
         visible = ~m.map {
           case _: SpecialProposalClass        => true
@@ -1110,7 +1125,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         val ft = FastTurnaroundProgramClass.sub andThen FastTurnaroundSubmission.request
 
         def spRequest = for {
-            s @ SpecialProposalClass(_, _, _, sub, _, _) <- model
+            s @ SpecialProposalClass(_, _, _, sub, _, _, _) <- model
             (req, _, _)                            <- SubmissionRequestEditor.open(sub.request, None, Nil, None, button)
           } yield Some(sr.set(s, req))
 

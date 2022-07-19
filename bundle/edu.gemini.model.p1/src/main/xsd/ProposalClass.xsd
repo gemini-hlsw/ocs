@@ -116,6 +116,7 @@
             <xsd:extension base="ProposalClass">
                 <xsd:sequence>
                     <xsd:element name="submission" type="SpecialSubmission"/>
+                    <xsd:element name="band3request" type="SubmissionRequest" minOccurs="0" maxOccurs="1"/>
                 </xsd:sequence>
                 <xsd:attribute name="tooOption"   type="TooOption" use="required"/>
                 <xsd:attribute name="jwstSynergy" type="xsd:boolean" use="required"/>
