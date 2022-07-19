@@ -257,13 +257,13 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
       val proposalXml = XML.loadString(result)
       // Check values manually calculated
       // Band 1/2 GN
-      proposalXml must (\\("block") \>~ """11.1 hr\s*""")
+      proposalXml must (\\("block") \>~ """11.10 hr\s*""")
       // Band 1/2 GS
-      proposalXml must (\\("block") \>~ """8.4 hr\s*""")
+      proposalXml must (\\("block") \>~ """8.42 hr\s*""")
       // Band 3 GN
-      proposalXml must (\\("block") \>~ """3.0 hr\s*""")
+      proposalXml must (\\("block") \>~ """3.00 hr\s*""")
       // Band 3 GS
-      proposalXml must (\\("block") \>~ """1.0 hr\s*""")
+      proposalXml must (\\("block") \>~ """1.00 hr\s*""")
     }
     "includes the principal investigator, REL-3151" in {
       val result = transformProposal("proposal_no_too.xml")
