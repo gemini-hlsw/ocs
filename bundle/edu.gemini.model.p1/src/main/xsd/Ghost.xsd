@@ -18,6 +18,19 @@
     <xsd:complexType name="GhostBlueprintNull"/>
 
     <!--
+      A target list contains 0 or more target elements.
+    -->
+    <xsd:complexType name="GhostAsterism">
+        <xsd:sequence>
+            <xsd:choice minOccurs="1" maxOccurs="2">
+                <xsd:element name="sidereal"    type="SiderealTarget"/>
+                <!-- <xsd:element name="nonsidereal" type="NonSiderealTarget"/> -->
+                <!-- <xsd:element name="too" 		type="TooTarget"/> -->
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!--
       GHOST Blueprint
     -->
     <xsd:complexType name="GhostBlueprint">
@@ -26,6 +39,7 @@
                 <xsd:sequence>
                     <xsd:element name="resolutionMode" type="GhostResolutionMode" maxOccurs="1" minOccurs="0"/>
                     <xsd:element name="targetMode"     type="GhostTargetMode"     maxOccurs="1" minOccurs="0"/>
+                    <xsd:element name="asterism"       type="GhostAsterism"       maxOccurs="1" minOccurs="0"/>
                 </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>
