@@ -314,6 +314,7 @@ package object immutable {
     val Single       = M.GhostTargetMode.SINGLE
     val Dual         = M.GhostTargetMode.DUAL
     val TargetAndSky = M.GhostTargetMode.TARGET_AND_SKY
+    val SkyAndTarget = M.GhostTargetMode.SKY_AND_TARGET
   }
 
   type GuidingEvaluation = M.GuidingEvaluation

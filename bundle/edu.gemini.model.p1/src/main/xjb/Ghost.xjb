@@ -28,6 +28,9 @@
             <jxb:bindings node="./xsd:enumeration[@value='Target + Sky']">
                 <jxb:typesafeEnumMember name="TARGET_AND_SKY"/>
             </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Sky + Target']">
+                <jxb:typesafeEnumMember name="SKY_AND_TARGET"/>
+            </jxb:bindings>
         </jxb:bindings>
     </jxb:bindings>
 
