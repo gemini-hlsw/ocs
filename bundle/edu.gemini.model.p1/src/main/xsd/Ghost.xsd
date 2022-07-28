@@ -50,6 +50,7 @@
             <xsd:enumeration value="Single"/>
             <xsd:enumeration value="Dual"/>
             <xsd:enumeration value="Target + Sky"/>
+            <xsd:enumeration value="Sky + Target"/>
         </xsd:restriction>
     </xsd:simpleType>
 </xsd:schema>
