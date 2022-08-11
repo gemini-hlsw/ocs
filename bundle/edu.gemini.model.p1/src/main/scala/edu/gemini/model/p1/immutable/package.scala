@@ -111,6 +111,7 @@ package object immutable {
   object GmosNDisperser extends EnumObject[M.GmosNDisperser] {
     val B1200 = M.GmosNDisperser.B1200_G5301
     val R831  = M.GmosNDisperser.R831_G5302
+    val B480  = M.GmosNDisperser.B480_G5309
     val B600  = M.GmosNDisperser.B600_G5307
     val R600  = M.GmosNDisperser.R600_G5304
     val R400  = M.GmosNDisperser.R400_G5305
