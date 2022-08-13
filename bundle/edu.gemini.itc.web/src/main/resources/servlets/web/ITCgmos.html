@@ -382,8 +382,15 @@
 					<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(This corresponds to the x-direction for spectroscopy.
 					It is unused for imaging.)</li></td>
 			</tr>
+
 			<tr>
-				<td colspan="2">Regions of Interest: <input value="FULL_FRAME" name="BuiltinROI" checked="checked" type="radio" /> Full Frame Readout <input value="CENTRAL_SPECTRUM" name="BuiltinROI" type="radio" /> Central Spectrum: spectroscopy of central 80" FOV  </td>
+				<td colspan="2">Region of Interest:
+					<select name="BuiltinROI" size="1">
+						<option value="FULL_FRAME">Full Frame</option>
+						<option value="CENTRAL_SPECTRUM">Central Spectrum (80")</option>
+						<option value="CCD2">CCD2</option>
+					</select>
+				</td>
 			</tr>
 
 			<tr>
