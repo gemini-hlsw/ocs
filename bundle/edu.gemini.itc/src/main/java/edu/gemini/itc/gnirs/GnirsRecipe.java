@@ -183,7 +183,6 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             final SpecS2N[] specS2Narr = new SpecS2N[_obsDetailParameters.analysisMethod() instanceof IfuSummed ? 1 : sf_list.size()];
 
             while (src_frac_it.hasNext()) {
-                Log.fine("i = " + i);
                 double slitLength = 1;           // Why?
 
                 if (_obsDetailParameters.analysisMethod() instanceof IfuSummed) {
@@ -197,13 +196,6 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                     haloThroughput = halo_src_frac_it.next();
                     slitLength = 1;              // Why?
                 }
-                Log.fine("throughput = " + throughput);
-                Log.fine("slitWidth = " + instrument.getSlitWidth());
-                Log.fine("slitLength = " + slitLength);
-                Log.fine("pixelSize = " + instrument.getPixelSize());
-                Log.fine("grating = " + instrument.getGrating());
-                Log.fine("order = " + instrument.getOrder());
-                Log.fine("disperser = " + instrument.disperser(instrument.getOrder()));
 
                 final Slit slit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
                 final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
