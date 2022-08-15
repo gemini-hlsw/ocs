@@ -283,72 +283,66 @@
 			<tr>
 
 				<td height="25">Camera:
-				<select name="PixelScale" size="1">
-				<option value="PS_015" selected="selected"> 0.15 arcsec/pix</option>
-				<option value="PS_005"> 0.05 arcsec/pix</option>
-				</select></td>
+					<select name="PixelScale" size="1">
+						<option value="PS_015" selected="selected"> 0.15 arcsec/pix</option>
+						<option value="PS_005"> 0.05 arcsec/pix</option>
+					</select>
+				</td>
 
 				<td height="25">Focal plane mask:
-				<select name="SlitWidth" size="1">
-				<option value="SW_1">
-				0.10 arcsec slit</option>
-				<option value="SW_2">
-				0.15 arcsec slit</option>
-				<option value="SW_3">
-
-				0.20 arcsec slit</option>
-				<option selected="selected" value="SW_4">
-				0.30 arcsec slit</option>
-				<option value="SW_5">
-				0.45 arcsec slit</option>
-				<option value="SW_6">
-				0.675 arcsec slit</option>
-
-				<option value="SW_7">
-				1.0 arcsec slit</option>
-
-				<option value="ACQUISITION">
-				imaging</option>
-				</select></td>
+					<select name="SlitWidth" size="1">
+						<option value="SW_1">0.10 arcsec slit</option>
+						<option value="SW_2">0.15 arcsec slit</option>
+						<option value="SW_3">0.20 arcsec slit</option>
+						<option selected="selected" value="SW_4">0.30 arcsec slit</option>
+						<option value="SW_5">0.45 arcsec slit</option>
+						<option value="SW_6">0.675 arcsec slit</option>
+						<option value="SW_7">1.0 arcsec slit</option>
+						<option value="LR_IFU">LR-IFU</option>
+						<option value="HR_IFU">HR-IFU</option>
+						<option value="ACQUISITION">imaging</option>
+					</select>
+				</td>
 			</tr>
+
 			<tr>
 				<td height="25">Grating:
-				<select name="Disperser" size="1">
-
-				<option value="D_10"> 10 l/mm</option>
-				<option value="D_32" selected="selected"> 32 l/mm</option>
-				<option value="D_111"> 111 l/mm</option>
-				<option value="imaging"> none</option>
-				</select></td>
+					<select name="Disperser" size="1">
+						<option value="D_10"> 10 l/mm</option>
+						<option value="D_32" selected="selected"> 32 l/mm</option>
+						<option value="D_111"> 111 l/mm</option>
+						<option value="imaging"> none</option>
+					</select>
+				</td>
 
 				<td height="25">Spectrum central wavelength:
-				<input name="instrumentCentralWavelength" size="5" value=" 2.15" type="text" /> µm</td>
+					<input name="instrumentCentralWavelength" size="5" value=" 2.15" type="text" /> µm
+				</td>
 			</tr>
+
 			<tr>
 				<td height="25">Cross dispersion:
-				<select name="CrossDispersed" size="1">
-				<option value="NO" selected="selected">
-
-				no</option>
-				<option value="SXD">
-				yes</option>
-				</select></td>
+					<select name="CrossDispersed" size="1">
+						<option value="NO" selected="selected">no</option>
+						<option value="SXD">yes</option>
+					</select>
+				</td>
 
 				<td height="25">Filter:
-				<select name="Filter" size="1">
-				<option value="spectroscopy">spectroscopy</option>
-				<option value="none" disabled></option>
-				<option value="Y">Y-MK: 1.03 µm</option>
-				<option value="J">J-MK: 1.25 µm</option>
-				<option value="ORDER_4">H-MK 1.65 µm</option>
-				<option value="K">K-MK: 2.20 µm</option>
-				<option value="H2">H2: 2.12 µm</option>
-				<option value="PAH">PAH: 3.3 µm</option>
-				<option value="H_plus_ND100X">H + ND100X</option>
-				<option value="H2_plus_ND100X">H2 + ND100X</option>
-				</select></td>
+					<select name="Filter" size="1">
+						<option value="spectroscopy">spectroscopy</option>
+						<option value="none" disabled></option>
+						<option value="Y">Y-MK: 1.03 µm</option>
+						<option value="J">J-MK: 1.25 µm</option>
+						<option value="ORDER_4">H-MK 1.65 µm</option>
+						<option value="K">K-MK: 2.20 µm</option>
+						<option value="H2">H2: 2.12 µm</option>
+						<option value="PAH">PAH: 3.3 µm</option>
+						<option value="H_plus_ND100X">H + ND100X</option>
+						<option value="H2_plus_ND100X">H2 + ND100X</option>
+					</select>
+				</td>
 			</tr>
-        </tbody>
 
     </table>
 
@@ -540,29 +534,58 @@
 			</tr>
 
 			<!-- calc method C--><!-- analysis methods-->
-			<input value="1" name="autoSkyAper" type="hidden" />
-			<input value="1" name="userSkyAper" type="hidden" />
 			<tr>
 				<td colspan="2" height="50" valign="bottom"><b>Analysis method:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256#analysis','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
-
+				<input value="1" name="autoSkyAper" type="hidden">
+				<input value="1" name="userSkyAper" type="hidden">
+				<input value="1" name="ifuSkyFibres" type="hidden">
 			</tr>
+
 			<tr>
 				<td><input value="autoAper" name="analysisMethod" checked="checked" type="radio" /></td>
 				<td>Software aperture that gives 'optimum' S/N ratio </td>
 			</tr>
+
 			<tr>
 				<td><input value="userAper" name="analysisMethod" type="radio" /></td>
 				<td>Software aperture of diameter (or slit length) <input name="userAperDiam" size="4" value="2" type="text" /> arcsec </td>
+			</tr>
 
-			</tr>
 			<tr>
-				<td colspan="2" height="50" valign="bottom"><b>Output:</b> </td>
+				<td><input value="singleIFU" name="analysisMethod" type="radio" /></td>
+				<td>IFU: Select an individual element offset by
+					<input name="ifuOffset" size="5" value="0.0" type="text" /> arcsec from the center</td>
 			</tr>
-			<tr>
-				<td colspan="2">For spectroscopy, <input value="AUTO" name="PlotLimits" checked="checked" type="radio" /> autoscale or <input value="USER" name="PlotLimits" type="radio" /> specify
-				limits for plotted spectra (lower wavelength <input name="plotWavelengthL" size="6" value="2.10" type="text" /> micron and upper wavelength <input name="plotWavelengthU" size="6" value="2.20" type="text" /> micron) </td>
 
+			<tr>
+				<td><input value="summedIFU" name="analysisMethod" type="radio" /></td>
+				<td>IFU: Sum multiple elements:
+					<input name="ifuNumX" size="5" value="5" type="text" /> by
+					<input name="ifuNumY" size="5" value="5" type="text" /> apertures
+					<input name="ifuCenterX" size="5" value="0.0" type="hidden" />
+					<input name="ifuCenterY" size="5" value="0.0" type="hidden" /></td>
 			</tr>
+
+			<tr>
+				<td><input value="radialIFU" name="analysisMethod" type="radio" /></td>
+				<td>IFU: Select multiple elements along a radius with offsets from
+					<input name="ifuMinOffset" size="5" value="0.0" type="text" />  to
+					<input name="ifuMaxOffset" size="5" value="1.0" type="text" /> arcsec </td>
+			</tr>
+
+			<tr>
+				<td colspan="2" height="50" valign="bottom"><b>Output:</b> (spectroscopy) </td>
+			</tr>
+
+			<tr>
+				<td><input value="AUTO" name="PlotLimits" checked="checked" type="radio" /></td>
+				<td>Autoscale</td>
+			</tr>
+			<tr><td><input value="USER" name="PlotLimits" type="radio" /></td>
+				<td>Display the range <input name="plotWavelengthL" size="6" value="2.10" type="text" /> to
+					<input name="plotWavelengthU" size="6" value="2.20" type="text" /> microns</td>
+			</tr>
+
 			<tr>
 				<td colspan="2">
 					<p align="right"> <!--<input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" /> -->
