@@ -16,68 +16,44 @@ object VcsFailure {
   /** Indicates that the program has no program id. */
   case object MissingId extends VcsFailure
 
-  val missingId: VcsFailure = MissingId
+  /** Indicates that the given program already exists in the database. */
+  case class IdAlreadyExists(id: SPProgramID) extends VcsFailure
 
   /** Indicates that the given program already exists in the database. */
-  final case class IdAlreadyExists(id: SPProgramID) extends VcsFailure
-
-  def idAlreadyExists(id: SPProgramID): VcsFailure = IdAlreadyExists(id)
-
-  /** Indicates that the given program already exists in the database. */
-  final case class KeyAlreadyExists(id: SPProgramID, key: SPNodeKey) extends VcsFailure
-
-  def keyAlreadyExists(id: SPProgramID, key: SPNodeKey): VcsFailure = KeyAlreadyExists(id, key)
+  case class KeyAlreadyExists(id: SPProgramID, key: SPNodeKey) extends VcsFailure
 
   /** Two distinct programs share the same program id. */
-  final case class IdClash(id: SPProgramID, key0: SPNodeKey, key1: SPNodeKey) extends VcsFailure
-
-  def idClash(id: SPProgramID, key0: SPNodeKey, key1: SPNodeKey): VcsFailure = IdClash(id, key0, key1)
+  case class IdClash(id: SPProgramID, key0: SPNodeKey, key1: SPNodeKey) extends VcsFailure
 
   /** The program associated with the given id could not be found. */
-  final case class NotFound(id: SPProgramID) extends VcsFailure
-
-  def notFound(id: SPProgramID): VcsFailure = NotFound(id)
+  case class NotFound(id: SPProgramID) extends VcsFailure
 
   /** Indicates that the user tried to do something for which he doesn't have
     * permission. */
-  final case class Forbidden(why: String) extends VcsFailure
-
-  def forbidden(why: String): VcsFailure = Forbidden(why)
+  case class Forbidden(why: String) extends VcsFailure
 
   /** Indicates that the program you're trying to commit is out of date with
     * respect to the server's version.  Commit only works when the incoming
     * program is strictly newer than the existing version. */
   case object NeedsUpdate extends VcsFailure
 
-  val needsUpdate: VcsFailure = NeedsUpdate
-
   /** Indicates that the program you're trying to commit has conflicts which
     * must be resolved before committing. */
   case object HasConflict extends VcsFailure
 
-  val hasConflict: VcsFailure = HasConflict
-
   /** Indicates that the local program cannot be merged with the remote
     * program.  For example, because it contains executed observations that
     * would be renumbered. */
-  final case class Unmergeable(msg: String) extends VcsFailure
-
-  def unmergeable(msg: String): VcsFailure = Unmergeable(msg)
+  case class Unmergeable(msg: String) extends VcsFailure
 
   /** Indicates an unexpected problem while performing a vcs operation. */
-  final case class Unexpected(msg: String) extends VcsFailure
-
-  def unexpected(msg: String): VcsFailure = Unexpected(msg)
+  case class Unexpected(msg: String) extends VcsFailure
 
   /** Exception thrown while performing a vcs operation. */
-  final case class VcsException(ex: Throwable) extends VcsFailure
-
-  def vcsException(ex: Throwable): VcsFailure = VcsException(ex)
+  case class VcsException(ex: Throwable) extends VcsFailure
 
   /** User cancelled a vcs operation. */
   case object Cancelled extends VcsFailure
-
-  val cancelled: VcsFailure = Cancelled
 
   def idClash(ex: DBIDClashException): VcsFailure =
     IdClash(ex.id, ex.existingKey, ex.newKey)
