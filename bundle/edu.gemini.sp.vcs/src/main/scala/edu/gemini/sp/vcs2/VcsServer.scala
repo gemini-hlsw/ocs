@@ -209,7 +209,7 @@ class VcsServer(odb: IDBDatabaseService) { vs =>
 
     VcsAction(recordAndLock()) >>
       // catch exceptions in the calculation of `body` itself
-      (try { body } catch { case e: Throwable => VcsFailure.vcsException(e).liftVcs[A] })
+      (try { body } catch { case e: Throwable => VcsFailure.VcsException(e).liftVcs[A] })
         .run
         .onFinish(_ => Task.delay(checkAndUnlock()))
         .liftVcs
