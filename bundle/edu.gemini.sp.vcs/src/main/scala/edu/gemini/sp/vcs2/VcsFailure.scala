@@ -75,7 +75,7 @@ object VcsFailure {
         "Give your program an id and try again."
 
       case KeyAlreadyExists(i,k)              =>
-        s"Program $i cannot be added because a program with the same internal key already exists in the database."
+        s"Program $i cannot be added because a program with the same internal key ($k) already exists in the database."
 
       case IdAlreadyExists(i)                 =>
         s"Program $i cannot be added because a program with the same ID already exists in the database."
