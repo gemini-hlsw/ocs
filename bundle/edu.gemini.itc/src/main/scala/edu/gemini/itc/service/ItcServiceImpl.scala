@@ -117,7 +117,7 @@ class ItcServiceImpl extends ItcService {
 
   private def calculateSpectroscopyCharts(p: ItcParameters): Result =
     p.instrument match {
-      case i: GmosParameters              => spectroscopyResultCharts(new GmosRecipe(p, i))
+      case i: GmosParameters              => spectroscopyResult(new GmosRecipe(p, i), false)
       case _                              => ItcResult.forMessage ("Spectroscopy with this instrument is not supported by ITC.")
 
     }
@@ -131,12 +131,6 @@ class ItcServiceImpl extends ItcService {
   private def spectroscopyResult(recipe: SpectroscopyArrayRecipe, headless: Boolean): Result = {
     val r = recipe.calculateSpectroscopy()
     val s = recipe.serviceResult(r, headless)
-    ItcResult.forResult(s)
-  }
-
-  private def spectroscopyResultCharts(recipe: SpectroscopyArrayRecipe): Result = {
-    val r = recipe.calculateSpectroscopy()
-    val s = recipe.serviceResult(r, false)
     ItcResult.forResult(s)
   }
 

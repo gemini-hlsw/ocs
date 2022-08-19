@@ -67,6 +67,21 @@ sealed trait ItcResult extends Serializable {
 
 }
 
+object ItcResult {
+
+  import edu.gemini.itc.shared.ItcService._
+
+  /** Creates an ITC result in case of an error. */
+  def forException(e: Throwable): Result = ItcError(e.getMessage).left
+
+  /** Creates an ITC result with a single problem/error message. */
+  def forMessage(msg: String): Result = ItcError(msg).left
+
+  /** Creates an ITC result for a result. */
+  def forResult(result: ItcResult): Result = result.right
+
+}
+
 // === IMAGING RESULTS
 
 final case class ItcImagingResult(ccds: List[ItcCcd]) extends ItcResult
@@ -168,21 +183,6 @@ final case class ItcSpectroscopyResult(ccds: List[ItcCcd], chartGroups: List[Spc
 object SpcChartData {
   def apply(chartType: SpcChartType, title: String, xAxisLabel: String, yAxisLabel: String, series: List[SpcSeriesData]) =
     new SpcChartData(chartType, title, ChartAxis(xAxisLabel), ChartAxis(yAxisLabel), series, List())
-}
-
-object ItcResult {
-
-  import edu.gemini.itc.shared.ItcService._
-
-  /** Creates an ITC result in case of an error. */
-  def forException(e: Throwable): Result = ItcError(e.getMessage).left
-
-  /** Creates an ITC result with a single problem/error message. */
-  def forMessage(msg: String): Result = ItcError(msg).left
-
-  /** Creates an ITC result for a result. */
-  def forResult(result: ItcResult): Result = result.right
-
 }
 
 /**
