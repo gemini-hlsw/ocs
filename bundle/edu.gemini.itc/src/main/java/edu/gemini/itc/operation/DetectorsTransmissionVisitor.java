@@ -100,16 +100,27 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
             }
         }
         detectorCcdIndexes.add(finalPixelValue - 1);
+        // detectorCcdIndexes describes the boundaries of the CCDs and looks like [0, 2047, 2115, 4162, 4230, 6277]
         Log.fine("detectorCcdIndexes = " + detectorCcdIndexes);
 
-        // If the user has selected ROI = CCD2 then set the transmission of pixels in CCD1 and CCD3 to zero:
         if (ROI == GmosCommonType.BuiltinROI.CCD2) {
-            Log.fine("Zeroing the transmission of CCDs 1 and 3...");
-            // detectorCcdIndexes describes the boundaries of the CCDs and looks like [0, 2047, 2115, 4162, 4230, 6277]
-            for (int i = detectorCcdIndexes.get(0); i < detectorCcdIndexes.get(1); i++) {
+            Log.fine("Zeroing the transmission of pixels in CCDs 1 and 3...");
+            for (int i = detectorCcdIndexes.get(0); i <= detectorCcdIndexes.get(1); i++) {
                 pixelData[i] = 0.0;
             }
-            for (int i = detectorCcdIndexes.get(4); i < detectorCcdIndexes.get(5); i++) {
+            for (int i = detectorCcdIndexes.get(4); i <= detectorCcdIndexes.get(5); i++) {
+                pixelData[i] = 0.0;
+            }
+
+        } else if (ROI == GmosCommonType.BuiltinROI.CENTRAL_STAMP) {
+            Log.fine("Zeroing the transmission of pixels outside the central stamp...");
+            double ccdCenter = (detectorCcdIndexes.get(3) + detectorCcdIndexes.get(2)) / 2.;
+            int roiStart = (int) (ccdCenter - (ROI.getROIDescription().getValue().getXSize() / 2.0 - 0.5));
+            int roiEnd = (int) (ccdCenter + (ROI.getROIDescription().getValue().getXSize() / 2.0 - 0.5));
+            for (int i = detectorCcdIndexes.get(0); i < roiStart; i++) {
+                pixelData[i] = 0.0;
+            }
+            for (int i = roiEnd + 1; i < detectorCcdIndexes.get(5); i++) {
                 pixelData[i] = 0.0;
             }
         }
