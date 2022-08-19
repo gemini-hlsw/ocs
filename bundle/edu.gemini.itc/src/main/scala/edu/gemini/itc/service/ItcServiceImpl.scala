@@ -60,6 +60,18 @@ class ItcServiceImpl extends ItcService {
     case e: Throwable => ItcResult.forException(e)
   }
 
+  def calculateCharts(p: ItcParameters): Result = try {
+    // execute ITC service call with updated parameters
+    p.observation.calculationMethod match {
+      case _: Imaging       => ItcResult.forMessage ("Imaging not implemented.")
+      case _: Spectroscopy  => calculateSpectroscopyCharts(p)
+    }
+
+  } catch {
+    case e: Throwable => ItcResult.forException(e)
+  }
+
+  // === Imaging
   // === Imaging
 
   private def calculateImaging(p: ItcParameters): Result =
@@ -92,13 +104,20 @@ class ItcServiceImpl extends ItcService {
 
   private def calculateSpectroscopy(p: ItcParameters, headless: Boolean): Result =
     p.instrument match {
-      case i: MichelleParameters          => ItcResult.forMessage ("Spectroscopy not implemented.")
-      case i: TRecsParameters             => ItcResult.forMessage ("Spectroscopy not implemented.")
       case i: Flamingos2Parameters        => spectroscopyResult   (new Flamingos2Recipe(p, i), headless )
       case i: GmosParameters              => spectroscopyResult   (new GmosRecipe(p, i),       headless )
       case i: GnirsParameters             => spectroscopyResult   (new GnirsRecipe(p, i),      headless )
       case i: NifsParameters              => spectroscopyResult   (new NifsRecipe(p, i),       headless )
       case i: NiriParameters              => spectroscopyResult   (new NiriRecipe(p, i),       headless )
+      case _                              => ItcResult.forMessage ("Spectroscopy with this instrument is not supported by ITC.")
+
+    }
+
+  // === Spectroscopy
+
+  private def calculateSpectroscopyCharts(p: ItcParameters): Result =
+    p.instrument match {
+      case i: GmosParameters              => spectroscopyResult(new GmosRecipe(p, i), false)
       case _                              => ItcResult.forMessage ("Spectroscopy with this instrument is not supported by ITC.")
 
     }
@@ -114,7 +133,5 @@ class ItcServiceImpl extends ItcService {
     val s = recipe.serviceResult(r, headless)
     ItcResult.forResult(s)
   }
-
-
 
 }

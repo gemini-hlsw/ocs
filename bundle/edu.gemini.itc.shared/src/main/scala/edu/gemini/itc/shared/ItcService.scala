@@ -67,6 +67,21 @@ sealed trait ItcResult extends Serializable {
 
 }
 
+object ItcResult {
+
+  import edu.gemini.itc.shared.ItcService._
+
+  /** Creates an ITC result in case of an error. */
+  def forException(e: Throwable): Result = ItcError(e.getMessage).left
+
+  /** Creates an ITC result with a single problem/error message. */
+  def forMessage(msg: String): Result = ItcError(msg).left
+
+  /** Creates an ITC result for a result. */
+  def forResult(result: ItcResult): Result = result.right
+
+}
+
 // === IMAGING RESULTS
 
 final case class ItcImagingResult(ccds: List[ItcCcd]) extends ItcResult
@@ -170,21 +185,6 @@ object SpcChartData {
     new SpcChartData(chartType, title, ChartAxis(xAxisLabel), ChartAxis(yAxisLabel), series, List())
 }
 
-object ItcResult {
-
-  import edu.gemini.itc.shared.ItcService._
-
-  /** Creates an ITC result in case of an error. */
-  def forException(e: Throwable): Result = ItcError(e.getMessage).left
-
-  /** Creates an ITC result with a single problem/error message. */
-  def forMessage(msg: String): Result = ItcError(msg).left
-
-  /** Creates an ITC result for a result. */
-  def forResult(result: ItcResult): Result = result.right
-
-}
-
 /**
  * Service interface for ITC calculations.
  */
@@ -198,6 +198,8 @@ trait ItcService {
    * @param headless pass `true` for headless applications that do not require chart data.
    */
   def calculate(p: ItcParameters, headless: Boolean): Result
+
+  def calculateCharts(p: ItcParameters): Result
 
 }
 
