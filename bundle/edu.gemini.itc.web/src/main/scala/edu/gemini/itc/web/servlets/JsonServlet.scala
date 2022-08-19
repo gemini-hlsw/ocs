@@ -47,3 +47,41 @@ class JsonServlet extends HttpServlet with ItcParametersCodec with ItcResultCode
   }
 
 }
+
+/**
+ * Servlet that accepts a JSON-encoded `ItcParameters` as its POST payload 
+ * and responds with a JSON-encoded `ItcResult` on success, or `SC_BAD_REQUEST` with
+ * an error message on failure. JSON codecs are defined in package `edu.gemini.itc.web.json`.
+ */
+class JsonChartServlet extends HttpServlet with ItcParametersCodec with ItcResultCodec {
+
+  override def doPost(req: HttpServletRequest, res: HttpServletResponse) = {
+
+    val itc: ItcService = new ItcServiceImpl
+
+    // Read the body, which with some luck is a JSON string
+    val enc  = Option(req.getCharacterEncoding).getOrElse("UTF-8")
+    val src  = Source.fromInputStream(req.getInputStream, enc)
+    val json = try src.mkString finally src.close
+
+    // Calculate the chart
+    val result: Either[String, ItcResult] =
+      for {
+        itcReq <- Parse.decodeEither[ItcParameters](json)
+        itcRes <- itc.calculateCharts(itcReq).toEither.leftMap(_.msg)
+      } yield itcRes
+
+    // Send our result back.
+    result match {
+      case Left(err)     => res.sendError(SC_BAD_REQUEST, err)
+      case Right(itcRes) =>
+        res.setStatus(SC_OK)
+        res.setContentType("text/json; charset=UTF-8")
+        val writer = res.getWriter
+        writer.write(itcRes.asJson.spaces2)
+        writer.close
+    }
+
+  }
+
+}

@@ -7,6 +7,7 @@ import edu.gemini.itc.base.Result;
 import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.gnirs.Gnirs;
 import edu.gemini.itc.gnirs.GnirsRecipe;
+import edu.gemini.itc.gnirs.IFUComponent;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.gemini.gnirs.*;
@@ -16,6 +17,7 @@ import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 import scala.Option;
 
 import java.io.PrintWriter;
+import java.util.logging.Logger;
 import java.util.UUID;
 
 /**
@@ -23,6 +25,7 @@ import java.util.UUID;
  */
 public final class GnirsPrinter extends PrinterBase implements OverheadTablePrinter.PrinterWithOverhead {
 
+    private static final Logger Log = Logger.getLogger(GnirsPrinter.class.getName());
     private final GnirsParameters instr;
     private final PlottingDetails pdp;
     private final GnirsRecipe recipe;
@@ -86,7 +89,7 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
         _println("<p style=\"page-break-inside: never\">");
 
         if (instrument.XDisp_IsUsed()) {
-
+            Log.fine("Generating XD output...");
             _printImageLink(id, SignalChart.instance(), pdp);
             _println("");
 
@@ -100,24 +103,24 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
             _printImageLink(id, S2NChart.instance(), pdp);
             _println("");
 
-
             for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
                 _printFileLink(id, FinalS2NData.instance(), 0, i, "Order " + (i+3));
-
             }
 
         } else {
+            Log.fine("Generating non-XD (long-slit and IFU) output...");
+            for (int i = 0; i < result.specS2N().length; i++) {
+                // _println("<p style=\"page-break-inside: never\">");  // causes tests to fail
+                _printImageLink(id, SignalChart.instance(),   i, pdp);
+                _println("");
+                _printFileLink(id, SignalData.instance(),     i);
+                _printFileLink(id, BackgroundData.instance(), i);
+                _printImageLink(id, S2NChart.instance(),      i, pdp);
+                _println("");
+                _printFileLink(id, SingleS2NData.instance(),  i);
+                _printFileLink(id, FinalS2NData.instance(),   i);
+            }
 
-            _printImageLink(id, SignalChart.instance(), pdp);
-            _println("");
-
-            _printFileLink(id, SignalData.instance());
-            _printFileLink(id, BackgroundData.instance());
-            _printImageLink(id, S2NChart.instance(), pdp);
-            _println("");
-
-            _printFileLink(id, SingleS2NData.instance());
-            _printFileLink(id, FinalS2NData.instance());
         }
 
         printConfiguration(result.parameters(), instrument, result.aoSystem(), iqAtSource);
@@ -190,11 +193,13 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
         s += "\n";
 
         if (p.observation().calculationMethod() instanceof Spectroscopy) {
+
             if (instrument.XDisp_IsUsed())
                 s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelengthXD());
             else
                 s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelength());
             s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + " arcsec\n";
+
             if (instrument.XDisp_IsUsed()) {
                 s += String.format("Pixel Size in Spectral Direction(Order 3): %.3f nm\n", instrument.getGratingDispersion() / 3);
                 s += String.format("Pixel Size in Spectral Direction(Order 4): %.3f nm\n", instrument.getGratingDispersion() / 4);
@@ -202,10 +207,26 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
                 s += String.format("Pixel Size in Spectral Direction(Order 6): %.3f nm\n", instrument.getGratingDispersion() / 6);
                 s += String.format("Pixel Size in Spectral Direction(Order 7): %.3f nm\n", instrument.getGratingDispersion() / 7);
                 s += String.format("Pixel Size in Spectral Direction(Order 8): %.3f nm\n", instrument.getGratingDispersion() / 8);
+
+            } else if (instrument.isIfuUsed()) {
+                if (instrument.getIFUMethod() instanceof IfuSingle) {
+                    s += "with a single IFU element at " + instrument.getIFUOffset() + " arcsecs.";
+                } else if (instrument.getIFUMethod() instanceof IfuSummed) {
+                    s += String.format("with multiple summed IFU elements arranged in a " +
+                            instrument.getIFUNumX() + "x" + instrument.getIFUNumY() +
+                            " (%.3f\"x%.3f\") grid.",
+                            instrument.getIFUNumX() * IFUComponent.ifuElementSize,
+                            instrument.getIFUNumY() * IFUComponent.ifuElementSize);
+                } else {
+                    s += "with multiple IFU elements arranged from " +
+                            instrument.getIFUMinOffset() + " to " + instrument.getIFUMaxOffset() + " arcsecs.";
+                }
+
             } else {
-                s += String.format("Pixel Size in Spectral Direction: %.3f nm\n", instrument.getGratingDispersion() / instrument.getOrder());
+                s += String.format("Pixel Size in Spectral Direction: %.3f nm\n",
+                        instrument.getGratingDispersion() / instrument.getOrder());
             }
-        } else {
+        } else {  // Imaging
             s += "Pixel Size: " + instrument.getPixelSize() + " arcsec\n";
         }
         return s;
