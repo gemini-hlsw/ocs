@@ -14,7 +14,8 @@ import scalaz._, Scalaz._
  * supported) and responds with a JSON-encoded `ItcResult` on success, or `SC_BAD_REQUEST` with
  * an error message on failure. JSON codecs are defined in package `edu.gemini.itc.web.json`.
  */
-class JsonServlet(versionToken: String = "") extends HttpServlet with ItcParametersCodec with ItcResultCodec {
+class JsonServlet(versionToken: String) extends HttpServlet with ItcParametersCodec with ItcResultCodec {
+  def this() = this("")
 
   override def doPost(req: HttpServletRequest, res: HttpServletResponse) = {
 
@@ -59,6 +60,7 @@ class JsonServlet(versionToken: String = "") extends HttpServlet with ItcParamet
  * an error message on failure. JSON codecs are defined in package `edu.gemini.itc.web.json`.
  */
 class JsonChartServlet(versionToken: String = "") extends HttpServlet with ItcParametersCodec with ItcResultCodec {
+  def this() = this("")
 
   override def doPost(req: HttpServletRequest, res: HttpServletResponse) = {
 
