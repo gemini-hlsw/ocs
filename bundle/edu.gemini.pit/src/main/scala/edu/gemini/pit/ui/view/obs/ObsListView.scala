@@ -59,8 +59,9 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
     m.foreach {p =>
 
       tabEnabled = band == Band.BAND_1_2 || (p.proposalClass match {
-        case q:QueueProposalClass         => q.band3request.isDefined
-        case f:FastTurnaroundProgramClass => f.band3request.isDefined
+        case q: QueueProposalClass         => q.band3request.isDefined
+        case f: FastTurnaroundProgramClass => f.band3request.isDefined
+        case s: SpecialProposalClass       => s.band3request.isDefined && s.sub.specialType == SpecialProposalType.GUARANTEED_TIME
         case _                    => false
       }) || p.observations.exists(o => o.band == Band.BAND_3 && o.nonEmpty)
 
