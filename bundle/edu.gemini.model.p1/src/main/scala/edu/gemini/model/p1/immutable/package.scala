@@ -240,7 +240,8 @@ package object immutable {
 
   type GnirsDisperser = M.GnirsDisperser
   object GnirsDisperser extends EnumObject[M.GnirsDisperser] {
-    val D_10 = M.GnirsDisperser.D_10
+    val D_10  = M.GnirsDisperser.D_10
+    val D_111 = M.GnirsDisperser.D_111
   }
 
   type GnirsFilter = M.GnirsFilter
