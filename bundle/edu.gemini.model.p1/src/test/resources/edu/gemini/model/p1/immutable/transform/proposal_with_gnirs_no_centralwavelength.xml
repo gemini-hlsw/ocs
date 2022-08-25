@@ -29,7 +29,7 @@
                 <altair>
                     <lgs pwfs1="false"/>
                 </altair>
-                <pixelScale>0.15&quot;/pix</pixelScale>
+                <pixelScale>0.25&quot;/pix</pixelScale>
                 <disperser>111 l/mm grating</disperser>
                 <crossDisperser>SXD</crossDisperser>
                 <fpu>0.15 arcsec</fpu>

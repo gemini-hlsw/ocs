@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2022.2.1">
+    <meta band3optionChosen="false" overrideAffiliate="false"/>
+    <semester year="2022" half="B"/>
+    <title></title>
+    <abstract></abstract>
+    <scheduling></scheduling>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>John</firstName>
+            <lastName>Doe</lastName>
+            <status>PhD</status>
+            <gender>None selected</gender>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets/>
+    <conditions/>
+    <blueprints>
+        <gnirs>
+            <spectroscopy id="blueprint-0">
+                <name>GNIRS Spectroscopy  0.15"/pix 111 l/mm grating None 0.10 arcsec &gt;=2.5um</name>
+                <visitor>false</visitor>
+                <altair>
+                    <none/>
+                </altair>
+                <pixelScale>0.15"/pix</pixelScale>
+                <disperser>111 l/mm grating</disperser>
+                <crossDisperser>None</crossDisperser>
+                <fpu>0.10 arcsec</fpu>
+                <centralWavelength>&gt;=2.5um</centralWavelength>
+            </spectroscopy>
+        </gnirs>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" blueprint="blueprint-0"/>
+    </observations>
+    <proposalClass>
+        <classical jwstSynergy="true" key="7857101a-1301-4ec1-9c42-4ef2cb9aa3c5">
+            <ngo partnerLead="investigator-0">
+                <request>
+                    <time units="hr">3.0</time>
+                    <minTime units="hr">4.0</minTime>
+                </request>
+                <partner>br</partner>
+            </ngo>
+            <multiFacility>
+                <geminiTimeRequired>
+                    <site>Gemini North</site>
+                    <instrument>GNIRS</instrument>
+                    <required>false</required>
+                </geminiTimeRequired>
+                <aeonMode>false</aeonMode>
+            </multiFacility>
+            <visitor ref="investigator-0"/>
+        </classical>
+    </proposalClass>
+</proposal>

@@ -227,7 +227,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     }
 
     // The proposal class combo is always visible
-    object proposalClass extends ComboBox(ProposalClassSelection.values.toSeq) with Bound.Self[Proposal] {
+    object proposalClass extends ComboBox(ProposalClassSelection.values.filterNot(_ == ProposalClassSelection.Classical).toSeq) with Bound.Self[Proposal] {
 
       selection.reactions += {
         case SelectionChanged(_) =>
