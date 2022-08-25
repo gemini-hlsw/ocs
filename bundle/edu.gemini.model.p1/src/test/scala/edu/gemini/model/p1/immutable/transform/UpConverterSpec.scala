@@ -20,7 +20,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have size 4
+          changes must have size 5
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
 
           val proposal = ProposalIo.read(result.toString())
@@ -31,7 +31,6 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           proposal.investigators.all must have size 1
           proposal.targets must beEmpty
           proposal.conditions must beEmpty
-          proposal.blueprints must have size 1
           proposal.observations must have size 2
           val isQueue = proposal.proposalClass match {
             case _: QueueProposalClass => true
@@ -55,7 +54,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
         case ConversionResult(transformed, from, changes, root) =>
           transformed must beTrue
           from must beEqualTo(Semester(2022, SemesterOption.B))
-          changes must have length 4
+          changes must have length 5
       }
 
     }
@@ -587,7 +586,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 8
+          changes must have length 9
           changes must contain("GNIRS observation doesn't have a central wavelength range, assigning to '< 2.5um'")
           // Check that the centralWavelength node is added
           result must \\("centralWavelength") \> "< 2.5um"

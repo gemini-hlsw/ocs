@@ -190,7 +190,23 @@ case object SemesterConverter2022BTo2023A extends SemesterConverter {
       }
       StepResult("Classical proposal converted to queue", <proposalClass>{ClassicalTransformer.transform(ns)}</proposalClass>).successNel
   }
-  override val transformers: List[TransformFunction] = List(upgradeClassical)
+
+  def removeGNIRSRedCameraBlueprint: TransformFunction = {
+    val msg = """The original proposal contained a GNIRS observation using the red-camera and pixel scale 0.15". This combination has been removed"""
+    val transform: TransformFunction = {
+      case p @ <blueprints>{ns @ _*}</blueprints> if (p \\ "gnirs").nonEmpty =>
+        // Remove nodes that match the instrument with the specific configuration
+        val filtered = ns.filter{n =>
+          val gnirsSpec = (n \\ "gnirs" \\ "spectroscopy")
+          val ps = gnirsSpec.headOption.map(_ \\ "pixelScale").exists(_.text == """0.15"/pix""")
+          val cw = gnirsSpec.headOption.map(_ \\ "centralWavelength").exists(_.text == ">=2.5um")
+          !(ps && cw)
+        }
+        StepResult(msg, <blueprints>{filtered}</blueprints>).successNel
+    }
+    transform
+  }
+  override val transformers: List[TransformFunction] = List(upgradeClassical, removeGNIRSRedCameraBlueprint)
 }
 
 /**
