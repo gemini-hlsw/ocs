@@ -11,9 +11,9 @@ object Gnirs {
 
   class AdaptiveOpticsNode extends SingleSelectNode[Unit, Altair, Altair](()) with AltairNode {
     override val allGuideStarTypes = false
-    def apply(a: Altair) = Left(new PixelScaleNode(a))
+    def apply(a:Altair) = Left(new PixelScaleNode(a))
     def unapply = {
-      case b: GnirsBlueprintBase => b.altair
+      case b:GnirsBlueprintBase => b.altair
     }
   }
 
@@ -21,7 +21,7 @@ object Gnirs {
     val title = "Pixel Scale"
     val description = "Please select pixel scale."
     val choices = GnirsPixelScale.values.toList
-    def apply(ps: GnirsPixelScale) = Left(new ModeNode((a, ps)))
+    def apply(ps:GnirsPixelScale) = Left(new ModeNode((a, ps)))
     
     override def default = a match {
       case AltairNone => Some(GnirsPixelScale.PS_015)
@@ -29,7 +29,7 @@ object Gnirs {
     }
     
     def unapply = {
-      case b: GnirsBlueprintBase => b.pixelScale
+      case b:GnirsBlueprintBase => b.pixelScale
     }
   }
 
@@ -41,8 +41,8 @@ object Gnirs {
       case Spectroscopy => Left(new DisperserNode(s))
     }
     def unapply = {
-      case _: GnirsBlueprintImaging      => Imaging
-      case _: GnirsBlueprintSpectroscopy => Spectroscopy
+      case _:GnirsBlueprintImaging      => Imaging
+      case _:GnirsBlueprintSpectroscopy => Spectroscopy
     }
   }
 
@@ -50,9 +50,9 @@ object Gnirs {
     val title = "Filters"
     val description = "Please select an imaging filter."
     val choices = GnirsFilter.values.toList
-    def apply(f: GnirsFilter) = Right(GnirsBlueprintImaging(s._1, s._2, f))
+    def apply(f:GnirsFilter) = Right(GnirsBlueprintImaging(s._1, s._2, f))
     def unapply = {
-      case b: GnirsBlueprintImaging => b.filter
+      case b:GnirsBlueprintImaging => b.filter
     }
   }
 
@@ -61,11 +61,11 @@ object Gnirs {
     val description = "Please select a disperser."
     def choices = s._2 match {
       case GnirsPixelScale.PS_005 => GnirsDisperser.values.toList
-      case GnirsPixelScale.PS_015 => GnirsDisperser.values.filterNot(f => f == GnirsDisperser.D_111 || f == GnirsDisperser.D_10).toList
+      case GnirsPixelScale.PS_015 => GnirsDisperser.values.filterNot(_ == GnirsDisperser.D_10).toList
     }
-    def apply(d: GnirsDisperser) = Left(new CrossDisperserNode((s._1, s._2, d)))
+    def apply(d:GnirsDisperser) = Left(new CrossDisperserNode((s._1, s._2, d)))
     def unapply = {
-      case b: GnirsBlueprintSpectroscopy => b.disperser
+      case b:GnirsBlueprintSpectroscopy => b.disperser
     }
   }
 
