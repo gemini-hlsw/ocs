@@ -167,7 +167,30 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter supports migrating to 2023A
  */
 case object SemesterConverter2022BTo2023A extends SemesterConverter {
-  override val transformers: List[TransformFunction] = Nil
+  // REL-4175 Convert classical to queue
+  val upgradeClassical: TransformFunction = {
+    case p @ <proposalClass>{ns @ _*}</proposalClass> if (p \ "classical").nonEmpty =>
+      object ClassicalTransformer extends BasicTransformer {
+        override def transform(n : xml.Node): xml.NodeSeq = n match {
+          case s @ <classical>{ns @ _*}</classical>
+             if s.attribute("key").isDefined    =>
+            if (s.attribute("jwstSynergy").isDefined)
+              <queue key={s.attribute("key")} jwstSynergy={s.attribute("jwstSynergy")} tooOption="None">{ns}</queue>
+            else
+              <queue key={s.attribute("key")} jwstSynergy="false" tooOption="None">{ns}</queue>
+          case s @ <classical>{ns @ _*}</classical> =>
+            if (s.attribute("jwstSynergy").isDefined)
+              <queue jwstSynergy={s.attribute("jwstSynergy")} tooOption="None">{ns}</queue>
+            else
+              <queue jwstSynergy="false" tooOption="None">{ns}</queue>
+          case elem: xml.Elem                   =>
+            elem.copy(child = elem.child.flatMap(transform))
+          case _                                => n
+        }
+      }
+      StepResult("Classical proposal converted to queue", <proposalClass>{ClassicalTransformer.transform(ns)}</proposalClass>).successNel
+  }
+  override val transformers: List[TransformFunction] = List(upgradeClassical)
 }
 
 /**
