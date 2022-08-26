@@ -193,14 +193,23 @@ case object SemesterConverter2022BTo2023A extends SemesterConverter {
 
   def removeGNIRSRedCameraBlueprint: TransformFunction = {
     val msg = """The original proposal contained a GNIRS observation using the red-camera and pixel scale 0.15". This combination has been removed"""
+    // Remove nodes that match the instrument with the specific configuration
+    def shouldRemove(ns: Seq[scala.xml.Node]): Boolean =
+      ns.exists{(n: scala.xml.Node) =>
+        val gnirsSpec = (n \\ "gnirs" \\ "spectroscopy")
+        val ps = gnirsSpec.headOption.map(_ \\ "pixelScale").exists(_.text == """0.15"/pix""")
+        val cw = gnirsSpec.headOption.map(_ \\ "centralWavelength").exists(_.text == ">=2.5um")
+        ps && cw
+      }
+
     val transform: TransformFunction = {
-      case p @ <blueprints>{ns @ _*}</blueprints> if (p \\ "gnirs").nonEmpty =>
+      case p @ <blueprints>{ns @ _*}</blueprints> if (p \\ "gnirs").nonEmpty && shouldRemove(ns) =>
         // Remove nodes that match the instrument with the specific configuration
-        val filtered = ns.filter{n =>
+        val filtered = ns.filterNot {n =>
           val gnirsSpec = (n \\ "gnirs" \\ "spectroscopy")
           val ps = gnirsSpec.headOption.map(_ \\ "pixelScale").exists(_.text == """0.15"/pix""")
           val cw = gnirsSpec.headOption.map(_ \\ "centralWavelength").exists(_.text == ">=2.5um")
-          !(ps && cw)
+          ps && cw
         }
         StepResult(msg, <blueprints>{filtered}</blueprints>).successNel
     }
