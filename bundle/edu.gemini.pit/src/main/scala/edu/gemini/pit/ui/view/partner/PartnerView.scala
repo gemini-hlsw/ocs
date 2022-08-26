@@ -126,6 +126,8 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
       val b3 = m.flatMap(_.proposalClass match {
         case q: QueueProposalClass => q.band3request.map(r => (r.time.hours, r.minTime.hours))
+        case s: SpecialProposalClass if s.sub.specialType == SpecialProposalType.GUARANTEED_TIME => 
+          s.band3request.map(r => (r.time.hours, r.minTime.hours))
         case _                     => None
       })
 
