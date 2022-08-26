@@ -586,7 +586,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 9
+          changes must have length 8
           changes must contain("GNIRS observation doesn't have a central wavelength range, assigning to '< 2.5um'")
           // Check that the centralWavelength node is added
           result must \\("centralWavelength") \> "< 2.5um"
