@@ -113,7 +113,7 @@
             <!-- What is our band 3 setting? -->
             <xsl:variable name="band3">
                 <xsl:choose>
-                    <xsl:when test="proposalClass/queue/band3request">Yes</xsl:when>
+                    <xsl:when test="proposalClass/*/band3request">Yes</xsl:when>
                     <xsl:otherwise>No</xsl:otherwise>
                 </xsl:choose>
             </xsl:variable>

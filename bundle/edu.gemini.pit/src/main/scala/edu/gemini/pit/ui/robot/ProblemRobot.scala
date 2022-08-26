@@ -581,6 +581,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       o <- p.nonEmptyObservations
       if o.band == Band.BAND_3 && (p.proposalClass match {
         case q: QueueProposalClass if q.band3request.isDefined => false
+        case s: SpecialProposalClass if s.band3request.isDefined && s.sub.specialType == SpecialProposalType.GUARANTEED_TIME => false
         case _                                                 => true
       })
     } yield {
