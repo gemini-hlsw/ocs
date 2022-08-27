@@ -148,6 +148,11 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
     add(label, BorderPanel.Position.North)
     add(tools, BorderPanel.Position.Center)
 
+    def sumOfBand3(p: Proposal, b1: Double): String = {
+      val b3 = p.observations.filter(_.band == Band.BAND_3).flatMap(_.totalTime).map(_.hours).sum
+      "Sum observation times: %3.2f hr | Sum Band 3 times: %3.2f hr".format(b1, b3)
+    }
+
     object label extends Label with Bound[Proposal, List[Observation]] {
       val lens = Proposal.observations
       horizontalAlignment = Alignment.Left
@@ -162,8 +167,9 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band) extends BorderPanel with
           val b1 = p.observations.filter(_.band == Band.BAND_1_2).flatMap(_.totalTime).map(_.hours).sum
           p.proposalClass match {
             case q:QueueProposalClass if q.band3request.isDefined =>
-              val b3 = p.observations.filter(_.band == Band.BAND_3).flatMap(_.totalTime).map(_.hours).sum
-              "Sum observation times: %3.2f hr | Sum Band 3 times: %3.2f hr".format(b1, b3)
+              sumOfBand3(p, b1)
+            case s:SpecialProposalClass if s.band3request.isDefined && s.sub.specialType == SpecialProposalType.GUARANTEED_TIME =>
+              sumOfBand3(p, b1)
             case _ =>
               "Sum observation times: %3.2f hr".format(b1)
           }
