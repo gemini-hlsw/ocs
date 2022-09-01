@@ -1,0 +1,17 @@
+#name
+GHOST
+#Starting wavelength (nm)
+300
+#Ending wavelength (nm)
+1000
+#Sampling (nm)
+#0.005
+0.2
+#Background filename
+ghost_background.dat
+#Plate Scale 1.64 (arcsec/mm) --> 0.02459 arcsec/pix
+1.64
+#Read Noise
+2.3
+#Dark Current per pixel per second
+0.0019

@@ -114,6 +114,7 @@ public final class WaterTransmissionVisitor {
                         + file_name + _transmissionCategory + _airmassCategory + ITCConstants.DATA_SUFFIX;
         }
 
+        System.out.println("***** ***** Water name " + name);
         return new TransmissionElement(name);
 
     }

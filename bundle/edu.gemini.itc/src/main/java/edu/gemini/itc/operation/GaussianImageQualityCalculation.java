@@ -9,7 +9,7 @@ public class GaussianImageQualityCalculation implements ImageQualityCalculatable
 
     public GaussianImageQualityCalculation(final double fwhm) {
         this.im_qual = fwhm;
-        Log.fine(String.format("Image quality = %.5f arcsec", im_qual));
+        Log.info(String.format("**** Image quality = %.5f arcsec", im_qual));
     }
 
     public void calculate() {}

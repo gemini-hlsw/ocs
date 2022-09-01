@@ -29,7 +29,7 @@ public class ImageQualityCalculation implements ImageQualityCalculatable {
     public void calculate() {
         ArraySpectrum im_qual_model = new DefaultArraySpectrum(im_qual_model_file);
         im_qual = im_qual_model.getY(effectiveWavelength) * (Math.pow(airmass, 0.6));
-        Log.fine(String.format("Image quality = %.5f arcsec at %.1f nm and airmass = %.2f", im_qual, effectiveWavelength, airmass));
+        Log.info(String.format("ImageQualityCalculation Image quality = %.5f arcsec at %.1f nm and airmass = %.2f", im_qual, effectiveWavelength, airmass));
     }
 
     public double getImageQuality() {

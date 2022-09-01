@@ -48,14 +48,17 @@ public abstract class GratingOptics extends TransmissionElement implements Dispe
     }
 
     public double getGratingResolvingPower() {
+        System.out.println("resolvingPower, "+ gratingName + "  blaze: " + data.apply(gratingName).resolvingPower());
         return data.apply(gratingName).resolvingPower();
     }
 
     public double getGratingBlaze() {
+        System.out.println("getGratingBlaze, "+ gratingName + "  blaze: " + data.apply(gratingName).blaze());
         return data.apply(gratingName).blaze();
     }
 
     public double resolutionHalfArcsecSlit() {
+        System.out.println("resolutionHalfArcsecSlit, "+ gratingName + "  resolution: " + data.apply(gratingName).resolution());
         return data.apply(gratingName).resolution();
     }
 

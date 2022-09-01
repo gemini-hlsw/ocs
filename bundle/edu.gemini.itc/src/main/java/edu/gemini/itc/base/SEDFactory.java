@@ -217,6 +217,8 @@ public final class SEDFactory {
             }
         }
 
+        //System.out.println("sed-Start: " + sed.getStart() + " sedEnd: " + sed.getEnd() + " instrStart " + instrument.getObservingStart() + " inst-end: " + instrument.getObservingEnd());
+
         // any sed except BBODY and ELINE have normalization regions
         if (!(sdp.distribution() instanceof EmissionLine) && !(sdp.distribution() instanceof BlackBody)) {
             if (sed.getStart() > start || sed.getEnd() < end) {
@@ -260,6 +262,7 @@ public final class SEDFactory {
                 odp.wv(),
                 odp.airmass(),
                 getWater(instrument));
+
         sed.accept(water);
 
         // Background spectrum is introduced here.
@@ -305,10 +308,24 @@ public final class SEDFactory {
         // background spectra.
         // input: instrument, source and background SED
         // output: total flux of source and background.
+
+        double[][] data = sed.getData();
+
         if (!(instrument instanceof Gsaoi) && !(instrument instanceof Niri) && !(instrument instanceof Gnirs)) {
             // TODO: for any instrument other than GSAOI and NIRI convolve here, why?
             instrument.convolveComponents(sed);
         }
+        /*double[][] data2 = sed.getData();
+        System.out.println("**** sed   beforeConvolveEleemnt   afterConvolveElement **** ");
+        for (int i = 0; i < data[0].length; i++) {
+            if (data[0][i] > 500 && data[0][i] < 510)
+                System.out.println(data[0][i] + " -> " + data[1][i] + ";  "+ data2[1][i] );
+        }
+
+        System.out.println("******************************************************** ");
+
+         */
+
         instrument.convolveComponents(sky);
 
         // TODO: AO (FOR NIFS DONE AT THE VERY END, WHY DIFFERENT FROM GSAOI/NIRI?)

@@ -22,14 +22,7 @@ ocsAppManifest := {
     configs = List(
       common(v), // note, each config extends xxx_credentials, defined in $TOP/project/OcsCredentials.scala
         with_gogo(v),
-          rnorris(v),
-          swalker(v),
-          jluhrs(v),
           cquiroz(v),
-          sraaphorst(v),
-          anunez(v),
-          astephens(v),
-          osmirnova(v),
           with_remote_gogo(v),
             odbtest(v),
               gsodbtest(v),

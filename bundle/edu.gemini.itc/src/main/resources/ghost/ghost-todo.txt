@@ -1,0 +1,62 @@
+- In the SpecS2NSlitVisitor.java the resample take in account the dispersion value, What value should we use ?
+- Could you send the commision result of the observations to compare with the ITC?
+- What about the IFR_trans.m. This is only used in the signal and not in the sky. The IFR_trans.m function implies a 30 % of the SNR when the seeing (FWHM) is greater 1.  
+- The slitLength should be different for the signal and the backouground ? I mean in the context of the nSkyMicrolens selected by the user.
+- Size of one fiber in pixel to change the code in the Ghost.java, function getSlitLength
+- It is necessary to change the grantingDispersionClass to use the Venu file. 
+- wellDepth -> I think this value is only necessary to implement the well saturation. The same happens with the adc saturation limit (gain in this case). a
+
+
+
+STANDARD nSkyMicrolens: 10  slitLength: 8.1
+STANDARD Sky nSkyMicrolens: 10  slitLength: 27.0
+getSlitLength 18.900000000000002
+
+STANDARD nSkyMicrolens: 3  slitLength: 8.1
+STANDARD Sky nSkyMicrolens: 3  slitLength: 8.100000000000001
+getSlitLength 18.900000000000002
+
+
+Aug 30, 2022 5:56:14 PM edu.gemini.itc.operation.ImageQualityCalculation calculate
+INFO: ImageQualityCalculation Image quality = 1.06354 arcsec at 500.0 nm and airmass = 1.50
+STANDARD nSkyMicrolens: 3  slitLength: 0.0
+STANDARD Sky nSkyMicrolens: 3  slitLength: 8.100000000000001 spatialBinning: 1
+resolutionnnnnn: STANDARD
+Resolution: 0.3845618002368732 one: 0.054937400033839026
+resolutionnnnnn: STANDARD
+#######  0.32 area: 4.1983999999999995 imQuality: 1.063539462618603
+resolutionHalfArcsecSlit, echelle  resolution: 0.01027
+resolutionHalfArcsecSlit, echelle  resolution: 0.01027
+#######  resElement: 0.0065728 backgroundResElement: 0.0065728 resElementData: 0.032864 backgroundResElementData: 0.032864
+Aug 30, 2022 5:56:14 PM edu.gemini.itc.operation.SpecS2NSlitVisitor calculateS2N
+INFO: Dark noise = 0.0019 * 8 pix * 600.0 sec = 9.12
+Aug 30, 2022 5:56:14 PM edu.gemini.itc.operation.SpecS2NSlitVisitor calculateS2N
+INFO: Read noise = 2.3^2 * 8 pix = 42.31999999999999
+Aug 30, 2022 5:56:14 PM edu.gemini.itc.operation.SpecS2NSlitVisitor calculateS2N
+INFO: haloIsUsed: false
+Aug 30, 2022 5:56:14 PM edu.gemini.itc.operation.SpecS2NSlitVisitor signal
+INFO: Calculating signal with 0.3845618002368732 throughput on detector pixels 0 - 26317
+Aug 30, 2022 5:56:14 PM edu.gemini.itc.operation.SpecS2NSlitVisitor signal
+
+
+ghost getEffectiveWavelength: 500.0
+Aug 30, 2022 6:00:51 PM edu.gemini.itc.operation.ImageQualityCalculation calculate
+INFO: ImageQualityCalculation Image quality = 1.06354 arcsec at 500.0 nm and airmass = 1.50
+STANDARD Sky nSkyMicrolens: 3  slitLength: 11.34 spatialBinning: 1
+resolutionnnnnn: HIGH
+Resolution: 0.35003123020977084 one: 0.018422696326830044
+resolutionnnnnn: HIGH
+#######  0.19 area: 3.4275999999999995 imQuality: 1.063539462618603
+resolutionHalfArcsecSlit, echelle  resolution: 0.01027
+resolutionHalfArcsecSlit, echelle  resolution: 0.01027
+#######  resElement: 0.0039026 backgroundResElement: 0.0039026 resElementData: 0.019513 backgroundResElementData: 0.019513
+Aug 30, 2022 6:00:51 PM edu.gemini.itc.operation.SpecS2NSlitVisitor calculateS2N
+INFO: Dark noise = 0.0019 * 11 pix * 600.0 sec = 12.54
+Aug 30, 2022 6:00:51 PM edu.gemini.itc.operation.SpecS2NSlitVisitor calculateS2N
+INFO: Read noise = 2.3^2 * 11 pix = 58.18999999999999
+Aug 30, 2022 6:00:51 PM edu.gemini.itc.operation.SpecS2NSlitVisitor calculateS2N
+INFO: haloIsUsed: false
+Aug 30, 2022 6:00:51 PM edu.gemini.itc.operation.SpecS2NSlitVisitor signal
+INFO: Calculating signal with 0.35003123020977084 throughput on detector pixels 0 - 26317
+Aug 30, 2022 6:00:51 PM edu.gemini.itc.operation.SpecS2NSlitVisitor signal
+INFO: Disperser is: 0.02655898

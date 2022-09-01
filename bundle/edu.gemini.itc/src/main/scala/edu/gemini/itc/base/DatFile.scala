@@ -36,6 +36,8 @@ object DatFile {
 
   case class Grating(name: String, resolvingPower: Int, blaze: Int, dispersion: Double, resolution: Double)
 
+  case class GratingGhost(order: Int, resolvingPower :Double, blaze: Int, resolution: Double)
+
   // ===== Parse utils
 // EXPERIMENTAL; May or may not be used in a later stage.
 //  abstract class Parser extends JavaTokenParsers {

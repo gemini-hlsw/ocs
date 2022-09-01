@@ -109,12 +109,15 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     private void resample() {
 
         // calc the width of a spectral resolution element in nm
-        final double resElement                 = disperser.resolution(slit, imgQuality);
-        final double backgroundResElement       = disperser.resolution(slit);
-
+        System.out.println("#######  "+ slit.width() + " area: " + slit.area() + " imQuality: " + imgQuality);
+        final double resElement                 = disperser.resolution(slit, imgQuality);  // the same that bellow, but the width depend on imQuality
+        final double backgroundResElement       = disperser.resolution(slit);   // value calculate from grating_resolution * slit width / 0.5
+                                                                                // The resolution is gotten from gratings file of each instrument.
         // and the data size in the spectral domain
         final double resElementData             = resElement / sourceFlux.getSampling();
         final double backgroundResElementData   = backgroundResElement / backgroundFlux.getSampling();
+
+        System.out.println("#######  resElement: " + resElement + " backgroundResElement: " + backgroundResElement + " resElementData: "+ resElementData + " backgroundResElementData: "+ backgroundResElementData);
 
         // use the int value of spectral_pix as a smoothing element (at least 1)
         final int smoothingElement              = (int) Math.max(1.0, Math.round(resElementData));
@@ -158,17 +161,25 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     /** Calculates single and final S2N. */
     private void calculateS2N() {
 
+        double[][] sourceVal = sourceFlux.getData();
         // shot noise on dark current flux in aperture
-        final double darkNoise = darkCurrent * slit.lengthPixels() * exposureTime;  // per pixel
-        Log.fine("Dark noise = " + darkCurrent + " * "  + slit.lengthPixels() + " pix * " + exposureTime + " sec = " + darkNoise);
+        final double darkNoise = darkCurrent * slit.lengthPixels() * exposureTime;  // per pixel   *******
+        Log.info("Dark noise = " + darkCurrent + " * "  + slit.lengthPixels() + " pix * " + exposureTime + " sec = " + darkNoise);
 
         // readout noise in aperture
-        final double readNoise = this.readNoise * this.readNoise * slit.lengthPixels();  // per pixel
-        Log.fine("Read noise = " + this.readNoise + "^2 * "  + slit.lengthPixels() + " pix = " + readNoise);
+        final double readNoise = this.readNoise * this.readNoise * slit.lengthPixels();  // per pixel   *******
+        Log.info("Read noise = " + this.readNoise + "^2 * "  + slit.lengthPixels() + " pix = " + readNoise);
 
+        Log.info("haloIsUsed: " + haloIsUsed);
         // signal and background for given slit and throughput
         final VisitableSampledSpectrum signal     = haloIsUsed ? signalWithHalo(throughput.throughput(), haloThroughput.throughput()) : signal(throughput.throughput());
         final VisitableSampledSpectrum background = background(slit);
+
+        double[][] data = background.getData();
+        double[][] data2 = signal.getData();
+
+
+        System.out.println("###################################### ");
 
         // -- calculate and assign s2n results
 
@@ -177,6 +188,16 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
         // final S2N for all exposures
         resultS2NFinal = finalS2N(signal, background, darkNoise, readNoise);
+
+
+        double[][] data3 = resultS2NSingle.getData();
+        double[][] data4 = resultS2NFinal.getData();
+        System.out.println("**** background    signal  S2Nsingle    S2NFinal  initialFlux **** ");
+        for (int i = 0; i < data[0].length; i++) {
+            if (data[0][i] > 480 && data[0][i] < 520)
+                System.out.println(data[0][i] + " -> " + data[1][i] + ";  "+ data2[1][i] +";  " + data3[1][i]
+                                   + ";  " + data4[1][i] + ";  " + sourceVal[1][i]);
+        }
     }
 
     /** Calculates signal and background per coadd. */
@@ -201,8 +222,10 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
         final VisitableSampledSpectrum signal = (VisitableSampledSpectrum) sourceFlux.clone();
         final int lastPixel = lastCcdPixel(signal.getLength());
-        Log.fine("Calculating signal with " + throughput + " throughput on detector pixels " + firstCcdPixel + " - " + lastPixel);
+        Log.info("Calculating signal with " + throughput + " throughput on detector pixels " + firstCcdPixel + " - " + lastPixel);
 
+
+        Log.info("Disperser is: "+ disperser.dispersion());
         for (int i = 0; i < signal.getLength(); ++i) { signal.setY(i, 0); } // zero data array before use per REL-2992
 
         for (int i = firstCcdPixel; i <= lastPixel; ++i) {
@@ -243,7 +266,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
             background.setY(i,
                     backgroundFlux.getY(i) *
                             slit.width() * slit.pixelSize() * slit.lengthPixels() *
-                            exposureTime * disperser.dispersion());
+                            exposureTime * disperser.dispersion());  // Use the grating dispersion. The data is gotten from grating file for each instrument.
         }
 
         return background;
