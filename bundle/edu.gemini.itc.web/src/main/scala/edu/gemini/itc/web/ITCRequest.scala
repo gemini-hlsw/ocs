@@ -212,7 +212,7 @@ object ITCRequest {
     val readMode                 = r.enumParameter(classOf[GhostType.ReadMode]);
     val ampGain                  = extractGain(readMode);
     val resolution               = r.enumParameter(classOf[GhostType.Resolution],"instResolution");
-    val nSkyMicrolens            = r.intParameter("nSkyMicrolens");
+    val nSkyMicrolens            =  ghostGetNumSky(r); //r.intParameter("nSkyMicrolens");
 
     GhostParameters(centralWl, nSkyMicrolens, resolution, ampGain, readMode, spatBinning, specBinning);
   }
@@ -466,6 +466,15 @@ object ITCRequest {
     SourceDefinition(spatialProfile, sourceDefinition, norm, units, normBand, redshift)
   }
 
+  // TODO. this method has been create very fast only to test. The idea is performing this logic in the html code.
+  def ghostGetNumSky(r:ITCRequest): Int = {
+    val res = r.enumParameter(classOf[GhostType.Resolution],"instResolution")
+    if (res == GhostType.Resolution.STANDARD)
+      r.intParameter("nSkyMicrolens");
+    else
+      7
+  }
+
   def analysisMethod(r: ITCRequest): AnalysisMethod = r.parameter("analysisMethod") match {
     case "autoAper"   => AutoAperture(r.doubleParameter("autoSkyAper"))
     case "userAper"   => UserAperture(r.doubleParameter("userAperDiam"), r.doubleParameter("userSkyAper"))
@@ -473,7 +482,7 @@ object ITCRequest {
     case "radialIFU"  => IfuRadial(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuMinOffset"), r.doubleParameter("ifuMaxOffset"))
     case "summedIFU"  => IfuSummed(r.intParameter("ifuSkyFibres"), r.intParameter("ifuNumX"), r.intParameter("ifuNumY"), r.doubleParameter("ifuCenterX"), r.doubleParameter("ifuCenterY"))
     case "sumIFU"     => IfuSum(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuNum"), r.parameter("instrumentFPMask")=="IFU_1") // IFU_1 = IFU-2
-    case "ifuSky"     => Ifu(r.intParameter("nSkyMicrolens")) // This new class is created to the first aproximation to Ghost
+    case "ifuSky"     => Ifu(ghostGetNumSky(r)) // This new class is created to the first aproximation to Ghost
                                                                     // where the number of fibers to sky depending of the Number of sky microlens choose.
                                                                     // This value is only taken in account in the finalS2N function as a element of the noise factor. noiseFactor = 1 + (1 / skyAper);
     case _            => throw new NoSuchElementException(s"Unknown analysis method ${r.parameter("analysisMethod")}")

@@ -75,14 +75,17 @@ public final class IFUComponent extends TransmissionElement {
             for (int j = 0; j < numY; j++) {
                 double y = (2*j - (numY - Math.abs(i)%2 + 1)) * distY;
                 double r = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+                System.out.print("x: "+ x + " y: "+ y + " r: " + r + " radious: "+ radius);
                 if (r < radius) {
+                    System.out.println("  included");
                     IFUApertures.addAperture(new HexagonalAperture(x, y, IFU_DIAMETER));
                     IFUOffsets.add(r);
                     Nelements++;
                 }
+                System.out.println("  descarted");
             }
         }
-        Log.fine("-> will sum " + Nelements + " IFU elements");
+        Log.info("-> will sum " + Nelements + " IFU elements");
 
     }
 

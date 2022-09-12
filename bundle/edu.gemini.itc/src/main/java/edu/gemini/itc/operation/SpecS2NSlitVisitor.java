@@ -189,7 +189,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         // final S2N for all exposures
         resultS2NFinal = finalS2N(signal, background, darkNoise, readNoise);
 
-
+        /*
         double[][] data3 = resultS2NSingle.getData();
         double[][] data4 = resultS2NFinal.getData();
         System.out.println("**** background    signal  S2Nsingle    S2NFinal  initialFlux **** ");
@@ -198,6 +198,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
                 System.out.println(data[0][i] + " -> " + data[1][i] + ";  "+ data2[1][i] +";  " + data3[1][i]
                                    + ";  " + data4[1][i] + ";  " + sourceVal[1][i]);
         }
+        */
     }
 
     /** Calculates signal and background per coadd. */
@@ -300,6 +301,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
             skyAper = ((ApertureMethod) analysisMethod).skyAperture();
         } else if (analysisMethod instanceof IfuMethod) {
             skyAper = ((IfuMethod) analysisMethod).skyFibres();
+            System.out.println("SKYYYYYYYFIBRESSSSS: " + skyAper);
         } else {
             throw new Error();
         }

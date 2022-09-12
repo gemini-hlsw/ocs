@@ -87,15 +87,35 @@ public final class GHostRecipe  {
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
         SEDFactory.SourceResult sed = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
-        IFU_Trans ifu = instrument.getIFU_trans();
-        ifu.setFWHM(IQcalc.getImageQuality());
-        ifu.visit(sed.sed);  // apply ifu loss. TODO The most clean way is to put this Object in the component list.
-        instrument.applySkyCoeff(sed.sky);
+        final VisitableMorphology morph = _sdParameters.isUniform() ? new USBMorphology() : new GaussianMorphology(IQcalc.getImageQuality());
+        morph.accept(instrument.getIFU().getAperture());
+        //IFU_Trans ifu = instrument.getIFU_trans();
+        //ifu.setFWHM(IQcalc.getImageQuality());
+        //ifu.visit(sed.sed);  // apply ifu loss. TODO The most clean way is to put this Object in the component list.
+        //instrument.applySkyCoeff(sed.sky);
 
-        System.out.println("slitLength: "+ instrument.getSlitLength());
+        final List<Double> sf_list = instrument.getIFU().getFractionOfSourceInAperture();
+        double totalspsf = 0;  // total source fraction in the aperture
+        double numfibers = 0;  // number of fibers being summed
+        for (Double aSf_list : sf_list) {
+            final double spsf = aSf_list;
+            totalspsf += spsf;
+            numfibers += 1;
+        }
         // TODO. It is necessary to take in account the slitLength with the spatial binning.
         final Slit slit = Slit$.MODULE$.apply(instrument.getSlitWidth(), instrument.getSlitLength(), instrument.getPixelSize());
-        final SlitThroughput throughput = new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality());
+        //final SlitThroughput throughput = new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality());
+        final SlitThroughput throughput = new SlitThroughput(totalspsf, sf_list.get((sf_list.size() - 1) / 2));
+
+        ApertureComposite IFUApertures = (ApertureComposite) instrument.getIFU().getAperture();
+        List<ApertureComponent> list = IFUApertures.getApertureList();
+        for( ApertureComponent ac : list) {
+            HexagonalAperture h = (HexagonalAperture) ac;
+            Log.info("x: "+ h.getIfuPosX() + " y: "+ h.getIfuPosY() + " fractionSource: "+  h.getFractionOfSourceInAperture());
+        }
+        System.out.println("slitLength: "+ instrument.getSlitLength() + " throughtput: "+ totalspsf +
+                           " onePIx: " + sf_list.get((sf_list.size() - 1) / 2) + " numfibers: "+ numfibers + " centerFiber: "+ (sf_list.size() - 1) / 2);
+
 
         //Log.info("Resolution: "+ instrument.getThroughput(IQcalc.getImageQuality()) + " one: "+ instrument.getThrOne(IQcalc.getImageQuality()));
 

@@ -59,4 +59,8 @@ public final class ApertureComposite extends ApertureComponent {
         }
     }
 
+    public List<ApertureComponent> getApertureList(){
+        return apertureList;
+    }
+
 }

@@ -281,7 +281,7 @@ public class InstGhost
         GhostType.AmpGain oldValue = getGainChoice();
         setGainChoice(GhostType.AmpGain.getAmpGain(name, oldValue));
     }
-    
+
     @Override
     public Option<edu.gemini.spModel.core.Angle> calculateParallacticAngle(ISPObservation obs) {
         System.out.println("TODO. calculateParallacticAngle is not implemented the default values is 90");

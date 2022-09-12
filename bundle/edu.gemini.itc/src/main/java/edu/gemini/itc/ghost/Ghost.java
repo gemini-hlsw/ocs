@@ -24,7 +24,9 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
 
     private static final double WellDepth = 350000;  // Fr-Unknown
     private final TransmissionElement _blazeThrougthput;
-    private final IFU_Trans _ifu;
+    private final IFU_Trans _ifuTrans;
+    private final IFUComponent _ifu;
+
     protected DetectorsTransmissionVisitor _dtv;
 
     /**
@@ -95,7 +97,10 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
         addDisperser(_gratingOptics);
         _sampling = super.getSampling();
 
-        _ifu = new IFU_Trans(gp.resolution());
+        _ifuTrans = new IFU_Trans(gp.resolution());
+
+        _ifu = new IFUComponent(gp.resolution());
+        addComponent(_ifu);
     }
 
     public int detectorPixels() {
@@ -192,7 +197,7 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
 
 
     public IFU_Trans getIFU_trans() {
-        return _ifu;
+        return _ifuTrans;
     }
 
     public Option<IfuMethod> getIfuMethod() {
@@ -312,6 +317,11 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
         for (int i = 0; i < sky.getLength(); i++) {
             sky.setY(i, sky.getY(i) * skyCoeff);
         }
+    }
+
+    public IFUComponent getIFU() {
+        System.out.println("getIFUUUUUUU ");
+        return _ifu;
     }
 
     public String getCCDType() {
