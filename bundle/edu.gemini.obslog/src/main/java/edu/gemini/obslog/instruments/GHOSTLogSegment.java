@@ -12,7 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * ObsLog support for visitor instruments
+ * ObsLog support for GHOST.
  */
 public class GHOSTLogSegment extends InstrumentLogSegment {
     public static final Logger LOG = Logger.getLogger(GHOSTLogSegment.class.getName());
