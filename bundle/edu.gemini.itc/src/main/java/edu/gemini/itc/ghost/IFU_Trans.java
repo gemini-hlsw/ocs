@@ -78,44 +78,6 @@ public class IFU_Trans implements SampledSpectrumVisitor {
         }
     }
 
-    public double getThroughput(GhostType.Resolution res, double FWHM){
-        switch (res) {
-            case STANDARD: {
-                if (FWHM < 0.28) {
-                    double alpha = 0.701 * FWHM + 5 * Math.ulp(1);  //% for best seeing use integration in equiv circle
-                    return (1 - Math.pow(1 + Math.pow((0.333 / alpha), 2), -3)) * SR_IFU_tx;
-                }
-
-                if (FWHM < 1.55)
-                    return polyVal(POLY_SR, FWHM) * SR_IFU_tx;
-
-                if (FWHM < 3)
-                    return polyVal(POLY_SR_bad, FWHM) * SR_IFU_tx;
-
-                double alpha = 0.701 * FWHM;     // for really bad seeing use integration in equiv circle
-                return (1 - Math.pow(1 + Math.pow((0.333 / alpha), 2), -3)) * SR_IFU_tx;
-            }
-            case HIGH:
-                if (FWHM < 0.28) {
-                    double alpha = 0.701 * FWHM + 5 * Math.ulp(1);
-                    return (1 - Math.pow(1 + Math.pow((0.333/alpha),2),-3)) * HR_IFU_tx;
-                }
-
-                if (FWHM <= 1.55)
-                    return polyVal(POLY_HR,FWHM) * HR_IFU_tx;
-
-                if (FWHM < 3)
-                    return polyVal(POLY_HR_bad,FWHM) * HR_IFU_tx;
-
-                double alpha = 0.701 * FWHM;
-                return (1 - Math.pow(1 + Math.pow((0.333/alpha),2),-3)) * HR_IFU_tx ;
-
-            default:
-                Log.error("Wrong resolution param provided to get the IFU throughput");
-                return 0;
-        }
-    }
-
     @Override
     public void visit(SampledSpectrum sed) {
         final double loss = getInjectionLoss();
