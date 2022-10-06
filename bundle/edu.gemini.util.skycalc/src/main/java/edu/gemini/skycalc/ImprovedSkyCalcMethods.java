@@ -1082,9 +1082,9 @@ public class ImprovedSkyCalcMethods {
 	        sid_g = sid_g + 1.0027379093 * ut - longit / 24.;
 	        sid_int = (long) sid_g;
 	        sid_g = (sid_g - sid_int) * 24.;
-	//        if (sid_g < 0.) {
-	//            sid_g = sid_g + 24.;
-	//        }
+	       if (sid_g < 0.) {
+	           sid_g = sid_g + 24.;
+	       }
 	        return (sid_g);
 	    }
 
