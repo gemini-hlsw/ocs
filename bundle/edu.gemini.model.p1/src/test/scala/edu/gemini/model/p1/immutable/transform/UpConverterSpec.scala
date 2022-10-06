@@ -15,6 +15,49 @@ import scalaz.{ Validation, Success }
 
 class UpConverterSpec extends Specification with SemesterProperties with XmlMatchers {
   "The UpConverter" should {
+    "Convert classical proposals to queue in 2023" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_classical_gnirs.xml")))
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have size 5
+          changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
+
+          val proposal = ProposalIo.read(result.toString())
+          proposal.meta.band3OptionChosen must beFalse
+          proposal.title must beEqualTo("")
+          proposal.abstrakt must beEmpty
+          proposal.scheduling must beEmpty
+          proposal.investigators.all must have size 1
+          proposal.targets must beEmpty
+          proposal.conditions must beEmpty
+          proposal.observations must have size 2
+          val isQueue = proposal.proposalClass match {
+            case _: QueueProposalClass => true
+            case _ => false
+          }
+          val key: Option[String] = proposal.proposalClass match {
+            case q: QueueProposalClass => q.key.map(_.toString)
+            case _ => None
+          }
+          val jwst = proposal.proposalClass match {
+            case q: QueueProposalClass => q.jwstSynergy
+            case _ => false
+          }
+          isQueue must beTrue
+          jwst must beTrue
+          key must beEqualTo(Some("7857101a-1301-4ec1-9c42-4ef2cb9aa3c5"))
+          Option(proposal.proposalClass) must beSome
+      }
+
+      UpConverter.upConvert(xml) must beSuccessful.like {
+        case ConversionResult(transformed, from, changes, root) =>
+          transformed must beTrue
+          from must beEqualTo(Semester(2022, SemesterOption.B))
+          changes must have length 5
+      }
+
+    }
     "change the version but not the semester from a 2014.1.1 proposal to the current Release" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_ver_2014.1.1.xml")))
       val converted = UpConverter.convert(xml)

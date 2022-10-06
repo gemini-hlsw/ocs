@@ -266,7 +266,10 @@ package object immutable {
   }
 
   type GnirsCentralWavelength = M.GnirsCentralWavelength
-  object GnirsCentralWavelength extends EnumObject[M.GnirsCentralWavelength]
+  object GnirsCentralWavelength extends EnumObject[M.GnirsCentralWavelength] {
+    val LT_25  = M.GnirsCentralWavelength.LT_25
+    val GTE_25 = M.GnirsCentralWavelength.GTE_25
+  }
 
   type GracesFiberMode = M.GracesFiberMode
   object GracesFiberMode extends EnumObject[M.GracesFiberMode]

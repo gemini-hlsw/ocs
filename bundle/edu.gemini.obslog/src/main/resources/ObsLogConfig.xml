@@ -976,6 +976,18 @@
         <entry key="datasetcomments"/>
     </logEntry>
 
+    <logEntry key="GHOST">
+        <entry key="observationid"/>
+        <entry key="datasetut"/>
+        <entry key="datalabels"/>
+        <entry key="filename"/>
+        <entry key="targetname"/>
+        <entry key="observe_exposuretime"/>
+        <entry key="comment"/>
+        <entry key="observe_status"/>
+        <entry key="datasetcomments"/>
+    </logEntry>
+
     <logEntry key="GPI">
         <entry key="observationid"/>
         <entry key="datasetut"/>

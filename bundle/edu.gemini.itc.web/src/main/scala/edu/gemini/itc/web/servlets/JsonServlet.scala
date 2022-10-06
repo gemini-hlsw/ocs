@@ -14,7 +14,8 @@ import scalaz._, Scalaz._
  * supported) and responds with a JSON-encoded `ItcResult` on success, or `SC_BAD_REQUEST` with
  * an error message on failure. JSON codecs are defined in package `edu.gemini.itc.web.json`.
  */
-class JsonServlet extends HttpServlet with ItcParametersCodec with ItcResultCodec {
+class JsonServlet(versionToken: String) extends HttpServlet with ItcParametersCodec with ItcResultCodec {
+  def this() = this("")
 
   override def doPost(req: HttpServletRequest, res: HttpServletResponse) = {
 
@@ -40,7 +41,12 @@ class JsonServlet extends HttpServlet with ItcParametersCodec with ItcResultCode
         res.setStatus(SC_OK)
         res.setContentType("text/json; charset=UTF-8")
         val writer = res.getWriter // can only be called once :-\
-        writer.write(itcRes.asJson.spaces2)
+        val json: Json =
+          if (versionToken.isEmpty)
+            itcRes.asJson
+          else
+            itcRes.asJson.->:(("versionToken", jString(versionToken)))
+        writer.write(json.spaces2)
         writer.close
     }
 
@@ -49,11 +55,12 @@ class JsonServlet extends HttpServlet with ItcParametersCodec with ItcResultCode
 }
 
 /**
- * Servlet that accepts a JSON-encoded `ItcParameters` as its POST payload 
+ * Servlet that accepts a JSON-encoded `ItcParameters` as its POST payload
  * and responds with a JSON-encoded `ItcResult` on success, or `SC_BAD_REQUEST` with
  * an error message on failure. JSON codecs are defined in package `edu.gemini.itc.web.json`.
  */
-class JsonChartServlet extends HttpServlet with ItcParametersCodec with ItcResultCodec {
+class JsonChartServlet(versionToken: String = "") extends HttpServlet with ItcParametersCodec with ItcResultCodec {
+  def this() = this("")
 
   override def doPost(req: HttpServletRequest, res: HttpServletResponse) = {
 
@@ -78,7 +85,12 @@ class JsonChartServlet extends HttpServlet with ItcParametersCodec with ItcResul
         res.setStatus(SC_OK)
         res.setContentType("text/json; charset=UTF-8")
         val writer = res.getWriter
-        writer.write(itcRes.asJson.spaces2)
+        val json: Json =
+          if (versionToken.isEmpty)
+            itcRes.asJson
+          else
+            itcRes.asJson.->:(("versionToken", jString(versionToken)))
+        writer.write(json.spaces2)
         writer.close
     }
 

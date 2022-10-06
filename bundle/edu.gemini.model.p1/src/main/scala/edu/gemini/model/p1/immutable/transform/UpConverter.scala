@@ -167,7 +167,55 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter supports migrating to 2023A
  */
 case object SemesterConverter2022BTo2023A extends SemesterConverter {
-  override val transformers: List[TransformFunction] = Nil
+  // REL-4175 Convert classical to queue
+  val upgradeClassical: TransformFunction = {
+    case p @ <proposalClass>{ns @ _*}</proposalClass> if (p \ "classical").nonEmpty =>
+      object ClassicalTransformer extends BasicTransformer {
+        override def transform(n : xml.Node): xml.NodeSeq = n match {
+          case s @ <classical>{ns @ _*}</classical>
+             if s.attribute("key").isDefined    =>
+            if (s.attribute("jwstSynergy").isDefined)
+              <queue key={s.attribute("key")} jwstSynergy={s.attribute("jwstSynergy")} tooOption="None">{ns}</queue>
+            else
+              <queue key={s.attribute("key")} jwstSynergy="false" tooOption="None">{ns}</queue>
+          case s @ <classical>{ns @ _*}</classical> =>
+            if (s.attribute("jwstSynergy").isDefined)
+              <queue jwstSynergy={s.attribute("jwstSynergy")} tooOption="None">{ns}</queue>
+            else
+              <queue jwstSynergy="false" tooOption="None">{ns}</queue>
+          case elem: xml.Elem                   =>
+            elem.copy(child = elem.child.flatMap(transform))
+          case _                                => n
+        }
+      }
+      StepResult("Classical proposal converted to queue", <proposalClass>{ClassicalTransformer.transform(ns)}</proposalClass>).successNel
+  }
+
+  def removeGNIRSRedCameraBlueprint: TransformFunction = {
+    val msg = """The original proposal contained a GNIRS observation using the red-camera and pixel scale 0.15". This combination has been removed"""
+    // Remove nodes that match the instrument with the specific configuration
+    def shouldRemove(ns: Seq[scala.xml.Node]): Boolean =
+      ns.exists{(n: scala.xml.Node) =>
+        val gnirsSpec = (n \\ "gnirs" \\ "spectroscopy")
+        val ps = gnirsSpec.headOption.map(_ \\ "pixelScale").exists(_.text == """0.15"/pix""")
+        val cw = gnirsSpec.headOption.map(_ \\ "centralWavelength").exists(_.text == ">=2.5um")
+        ps && cw
+      }
+
+    val transform: TransformFunction = {
+      case p @ <blueprints>{ns @ _*}</blueprints> if (p \\ "gnirs").nonEmpty && shouldRemove(ns) =>
+        // Remove nodes that match the instrument with the specific configuration
+        val filtered = ns.filterNot {n =>
+          val gnirsSpec = (n \\ "gnirs" \\ "spectroscopy")
+          val ps = gnirsSpec.headOption.map(_ \\ "pixelScale").exists(_.text == """0.15"/pix""")
+          val cw = gnirsSpec.headOption.map(_ \\ "centralWavelength").exists(_.text == ">=2.5um")
+          ps && cw
+        }
+        StepResult(msg, <blueprints>{filtered}</blueprints>).successNel
+    }
+    transform
+  }
+  override val transformers: List[TransformFunction] = List(upgradeClassical, removeGNIRSRedCameraBlueprint)
 }
 
 /**
