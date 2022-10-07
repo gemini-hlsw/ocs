@@ -127,11 +127,11 @@ final public class TelescopePosTableModel extends AbstractTableModel {
         // coordinates into an SPCoordinates.
         if (a.asterismType() == AsterismType.GhostDualTarget) {
             if (a.overriddenBase().isDefined()) {
-                row = new BaseCoordinatesRow(a.overriddenBase().get(), true, "Base");
+                row = new BaseCoordinatesRow(a.overriddenBase().get(), true);
             }
             else {
                 final Coordinates c = Utils.getCoordinates(a, when).getOrElse(Coordinates.zero());
-                row = new BaseCoordinatesRow(new SPCoordinates(c), false, "Base");
+                row = new BaseCoordinatesRow(new SPCoordinates(c), false);
             }
         }
         else {
@@ -139,7 +139,7 @@ final public class TelescopePosTableModel extends AbstractTableModel {
             // base position corresponds to a target or is set to a sky
             // position, which means checking if a.base (the override) exists.
             if (a.overriddenBase().isDefined())
-                row = new BaseCoordinatesRow(a.overriddenBase().get(), true, "Base");
+                row = new BaseCoordinatesRow(a.overriddenBase().get(), true);
             else {
                 // This is mildly annoying because all non-dual-target asterisms
                 // have their own individual target() member.
