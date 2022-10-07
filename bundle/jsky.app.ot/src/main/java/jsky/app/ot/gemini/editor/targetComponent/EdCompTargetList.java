@@ -1,6 +1,7 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import edu.gemini.ags.api.AgsRegistrar;
+import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.SPNodeKey;
 import edu.gemini.shared.util.immutable.*;
@@ -178,6 +179,22 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             return None.instance();
     }
 
+    private static Option<Long> schedulingBlockStartEpochMillis(ISPNode node) {
+        return ImOption
+                .apply(node)
+                .flatMap(n -> ImOption.apply(n.getContextObservation()))
+                .flatMap(o -> ImOption.apply((SPObservation) o.getDataObject()))
+                .flatMap(o -> o.getSchedulingBlockStart());
+    }
+
+    private static Option<Instant> schedulingBlockStartInstant(ISPNode node) {
+        return schedulingBlockStartEpochMillis(node).map(Instant::ofEpochMilli);
+    }
+
+    private Option<Instant> schedulingBlockStartInstant() {
+        return schedulingBlockStartInstant(getNode());
+    }
+
     /**
      * Extract the base position out of the asterism.
      * It could be a target or a sky position.
@@ -198,9 +215,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 final GhostAsterism.DualTarget gda = (GhostAsterism.DualTarget) a;
                 if (gda.overriddenBase().isDefined()) return new Right<>(gda.overriddenBase().get());
                 else {
-                    final Option<Instant> sbi = ((SPObservation)getContextObservation().getDataObject())
-                            .getSchedulingBlockStart()
-                            .map(Instant::ofEpochMilli);
+                    final Option<Instant> sbi = schedulingBlockStartInstant();
                     final Option<Coordinates> cOpt = ImOption.fromScalaOpt(gda.basePosition(ImOption.toScalaOpt(sbi)));
                     return new Right<>(cOpt.map(SPCoordinates::new).getOrElse(SPCoordinates::new));
                 }
@@ -1175,9 +1190,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     return ImOption.scalaNone();
 
                 // Try to get the scheduling block start, convert to Instant, and look up base.
-                final Option<Instant> sbi = ((SPObservation)getContextObservation().getDataObject())
-                        .getSchedulingBlockStart()
-                        .map(Instant::ofEpochMilli);
+                final Option<Instant> sbi = schedulingBlockStartInstant();
                 return ImOption.toScalaOpt(
                         ImOption.fromScalaOpt(ga.basePosition(ImOption.toScalaOpt(sbi)))
                         .map(SPCoordinates::new)
@@ -1299,18 +1312,34 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 final TableTargetSelection s = (TableTargetSelection) contents;
                 final SPTarget tSrc = s.getTarget();
 
+                // Paste: garget -> target
                 final Option<SPTarget> tOpt = TargetSelection.getTargetForNode(env, obsComponent);
                 tOpt.foreach(t -> {
                     t.setTarget(tSrc.getTarget());
                     t.setMagnitudes(tSrc.getMagnitudesJava());
+                });
+
+                // Paste: target -> coordinates
+                final Option<SPCoordinates> cOpt = TargetSelection.getCoordinatesForNode(env, obsComponent);
+                cOpt.foreach(c -> {
+                    final Option<Long> sbi = schedulingBlockStartEpochMillis(obsComponent);
+                    tSrc.getCoordinatesAsJava(sbi).foreach(coreCoords -> c.setCoordinates(coreCoords));
                 });
             }
             else if (contents instanceof TableCoordinateSelection) {
                 final TableCoordinateSelection s = (TableCoordinateSelection) contents;
                 final Coordinates cSrc = s.getCoordinates().getCoordinates();
 
+                // Paste: coordinates -> coordinates
                 final Option<SPCoordinates> cOpt = TargetSelection.getCoordinatesForNode(env, obsComponent);
                 cOpt.foreach(c -> c.setCoordinates(cSrc));
+
+                // Paste: coordinates -> target
+                final Option<SPTarget> tOpt = TargetSelection.getTargetForNode(env, obsComponent);
+                tOpt.foreach(t -> {
+                    t.setRaDegrees(cSrc.ra().toDegrees());
+                    t.setDecDegrees(cSrc.dec().toDegrees());
+                });
             }
             else if (contents instanceof TableGroupSelection) {
                 final TableGroupSelection s = (TableGroupSelection) contents;
