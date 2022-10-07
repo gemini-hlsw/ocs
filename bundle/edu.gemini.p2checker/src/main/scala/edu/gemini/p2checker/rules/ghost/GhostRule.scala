@@ -31,6 +31,18 @@ object GhostRule extends IRule {
         else Some(new Problem(Problem.Type.ERROR, id, String.format(CoordinatesOutOfRange, name), node))
       }.toList
 
+    def checkDistance(
+       node:  ISPObsComponent,
+       ifu1: Option[Coordinates],
+       ifu2: Option[Coordinates]
+     ): Option[Problem] = {
+      for {
+        t1 <- ifu1
+        t2 <- ifu2
+        if (t1.angularDistance(t2).toSignedArcsecs.abs < 102)
+      } yield new Problem(Problem.Type.ERROR, id, ProbesTooClose, node)
+    }
+
     def checkBoth(
       ctx:  ObsContext,
       node: ISPObsComponent,
@@ -39,7 +51,8 @@ object GhostRule extends IRule {
       ifu2: Option[Coordinates]
     ): List[Problem] =
       checkOne("IFU1", node, base, ifu1, GhostIfuPatrolField.ifu1(ctx)) ++
-      checkOne("IFU2", node, base, ifu2, GhostIfuPatrolField.ifu2(ctx))
+      checkOne("IFU2", node, base, ifu2, GhostIfuPatrolField.ifu2(ctx)) ++
+        checkDistance(node, ifu1, ifu2).toList
 
     def checkAsterism(
       ast:  Asterism,
@@ -81,6 +94,8 @@ object GhostRule extends IRule {
     }
 
     private val CoordinatesOutOfRange: String = "The coordinates for %s are out of range at the base position."
+
+    private val ProbesTooClose: String = "The separation between the IFU probes must be at least 102 arcsec."
   }
 
   object OffsetsRule extends IRule {
