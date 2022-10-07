@@ -139,7 +139,7 @@ final public class TelescopePosTableModel extends AbstractTableModel {
             // base position corresponds to a target or is set to a sky
             // position, which means checking if a.base (the override) exists.
             if (a.overriddenBase().isDefined())
-                row = new BaseCoordinatesRow(a.overriddenBase().get(), true);
+                row = new BaseCoordinatesRow(a.overriddenBase().get(), true, "Base");
             else {
                 // This is mildly annoying because all non-dual-target asterisms
                 // have their own individual target() member.
