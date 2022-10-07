@@ -11,7 +11,8 @@ public enum GhostBinning implements DisplayableSpType, LoggableSpType, Sequencea
     ONE_BY_EIGHT(1, 8),
     TWO_BY_TWO(2,2),
     TWO_BY_FOUR(2,4),
-    TWO_BY_EIGHT(2,8)
+    TWO_BY_EIGHT(2,8),
+    FOUR_BY_FOUR(4,4)
     ;
 
     public static final GhostBinning DEFAULT = GhostBinning.ONE_BY_ONE;
