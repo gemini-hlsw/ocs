@@ -27,7 +27,7 @@ final public class GhostSupport implements ITccInstrumentSupport {
 
     @Override
     public String getWavelength() {
-        return null;
+        return "0.655";
     }
 
     @Override
