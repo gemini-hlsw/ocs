@@ -1312,7 +1312,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 final TableTargetSelection s = (TableTargetSelection) contents;
                 final SPTarget tSrc = s.getTarget();
 
-                // Paste: garget -> target
+                // Paste: target -> target
                 final Option<SPTarget> tOpt = TargetSelection.getTargetForNode(env, obsComponent);
                 tOpt.foreach(t -> {
                     t.setTarget(tSrc.getTarget());
