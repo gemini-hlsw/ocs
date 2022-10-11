@@ -1,8 +1,6 @@
 package edu.gemini.horizons.server.backend;
 
 import edu.gemini.shared.util.immutable.ImOption;
-import edu.gemini.spModel.core.Angle;
-import edu.gemini.spModel.core.Angle$;
 import edu.gemini.spModel.core.Site;
 
 import edu.gemini.horizons.api.HorizonsException;
