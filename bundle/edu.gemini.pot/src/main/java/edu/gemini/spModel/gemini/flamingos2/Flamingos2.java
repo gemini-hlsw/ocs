@@ -148,8 +148,8 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         K_SHORT("K-short (2.15 um)", "K-short", new Some<>(2.15), Ictd.track("K-short")),
         K_BLUE("K-blue (2.06 um)", "K-blue", new Some<>(2.06),    Ictd.track("K-blue")),
         K_RED("K-red (2.31 um)", "K-red", new Some<>(2.31),       Ictd.track("K-red")),
-        JH("JH (spectroscopic)", "JH", new Some<>(1.39),          Ictd.track("JH")),
-        HK("HK (spectroscopic)", "HK", new Some<>(1.871),         Ictd.track("HK")),
+        JH("JH (spectroscopic)", "JH", new Some<>(1.3385),        Ictd.track("JH")),
+        HK("HK (spectroscopic)", "HK", new Some<>(1.9),           Ictd.track("HK")),
         DARK("Dark", "Dark", None.DOUBLE,                         Ictd.track("Dark")) {
             @Override public boolean isObsolete() {
                 return true;
