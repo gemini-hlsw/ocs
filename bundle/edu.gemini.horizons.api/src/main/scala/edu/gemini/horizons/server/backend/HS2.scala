@@ -177,7 +177,8 @@ object HorizonsService2 {
         STOP_TIME        -> formatDate(stop),
         STEP_SIZE        -> s"${stepSize}m",
         EXTRA_PRECISION  -> YES,
-        TIME_DIGITS      -> FRACTIONAL_SEC
+        TIME_DIGITS      -> FRACTIONAL_SEC,
+        QUANTITIES       -> "'1,3,8,9'" // see 3. Observer Table at https://ssd.jpl.nasa.gov/horizons/manual.html#output
       )
 
     val replyType = target match {
