@@ -14,6 +14,7 @@ import edu.gemini.pot.sp.validator.NodeCardinality;
 import edu.gemini.pot.sp.validator.NodeType;
 import edu.gemini.pot.sp.validator.Validator$;
 import edu.gemini.pot.spdb.IDBDatabaseService;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.obscomp.SPNote;
 import edu.gemini.spModel.seqcomp.SeqBase;
@@ -138,6 +139,7 @@ public class SPTreeEditUtil {
         if (node instanceof ISPObsComponent &&
                 parent instanceof ISPObsComponentContainer) {
             ((ISPObsComponentContainer)parent).addObsComponent((ISPObsComponent)node);
+            ImOption.apply(parent.getContextObservation()).foreach(o -> AsterismEditUtil.matchAsterismToInstrument(o));
             return true;
         }
         if (node instanceof ISPGroup && parent instanceof ISPGroupContainer) {
@@ -575,6 +577,7 @@ public class SPTreeEditUtil {
 
         public void apply() {
             target.setDataObject(source.getDataObject());
+            ImOption.apply(target.getContextObservation()).foreach(o -> AsterismEditUtil.matchAsterismToInstrument(o));
         }
     }
 
@@ -674,7 +677,7 @@ public class SPTreeEditUtil {
         }
     }
 
-      /**
+    /**
      * Move the given ISPNodes to the new parent ISPNode.
      *
      * If the nodes are obsComponents (excepting Notes) or sequenceComponents that already exists in the new

@@ -43,7 +43,7 @@ public class AddObsCompAction extends AbstractViewerAction implements Comparable
             final ISPObsComponent toAdd =
                 viewer.getFactory().createObsComponent(getProgram(), componentType, init.getOrNull(), null);
 
-            parent.addObsComponent(toAdd);
+            SPTreeEditUtil.addNode(getProgram(), parent, toAdd);
         } catch (Exception ex) {
             DialogUtil.error(ex);
         }
