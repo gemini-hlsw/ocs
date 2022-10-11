@@ -154,12 +154,6 @@ object HorizonsService2 {
     def formatDate(date: Date): String =
       s"'${DateFormat.format(date.toInstant)}'"
 
-    def siteCoord(site: Site): String =
-      site match {
-        case Site.GN => SITE_COORD_GN
-        case Site.GS => SITE_COORD_GS
-      }
-
     def toEphemeris(r: HorizonsReply): Long ==>> E =
       ==>>.fromList {
         r.getEphemeris.asScala.toList.map { e =>
@@ -178,7 +172,7 @@ object HorizonsService2 {
         CENTER           -> CENTER_COORD,
         COORD_TYPE       -> COORD_TYPE_GEO,
         COMMAND          -> s"'${target.queryString}'",
-        SITE_COORD       -> siteCoord(site),
+        SITE_COORD       -> formatSiteCoord(site),
         START_TIME       -> formatDate(start),
         STOP_TIME        -> formatDate(stop),
         STEP_SIZE        -> s"${stepSize}m",
