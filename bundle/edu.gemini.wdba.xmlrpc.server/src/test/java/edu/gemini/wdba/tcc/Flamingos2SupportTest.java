@@ -140,8 +140,8 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
         flam2.setFilter(Filter.OPEN);
 
         final Pair<Disperser,String>[] dtA = new Pair[] {
-            new Pair<>(Disperser.R1200JH, "1.39"),
-            new Pair<>(Disperser.R1200HK, "1.871"),
+            new Pair<>(Disperser.R1200JH, "1.3385"),
+            new Pair<>(Disperser.R1200HK, "1.9"),
             new Pair<>(Disperser.R3000,   "1.65"),
         };
 
@@ -164,8 +164,8 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
             new Pair<>(Filter.K_SHORT, "2.15"),
             new Pair<>(Filter.K_BLUE, "2.06"),
             new Pair<>(Filter.K_RED,  "2.31"),
-            new Pair<>(Filter.JH,      "1.39"),
-            new Pair<>(Filter.HK,      "1.871"),
+            new Pair<>(Filter.JH,      "1.3385"),
+            new Pair<>(Filter.HK,      "1.9"),
         };
 
         for (final Pair<Filter, String> t : ftA) {
