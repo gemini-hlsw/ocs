@@ -78,8 +78,8 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     public enum Disperser implements DisplayableSpType, SequenceableSpType, LoggableSpType {
 
         NONE("None", "none", None.DOUBLE),
-        R1200JH("R=1200 (J + H) grism", "R1200JH", new Some<>(1.39)),
-        R1200HK("R=1200 (H + K) grism", "R1200HK", new Some<>(1.871)),
+        R1200JH("R=1200 (J + H) grism", "R1200JH", new Some<>(1.3385)),
+        R1200HK("R=1200 (H + K) grism", "R1200HK", new Some<>(1.9)),
         R3000("R=3000 (J or H or K) grism", "R3000", new Some<>(1.65)),
         ;
 
