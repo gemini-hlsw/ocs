@@ -43,6 +43,7 @@ public final class CgiHorizonsConstants {
     public static final String EXTRA_PRECISION = "extra_prec";
     public static final String TIME_DIGITS     = "time_digits";
     public static final String FRACTIONAL_SEC  = "FRACSEC";
+    public static final String QUANTITIES      = "QUANTITIES";
 
     public static final String YES = "YES";
     public static final String NO = "NO";
