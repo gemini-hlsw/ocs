@@ -43,6 +43,33 @@ public class GnirsRule implements IRule {
         }
     };
 
+    private static final IConfigRule SHORT_RED_CAMERA_RULE = new IConfigRule() {
+        private static final String MESSAGE = "The short red camera is currently unavailable.";
+
+        @Override
+        public Problem check(final Config config, final int step, final ObservationElements elems, final Object state) {
+            final Camera camera = (Camera) SequenceRule.getInstrumentItem(config, InstGNIRS.CAMERA_PROP);
+            if (camera == null) return null;
+            switch (camera) {
+                case SHORT_BLUE:
+                case LONG_BLUE:
+                    return null;
+            }
+
+            final PixelScale ps = (PixelScale) SequenceRule.getInstrumentItem(config, InstGNIRS.PIXEL_SCALE_PROP);
+            if (ps != PixelScale.PS_015) return null;
+            final Wavelength l = (Wavelength) SequenceRule.getInstrumentItem(config, InstGNIRS.CENTRAL_WAVELENGTH_PROP);
+            if ((l == null) || l.doubleValue() <= 2.5) return null;
+
+            return new Problem(ERROR, PREFIX + "SHORT_RED_CAMERA_RULE", MESSAGE, elems.getSeqComponentNode());
+        }
+
+        @Override
+        public IConfigMatcher getMatcher() {
+            return IConfigMatcher.ALWAYS;
+        }
+    };
+
     // ERROR if Wavelength > 2.5 um && Cross-dispered != No, "Cross-dispersed mode is not available in the L or M bands."
     private static IConfigRule WAVELENGTH_XD_RULE = new IConfigRule() {
         private static final String MESSAGE = "Cross-dispersed mode is not available in the L or M bands.";
@@ -408,6 +435,7 @@ public class GnirsRule implements IRule {
 
     static {
         GNIRS_RULES.add(RED_CAMERA_XD_RULE);
+        GNIRS_RULES.add(SHORT_RED_CAMERA_RULE);
         GNIRS_RULES.add(WAVELENGTH_XD_RULE);
         GNIRS_RULES.add(SHORT_BLUE_XD_RULE);
 
