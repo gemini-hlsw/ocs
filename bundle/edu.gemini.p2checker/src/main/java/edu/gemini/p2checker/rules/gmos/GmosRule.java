@@ -11,6 +11,7 @@ import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.ISPProgramNode;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.skycalc.Offset;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
@@ -48,19 +49,19 @@ public final class GmosRule implements IRule {
     private static final String PREFIX = "GmosRule_";
     private static final Collection<IConfigRule> GMOS_RULES = new ArrayList<>();
 
-    //keys to access sequence elements
-    private static final ItemKey FPU_KEY = new ItemKey("instrument:fpu");
-    private static final ItemKey FPU_MODE_KEY = new ItemKey("instrument:fpuMode");
-    private static final ItemKey DISPERSER_KEY = new ItemKey("instrument:disperser");
-    private static final ItemKey FILTER_KEY = new ItemKey("instrument:filter");
-    private static final ItemKey DETECTOR_KEY = new ItemKey("instrument:detectorManufacturer");
-    private static final ItemKey GAIN_KEY = new ItemKey("instrument:gainChoice");
+    // keys to access sequence elements
     private static final ItemKey CCD_X_BINNING_KEY = new ItemKey("instrument:ccdXBinning");
     private static final ItemKey CCD_Y_BINNING_KEY = new ItemKey("instrument:ccdYBinning");
+    private static final ItemKey DETECTOR_KEY      = new ItemKey("instrument:detectorManufacturer");
+    private static final ItemKey DISPERSER_KEY     = new ItemKey("instrument:disperser");
+    private static final ItemKey FILTER_KEY        = new ItemKey("instrument:filter");
+    private static final ItemKey FPU_KEY           = new ItemKey("instrument:fpu");
+    private static final ItemKey FPU_MODE_KEY      = new ItemKey("instrument:fpuMode");
+    private static final ItemKey GAIN_KEY          = new ItemKey("instrument:gainChoice");
 
     /**
      * either a filter or a grating should be defined whatever the fpu
-     * WARN if (disperser == 'Mirror' && filter == 'none'), \
+     * WARN if (disperser == 'Mirror' && filter == 'none')
      */
     private static final IConfigRule DISPERSER_AND_MIRROR_RULE = new AbstractConfigRule() {
         private static final String MESSAGE = "Mirror must be used with a filter, or select a grating " +
@@ -79,6 +80,37 @@ public final class GmosRule implements IRule {
         }
     };
 
+    private static final IConfigRule CAL_NO_CONDITIONS_RULE = new AbstractConfigRule() {
+        private static final String DAYTIME_MESSAGE =
+            "Daytime calibrations should not have conditions constraints.";
+
+        private static final String NIGHTTIME_MESSAGE =
+            "GMOS baseline spectrophotometric standards should not have conditions constraints.";
+
+        public Problem check(Config config, int step, ObservationElements elems, Object state) {
+            final ObsClass oclass = ImOption.apply(SequenceRule.getObsClass(config)).getOrElse(ObsClass.SCIENCE);
+            final boolean isAny   = elems.getSiteQuality().exists(q -> SPSiteQuality.Conditions.WORST.equals(q.conditions()));
+
+            final Problem result;
+            switch (oclass) {
+
+                case DAY_CAL:
+                    result = isAny ? null : new Problem(WARNING, PREFIX + "CAL_NO_CONDITIONS_RULE", DAYTIME_MESSAGE, SequenceRule.getInstrumentOrSequenceNode(step, elems));
+                    break;
+
+                case PARTNER_CAL:
+                    final boolean isMirror = ImOption.apply(getDisperser(config)).exists(d -> d.isMirror());
+                    result = (isAny || isMirror) ? null : new Problem(WARNING, PREFIX + "CAL_NO_CONDITIONS_RULE", NIGHTTIME_MESSAGE, SequenceRule.getInstrumentOrSequenceNode(step, elems));
+                    break;
+
+                default:
+                    result = null;
+                    break;
+            }
+
+            return result;
+        }
+    };
 
     /**
      * Acquisition
@@ -372,7 +404,7 @@ public final class GmosRule implements IRule {
 
     /**
      * For imaging observations, it is required to use 1x1, 2x2, or 4x4 binning.
-     * For MOS pre-imaging, only 1x1 or 2x2 are allowe.
+     * For MOS pre-imaging, only 1x1 or 2x2 are allowed.
      */
     private static final IConfigRule BINNING_RULE = new IConfigRule() {
 
@@ -1895,6 +1927,7 @@ public final class GmosRule implements IRule {
     static {
 //        GMOS_RULES.add(SequenceRule.DUMP_CONFIG_RULE);
         GMOS_RULES.add(DISPERSER_AND_MIRROR_RULE);
+        GMOS_RULES.add(CAL_NO_CONDITIONS_RULE);
         GMOS_RULES.add(BAD_AMP_COUNT_RULE);
         GMOS_RULES.add(CHECK_3_AMP_MODE);
         GMOS_RULES.add(ACQUISITION_RULE);
