@@ -122,6 +122,88 @@ public class GmosRuleTest extends AbstractRuleTest {
 
     }
 
+    @Test
+    public void testDayCalAnyConditions() throws Exception {
+
+        addSimpleDarkObserve(1, 1.0, 1);
+        addSiteQuality(
+            SPSiteQuality.ImageQuality.ANY,
+            SPSiteQuality.CloudCover.ANY,
+            SPSiteQuality.SkyBackground.ANY,
+            SPSiteQuality.WaterVapor.ANY
+        );
+
+        final ObservationElements elems = new ObservationElements(obs);
+        final GmosRule rules = new GmosRule();
+        final List<Problem> problems = rules.check(elems).getProblems();
+
+        assertEquals(0, problems.size());
+    }
+
+    @Test
+    public void testDayCalBetterConditions() throws Exception {
+
+        addSimpleDarkObserve(1, 1.0, 1);
+        addSiteQuality(
+            SPSiteQuality.ImageQuality.PERCENT_20,
+            SPSiteQuality.CloudCover.ANY,
+            SPSiteQuality.SkyBackground.ANY,
+            SPSiteQuality.WaterVapor.ANY
+        );
+
+        final ObservationElements elems = new ObservationElements(obs);
+        final GmosRule rules = new GmosRule();
+        final List<Problem> problems = rules.check(elems).getProblems();
+
+        assertEquals(1, problems.size());
+
+        Problem p0 = problems.get(0);
+        assertEquals(Problem.Type.WARNING, p0.getType());
+        assertTrue(p0.toString(), p0.toString().startsWith("Warning:Daytime calibrations should not have conditions constraints."));
+    }
+
+    @Test
+    public void testPartnerCalAnyConditions() throws Exception {
+
+        setDisperserNorth(GmosNorthType.DisperserNorth.B1200_G5301);
+        addSimpleArcObserve(1, 1.0, 1);
+        addSiteQuality(
+            SPSiteQuality.ImageQuality.ANY,
+            SPSiteQuality.CloudCover.ANY,
+            SPSiteQuality.SkyBackground.ANY,
+            SPSiteQuality.WaterVapor.ANY
+        );
+
+        final ObservationElements elems = new ObservationElements(obs);
+        final GmosRule rules = new GmosRule();
+        final List<Problem> problems = rules.check(elems).getProblems();
+
+        assertEquals(0, problems.size());
+    }
+
+    @Test
+    public void testPartnerCalBetterConditions() throws Exception {
+
+        setDisperserNorth(GmosNorthType.DisperserNorth.B1200_G5301);
+        addSimpleArcObserve(1, 1.0, 1);
+        addSiteQuality(
+            SPSiteQuality.ImageQuality.PERCENT_20,
+            SPSiteQuality.CloudCover.ANY,
+            SPSiteQuality.SkyBackground.ANY,
+            SPSiteQuality.WaterVapor.ANY
+        );
+
+        final ObservationElements elems = new ObservationElements(obs);
+        final GmosRule rules = new GmosRule();
+        final List<Problem> problems = rules.check(elems).getProblems();
+
+        assertEquals(1, problems.size());
+
+        Problem p0 = problems.get(0);
+        assertEquals(Problem.Type.WARNING, p0.getType());
+        assertTrue(p0.toString(), p0.toString().startsWith("Warning:GMOS baseline spectrophotometric standards should not have conditions constraints."));
+    }
+
     private void checkZeroExp(ISPObservation observation) {
         ObservationElements elems = new ObservationElements(observation);
         GmosRule rules = new GmosRule();
@@ -146,6 +228,12 @@ public class GmosRuleTest extends AbstractRuleTest {
         obs.getSeqComponent().setSeqComponents(new ArrayList<ISPSeqComponent>());
         addSimpleDarkObserve(1, 0.0, 1);
 
+        addSiteQuality(
+            SPSiteQuality.ImageQuality.ANY,
+            SPSiteQuality.CloudCover.ANY,
+            SPSiteQuality.SkyBackground.ANY,
+            SPSiteQuality.WaterVapor.ANY
+        );
         checkZeroExp(obs);
 
         // Check with flat
@@ -176,6 +264,12 @@ public class GmosRuleTest extends AbstractRuleTest {
     private void setFilterNorth(GmosNorthType.FilterNorth filter) {
         InstGmosNorth gmosDataObject = (InstGmosNorth) gmosComponent.getDataObject();
         gmosDataObject.setFilterNorth(filter);
+        gmosComponent.setDataObject(gmosDataObject);
+    }
+
+    private void setDisperserNorth(GmosNorthType.DisperserNorth disperser) {
+        InstGmosNorth gmosDataObject = (InstGmosNorth) gmosComponent.getDataObject();
+        gmosDataObject.setDisperserNorth(disperser);
         gmosComponent.setDataObject(gmosDataObject);
     }
 
