@@ -168,7 +168,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
   private case object AsSky    extends IfuDisposition
 
   private def drawHighResolutionIfu(g2d: Graphics2D, p: Point2D): Unit =
-    drawIfu(g2d, p, "HRIFU", highResolutionIfuArcsec, HrIfuTargetColor, TpeGhostIfuFeature.IfuFovColor)
+    drawIfu(g2d, p, "HRIFU", highResolutionIfuArcsec, HrIfuTargetColor)
 
   private def drawStandardResolutionIfu(g2d: Graphics2D, p: Point2D, i: IfuNumber, d: IfuDisposition): Unit =
     drawIfu(
@@ -176,11 +176,10 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       p,
       if (d == AsTarget) s"SRIFU${i.toInt}" else "Sky",
       standardResolutionIfuArcsec,
-      if (d == AsTarget) SrIfuTargetColor else SrIfuSkyColor,
-      TpeGhostIfuFeature.IfuFovColor
+      if (d == AsTarget) SrIfuTargetColor else SrIfuSkyColor
     )
 
-  private def drawIfu(g2d: Graphics2D, p: Point2D, label: String, a: Area, c: Color, l: Color): Unit = {
+  private def drawIfu(g2d: Graphics2D, p: Point2D, label: String, a: Area, c: Color): Unit = {
 
     // Transform the hexagon at the appropriate place.
     val trans: AffineTransform = {
@@ -201,7 +200,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
       val strBounds = fontMet.getStringBounds(label, g2d)
       val strWidth = strBounds.getWidth
       val strHeight = strBounds.getHeight
-      g2d.setColor(l)
+      g2d.setColor(Color.yellow)
       val x = p.getX + math.max(ifuBounds.getWidth - strWidth / 2, TpeImageFeature.MARKER_SIZE + 2)
       val y = p.getY + math.min(strHeight, math.max(ifuBounds.getHeight - strHeight, TpeImageFeature.MARKER_SIZE * 2))
       g2d.drawString(label, x.toFloat, y.toFloat)
