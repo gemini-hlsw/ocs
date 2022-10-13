@@ -8,14 +8,16 @@ import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * For Gmos Spectroscopy the spectrum will be spread across 3 CCD's
- * The Three CCD's are not continous.  The Gaps will be represented in
+ * The Three CCD's are not continuous.  The Gaps will be represented in
  * a file read in.
  */
 public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
 
+    private static final Logger Log = Logger.getLogger(DetectorsTransmissionVisitor.class.getName());
     private final int spectralBinning;
     private final double centralWavelength;
     private final double nmppx;
@@ -23,6 +25,7 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
     private VisitableSampledSpectrum detectorsTransmissionValues;
     private List<Integer> detectorCcdIndexes;
     private final GmosCommonType.DetectorManufacturer ccdType;
+    private final GmosCommonType.BuiltinROI ROI;
     private final int gapSizePix;
 
     public DetectorsTransmissionVisitor(final GmosParameters p, final double nmppx, final String filename) {
@@ -32,6 +35,7 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
         this.rulingDensity      = p.grating().rulingDensity();
         final double[][] data   = DatFile.arrays().apply(filename);
         this.ccdType = p.ccdType();
+        this.ROI = p.builtinROI();
 
         switch (p.ccdType()) {
             case E2V:
@@ -57,7 +61,7 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
     }
 
     /**
-     * This method performs the Detectors transmision manipulation on the SED.
+     * This method performs the Detectors transmission manipulation on the SED.
      */
     public void visit(SampledSpectrum sed) {
         for (int i = 0; i < sed.getLength(); i++) {
@@ -77,26 +81,49 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
         int finalPixelValue = (int) data[0][data[0].length - 1];
         double[] pixelData = new double[finalPixelValue];
         pixelData[0] = 1.0; // XXX previously defaulted to 0
-        int j = 0;
+        int j = 0;                                    // ccdpix data index
         detectorCcdIndexes = new ArrayList<>(6);
         detectorCcdIndexes.add(0);
         int prevY = 1;
-        for (int i = 1; i < finalPixelValue; i++) {
-            int x = (int) data[0][j];
-            int y = (int) data[1][j];
-            if (prevY != y) {
+        for (int i = 1; i < finalPixelValue; i++) {   // pixel index
+            int x = (int) data[0][j];                 // ccdpix wavelength
+            int y = (int) data[1][j];                 // ccdpix transmission
+            if (prevY != y) {                         // if the transmission changes then this is a CCD boundary
                 detectorCcdIndexes.add(x - prevY - 1);
                 prevY = y;
             }
-            if (x == i) {
+            if (x == i) {              // if this pixel is in ccdpix use its transmission value
                 pixelData[i] = y;
                 j++;
-            } else {
-                // Apply the last transmission pixel value and go on without incrementing
+            } else {                   // else use the last transmission value and go on without incrementing
                 pixelData[i] = data[1][j - 1];
             }
         }
         detectorCcdIndexes.add(finalPixelValue - 1);
+        // detectorCcdIndexes describes the boundaries of the CCDs and looks like [0, 2047, 2115, 4162, 4230, 6277]
+        Log.fine("detectorCcdIndexes = " + detectorCcdIndexes);
+
+        if (ROI == GmosCommonType.BuiltinROI.CCD2) {
+            Log.fine("Zeroing the transmission of pixels in CCDs 1 and 3...");
+            for (int i = detectorCcdIndexes.get(0); i <= detectorCcdIndexes.get(1); i++) {
+                pixelData[i] = 0.0;
+            }
+            for (int i = detectorCcdIndexes.get(4); i <= detectorCcdIndexes.get(5); i++) {
+                pixelData[i] = 0.0;
+            }
+
+        } else if (ROI == GmosCommonType.BuiltinROI.CENTRAL_STAMP) {
+            Log.fine("Zeroing the transmission of pixels outside the central stamp...");
+            double ccdCenter = (detectorCcdIndexes.get(3) + detectorCcdIndexes.get(2)) / 2.;
+            int roiStart = (int) (ccdCenter - (ROI.getROIDescription().getValue().getXSize() / 2.0 - 0.5));
+            int roiEnd = (int) (ccdCenter + (ROI.getROIDescription().getValue().getXSize() / 2.0 - 0.5));
+            for (int i = detectorCcdIndexes.get(0); i < roiStart; i++) {
+                pixelData[i] = 0.0;
+            }
+            for (int i = roiEnd + 1; i < detectorCcdIndexes.get(5); i++) {
+                pixelData[i] = 0.0;
+            }
+        }
 
         detectorsTransmissionValues = SEDFactory.getSED(pixelData, 1, 1);
 
