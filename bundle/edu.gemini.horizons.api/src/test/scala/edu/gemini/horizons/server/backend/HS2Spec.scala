@@ -122,12 +122,13 @@ object HS2Spec extends Specification with ScalaCheck {
     }
 
     "handle multiple results" in {
+      println(runSearch(Search.MajorBody("mar")).map(_.take(5)))
       runSearch(Search.MajorBody("mar")).map(_.take(5)) must_== \/-(List(
         Row(HD.MajorBody(4), "Mars Barycenter"),
         Row(HD.MajorBody(499), "Mars"),
         Row(HD.MajorBody(723), "Margaret"),
-        Row(HD.MajorBody(65803), "Didymos (primary body)"), // RCN: these two cases started showing
-        Row(HD.MajorBody(136199), "Eris (primary body)")    //  up in October of 2022 (no idea why)
+        Row(HD.MajorBody(50000), "Quaoar (primary body)"),    //  up in October of 2022 (no idea why)
+        Row(HD.MajorBody(65803), "Didymos (primary body)") // RCN: these two cases started showing
       ))
     }
 
