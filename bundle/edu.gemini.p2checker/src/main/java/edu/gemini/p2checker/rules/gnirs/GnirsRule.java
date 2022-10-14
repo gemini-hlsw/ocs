@@ -49,13 +49,16 @@ public class GnirsRule implements IRule {
         @Override
         public Problem check(final Config config, final int step, final ObservationElements elems, final Object state) {
             final Camera camera = (Camera) SequenceRule.getInstrumentItem(config, InstGNIRS.CAMERA_PROP);
-            if (camera == null) return null;
             boolean isShortRed = camera == Camera.SHORT_RED;
+            if (isShortRed) {
+                return new Problem(ERROR, PREFIX + "SHORT_RED_CAMERA_RULE", MESSAGE, elems.getSeqComponentNode());
+            }
+            if (camera != null) return null;
 
             final PixelScale ps = (PixelScale) SequenceRule.getInstrumentItem(config, InstGNIRS.PIXEL_SCALE_PROP);
-            if (!isShortRed && ps != PixelScale.PS_015) return null;
+            if (ps != PixelScale.PS_015) return null;
             final Wavelength l = (Wavelength) SequenceRule.getInstrumentItem(config, InstGNIRS.CENTRAL_WAVELENGTH_PROP);
-            if (!isShortRed && ((l == null) || l.doubleValue() <= 2.5)) return null;
+            if (((l == null) || l.doubleValue() <= 2.5)) return null;
 
             return new Problem(ERROR, PREFIX + "SHORT_RED_CAMERA_RULE", MESSAGE, elems.getSeqComponentNode());
         }
