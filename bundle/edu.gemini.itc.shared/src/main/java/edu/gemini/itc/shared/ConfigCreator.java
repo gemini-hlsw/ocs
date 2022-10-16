@@ -204,8 +204,13 @@ public final class ConfigCreator {
             step.putItem(BuiltinROIKey, (gmosParams.builtinROI()));
             step.putItem(DisperserKey, (gmosParams.grating()));
 
-            final GmosCommonType.Binning xbin = GmosCommonType.Binning.getBinningByValue(gmosParams.spectralBinning());
             final GmosCommonType.Binning ybin = GmosCommonType.Binning.getBinningByValue(gmosParams.spatialBinning());
+            final GmosCommonType.Binning xbin;
+            if (gmosParams.grating().isMirror()) {
+                xbin = ybin;
+            } else {
+                xbin = GmosCommonType.Binning.getBinningByValue(gmosParams.spectralBinning());
+            }
             step.putItem(CcdXBinning, xbin);
             step.putItem(CcdYBinning, ybin);
             step.putItem(AmpGain, (gmosParams.ampGain()));
