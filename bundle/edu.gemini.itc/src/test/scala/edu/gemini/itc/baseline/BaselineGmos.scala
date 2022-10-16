@@ -58,8 +58,8 @@ object BaselineGmos {
       AmpGain.HIGH,
       AmpReadMode.SLOW,
       None,
-      2,
-      4,
+      2,                            // spatial binning
+      4,                            // spectral binning
       DetectorManufacturer.E2V,
       BuiltinROI.FULL_FRAME,
       Site.GS),
