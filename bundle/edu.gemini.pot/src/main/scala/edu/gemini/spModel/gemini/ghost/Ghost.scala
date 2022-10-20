@@ -400,10 +400,10 @@ final class Ghost
     GhostScienceAreaGeometry
 
   override def pwfs1VignettingClearance: Angle =
-    edu.gemini.skycalc.Angle.arcsecs(4.7)
+    edu.gemini.skycalc.Angle.arcmins(4.7)
 
   override def pwfs2VignettingClearance: Angle =
-    edu.gemini.skycalc.Angle.arcsecs(4.0)
+    edu.gemini.skycalc.Angle.arcmins(4.0)
 
 }
 
