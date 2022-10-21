@@ -31,6 +31,7 @@ import edu.gemini.spModel.gemini.parallacticangle.ParallacticAngleSupportInst;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
 import edu.gemini.spModel.guide.GuideProbeUtil;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obs.plannedtime.DefaultStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTime;
@@ -1099,12 +1100,12 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     private static final Angle PWFS2_VIG = Angle.arcmins(4.8);
 
     @Override
-    public Angle pwfs1VignettingClearance() {
+    public Angle pwfs1VignettingClearance(ObsContext ctx) {
         return PWFS1_VIG;
     }
 
     @Override
-    public Angle pwfs2VignettingClearance() {
+    public Angle pwfs2VignettingClearance(ObsContext ctx) {
         return PWFS2_VIG;
     }
 

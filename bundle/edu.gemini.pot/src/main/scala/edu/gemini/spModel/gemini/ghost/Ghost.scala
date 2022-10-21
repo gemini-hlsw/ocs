@@ -8,6 +8,7 @@ import edu.gemini.shared.util.immutable.{Option => JOption}
 import edu.gemini.skycalc.Angle
 import edu.gemini.spModel.config.ConfigPostProcessor
 import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
+import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.data.config.{DefaultParameter, DefaultSysConfig, ISysConfig, StringParameter}
@@ -399,10 +400,15 @@ final class Ghost
   override def getVignettableScienceArea: ScienceAreaGeometry =
     GhostScienceAreaGeometry
 
-  override def pwfs1VignettingClearance: Angle =
-    edu.gemini.skycalc.Angle.arcmins(4.7)
+  override def pwfs1VignettingClearance(ctx: ObsContext): Angle = {
+    val limit = ctx.getTargets.getAsterism match {
+      case GhostAsterism.SingleTarget(_, _) => 4.7
+      case _                                => 5.75
+    }
+    edu.gemini.skycalc.Angle.arcmins(limit)
+  }
 
-  override def pwfs2VignettingClearance: Angle =
+  override def pwfs2VignettingClearance(ctx: ObsContext): Angle =
     edu.gemini.skycalc.Angle.arcmins(4.0)
 
 }

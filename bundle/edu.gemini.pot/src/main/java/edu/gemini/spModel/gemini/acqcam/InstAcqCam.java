@@ -21,6 +21,7 @@ import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams.*;
 import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
@@ -553,6 +554,6 @@ public final class InstAcqCam extends SPInstObsComp implements PropertyProvider 
     private static final Angle PWFS1_VIG = Angle.arcmins(5.8);
     private static final Angle PWFS2_VIG = Angle.arcmins(5.3);
 
-    @Override public Angle pwfs1VignettingClearance() { return PWFS1_VIG; }
-    @Override public Angle pwfs2VignettingClearance() { return PWFS2_VIG; }
+    @Override public Angle pwfs1VignettingClearance(ObsContext ctx) { return PWFS1_VIG; }
+    @Override public Angle pwfs2VignettingClearance(ObsContext ctx) { return PWFS2_VIG; }
 }
