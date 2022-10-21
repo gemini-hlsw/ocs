@@ -20,6 +20,14 @@ object AgsStrategyKey {
     val id = "F2_OIWFS"
   }
 
+  case object GhostPwfs1Key extends AgsStrategyKey {
+    val id = "GHOST_PWFS1"
+  }
+
+  case object GhostPwfs2Key extends AgsStrategyKey {
+    val id = "GHOST_PWFS2"
+  }
+
   case object GmosNorthOiwfsKey extends AgsStrategyKey {
     val id = "GMOS-N_OIWFS"
   }

@@ -396,9 +396,14 @@ final class Ghost
     CommonStepCalculator.instance.calc(cur, prev).addAll(times)
   }
 
-  override def getVignettableScienceArea: ScienceAreaGeometry = GhostScienceAreaGeometry
+  override def getVignettableScienceArea: ScienceAreaGeometry =
+    GhostScienceAreaGeometry
 
-  override def pwfs2VignettingClearance: Angle = Angle.arcmins(5.5)
+  override def pwfs1VignettingClearance: Angle =
+    edu.gemini.skycalc.Angle.arcmins(4.7)
+
+  override def pwfs2VignettingClearance: Angle =
+    edu.gemini.skycalc.Angle.arcmins(4.0)
 
 }
 

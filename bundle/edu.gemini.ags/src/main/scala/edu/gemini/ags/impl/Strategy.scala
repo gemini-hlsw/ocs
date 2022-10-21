@@ -32,7 +32,9 @@ object Strategy {
   val Pwfs1North      = SingleProbeStrategy(Pwfs1NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs1))
   val Pwfs2North      = SingleProbeStrategy(Pwfs2NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs2))
   val Pwfs1South      = SingleProbeStrategy(Pwfs1SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs1))
+  val GhostPwfs1      = GhostStrategy(GhostPwfs1Key,            Pwfs1South)
   val Pwfs2South      = SingleProbeStrategy(Pwfs2SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs2))
+  val GhostPwfs2      = GhostStrategy(GhostPwfs2Key,            Pwfs2South)
 
   val NiciOiwfs       = ScienceTargetStrategy(NiciOiwfsKey,     NiciOiwfsGuideProbe.instance, NiciBandsList)
   val Off             = OffStrategy
@@ -48,6 +50,8 @@ object Strategy {
     AltairAowfs,
     Flamingos2Oiwfs,
     GemsNgs2,
+    GhostPwfs1,
+    GhostPwfs2,
     GmosNorthOiwfs,
     GmosSouthOiwfs,
     GnirsOiwfs,
@@ -91,7 +95,7 @@ object Strategy {
       List(GemsNgs2) ++ oiStategies(ctx, Flamingos2Oiwfs)
     ),
 
-    SPComponentType.INSTRUMENT_GHOST      -> const(List(Pwfs2South, Pwfs1South)),
+    SPComponentType.INSTRUMENT_GHOST      -> const(List(GhostPwfs2, GhostPwfs1)),
 
     SPComponentType.INSTRUMENT_GMOS       -> ((ctx: ObsContext) => {
       val ao = ctx.getAOComponent.asScalaOpt
@@ -122,6 +126,7 @@ object Strategy {
     val isAvailable = GuideProbeUtil.instance.isAvailable(ctx, _: GuideProbe)
     s match {
       case SingleProbeStrategy(_, params, _) => isAvailable(params.guideProbe)
+      case GhostStrategy(_, delegate)        => guidersAvailable(ctx)(delegate)
       case ScienceTargetStrategy(_, gp, _)   => isAvailable(gp)
       case Ngs2Strategy(_, _)                => isAvailable(CanopusWfs.cwfs3) && isAvailable(PwfsGuideProbe.pwfs1)
       case _                                 => false
