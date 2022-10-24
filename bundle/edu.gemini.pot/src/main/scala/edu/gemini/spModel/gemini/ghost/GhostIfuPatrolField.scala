@@ -3,12 +3,11 @@
 
 package edu.gemini.spModel.gemini.ghost
 
-import edu.gemini.spModel.core.{Angle, Coordinates, Offset}
+import edu.gemini.spModel.core.{Angle, Coordinates, Offset, OffsetP, OffsetQ}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.telescope.IssPort
 
 import java.awt.geom.{AffineTransform, Area, Rectangle2D}
-
 import scala.collection.JavaConverters._
 
 
@@ -32,6 +31,20 @@ object GhostIfuPatrolField {
   val ScaleMmToArcsec: Double = 1.0 / 0.61  // arcsec / mm
   val TransformMmToArcsec: AffineTransform =
     AffineTransform.getScaleInstance(ScaleMmToArcsec, ScaleMmToArcsec)
+
+  // From REL-4199 there are offsets to be applied for p2 checks
+  val SRIFU1SeparationOffset: Offset =
+    Offset(OffsetP(Angle.fromArcsecs(-ScaleMmToArcsec)), OffsetQ(Angle.fromArcsecs(ScaleMmToArcsec)))
+
+  val SRIFU2SeparationOffset: Offset =
+    Offset(OffsetP(Angle.zero), OffsetQ(Angle.fromArcsecs(ScaleMmToArcsec)))
+
+  val HRIFUSeparationOffset: Offset =
+    Offset(OffsetP(Angle.zero), OffsetQ(Angle.fromArcsecs(-ScaleMmToArcsec)))
+
+  val HRSkySeparationOffset: Offset =
+    Offset(OffsetP(Angle.zero), OffsetQ(Angle.fromArcsecs(-ScaleMmToArcsec)))
+  // End offsets for REL-4199
 
   val HrSkyFiberOffset: Angle =
     Angle.fromArcsecs(2.0 * ScaleMmToArcsec)

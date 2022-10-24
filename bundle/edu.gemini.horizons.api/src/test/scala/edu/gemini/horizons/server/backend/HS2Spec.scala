@@ -17,15 +17,15 @@ object HS2Spec extends Specification with ScalaCheck {
   import HorizonsService2.{ HS2Error, Row, Search, search, lookupEphemeris, lookupEphemerisE, EphemerisEmpty }
   import edu.gemini.spModel.core.{ HorizonsDesignation => HD, Semester, Site, Ephemeris }
   import edu.gemini.horizons.api.EphemerisEntry
-  
+
   def runSearch[A](s: Search[A]): HS2Error \/ List[Row[A]] =
     search(s).run.unsafePerformIO
 
   def runLookup(d: HD, n: Int): HS2Error \/ Ephemeris =
     lookupEphemeris(d, Site.GS, n).run.unsafePerformIO
 
-  def runLookupE(d: HD, n: Int): HS2Error \/ (Long ==>> EphemerisEntry) = {    
-    val sem = Semester.parse("2023A") // pick a point in time    
+  def runLookupE(d: HD, n: Int): HS2Error \/ (Long ==>> EphemerisEntry) = {
+    val sem = Semester.parse("2023A") // pick a point in time
     lookupEphemerisE(d, Site.GS, sem.getStartDate(Site.GS), sem.getEndDate(Site.GS), n)(_.some).run.unsafePerformIO
   }
 
