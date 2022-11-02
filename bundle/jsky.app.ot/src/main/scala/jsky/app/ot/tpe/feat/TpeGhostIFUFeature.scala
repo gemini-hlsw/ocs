@@ -137,10 +137,9 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
 
               // IFU2
               val p2 = pm.getLocationFromTag(s)
-              // We don't draw the SRIFU2, apparently, even though its position
-              // determines the position of the HR sky fibers
-              // drawStandardResolutionIfu(g2d, p2, Ifu2, AsSky)
-              drawHighResolutionSky(g2d, p2)
+              // We draw the SRIFU2 as Sky
+              drawStandardResolutionIfu(g2d, p2, Ifu2, AsSky)
+              //drawHighResolutionSky(g2d, p2)
           }
         }
 
