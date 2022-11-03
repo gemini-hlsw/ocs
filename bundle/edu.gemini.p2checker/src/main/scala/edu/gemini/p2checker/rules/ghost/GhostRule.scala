@@ -63,18 +63,38 @@ object GhostRule extends IRule {
     ): List[Problem] =
       ast match {
         case GhostAsterism.SingleTarget(t, _)                   =>
-          checkOne("IFU1", node, base, t.coordinates(when).map(_.offset(SRIFU1SeparationOffset.p.toAngle, SRIFU1SeparationOffset.q.toAngle)), GhostIfuPatrolField.ifu1(ctx))
+          checkOne("IFU1",
+            node,
+            base,
+            t.coordinates(when).map(_.offset(SRIFU1SeparationOffset.p.toAngle, SRIFU1SeparationOffset.q.toAngle)),
+            GhostIfuPatrolField.ifu1(ctx))
         case GhostAsterism.DualTarget(t1, t2, _)                =>
-          checkBoth(ctx, node, base, t1.coordinates(when).map(_.offset(SRIFU1SeparationOffset.p.toAngle, SRIFU1SeparationOffset.q.toAngle)), t2.coordinates(when).map(_.offset(SRIFU2SeparationOffset.p.toAngle, SRIFU2SeparationOffset.q.toAngle)))
+          checkBoth(ctx,
+            node,
+            base,
+            t1.coordinates(when).map(_.offset(SRIFU1SeparationOffset.p.toAngle, SRIFU1SeparationOffset.q.toAngle)),
+            t2.coordinates(when).map(_.offset(SRIFU2SeparationOffset.p.toAngle, SRIFU2SeparationOffset.q.toAngle)))
         case GhostAsterism.TargetPlusSky(t, s, _)               =>
-          checkBoth(ctx, node, base, t.coordinates(when).map(_.offset(SRIFU1SeparationOffset.p.toAngle, SRIFU1SeparationOffset.q.toAngle)), Some(s.coordinates))
+          checkBoth(ctx,
+            node,
+            base,
+            t.coordinates(when).map(_.offset(SRIFU1SeparationOffset.p.toAngle, SRIFU1SeparationOffset.q.toAngle)),
+            Some(s.coordinates.offset(SRIFU2SeparationOffset.p.toAngle, SRIFU2SeparationOffset.q.toAngle)))
         case GhostAsterism.SkyPlusTarget(s, t, _)               =>
-          checkBoth(ctx, node, base, Some(s.coordinates), t.coordinates(when).map(_.offset(SRIFU2SeparationOffset.p.toAngle, SRIFU2SeparationOffset.q.toAngle)))
-        case hr@GhostAsterism.HighResolutionTargetPlusSky(t, sky, _) =>
+          checkBoth(ctx,
+            node,
+            base,
+            Some(s.coordinates.offset(SRIFU1SeparationOffset.p.toAngle, SRIFU1SeparationOffset.q.toAngle)),
+            t.coordinates(when).map(_.offset(SRIFU2SeparationOffset.p.toAngle, SRIFU2SeparationOffset.q.toAngle)))
+        case GhostAsterism.HighResolutionTargetPlusSky(t, sky, _) =>
           // The sky position is taken from the user configuration, but the
           // actual SRIFU2 is positioned just south of that.  For the range
           // check we need to use the actual SRIFU2 location.
-          checkBoth(ctx, node, base, t.coordinates(when).map(_.offset(HRIFUSeparationOffset.p.toAngle, HRIFUSeparationOffset.q.toAngle)), Some(sky.coordinates.offset(HRSkySeparationOffset.p.toAngle, HRSkySeparationOffset.q.toAngle)))
+          checkBoth(ctx,
+            node,
+            base,
+            t.coordinates(when).map(_.offset(HRIFUSeparationOffset.p.toAngle, HRIFUSeparationOffset.q.toAngle)),
+            Some(sky.coordinates.offset(HRSkySeparationOffset.p.toAngle, HRSkySeparationOffset.q.toAngle)))
         case _                                                  =>
           Nil
       }
