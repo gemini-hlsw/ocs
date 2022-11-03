@@ -6,13 +6,19 @@ import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.obslog.{ObsQaLog, ObsExecLog, ObsLog}
 
+import java.util.concurrent.atomic.AtomicLong
+import java.util.logging.Logger
+
 import scalaz._
+import scalaz.concurrent.Task
 import Scalaz._
 
 /** Low-level actions for working with science programs.  These are meant to be
   * included in building up larger actions.
   */
 object ModelActions {
+  private val Log = Logger.getLogger(ModelActions.getClass.getName)
+
   def lookupProgram(pid: SPProgramID, odb: IDBDatabaseService): DmanAction[ISPProgram] =
     safeGet(odb.lookupProgramByID(pid), s"Missing program '$pid'")
 
@@ -22,8 +28,30 @@ object ModelActions {
   def lookupObs(oid: SPObservationID, odb: IDBDatabaseService): DmanAction[ISPObservation] =
     safeGet(odb.lookupObservationByID(oid), s"Missing observation '$oid'")
 
-  private def locked[A](k: SPNodeKey, lock: SPNodeKey => Unit, unlock: SPNodeKey => Unit)(body: => DmanAction[A]): DmanAction[A] =
-    DmanAction(lock(k)) >> { try { body } finally { unlock(k) } }
+  private def locked[A](k: SPNodeKey, lock: SPNodeKey => Unit, unlock: SPNodeKey => Unit)(body: => DmanAction[A]): DmanAction[A] = {
+    val a = new AtomicLong()
+
+    def recordAndLock(): Unit = {
+      a.set(Thread.currentThread.getId)
+      lock(k)
+    }
+
+    def checkAndUnlock(): Unit = {
+      val lockingThreadId   = a.get
+      val unlockingThreadId = Thread.currentThread.getId
+      if (lockingThreadId != unlockingThreadId) {
+        Log.severe(s"Unlocking thread ($unlockingThreadId) differs from locking thread ($lockingThreadId). This will fail.")
+      }
+      unlock(k)
+    }
+
+    DmanAction(recordAndLock()) >>
+      // catch exceptions in the calculation of `body` itself
+      (try { body } catch { case e: Throwable => DmanFailure.DmanException(e).left[A].liftDman })
+        .run
+        .onFinish(_ => Task.delay(checkAndUnlock()))
+        .liftDman
+  }
 
   def readLocked[A](k: SPNodeKey)(body: => DmanAction[A]): DmanAction[A] =
     locked(k, SPNodeKeyLocks.instance.readLock, SPNodeKeyLocks.instance.readUnlock)(body)
