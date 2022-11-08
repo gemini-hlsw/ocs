@@ -554,7 +554,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
      * A panel to house one component in a tab.
      */
     private def makeTabPane(component: Component, addGlue: Boolean = true): Panel = {
-      var panel = new BoxPanel(Orientation.Vertical)
+      val panel = new BoxPanel(Orientation.Vertical)
       panel.border = ComponentEditor.TAB_PANEL_BORDER
       panel.contents += component
       if (addGlue)
@@ -579,6 +579,13 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
 
         // The new resolution mode.
         val newResolutionMode = resolutionModeComboBox.selection.item
+        if (newResolutionMode === ResolutionMode.GhostPRV) {
+          Option(getDataObject).foreach(_.setEnableFiberAgitator1(true))
+          Option(getDataObject).foreach(_.setEnableFiberAgitator2(true))
+        } else {
+          Option(getDataObject).foreach(_.setEnableFiberAgitator1(false))
+          Option(getDataObject).foreach(_.setEnableFiberAgitator2(false))
+        }
 
         // The asterism type.
         val asterismType = asterismComboBox.selection.item

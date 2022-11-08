@@ -238,9 +238,9 @@ final class Ghost
   }
 
   /**
-   * Fiber agitator 1: default is enabled.
+   * Fiber agitator 1: default is disabled.
    */
-  private var enableFiberAgitator1: Boolean = true
+  private var enableFiberAgitator1: Boolean = false
 
   def isEnableFiberAgitator1: Boolean = enableFiberAgitator1
 
@@ -253,9 +253,9 @@ final class Ghost
   }
 
   /**
-   * Fiber agitator 2: default is enabled.
+   * Fiber agitator 2: default is disabled
    */
-  private var enableFiberAgitator2: Boolean = true
+  private var enableFiberAgitator2: Boolean = false
 
   def isEnableFiberAgitator2: Boolean = enableFiberAgitator2
 
