@@ -408,8 +408,13 @@ final class Ghost
     edu.gemini.skycalc.Angle.arcmins(limit)
   }
 
-  override def pwfs2VignettingClearance(ctx: ObsContext): Angle =
-    edu.gemini.skycalc.Angle.arcmins(4.0)
+  override def pwfs2VignettingClearance(ctx: ObsContext): Angle = {
+    val limit = ctx.getTargets.getAsterism match {
+      case GhostAsterism.SingleTarget(_, _) => 4.0
+      case _                                => 5.25
+    }
+    edu.gemini.skycalc.Angle.arcmins(limit)
+  }
 
 }
 
