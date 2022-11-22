@@ -188,6 +188,28 @@ object GhostAsterism {
       Lens.lensu((a,b) => a.copy(overriddenBase = b), _.overriddenBase)
   }
 
+  sealed trait PrvMode extends Product with Serializable {
+    def tag: String
+  }
+
+  object PrvMode {
+    case object PrvOn extends PrvMode {
+      def tag: String = "PRV_ON"
+    }
+    case object PrvOff extends PrvMode {
+      def tag: String = "PRV_OFF"
+    }
+
+    val All: List[PrvMode] =
+      List(PrvOn, PrvOff)
+
+    def fromTag(tag: String): Option[PrvMode] =
+      All.find(_.tag === tag)
+
+    def unsafeFromTag(tag: String): PrvMode =
+      fromTag(tag).get
+  }
+
   /** High resolution modes.
     *
     * They have a calibration duration (of type Duration), which should be
@@ -198,12 +220,12 @@ object GhostAsterism {
     * guide fibers will be used by default because the target must be bright,
     * but can be explicitly turned off.
     */
-  sealed abstract class HighResolution(target: GhostTarget) extends GhostAsterism with Serializable {
+  sealed abstract class HighResolution(target: GhostTarget, prvMode: PrvMode) extends GhostAsterism with Serializable {
     override def allSpTargets: NonEmptyList[SPTarget] =
       NonEmptyList(target.spTarget)
 
     override def allSpCoordinates: List[SPCoordinates] = this match {
-      case HighResolutionTargetPlusSky(_,s,b) => b.toList :+ s
+      case HighResolutionTargetPlusSky(_,s,_,b) => b.toList :+ s
     }
 
     /** Defines the default base position to be the same as the target position. */
@@ -214,23 +236,27 @@ object GhostAsterism {
       Target.pm.get(target.spTarget.getTarget)
 
     override def copyWithClonedTargets: Asterism = this match {
-      case HighResolutionTargetPlusSky(t,s,b) => HighResolutionTargetPlusSky(t.copyWithClonedTarget, s.clone, b.map(_.clone))
+      case HighResolutionTargetPlusSky(t,s,p,b) => HighResolutionTargetPlusSky(t.copyWithClonedTarget, s.clone, p, b.map(_.clone))
     }
 
-    override def resolutionMode: ResolutionMode = ResolutionMode.GhostHigh
+    override def resolutionMode: ResolutionMode =
+      prvMode match {
+        case PrvMode.PrvOn  => ResolutionMode.GhostPRV
+        case PrvMode.PrvOff => ResolutionMode.GhostHigh
+      }
 
     override def asterismType: AsterismType = this match {
-      case HighResolutionTargetPlusSky(_,_,_) => AsterismType.GhostHighResolutionTargetPlusSky
+      case HighResolutionTargetPlusSky(_,_,_,_) => AsterismType.GhostHighResolutionTargetPlusSky
     }
 
     def hrifu: GhostTarget =
       this match {
-        case HighResolutionTargetPlusSky(t,_,_) => t
+        case HighResolutionTargetPlusSky(t,_,_,_) => t
       }
 
     def hrsky: SPCoordinates =
       this match {
-        case HighResolutionTargetPlusSky(_,s,_) => s
+        case HighResolutionTargetPlusSky(_,s,_,_) => s
       }
 
     def srifu2(posAngle: Angle): Coordinates = {
@@ -243,7 +269,7 @@ object GhostAsterism {
       val q = Angle.fromArcsecs( y * Math.cos(θ))
 
       this match {
-        case HighResolutionTargetPlusSky(_, s, _) =>
+        case HighResolutionTargetPlusSky(_, s, _, _) =>
           s.coordinates.offset(p, q)
       }
     }
@@ -251,15 +277,18 @@ object GhostAsterism {
 
   final case class HighResolutionTargetPlusSky(target: GhostTarget,
                                                sky:    SPCoordinates,
-                                               override val overriddenBase: Option[SPCoordinates]) extends HighResolution(target)
+                                               prv:    PrvMode,
+                                               override val overriddenBase: Option[SPCoordinates]) extends HighResolution(target, prv)
 
   object HighResolution {
-    val emptyHRTargetPlusSky: HighResolutionTargetPlusSky = HighResolutionTargetPlusSky(GhostTarget.empty, new SPCoordinates, None)
+    def emptyHRTargetPlusSky(prvMode: PrvMode): HighResolutionTargetPlusSky = HighResolutionTargetPlusSky(GhostTarget.empty, new SPCoordinates, prvMode, None)
 
     val HRTargetPlusSkyIFU1: HighResolutionTargetPlusSky @> GhostTarget =
       Lens.lensu((a,b) => a.copy(target = b), _.target)
     val HRTargetPlusSkyIFU2: HighResolutionTargetPlusSky @> SPCoordinates =
       Lens.lensu((a,b) => a.copy(sky = b), _.sky)
+    val HRTargetPlusSkyPrvMode: HighResolutionTargetPlusSky @> PrvMode =
+      Lens.lensu((a, b) => a.copy(prv = b), _.prv)
     val HRTargetPlusSkyOverriddenBase: HighResolutionTargetPlusSky @> Option[SPCoordinates] =
       Lens.lensu((a,b) => a.copy(overriddenBase = b), _.overriddenBase)
   }
@@ -282,8 +311,8 @@ object GhostAsterism {
     StandardResolution.emptySkyPlusTarget.copyWithClonedTargets
   }
 
-  def createEmptyHRTargetPlusSkyAsterism: Asterism = {
-    HighResolution.emptyHRTargetPlusSky.copyWithClonedTargets
+  def createEmptyHRTargetPlusSkyAsterism(prv: PrvMode): Asterism = {
+    HighResolution.emptyHRTargetPlusSky(prv).copyWithClonedTargets
   }
 
   // Names of the IFUs.

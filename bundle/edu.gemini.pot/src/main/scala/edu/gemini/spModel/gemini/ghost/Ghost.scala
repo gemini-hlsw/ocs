@@ -529,6 +529,8 @@ object Ghost {
   val HRIFU2_RA_HMS: String    = "hrifu2CoordsRAHMS"
   val HRIFU2_DEC_DMS: String   = "hrifu2CoordsDecDMS"
 
+  val RESOLUTION_MODE: String  = "resolutionMode"
+
   // Property names for user targets
   def userTargetParams(index: Int): (String, String, String, String, String) =
     (s"userTarget${index}Name", s"userTarget${index}CoordsRADeg", s"userTarget${index}CoordsDecDeg", s"userTarget${index}CoordsRAHMS", s"userTarget${index}CoordsDecDMS")

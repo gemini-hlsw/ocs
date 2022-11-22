@@ -130,7 +130,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
               val p2 = pm.getLocationFromTag(t.spTarget)
               drawStandardResolutionIfu(g2d, p2, Ifu2, AsTarget)
 
-            case GhostAsterism.HighResolutionTargetPlusSky(t, s, _) =>
+            case GhostAsterism.HighResolutionTargetPlusSky(t, s, _, _) =>
               // IFU1
               val p1 = pm.getLocationFromTag(t.spTarget)
               drawHighResolutionIfu(g2d, p1)

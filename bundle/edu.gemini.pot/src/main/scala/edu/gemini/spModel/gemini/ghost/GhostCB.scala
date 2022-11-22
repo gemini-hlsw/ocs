@@ -97,6 +97,7 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
             coordParam(ut.target, Some(a), b, c, d, e)
             config.putParameter(systemName, DefaultParameter.getInstance(s"userTarget${i+1}Type", ut.`type`))
           }
+          config.putParameter(systemName, DefaultParameter.getInstance(Ghost.RESOLUTION_MODE, t.getAsterism.resolutionMode.tag))
           t.getAsterism match {
 
             /** STANDARD RESOLUTION
