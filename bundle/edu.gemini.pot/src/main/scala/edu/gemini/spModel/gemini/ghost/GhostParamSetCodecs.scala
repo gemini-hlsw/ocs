@@ -13,9 +13,13 @@ object GhostParamSetCodecs {
   private val Target  = "target"
   private val GFState = "guideFiberState"
   private val Base    = "base"
+  private val Prv     = "prv"
 
   implicit val GuideFiberStateParamCodec: ParamCodec[GuideFiberState] =
     ParamCodec[String].xmap(GuideFiberState.unsafeFromString, _.name)
+
+  implicit val PrvModeParamCodec: ParamCodec[PrvMode] =
+    ParamCodec[String].xmap(PrvMode.unsafeFromTag, _.tag)
 
   implicit val GhostTargetParamSetCodec: ParamSetCodec[GhostTarget] =
     ParamSetCodec.initial(GhostTarget.empty)
@@ -46,8 +50,9 @@ object GhostParamSetCodecs {
       .withOptionalParamSet(Base, SkyPlusTargetOverriddenBase)
 
   implicit val HRTargetPlusSkyParamSetCodec: ParamSetCodec[HighResolutionTargetPlusSky] =
-    ParamSetCodec.initial(emptyHRTargetPlusSky)
+    ParamSetCodec.initial(emptyHRTargetPlusSky(PrvMode.PrvOff))
       .withParamSet(IFU1, HRTargetPlusSkyIFU1)
       .withParamSet(IFU2, HRTargetPlusSkyIFU2)
+      .withParam(Prv, HRTargetPlusSkyPrvMode)
       .withOptionalParamSet(Base, HRTargetPlusSkyOverriddenBase)
 }

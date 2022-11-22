@@ -609,7 +609,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
             resolutionModeComboBox.selection.item = GhostStandard
           }
           val nat = newAsterismType.getOrElse(GhostSingleTarget)
-          nat.converter.asScalaOpt.foreach(convertAsterism)
+          nat.converter.asScalaOpt.foreach(convertAsterism(_, newResolutionMode.some))
           asterismComboBox.selection.item = nat
         }
         listenTo(asterismComboBox.selection)
@@ -625,7 +625,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     reactions += {
       case SelectionChanged(`asterismComboBox`) => Swing.onEDT {
         val converter = asterismComboBox.selection.item.converter.asScalaOpt
-        converter.foreach(convertAsterism)
+        converter.foreach(convertAsterism(_, None))
       }
     }
 
@@ -633,20 +633,39 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       getContextObservation.findTargetObsComp.map(_.getAsterism.resolutionMode).getOrElse(ResolutionMode.GhostStandard)
 
     /** Convert the asterism to the new type, and set the new target environment. */
-    def convertAsterism(converter: AsterismConverter): Unit = Swing.onEDT {
-      // Disable the combo box, and enable it only if conversion succeeds.
-      // If the conversion fails, the combo box will stay disabled and a P2 error will be generated.
-      asterismComboBox.enabled = false
+    def convertAsterism(
+      converter: AsterismConverter,
+      newResolutionMode: Option[ResolutionMode]
+    ): Unit = {
+      val prvModeOption = newResolutionMode.flatMap {
+        case ResolutionMode.GhostHigh => PrvMode.PrvOff.some
+        case ResolutionMode.GhostPRV  => PrvMode.PrvOn.some
+        case _                        => none
+      }
 
-      for {
-        oc <- Option(getContextTargetObsComp)
-        toc <- Option(oc.getDataObject).collect { case t: TargetObsComp => t }
-        env <- converter.convert(toc.getTargetEnvironment)
-      } {
-        toc.setTargetEnvironment(env)
-        oc.setDataObject(toc)
-        asterismComboBox.enabled = true
-        initIFUs()
+      Swing.onEDT {
+        // Disable the combo box, and enable it only if conversion succeeds.
+        // If the conversion fails, the combo box will stay disabled and a P2 error will be generated.
+        asterismComboBox.enabled = false
+
+        for {
+          oc <- Option(getContextTargetObsComp)
+          toc <- Option(oc.getDataObject).collect { case t: TargetObsComp => t }
+          env <- converter.convert(toc.getTargetEnvironment)
+        } {
+          val newEnv = prvModeOption.fold(env) { prvMode =>
+            env.getAsterism match {
+              case HighResolutionTargetPlusSky(t, s, p, b) if p != prvMode =>
+                env.setAsterism(HighResolutionTargetPlusSky(t, s, prvMode, b))
+              case _                                                       =>
+                env
+            }
+          }
+          toc.setTargetEnvironment(newEnv)
+          oc.setDataObject(toc)
+          asterismComboBox.enabled = true
+          initIFUs()
+        }
       }
     }
 
@@ -738,12 +757,12 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       Option(getContextTargetEnv).foreach(env => {
         val asterism = env.getAsterism
         val (name1: String, name2Opt: Option[String]) = asterism match {
-          case GhostAsterism.SingleTarget(gt, _)                   => (gt.spTarget.getName, None)
-          case GhostAsterism.DualTarget(gt1, gt2, _)               => (gt1.spTarget.getName, Some(gt2.spTarget.getName))
-          case GhostAsterism.TargetPlusSky(gt1, _, _)              => (gt1.spTarget.getName, Some(Sky))
-          case GhostAsterism.SkyPlusTarget(_, gt2, _)              => (Sky, Some(gt2.spTarget.getName))
-          case GhostAsterism.HighResolutionTargetPlusSky(gt, _, _) => (gt.spTarget.getName, Some(Sky))
-          case _                                                   => sys.error("illegal asterism type")
+          case GhostAsterism.SingleTarget(gt, _)                      => (gt.spTarget.getName, None)
+          case GhostAsterism.DualTarget(gt1, gt2, _)                  => (gt1.spTarget.getName, Some(gt2.spTarget.getName))
+          case GhostAsterism.TargetPlusSky(gt1, _, _)                 => (gt1.spTarget.getName, Some(Sky))
+          case GhostAsterism.SkyPlusTarget(_, gt2, _)                 => (Sky, Some(gt2.spTarget.getName))
+          case GhostAsterism.HighResolutionTargetPlusSky(gt, _, _, _) => (gt.spTarget.getName, Some(Sky))
+          case _                                                      => sys.error("illegal asterism type")
         }
         targetPane.ifu1TargetName.text = name1
         name2Opt.foreach(name2 => {
@@ -752,12 +771,12 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         targetPane.ifu2Pane.visible = name2Opt.isDefined
 
         val (guideFibers1: Boolean, editableGuideFibers1: Boolean, guideFibers2: Boolean, editableGuideFibers2: Boolean) = asterism match {
-          case SingleTarget(gt, _)                                 => (gt.guideFiberState === Enabled, true, false, false)
-          case GhostAsterism.DualTarget(gt1, gt2, _)               => (gt1.guideFiberState == Enabled, true, gt2.guideFiberState == Enabled, true)
-          case GhostAsterism.TargetPlusSky(gt, _, _)               => (gt.guideFiberState === Enabled, true, false, false)
-          case GhostAsterism.SkyPlusTarget(_, gt2, _)              => (false, false, gt2.guideFiberState === Enabled, true)
-          case GhostAsterism.HighResolutionTargetPlusSky(gt, _, _) => (gt.guideFiberState === Enabled, true, false, false)
-          case _                                                   => sys.error("illegal asterism type")
+          case SingleTarget(gt, _)                                    => (gt.guideFiberState === Enabled, true, false, false)
+          case GhostAsterism.DualTarget(gt1, gt2, _)                  => (gt1.guideFiberState == Enabled, true, gt2.guideFiberState == Enabled, true)
+          case GhostAsterism.TargetPlusSky(gt, _, _)                  => (gt.guideFiberState === Enabled, true, false, false)
+          case GhostAsterism.SkyPlusTarget(_, gt2, _)                 => (false, false, gt2.guideFiberState === Enabled, true)
+          case GhostAsterism.HighResolutionTargetPlusSky(gt, _, _, _) => (gt.guideFiberState === Enabled, true, false, false)
+          case _                                                      => sys.error("illegal asterism type")
         }
 
         deafTo(targetPane.ifu1GuideFiberCheckBox)

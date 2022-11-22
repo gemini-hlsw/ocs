@@ -27,11 +27,11 @@ object AsterismConverters {
       env.getAsterism match {
         case ga: GhostAsterism =>
           ga match {
-            case SingleTarget(t, b)                   => creator(env, t,     None,   None, b).some
-            case DualTarget(t1, t2, b)                => creator(env, t1, t2.some,   None, b).some
-            case TargetPlusSky(t, s, b)               => creator(env, t,     None, s.some, b).some
-            case SkyPlusTarget(s, t, b)               => creator(env, t,     None, s.some, b).some
-            case HighResolutionTargetPlusSky(t, s, b) => creator(env, t,     None, s.some, b).some
+            case SingleTarget(t, b)                      => creator(env, t,     None,   None, b).some
+            case DualTarget(t1, t2, b)                   => creator(env, t1, t2.some,   None, b).some
+            case TargetPlusSky(t, s, b)                  => creator(env, t,     None, s.some, b).some
+            case SkyPlusTarget(s, t, b)                  => creator(env, t,     None, s.some, b).some
+            case HighResolutionTargetPlusSky(t, s, _, b) => creator(env, t,     None, s.some, b).some
           }
         case _                 =>
           None
@@ -87,7 +87,7 @@ object AsterismConverters {
     override def name: String = "GhostAsterism.HighResolutionTargetPlusSky"
 
     override protected def creator(env: TargetEnvironment, t: GhostTarget, t2: Option[GhostTarget], s: SkyPosition, b: BasePosition): TargetEnvironment = {
-      val asterism    = HighResolutionTargetPlusSky(t, s.getOrElse(new SPCoordinates), b)
+      val asterism    = HighResolutionTargetPlusSky(t, s.getOrElse(new SPCoordinates), PrvMode.PrvOff, b)
       val userTargets = appendTarget(env.getUserTargets, gT2UT(t2))
       TargetEnvironment.createWithClonedTargets(asterism, env.getGuideEnvironment, userTargets)
     }
