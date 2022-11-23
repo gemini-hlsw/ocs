@@ -8,6 +8,7 @@ import edu.gemini.pot.sp.*;
 import edu.gemini.pot.spdb.DBLocalDatabase;
 import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.spModel.core.SPProgramID;
+import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import junit.framework.TestCase;
@@ -92,6 +93,13 @@ public abstract class SpModelTestBase extends TestCase {
         TargetObsComp dataObj = (TargetObsComp) target.getDataObject();
         if (dataObj == null) return null;
         return dataObj.getTargetEnvironment();
+    }
+
+    protected void setAsterism(Asterism a) throws Exception {
+        final TargetEnvironment env = getTargetEnvironment().setAsterism(a);
+        final TargetObsComp dataObj = (TargetObsComp) target.getDataObject();
+        dataObj.setTargetEnvironment(env);
+        target.setDataObject(dataObj);
     }
 
     protected ISPSeqComponent addSeqComponent(ISPSeqComponent parent, SPComponentType type) throws Exception {
