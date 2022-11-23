@@ -139,10 +139,11 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       GhostDualTarget,
       GhostTargetPlusSky,
       GhostSkyPlusTarget,
-      GhostHighResolutionTargetPlusSky
+      GhostHighResolutionTargetPlusSky,
+      GhostHighResolutionTargetPlusSkyPrv
     )
 
-    val asterismComboBox: ComboBox[AsterismType] = new ComboBox[AsterismType](resolutionModeComboBox.selection.item.asterismTypes.asScala)
+    val asterismComboBox: ComboBox[AsterismType] = new ComboBox[AsterismType](resolutionModeComboBox.selection.item.asterismTypes.asScala.toList)
     layout(asterismComboBox) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 1
@@ -599,18 +600,19 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         // If they are not the same, convert the asterism type from the old resolution mode
         // to the new resolution mode and store.
         if (originalResolutionMode != newResolutionMode) {
-          val newAsterismType = AsterismTypeConverters.asterismTypeConverters((originalResolutionMode, asterismType, newResolutionMode))
-
-          // If we find ourselves in an inconsistent state with regards to resolution mode and asterism type, default back to standard mode, ghost single
-          // target to try to preserve as much information as possible and log a severe error message.
-          if (newAsterismType.isEmpty) {
-            LOG.severe(s"GHOST observation has incompatible resolution type ${originalResolutionMode.displayName} and asterism type ${asterismType.displayName}." +
-              "\n\tResetting to standard mode with single target.")
-            resolutionModeComboBox.selection.item = GhostStandard
+          val newAsterismType = newResolutionMode match  {
+            case GhostStandard => GhostTargetPlusSky
+            case GhostHigh     => GhostHighResolutionTargetPlusSky
+            case GhostPRV      => GhostHighResolutionTargetPlusSkyPrv
+            case _             => GhostSingleTarget
           }
-          val nat = newAsterismType.getOrElse(GhostSingleTarget)
-          nat.converter.asScalaOpt.foreach(convertAsterism(_, newResolutionMode.some))
-          asterismComboBox.selection.item = nat
+
+          if (newResolutionMode != newAsterismType.resolutionMode) {
+            resolutionModeComboBox.selection.item = newAsterismType.resolutionMode
+          }
+
+          newAsterismType.converter.asScalaOpt.foreach(convertAsterism)
+          asterismComboBox.selection.item = newAsterismType
         }
         listenTo(asterismComboBox.selection)
         listenTo(resolutionModeComboBox.selection)
@@ -625,7 +627,7 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
     reactions += {
       case SelectionChanged(`asterismComboBox`) => Swing.onEDT {
         val converter = asterismComboBox.selection.item.converter.asScalaOpt
-        converter.foreach(convertAsterism(_, None))
+        converter.foreach(convertAsterism)
       }
     }
 
@@ -633,41 +635,23 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       getContextObservation.findTargetObsComp.map(_.getAsterism.resolutionMode).getOrElse(ResolutionMode.GhostStandard)
 
     /** Convert the asterism to the new type, and set the new target environment. */
-    def convertAsterism(
-      converter: AsterismConverter,
-      newResolutionMode: Option[ResolutionMode]
-    ): Unit = {
-      val prvModeOption = newResolutionMode.flatMap {
-        case ResolutionMode.GhostHigh => PrvMode.PrvOff.some
-        case ResolutionMode.GhostPRV  => PrvMode.PrvOn.some
-        case _                        => none
-      }
-
+    def convertAsterism(converter: AsterismConverter): Unit =
       Swing.onEDT {
         // Disable the combo box, and enable it only if conversion succeeds.
         // If the conversion fails, the combo box will stay disabled and a P2 error will be generated.
         asterismComboBox.enabled = false
 
         for {
-          oc <- Option(getContextTargetObsComp)
+          oc  <- Option(getContextTargetObsComp)
           toc <- Option(oc.getDataObject).collect { case t: TargetObsComp => t }
           env <- converter.convert(toc.getTargetEnvironment)
         } {
-          val newEnv = prvModeOption.fold(env) { prvMode =>
-            env.getAsterism match {
-              case HighResolutionTargetPlusSky(t, s, p, b) if p != prvMode =>
-                env.setAsterism(HighResolutionTargetPlusSky(t, s, prvMode, b))
-              case _                                                       =>
-                env
-            }
-          }
-          toc.setTargetEnvironment(newEnv)
+          toc.setTargetEnvironment(env)
           oc.setDataObject(toc)
           asterismComboBox.enabled = true
           initIFUs()
         }
       }
-    }
 
     reactions += {
       case ButtonClicked(targetPane.ifu1GuideFiberCheckBox) =>
