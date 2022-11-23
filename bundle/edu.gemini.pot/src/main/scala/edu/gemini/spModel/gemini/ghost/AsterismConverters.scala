@@ -83,16 +83,21 @@ object AsterismConverters {
     }
   }
 
-  case object GhostHRTargetPlusSkyConverter extends GhostAsterismConverter {
-    override def name: String = "GhostAsterism.HighResolutionTargetPlusSky"
-
+  abstract class GhostHrConverter(val prv: PrvMode) extends GhostAsterismConverter {
     override protected def creator(env: TargetEnvironment, t: GhostTarget, t2: Option[GhostTarget], s: SkyPosition, b: BasePosition): TargetEnvironment = {
-      val asterism    = HighResolutionTargetPlusSky(t, s.getOrElse(new SPCoordinates), PrvMode.PrvOff, b)
+      val asterism = HighResolutionTargetPlusSky(t, s.getOrElse(new SPCoordinates), prv, b)
       val userTargets = appendTarget(env.getUserTargets, gT2UT(t2))
       TargetEnvironment.createWithClonedTargets(asterism, env.getGuideEnvironment, userTargets)
     }
   }
 
+  case object GhostHRTargetPlusSkyConverter extends GhostHrConverter(PrvMode.PrvOff) {
+    override def name: String = "GhostAsterism.HighResolutionTargetPlusSky"
+  }
+
+  case object GhostHRTargetPlusSkyPrvConverter extends GhostHrConverter(PrvMode.PrvOn) {
+    override def name: String = "GhostAsterism.HighResolutionTargetPlusSkyPrv"
+  }
 
   private def appendCoords(userTargets: ImList[UserTarget], c: Option[SPCoordinates]): ImList[UserTarget] =
     appendTarget(userTargets, c.map(c2UT))

@@ -295,7 +295,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
    * Determine if IFU2 is in use.
    */
   private def usingIFU2(env: TargetEnvironment): Boolean = env.getAsterism.asterismType match {
-    case AsterismType.GhostDualTarget | AsterismType.GhostTargetPlusSky | AsterismType.GhostSkyPlusTarget | AsterismType.GhostHighResolutionTargetPlusSky => true
+    case AsterismType.GhostDualTarget | AsterismType.GhostTargetPlusSky | AsterismType.GhostSkyPlusTarget | AsterismType.GhostHighResolutionTargetPlusSky | AsterismType.GhostHighResolutionTargetPlusSkyPrv => true
     case AsterismType.GhostSingleTarget => false
     case AsterismType.Single => sys.error("Invalid asterism type for GHOST")
   }
