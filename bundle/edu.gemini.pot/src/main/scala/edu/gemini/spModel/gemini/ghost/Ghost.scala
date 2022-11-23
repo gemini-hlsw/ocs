@@ -534,7 +534,12 @@ object Ghost {
   val HRIFU2_RA_HMS: String    = "hrifu2CoordsRAHMS"
   val HRIFU2_DEC_DMS: String   = "hrifu2CoordsDecDMS"
 
+<<<<<<< HEAD
   val RESOLUTION_MODE: String  = "resolutionMode"
+=======
+  val MAG_G_PROP = "magG"
+  val MAG_V_PROP = "magV"
+>>>>>>> a09d13bf7 (REL-4230: adds mags to GHOST sequence)
 
   // Property names for user targets
   def userTargetParams(index: Int): (String, String, String, String, String) =
