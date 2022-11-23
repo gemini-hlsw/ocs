@@ -249,13 +249,13 @@ trait Arbitraries extends edu.gemini.spModel.core.Arbitraries {
       for {
         tc :: s :: _ <- coordinateGen(2)
         t <- ghostTargetWithCoords(tc)
-      } yield HighResolutionTargetPlusSky(t, new SPCoordinates(s), None)
+      } yield HighResolutionTargetPlusSky(t, new SPCoordinates(s), PrvMode.PrvOff, None)
 
     val genHighResTargetPlusSkyWithBase: Gen[HighResolutionTargetPlusSky] =
       for {
         bc :: tc :: s :: _ <- coordinateGen(3)
         t <- ghostTargetWithCoords(tc)
-      } yield HighResolutionTargetPlusSky(t, new SPCoordinates(s), Some(new SPCoordinates(bc)))
+      } yield HighResolutionTargetPlusSky(t, new SPCoordinates(s), PrvMode.PrvOff, Some(new SPCoordinates(bc)))
   }
 
   implicit val arbGuideFiberState: Arbitrary[GhostAsterism.GuideFiberState] =

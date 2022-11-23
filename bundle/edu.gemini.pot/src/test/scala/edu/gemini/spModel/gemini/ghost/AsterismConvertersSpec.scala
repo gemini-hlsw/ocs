@@ -60,6 +60,10 @@ object AsterismConvertersSpec extends Specification with ScalaCheck with Arbitra
       twoWayTest(genGhostHighResTargetPlusSkyAsterismTargetEnvironment, GhostSkyPlusTargetConverter, GhostHRTargetPlusSkyConverter)
     }
 
+    "Convert between HighResolutionTargetPlusSky and HighResolutionTargetPlusSkyPrv losslessly" in {
+      twoWayTest(genGhostHighResTargetPlusSkyAsterismTargetEnvironment, GhostHRTargetPlusSkyConverter, GhostHRTargetPlusSkyPrvConverter)
+    }
+
     "Be able to convert any GHOST asterism to any other" in {
       forAll(genGhostAsterismTargetEnvironment) { env =>
         GhostConverters.forall(_.convert(env) should not(beEmpty))
@@ -78,7 +82,8 @@ object AsterismConvertersSpec extends Specification with ScalaCheck with Arbitra
     GhostDualTargetConverter,
     GhostTargetPlusSkyConverter,
     GhostSkyPlusTargetConverter,
-    GhostHRTargetPlusSkyConverter
+    GhostHRTargetPlusSkyConverter,
+    GhostHRTargetPlusSkyPrvConverter
   )
 
   private def oneWayTest(gen: Gen[TargetEnvironment], converter: AsterismConverter): Prop =
