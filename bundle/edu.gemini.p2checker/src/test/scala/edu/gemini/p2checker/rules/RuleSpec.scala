@@ -1,11 +1,13 @@
 package edu.gemini.p2checker.rules
 
-import java.util.UUID
+import java.util.{Collections, UUID}
 import edu.gemini.p2checker.api.{IRule, ObservationElements}
-import edu.gemini.pot.sp.{ISPFactory, ISPObservation, ISPProgram, Instrument, SPComponentType}
+import edu.gemini.pot.sp.{ISPFactory, ISPObservation, ISPProgram, ISPSeqComponent, Instrument, SPComponentType}
 import edu.gemini.pot.util.POTUtil
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.data.ISPDataObject
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, ImageQuality, SkyBackground, WaterVapor}
 import edu.gemini.spModel.obsclass.ObsClass
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.seqcomp.SeqRepeatObserve
@@ -62,12 +64,37 @@ abstract class RuleSpec extends Specification {
   // check if expected errors and warnings are part of the result
   def expectNoneOf(ids: String*)(o: ISPObservation) = executeRules(o) must not(containAnyOf(ids))
 
-  def addObserve(c: ObsClass, p: ISPProgram, o: ISPObservation, f: ISPFactory): Unit = {
+  def createObserve(c: ObsClass, p: ISPProgram, o: ISPObservation, f: ISPFactory): ISPSeqComponent = {
     val sc   = f.createSeqComponent(p, SPComponentType.OBSERVER_OBSERVE, null)
     val dobj = sc.getDataObject.asInstanceOf[SeqRepeatObserve]
     dobj.setObsClass(c)
     sc.setDataObject(dobj)
-    o.getSeqComponent.addSeqComponent(sc)
+    sc
   }
+
+  def addObserve(c: ObsClass, p: ISPProgram, o: ISPObservation, f: ISPFactory): Unit = {
+    o.getSeqComponent.addSeqComponent(createObserve(c, p, o, f))
+  }
+
+  def setObserve(c: ObsClass, p: ISPProgram, o: ISPObservation, f: ISPFactory): Unit = {
+    o.getSeqComponent.setSeqComponents(Collections.singletonList(createObserve(c, p, o, f)));
+  }
+
+  def setConditions(
+    o:  ISPObservation,
+    cc: CloudCover    = CloudCover.ANY,
+    iq: ImageQuality  = ImageQuality.ANY,
+    sb: SkyBackground = SkyBackground.ANY,
+    wv: WaterVapor    = WaterVapor.ANY
+  ): Unit = {
+    val oc = o.findObsComponentByType(SPComponentType.SCHEDULING_CONDITIONS).get
+    val sc = oc.getDataObject().asInstanceOf[SPSiteQuality]
+    sc.setCloudCover(cc)
+    sc.setImageQuality(iq)
+    sc.setSkyBackground(sb)
+    sc.setWaterVapor(wv)
+    oc.setDataObject(sc)
+  }
+
 
 }
