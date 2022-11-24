@@ -1232,7 +1232,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     break;
                 case GhostHighResolutionTargetPlusSky:
                     final GhostAsterism.HighResolutionTargetPlusSky ghtsa = (GhostAsterism.HighResolutionTargetPlusSky) oldA;
-                    newA = ghtsa.copy(ghtsa.target(), ghtsa.sky(), coords(ghtsa, linked));
+                    newA = ghtsa.copy(ghtsa.target(), ghtsa.sky(), ghtsa.prv(), coords(ghtsa, linked));
                     break;
                 default: // This should never happen.
                     newA = oldA;
