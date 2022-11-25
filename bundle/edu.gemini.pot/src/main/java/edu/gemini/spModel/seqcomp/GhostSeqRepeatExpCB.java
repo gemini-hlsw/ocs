@@ -74,8 +74,8 @@ final public class GhostSeqRepeatExpCB extends AbstractSeqComponentCB {
         ).getOrElse(defaultValue);
     }
 
-    private static GhostReadNoiseGain getGain(IConfig config, Option<IConfig> prev, PropertyDescriptor prop) {
-        return lookup(config, prev, prop.getName(), GhostReadNoiseGain.DEFAULT);
+    private static GhostReadNoiseGain getGain(IConfig config, Option<IConfig> prev, PropertyDescriptor prop, GhostReadNoiseGain defaultGain) {
+        return lookup(config, prev, prop.getName(), defaultGain);
     }
 
     private static GhostBinning getBinning(IConfig config, Option<IConfig> prev, PropertyDescriptor prop) {
@@ -89,14 +89,14 @@ final public class GhostSeqRepeatExpCB extends AbstractSeqComponentCB {
         final GhostCamera.Red red = new GhostCamera.Red(
             c.getRedExposureCount(),
             secondsToDuration(c.getRedExposureTime()),
-            getGain(config, prev, Ghost.RED_READ_NOISE_GAIN_PROP()),
+            getGain(config, prev, Ghost.RED_READ_NOISE_GAIN_PROP(), GhostReadNoiseGain.DEFAULT_RED),
             getBinning(config, prev, Ghost.RED_BINNING_PROP())
         );
 
         final GhostCamera.Blue blue = new GhostCamera.Blue(
             c.getBlueExposureCount(),
             secondsToDuration(c.getBlueExposureTime()),
-            getGain(config, prev, Ghost.BLUE_READ_NOISE_GAIN_PROP()),
+            getGain(config, prev, Ghost.BLUE_READ_NOISE_GAIN_PROP(), GhostReadNoiseGain.DEFAULT_BLUE),
             getBinning(config, prev, Ghost.BLUE_BINNING_PROP())
         );
 
