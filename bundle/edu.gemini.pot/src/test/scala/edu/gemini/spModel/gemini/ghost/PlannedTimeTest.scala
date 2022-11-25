@@ -49,7 +49,7 @@ class PlannedTimeTest extends InstrumentSequenceTestBase[Ghost, SeqConfigGhost] 
     verifyMs(
       20 * 60 * 1000 + // setup
       11000          + // exposure
-      50000          + // 1 1x1 slow (red) readout
+      50000          + // 1 1x1 medium (red) readout
       10000            // DHS write
     )
   }
