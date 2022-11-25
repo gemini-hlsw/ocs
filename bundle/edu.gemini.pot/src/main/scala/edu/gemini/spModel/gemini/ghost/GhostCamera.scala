@@ -71,9 +71,10 @@ object GhostCamera {
     // Fast readout: 20.7 sec
     override protected def oneByOneReadout: Duration =
       gain match {
-        case GhostReadNoiseGain.SLOW_LOW  => duration(95, 1)
+        case GhostReadNoiseGain.SLOW_LOW   => duration(95, 1)
+        case GhostReadNoiseGain.MEDIUM_LOW => duration(50, 0)
         case GhostReadNoiseGain.FAST_LOW |
-             GhostReadNoiseGain.FAST_HIGH => duration(20, 7)
+             GhostReadNoiseGain.FAST_HIGH  => duration(20, 7)
       }
   }
 
@@ -88,9 +89,10 @@ object GhostCamera {
     // Fast readout: 10.3 sec
     override protected def oneByOneReadout: Duration =
       gain match {
-        case GhostReadNoiseGain.SLOW_LOW  => duration(45, 6)
+        case GhostReadNoiseGain.SLOW_LOW   => duration(45, 6)
+        case GhostReadNoiseGain.MEDIUM_LOW => duration(24, 2)
         case GhostReadNoiseGain.FAST_LOW |
-             GhostReadNoiseGain.FAST_HIGH => duration(10, 3)
+             GhostReadNoiseGain.FAST_HIGH  => duration(10, 3)
       }
   }
 
@@ -116,8 +118,8 @@ object GhostCamera {
   private def configToA[A](config: Config, key: ItemKey, default: => A)(pf: PartialFunction[AnyRef, A]): A =
     Option(config.getItemValue(key)).collect(pf).getOrElse(default)
 
-  private def configToGain(config: Config, key: ItemKey): GhostReadNoiseGain =
-    configToA(config, key, GhostReadNoiseGain.DEFAULT) {
+  private def configToGain(config: Config, key: ItemKey, default: => GhostReadNoiseGain): GhostReadNoiseGain =
+    configToA(config, key, default) {
       case g: GhostReadNoiseGain => g
     }
 
@@ -133,7 +135,7 @@ object GhostCamera {
       Red(
         configToCount(c, Ghost.RED_EXPOSURE_COUNT_OBS_KEY),
         configToDuration(c, Ghost.RED_EXPOSURE_TIME_OBS_KEY),
-        configToGain(c, Ghost.RED_READ_NOISE_GAIN_KEY),
+        configToGain(c, Ghost.RED_READ_NOISE_GAIN_KEY, GhostReadNoiseGain.DEFAULT_RED),
         configToBinning(c, Ghost.RED_BINNING_KEY)
       )
 
@@ -145,7 +147,7 @@ object GhostCamera {
       Blue(
         configToCount(c, Ghost.BLUE_EXPOSURE_COUNT_OBS_KEY),
         configToDuration(c, Ghost.BLUE_EXPOSURE_TIME_OBS_KEY),
-        configToGain(c, Ghost.BLUE_READ_NOISE_GAIN_KEY),
+        configToGain(c, Ghost.BLUE_READ_NOISE_GAIN_KEY, GhostReadNoiseGain.DEFAULT_BLUE),
         configToBinning(c, Ghost.BLUE_BINNING_KEY)
       )
 

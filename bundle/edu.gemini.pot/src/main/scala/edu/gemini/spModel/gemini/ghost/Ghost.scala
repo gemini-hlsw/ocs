@@ -306,7 +306,7 @@ final class Ghost
     }
   }
 
-  private var redReadNoiseGain: GhostReadNoiseGain = GhostReadNoiseGain.DEFAULT
+  private var redReadNoiseGain: GhostReadNoiseGain = GhostReadNoiseGain.DEFAULT_RED
 
   def getRedReadNoiseGain: GhostReadNoiseGain = redReadNoiseGain
 
@@ -355,7 +355,7 @@ final class Ghost
     }
   }
 
-  private var blueReadNoiseGain: GhostReadNoiseGain = GhostReadNoiseGain.DEFAULT
+  private var blueReadNoiseGain: GhostReadNoiseGain = GhostReadNoiseGain.DEFAULT_BLUE
 
   def getBlueReadNoiseGain: GhostReadNoiseGain = blueReadNoiseGain
 
