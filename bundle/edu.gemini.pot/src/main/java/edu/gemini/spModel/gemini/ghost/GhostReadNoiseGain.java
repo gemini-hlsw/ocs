@@ -7,10 +7,10 @@ import edu.gemini.spModel.type.SpTypeUtil;
 import edu.gemini.spModel.type.StandardSpType;
 
 public enum GhostReadNoiseGain implements StandardSpType {
-    SLOW_LOW("Slow / Low", "Slow Read / Low Gain: Standard Science Mode"),
+    SLOW_LOW("Slow / Low", "Slow Read / Low Gain: Slow Readout"),
     MEDIUM_LOW("Medium / Low", "Medium Read / Low Gain: Medium Readout"),
     FAST_LOW("Fast / Low", "Fast Read / Low Gain: Rapid Readout"),
-    FAST_HIGH("Fast / High", "Fast Read / High Gain: Bright Target Spectroscopy")
+    FAST_HIGH("Fast / High", "Fast Read / High Gain: Bright Targets")
     ;
 
     private final String displayValue;
