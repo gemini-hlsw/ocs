@@ -1,5 +1,6 @@
 package edu.gemini.p2checker.rules
 
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.CloudCover
 import edu.gemini.p2checker.rules.gmos.GmosRule
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.gemini.gmos._
@@ -13,7 +14,6 @@ final class GmosSpec extends RuleSpec {
   val ruleSet = new GmosRule()
 
   // === REL-2143: Don't allow E2V CCDs for GMOS-S programs after 2014A.
-
   "No E2V for GMOS-S after 2014A rule" should {
 
     import GmosCommonType.DetectorManufacturer._
@@ -76,6 +76,62 @@ final class GmosSpec extends RuleSpec {
     }
   }
 
+  "GMOS cal no conditions rule" should {
+    import GmosSouthType.DisperserSouth._
+
+    import SPComponentType._
+
+    val rule = "GmosRule_CAL_NO_CONDITIONS_RULE"
+
+    "give no error for day cal with any conditions" in {
+      expectNoneOf(rule) {
+        advancedSetup[InstGmosSouth](INSTRUMENT_GMOSSOUTH) { (p, o, d, f) =>
+          setConditions(o)
+          addObserve(ObsClass.DAY_CAL, p, o, f)
+        }
+      }
+    }
+
+    "give error for day cal with non-any conditions" in {
+      expectAllOf(rule) {
+        advancedSetup[InstGmosSouth](INSTRUMENT_GMOSSOUTH) { (p, o, d, f) =>
+          setConditions(o, CloudCover.PERCENT_50)
+          setObserve(ObsClass.DAY_CAL, p, o, f)
+        }
+      }
+    }
+
+    "give no error for partner cal with any conditions" in {
+      expectNoneOf(rule) {
+        advancedSetup[InstGmosSouth](INSTRUMENT_GMOSSOUTH) { (p, o, d, f) =>
+          setConditions(o)
+          setObserve(ObsClass.PARTNER_CAL, p, o, f)
+          d.setDisperser(B1200_G5321)
+        }
+      }
+    }
+
+    "give no error for partner cal with mirror" in {
+      expectNoneOf(rule) {
+        advancedSetup[InstGmosSouth](INSTRUMENT_GMOSSOUTH) { (p, o, d, f) =>
+          setConditions(o, CloudCover.PERCENT_50)
+          setObserve(ObsClass.PARTNER_CAL, p, o, f)
+          d.setDisperser(MIRROR)
+        }
+      }
+    }
+
+    "give error for partner cal with non-any conditions and non-mirror disperser" in {
+      expectAllOf(rule) {
+        advancedSetup[InstGmosSouth](INSTRUMENT_GMOSSOUTH) { (p, o, d, f) =>
+          setConditions(o, CloudCover.PERCENT_50)
+          setObserve(ObsClass.PARTNER_CAL, p, o, f)
+          d.setDisperser(B1200_G5321)
+        }
+      }
+    }
+  }
+
   "GMOS N&S Configuration Rule" should {
 
     import GmosSouthType.DisperserSouth._
@@ -117,7 +173,6 @@ final class GmosSpec extends RuleSpec {
       }
     }
   }
-
 
 }
 

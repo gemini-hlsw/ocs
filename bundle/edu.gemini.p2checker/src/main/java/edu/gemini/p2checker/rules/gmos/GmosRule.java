@@ -30,6 +30,7 @@ import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.ImageQuality;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.SkyBackground;
+import edu.gemini.spModel.obs.ObsClassService;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
@@ -80,27 +81,28 @@ public final class GmosRule implements IRule {
         }
     };
 
-    private static final IConfigRule CAL_NO_CONDITIONS_RULE = new AbstractConfigRule() {
+    private static final IRule CAL_NO_CONDITIONS_RULE = new IRule() {
         private static final String DAYTIME_MESSAGE =
             "Daytime calibrations should not have conditions constraints.";
 
         private static final String NIGHTTIME_MESSAGE =
             "GMOS baseline spectrophotometric standards should not have conditions constraints.";
 
-        public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            final ObsClass oclass = ImOption.apply(SequenceRule.getObsClass(config)).getOrElse(ObsClass.SCIENCE);
+        @Override
+        public IP2Problems check(ObservationElements elems) {
+            final ObsClass oclass = ImOption.apply(ObsClassService.lookupObsClass(elems.getObservationNode())).getOrElse(ObsClass.SCIENCE);
             final boolean isAny   = elems.getSiteQuality().exists(q -> SPSiteQuality.Conditions.WORST.equals(q.conditions()));
 
             final Problem result;
             switch (oclass) {
 
                 case DAY_CAL:
-                    result = isAny ? null : new Problem(WARNING, PREFIX + "CAL_NO_CONDITIONS_RULE", DAYTIME_MESSAGE, SequenceRule.getInstrumentOrSequenceNode(step, elems));
+                    result = isAny ? null : new Problem(WARNING, PREFIX + "CAL_NO_CONDITIONS_RULE", DAYTIME_MESSAGE, elems.getObservationNode());
                     break;
 
                 case PARTNER_CAL:
-                    final boolean isMirror = ImOption.apply(getDisperser(config)).exists(d -> d.isMirror());
-                    result = (isAny || isMirror) ? null : new Problem(WARNING, PREFIX + "CAL_NO_CONDITIONS_RULE", NIGHTTIME_MESSAGE, SequenceRule.getInstrumentOrSequenceNode(step, elems));
+                    final boolean isMirror = ImOption.apply((InstGmosCommon) elems.getInstrument()).exists(g -> ((Disperser) g.getDisperser()).isMirror());
+                    result = (isAny || isMirror) ? null : new Problem(WARNING, PREFIX + "CAL_NO_CONDITIONS_RULE", NIGHTTIME_MESSAGE, elems.getObservationNode());
                     break;
 
                 default:
@@ -108,7 +110,7 @@ public final class GmosRule implements IRule {
                     break;
             }
 
-            return result;
+            return (result == null) ? new P2Problems() : P2Problems.singleton(result);
         }
     };
 
@@ -1927,7 +1929,6 @@ public final class GmosRule implements IRule {
     static {
 //        GMOS_RULES.add(SequenceRule.DUMP_CONFIG_RULE);
         GMOS_RULES.add(DISPERSER_AND_MIRROR_RULE);
-        GMOS_RULES.add(CAL_NO_CONDITIONS_RULE);
         GMOS_RULES.add(BAD_AMP_COUNT_RULE);
         GMOS_RULES.add(CHECK_3_AMP_MODE);
         GMOS_RULES.add(ACQUISITION_RULE);
@@ -1976,7 +1977,9 @@ public final class GmosRule implements IRule {
         GmosSpatialDitherState state = new GmosSpatialDitherState();
 
         IP2Problems probs = (new CompositeRule(
-                new IRule[]{new GmosOiwfsStarRule(),
+                new IRule[]{
+                        CAL_NO_CONDITIONS_RULE,
+                        new GmosOiwfsStarRule(),
                         new SequenceRule(GMOS_RULES, state),
                         AltairRule.INSTANCE, // Altair checks (See REL-386)
                         UNUSED_CUSTOM_ROI_RULE,
