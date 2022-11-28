@@ -86,7 +86,7 @@ object GhostRule extends IRule {
             base,
             Some(s.coordinates.offset(SRIFU1SeparationOffset.p.toAngle, SRIFU1SeparationOffset.q.toAngle)),
             t.coordinates(when).map(_.offset(SRIFU2SeparationOffset.p.toAngle, SRIFU2SeparationOffset.q.toAngle)))
-        case GhostAsterism.HighResolutionTargetPlusSky(t, sky, _) =>
+        case GhostAsterism.HighResolutionTargetPlusSky(t, sky, _, _) =>
           // The sky position is taken from the user configuration, but the
           // actual SRIFU2 is positioned just south of that.  For the range
           // check we need to use the actual SRIFU2 location.
