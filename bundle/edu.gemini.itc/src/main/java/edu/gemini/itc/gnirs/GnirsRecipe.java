@@ -132,8 +132,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // TODO: why, oh why?
         final double im_qual1 = _sdParameters.isUniform() ? 10000 : im_qual;
 
-        if (instrument.isIfuUsed()) {
-
+        if (instrument.isIfuUsed()) {  // === IFU ===
             // Module 1a
             // The purpose of this section is to calculate the fraction of the
             // source flux which is contained within an aperture which we adopt
@@ -143,13 +142,14 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             //
             // inputs: source morphology specification
 
-            // IFU morphology section
+            // Morphology section
             final VisitableMorphology morph, haloMorphology;
             if (_sdParameters.profile() == PointSource$.MODULE$) {
                 morph = new AOMorphology(im_qual);
                 haloMorphology = new AOMorphology(IQcalc.getImageQuality());
             } else if (_sdParameters.profile() instanceof GaussianSource) {
-                morph = new GaussianMorphology(im_qual);
+                Log.fine("Gaussian & Halo FWHM = " + IQcalc.getImageQuality() + " arcsec");
+                morph = new GaussianMorphology(IQcalc.getImageQuality());
                 haloMorphology = new GaussianMorphology(IQcalc.getImageQuality());
             } else if (_sdParameters.profile() == UniformSource$.MODULE$) {
                 morph = new USBMorphology();
@@ -161,11 +161,13 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
             //for now just a single item from the list
             final List<Double> sf_list = instrument.getIFU().getFractionOfSourceInAperture();  //extract corrected source fraction list
+            Log.fine("sf_list = " + sf_list);
 
             instrument.getIFU().clearFractionOfSourceInAperture();
             haloMorphology.accept(instrument.getIFU().getAperture());
 
             final List<Double> halo_sf_list = instrument.getIFU().getFractionOfSourceInAperture();  //extract uncorrected halo source fraction list
+            Log.fine("halo_sf_list = " + halo_sf_list);
 
             final List<Double> ap_offset_list = instrument.getIFU().getApertureOffsetList();
             Log.fine("ap_offset_list = " + ap_offset_list);
@@ -173,8 +175,8 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             // In this version we are bypassing morphology modules 3a-5a.
             // i.e. the output morphology is same as the input morphology.
             // Might implement these modules at a later time.
-            double throughput = 0;
-            double haloThroughput = 0;
+            double throughput = 0.0;
+            double haloThroughput = 0.0;
 
             final Iterator<Double> src_frac_it = sf_list.iterator();
             final Iterator<Double> halo_src_frac_it = halo_sf_list.iterator();
@@ -183,39 +185,40 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             final SpecS2N[] specS2Narr = new SpecS2N[_obsDetailParameters.analysisMethod() instanceof IfuSummed ? 1 : sf_list.size()];
 
             while (src_frac_it.hasNext()) {
-                double slitLength = 1;           // Why?
+                double slitLength = 1.0;  // pixel
 
                 if (_obsDetailParameters.analysisMethod() instanceof IfuSummed) {
                     while (src_frac_it.hasNext()) {
                         throughput = throughput + src_frac_it.next();
                         haloThroughput = haloThroughput + halo_src_frac_it.next();
-                        slitLength = (ap_offset_list.size() / 2);
                     }
+                    slitLength = ap_offset_list.size() / 2.0;
                 } else {
                     throughput = src_frac_it.next();
                     haloThroughput = halo_src_frac_it.next();
-                    slitLength = 1;              // Why?
                 }
+                Log.fine("slitLength = " + slitLength);
 
                 final Slit slit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
                 final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
                         slit,
                         instrument.disperser(instrument.getOrder()),
                         new SlitThroughput(throughput, throughput),
-                        instrument.getSpectralPixelWidth(),
+                        instrument.getSpectralPixelWidth() / instrument.getOrder(),
                         instrument.getObservingStart(),
                         instrument.getObservingEnd(),
-                        im_qual,
+                        im_qual1,
                         instrument.getReadNoise(),
                         instrument.getDarkCurrent(),
                         _obsDetailParameters);
 
-                specS2N.setSourceSpectrum(calcSource.sed);
-                specS2N.setBackgroundSpectrum(calcSource.sky);
+                sed.accept(instrument.getGratingOrderNTransmission(instrument.getOrder()));
+                specS2N.setSourceSpectrum(sed);
+                specS2N.setBackgroundSpectrum(sky);
                 if (altair.isDefined()) {
-                    specS2N.setHaloSpectrum(calcSource.halo.get(), new SlitThroughput(haloThroughput, haloThroughput), IQcalc.getImageQuality());
+                    specS2N.setHaloSpectrum(halo.get(), new SlitThroughput(haloThroughput, haloThroughput), IQcalc.getImageQuality());
                 }
-                calcSource.sed.accept(specS2N);
+                sed.accept(specS2N);
                 specS2Narr[i++] = specS2N;
             }
 

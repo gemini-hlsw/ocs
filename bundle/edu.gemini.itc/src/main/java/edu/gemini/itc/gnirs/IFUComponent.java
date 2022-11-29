@@ -11,8 +11,6 @@ import java.util.logging.Logger;
  * This defines GNIRS IFU apertures.
  */
 
-// TODO: Read in the correct IFU transmission data file
-
 public class IFUComponent extends TransmissionElement {
 
     private static final Logger Log = Logger.getLogger(IFUComponent.class.getName());
@@ -44,6 +42,7 @@ public class IFUComponent extends TransmissionElement {
         } else {
            throw new RuntimeException("Unknown IFU");  // This should never happen
         }
+        Log.fine("ifuElementSize = " + ifuElementSize);
 
         int Napps = new Double((IFURadialMax - IFURadialMin) / (ifuElementSize) + 1).intValue();
 
@@ -90,6 +89,7 @@ public class IFUComponent extends TransmissionElement {
         } else {
            throw new RuntimeException("Unknown IFU");  // This should never happen
         }
+        Log.fine("ifuElementSize = " + ifuElementSize);
 
         IFUApertures = new ApertureComposite();
         IFUOffsets = new ArrayList<>();
@@ -129,6 +129,7 @@ public class IFUComponent extends TransmissionElement {
         } else {
            throw new RuntimeException("Unknown IFU");  // This should never happen
         }
+        Log.fine("ifuElementSize = " + ifuElementSize);
 
         IFUApertures.addAperture(new RectangularAperture(ifuElementSize, ifuElementSize, offset, 0));
         IFUOffsets.add(offset);
