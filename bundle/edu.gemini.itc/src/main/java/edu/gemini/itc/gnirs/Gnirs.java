@@ -173,6 +173,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
 
         _centralWavelength = correctedCentralWavelength(); // correct central wavelength if cross dispersion is used
         _XDisp = isXDispUsed();
+        Log.fine("_centralWavelength = " + _centralWavelength);
 
         if (_mode instanceof Spectroscopy) {
             if ((_XDisp) && (getCentralWavelengthXD() < 780 || getCentralWavelengthXD() > 2500))
@@ -270,6 +271,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
         if (isIfuUsed() && getIfuMethod().isDefined()) {
             Log.fine("Defining IFU parameters...");
             _IFUMethod = (IfuMethod) odp.analysisMethod();
+            Log.fine("gp.slitWidth = " + gp.slitWidth());
 
             if (odp.analysisMethod() instanceof IfuSingle) {
                 _IFUOffset      = ((IfuSingle) odp.analysisMethod()).offset();
@@ -457,7 +459,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
         try {
             return GnirsOrderSelector.getOrder(_centralWavelength);
         } catch (Exception e) {
-            System.out.println("Cannot find Order setting to 1.");
+            System.out.println("Cannot find grating order.  Setting to 1.");
             return 1;
         }
     }
@@ -509,6 +511,5 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
             add(new SaturationLimitRule(_wellDepth, 0.80));
         }};
     }
-
 
 }
