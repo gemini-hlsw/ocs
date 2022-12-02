@@ -161,7 +161,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
             //for now just a single item from the list
             final List<Double> sf_list = instrument.getIFU().getFractionOfSourceInAperture();  //extract corrected source fraction list
-            Log.fine("sf_list = " + sf_list);
+            Log.fine("Fraction of source in " + sf_list.size() + " IFU elements = " + sf_list);
 
             instrument.getIFU().clearFractionOfSourceInAperture();
             haloMorphology.accept(instrument.getIFU().getAperture());
@@ -177,11 +177,13 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             // Might implement these modules at a later time.
             double throughput = 0.0;
             double haloThroughput = 0.0;
+            double onePixThroughput = 0.0;
 
             final Iterator<Double> src_frac_it = sf_list.iterator();
             final Iterator<Double> halo_src_frac_it = halo_sf_list.iterator();
 
             int i = 0;
+            double t;
             final SpecS2N[] specS2Narr = new SpecS2N[_obsDetailParameters.analysisMethod() instanceof IfuSummed ? 1 : sf_list.size()];
 
             while (src_frac_it.hasNext()) {
@@ -189,21 +191,25 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
                 if (_obsDetailParameters.analysisMethod() instanceof IfuSummed) {
                     while (src_frac_it.hasNext()) {
-                        throughput = throughput + src_frac_it.next();
-                        haloThroughput = haloThroughput + halo_src_frac_it.next();
+                        t = src_frac_it.next();
+                        throughput += t;
+                        onePixThroughput = Math.max(onePixThroughput, t);  // plot the pixel with the largest throughput
+                        haloThroughput += halo_src_frac_it.next();
                     }
                     slitLength = ap_offset_list.size() / 2.0;
                 } else {
                     throughput = src_frac_it.next();
+                    onePixThroughput = throughput;
                     haloThroughput = halo_src_frac_it.next();
                 }
-                Log.fine("slitLength = " + slitLength);
+                Log.fine("Fraction of source in IFU:  1 pix = " + onePixThroughput + ", " + slitLength + " pix = " + throughput);
 
                 final Slit slit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
+
                 final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
                         slit,
                         instrument.disperser(instrument.getOrder()),
-                        new SlitThroughput(throughput, throughput),
+                        new SlitThroughput(throughput, onePixThroughput),
                         instrument.getSpectralPixelWidth() / instrument.getOrder(),
                         instrument.getObservingStart(),
                         instrument.getObservingEnd(),
@@ -391,29 +397,25 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
     private static SpcChartData createGnirsIfuSignalChart(final SpectroscopyResult result, final int index) {
         final Gnirs instrument = (Gnirs) result.instrument();
-        final List<Double> ap_offset_list = instrument.getIFU().getApertureOffsetList();
-        final String title = instrument.getIFUMethod() instanceof IfuSummed ?
-                "Signal and SQRT(Background)\n" +
-                        "IFU summed apertures: " +
-                        instrument.getIFUNumX() + "x" + instrument.getIFUNumY() + "  (" +
-                        String.format("%.3f", instrument.getIFUNumX() * IFUComponent.ifuElementSize) + "\" x " +
-                        String.format("%.3f", instrument.getIFUNumY() * IFUComponent.ifuElementSize) + "\")" :
-                "Signal and SQRT(Background)\n" +
-                        "IFU element offset: " + String.format("%.3f", ap_offset_list.get(index)) + " arcsec";
+        final double offset = instrument.getIFU().getApertureOffsetList().get(index);
+        String title = "Signal and SQRT(Background) in one pixel";
+        if ((instrument.getIFUMethod() instanceof IfuSingle) || (instrument.getIFUMethod() instanceof IfuRadial)) {
+            if (offset != 0.0) { title += String.format("\nIFU element offset: %.3f arcseconds", offset); }
+        }
         return Recipe$.MODULE$.createSignalChart(result, title, index);
     }
 
     private static SpcChartData createGnirsIfuS2NChart(final SpectroscopyResult result, final int index) {
         final Gnirs instrument = (Gnirs) result.instrument();
-        final List<Double> ap_offset_list = instrument.getIFU().getApertureOffsetList();
-        final String title = instrument.getIFUMethod() instanceof IfuSummed ?
-                "Intermediate Single Exp and Final S/N\n" +
-                        "IFU apertures: " +
-                        instrument.getIFUNumX() + "x" + instrument.getIFUNumY() + "  (" +
-                        String.format("%.3f", instrument.getIFUNumX() * IFUComponent.ifuElementSize) + "\" x " +
-                        String.format("%.3f", instrument.getIFUNumY() * IFUComponent.ifuElementSize) + "\")" :
-                "Intermediate Single Exp and Final S/N\nIFU element offset: " +
-                        String.format("%.3f", ap_offset_list.get(index)) + " arcsec";
+        final double offset = instrument.getIFU().getApertureOffsetList().get(index);
+        String title = "Intermediate Single Exp and Final S/N\n";
+        if (instrument.getIFUMethod() instanceof IfuSummed) {
+            title += "IFU summed apertures: " + instrument.getIFUNumX() + "x" + instrument.getIFUNumY() + "  (" +
+                    String.format("%.3f", instrument.getIFUNumX() * IFUComponent.ifuElementSize) + "\" x " +
+                    String.format("%.3f", instrument.getIFUNumY() * IFUComponent.ifuElementSize) + "\")";
+        } else if (offset != 0.0) {
+            title += String.format("\nIFU element offset: %.3f arcseconds", offset);
+        }
         return Recipe$.MODULE$.createS2NChart(result, title, index);
     }
 

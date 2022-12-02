@@ -175,7 +175,58 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
         }
 
         _println(HtmlPrinter.printParameterSummary(p.conditions(), instrument.getEffectiveWavelength(), iqAtSource));
-        _println(HtmlPrinter.printParameterSummary(p.observation()));
+        _println(printParameterSummary(p.observation(), instrument));
+    }
+
+    public static String printParameterSummary(final ObservationDetails odp, final Gnirs instrument) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("Calculation and analysis methods:\n");
+        sb.append("<LI>Mode: ");
+        sb.append((odp.calculationMethod() instanceof Imaging ? "imaging" : "spectroscopy"));
+        sb.append("\n");
+        sb.append("<LI>Calculation of ");
+        if (odp.calculationMethod() instanceof S2NMethod) {
+            sb.append(String.format("S/N ratio with %d", ((S2NMethod) odp.calculationMethod()).exposures()));
+        } else {
+            sb.append(String.format("integration time from a S/N ratio of %.2f for", ((ImagingInt) odp.calculationMethod()).sigma()));
+        }
+        sb.append(String.format(" exposures of %.2f secs", odp.exposureTime()));
+        if (odp.calculationMethod().coaddsOrElse(1) > 1) {
+            sb.append(String.format(" and %d coadds", odp.calculationMethod().coaddsOrElse(1)));
+        }
+        sb.append(String.format(", and %.2f%% of them on source.\n", odp.sourceFraction() * 100));
+
+        sb.append("<LI>Analysis performed ");
+        if (odp.analysisMethod() instanceof AutoAperture) {
+            sb.append("for aperture that gives 'optimum' S/N ");
+            sb.append(String.format("and a sky aperture that is %.2f times the target aperture.\n", ((AutoAperture) odp.analysisMethod()).skyAperture()));
+
+        } else if (odp.analysisMethod() instanceof UserAperture) {
+            sb.append(String.format("for aperture of diameter %.2f ", ((UserAperture) odp.analysisMethod()).diameter()));
+            sb.append(String.format("and a sky aperture that is %.2f times the target aperture.\n", ((UserAperture) odp.analysisMethod()).skyAperture()));
+
+        } else if (odp.analysisMethod() instanceof IfuMethod) {
+
+            if (instrument.getIFUMethod() instanceof IfuSingle) {
+                sb.append("on a single IFU element at " + instrument.getIFUOffset() + " arcseconds from the center.\n");
+
+            } else if (instrument.getIFUMethod() instanceof IfuSummed) {
+                sb.append(String.format("on %d x %d (%.3f\" x %.3f\") summed IFU elements.\n",
+                        instrument.getIFUNumX(),
+                        instrument.getIFUNumY(),
+                        instrument.getIFUNumX() * IFUComponent.ifuElementSize,
+                        instrument.getIFUNumY() * IFUComponent.ifuElementSize));
+
+            } else {
+                sb.append("on multiple IFU elements arranged from " +
+                        instrument.getIFUMinOffset() + " to " + instrument.getIFUMaxOffset() + " arcsecs.\n");
+            }
+
+        } else {
+            throw new Error("Unsupported analysis method");
+        }
+
+        return sb.toString();
     }
 
     private String gnirsToString(final Gnirs instrument, final ItcParameters p) {
@@ -207,25 +258,26 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
                 s += String.format("Pixel Size in Spectral Direction(Order 6): %.3f nm\n", instrument.getGratingDispersion() / 6);
                 s += String.format("Pixel Size in Spectral Direction(Order 7): %.3f nm\n", instrument.getGratingDispersion() / 7);
                 s += String.format("Pixel Size in Spectral Direction(Order 8): %.3f nm\n", instrument.getGratingDispersion() / 8);
-
-            } else if (instrument.isIfuUsed()) {
-                if (instrument.getIFUMethod() instanceof IfuSingle) {
-                    s += "with a single IFU element at " + instrument.getIFUOffset() + " arcsecs.";
-                } else if (instrument.getIFUMethod() instanceof IfuSummed) {
-                    s += String.format("with multiple summed IFU elements arranged in a " +
-                            instrument.getIFUNumX() + "x" + instrument.getIFUNumY() +
-                            " (%.3f\"x%.3f\") grid.",
-                            instrument.getIFUNumX() * IFUComponent.ifuElementSize,
-                            instrument.getIFUNumY() * IFUComponent.ifuElementSize);
-                } else {
-                    s += "with multiple IFU elements arranged from " +
-                            instrument.getIFUMinOffset() + " to " + instrument.getIFUMaxOffset() + " arcsecs.";
-                }
-
             } else {
                 s += String.format("Pixel Size in Spectral Direction: %.3f nm\n",
                         instrument.getGratingDispersion() / instrument.getOrder());
             }
+
+            if (instrument.isIfuUsed()) {
+                if (instrument.getIFUMethod() instanceof IfuSingle) {
+                    s += "IFU: a single element at " + instrument.getIFUOffset() + " arcsecs.\n";
+                } else if (instrument.getIFUMethod() instanceof IfuSummed) {
+                    s += String.format("IFU: multiple elements summed in a " +
+                                    instrument.getIFUNumX() + "x" + instrument.getIFUNumY() +
+                                    " (%.3f\"x%.3f\") grid.\n",
+                            instrument.getIFUNumX() * IFUComponent.ifuElementSize,
+                            instrument.getIFUNumY() * IFUComponent.ifuElementSize);
+                } else {
+                    s += "IFU: multiple elements arranged from " +
+                            instrument.getIFUMinOffset() + " to " + instrument.getIFUMaxOffset() + " arcsecs.\n";
+                }
+            }
+
         } else {  // Imaging
             s += "Pixel Size: " + instrument.getPixelSize() + " arcsec\n";
         }
