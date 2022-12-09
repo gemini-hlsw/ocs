@@ -61,7 +61,9 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
 
         _println("");
 
-        _printSoftwareAperture(result, 1 / instrument.getSlitWidth());
+        if (! instrument.isIfuUsed()) {
+            _printSoftwareAperture(result, 1 / instrument.getSlitWidth());
+        }
 
         // Altair specific section
         if (result.aoSystem().isDefined()) {
@@ -71,9 +73,10 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
             _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", iqAtSource));
         }
 
-        _printSkyAperture(result);
-
-        _println("");
+        if (! instrument.isIfuUsed()) {
+            _printSkyAperture(result);
+            _println("");
+        }
 
         _printRequestedIntegrationTime(result);
 
