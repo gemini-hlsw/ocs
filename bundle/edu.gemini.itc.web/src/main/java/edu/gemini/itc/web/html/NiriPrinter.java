@@ -5,12 +5,9 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.niri.Niri;
 import edu.gemini.itc.niri.NiriRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.gemini.niri.InstNIRI;
 import edu.gemini.spModel.gemini.niri.NiriReadoutTime;
 import edu.gemini.spModel.gemini.niri.Niri.Mask;
-import edu.gemini.spModel.obs.plannedtime.PlannedTime;
-import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
 import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 import scala.Option;
 
@@ -175,5 +172,15 @@ public final class NiriPrinter extends PrinterBase implements OverheadTablePrint
     public double getReadoutTimePerCoadd() {
         NiriReadoutTime nrt = NiriReadoutTime.lookup(instr.builtinROI(), instr.readMode()).getValue();
         return nrt.getReadout(1);
+    }
+
+    @Override
+    public double getVisitTime() {
+        return this.getVisit_time();
+    }
+
+    @Override
+    public double getRecenterInterval() {
+        return this.getRecentInterval();
     }
 }

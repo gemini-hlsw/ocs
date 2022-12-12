@@ -3,15 +3,11 @@ package edu.gemini.itc.web.html;
 import edu.gemini.itc.altair.Altair;
 import edu.gemini.itc.base.AOSystem;
 import edu.gemini.itc.base.ImagingResult;
-import edu.gemini.itc.base.Result;
 import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.gnirs.Gnirs;
 import edu.gemini.itc.gnirs.GnirsRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.gemini.gnirs.*;
-import edu.gemini.spModel.obs.plannedtime.PlannedTime;
-import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
 import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 import scala.Option;
 
@@ -224,4 +220,13 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
         return GnirsReadoutTime.getReadoutOverheadPerCoadd(instr.readMode());
     }
 
+    @Override
+    public double getVisitTime() {
+        return this.getVisit_time();
+    }
+
+    @Override
+    public double getRecenterInterval() {
+        return this.getRecentInterval();
+    }
 }

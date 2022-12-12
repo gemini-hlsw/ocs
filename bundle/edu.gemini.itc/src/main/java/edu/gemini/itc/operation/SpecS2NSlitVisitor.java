@@ -109,7 +109,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     private void resample() {
 
         // calc the width of a spectral resolution element in nm
-        System.out.println("#######  "+ slit.width() + " area: " + slit.area() + " imQuality: " + imgQuality);
+        Log.info("#######  "+ slit.width() + " area: " + slit.area() + " imQuality: " + imgQuality);
         final double resElement                 = disperser.resolution(slit, imgQuality);  // the same that bellow, but the width depend on imQuality
         final double backgroundResElement       = disperser.resolution(slit);   // value calculate from grating_resolution * slit width / 0.5
                                                                                 // The resolution is gotten from gratings file of each instrument.
@@ -117,7 +117,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         final double resElementData             = resElement / sourceFlux.getSampling();
         final double backgroundResElementData   = backgroundResElement / backgroundFlux.getSampling();
 
-        System.out.println("#######  resElement: " + resElement + " backgroundResElement: " + backgroundResElement + " resElementData: "+ resElementData + " backgroundResElementData: "+ backgroundResElementData);
+        Log.info("#######  resElement: " + resElement + " backgroundResElement: " + backgroundResElement + " resElementData: "+ resElementData + " backgroundResElementData: "+ backgroundResElementData);
 
         // use the int value of spectral_pix as a smoothing element (at least 1)
         final int smoothingElement              = (int) Math.max(1.0, Math.round(resElementData));
@@ -177,9 +177,6 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
         double[][] data = background.getData();
         double[][] data2 = signal.getData();
-
-
-        System.out.println("###################################### ");
 
         // -- calculate and assign s2n results
 
@@ -301,7 +298,6 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
             skyAper = ((ApertureMethod) analysisMethod).skyAperture();
         } else if (analysisMethod instanceof IfuMethod) {
             skyAper = ((IfuMethod) analysisMethod).skyFibres();
-            System.out.println("SKYYYYYYYFIBRESSSSS: " + skyAper);
         } else {
             throw new Error();
         }

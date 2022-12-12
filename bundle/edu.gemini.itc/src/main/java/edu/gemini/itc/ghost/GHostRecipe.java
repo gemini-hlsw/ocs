@@ -10,7 +10,6 @@ import scala.collection.JavaConversions;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
@@ -44,13 +43,28 @@ public final class GHostRecipe  {
         // some general validations
         Validation.validate(_mainInstrument[0], _obsDetailParameters, _sdParameters);
     }
-
+/*
     public ItcSpectroscopyResult serviceResult(final SpectroscopyResult[] r, final boolean headless) {
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>();
         dataSets.add(Recipe$.MODULE$.createSignalChart(r[0], 0));
         dataSets.add(Recipe$.MODULE$.createS2NChart(r[0], _mainInstrument[0].getCCDType() ,0));
         return Recipe$.MODULE$.serviceResult(r[0], dataSets, headless);
     }
+  */
+
+    public ItcSpectroscopyResult serviceResult(final SpectroscopyResult[] r, final boolean headless) {
+        final List<List<SpcChartData>> groups = new ArrayList<>();
+        final List<SpcChartData> dataSets1 = new ArrayList<SpcChartData>();
+        final List<SpcChartData> dataSets2 = new ArrayList<SpcChartData>();
+        dataSets1.add(Recipe$.MODULE$.createSignalChart(r[0], 0));
+        dataSets1.add(Recipe$.MODULE$.createS2NChart(r[0], _mainInstrument[0].getCCDType() ,0));
+        groups.add(dataSets1);
+        dataSets2.add(Recipe$.MODULE$.createSignalChart(r[1], 0));
+        dataSets2.add(Recipe$.MODULE$.createS2NChart(r[1], _mainInstrument[1].getCCDType() ,0));
+        groups.add(dataSets2);
+        return Recipe$.MODULE$.serviceGroupedResult(r, groups, headless);
+    }
+
 
 
     private static SpcChartData createS2NChart(final SpectroscopyResult result, final int i) {
@@ -72,8 +86,9 @@ public final class GHostRecipe  {
         final SpectroscopyResult[] results = new SpectroscopyResult[length];
         for (int i = 0; i < length; i++) {
             results[i] = calculateSpectroscopy(_mainInstrument[i], length);
-            break;
         }
+        Log.info("calculateSpectroscopy getImageQuality[0]: " +
+                            results[0].iqCalc().getImageQuality() + " [1]: "+ results[1].iqCalc().getImageQuality());
         return results;
     }
 
@@ -89,10 +104,6 @@ public final class GHostRecipe  {
         SEDFactory.SourceResult sed = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
         final VisitableMorphology morph = _sdParameters.isUniform() ? new USBMorphology() : new GaussianMorphology(IQcalc.getImageQuality());
         morph.accept(instrument.getIFU().getAperture());
-        //IFU_Trans ifu = instrument.getIFU_trans();
-        //ifu.setFWHM(IQcalc.getImageQuality());
-        //ifu.visit(sed.sed);  // apply ifu loss. TODO The most clean way is to put this Object in the component list.
-        //instrument.applySkyCoeff(sed.sky);
 
         final List<Double> sf_list = instrument.getIFU().getFractionOfSourceInAperture();
         double totalspsf = 0;  // total source fraction in the aperture
@@ -102,9 +113,10 @@ public final class GHostRecipe  {
             totalspsf += spsf;
             numfibers += 1;
         }
-        // TODO. It is necessary to take in account the slitLength with the spatial binning.
-        final Slit slit = Slit$.MODULE$.apply(instrument.getSlitWidth(), instrument.getSlitLength(), instrument.getPixelSize());
-        //final SlitThroughput throughput = new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality());
+
+        final Slit slit = Slit$.MODULE$.apply(instrument.getSlitWidth(),
+                                    instrument.getSlitLength()/instrument.getSpatialBinning(),
+                                              instrument.getPixelSize());
         final SlitThroughput throughput = new SlitThroughput(totalspsf, sf_list.get((sf_list.size() - 1) / 2));
 
         ApertureComposite IFUApertures = (ApertureComposite) instrument.getIFU().getAperture();
@@ -113,13 +125,10 @@ public final class GHostRecipe  {
             HexagonalAperture h = (HexagonalAperture) ac;
             Log.info("x: "+ h.getIfuPosX() + " y: "+ h.getIfuPosY() + " fractionSource: "+  h.getFractionOfSourceInAperture());
         }
-        System.out.println("slitLength: "+ instrument.getSlitLength() + " throughtput: "+ totalspsf +
+        Log.info("slitLength: "+ instrument.getSlitLength() + " throughtput: "+ totalspsf +
                            " onePIx: " + sf_list.get((sf_list.size() - 1) / 2) + " numfibers: "+ numfibers + " centerFiber: "+ (sf_list.size() - 1) / 2);
 
-
-        //Log.info("Resolution: "+ instrument.getThroughput(IQcalc.getImageQuality()) + " one: "+ instrument.getThrOne(IQcalc.getImageQuality()));
-
-        final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
+         final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
                 slit,
                 instrument.disperser.get(),
                 throughput,
@@ -128,7 +137,7 @@ public final class GHostRecipe  {
                 instrument.getObservingEnd(),
                 IQcalc.getImageQuality(),
                 instrument.getReadNoise(),
-                instrument.getDarkCurrent(),
+                instrument.getDarkCurrent() * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
                 _obsDetailParameters);
 
         specS2N.setSourceSpectrum(sed.sed);

@@ -8,7 +8,6 @@ import edu.gemini.itc.gmos.GmosSaturLimitRule;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.gmos.*;
-import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 
 import java.io.PrintWriter;
@@ -265,5 +264,15 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
 
     public double getReadoutTimePerCoadd() {
         return 0;
+    }
+
+    @Override
+    public double getVisitTime() {
+        return this.getVisit_time();
+    }
+
+    @Override
+    public double getRecenterInterval() {
+        return this.getRecentInterval();
     }
 }

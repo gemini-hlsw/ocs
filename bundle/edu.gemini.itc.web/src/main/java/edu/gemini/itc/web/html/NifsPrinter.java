@@ -1,18 +1,12 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.altair.Altair;
-import edu.gemini.itc.base.ImagingResult;
-import edu.gemini.itc.base.Result;
 import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.nifs.IFUComponent;
 import edu.gemini.itc.nifs.Nifs;
 import edu.gemini.itc.nifs.NifsRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.gemini.nifs.InstNIFS;
-import edu.gemini.spModel.gemini.nifs.NIFSParams;
-import edu.gemini.spModel.obs.plannedtime.PlannedTime;
-import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
 import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 
 import java.io.PrintWriter;
@@ -137,4 +131,13 @@ public final class NifsPrinter extends PrinterBase implements OverheadTablePrint
         return instr.readMode().getMinExp() + InstNIFS.COADD_CONSTANT;
     }
 
+    @Override
+    public double getVisitTime() {
+        return this.getVisit_time();
+    }
+
+    @Override
+    public double getRecenterInterval() {
+        return this.getRecentInterval();
+    }
 }

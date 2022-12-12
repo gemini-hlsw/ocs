@@ -14,6 +14,8 @@ public class TransmissionElement implements SampledSpectrumVisitor {
     private final ArraySpectrum _trans;
     public  String _file;
 
+    private String _description="";
+
     /**
      * Constructs a TransmissionElement
      */
@@ -45,5 +47,16 @@ public class TransmissionElement implements SampledSpectrumVisitor {
 
     public ArraySpectrum get_trans() {
         return _trans;
+    }
+
+    public void setDescription(String desc) {
+        this._description = desc;
+    }
+    public String toString() {
+        if (!_description.equals("")) {
+            return _description;
+        }
+        else
+            return "Element defined by the " + _file + " file" ;
     }
 }

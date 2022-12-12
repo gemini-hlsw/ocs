@@ -4,7 +4,41 @@
     <meta charset="UTF-8"/>
     <title>GHOST ITC</title>
     <base target="content_frame">
+    <script src="./jQuery/jquery-3.6.1.js" type="text/javascript"></script>
     <link rel="stylesheet" type="text/css" href="itc_test.css" />
+    <script type="text/javascript">
+    $( document ).ready(function() {
+        function showOpts(listEl, opt) {
+           for (e2 of l) {
+              if (parseInt($(e2).text, 10) >= parseInt(opt, 10))
+                 $(e2).removeAttr(disabled);
+              else
+                 $(e2).attr('disabled', 'disabled');
+           }
+        }
+
+        $("[name*='instResolution']").change(function () {
+           if (this.value == 'HIGH') {
+              $("[name*=nSkyMicrolens]").attr('disabled', 'disabled');
+           } else if (this.value == 'STANDARD') {
+              $("[name*=nSkyMicrolens]").removeAttr('disabled')
+           }
+        });
+        $('form').on('submit',function(){
+            $("[name*=nSkyMicrolens]").removeAttr('disabled')
+        });
+        $("[name*='spatialBinning']").change(function () {
+           optSpaInt = parseInt($("[name*='spatialBinning'] > option:selected").text(), 10)
+           $("[name*='spectralBinning'] > option").each(function(i) {
+               optSpeInt = parseInt(this.text, 10)
+               if (optSpeInt >= optSpaInt)
+                 $(this).removeAttr('disabled');
+              else
+                 $(this).attr('disabled', 'disabled');
+            });
+        });
+    });
+    </script>
 </head>
 
 <body link="#0000FF" vlink="#8B0000" text="#000000" bgcolor="#ffffff">
@@ -276,18 +310,20 @@
         <table background="https://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0" width="100%">
             <input name="Site" value="GS" type="hidden" />
             <tbody>
+            <!--
             <tr>
-                <td colspan="2"><b>Instrument optical properties:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10273#optical','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false"><span>more info</span></a><span>)</span></i></td>
+                <td colspan="2"><b>Instrument optical properties:</b> <i><span>(</span><a href="#" onclick="window.open('https://www.gemini.edu/instrumentation/future-instruments/ghost#WhatIs','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false"><span>more info</span></a><span>)</span></i></td>
             </tr>
+            -->
 
             <tr>
-                <td colspan="2" height="50" valign="bottom"><b>Resolution:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10273#detector','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false"><span>more info</span></a><span>)</span></i></td>
+                <td colspan="2"  valign="bottom"><b>Resolution:</b> <i><span>(</span><a href="#" onclick="window.open('https://www.gemini.edu/instrumentation/future-instruments/ghost#WhatIs','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false"><span>more info</span></a><span>)</span></i></td>
             </tr>
 
             <tr>
                 <td colspan="1">
-                    <input value="STANDARD" name="instResolution" type="radio" checked="checked"/> Standard Resolution
-                    <input value="HIGH" name="instResolution" type="radio" /> High Resolution
+                    <input value="STANDARD" name="instResolution" id="stdRes" type="radio" checked="checked"/> Standard Resolution
+                    <input value="HIGH" name="instResolution" id="highRes" type="radio" /> High Resolution
                 </td>
                 <td colspan="1" style="visibility:hidden">Spectrum central wavelength:
                     <input name="instrumentCentralWavelength" size="5" value="530" type="text" /> nm
@@ -305,17 +341,9 @@
 
             </tr>
 
-            <tr><td colspan="2"><br>Detector binning:</br></td></tr>
-            <tr>
-                <!--
-                <td colspan="2"><li>Spatial:
-                    <input value="1" name="spatBinning" checked="checked" type="radio" /> 1 (no binning)
-                    <input value="2" name="spatBinning" type="radio" /> 2 pixels
-                    <input value="4" name="spatBinning" type="radio" /> 4 pixels
-                    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(For imaging this applies to both the x- <b>and</b> y-directions.
-                    For spectroscopy this corresponds to the y-direction.)</li></td>
-                 -->
-                <td colspan="1">
+            <tr stype="padding-top:2%;"><td colspan="2"><b>Detector Binning:</b></td></tr>
+            <tr stype="padding-top:2%;">
+               <td colspan="1">
                     Spatial Resolution
                     <select name="spatialBinning" size="1">
                         <option value="ONE" selected>1</option>
@@ -326,13 +354,15 @@
                     <select name="spectralBinning" size="1">
                         <option value="ONE" selected>1</option>
                         <option value="TWO">2</option>
+                        <option value="FOUR">4</option>
+                        <option value="EIGHT">8</option>
                     </select>
                 </td>
             </tr>
+            <tr style="padding-top:2%"><td colspan="3"><b>Read Modes:</b></td></tr>
             <tr>
                 <td colspan="2">
-                    Read Modes:
-                    <select name="ReadMode" size="1">
+                    <select name="ReadMode"  id="ReadMode" size="1">
                         <option value="STANDARD" selected>Standard Science</option>
                         <option value="FAST">Fast Read </option>
                         <option value="BRIGTHTARGETS">Bright Targets </option>
@@ -355,7 +385,8 @@
             </tr>
             <tr>
                 <td colspan="4">Wavefront sensor for tip-tilt compensation:
-                    <input value="OIWFS" name="Type" checked="checked" type="radio" /> OIWFS </td>
+                    <input value="PWFS" name="Type" type="radio" checked /> PWFS
+                </td>
             </tr>
             <tr>
                 <td colspan="2">
@@ -448,29 +479,22 @@
             <tr>
                 <td><input value="s2n" name="calcMethod" checked="checked" type="radio" /></td>
                 <td>Total S/N ratio resulting from <input name="numExpA" size="5" value="1" type="text" />
-                    exposures each having an exposure time of <input name="expTimeA" size="5" value="900" type="text" /> secs and with a fraction <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
+                    exposures each having an exposure time of <input name="expTimeA" size="5" value="900" type="text" /> secs and with a fraction
+                    <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source
+                </td>
             </tr>
-            <!--
-            <tr>
-                <td><input value="intTime" name="calcMethod" type="radio" /></td>
-                <td>Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" /> using an exposure time for each exposure of <input name="expTimeC" size="5" value="900" type="text" /> secs and with a fraction <input name="fracOnSourceC" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
             </tr>
-            -->
-            <tr>
-                <td colspan="2" height="40" valign="bottom"><b>Telescope offset:</b><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/sciops/instruments/gnirs/spectroscopy/observing-strategies#offsetting','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
+            <tr style="visibility:hidden">
+                <td colspan="1" valign="bottom"><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/sciops/instruments/gnirs/spectroscopy/observing-strategies#offsetting','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
+                <td colspan="1" ><input name="offset" size="5" value="0.0" type="text" /></td>
             </tr>
-            <tr>
-                <td colspan="2">offset size: <input name="offset" size="5" value="0.0" type="text" />  arcsec</td>
-            </tr>
-
-            <tr>
-                <td colspan="3" height="50" valign="bottom"><b>Output:</b> </td>
+           <tr>
+                <td colspan="3" valign="bottom"><b>Output:</b> </td>
             </tr>
             <tr>
                 <td colspan="3">For spectroscopy, <input value="AUTO" name="PlotLimits" checked="checked" type="radio" /> autoscale or <input value="USER" name="PlotLimits" type="radio" /> specify
-                    limits for plotted spectra (lower wavelength <input name="plotWavelengthL" size="6" value="0.500" type="text" /> µm and upper wavelength <input name="plotWavelengthU" size="6" value="0.900" type="text" /> µm) </td>
+                    limits for plotted spectra (lower wavelength <input name="plotWavelengthL" size="6" value="0.36" type="text" /> µm and upper wavelength <input name="plotWavelengthU" size="6" value="1" type="text" /> µm) </td>
 
-            </tr>
             <tr>
                 <td colspan="3">
                     <p align="right">
@@ -479,6 +503,7 @@
                     </p>
                 </td>
             </tr>
+
 
             </tbody>
             <tr><input value="ifuSky" name="analysisMethod" type="radio" checked="checked" style="visibility:hidden" /></tr>

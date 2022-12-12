@@ -14,9 +14,27 @@ import java.util.*;
 public abstract class PrinterBase {
 
     private final PrintWriter _out;
+    private final double visit_time;
+
+    private final double recenterInterval;
 
     protected PrinterBase(final PrintWriter pr) {
         _out = pr;
+        visit_time = 7200;
+        recenterInterval = 3600;
+    }
+
+    protected PrinterBase(final PrintWriter pr, int visit_time, double recenterInterval) {
+        _out = pr;
+        this.visit_time = visit_time;
+        this.recenterInterval = recenterInterval;
+    }
+
+    public double getVisit_time() {
+        return visit_time;
+    }
+    public double getRecentInterval() {
+        return recenterInterval;
     }
 
     public abstract void writeOutput();

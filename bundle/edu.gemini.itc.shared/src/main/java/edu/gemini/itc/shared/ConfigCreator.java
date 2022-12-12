@@ -146,14 +146,14 @@ public final class ConfigCreator {
     /**
      * Instrument-specific configs
      */
-    // TODO-GHOSTITC
     public final ConfigCreatorResult createGhostConfig(final GhostParameters ghostParameters, final int numExp) {
         final ConfigCreatorResult result = createCommonConfig(numExp);
         for (final Config step : result.getConfig()) {
             step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GHOST);
             step.putItem(CcdXBinning, ghostParameters.spectralBinning());
             step.putItem(CcdYBinning, ghostParameters.spatialBinning());
-            step.putItem(CcdYBinning, ghostParameters.spatialBinning());
+            step.putItem(ReadModeKey, ghostParameters.readMode());
+            step.putItem(DetectorManufacturerKey, (GhostType.DetectorManufacturer.DEFAULT));
 
         }
         return result;

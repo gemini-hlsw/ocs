@@ -42,14 +42,16 @@ import java.util.logging.Logger;
 import edu.gemini.spModel.data.config.ISysConfig;
 import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKeyProvider;
 
+import static edu.gemini.spModel.obscomp.InstConstants.EXPOSURE_TIME_KEY;
 
 
 /**
  * The Ghost instrument.
  */
 public class InstGhost
-        extends ParallacticAngleSupportInst implements IssPortProvider, PosAngleConstraintAware,
+        extends ParallacticAngleSupportInst implements IssPortProvider,
             StepCalculator, PropertyProvider, CalibrationKeyProvider, ItcOverheadProvider {
+
 
     private static final Logger LOG = Logger.getLogger(InstGhost.class.getName());
 
@@ -64,31 +66,40 @@ public class InstGhost
     /**
      * This obs component's SP type.
      */
-    public static final SPComponentBroadType BROAD_TYPE = SPComponentBroadType.INSTRUMENT;
-
-
 
     public static final double DEF_EXPOSURE_TIME = 300.0; // sec
-    public static final int DEF_COADDS = 1;
-
-    // The size of the detector in arc secs
-    public static final double DETECTOR_WIDTH = 330.34;
-    public static final double DETECTOR_HEIGHT = 330.34;
-
-    public static final PropertyDescriptor AMP_GAIN_CHOICE_PROP;
-
-    //public static final PropertyDescriptor AMP_GAIN_SETTING_PROP;
-
+    public static final int DEF_COADDS = 0;
     public static final PropertyDescriptor CCD_X_BIN_PROP;
     public static final PropertyDescriptor CCD_Y_BIN_PROP;
 
-
     public static final PropertyDescriptor PORT_PROP;
+
+    public static final PropertyDescriptor AMP_GAIN_CHOICE_PROP;
 
     public static final ItemKey X_BIN_KEY = new ItemKey(SeqConfigNames.INSTRUMENT_KEY, "ccdXBinning");
     public static final ItemKey Y_BIN_KEY = new ItemKey(SeqConfigNames.INSTRUMENT_KEY, "ccdYBinning");
 
-    public static final PropertyDescriptor POS_ANGLE_CONSTRAINT_PROP;
+
+    private GhostType.Binning _xBin = GhostType.Binning.DEFAULT;
+    private GhostType.Binning _yBin = GhostType.Binning.DEFAULT;
+    private PosAngleConstraint _posAngleConstraint = PosAngleConstraint.FIXED;
+
+    private GhostType.AmpGain _ampGain = GhostType.AmpGain.DEFAULT;
+    private GhostType.AmpGain _gainChoice = GhostType.AmpGain.DEFAULT;
+    private GhostType.ReadMode _readMode = GhostType.ReadMode.DEFAULT;
+
+    private static final Duration SETUP_TIME_IFU_ARM         = Duration.ofMinutes(1);  // Talking with Cristian and his experience with the Arm movement.
+    private static final Duration SETUP_TIME_INST_GUIDING    = Duration.ofSeconds(30);  // This value corresponds the time spent by the instrument to starting to guide
+    // with its owner guiding fibers.
+
+    private static final Duration SETUP_TIME = Duration.ofSeconds(900); // This value was provided by Venus
+    // should be added 900 seconds of the SETUP_TIME
+    public static final Duration REACQUISTION_TIME = Duration.ofSeconds(200);
+    private static final Duration SETUP_AVG_TIME_ADQ    = Duration.ofMinutes(15);
+
+    private IssPort _port = IssPort.SIDE_LOOKING;
+
+    //public static final PropertyDescriptor POS_ANGLE_CONSTRAINT_PROP;
 
 
     private static PropertyDescriptor initProp(String propName, boolean query, boolean iter) {
@@ -100,8 +111,7 @@ public class InstGhost
 
     // Initialize the properties.
     static {
-
-        System.out.println("********************** Initial static block ");
+        System.out.println("********** Initial static block  *****************");
         final boolean query_yes = true;
         final boolean iter_yes = true;
         final boolean query_no = false;
@@ -113,8 +123,7 @@ public class InstGhost
         AMP_GAIN_CHOICE_PROP = initProp("gainChoice", false, true);
         AMP_GAIN_CHOICE_PROP.setDisplayName("Gain Choice");
 
-        POS_ANGLE_CONSTRAINT_PROP = initProp("posAngleConstraint", query_no, iter_no);
-
+        //POS_ANGLE_CONSTRAINT_PROP = initProp("posAngleConstraint", query_no, iter_no);
 
         CCD_X_BIN_PROP = initProp(X_BIN_KEY.getName(), query_yes, iter_yes);
         CCD_X_BIN_PROP.setDisplayName("X Bin");
@@ -140,20 +149,9 @@ public class InstGhost
         Double wavelength = getWavelength(instrument) * 1000.; // adjust scaling of wavelength from um to nm (as used in config tables)
         IParameter orderParameter = instrument.getParameter("disperserOrder");
 
-
         ConfigKeyGhost config = new ConfigKeyGhost(xBin, yBin, ampGain);
         return new CalibrationKeyImpl.WithWavelength(config, wavelength);
     }
-
-    private GhostType.Binning _xBin = GhostType.Binning.DEFAULT;
-    private GhostType.Binning _yBin = GhostType.Binning.DEFAULT;
-    private PosAngleConstraint _posAngleConstraint = PosAngleConstraint.FIXED;
-
-    private GhostType.AmpGain _ampGain = GhostType.AmpGain.DEFAULT;
-    private GhostType.AmpGain _gainChoice = GhostType.AmpGain.DEFAULT;
-    private GhostType.ReadMode _readMode = GhostType.ReadMode.DEFAULT;
-
-    private IssPort _port = IssPort.SIDE_LOOKING;
 
 
     @Override
@@ -169,13 +167,12 @@ public class InstGhost
         super(SPComponentType.INSTRUMENT_GHOST);
     }
 
+
     /**
      * Constructor
      */
     public InstGhost(SPComponentType type) {
         super(type);
-
-
     }
 
     private void initParamDefault() {
@@ -199,17 +196,10 @@ public class InstGhost
         return "gemGHOST";
     }
 
-
-    private static final Duration SETUP_TIME_LS_SPECTROSCOPY = Duration.ofMinutes(16);
-    //private static final Duration SETUP_TIME_IFU_MOS         = Duration.ofMinutes(18);
-    private static final Duration SETUP_TIME_IFU_MOS         = Duration.ofMinutes(0);
-
     @Override
     public Duration getSetupTime(ISPObservation obs) {
-        System.out.println("TODO. Not implemented yet getSetupTime(ISPObservation) ");
-        //if (_disperser.isMirror()) return SETUP_TIME_IMAGING;
-        //if (_fpu.isSpectroscopic() || _fpu.isNSslit()) return SETUP_TIME_LS_SPECTROSCOPY;
-        return SETUP_TIME_IFU_MOS;
+        LOG.info("LALALALALALLALALALALAALLA1. This getSetupTime(ISPOBservation obs) is not implemented. Default value is return");
+        return SETUP_TIME;
     }
 
     /**
@@ -218,8 +208,13 @@ public class InstGhost
      */
     @Deprecated @Override
     public Duration getSetupTime(Config conf) {
-        System.out.println("TODO. Not implemented yet getSetupTime(Config) ");
-        return SETUP_TIME_IFU_MOS;
+        // TODO. Venu has to confirm the values.
+        //return Duration.ofSeconds(SETUP_TIME_IFU_ARM.getSeconds() +
+        //                          SETUP_TIME_INST_GUIDING.getSeconds() +
+        //                          SETUP_AVG_TIME_ADQ.getSeconds());
+        LOG.info("TODO. Venu has to confirm the values. getSetupTime: "+conf.getItemValue(EXPOSURE_TIME_KEY) + " " + ExposureCalculator.instance.totalExposureTimeSec(conf));
+
+        return SETUP_TIME;
     }
 
     /**
@@ -377,38 +372,44 @@ public class InstGhost
     @Override
     public CategorizedTimeGroup calc(Config cur, Option<Config> prev) {
         final Collection<CategorizedTime> times = new ArrayList<>();
-
         double exposureTime = ExposureCalculator.instance.exposureTimeSec(cur);
-
-
         times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, exposureTime));
-
-
-
-        double readoutTime = 1.0;
+        double readoutTime = GhostReadoutTime.getReadoutOverhead(cur);
+        System.out.println("*** readoutTime: " + readoutTime );
         times.add(CategorizedTime.fromSeconds(Category.READOUT, readoutTime));
-
-        times.add(getDhsWriteTime());
-
+        System.out.println("DHS suppouse value: " + getDhsWriteTime().time);
+        //times.add(getDhsWriteTime());
         return CommonStepCalculator.instance.calc(cur, prev).addAll(times);
     }
 
-
-    // The reacquisition time.
-    //private static final Duration REACQUISITION_TIME = Duration.ofMinutes(5);
-    private static final Duration REACQUISITION_TIME = Duration.ofMinutes(0);
-
     @Override
     public Duration getReacquisitionTime(ISPObservation obs) {
-        return REACQUISITION_TIME;
+        LOG.info("TODO, ######################### getReacquisitonTime(ConISPObservation obs) method");
+        // Venu described that for each 120 minutes of observation the setup time is increased with 900 seconds.
+        /*
+        int t = (int) ( _exposureTime / REACQUISTION_TIME.getSeconds());
+        if (t == 0)
+            return Duration.ZERO;
+        return Duration.ofSeconds(t*SETUP_TIME.getSeconds());
+         */
+        return REACQUISTION_TIME;
     }
 
     @Override
     public Duration getReacquisitionTime(Config conf) {
-        return REACQUISITION_TIME;
+        LOG.info("TODO, &&&&&&&&&&&&&&&&&& getReacquisitonTime(Config conf) method &&&&&&&&&&&&");
+        /*double exposureTime = ExposureCalculator.instance.exposureTimeSec(conf);
+        System.out.println("exposureTime is: "+ exposureTime);
+        System.out.println("$$$$$$$$$$$$$$$$$$$$$");
+        int t = (int) ( exposureTime / REACQUISTION_TIME.getSeconds());
+        if (t == 0)
+            return Duration.ZERO;
+
+        return Duration.ofSeconds(t*SETUP_TIME.getSeconds());
+         */
+        return REACQUISTION_TIME;
+
     }
-
-
 
     /**
      * This needs to be overridden to support the PosAngleConstraint.
@@ -417,40 +418,6 @@ public class InstGhost
         return (_posAngleConstraint == null) ? PosAngleConstraint.FIXED : _posAngleConstraint;
     }
 
-    public void setPosAngleConstraint(PosAngleConstraint newValue) {
-        PosAngleConstraint oldValue = getPosAngleConstraint();
-        if (!oldValue.equals(newValue)) {
-            _posAngleConstraint = newValue;
-            firePropertyChange(POS_ANGLE_CONSTRAINT_PROP.getName(), oldValue, newValue);
-        }
-    }
-
-
-    @Override
-    public ImList<PosAngleConstraint> getSupportedPosAngleConstraints() {
-        return DefaultImList.create(PosAngleConstraint.FIXED,
-                                    PosAngleConstraint.FIXED_180,
-                                    PosAngleConstraint.UNBOUNDED,
-                                    PosAngleConstraint.PARALLACTIC_ANGLE,
-                                    PosAngleConstraint.PARALLACTIC_OVERRIDE);
-    }
-
-    @Override
-    public boolean allowUnboundedPositionAngle() {
-        // Note that we disable unbounded position angle as an option for MOS preimaging and FPU Custom Mask.
-        System.out.println("TODO. allowUnboundedPositionAngle not implemented ");
-        return true;
-    }
-
-    // REL-814 Preserve the FPU Custom Mask Name
-    @Override
-    public void restoreScienceDetails(final SPInstObsComp oldData) {
-        super.restoreScienceDetails(oldData);
-        if (oldData instanceof InstGhost) {
-            final InstGhost oldGhost = (InstGhost)oldData;
-
-        }
-    }
 
     @Override
     public Set<Site> getSite() {

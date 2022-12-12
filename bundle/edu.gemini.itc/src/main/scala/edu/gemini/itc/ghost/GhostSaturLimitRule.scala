@@ -10,7 +10,7 @@ final case class GhostSaturLimitRule(adLimit: Double, wellDepth: Double, xBin: I
   def wellSaturLimit: Double = wellDepth * xBin * yBin
   def adcSaturLimit: Double = adLimit * gain
 
-  /** For GMOS saturation limit is determined either by the full well limit or by the ADC limit.
+  /** For Ghost saturation limit is determined either by the full well limit or by the ADC limit.
     * Therefor for the "saturation" limit we use the smallest of the two values.
     */
   def limit: Double = wellSaturLimit.min(adcSaturLimit)

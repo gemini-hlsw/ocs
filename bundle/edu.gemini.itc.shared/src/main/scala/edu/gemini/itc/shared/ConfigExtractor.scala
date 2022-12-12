@@ -67,7 +67,7 @@ object ConfigExtractor {
     instrument.getType match {
       case INSTRUMENT_ACQCAM                      => extractAcqCam(c)
       case INSTRUMENT_FLAMINGOS2                  => extractF2(c)
-      case INSTRUMENT_GHOST                       => extractGhost(c) // TODO-GHOSTITC: may need more here?
+      case INSTRUMENT_GHOST                       => extractGhost(c)
       case INSTRUMENT_GNIRS                       => extractGnirs(targetEnv, probe, when, c)
       case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => extractGmos(c)
       case INSTRUMENT_GSAOI                       => extractGsaoi(c, cond)

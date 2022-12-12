@@ -6,7 +6,6 @@ import edu.gemini.itc.gsaoi.Camera;
 import edu.gemini.itc.gsaoi.Gsaoi;
 import edu.gemini.itc.gsaoi.GsaoiRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 
 import java.io.PrintWriter;
@@ -111,4 +110,13 @@ public final class GsaoiPrinter extends PrinterBase
         return gsaoi.readout(1, gsaoi.getNonDestructiveReads());
     }
 
+    @Override
+    public double getVisitTime() {
+        return this.getVisit_time();
+    }
+
+    @Override
+    public double getRecenterInterval() {
+        return this.getRecentInterval();
+    }
 }

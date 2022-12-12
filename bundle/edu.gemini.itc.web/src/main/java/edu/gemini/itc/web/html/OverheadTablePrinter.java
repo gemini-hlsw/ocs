@@ -8,7 +8,6 @@ import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.obs.plannedtime.OffsetOverheadCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
-import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
 import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 import edu.gemini.spModel.time.TimeAmountFormatter;
 
@@ -27,6 +26,10 @@ public class OverheadTablePrinter {
     private final SPComponentType instrumentName;
     private final int numOfExposures;
 
+    private final double visit_time;
+
+    private final double recenterInterval;
+
     private PlannedTime.Step s;
     private Map<PlannedTime.Category, ImList<PlannedTime.CategorizedTime>> m;
     private ImList<PlannedTime.CategorizedTime> cts;
@@ -41,9 +44,14 @@ public class OverheadTablePrinter {
         ConfigCreator.ConfigCreatorResult createInstConfig(int numberExposures);
         ItcOverheadProvider getInst();
         double getReadoutTimePerCoadd(); // this should return "0" for instruments with no coadds
+
+        double getVisitTime();
+
+        double getRecenterInterval();
     }
 
-    public static String print (PrinterWithOverhead printer, final ItcParameters params, final double readoutTimePerCoadd, Result result, ItcSpectroscopyResult sResult) {
+    public static String print (PrinterWithOverhead printer, final ItcParameters params,
+                                final double readoutTimePerCoadd, Result result, ItcSpectroscopyResult sResult) {
         try {
             OverheadTablePrinter otp = new OverheadTablePrinter(printer, params, readoutTimePerCoadd, result, sResult);
 
@@ -69,13 +77,13 @@ public class OverheadTablePrinter {
         return print(printer, p, 0, r, null);
     }
 
-    private OverheadTablePrinter(PrinterWithOverhead printer, final ItcParameters params, final double readoutTimePerCoadd, Result result, ItcSpectroscopyResult sResult)
+    private OverheadTablePrinter(PrinterWithOverhead printer, final ItcParameters params,
+                                 final double readoutTimePerCoadd, Result result,
+                                 ItcSpectroscopyResult sResult)
             throws OverheadTablePrinterException
     {
-
         final ObservationDetails obs = result.observation();
         final CalculationMethod calcMethod = obs.calculationMethod();
-
 
         if (calcMethod instanceof ImagingInt) {
             this.numOfExposures = (int)(((ImagingResult) result).is2nCalc().numberSourceExposures() / obs.sourceFraction());
@@ -86,6 +94,8 @@ public class OverheadTablePrinter {
         } else {
             this.numOfExposures = 1;
         }
+        this.visit_time = printer.getVisitTime();
+        this.recenterInterval = printer.getRecenterInterval();
 
         if (this.numOfExposures > 0) {
             this.r = sResult;
@@ -125,7 +135,7 @@ public class OverheadTablePrinter {
     private int getNumRecenter() {
         int numReacq = 0;
         if (p.observation().calculationMethod() instanceof Spectroscopy) {
-            numReacq = PlannedTimeMath.numRecenter(pta, ccResult.getConfig()[0]);
+            numReacq = PlannedTimeMath.numRecenter(pta, ccResult.getConfig()[0], visit_time, recenterInterval);
             // for IFU spectroscopy recentering is needed only for faint targets (with SNR in individual images < 5)
             if (isIFU()) {
                 if (r.maxSingleSNRatio() > 5) {
@@ -183,10 +193,9 @@ public class OverheadTablePrinter {
             return buf.toString();
         }
 
-
         // print setup overheads, counting one full setup per every two hours of science
         String setupStr = "";
-        int numAcq = PlannedTimeMath.numAcq(pta);
+        int numAcq = PlannedTimeMath.numAcq(pta, visit_time);
         if (numAcq == 1) {
             setupStr = String.format("%.1f s", pta.setup.time.fullSetupTime.toMillis() / 1000.0);
         } else if (numAcq > 1) {
@@ -201,7 +210,10 @@ public class OverheadTablePrinter {
          *    - as target "Recentering" on the slit for all instruments but GSAOI
          *    - as "LGS Reacquisition" for GSAOI after large unguided sky offsets
          */
+        System.out.println("Going to calculate the recenterrrrrrrrrrrrr ");
         int numReacq = getNumRecenter();
+        System.out.println("Recender: " + numReacq );
+        System.out.println("------------------------------ ");
         int numLgsReacq = getGsaoiLgsReacqNum();
         String  reacqStr;
         if (numReacq > 0) {
@@ -218,7 +230,6 @@ public class OverheadTablePrinter {
             buf.append("<td align=\"right\"> ").append(reacqStr).append("</td>");
             buf.append("</tr>");
         }
-
 
         // print offset overheads
         if (!getOffsetsByOverhead().isEmpty()) {
@@ -262,7 +273,7 @@ public class OverheadTablePrinter {
             buf.append("</tr>");
         }
 
-        long totalTime = PlannedTimeMath.totalTimeWithReacq(pta, numReacq);
+        long totalTime = PlannedTimeMath.totalTimeWithReacq(pta, numReacq, (int) visit_time);
         buf.append("<tr><td><b>Program time</b></td><td align=\"right\"><b>").append(String.format("%s", TimeAmountFormatter.getDescriptiveFormat(totalTime))).append("</b></td></tr>");
         buf.append("</table>");
 

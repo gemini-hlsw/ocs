@@ -34,8 +34,6 @@ public class GhostType {
     public static final double SIZE_ONE_FIBER_SR_PIXELS = 2.7;  // Size of one fiber in pixels.
     public static final double SIZE_ONE_FIBER_HR_PIXELS = 1.62;  // Size of one fiber in pixels.
 
-    // TODO. The E2V_PIXEL_SIZE should be in arcsecs/pixel.
-    //public static final double E2V_PIXEL_SIZE = 0.06667; // microns/pixel
     public static final double E2V_PIXEL_SIZE = 0.4; // arcsec/pixel
 
     public enum DetectorManufacturer implements DisplayableSpType {
@@ -142,7 +140,7 @@ public class GhostType {
 
     public enum AmpGain implements LoggableSpType, SequenceableSpType {
         LOW("Low"),
-        FAST("Fast"),
+        HIGH("HIGH"),
         ;
 
         public static final GhostType.AmpGain DEFAULT = GhostType.AmpGain.LOW;
@@ -184,19 +182,54 @@ public class GhostType {
      * FAST --> Slow read and low gain
      * BrightTargets --> Fast read and high gain.
      */
+
+    public enum DetectorReadMode {
+        SLOW,
+        FAST;
+    }
     public enum ReadMode implements DisplayableSpType, SequenceableSpType {
-        STANDARD("Standard Science"),
-        FAST("Fast Read"),
-        BRIGTHTARGETS("Bright Targets"),
+        STANDARD("Standard Science", DetectorReadMode.SLOW, AmpGain.LOW),
+        FAST("Fast Read", DetectorReadMode.SLOW, AmpGain.LOW),
+        BRIGTHTARGETS("Bright Targets", DetectorReadMode.FAST, AmpGain.HIGH),
         ;
 
         private String _displayValue;
 
-        public static final ReadMode DEFAULT = STANDARD;
-        public static final ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "ampReadMode");
+        private DetectorReadMode _readMode;
 
-        ReadMode(String displayValue) {
+        public String get_displayValue() {
+            return _displayValue;
+        }
+
+        public void set_displayValue(String _displayValue) {
+            this._displayValue = _displayValue;
+        }
+
+        public DetectorReadMode get_readMode() {
+            return _readMode;
+        }
+
+        public void set_readMode(DetectorReadMode _readMode) {
+            this._readMode = _readMode;
+        }
+
+        public AmpGain get_ampGain() {
+            return _ampGain;
+        }
+
+        public void set_ampGain(AmpGain _ampGain) {
+            this._ampGain = _ampGain;
+        }
+
+        private AmpGain _ampGain;
+
+        public static final ReadMode DEFAULT = STANDARD;
+        public static final ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "readMode");
+
+        ReadMode(String displayValue, DetectorReadMode detReadMode, AmpGain amp) {
             _displayValue = displayValue;
+            _readMode = detReadMode;
+            _ampGain = amp;
         }
 
         public String displayValue() {
@@ -208,13 +241,8 @@ public class GhostType {
         }
 
 
-        /** Return an AmpSpeed by name **/
-        public static ReadMode getAmpReadMode(String name) {
-            return ReadMode.getAmpReadMode(name, DEFAULT);
-        }
-
         /** Return an AmpSpeed by name giving a value to return upon error **/
-        public static ReadMode getAmpReadMode(String name, ReadMode nvalue) {
+        public static ReadMode getReadMode(String name, ReadMode nvalue) {
             return SpTypeUtil.oldValueOf(ReadMode.class, name, nvalue);
         }
     }
@@ -226,6 +254,7 @@ public class GhostType {
         ONE(1),
         TWO(2),
         FOUR(4),
+        EIGHT(8),
         ;
 
         public static final Binning DEFAULT = Binning.ONE;

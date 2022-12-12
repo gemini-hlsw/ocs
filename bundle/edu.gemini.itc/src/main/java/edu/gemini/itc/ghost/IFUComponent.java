@@ -34,6 +34,8 @@ public final class IFUComponent extends TransmissionElement {
 
     private final double RADIUS_SR=0.3409428;
 
+    private GhostType.Resolution _res;
+
     public IFUComponent(GhostType.Resolution res) {
 
         super(ITCConstants.LIB + "/" + Ghost.INSTR_DIR + "/" +Ghost.INSTR_PREFIX + "ifu" + Instrument.DATA_SUFFIX);
@@ -47,7 +49,7 @@ public final class IFUComponent extends TransmissionElement {
             ifu_spacing =  IFU_SPACING_SR;
             radius = RADIUS_SR;
         }
-        System.out.println("Calculating IFU elements for " + res.displayValue() + ". Radius: " + radius + " mm, ifu_diameter: "+ ifu_diameter + " ifu_spacing: " + ifu_spacing);
+        Log.info("Calculating IFU elements for " + res.displayValue() + ". Radius: " + radius + " mm, ifu_diameter: "+ ifu_diameter + " ifu_spacing: " + ifu_spacing);
         int numX=8;
         int numY=9;
         int numIFUs = 0;
@@ -60,20 +62,21 @@ public final class IFUComponent extends TransmissionElement {
                 double y = (2*j - numY + Math.abs(i)%2 - 1) * distY;
                 double r = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
                 if (r < radius) {
-                    System.out.println("x: "+ x + " y: "+ y + " r: " + r + " radious: "+ radius);
+                    Log.info("x: "+ x + " y: "+ y + " r: " + r + " radious: "+ radius);
                     IFUApertures.addAperture(new HexagonalAperture(x, y, ifu_diameter));
                     IFUOffsets.add(r);
                     numIFUs++;
                 }
-                //System.out.println("  discarded");
+                //Log.info("  discarded");
             }
         }
         Log.info("-> will sum HR " + numIFUs + " IFU elements");
         List<ApertureComponent> list = IFUApertures.getApertureList();
         for( ApertureComponent ac : list) {
             HexagonalAperture h = (HexagonalAperture) ac;
-            System.out.println("(" +h.getIfuPosX() + ","+ h.getIfuPosY() + "): "+  h.getFractionOfSourceInAperture());
+            Log.info("(" +h.getIfuPosX() + ","+ h.getIfuPosY() + "): "+  h.getFractionOfSourceInAperture());
         }
+        this._res = res;
     }
 
     public ApertureComponent getAperture() {
@@ -89,7 +92,17 @@ public final class IFUComponent extends TransmissionElement {
     }
 
     public String toString() {
-        return "IFU Transmission";
+        String infoIfu = "IFU";
+        double ifu_diameter =  IFU_DIAMETER_HR;
+        double ifu_spacing =  IFU_SPACING_HR;
+        double radius= RADIUS_HR;
+        if (_res == GhostType.Resolution.STANDARD) {
+            ifu_diameter = IFU_DIAMETER_SR;
+            ifu_spacing =  IFU_SPACING_SR;
+            radius = RADIUS_SR;
+        }
+        infoIfu += " resolution: " + _res.displayValue()  + ". Features, ifu-diameter: " + ifu_diameter + " ifu-spacing: " + ifu_spacing + " ifu-radius: " + radius;
+        return infoIfu;
     }
 
 }

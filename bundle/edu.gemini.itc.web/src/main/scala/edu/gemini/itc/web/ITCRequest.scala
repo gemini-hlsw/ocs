@@ -196,7 +196,7 @@ object ITCRequest {
     Flamingos2Parameters(filter, grism, fpMask, None, readMode)
   }
 
-  // TODO-GHOSTITC
+  // GHOST
   def ghostParameters(r: ITCRequest): GhostParameters = {
 
     def extractGain(r:GhostType.ReadMode) : GhostType.AmpGain = r match {
