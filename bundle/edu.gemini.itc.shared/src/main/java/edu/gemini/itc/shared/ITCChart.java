@@ -81,7 +81,7 @@ public final class ITCChart {
     public ITCChart(final SpcChartData s, final PlottingDetails plotParams) {
 
         chart = ChartFactory.createXYLineChart(s.title(), s.xAxis().label(), s.yAxis().label(), this.seriesData, PlotOrientation.VERTICAL, true, false, false);
-        chart.getXYPlot().setRenderer(new StandardXYItemRenderer(StandardXYItemRenderer.LINES));
+        //chart.getXYPlot().setRenderer(new StandardXYItemRenderer(StandardXYItemRenderer.LINES));
         chart.getLegend().setPosition(RectangleEdge.TOP);
         chart.setBackgroundPaint(Color.white);
 
@@ -152,7 +152,7 @@ public final class ITCChart {
         final int ix = seriesData.getSeriesCount() - 1;
         final XYItemRenderer renderer = chart.getXYPlot().getRenderer();
         renderer.setSeriesPaint(ix, color.isDefined() ? color.get() : colorByIndex(ix));
-        renderer.setSeriesStroke(ix, new BasicStroke(1));
+        renderer.setSeriesStroke(ix, new BasicStroke(2));
         //renderer.
         if (!inLegend)
             renderer.setSeriesVisibleInLegend(ix, false);

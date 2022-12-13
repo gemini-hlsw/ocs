@@ -35,8 +35,14 @@
                  $(this).removeAttr('disabled');
               else
                  $(this).attr('disabled', 'disabled');
+
+              if (optSpeInt == optSpaInt)
+                  $(this).attr('selected', 'selected');
+              else
+                 $(this).removeAttr('selected');
             });
         });
+
     });
     </script>
 </head>
