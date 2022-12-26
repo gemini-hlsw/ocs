@@ -170,7 +170,7 @@ class ParamsListTableModel extends AbstractTableModel {
 
     // We keep a List of Pair (shell, data object), for efficiency
     private final java.util.List<Pair<ISPTemplateParameters, TemplateParameters>> data =
-            new ArrayList<Pair<ISPTemplateParameters, TemplateParameters>>();
+            new ArrayList<>();
 
     public void setTemplateGroupNode(ISPTemplateGroup tgn) {
         if (templateGroupNode != null) {
@@ -193,7 +193,7 @@ class ParamsListTableModel extends AbstractTableModel {
     }
 
     private static Pair<ISPTemplateParameters, TemplateParameters> pair(ISPTemplateParameters tp) {
-        return new Pair<ISPTemplateParameters, TemplateParameters>(tp, (TemplateParameters) tp.getDataObject());
+        return new Pair<>(tp, (TemplateParameters) tp.getDataObject());
     }
 
     private void refreshList() {
@@ -324,11 +324,7 @@ final class EdTemplateParameters extends JPanel {
         }};
         setLayout(new BorderLayout());
 
-        StaffBean.addPropertyChangeListener(new PropertyChangeListener() {
-            @Override public void propertyChange(PropertyChangeEvent evt) {
-                updateLayout();
-            }
-        });
+        StaffBean.addPropertyChangeListener(evt -> updateLayout());
     }
 
 
