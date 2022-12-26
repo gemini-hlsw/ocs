@@ -22,7 +22,6 @@ import jsky.app.ot.viewer.SPDragDropObject;
 import jsky.app.ot.viewer.SPTree;
 import jsky.app.ot.viewer.SPViewer;
 import jsky.util.gui.DialogUtil;
-import jsky.util.gui.SingleSelectComboBox;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -442,8 +441,8 @@ final class EdTemplateParameters extends JPanel {
 
         private void addTargets(final ImList<SPTarget> ts) {
             addNewParameters(o -> {
-                final SPSiteQuality sq = o.map(tp -> tp.getSiteQuality()).getOrElse(new SPSiteQuality());
-                final TimeValue     tv = o.map(tp -> tp.getTime()).getOrElse(TimeValue.ZERO_HOURS);
+                final SPSiteQuality sq = o.map(TemplateParameters::getSiteQuality).getOrElse(new SPSiteQuality());
+                final TimeValue     tv = o.map(TemplateParameters::getTime).getOrElse(TimeValue.ZERO_HOURS);
                 return ts.map(t -> TemplateParameters.newInstance(t, sq, tv));
             });
         }
@@ -453,7 +452,7 @@ final class EdTemplateParameters extends JPanel {
 
             TargetImport.promptAndReadAsJava(c, program).biForEach(
               msg -> JOptionPane.showMessageDialog(c, msg, "Error", JOptionPane.ERROR_MESSAGE),
-              ts  -> addTargets(ts)
+              this::addTargets
             );
         }
     };
@@ -555,10 +554,6 @@ class EdTemplateGroupHeader extends JPanel {
     private TemplateGroup templateGroup;
 
     private final JLabel resource = new JLabel();
-    private final JComboBox status = new SingleSelectComboBox() {{
-        setChoices(TemplateGroup.Status.values());
-        setMaximumRowCount(TemplateGroup.Status.values().length);
-    }};
 
     private final JTextField title = new JTextField() {{
         getDocument().addDocumentListener(new AbstractDocumentListener() {
@@ -600,7 +595,6 @@ class EdTemplateGroupHeader extends JPanel {
         // Update our UI
         resource.setText(blueprint.toString());
         title.setText(templateGroup.getTitle());
-        status.setSelectedItem(templateGroup.getStatus());
     }
 }
 
