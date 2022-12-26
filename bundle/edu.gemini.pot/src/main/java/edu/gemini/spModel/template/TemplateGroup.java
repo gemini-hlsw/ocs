@@ -19,7 +19,7 @@ public final class TemplateGroup extends AbstractDataObject {
     public static final SPComponentType SP_TYPE = SPComponentType.TEMPLATE_GROUP;
 
     public static final ISPNodeInitializer<ISPTemplateGroup, TemplateGroup> NI =
-        new SimpleNodeInitializer<>(SP_TYPE, () -> new TemplateGroup());
+        new SimpleNodeInitializer<>(SP_TYPE, TemplateGroup::new);
 
     // Private PIO parameters
     private static final String PARAM_BLUEPRINT = "blueprint";
@@ -36,7 +36,7 @@ public final class TemplateGroup extends AbstractDataObject {
     /**
      * Observation status values.
      */
-    public static enum Status implements DisplayableSpType, DescribableSpType {
+    public enum Status implements DisplayableSpType, DescribableSpType {
 
         PHASE2("Phase 2", "In Phase 2"),
         FOR_REVIEW("For Review", "Ready for review by contact scientist"),
@@ -47,8 +47,8 @@ public final class TemplateGroup extends AbstractDataObject {
         /** The default ObservationStatus value **/
         public static Status DEFAULT = PHASE2;
 
-        private String displayValue;
-        private String description;
+        private final String displayValue;
+        private final String description;
 
         private Status(String displayVal, String description) {
             displayValue = displayVal;
@@ -144,8 +144,8 @@ public final class TemplateGroup extends AbstractDataObject {
         blueprintId = Pio.getValue(paramSet, PARAM_BLUEPRINT);
         status = Status.valueOf(Pio.getValue(paramSet, PARAM_STATUS));
         groupType = Pio.getEnumValue(paramSet, PROP_GROUP_TYPE, GroupType.DEFAULT);
-        int[] segments = VersionToken.segments(Pio.getValue(paramSet, PARAM_VERSION_TOKEN, versionToken.toString()));
-        int next = Pio.getIntValue(paramSet, PARAM_VERSION_TOKEN_NEXT, 1);
+        final int[] segments = VersionToken.segments(Pio.getValue(paramSet, PARAM_VERSION_TOKEN, versionToken.toString()));
+        final int next = Pio.getIntValue(paramSet, PARAM_VERSION_TOKEN_NEXT, 1);
         versionToken = VersionToken.apply(segments, next);
     }
 
