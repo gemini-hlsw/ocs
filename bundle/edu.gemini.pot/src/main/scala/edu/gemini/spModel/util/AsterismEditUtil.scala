@@ -1,20 +1,19 @@
 // Copyright (c) 2016-2022 Association of Universities for Research in Astronomy, Inc. (AURA)
 // For license information see LICENSE or https://opensource.org/licenses/BSD-3-Clause
 
-package jsky.app.ot.nsp
+package edu.gemini.spModel.util
 
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.gemini.ghost.GhostAsterism
-import edu.gemini.spModel.gemini.ghost.GhostAsterism.GuideFiberState.Enabled
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostTarget
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.GuideFiberState.Enabled
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.Asterism
 import edu.gemini.spModel.target.env.UserTarget
 import edu.gemini.spModel.target.obsComp.TargetObsComp
-import edu.gemini.spModel.util.SPTreeUtil
 
 object AsterismEditUtil {
 

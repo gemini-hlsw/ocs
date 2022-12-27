@@ -18,6 +18,7 @@ import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.obscomp.SPNote;
 import edu.gemini.spModel.seqcomp.SeqBase;
+import edu.gemini.spModel.util.AsterismEditUtil;
 import edu.gemini.spModel.util.DBCopyService;
 import edu.gemini.spModel.util.SPTreeUtil;
 import jsky.app.ot.OTOptions;
