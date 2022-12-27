@@ -1,0 +1,38 @@
+Instrument: GHOST
+Blueprint templates : GHOST_BP.xml
+Last update: 2022 December 19, Bryan Miller, single position from PIT for dual-target
+
+Observations identified by Library IDs, indicated with {}
+
+# DEFINITIONS
+Phase I = PI
+
+**** IF INSTRUMENT MODE == SPECTROSCOPY ***
+
+INCLUDE {1}     # Science
+
+SET RESOLUTION MODE FROM PI  # Possible w/o a target component?
+
+SET TARGET MODE FROM PI      # Possible w/o a target component?
+
+ON TEMPATE INSTANTIATION (adding the target(s))
+	IF RESOLUTION MODE == STANDARD
+	    IF TARGET MODE == 'Single'
+	    	Add target from PI to SRIFU1
+	    IF TARGET MODE == 'Dual'  # Position from PI is the Base position
+	    	Add target1 from PI with RA + 1 arcmin to SRIFU1
+	    	Add target2 from PI with RA - 1 arcmin to SRIFU2	
+	    	    
+		IF TARGET MODE ==  'SRIFU1 Sky + SRIFU2 Target'
+			Add target from PI to SRIFU2
+			Add target from PI with ra + 2 arcmin to SRIFU1
+		ELSE
+			Add target from PI to SRIFU1
+			IF TARGET MODE ==  'SRIFU1 Target + SRIFU2 Sky'
+				Add target from PI with ra - 2 arcmin to SRIFU2
+
+	IF RESOLUTION MODE == HIGH or PRECISION RADIAL VELOCITY
+		Add target from PI to HRIFU
+		Add target from PI with ra - 2 arcmin to HRSKY
+		
+

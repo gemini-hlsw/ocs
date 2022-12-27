@@ -4,6 +4,7 @@ import scala.None$;
 import scala.Option$;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public final class ImOption {
     private ImOption() { }
@@ -34,5 +35,9 @@ public final class ImOption {
 
     public static <T> scala.Option<T> scalaNone() {
         return toScalaOpt(None.instance());
+    }
+
+    public static <T> Option<T> when(final boolean condition, Supplier<T> value) {
+        return condition ? new Some<>(value.get()) : None.instance();
     }
 }

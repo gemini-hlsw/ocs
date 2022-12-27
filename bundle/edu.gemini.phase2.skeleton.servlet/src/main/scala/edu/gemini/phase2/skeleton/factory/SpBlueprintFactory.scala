@@ -1,6 +1,7 @@
 package edu.gemini.phase2.skeleton.factory
 
 import edu.gemini.model.p1.immutable._
+import edu.gemini.shared.util.immutable.ImOption
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.flamingos2.blueprint.{SpFlamingos2BlueprintImaging, SpFlamingos2BlueprintLongslit, SpFlamingos2BlueprintMos}
@@ -14,6 +15,7 @@ import edu.gemini.spModel.template.SpBlueprint
 
 import scala.collection.JavaConverters._
 import edu.gemini.spModel.gemini.altair.blueprint.{SpAltair, SpAltairLgs, SpAltairNgs, SpAltairNone}
+import edu.gemini.spModel.gemini.ghost.blueprint.SpGhostBlueprint
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gnirs.blueprint.{SpGnirsBlueprintImaging, SpGnirsBlueprintSpectroscopy}
 import edu.gemini.spModel.gemini.nici.NICIParams
@@ -33,6 +35,7 @@ import edu.gemini.spModel.gemini.gpi.Gpi
 import edu.gemini.spModel.gemini.gpi.blueprint.SpGpiBlueprint
 import edu.gemini.spModel.gemini.graces.blueprint.SpGracesBlueprint
 import edu.gemini.spModel.gemini.visitor.VisitorConfig
+import edu.gemini.spModel.target.env.AsterismType
 
 object SpBlueprintFactory {
 
@@ -41,6 +44,7 @@ object SpBlueprintFactory {
       case b: Flamingos2BlueprintImaging    => F2.imaging(b)
       case b: Flamingos2BlueprintLongslit   => F2.longslit(b)
       case b: Flamingos2BlueprintMos        => F2.mos(b)
+      case b: GhostBlueprint                => Ghost(b)
       case b: GmosNBlueprintIfu             => GmosN.ifu(b)
       case b: GmosNBlueprintImaging         => GmosN.imaging(b)
       case b: GmosNBlueprintLongslit        => GmosN.longslit(b)
@@ -107,6 +111,36 @@ object SpBlueprintFactory {
         else if (oi) new SpAltairLgs(SpAltairLgs.LgsMode.LGS_OI)
         else new SpAltairLgs(SpAltairLgs.LgsMode.LGS)
     }
+  }
+
+  object Ghost {
+
+    private def asterismType(
+      r: GhostResolutionMode,
+      t: GhostTargetMode
+    ): AsterismType = {
+      import GhostResolutionMode._
+      import GhostTargetMode._
+
+      (r, t) match {
+        case (Standard,                Single)       => AsterismType.GhostSingleTarget
+        case (Standard,                Dual)         => AsterismType.GhostDualTarget
+        case (Standard,                TargetAndSky) => AsterismType.GhostTargetPlusSky
+        case (Standard,                SkyAndTarget) => AsterismType.GhostSkyPlusTarget
+        case (High,                    _)            => AsterismType.GhostHighResolutionTargetPlusSky
+        case (PrecisionRadialVelocity, _)            => AsterismType.GhostHighResolutionTargetPlusSkyPrv
+        case _                                       => AsterismType.Single
+      }
+    }
+
+    def apply(b: GhostBlueprint): Either[String, SpGhostBlueprint] = {
+      val astType: AsterismType = asterismType(b.resolutionMode, b.targetMode)
+      SpGhostBlueprint
+        .fromAsterismType(astType)
+        .toScalaOpt
+        .toRight(s"Incompatible asterism type: ${astType.tag}")
+    }
+
   }
 
   object Graces {

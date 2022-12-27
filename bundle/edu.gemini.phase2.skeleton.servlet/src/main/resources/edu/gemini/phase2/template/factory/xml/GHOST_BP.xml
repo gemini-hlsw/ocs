@@ -1,0 +1,975 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
+
+<document>
+  <container kind="program" type="Program" version="2023A-1" subtype="basic" key="51a43069-2f6c-4026-a201-f3e701892613" name="">
+    <paramset name="Science Program" kind="dataObj">
+      <param name="title" value="GHOST PHASE I/II MAPPING BPS"/>
+      <param name="programMode" value="QUEUE"/>
+      <param name="tooType" value="none"/>
+      <param name="programStatus" value="PHASE2"/>
+      <param name="nextObsId" value="1"/>
+      <paramset name="piInfo">
+        <param name="firstName" value=""/>
+        <param name="lastName" value=""/>
+        <param name="email" value=""/>
+        <param name="phone" value=""/>
+      </paramset>
+      <param name="queueBand" value="1"/>
+      <param name="isLibrary" value="true"/>
+      <paramset name="timeAcct"/>
+      <param name="awardedTime" value="0.0" units="hours"/>
+      <param name="fetched" value="yes"/>
+      <param name="completed" value="false"/>
+      <param name="notifyPi" value="NO"/>
+      <param name="timingWindowNotification" value="false"/>
+    </paramset>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="6b205a5a-fa7d-4968-be0f-035b2a6a0e72" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="Next libID = 2"/>
+        <param name="NoteText" value=""/>
+      </paramset>
+    </container>
+    <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="e9a65dbe-e121-4022-8518-550b79bc1b1e" name="">
+      <paramset name="Observation" kind="dataObj">
+        <param name="title" value="GHOST science"/>
+        <param name="libraryId" value="1"/>
+        <param name="priority" value="LOW"/>
+        <param name="tooOverrideRapid" value="false"/>
+        <param name="phase2Status" value="INACTIVE"/>
+        <paramset name="schedulingBlock">
+          <param name="start" value="1667237400000"/>
+          <paramset name="duration">
+            <param name="tag" value="unstated"/>
+          </paramset>
+        </paramset>
+        <param name="qaState" value="UNDEFINED"/>
+        <param name="overrideQaState" value="false"/>
+        <param name="setupTimeType" value="FULL"/>
+      </paramset>
+      <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GHOST" key="b1ebce10-d2be-4de1-93ee-7277da77dbef" name="GHOST">
+        <paramset name="GHOST" kind="dataObj">
+          <param name="posAngle" value="0"/>
+          <param name="issPort" value="UP_LOOKING"/>
+          <param name="enableFiberAgitator1" value="false"/>
+          <param name="enableFiberAgitator2" value="false"/>
+          <param name="redExposureTime" value="600.0"/>
+          <param name="redExposureCount" value="1"/>
+          <param name="redBinning" value="ONE_BY_ONE"/>
+          <param name="redReadNoiseGain" value="MEDIUM_LOW"/>
+          <param name="blueExposureTime" value="600.0"/>
+          <param name="blueExposureCount" value="1"/>
+          <param name="blueBinning" value="ONE_BY_ONE"/>
+          <param name="blueReadNoiseGain" value="SLOW_LOW"/>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="56e679b6-1740-47fe-855f-706f5071ff24" name="Note">
+        <paramset name="Note" kind="dataObj">
+          <param name="title" value="Description"/>
+          <param name="NoteText" value="Describe this template"/>
+        </paramset>
+      </container>
+      <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="81fdf234-3253-4f2b-8c0f-a224f2310325" name="Observing Log">
+        <paramset name="Observing Log" kind="dataObj">
+          <paramset name="obsQaRecord"/>
+        </paramset>
+      </container>
+      <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="1ae16348-fc28-4ef7-826d-12dd96e35741" name="Observation Exec Log">
+        <paramset name="Observation Exec Log" kind="dataObj">
+          <paramset name="obsExecRecord">
+            <paramset name="datasets"/>
+            <paramset name="events"/>
+            <paramset name="configMap"/>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="953a10d3-7da0-4746-af7b-0696ac287ee3" name="Sequence">
+        <paramset name="Sequence" kind="dataObj"/>
+        <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GHOST" key="668cc23e-f767-4279-94ff-7d06026703f7" name="GHOST Sequence">
+          <paramset name="GHOST Sequence" kind="dataObj">
+            <param name="blueExposureCount" value="1"/>
+            <param name="blueExposureTime" value="600.0"/>
+            <param name="redExposureCount" value="1"/>
+            <param name="redExposureTime" value="600.0"/>
+          </paramset>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="aa14b2b0-07b7-4503-beff-856455c7529a" name="Observe">
+            <paramset name="Observe" kind="dataObj">
+              <param name="repeatCount" value="1"/>
+              <param name="class" value="SCIENCE"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+    </container>
+    <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="7302de0a-99d8-47c4-92d3-b2d0bf4e96c5" name="">
+      <paramset name="Observation" kind="dataObj">
+        <param name="title" value="GHOST science - SRIFU1 + sky example"/>
+        <param name="libraryId" value=""/>
+        <param name="priority" value="LOW"/>
+        <param name="tooOverrideRapid" value="false"/>
+        <param name="phase2Status" value="PI_TO_COMPLETE"/>
+        <paramset name="schedulingBlock">
+          <param name="start" value="1667237400000"/>
+          <paramset name="duration">
+            <param name="tag" value="unstated"/>
+          </paramset>
+        </paramset>
+        <param name="qaState" value="UNDEFINED"/>
+        <param name="overrideQaState" value="false"/>
+        <param name="setupTimeType" value="FULL"/>
+      </paramset>
+      <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GHOST" key="a746d845-cffe-4ba3-8edf-abdb42c27801" name="GHOST">
+        <paramset name="GHOST" kind="dataObj">
+          <param name="posAngle" value="0"/>
+          <param name="issPort" value="UP_LOOKING"/>
+          <param name="enableFiberAgitator1" value="false"/>
+          <param name="enableFiberAgitator2" value="false"/>
+          <param name="redExposureTime" value="600.0"/>
+          <param name="redExposureCount" value="1"/>
+          <param name="redBinning" value="ONE_BY_ONE"/>
+          <param name="redReadNoiseGain" value="MEDIUM_LOW"/>
+          <param name="blueExposureTime" value="600.0"/>
+          <param name="blueExposureCount" value="1"/>
+          <param name="blueBinning" value="ONE_BY_ONE"/>
+          <param name="blueReadNoiseGain" value="SLOW_LOW"/>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="71e6a8d8-474d-4a01-b7ec-cb83d5f3359a" name="Targets">
+        <paramset name="Targets" kind="dataObj">
+          <paramset name="targetEnv">
+            <paramset name="asterism">
+              <paramset name="ifu1">
+                <paramset name="target">
+                  <param name="name" value="HD1355"/>
+                  <param name="redshift" value="-5.0E-6"/>
+                  <param name="parallax" value="3.7153"/>
+                  <paramset name="magnitude">
+                    <param name="value" value="9.96"/>
+                    <param name="band" value="B"/>
+                    <param name="system" value="Vega"/>
+                    <param name="error" value="0.03"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="8.87"/>
+                    <param name="band" value="V"/>
+                    <param name="system" value="Vega"/>
+                    <param name="error" value="0.02"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="7.037"/>
+                    <param name="band" value="J"/>
+                    <param name="system" value="Vega"/>
+                    <param name="error" value="0.018"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="6.532"/>
+                    <param name="band" value="H"/>
+                    <param name="system" value="Vega"/>
+                    <param name="error" value="0.044"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="6.415"/>
+                    <param name="band" value="K"/>
+                    <param name="system" value="Vega"/>
+                    <param name="error" value="0.024"/>
+                  </paramset>
+                  <paramset name="coordinates">
+                    <param name="ra" value="4.423109895970015"/>
+                    <param name="dec" value="348.784820192"/>
+                  </paramset>
+                  <paramset name="proper-motion">
+                    <param name="delta-ra" value="7.57"/>
+                    <param name="delta-dec" value="-8.661"/>
+                    <param name="epoch" value="2000.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
+                <param name="guideFiberState" value="enabled"/>
+              </paramset>
+              <paramset name="ifu2">
+                <param name="ra" value="4.423108333333346"/>
+                <param name="dec" value="348.81815277777775"/>
+              </paramset>
+              <param name="tag" value="ghostTargetPlusSky"/>
+            </paramset>
+            <paramset name="guideEnv">
+              <param name="primary" value="0"/>
+              <paramset name="guideGroup">
+                <param name="tag" value="AutoActiveTag"/>
+                <param name="posAngle" value="0.0"/>
+                <paramset name="guider">
+                  <param name="key" value="PWFS2"/>
+                  <param name="primary" value="0"/>
+                  <paramset name="spTarget">
+                    <paramset name="target">
+                      <param name="name" value="Gaia DR2 2424603635247995264"/>
+                      <paramset name="magnitude">
+                        <param name="value" value="12.633876256076077"/>
+                        <param name="band" value="V"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="12.293584146793286"/>
+                        <param name="band" value="R"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="11.968376909683993"/>
+                        <param name="band" value="I"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="12.4838517478606"/>
+                        <param name="band" value="r"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="12.36244890570376"/>
+                        <param name="band" value="i"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="12.87175494000135"/>
+                        <param name="band" value="g"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="11.153477242505286"/>
+                        <param name="band" value="K"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="11.222237037468298"/>
+                        <param name="band" value="H"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="11.491788136526072"/>
+                        <param name="band" value="J"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="coordinates">
+                        <param name="ra" value="4.3382858653453695"/>
+                        <param name="dec" value="348.8563719107751"/>
+                      </paramset>
+                      <paramset name="proper-motion">
+                        <param name="delta-ra" value="-14.985691687370013"/>
+                        <param name="delta-dec" value="-6.722483282732992"/>
+                        <param name="epoch" value="2015.5"/>
+                      </paramset>
+                      <param name="tag" value="sidereal"/>
+                    </paramset>
+                  </paramset>
+                </paramset>
+              </paramset>
+            </paramset>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="750d6980-8b3b-4af7-8a24-7acd5ba13faf" name="Observing Conditions">
+        <paramset name="Observing Conditions" kind="dataObj">
+          <param name="CloudCover" value="PERCENT_80"/>
+          <param name="ImageQuality" value="ANY"/>
+          <param name="SkyBackground" value="ANY"/>
+          <param name="WaterVapor" value="ANY"/>
+          <param name="ElevationConstraintType" value="NONE"/>
+          <param name="ElevationConstraintMin" value="0.0"/>
+          <param name="ElevationConstraintMax" value="0.0"/>
+          <paramset name="timing-window-list"/>
+        </paramset>
+      </container>
+      <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="e727993e-3e31-43ba-858a-057ca2c51b3a" name="Observing Log">
+        <paramset name="Observing Log" kind="dataObj">
+          <paramset name="obsQaRecord"/>
+        </paramset>
+      </container>
+      <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="7394f7cf-2f01-47a1-8aff-39ea1d105b68" name="Observation Exec Log">
+        <paramset name="Observation Exec Log" kind="dataObj">
+          <paramset name="obsExecRecord">
+            <paramset name="datasets"/>
+            <paramset name="events"/>
+            <paramset name="configMap"/>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="9ae6255a-2082-47a6-a084-0969ca5b00c2" name="Sequence">
+        <paramset name="Sequence" kind="dataObj"/>
+        <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GHOST" key="d2403616-71fb-46d0-a741-eb82e4a31599" name="GHOST Sequence">
+          <paramset name="GHOST Sequence" kind="dataObj">
+            <param name="blueExposureCount" value="1"/>
+            <param name="blueExposureTime" value="600.0"/>
+            <param name="redExposureCount" value="1"/>
+            <param name="redExposureTime" value="600.0"/>
+          </paramset>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="f288dd5d-5de1-4e65-a08e-1d4c31f22c16" name="Observe">
+            <paramset name="Observe" kind="dataObj">
+              <param name="repeatCount" value="1"/>
+              <param name="class" value="SCIENCE"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+    </container>
+    <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="d83369a8-7fee-4c71-91f1-0b90ed5c74e8" name="">
+      <paramset name="Observation" kind="dataObj">
+        <param name="title" value="GHOST science - high resolution example"/>
+        <param name="libraryId" value=""/>
+        <param name="priority" value="LOW"/>
+        <param name="tooOverrideRapid" value="false"/>
+        <param name="phase2Status" value="PI_TO_COMPLETE"/>
+        <paramset name="schedulingBlock">
+          <param name="start" value="1667237400000"/>
+          <paramset name="duration">
+            <param name="tag" value="unstated"/>
+          </paramset>
+        </paramset>
+        <param name="qaState" value="UNDEFINED"/>
+        <param name="overrideQaState" value="false"/>
+        <param name="setupTimeType" value="FULL"/>
+      </paramset>
+      <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GHOST" key="1dc5f526-e0d2-4fae-9f16-bfe3945c8b2d" name="GHOST">
+        <paramset name="GHOST" kind="dataObj">
+          <param name="posAngle" value="0"/>
+          <param name="issPort" value="UP_LOOKING"/>
+          <param name="enableFiberAgitator1" value="false"/>
+          <param name="enableFiberAgitator2" value="false"/>
+          <param name="redExposureTime" value="600.0"/>
+          <param name="redExposureCount" value="1"/>
+          <param name="redBinning" value="ONE_BY_ONE"/>
+          <param name="redReadNoiseGain" value="MEDIUM_LOW"/>
+          <param name="blueExposureTime" value="600.0"/>
+          <param name="blueExposureCount" value="1"/>
+          <param name="blueBinning" value="ONE_BY_ONE"/>
+          <param name="blueReadNoiseGain" value="SLOW_LOW"/>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="4fdd9069-5642-4066-9595-3cc66697e098" name="Targets">
+        <paramset name="Targets" kind="dataObj">
+          <paramset name="targetEnv">
+            <paramset name="asterism">
+              <paramset name="ifu1">
+                <paramset name="target">
+                  <param name="name" value="HD1355"/>
+                  <param name="redshift" value="-5.0E-6"/>
+                  <param name="parallax" value="3.7153"/>
+                  <paramset name="magnitude">
+                    <param name="value" value="9.96"/>
+                    <param name="band" value="B"/>
+                    <param name="system" value="Vega"/>
+                    <param name="error" value="0.03"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="8.87"/>
+                    <param name="band" value="V"/>
+                    <param name="system" value="Vega"/>
+                    <param name="error" value="0.02"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="7.037"/>
+                    <param name="band" value="J"/>
+                    <param name="system" value="Vega"/>
+                    <param name="error" value="0.018"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="6.532"/>
+                    <param name="band" value="H"/>
+                    <param name="system" value="Vega"/>
+                    <param name="error" value="0.044"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="6.415"/>
+                    <param name="band" value="K"/>
+                    <param name="system" value="Vega"/>
+                    <param name="error" value="0.024"/>
+                  </paramset>
+                  <paramset name="coordinates">
+                    <param name="ra" value="4.423109895970015"/>
+                    <param name="dec" value="348.784820192"/>
+                  </paramset>
+                  <paramset name="proper-motion">
+                    <param name="delta-ra" value="7.57"/>
+                    <param name="delta-dec" value="-8.661"/>
+                    <param name="epoch" value="2000.0"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
+                <param name="guideFiberState" value="enabled"/>
+              </paramset>
+              <paramset name="ifu2">
+                <param name="ra" value="4.423108333333346"/>
+                <param name="dec" value="348.81815277777775"/>
+              </paramset>
+              <param name="tag" value="ghostTargetPlusSky"/>
+            </paramset>
+            <paramset name="guideEnv">
+              <param name="primary" value="0"/>
+              <paramset name="guideGroup">
+                <param name="tag" value="AutoActiveTag"/>
+                <param name="posAngle" value="0.0"/>
+                <paramset name="guider">
+                  <param name="key" value="PWFS2"/>
+                  <param name="primary" value="0"/>
+                  <paramset name="spTarget">
+                    <paramset name="target">
+                      <param name="name" value="Gaia DR2 2424603635247995264"/>
+                      <paramset name="magnitude">
+                        <param name="value" value="12.633876256076077"/>
+                        <param name="band" value="V"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="12.293584146793286"/>
+                        <param name="band" value="R"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="11.968376909683993"/>
+                        <param name="band" value="I"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="12.4838517478606"/>
+                        <param name="band" value="r"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="12.36244890570376"/>
+                        <param name="band" value="i"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="12.87175494000135"/>
+                        <param name="band" value="g"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="11.153477242505286"/>
+                        <param name="band" value="K"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="11.222237037468298"/>
+                        <param name="band" value="H"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="11.491788136526072"/>
+                        <param name="band" value="J"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="coordinates">
+                        <param name="ra" value="4.3382858653453695"/>
+                        <param name="dec" value="348.8563719107751"/>
+                      </paramset>
+                      <paramset name="proper-motion">
+                        <param name="delta-ra" value="-14.985691687370013"/>
+                        <param name="delta-dec" value="-6.722483282732992"/>
+                        <param name="epoch" value="2015.5"/>
+                      </paramset>
+                      <param name="tag" value="sidereal"/>
+                    </paramset>
+                  </paramset>
+                </paramset>
+              </paramset>
+            </paramset>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="def819c0-3401-4a66-8bd3-ca1a7408fd60" name="Observing Conditions">
+        <paramset name="Observing Conditions" kind="dataObj">
+          <param name="CloudCover" value="PERCENT_80"/>
+          <param name="ImageQuality" value="ANY"/>
+          <param name="SkyBackground" value="ANY"/>
+          <param name="WaterVapor" value="ANY"/>
+          <param name="ElevationConstraintType" value="NONE"/>
+          <param name="ElevationConstraintMin" value="0.0"/>
+          <param name="ElevationConstraintMax" value="0.0"/>
+          <paramset name="timing-window-list"/>
+        </paramset>
+      </container>
+      <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="e55abc90-eeb9-4c1b-a568-3cae239308ed" name="Observing Log">
+        <paramset name="Observing Log" kind="dataObj">
+          <paramset name="obsQaRecord"/>
+        </paramset>
+      </container>
+      <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="c61f357c-7c17-4848-8346-a3f165f34e3b" name="Observation Exec Log">
+        <paramset name="Observation Exec Log" kind="dataObj">
+          <paramset name="obsExecRecord">
+            <paramset name="datasets"/>
+            <paramset name="events"/>
+            <paramset name="configMap"/>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="a9792111-9f82-4c47-8d20-abe7d1c1e143" name="Sequence">
+        <paramset name="Sequence" kind="dataObj"/>
+        <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GHOST" key="179a698b-fb7c-44aa-b505-e318760e894a" name="GHOST Sequence">
+          <paramset name="GHOST Sequence" kind="dataObj">
+            <param name="blueExposureCount" value="1"/>
+            <param name="blueExposureTime" value="600.0"/>
+            <param name="redExposureCount" value="1"/>
+            <param name="redExposureTime" value="600.0"/>
+          </paramset>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="50859f53-a112-4fe3-b679-fd574a3024cb" name="Observe">
+            <paramset name="Observe" kind="dataObj">
+              <param name="repeatCount" value="1"/>
+              <param name="class" value="SCIENCE"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+    </container>
+    <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="de062e39-31e0-4295-b467-6d199416de8f" name="">
+      <paramset name="Observation" kind="dataObj">
+        <param name="title" value="GHOST science - dual target example"/>
+        <param name="libraryId" value=""/>
+        <param name="priority" value="LOW"/>
+        <param name="tooOverrideRapid" value="false"/>
+        <param name="phase2Status" value="PI_TO_COMPLETE"/>
+        <paramset name="schedulingBlock">
+          <param name="start" value="1667237400000"/>
+          <paramset name="duration">
+            <param name="tag" value="unstated"/>
+          </paramset>
+        </paramset>
+        <param name="qaState" value="UNDEFINED"/>
+        <param name="overrideQaState" value="false"/>
+        <param name="setupTimeType" value="FULL"/>
+      </paramset>
+      <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="b21548a1-f66a-44e7-a851-4fc38b485ddc" name="Observing Conditions">
+        <paramset name="Observing Conditions" kind="dataObj">
+          <param name="CloudCover" value="PERCENT_80"/>
+          <param name="ImageQuality" value="ANY"/>
+          <param name="SkyBackground" value="ANY"/>
+          <param name="WaterVapor" value="ANY"/>
+          <param name="ElevationConstraintType" value="NONE"/>
+          <param name="ElevationConstraintMin" value="0.0"/>
+          <param name="ElevationConstraintMax" value="0.0"/>
+          <paramset name="timing-window-list"/>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GHOST" key="390bf25d-d650-4b0a-96a1-1f3373634566" name="GHOST">
+        <paramset name="GHOST" kind="dataObj">
+          <param name="posAngle" value="0"/>
+          <param name="issPort" value="UP_LOOKING"/>
+          <param name="enableFiberAgitator1" value="false"/>
+          <param name="enableFiberAgitator2" value="false"/>
+          <param name="redExposureTime" value="600.0"/>
+          <param name="redExposureCount" value="1"/>
+          <param name="redBinning" value="ONE_BY_ONE"/>
+          <param name="redReadNoiseGain" value="MEDIUM_LOW"/>
+          <param name="blueExposureTime" value="600.0"/>
+          <param name="blueExposureCount" value="1"/>
+          <param name="blueBinning" value="ONE_BY_ONE"/>
+          <param name="blueReadNoiseGain" value="SLOW_LOW"/>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="e854a9d0-0ac6-4b3a-b738-99000d4469b5" name="Targets">
+        <paramset name="Targets" kind="dataObj">
+          <paramset name="targetEnv">
+            <paramset name="asterism">
+              <paramset name="ifu1">
+                <paramset name="target">
+                  <param name="name" value="NGC2808 star1 "/>
+                  <paramset name="magnitude">
+                    <param name="value" value="13.23072477955091"/>
+                    <param name="band" value="V"/>
+                    <param name="system" value="Vega"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="12.150290743698195"/>
+                    <param name="band" value="R"/>
+                    <param name="system" value="Vega"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="11.133283169636655"/>
+                    <param name="band" value="I"/>
+                    <param name="system" value="Vega"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="12.599432443541296"/>
+                    <param name="band" value="r"/>
+                    <param name="system" value="Vega"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="11.68799822472841"/>
+                    <param name="band" value="i"/>
+                    <param name="system" value="Vega"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="14.250653157785202"/>
+                    <param name="band" value="g"/>
+                    <param name="system" value="Vega"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="8.514383555398194"/>
+                    <param name="band" value="K"/>
+                    <param name="system" value="Vega"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="8.756784038894278"/>
+                    <param name="band" value="H"/>
+                    <param name="system" value="Vega"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="9.627747336078956"/>
+                    <param name="band" value="J"/>
+                    <param name="system" value="Vega"/>
+                  </paramset>
+                  <paramset name="coordinates">
+                    <param name="ra" value="138.08428805253521"/>
+                    <param name="dec" value="295.12763567379943"/>
+                  </paramset>
+                  <paramset name="proper-motion">
+                    <param name="delta-ra" value="1.1413518814497048"/>
+                    <param name="delta-dec" value="0.3346264845685283"/>
+                    <param name="epoch" value="2015.5"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
+                <param name="guideFiberState" value="enabled"/>
+              </paramset>
+              <paramset name="ifu2">
+                <paramset name="target">
+                  <param name="name" value="NGC2808 star 2"/>
+                  <paramset name="magnitude">
+                    <param name="value" value="14.725969124078764"/>
+                    <param name="band" value="V"/>
+                    <param name="system" value="Vega"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="14.0201028644874"/>
+                    <param name="band" value="R"/>
+                    <param name="system" value="Vega"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="13.354272681502447"/>
+                    <param name="band" value="I"/>
+                    <param name="system" value="Vega"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="14.282613077124529"/>
+                    <param name="band" value="r"/>
+                    <param name="system" value="Vega"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="13.82944676779055"/>
+                    <param name="band" value="i"/>
+                    <param name="system" value="Vega"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="15.381803930363931"/>
+                    <param name="band" value="g"/>
+                    <param name="system" value="Vega"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="11.577787215047401"/>
+                    <param name="band" value="K"/>
+                    <param name="system" value="Vega"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="11.738050785399366"/>
+                    <param name="band" value="H"/>
+                    <param name="system" value="Vega"/>
+                  </paramset>
+                  <paramset name="magnitude">
+                    <param name="value" value="12.350072896201958"/>
+                    <param name="band" value="J"/>
+                    <param name="system" value="Vega"/>
+                  </paramset>
+                  <paramset name="coordinates">
+                    <param name="ra" value="137.97067205480164"/>
+                    <param name="dec" value="295.15336877266816"/>
+                  </paramset>
+                  <paramset name="proper-motion">
+                    <param name="delta-ra" value="0.8458675442987402"/>
+                    <param name="delta-dec" value="0.2660131714228431"/>
+                    <param name="epoch" value="2015.5"/>
+                  </paramset>
+                  <param name="tag" value="sidereal"/>
+                </paramset>
+                <param name="guideFiberState" value="enabled"/>
+              </paramset>
+              <param name="tag" value="ghostDualTarget"/>
+            </paramset>
+            <paramset name="guideEnv">
+              <param name="primary" value="0"/>
+              <paramset name="guideGroup">
+                <param name="tag" value="AutoActiveTag"/>
+                <param name="posAngle" value="0.0"/>
+                <paramset name="guider">
+                  <param name="key" value="PWFS2"/>
+                  <param name="primary" value="0"/>
+                  <paramset name="spTarget">
+                    <paramset name="target">
+                      <param name="name" value="Gaia DR2 5248754909672194304"/>
+                      <paramset name="magnitude">
+                        <param name="value" value="11.217195629875249"/>
+                        <param name="band" value="V"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="10.707163258058326"/>
+                        <param name="band" value="R"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="10.22410985101349"/>
+                        <param name="band" value="I"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="10.92282703677957"/>
+                        <param name="band" value="r"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="10.656343741740354"/>
+                        <param name="band" value="i"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="11.654860415648425"/>
+                        <param name="band" value="g"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="8.942442674948325"/>
+                        <param name="band" value="K"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="9.055339339134704"/>
+                        <param name="band" value="H"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="magnitude">
+                        <param name="value" value="9.496968122250106"/>
+                        <param name="band" value="J"/>
+                        <param name="system" value="Vega"/>
+                      </paramset>
+                      <paramset name="coordinates">
+                        <param name="ra" value="138.2058987921505"/>
+                        <param name="dec" value="295.0557015649252"/>
+                      </paramset>
+                      <paramset name="proper-motion">
+                        <param name="delta-ra" value="36.64160021542454"/>
+                        <param name="delta-dec" value="-1.7399778064393452"/>
+                        <param name="epoch" value="2015.5"/>
+                      </paramset>
+                      <param name="tag" value="sidereal"/>
+                    </paramset>
+                  </paramset>
+                </paramset>
+              </paramset>
+            </paramset>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="b17e6907-f468-4e67-9ec6-383e49706947" name="Observing Log">
+        <paramset name="Observing Log" kind="dataObj">
+          <paramset name="obsQaRecord"/>
+        </paramset>
+      </container>
+      <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="b6d12fa3-f63e-4ded-8a20-89704fad23e3" name="Observation Exec Log">
+        <paramset name="Observation Exec Log" kind="dataObj">
+          <paramset name="obsExecRecord">
+            <paramset name="datasets"/>
+            <paramset name="events"/>
+            <paramset name="configMap"/>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="cdb0232a-a726-4289-b548-b6c6f772469c" name="Sequence">
+        <paramset name="Sequence" kind="dataObj"/>
+        <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GHOST" key="caef6c68-7aef-4c4a-a84c-d7e1a95d7601" name="GHOST Sequence">
+          <paramset name="GHOST Sequence" kind="dataObj">
+            <param name="blueExposureCount" value="1"/>
+            <param name="blueExposureTime" value="600.0"/>
+            <param name="redExposureCount" value="1"/>
+            <param name="redExposureTime" value="600.0"/>
+          </paramset>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="922bfd1a-28a3-4584-bd54-62ac347a0032" name="Observe">
+            <paramset name="Observe" kind="dataObj">
+              <param name="repeatCount" value="1"/>
+              <param name="class" value="SCIENCE"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+    </container>
+  </container>
+  <container kind="versions" type="versions" version="1.0">
+    <paramset name="node">
+      <param name="key" value="8136caf3-0ef6-461a-b3ba-bfa6ed78176e"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="50859f53-a112-4fe3-b679-fd574a3024cb"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a9792111-9f82-4c47-8d20-abe7d1c1e143"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a746d845-cffe-4ba3-8edf-abdb42c27801"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="1"/>
+      <param name="1ce96c21-0dc9-48c4-bb14-9f0de248fa5c" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="71e6a8d8-474d-4a01-b7ec-cb83d5f3359a"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="51"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9ae6255a-2082-47a6-a084-0969ca5b00c2"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="179a698b-fb7c-44aa-b505-e318760e894a"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="668cc23e-f767-4279-94ff-7d06026703f7"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="12"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e9a65dbe-e121-4022-8518-550b79bc1b1e"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="66"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d4e317bc-f38d-4bce-8dc5-2dc5a1ba13ef"/>
+      <param name="1ce96c21-0dc9-48c4-bb14-9f0de248fa5c" value="64"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="aa14b2b0-07b7-4503-beff-856455c7529a"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ba3070ca-269b-408a-94da-819b304f68dc"/>
+      <param name="1ce96c21-0dc9-48c4-bb14-9f0de248fa5c" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e727993e-3e31-43ba-858a-057ca2c51b3a"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="81fdf234-3253-4f2b-8c0f-a224f2310325"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d83369a8-7fee-4c71-91f1-0b90ed5c74e8"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="25"/>
+      <param name="1ce96c21-0dc9-48c4-bb14-9f0de248fa5c" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b21548a1-f66a-44e7-a851-4fc38b485ddc"/>
+      <param name="1ce96c21-0dc9-48c4-bb14-9f0de248fa5c" value="2"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1dc5f526-e0d2-4fae-9f16-bfe3945c8b2d"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="1"/>
+      <param name="1ce96c21-0dc9-48c4-bb14-9f0de248fa5c" value="5"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e55abc90-eeb9-4c1b-a568-3cae239308ed"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="de062e39-31e0-4295-b467-6d199416de8f"/>
+      <param name="1ce96c21-0dc9-48c4-bb14-9f0de248fa5c" value="65"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e854a9d0-0ac6-4b3a-b738-99000d4469b5"/>
+      <param name="1ce96c21-0dc9-48c4-bb14-9f0de248fa5c" value="21"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c61f357c-7c17-4848-8346-a3f165f34e3b"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b1ebce10-d2be-4de1-93ee-7277da77dbef"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="9"/>
+      <param name="1ce96c21-0dc9-48c4-bb14-9f0de248fa5c" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="750d6980-8b3b-4af7-8a24-7acd5ba13faf"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="5"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="56e679b6-1740-47fe-855f-706f5071ff24"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="40"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b17e6907-f468-4e67-9ec6-383e49706947"/>
+      <param name="1ce96c21-0dc9-48c4-bb14-9f0de248fa5c" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7302de0a-99d8-47c4-92d3-b2d0bf4e96c5"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="78"/>
+      <param name="1ce96c21-0dc9-48c4-bb14-9f0de248fa5c" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cdb0232a-a726-4289-b548-b6c6f772469c"/>
+      <param name="1ce96c21-0dc9-48c4-bb14-9f0de248fa5c" value="4"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1ae16348-fc28-4ef7-826d-12dd96e35741"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="953a10d3-7da0-4746-af7b-0696ac287ee3"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="4"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="922bfd1a-28a3-4584-bd54-62ac347a0032"/>
+      <param name="1ce96c21-0dc9-48c4-bb14-9f0de248fa5c" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4fdd9069-5642-4066-9595-3cc66697e098"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="2"/>
+      <param name="1ce96c21-0dc9-48c4-bb14-9f0de248fa5c" value="2"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7394f7cf-2f01-47a1-8aff-39ea1d105b68"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b6d12fa3-f63e-4ded-8a20-89704fad23e3"/>
+      <param name="1ce96c21-0dc9-48c4-bb14-9f0de248fa5c" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="de0eba24-fe64-4e40-b894-dc1e4e0cada4"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f288dd5d-5de1-4e65-a08e-1d4c31f22c16"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6b205a5a-fa7d-4968-be0f-035b2a6a0e72"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="7"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d2403616-71fb-46d0-a741-eb82e4a31599"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="def819c0-3401-4a66-8bd3-ca1a7408fd60"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="390bf25d-d650-4b0a-96a1-1f3373634566"/>
+      <param name="1ce96c21-0dc9-48c4-bb14-9f0de248fa5c" value="2"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="51a43069-2f6c-4026-a201-f3e701892613"/>
+      <param name="12de28ac-e8ab-4adb-8d7d-00157b19dfbc" value="55"/>
+      <param name="1ce96c21-0dc9-48c4-bb14-9f0de248fa5c" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="caef6c68-7aef-4c4a-a84c-d7e1a95d7601"/>
+      <param name="1ce96c21-0dc9-48c4-bb14-9f0de248fa5c" value="1"/>
+    </paramset>
+  </container>
+</document>

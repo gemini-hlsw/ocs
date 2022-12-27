@@ -1,16 +1,14 @@
 package edu.gemini.spModel.target.env;
 
 import edu.gemini.pot.sp.Instrument;
+import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.gemini.ghost.AsterismConverters;
-import edu.gemini.spModel.gemini.ghost.GhostAsterism$;
 import edu.gemini.spModel.type.DisplayableSpType;
 
 import java.util.Collections;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.function.Supplier;
 
 public enum AsterismType implements DisplayableSpType {
 
@@ -91,24 +89,36 @@ public enum AsterismType implements DisplayableSpType {
         return displayName;
     }
 
+    public static final SortedSet<AsterismType> DEFAULT_SET;
+
+    static {
+        final SortedSet<AsterismType> s = new TreeSet<>();
+        s.add(Single);
+        DEFAULT_SET = Collections.unmodifiableSortedSet(s);
+    }
+
+    public static final SortedSet<AsterismType> GHOST_SET;
+
+    static {
+        final SortedSet<AsterismType> s = new TreeSet<>();
+        s.add(GhostSingleTarget);
+        s.add(GhostDualTarget);
+        s.add(GhostTargetPlusSky);
+        s.add(GhostSkyPlusTarget);
+        s.add(GhostHighResolutionTargetPlusSky);
+        s.add(GhostHighResolutionTargetPlusSkyPrv);
+        GHOST_SET = Collections.unmodifiableSortedSet(s);
+    }
+
     // Return the asterism types supported by the different instruments.
     // We need to do this here because we want these statically accessible.
     public static SortedSet<AsterismType> supportedTypesForInstrument(final Instrument instType) {
-        final SortedSet<AsterismType> result;
-        if (instType == Instrument.Ghost) {
-            final SortedSet<AsterismType> s = new TreeSet<>();
-            s.add(GhostSingleTarget);
-            s.add(GhostDualTarget);
-            s.add(GhostTargetPlusSky);
-            s.add(GhostSkyPlusTarget);
-            s.add(GhostHighResolutionTargetPlusSky);
-            s.add(GhostHighResolutionTargetPlusSkyPrv);
-            result = Collections.unmodifiableSortedSet(s);
-        } else {
-            final SortedSet<AsterismType> s = new TreeSet<>();
-            s.add(Single);
-            result = Collections.unmodifiableSortedSet(s);
-        }
-        return result;
+        return (instType == Instrument.Ghost) ? GHOST_SET : DEFAULT_SET;
+    }
+
+    public static Option<SortedSet<AsterismType>> supportedTypesForComponent(final SPComponentType compType) {
+        return Instrument
+                .fromComponentType(compType)
+                .map(AsterismType::supportedTypesForInstrument);
     }
 }
