@@ -14,6 +14,7 @@ import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.env.Asterism$;
 import edu.gemini.spModel.target.env.AsterismType;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
+import edu.gemini.spModel.util.AsterismEditUtil;
 import edu.gemini.spModel.util.DefaultSchedulingBlock;
 
 
@@ -126,6 +127,7 @@ public class InstantiationFunctor extends DBAbstractFunctor {
         toc.setTargetEnvironment(toc.getTargetEnvironment().setAsterism(ast));
         comp.setDataObject(toc);
         addIfNotPresent(newObs, comp);
+        AsterismEditUtil.matchAsterismToInstrument(newObs);
     }
 
     // Copy the specified site quality into the specified observation
