@@ -328,7 +328,7 @@ public class GeneralRule implements IRule {
     /**
      * Rule for asterism type: the asterism type must match one available for the instrument.
      */
-    private static IRule ASTERISM_TYPE_RULE = elems -> {
+    private static final IRule ASTERISM_TYPE_RULE = elems -> {
         final Option<TargetObsComp> tocOpt = elems.getTargetObsComp();
         if (tocOpt.isEmpty())
             return null;
@@ -366,7 +366,7 @@ public class GeneralRule implements IRule {
     /**
      * WARN  if TARGET_PROPER_MOTION > 1000.0
      */
-    private static IRule TARGET_PM_RULE = new IRule() {
+    private static final IRule TARGET_PM_RULE = new IRule() {
         private static final String MESSAGE = "Very large proper motion. Please double check your proper motion";
         private static final double MAX_PM = 1000.0; //Max PM is 1000 milli-arcsecs. W
         public IP2Problems check(final ObservationElements elements)  {

@@ -9,11 +9,12 @@ import edu.gemini.spModel.obscomp.SPGroup.GroupType;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
+import edu.gemini.spModel.target.env.AsterismType;
 import edu.gemini.spModel.util.VersionToken;
 
 public final class TemplateGroup extends AbstractDataObject {
 
-    public static final String VERSION = "2021A-1";
+    public static final String VERSION = "2023A-1";
     public static final SPComponentType SP_TYPE = SPComponentType.TEMPLATE_GROUP;
 
     public static final ISPNodeInitializer<ISPTemplateGroup, TemplateGroup> NI =
@@ -21,14 +22,17 @@ public final class TemplateGroup extends AbstractDataObject {
 
     // Private PIO parameters
     private static final String PARAM_BLUEPRINT = "blueprint";
-    private static final String PARAM_STATUS = "status";
     private static final String PARAM_VERSION_TOKEN = "versionToken";
     private static final String PARAM_VERSION_TOKEN_NEXT = "versionTokenNext";
     private static final String PARAM_GROUP_TYPE = "groupType";
 
-    // Public property identifiers (for truly mutable stuff only)
+    private static final String PARAM_ASTERISM_TYPE = "asterismType";
+
+// Public property identifiers (for truly mutable stuff only)
     public static final String PROP_SPLIT_TOKEN = PARAM_VERSION_TOKEN;
     public static final String PROP_GROUP_TYPE = PARAM_GROUP_TYPE;
+
+    public static final String PROP_ASTERISM_TYPE = PARAM_ASTERISM_TYPE;
 
     // Each template group is derived from a single blueprint, and has a list of (Target, Conditions) refs to
     // which it can apply. These args can be moved between templates, but only if the templates share the same
@@ -36,6 +40,8 @@ public final class TemplateGroup extends AbstractDataObject {
     private String blueprintId;
     private VersionToken versionToken = new VersionToken(1);
     private GroupType groupType = GroupType.DEFAULT;
+
+    private AsterismType asterismType = AsterismType.Single;
 
     public TemplateGroup() {
         setTitle("Untitled");
@@ -75,6 +81,18 @@ public final class TemplateGroup extends AbstractDataObject {
         }
     }
 
+    public AsterismType getAsterismType() {
+        return asterismType;
+    }
+
+    public void setAsterismType(AsterismType astType) {
+        if (!this.asterismType.equals(astType)) {
+            final AsterismType prev = this.asterismType;
+            this.asterismType = astType;
+            firePropertyChange(PROP_ASTERISM_TYPE, prev, astType);
+        }
+    }
+
     @Override
     public ParamSet getParamSet(PioFactory factory) {
         final ParamSet ps = super.getParamSet(factory);
@@ -82,6 +100,7 @@ public final class TemplateGroup extends AbstractDataObject {
         Pio.addParam(factory, ps, PARAM_VERSION_TOKEN, versionToken.toString());
         Pio.addIntParam(factory, ps, PARAM_VERSION_TOKEN_NEXT, versionToken.nextSegment());
         Pio.addEnumParam(factory, ps, PARAM_GROUP_TYPE, groupType);
+        Pio.addEnumParam(factory, ps, PARAM_ASTERISM_TYPE, asterismType);
         return ps;
     }
 
@@ -89,7 +108,8 @@ public final class TemplateGroup extends AbstractDataObject {
     public void setParamSet(ParamSet paramSet) {
         super.setParamSet(paramSet);
         blueprintId = Pio.getValue(paramSet, PARAM_BLUEPRINT);
-        groupType = Pio.getEnumValue(paramSet, PROP_GROUP_TYPE, GroupType.DEFAULT);
+        asterismType = Pio.getEnumValue(paramSet, PARAM_ASTERISM_TYPE, AsterismType.Single);
+        groupType = Pio.getEnumValue(paramSet, PARAM_GROUP_TYPE, GroupType.DEFAULT);
         final int[] segments = VersionToken.segments(Pio.getValue(paramSet, PARAM_VERSION_TOKEN, versionToken.toString()));
         final int next = Pio.getIntValue(paramSet, PARAM_VERSION_TOKEN_NEXT, 1);
         versionToken = VersionToken.apply(segments, next);

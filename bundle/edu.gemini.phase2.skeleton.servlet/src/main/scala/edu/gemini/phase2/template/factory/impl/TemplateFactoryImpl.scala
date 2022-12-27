@@ -160,7 +160,7 @@ case class TemplateFactoryImpl(db: TemplateDb) extends TemplateFactory {
     }
 
     // Convert to shells.
-    val templateGroup = new GroupShell(grp).toTemplateGroupShell(pig)
+    val templateGroup = new GroupShell(grp).toTemplateGroupShell(pig, blue.asterismType)
 
     // Create the baseline calibration group
     val baselineDataObj = new SPGroup("Baseline: " + blue.toString)

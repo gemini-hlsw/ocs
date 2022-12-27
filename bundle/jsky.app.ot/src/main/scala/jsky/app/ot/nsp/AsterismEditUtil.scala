@@ -15,7 +15,6 @@ import edu.gemini.spModel.target.env.Asterism
 import edu.gemini.spModel.target.env.UserTarget
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.spModel.util.SPTreeUtil
-import scalaz.NonEmptyList
 
 object AsterismEditUtil {
 
