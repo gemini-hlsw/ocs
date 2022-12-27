@@ -44,7 +44,7 @@ object SpBlueprintFactory {
       case b: Flamingos2BlueprintImaging    => F2.imaging(b)
       case b: Flamingos2BlueprintLongslit   => F2.longslit(b)
       case b: Flamingos2BlueprintMos        => F2.mos(b)
-      case b: GhostBlueprint                => Ghost(b)
+      case b: GhostBlueprint                => GhostHandler(b)
       case b: GmosNBlueprintIfu             => GmosN.ifu(b)
       case b: GmosNBlueprintImaging         => GmosN.imaging(b)
       case b: GmosNBlueprintLongslit        => GmosN.longslit(b)
@@ -113,7 +113,7 @@ object SpBlueprintFactory {
     }
   }
 
-  object Ghost {
+  object GhostHandler {
 
     private def asterismType(
       r: GhostResolutionMode,

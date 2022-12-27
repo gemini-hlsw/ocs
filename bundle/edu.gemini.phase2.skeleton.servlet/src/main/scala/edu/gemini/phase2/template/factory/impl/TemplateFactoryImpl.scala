@@ -1,29 +1,29 @@
 package edu.gemini.phase2.template.factory.impl
 
-import edu.gemini.phase2.core.model.{ObsComponentShell, ObservationShell, GroupShell}
+import edu.gemini.phase2.core.model.{GroupShell, ObsComponentShell, ObservationShell}
 import edu.gemini.phase2.template.factory.api.{BlueprintExpansion, TemplateFactory}
 import edu.gemini.phase2.template.factory.impl.phoenix.Phoenix
 import edu.gemini.spModel.gemini.gmos.blueprint._
 import edu.gemini.spModel.gemini.phoenix.blueprint.SpPhoenixBlueprint
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.template.{Phase1Group, SpBlueprint}
-
-import flamingos2.{Flamingos2Mos, Flamingos2Longslit, Flamingos2Imaging}
+import flamingos2.{Flamingos2Imaging, Flamingos2Longslit, Flamingos2Mos}
 import gmos._
-import gnirs.{GnirsSpectroscopy, GnirsImaging}
+import gnirs.{GnirsImaging, GnirsSpectroscopy}
 import gsaoi.Gsaoi
-import michelle.{MichelleSpectroscopy, MichelleImaging}
-import nici.{NiciStandard, NiciCoronographic}
+import michelle.{MichelleImaging, MichelleSpectroscopy}
+import nici.{NiciCoronographic, NiciStandard}
 import nifs.{Nifs, NifsAo}
 import niri.Niri
+
 import scala.collection.JavaConverters._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.UseNS
-import edu.gemini.spModel.gemini.flamingos2.blueprint.{SpFlamingos2BlueprintMos, SpFlamingos2BlueprintLongslit, SpFlamingos2BlueprintImaging}
-import edu.gemini.spModel.gemini.gnirs.blueprint.{SpGnirsBlueprintSpectroscopy, SpGnirsBlueprintImaging}
-import edu.gemini.spModel.gemini.gnirs.GNIRSParams.SlitWidth
-import edu.gemini.spModel.gemini.michelle.blueprint.{SpMichelleBlueprintSpectroscopy, SpMichelleBlueprintImaging}
-import edu.gemini.spModel.gemini.nici.blueprint.{SpNiciBlueprintStandard, SpNiciBlueprintCoronagraphic}
+import edu.gemini.spModel.gemini.flamingos2.blueprint.{SpFlamingos2BlueprintImaging, SpFlamingos2BlueprintLongslit, SpFlamingos2BlueprintMos}
+import edu.gemini.phase2.template.factory.impl.ghost.Ghost
+import edu.gemini.spModel.gemini.gnirs.blueprint.{SpGnirsBlueprintImaging, SpGnirsBlueprintSpectroscopy}
+import edu.gemini.spModel.gemini.michelle.blueprint.{SpMichelleBlueprintImaging, SpMichelleBlueprintSpectroscopy}
+import edu.gemini.spModel.gemini.nici.blueprint.{SpNiciBlueprintCoronagraphic, SpNiciBlueprintStandard}
 import edu.gemini.spModel.gemini.nifs.blueprint.{SpNifsBlueprint, SpNifsBlueprintAo}
 import edu.gemini.spModel.gemini.niri.blueprint.SpNiriBlueprint
 import edu.gemini.spModel.obs.ObsPhase2Status
@@ -40,6 +40,7 @@ import edu.gemini.spModel.gemini.graces.blueprint.SpGracesBlueprint
 import edu.gemini.phase2.template.factory.impl.graces.Graces
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.phase2.template.factory.impl.gnirs.GnirsSpectroscopyIfu
+import edu.gemini.spModel.gemini.ghost.blueprint.SpGhostBlueprint
 
 case class TemplateFactoryImpl(db: TemplateDb) extends TemplateFactory {
 
@@ -67,6 +68,9 @@ case class TemplateFactoryImpl(db: TemplateDb) extends TemplateFactory {
       case b: SpFlamingos2BlueprintImaging => Right(Flamingos2Imaging(b))
       case b: SpFlamingos2BlueprintLongslit => Right(Flamingos2Longslit(b, sampleTarget))
       case b: SpFlamingos2BlueprintMos => Right(Flamingos2Mos(b))
+
+      // GHOST
+      case b: SpGhostBlueprint => Right(Ghost(b))
 
       // GMOS-N
       case b: SpGmosNBlueprintIfu => Right(GmosNIfu(b))
