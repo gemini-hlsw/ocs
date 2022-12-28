@@ -18,7 +18,8 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
     private static final Logger Log = Logger.getLogger( SpecS2NSlitVisitor.class.getName() );
     private final ObservationDetails odp;
-    private final Slit slit;
+    private final Slit input_slit;
+    private final Slit output_slit;
     private Disperser disperser;
     private final double sourceFraction;
     private final double exposureTime;
@@ -66,7 +67,8 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
                               final double darkCurrent,
                               final ObservationDetails odp) {
         this.odp            = odp;
-        this.slit           = slit;
+        this.input_slit     = slit;
+        this.output_slit    = slit;
         this.disperser      = disperser;
         this.throughput     = throughput;
         this.pixelWidth     = pixelWidth;
@@ -83,7 +85,40 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         this.numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
         this.sourceFraction  = calcMethod.sourceFraction();
         this.exposureTime    = calcMethod.exposureTime();
+    }
 
+    // Constructor for cases where the input slit dimensions are different from the output slit dimensions
+    public SpecS2NSlitVisitor(
+            final Slit input_slit,
+            final Slit output_slit,
+            final Disperser disperser,
+            final SlitThroughput throughput,
+            final double pixelWidth,
+            final double obsWaveLow,
+            final double obsEnd,
+            final double imgQuality,
+            final double readNoise,
+            final double darkCurrent,
+            final ObservationDetails odp) {
+        this.odp            = odp;
+        this.input_slit     = input_slit;
+        this.output_slit    = output_slit;
+        this.disperser      = disperser;
+        this.throughput     = throughput;
+        this.pixelWidth     = pixelWidth;
+        this.obsStart       = obsWaveLow;
+        this.obsEnd         = obsEnd;
+        this.imgQuality     = imgQuality;
+        this.darkCurrent    = darkCurrent;
+        this.readNoise      = readNoise;
+
+        // Currently SpectroscopySN is the only supported calculation method for spectroscopy.
+        final CalculationMethod calcMethod = odp.calculationMethod();
+        if (!(calcMethod instanceof SpectroscopyS2N)) throw new Error("Unsupported calculation method");
+        this.coadds = calcMethod.coaddsOrElse(1);
+        this.numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
+        this.sourceFraction  = calcMethod.sourceFraction();
+        this.exposureTime    = calcMethod.exposureTime();
     }
 
     // Return index of last CCD pixel, if defined and in range
@@ -109,8 +144,8 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     private void resample() {
 
         // calc the width of a spectral resolution element in nm
-        final double resElement                 = disperser.resolution(slit, imgQuality);
-        final double backgroundResElement       = disperser.resolution(slit);
+        final double resElement                 = disperser.resolution(output_slit, imgQuality);
+        final double backgroundResElement       = disperser.resolution(output_slit);
         Log.fine("Spectral resolution:  source = " + resElement + "nm, background = " + backgroundResElement + " nm");
 
         // and the data size in the spectral domain
@@ -132,7 +167,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
         if (haloIsUsed) {
             // calc the width of a spectral resolution element in nm
-            final double haloResElement       = disperser.resolution(slit, haloImgQuality);
+            final double haloResElement       = disperser.resolution(output_slit, haloImgQuality);
             // and the data size in the spectral domain
             final double haloResElementData  = haloResElement / sourceFlux.getSampling();
             // use the int value of spectral_pix as a smoothing element (at least 1)
@@ -162,16 +197,16 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     private void calculateS2N() {
 
         // shot noise on dark current flux in aperture
-        final double darkNoise = darkCurrent * slit.lengthPixels() * exposureTime;  // per spectral pixel
-        Log.fine("Dark noise = " + darkCurrent + " * "  + slit.lengthPixels() + " pix long slit * " + exposureTime + " sec = " + darkNoise);
+        final double darkNoise = darkCurrent * output_slit.lengthPixels() * exposureTime;  // per spectral pixel
+        Log.fine("Dark noise = " + darkCurrent + " * "  + output_slit.lengthPixels() + " pix long slit * " + exposureTime + " sec = " + darkNoise);
 
         // readout noise in aperture
-        final double readNoise = this.readNoise * this.readNoise * slit.lengthPixels();  // per spectral pixel
-        Log.fine("Read noise = " + this.readNoise + "^2 * "  + slit.lengthPixels() + " pix long slit = " + readNoise);
+        final double readNoise = this.readNoise * this.readNoise * output_slit.lengthPixels();  // per spectral pixel
+        Log.fine("Read noise = " + this.readNoise + "^2 * "  + output_slit.lengthPixels() + " pix long slit = " + readNoise);
 
         // signal and background for given slit and throughput
         final VisitableSampledSpectrum signal     = haloIsUsed ? signalWithHalo(throughput.throughput(), haloThroughput.throughput()) : signal(throughput.throughput());
-        final VisitableSampledSpectrum background = background(slit);
+        final VisitableSampledSpectrum background = background(input_slit);
 
         // -- calculate and assign s2n results
 
@@ -188,7 +223,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
         // total source flux in the aperture
         final VisitableSampledSpectrum signal = haloIsUsed ? signalWithHalo(throughput.onePixelThroughput(), haloThroughput.onePixelThroughput()) : signal(throughput.onePixelThroughput());
-        final VisitableSampledSpectrum sqrtBackground = background(new OnePixelSlit(slit.width(), slit.pixelSize())); // background(slit); REL-508
+        final VisitableSampledSpectrum sqrtBackground = background(new OnePixelSlit(input_slit.width(), input_slit.pixelSize())); // background(slit); REL-508
 
         // For debugging purposes, use this to plot the TOTAL signal in the aperture:
         //Log.warning("Calculating the TOTAL signal and background in the aperture.");

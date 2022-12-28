@@ -204,10 +204,15 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 }
                 Log.fine("Fraction of source in IFU:  1 pix = " + onePixThroughput + ", " + slitLength + " pix = " + throughput);
 
-                final Slit slit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
+                // The IFUs have anamorphic magnification which makes the output slit width 2x the input slice width:
+                Log.fine("Input slice width = " + instrument.getSlitWidth() + " arcsec, " +
+                        "output slit width = " + 2.0 * instrument.getSlitWidth() + " arcsec");
+                final Slit input_slit = Slit$.MODULE$.apply(instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
+                final Slit output_slit = Slit$.MODULE$.apply(2.0 * instrument.getSlitWidth(), slitLength, instrument.getPixelSize());
 
                 final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
-                        slit,
+                        input_slit,
+                        output_slit,
                         instrument.disperser(instrument.getOrder()),
                         new SlitThroughput(throughput, onePixThroughput),
                         instrument.getSpectralPixelWidth() / instrument.getOrder(),
