@@ -223,8 +223,10 @@ def swalker(version: Version) = AppConfig(
     "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/swalker/cron"
   ),
   props = Map(
+    "edu.gemini.auxfile.fits.enabled"            -> "false",
     "edu.gemini.auxfile.fits.dest"               -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.fits.host"               -> "gsconfig.gemini.edu",
+    "edu.gemini.auxfile.other.enabled"           -> "false",
     "edu.gemini.auxfile.other.dest"              -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.root"                    -> "/Users/swalker/.auxfile",
     "edu.gemini.dataman.gsa.summit.host"         -> "cpofits-lv1new.cl.gemini.edu",

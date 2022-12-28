@@ -2,6 +2,7 @@ package edu.gemini.auxfile.copier.osgi;
 
 import edu.gemini.auxfile.copier.AuxFileType;
 import edu.gemini.auxfile.copier.CopyConfig;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.util.ssh.SshConfig$;
 import org.osgi.framework.BundleContext;
@@ -19,9 +20,11 @@ final class OsgiCopyConfig extends CopyConfig {
     private static final String USER_KEY      = "user";
     private static final String PASSWORD_KEY  = "password";
     private static final String DEST_KEY      = "dest";
+    private static final String ENABLED_KEY   = "enabled";
 
-    private AuxFileType _fileType;
-    private String _destTmpl;
+    private final AuxFileType _fileType;
+    private final String _destTmpl;
+
 
     public static OsgiCopyConfig create(AuxFileType type, BundleContext ctx){
         try {
@@ -38,7 +41,9 @@ final class OsgiCopyConfig extends CopyConfig {
 	    super(getProperty(type, ctx, HOST_KEY),
 	          getProperty(type, ctx, USER_KEY),
 	          getProperty(type, ctx, PASSWORD_KEY),
-              SshConfig$.MODULE$.DEFAULT_TIMEOUT());
+              SshConfig$.MODULE$.DEFAULT_TIMEOUT(),
+              ImOption.apply(ctx.getProperty(buildPropertyName(type, ENABLED_KEY))).forall("true"::equals)
+              );
         _fileType = type;
         _destTmpl = getProperty(type, ctx, DEST_KEY);
     }
@@ -50,7 +55,7 @@ final class OsgiCopyConfig extends CopyConfig {
         final String cfg = ctx.getProperty(cfgProp);
         final String def = ctx.getProperty(defProp);
 
-        if        (cfg != null) {
+        if (cfg != null) {
             // this aux file type has a specific config, use it
             LOG.info("config for " + cfgProp + ": " + cfg);
             return cfg;

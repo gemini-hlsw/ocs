@@ -41,6 +41,11 @@ public final class AuxFileCopierImpl implements AuxFileCopier {
         if (!file.exists()) return true;
 
         // Do the copy using sftp.
+        if (!config.isEnabled()) {
+            LOG.log(Level.INFO, "Auxfile copy disabled, skipping copy of " + file.getName());
+            return true;
+        }
+
         final Try<BoxedUnit> result = SftpSession$.MODULE$.copy(config, file, desDir);
         if (result.isFailure()) {
             final Failure<BoxedUnit> failure = (Failure<BoxedUnit>) result;

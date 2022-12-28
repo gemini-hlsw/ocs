@@ -8,6 +8,7 @@ import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obscomp.SPGroup;
 import edu.gemini.spModel.seqcomp.SeqBase;
+import edu.gemini.spModel.target.env.AsterismType;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.None;
@@ -211,7 +212,7 @@ public final class SPViewerActions {
                 ISPObsComponentContainer container
             ) {
                 return Ghost$.MODULE$.isGhostObservation(container) ?
-                         ImOption.apply(Ghost$.MODULE$.TARGET_NI()) :
+                         ImOption.apply(Ghost$.MODULE$.TargetNi(scala.Option.apply((ISPObservation) container))) :
                          ImOption.empty();
             }
         };

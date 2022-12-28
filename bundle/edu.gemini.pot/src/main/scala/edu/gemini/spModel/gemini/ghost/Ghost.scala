@@ -74,6 +74,7 @@ final class Ghost
     // Only write the title as a property if it has been changed.
     if (isValidTitle) Pio.addParam(factory, paramSet, ISPDataObject.TITLE_PROP, getTitle)
 
+    Pio.addParam(factory, paramSet, Ghost.PREFERRED_ASTERISM_TYPE_PROP, getPreferredAsterismType.tag)
     Pio.addParam(factory, paramSet, InstConstants.POS_ANGLE_PROP, getPosAngleDegreesStr)
     Pio.addParam(factory, paramSet, Ghost.PORT_PROP, port.name())
     Pio.addBooleanParam(factory, paramSet, Ghost.ENABLE_FIBER_AGITATOR_1_PROP.getName, enableFiberAgitator1)
@@ -113,6 +114,11 @@ final class Ghost
 
 
   override def setParamSet(paramSet: ParamSet): Unit = {
+    setPreferredAsterismType(
+      Option(Pio.getValue(paramSet, Ghost.PREFERRED_ASTERISM_TYPE_PROP))
+        .flatMap(tag => AsterismType.values.find(_.tag == tag))
+        .getOrElse(AsterismType.GhostSingleTarget)
+    )
     Option(Pio.getValue(paramSet, Ghost.PORT_PROP)).map(IssPort.valueOf).foreach(setIssPort)
     Option(Pio.getValue(paramSet, ISPDataObject.TITLE_PROP)).foreach(setTitle)
     Option(Pio.getValue(paramSet, InstConstants.POS_ANGLE_PROP)).map(_.toDouble).foreach(setPosAngleDegrees)
@@ -177,7 +183,7 @@ final class Ghost
    */
   private var asterismType: AsterismType = AsterismType.GhostSingleTarget
 
-  override def getPreferredAsterismType(): AsterismType =
+  override def getPreferredAsterismType: AsterismType =
     asterismType
 
   def setPreferredAsterismType(newValue: AsterismType): Unit = {
@@ -479,13 +485,17 @@ object Ghost {
 
   // Targets in a GHOST observation need a "special" initializer that sets a
   // GHOST asterism.
-  val TARGET_NI: ISPNodeInitializer[ISPObsComponent, TargetObsComp] =
+  def TargetNi(
+    obs: Option[ISPObservation]
+  ): ISPNodeInitializer[ISPObsComponent, TargetObsComp] =
     new ComponentNodeInitializer(
       SPComponentType.TELESCOPE_TARGETENV,
       new java.util.function.Supplier[TargetObsComp] {
         override def get(): TargetObsComp = {
           val toc = new TargetObsComp
-          val   a = GhostAsterism.createEmptySingleTargetAsterism
+          val   a = GhostAsterism.createEmptyAsterism(
+            obs.map(AsterismType.forObservation).getOrElse(AsterismType.GhostSingleTarget)
+          )
           toc.setTargetEnvironment(TargetEnvironment.create(a))
           toc
         }
@@ -495,6 +505,9 @@ object Ghost {
           new TargetObsCompCB(oc)
       }
     )
+
+  val TARGET_NI: ISPNodeInitializer[ISPObsComponent, TargetObsComp] =
+    TargetNi(None)
 
   val OBSERVATION_NI: ISPNodeInitializer[ISPObservation, SPObservation] = new ObservationNI(Instrument.Ghost.some()) {
     override protected def addTargetEnv(factory: ISPFactory, obsNode: ISPObservation): Unit = {

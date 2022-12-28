@@ -25,7 +25,7 @@ public final class SpGhostBlueprint extends SpGhostBlueprintBase {
     }
 
     public String toString() {
-        return String.format("Ghost %s", asterismType().tag);
+        return String.format("Ghost %s", asterismType().displayName);
     }
 
 }
