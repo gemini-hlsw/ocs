@@ -1,10 +1,14 @@
 package edu.gemini.spModel.target.env;
 
+import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.Instrument;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.gemini.ghost.AsterismConverters;
+import edu.gemini.spModel.obscomp.SPInstObsComp;
+import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.type.DisplayableSpType;
+import edu.gemini.spModel.util.SPTreeUtil;
 
 import java.util.Collections;
 import java.util.SortedSet;
@@ -120,5 +124,20 @@ public enum AsterismType implements DisplayableSpType {
         return Instrument
                 .fromComponentType(compType)
                 .map(AsterismType::supportedTypesForInstrument);
+    }
+
+    public static AsterismType forTargetEnvironment(TargetEnvironment env) {
+        return env.getAsterism().asterismType();
+    }
+
+    public static AsterismType forObservation(ISPObservation obs) {
+        return ImOption
+            .apply(SPTreeUtil.findTargetEnvNode(obs))
+            .map(n -> forTargetEnvironment(((TargetObsComp) n.getDataObject()).getTargetEnvironment()))
+            .orElse(ImOption
+                .apply(SPTreeUtil.findInstrument(obs))
+                .filter(n -> n.getDataObject() instanceof SPInstObsComp)
+                .map(n -> ((SPInstObsComp) n.getDataObject()).getPreferredAsterismType())
+            ).getOrElse(AsterismType.Single);
     }
 }

@@ -38,11 +38,11 @@ class GhostBlueprintTest extends TemplateSpec("GHOST_BP.xml") with Specification
       }
     }
 
-    "put the asterism type in the template group" in {
+    "put the asterism type in the GHOST component" in {
       forAll { (b: GhostBlueprint) =>
         expand(proposal(b, Nil, MagnitudeBand.R)) { (_, sp) =>
-          groups(sp).forall { tg =>
-            tg.getDataObject.asInstanceOf[TemplateGroup].getAsterismType match {
+          templateObservations(sp).forall { o =>
+            AsterismType.forObservation(o) match {
               case AsterismType.Single                              =>
                 false
               case AsterismType.GhostSingleTarget                   =>

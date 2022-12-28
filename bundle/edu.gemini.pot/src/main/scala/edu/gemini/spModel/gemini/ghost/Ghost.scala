@@ -173,6 +173,22 @@ final class Ghost
   }
 
   /**
+   * Preferred Asterism type
+   */
+  private var asterismType: AsterismType = AsterismType.GhostSingleTarget
+
+  override def getPreferredAsterismType(): AsterismType =
+    asterismType
+
+  def setPreferredAsterismType(newValue: AsterismType): Unit = {
+    val oldValue = getPreferredAsterismType
+    if (oldValue != newValue) {
+      asterismType = newValue
+      firePropertyChange(Ghost.PREFERRED_ASTERISM_TYPE_PROP, oldValue, newValue)
+    }
+  }
+
+  /**
    * ISS Port
    */
   private var port: IssPort = IssPort.UP_LOOKING
@@ -509,6 +525,8 @@ object Ghost {
   // The name of the Ghost instrument configuration.
   val INSTRUMENT_NAME_PROP: String = "GHOST"
 
+  val PREFERRED_ASTERISM_TYPE: String = "preferredAsterismType"
+
   // GHOST-specific exposure times.
   val EXPOSURE_TIME_RED_PROP = "redExposureTime"
   val COUNT_RED = "redExposureCount"
@@ -578,6 +596,7 @@ object Ghost {
   private val iter_no   = false
 
   val POS_ANGLE_PROP: PropertyDescriptor = initProp(InstConstants.POS_ANGLE_PROP, query = query_no, iter = iter_no)
+  val PREFERRED_ASTERISM_TYPE_PROP: PropertyDescriptor = initProp(PREFERRED_ASTERISM_TYPE, query = query_no, iter = iter_no)
   val PORT_PROP: PropertyDescriptor = initProp(IssPortProvider.PORT_PROPERTY_NAME, query = query_no, iter = iter_no)
   val ENABLE_FIBER_AGITATOR_1_PROP: PropertyDescriptor = initProp(FIBER_AGITATOR_1, query = query_no, iter = iter_no)
   val ENABLE_FIBER_AGITATOR_2_PROP: PropertyDescriptor = initProp(FIBER_AGITATOR_2, query = query_no, iter = iter_no)

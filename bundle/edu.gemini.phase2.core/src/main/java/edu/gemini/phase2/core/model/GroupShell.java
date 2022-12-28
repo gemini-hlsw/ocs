@@ -4,7 +4,6 @@ import edu.gemini.pot.sp.*;
 import edu.gemini.spModel.obscomp.SPGroup;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
-import edu.gemini.spModel.target.env.AsterismType;
 import edu.gemini.spModel.template.Phase1Group;
 import edu.gemini.spModel.template.TemplateGroup;
 import edu.gemini.spModel.template.TemplateParameters;
@@ -60,20 +59,18 @@ public final class GroupShell extends BaseGroupShell {
         }
     }
 
-    public TemplateGroupShell toTemplateGroupShell(Phase1Group pig, AsterismType astType) {
-        return toTemplateGroupShell(pig.blueprintId, pig.argsList, astType);
+    public TemplateGroupShell toTemplateGroupShell(Phase1Group pig) {
+        return toTemplateGroupShell(pig.blueprintId, pig.argsList);
     }
 
     public TemplateGroupShell toTemplateGroupShell(
         String blueprintId,
-        Collection<TemplateParameters> argList,
-        AsterismType astType
+        Collection<TemplateParameters> argList
     ) {
         final TemplateGroup dataObj = new TemplateGroup();
         dataObj.setBlueprintId(blueprintId);
         dataObj.setTitle(group.getTitle());
         dataObj.setGroupType(group.getGroupType());
-        dataObj.setAsterismType(astType);
         return new TemplateGroupShell(dataObj, argList, obsComponents, observations);
     }
 

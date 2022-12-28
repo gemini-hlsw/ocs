@@ -3,11 +3,14 @@ package edu.gemini.spModel.template
 import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.pot.sp.Instrument
 import edu.gemini.spModel.core.Coordinates
+import edu.gemini.spModel.gemini.ghost.Ghost
 import edu.gemini.spModel.gemini.ghost.GhostAsterism
 import edu.gemini.spModel.gemini.ghost.blueprint.SpGhostBlueprint
+import edu.gemini.spModel.obsclass.ObsClass
 import edu.gemini.spModel.target.env.AsterismType
 import edu.gemini.spModel.obsclass.ObsClass.SCIENCE
 import edu.gemini.spModel.target.env.Asterism
+import edu.gemini.spModel.util.SPTreeUtil
 import org.junit.Test
 import org.junit.Assert._
 
@@ -35,9 +38,12 @@ class GhostInstantiationTest extends TestBase {
     val tgNode = fact.createTemplateGroup(prog, WithSomeNewKey)
     val tg     = new TemplateGroup()
     tg.setBlueprintId("blueprint-0")
-    tg.setAsterismType(astType)
+//    tg.setAsterismType(astType)
     tgNode.setDataObject(tg)
-    os.foreach(tgNode.addObservation)
+    os.foreach { o =>
+      setAsterismType(o, astType)
+      tgNode.addObservation(o)
+    }
 
     val tpNode = fact.createTemplateParameters(prog, WithSomeNewKey)
     val tp     = newParameters(ScienceTargetName, ScienceTargetCC)
@@ -84,6 +90,13 @@ class GhostInstantiationTest extends TestBase {
         fail(s"Expected a Ghost Dual Target asterism, not $a")
     }
 
+  }
+
+  private def setAsterismType(o: ISPObservation, asterismType: AsterismType): Unit = {
+    val shell = SPTreeUtil.findInstrument(o)
+    val ghost = shell.getDataObject.asInstanceOf[Ghost]
+    ghost.setPreferredAsterismType(asterismType)
+    shell.setDataObject(ghost)
   }
 
   @Test def testInstantiationHasProperAsterism(): Unit = {

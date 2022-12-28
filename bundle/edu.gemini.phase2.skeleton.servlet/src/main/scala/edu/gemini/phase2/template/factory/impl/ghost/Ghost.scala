@@ -3,6 +3,7 @@ package edu.gemini.phase2.template.factory.impl.ghost
 import edu.gemini.phase2.template.factory.impl.Maybe
 import edu.gemini.phase2.template.factory.impl.TemplateDb
 import edu.gemini.pot.sp.ISPGroup
+import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.gemini.ghost.blueprint.SpGhostBlueprint
 
@@ -34,21 +35,21 @@ case class Ghost(blueprint: SpGhostBlueprint) extends GhostBase[SpGhostBlueprint
 //      Add target from PI to HRIFU
 //      Add target from PI with ra - 2 arcmin to HRSKY
 
-// N.B.
-// The resolution mode and target mode "from PI" are kept in the template group.
-// The template instantiation rules are not used here.  When a template is
-// expanded the asterism type in the template group is consulted.
-
   override def targetGroup: Seq[Int] =
     List(1)
 
-    override def baselineFolder: Seq[Int] =
+  override def baselineFolder: Seq[Int] =
     List.empty
 
   override def notes: Seq[String] =
     List.empty
 
+  // Records the preferred asterism type from the PI in the GHOST component.
+  // This is then used on instantiation to create corresponding GHOST asterism.
+  private def setAsterismType(o: ISPObservation): Maybe[Unit] =
+    o.setAsterismType(blueprint.asterismType)
+
   override def initialize(group: ISPGroup, db: TemplateDb, pid: SPProgramID): Maybe[Unit] =
-    forObservations(group, targetGroup, _ => Right(()))
+    forObservations(group, targetGroup, setAsterismType)
 
 }

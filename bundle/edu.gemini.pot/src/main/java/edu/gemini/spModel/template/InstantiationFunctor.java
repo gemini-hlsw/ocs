@@ -88,8 +88,6 @@ public class InstantiationFunctor extends DBAbstractFunctor {
 
     // Copy observations from the template group into the destination group
     private static void copyObservations(ISPFactory fact, ISPProgram prog, ISPTemplateGroup templateGroup, SPSiteQuality siteQualityData, SPTarget targetData, ISPGroup group) throws Exception {
-        final AsterismType astType = ((TemplateGroup) templateGroup.getDataObject()).getAsterismType();
-
         for (ISPObservation templateObs: templateGroup.getAllObservations()) {
 
             // Clone the template obs
@@ -111,7 +109,7 @@ public class InstantiationFunctor extends DBAbstractFunctor {
                 copySiteQuality(fact, prog, siteQualityData, newObs);
             }
             if (newObsClass == ObsClass.SCIENCE || newObsClass == ObsClass.ACQ) {
-                copyTarget(fact, prog, astType, targetData, newObs);
+                copyTarget(fact, prog, targetData, newObs);
             }
 
             // Done
@@ -120,9 +118,10 @@ public class InstantiationFunctor extends DBAbstractFunctor {
     }
 
     // Copy the specified target into the specified observation
-    private static void copyTarget(ISPFactory fact, ISPProgram prog, AsterismType astType, SPTarget targetData, ISPObservation newObs) throws SPUnknownIDException, SPNodeNotLocalException, SPTreeStateException {
+    private static void copyTarget(ISPFactory fact, ISPProgram prog, SPTarget targetData, ISPObservation newObs) throws SPUnknownIDException, SPNodeNotLocalException, SPTreeStateException {
         final ISPObsComponent comp = fact.createObsComponent(prog, TargetObsComp.SP_TYPE, null);
         final TargetObsComp    toc = (TargetObsComp) comp.getDataObject();
+        final AsterismType astType = AsterismType.forObservation(newObs);
         final Asterism         ast = Asterism$.MODULE$.fromTypeAndTemplateTarget(astType, targetData);
         toc.setTargetEnvironment(toc.getTargetEnvironment().setAsterism(ast));
         comp.setDataObject(toc);
