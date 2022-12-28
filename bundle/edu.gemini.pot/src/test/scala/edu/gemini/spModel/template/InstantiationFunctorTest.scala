@@ -48,7 +48,7 @@ class InstantiationFunctorTest extends TestBase {
     tfNode.addTemplateGroup(tgNode)
     prog.setTemplateFolder(tfNode)
 
-    // Add an observation for each of the specified obs clsses
+    // Add an observation for each of the specified obs classes
     os.foreach(tgNode.addObservation)
 
     // Instantiate observations

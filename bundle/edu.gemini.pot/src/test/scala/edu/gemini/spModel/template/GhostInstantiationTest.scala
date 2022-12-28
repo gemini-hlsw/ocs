@@ -2,9 +2,12 @@ package edu.gemini.spModel.template
 
 import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.pot.sp.Instrument
+import edu.gemini.spModel.core.Coordinates
+import edu.gemini.spModel.gemini.ghost.GhostAsterism
 import edu.gemini.spModel.gemini.ghost.blueprint.SpGhostBlueprint
 import edu.gemini.spModel.target.env.AsterismType
 import edu.gemini.spModel.obsclass.ObsClass.SCIENCE
+import edu.gemini.spModel.target.env.Asterism
 import org.junit.Test
 import org.junit.Assert._
 
@@ -53,16 +56,41 @@ class GhostInstantiationTest extends TestBase {
     grp.getObservations.asScala.toList
   }
 
+
+  private def checkDiff(a: Coordinates, b: Coordinates, raArcmin: Double, decArcmin: Double): Unit = {
+    val (r, d) = a.diff(b)
+
+    val delta = 0.0001
+    assertEquals(raArcmin,  r.toSignedDegrees * 60, delta)
+    assertEquals(decArcmin, d.toSignedDegrees * 60, delta)
+  }
+
+  private def checkDualTarget(a: Asterism): Unit = {
+    val ct = newTarget(ScienceTargetName).getCoordinates(None).get
+
+    assertEquals(AsterismType.GhostDualTarget, a.asterismType)
+    a match {
+      case GhostAsterism.DualTarget(ifu1, ifu2, base) =>
+        // Overridden base at the template target coordinates
+         checkDiff(base.get.coordinates, ct, 0, 0)
+
+        // IFU1 at 1 arcmin (in p) from base
+        checkDiff(ifu1.coordinates(None).get, ct, 1, 0)
+
+        // IFU2 at -1 arcmin (in p) from base
+        checkDiff(ifu2.coordinates(None).get, ct, -1, 0)
+
+      case _ =>
+        fail(s"Expected a Ghost Dual Target asterism, not $a")
+    }
+
+  }
+
   @Test def testInstantiationHasProperAsterism(): Unit = {
     val obsList = instantiate(AsterismType.GhostDualTarget, newObs(SCIENCE, Instrument.Ghost))
-
     obsList match {
-      case o :: Nil =>
-        target(o).map(_.getAsterism.asterismType).contains(AsterismType.GhostDualTarget)
-
-      case _        =>
-        fail("Expected a single observation")
-
+      case o :: Nil => checkDualTarget(target(o).map(_.getAsterism).get)
+      case _        => fail("Expected a single observation")
     }
   }
 }
