@@ -77,13 +77,13 @@ class GhostInstantiationTest extends TestBase {
     a match {
       case GhostAsterism.DualTarget(ifu1, ifu2, base) =>
         // Overridden base at the template target coordinates
-         checkDiff(base.get.coordinates, ct, 0, 0)
+         checkDiff(base.get.coordinates, ct,0,0)
 
         // IFU1 at 1 arcmin (in p) from base
-        checkDiff(ifu1.coordinates(None).get, ct, 1, 0)
+        checkDiff(ct, ifu1.coordinates(None).get,1,0)
 
         // IFU2 at -1 arcmin (in p) from base
-        checkDiff(ifu2.coordinates(None).get, ct, -1, 0)
+        checkDiff(ct, ifu2.coordinates(None).get,-1,0)
 
       case _ =>
         fail(s"Expected a Ghost Dual Target asterism, not $a")
