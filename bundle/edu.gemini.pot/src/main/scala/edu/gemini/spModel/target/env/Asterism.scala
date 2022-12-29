@@ -203,8 +203,7 @@ object Asterism {
     def targetPlus(am: Int): SPTarget = {
       val res = new SPTarget()
       res.setTarget(
-        // We offset in p, which increases to the left.
-        Target.ra.mod(_.offset(Angle.fromArcmin(-am.toDouble)), target.getTarget)
+        Target.ra.mod(_.offset(Angle.fromArcmin(am.toDouble)), target.getTarget)
       )
       res
     }
