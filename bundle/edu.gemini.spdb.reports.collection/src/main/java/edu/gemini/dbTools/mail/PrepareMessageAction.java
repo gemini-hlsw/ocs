@@ -11,11 +11,14 @@ import javax.mail.Message;
 import static javax.mail.Message.RecipientType.*;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 public final class PrepareMessageAction implements OdbMailEvent.Action {
 
@@ -107,12 +110,18 @@ public final class PrepareMessageAction implements OdbMailEvent.Action {
                     String subject) {
 
         try {
-            final ProgramInternetAddresses pia = _mail.getInternetAddresses();
-            _msg.addRecipients(TO, to);
+            _msg.setRecipients(TO, to);
 
+            // Combine the recipients because multiple calls to "addRecipients"
+            // are producing multiple CC headers, which causes the message to
+            // bounce.
             final Message.RecipientType ccType = (to.length > 0) ? CC : TO;
-            _msg.addRecipients(ccType, cc0);
-            _msg.addRecipients(ccType, cc1);
+            _msg.setRecipients(
+                ccType,
+                Stream
+                    .concat(Arrays.stream(cc0), Arrays.stream(cc1))
+                    .toArray(InternetAddress[]::new)
+            );
 
             _msg.setSubject(subject);
             _msg.setText(template.subsitute(getProperties()));
