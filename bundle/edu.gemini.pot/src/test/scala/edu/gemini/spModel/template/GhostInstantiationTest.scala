@@ -38,7 +38,6 @@ class GhostInstantiationTest extends TestBase {
     val tgNode = fact.createTemplateGroup(prog, WithSomeNewKey)
     val tg     = new TemplateGroup()
     tg.setBlueprintId("blueprint-0")
-//    tg.setAsterismType(astType)
     tgNode.setDataObject(tg)
     os.foreach { o =>
       setAsterismType(o, astType)

@@ -90,10 +90,7 @@ object AsterismEditUtil {
       Asterism.Single(_)
     )
 
-  def matchAsterismToInstrument(obs: ISPObservation): Unit = {
-    println("\n\n\n\nmatchAsterismToInstrument\n")
-    new RuntimeException().printStackTrace(System.out)
-
+  def matchAsterismToInstrument(obs: ISPObservation): Unit =
     for {
       tn <- Option(SPTreeUtil.findTargetEnvNode(obs))
       toc = tn.getDataObject.asInstanceOf[TargetObsComp]
@@ -102,12 +99,10 @@ object AsterismEditUtil {
     } (i.getType, a) match {
 
       case (SPComponentType.INSTRUMENT_GHOST, _: GhostAsterism) =>
-        println(s"do nothing: $a")
         // do nothing
 
       case (SPComponentType.INSTRUMENT_GHOST, a)                =>
         val astType = i.getDataObject.asInstanceOf[Ghost].getPreferredAsterismType
-        println(s"preferredAsterismType: $astType")
         switchToGhostAsterism(tn, toc, a, astType)
 
       case (_, g: GhostAsterism)                                =>
@@ -116,6 +111,5 @@ object AsterismEditUtil {
       case _                                                    =>
         // do nothing
     }
-  }
 
 }
