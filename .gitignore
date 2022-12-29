@@ -60,3 +60,8 @@ metals.sbt
 
 # Vim
 *.swp
+
+.jvmopts
+.sdkmanrc
+
+
