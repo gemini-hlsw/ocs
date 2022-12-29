@@ -11,7 +11,6 @@ import javax.mail.Message;
 import static javax.mail.Message.RecipientType.*;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
