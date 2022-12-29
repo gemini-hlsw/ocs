@@ -182,35 +182,6 @@ public class ProperMotion extends AbstractScienceObject {
     }
 
     /**
-     * Computes a new position by taking an existing position and accounting
-     * for proper motion over the specified number of years.
-     * Uses the epoch of the oldPosition as the starting year.
-     *
-     * @param	oldPosition		start with this position
-     * @param	endYear			compute new position for this year
-     * @return					position for the new year
-     **/
-    public Coordinates computePosition(Coordinates oldPosition, double endYear) {
-        return computePosition(oldPosition, endYear, oldPosition.getEpoch());
-    }
-
-    /**
-     * Computes a new position by taking an existing position and accounting
-     * for proper motion over the specified number of years.
-     * Uses the startYear instead of the epoch of the oldPosition as the
-     * starting year.
-     *
-     * @param	oldPosition		start with this position
-     * @param	endYear			compute new position for this year
-     * @param	startYear		assume oldPosition measured on this year
-     * @return					position for the new year
-     **/
-    public Coordinates computePosition(Coordinates oldPosition, double endYear, double startYear) {
-        return oldPosition.add(new CoordinatesOffset(
-                (endYear - startYear) * getOffset().getRa(), (endYear - startYear) * getOffset().getDec()));
-    }
-
-    /**
      * Determines whether two proper motions are equal.
      **/
     public boolean equals(Object obj) {

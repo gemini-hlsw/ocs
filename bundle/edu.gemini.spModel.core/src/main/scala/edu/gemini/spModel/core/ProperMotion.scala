@@ -25,9 +25,6 @@ case class ProperMotion(
   def plusYears(t: Target, elapsedYears: Double): Coordinates = {
     val baseCoordinates = t.coords(None).getOrElse(Coordinates.zero)
 
-    val properVelocity: Offset = Offset(OffsetP(Angle.fromDegrees(deltaRA.velocity.toDegreesPerYear)),
-                                        OffsetQ(Angle.fromDegrees(deltaDec.velocity.toDegreesPerYear)))
-
     val radialVelocity: Double = {
       val redshift: Option[Redshift] = Target.redshift.get(t).flatten
       redshift.getOrElse(Redshift.zero).toRadialVelocity.toKilometersPerSecond
@@ -35,7 +32,7 @@ case class ProperMotion(
     val parallax = Target.parallax.get(t).flatten.orZero.mas / ProperMotion.Million
     ProperMotion.properMotionCalculator(baseCoordinates,
                                         Epoch.JulianLengthOfYear,
-                                        properVelocity,
+                                        (deltaRA.velocity.toDegreesPerYear, deltaDec.velocity.toDegreesPerYear),
                                         radialVelocity,
                                         parallax,
                                         elapsedYears)
@@ -78,13 +75,17 @@ object ProperMotion {
    */
   def properMotionCalculator(baseCoordinates: Coordinates,
                              daysPerYear: Double,
-                             properVelocity: Offset,
+                             properVelocity: Vec2,
                              radialVelocity: Double,
                              parallax: Double,
                              elapsedYears: Double): Coordinates = {
     // We want the baseCoordinates in radians.
-    val (ra,  dec)  = (baseCoordinates.ra.toAngle.toSignedDegrees.toRadians, baseCoordinates.dec.toAngle.toSignedDegrees.toRadians)
-    val (dRa, dDec) = (properVelocity.p.toAngle.toSignedDegrees.toRadians,   properVelocity.q.toAngle.toSignedDegrees.toRadians)
+    val (ra,  dec)  = (baseCoordinates.ra.toAngle.toRadians, baseCoordinates.dec.toAngle.toRadians)
+    // at dec 90 this gets undetermined, while we never observe at dec 90 it wouldn't be nice to have
+    // a division by zero error. At dec 90 we don't correct by cos(dec)
+    val (dRa, dDec) = 
+      if (cos(dec) == 0.0) (properVelocity._1.toRadians, properVelocity._2.toRadians) 
+      else (properVelocity._1.toRadians / cos(dec), properVelocity._2.toRadians)
 
     val pos: Vec3 = {
       val cd = cos(dec)
