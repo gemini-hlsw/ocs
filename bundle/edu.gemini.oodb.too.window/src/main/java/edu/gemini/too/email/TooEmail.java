@@ -320,13 +320,13 @@ public class TooEmail {
 
         try {
             if (toAddrs.length > 0) {
-                mess.addRecipients(Message.RecipientType.TO, toAddrs);
+                mess.setRecipients(Message.RecipientType.TO, toAddrs);
             }
             if (ccAddrs.length > 0) {
-                mess.addRecipients(Message.RecipientType.CC, ccAddrs);
+                mess.setRecipients(Message.RecipientType.CC, ccAddrs);
             }
             if (bccAddrs.length > 0) {
-                mess.addRecipients(Message.RecipientType.BCC, bccAddrs);
+                mess.setRecipients(Message.RecipientType.BCC, bccAddrs);
             }
             mess.setFrom(_sender);
             mess.setSubject(subj);
