@@ -9,7 +9,7 @@ case class AngularVelocity(masPerYear: Double) extends AnyVal with java.io.Seria
    * This `AngularVelocity` in degrees/year, it can be positive or negative
    * @group Conversions
    */
-  def toDegreesPerYear: Double = masPerYear / AngularVelocity.DegreesYearToMilliArcSecsYear
+  def toDegreesPerYear: Double = masPerYear / AngularVelocity.MilliArcSecsInADegree
 
 }
 
@@ -32,6 +32,7 @@ object AngularVelocity {
   val masPerYear: AngularVelocity @> Double =
     Lens.lensu((a, b) => a.copy(masPerYear = b), _.masPerYear)
 
+  val MilliArcSecsInADegree:Double = 1296000000
   val DegreesYearToMilliArcSecsYear:Double = 3.6e06
 
   val Zero = AngularVelocity(0.0)
