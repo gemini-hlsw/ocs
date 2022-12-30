@@ -25,7 +25,7 @@ final case class Epoch(year: Double) {
 
   /** Offset in epoch-years from this `Epoch` to the given fractional Julian day. */
   def untilJulianDay(jd: Double): Double =
-    untilEpochYear(Epoch.JulianYearBasis + (jd - Epoch.JulianBasis) / Epoch.JulianLengthOfYear)
+    Epoch.JulianYearBasis + (jd - Epoch.JulianBasis) / Epoch.JulianLengthOfYear
 
   /** Offset in epoch-years from this `Epoch` to the given epoch year under the same scheme. */
   def untilEpochYear(epochYear: Double): Double =
