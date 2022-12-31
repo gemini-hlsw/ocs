@@ -115,7 +115,8 @@ public final class GHostRecipe  {
         }
 
         final Slit slit = Slit$.MODULE$.apply(instrument.getSlitWidth(),
-                                    instrument.getSlitLength()/instrument.getSpatialBinning(),
+                                   instrument.getSlitLength()/instrument.getSpatialBinning(),
+                                              //instrument.getSlitLength(),
                                               instrument.getPixelSize());
         final SlitThroughput throughput = new SlitThroughput(totalspsf, sf_list.get((sf_list.size() - 1) / 2));
 

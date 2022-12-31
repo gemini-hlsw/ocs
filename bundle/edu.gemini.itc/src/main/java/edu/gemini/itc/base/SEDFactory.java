@@ -21,6 +21,10 @@ import edu.gemini.spModel.core.UserDefinedSpectrum;
 import edu.gemini.spModel.core.Wavelength;
 import scala.Option;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.sql.Timestamp;
+
 /**
  * This class encapsulates the process of creating a Spectral Energy
  * Distribution (SED).  (e.g. from a data file)
@@ -187,6 +191,24 @@ public final class SEDFactory {
         return calculate(instrument, sdp, odp, tp, Option.apply((AOSystem) null));
     }
 
+    public static void creatingFile(double sampling,  VisitableSampledSpectrum sed, String fName) {
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        String fileName = fName + "_"+ sampling + "_" + timestamp.toString().replace(' ', '_') +".dat";
+
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+            double[][] data = sed.getData();
+            for (int i = 0; i < data[0].length; i++) {
+                if (data[0][i] < 1200)
+                   writer.append(data[0][i] + "\t" + data[1][i] + "\n");
+            }
+            writer.close();
+            System.out.println("File created " + fileName);
+        } catch (Exception e) {
+            System.out.println("Error creating the file " + fName);
+        }
+    }
+
     public static SourceResult calculate(final Instrument instrument, final SourceDefinition sdp, final ObservingConditions odp, final TelescopeDetails tp, final Option<AOSystem> ao) {
         // Module 1b
         // Define the source energy (as function of wavelength).
@@ -309,12 +331,13 @@ public final class SEDFactory {
         // input: instrument, source and background SED
         // output: total flux of source and background.
 
-        double[][] data = sed.getData();
+        //double[][] data = sed.getData();
 
         if (!(instrument instanceof Gsaoi) && !(instrument instanceof Niri) && !(instrument instanceof Gnirs)) {
             // TODO: for any instrument other than GSAOI and NIRI convolve here, why?
             instrument.convolveComponents(sed);
         }
+
         /*double[][] data2 = sed.getData();
         System.out.println("**** sed   beforeConvolveEleemnt   afterConvolveElement **** ");
         for (int i = 0; i < data[0].length; i++) {
@@ -326,8 +349,9 @@ public final class SEDFactory {
 
          */
 
+        creatingFile(instrument.getSampling(),  sed, "BcompCalc");
         instrument.convolveComponents(sky);
-
+        creatingFile(instrument.getSampling(),  sed, "compCalc");
         // TODO: AO (FOR NIFS DONE AT THE VERY END, WHY DIFFERENT FROM GSAOI/NIRI?)
         if (instrument instanceof Nifs && ao.isDefined()) {
             halo = Option.apply(SEDFactory.applyAoSystem(ao.get(), sky, sed));

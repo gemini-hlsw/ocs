@@ -189,7 +189,7 @@ public class GhostType {
     }
     public enum ReadMode implements DisplayableSpType, SequenceableSpType {
         STANDARD("Standard Science", DetectorReadMode.SLOW, AmpGain.LOW),
-        FAST("Fast Read", DetectorReadMode.SLOW, AmpGain.LOW),
+        FAST("Fast Read", DetectorReadMode.FAST, AmpGain.LOW),
         BRIGTHTARGETS("Bright Targets", DetectorReadMode.FAST, AmpGain.HIGH),
         ;
 

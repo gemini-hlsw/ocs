@@ -6,6 +6,7 @@ GHOST
 1000
 #Sampling (nm)
 #0.005
+#0.01
 0.2
 #Background filename
 ghost_background.dat
