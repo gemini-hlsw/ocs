@@ -356,6 +356,8 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
 
         x2 = x_end;
         end_index = getLowerIndex(x2);
+        if (start_index == end_index)
+            end_index--;
         x1 = getX(end_index);
         y2 = getY(x2);
         y1 = getY(end_index);
@@ -365,6 +367,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
             System.out.println("end_index: " + end_index + " x1: " + x1 + " x2: " + x2 + " y1: " + y1
                     + " y2: " + y2 + " delta_x: " + delta_x + " area: " + area);
         }
+
         area += getIntegral(start_index, end_index);
         if (x_start >= 700 && x_start <= 703) {
             System.out.println(" area: " + area);
