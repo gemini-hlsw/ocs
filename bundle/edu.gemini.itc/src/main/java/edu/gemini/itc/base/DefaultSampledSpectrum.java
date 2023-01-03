@@ -349,6 +349,10 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         y2 = getY(start_index);
         delta_x = x2 - x1;
         area += delta_x * (y1 + y2) / 2.0;
+        if (x_start >= 700 && x_start <= 703) {
+            System.out.println("start_index: " + start_index + " x1: " + x1 + " x2: " + x2 + " y1: " + y1
+                    + " y2: " + y2 + " delta_x: " + delta_x + " area: " + area);
+        }
 
         x2 = x_end;
         end_index = getLowerIndex(x2);
@@ -357,8 +361,14 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         y1 = getY(end_index);
         delta_x = x2 - x1;
         area += delta_x * (y1 + y2) / 2.0;
-
+        if (x_start >= 700 && x_start <= 703) {
+            System.out.println("end_index: " + end_index + " x1: " + x1 + " x2: " + x2 + " y1: " + y1
+                    + " y2: " + y2 + " delta_x: " + delta_x + " area: " + area);
+        }
         area += getIntegral(start_index, end_index);
+        if (x_start >= 700 && x_start <= 703) {
+            System.out.println(" area: " + area);
+        }
 
         return area;
     }
@@ -396,10 +406,14 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      */
     @Override public double getAverage(double x_start, double x_end) {
         if (x_start >= 700 && x_start <= 703) {
-            System.out.println("x_start: " + x_start + " x_end: " + x_end + " integral: " + getIntegral(x_start, x_end)
-                              + " dInterval: " + (x_end - x_start) + " val: "+ getIntegral(x_start, x_end) / (x_end - x_start));
+            System.out.println("avgMethod. x_start: " + x_start + " x_end: " + x_end
+                    + " dInterval: " + (x_end - x_start));
         }
-        return getIntegral(x_start, x_end) / (x_end - x_start);
+        double val = getIntegral(x_start, x_end) / (x_end - x_start);
+        if (x_start >= 700 && x_start <= 703)
+            System.out.println("Integral Value: "+ val);
+        //return getIntegral(x_start, x_end) / (x_end - x_start);
+        return val;
     }
 
     /**
