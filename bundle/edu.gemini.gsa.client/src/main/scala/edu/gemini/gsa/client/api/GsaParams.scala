@@ -16,6 +16,7 @@ object GSAInstrument {
   private case class GSAInstrumentImpl(name: String) extends GSAInstrument
 
   def apply(i: Instrument): Option[GSAInstrument] = i match {
+      case Instrument.Ghost      => GSAInstrumentImpl("GHOST").some
       case Instrument.GmosNorth  => GSAInstrumentImpl("GMOS-N").some
       case Instrument.Gnirs      => GSAInstrumentImpl("GNIRS").some
       case Instrument.Nifs       => GSAInstrumentImpl("NIFS").some

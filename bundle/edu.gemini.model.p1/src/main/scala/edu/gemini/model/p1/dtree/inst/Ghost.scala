@@ -10,7 +10,7 @@ object Ghost {
     val title = "Resolution Mode"
     val description = "Select a resolution mode for your configuration."
 
-    def choices: List[GhostResolutionMode] = GhostResolutionMode.values.toList
+    def choices: List[GhostResolutionMode] = GhostResolutionMode.values.filterNot(_ == GhostResolutionMode.PrecisionRadialVelocity).toList
 
     def apply(om: GhostResolutionMode) = Left(new TargetModeNode(om))
 
@@ -22,7 +22,8 @@ object Ghost {
   }
 
   class TargetModeNode(rm: GhostResolutionMode) extends SingleSelectNode[GhostResolutionMode, GhostTargetMode, GhostBlueprint](rm){
-    def title = "TargetMode"
+    def title = "Target Mode"
+
     def description = "Select a target mode for your configuration."
 
     def apply(d: GhostTargetMode) = Right(GhostBlueprint(rm, d))
