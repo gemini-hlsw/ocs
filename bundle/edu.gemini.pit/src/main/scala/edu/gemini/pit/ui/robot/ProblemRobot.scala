@@ -84,7 +84,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           List(incompleteInvestigator, missingObsElementCheck, emptyTargetCheck,
             emptyEphemerisCheck, singlePointEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
             badGuiding, cwfsCorrectionsIssue, badVisibility, iffyVisibility, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsIQ70Check, lgsGemsIQ85Check,
-            lgsCC50Check, texesCCCheck, texesWVCheck, gmosWVCheck, gmosR600Check, dssiObsolete, band3IQ, band3LGS, band3RapidToO, sbIrObservation).flatten
+            lgsCC50Check, texesCCCheck, texesWVCheck, gmosWVCheck, gmosR600Check, dssiObsolete, ghostTargetCheck, band3IQ, band3LGS, band3RapidToO, sbIrObservation).flatten
       ps.sorted
     }
 
@@ -153,6 +153,16 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if a.length > MaxAttachmentSizeBytes
     } yield new Problem(Severity.Error, s"Attachment '${a.getName}' is larger than ${MaxAttachmentSize}MB.", "Overview", if (i == 1) s.inOverview(_.attachment1.select.doClick()) else s.inOverview(_.attachment2.select.doClick()))
 
+
+    private lazy val ghostTargetCheck = for {
+      o  <- p.nonEmptyObservations
+      b <- o.blueprint
+      if b.isInstanceOf[GhostBlueprint]
+      t <- p.targets.collect {
+        case t @ NonSiderealTarget(_, _, _, _, _, _, _) => t
+      }.headOption
+      msg = s"""GHOST cannot be used at the moment with Non Sidereal target "${t.name}".""""
+    } yield new Problem(Severity.Error, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private lazy val emptyTargetCheck = for {
       t <- p.targets

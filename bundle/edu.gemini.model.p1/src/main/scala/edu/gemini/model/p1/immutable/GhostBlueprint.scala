@@ -7,7 +7,7 @@ object GhostBlueprint {
 }
 
 case class GhostBlueprint(resolutionMode: GhostResolutionMode, targetMode: GhostTargetMode) extends GeminiBlueprintBase {
-  def name: String = s"Ghost ${resolutionMode.value} ${targetMode.value}"
+  def name: String = s"GHOST ${resolutionMode.value} ${targetMode.value}"
 
   def this(m: M.GhostBlueprint) = this(
     m.getResolutionMode,
