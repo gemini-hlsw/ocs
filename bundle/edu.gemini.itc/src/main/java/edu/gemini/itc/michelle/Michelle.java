@@ -146,7 +146,7 @@ public final class Michelle extends Instrument implements SpectroscopyInstrument
     }
 
     public double getGratingDispersion() {
-        return _gratingOptics.dispersion();
+        return _gratingOptics.dispersion(-1);
     }
 
     /**

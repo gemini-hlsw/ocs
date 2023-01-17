@@ -139,7 +139,7 @@ public class GhostType {
     }
 
     public enum AmpGain implements LoggableSpType, SequenceableSpType {
-        LOW("Low"),
+        LOW("LOW"),
         HIGH("HIGH"),
         ;
 

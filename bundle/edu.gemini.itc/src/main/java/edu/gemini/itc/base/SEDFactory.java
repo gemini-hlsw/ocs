@@ -218,9 +218,11 @@ public final class SEDFactory {
         // output: redshifted SED
 
         final VisitableSampledSpectrum sed = SEDFactory.getSED(sdp, instrument);
+
+        //creatingFile(instrument.getSampling(),  sed, "initialSignal.dat");
         final SampledSpectrumVisitor redshift = new RedshiftVisitor(sdp.redshift());
         sed.accept(redshift);
-
+        //creatingFile(instrument.getSampling(),  sed, "signalRedshift.dat");
         // Must check to see if the redshift has moved the spectrum beyond
         // useful range. The shifted spectrum must completely overlap
         // both the normalization waveband and the observation waveband
@@ -264,9 +266,11 @@ public final class SEDFactory {
             sed.accept(norm);
         }
 
+        //creatingFile(instrument.getSampling(),  sed, "signalWithoutAperture.dat");
         final SampledSpectrumVisitor tel = new TelescopeApertureVisitor();
         sed.accept(tel);
 
+        //creatingFile(instrument.getSampling(),  sed, "signalWithAperture.dat");
         // SED is now in units of photons/s/nm
 
         // Module 3b
@@ -333,10 +337,12 @@ public final class SEDFactory {
 
         //double[][] data = sed.getData();
 
+        //creatingFile(instrument.getSampling(),  sed, "signalBeforeConv.dat");
         if (!(instrument instanceof Gsaoi) && !(instrument instanceof Niri) && !(instrument instanceof Gnirs)) {
             // TODO: for any instrument other than GSAOI and NIRI convolve here, why?
             instrument.convolveComponents(sed);
         }
+        //creatingFile(instrument.getSampling(),  sed, "signalConv.dat");
 
         /*double[][] data2 = sed.getData();
         System.out.println("**** sed   beforeConvolveEleemnt   afterConvolveElement **** ");
@@ -349,9 +355,9 @@ public final class SEDFactory {
 
          */
 
-        creatingFile(instrument.getSampling(),  sed, "BcompCalc");
+        //creatingFile(instrument.getSampling(),  sky, "skyBconv");
         instrument.convolveComponents(sky);
-        creatingFile(instrument.getSampling(),  sed, "compCalc");
+        //creatingFile(instrument.getSampling(),  sky, "skyConv");
         // TODO: AO (FOR NIFS DONE AT THE VERY END, WHY DIFFERENT FROM GSAOI/NIRI?)
         if (instrument instanceof Nifs && ao.isDefined()) {
             halo = Option.apply(SEDFactory.applyAoSystem(ao.get(), sky, sed));

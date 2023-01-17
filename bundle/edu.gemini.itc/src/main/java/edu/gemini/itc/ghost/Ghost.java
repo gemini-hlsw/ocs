@@ -27,7 +27,7 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
 
     private static final double WellDepth = 350000;  // VENU has to confirm the correct value.
     private final TransmissionElement _blazeThrougthput;
-    private final IFU_Trans _ifuTrans;
+    //private final IFU_Trans _ifuTrans;
     private final IFUComponent _ifu;
 
     protected DetectorsTransmissionVisitor _dtv;
@@ -96,19 +96,19 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
         _blazeThrougthput.setDescription("Echelle Blaze function for individuals orders");
         addComponent(_blazeThrougthput);
         Log.info("*********** Directory "+ getDirectory() + "/ghost_" + gp.resolution().get_displayValue() + Instrument.getSuffix());
-        _gratingOptics = new GhostGratingOptics(getDirectory() + "/" +Ghost.INSTR_PREFIX, gp.resolution().get_displayValue() + "_dispersion", "gratings",
-                                                gp.centralWavelength().toNanometers(), _detector.getDetectorPixels(), gp.spectralBinning().getValue());
+        _gratingOptics = new GhostGratingOptics(
+                getDirectory() + "/" +Ghost.INSTR_PREFIX,
+                gp.resolution().get_displayValue() + "_dispersion",
+                "gratings",
+                gp.centralWavelength().toNanometers(), _detector.getDetectorPixels(), gp.spectralBinning().getValue());
         _gratingOptics.setDescription("Grating Resolution");
         addDisperser(_gratingOptics);
         _sampling = super.getSampling();
-
-        _ifuTrans = new IFU_Trans(gp.resolution());
-
         _ifu = new IFUComponent(gp.resolution());
         addComponent(_ifu);
+        // TODO. REMOVE after talking with Andy
         _resolutionElement = new TransmissionElement (getDirectory()+"/" + Ghost.INSTR_PREFIX + "resElement_"+ gp.resolution().get_displayValue() +getSuffix());
         addComponent(_resolutionElement);
-
         _ghostSaturLimitWarning = new GhostSaturLimitRule(AD_SATURATION, WellDepth, getSpatialBinning(), getSpectralBinning(), gain() , 0.90);
     }
 
@@ -149,13 +149,14 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
      * @return Effective wavelength in nm
      */
     public int getEffectiveWavelength() {
-         Log.info("ghost getEffectiveWavelength: "+ _gratingOptics.getEffectiveWavelength());
+        Log.info("ghost getEffectiveWavelength: "+ _gratingOptics.getEffectiveWavelength());
         return (int) _gratingOptics.getEffectiveWavelength();
 
     }
 
     public double getGratingDispersion() {
-        return _gratingOptics.dispersion();
+        System.out.println("getGratingDispersionnnnnnnnnnnnnnnnn " + _gratingOptics.dispersion(-1));
+        return _gratingOptics.dispersion(-1);
     }
 
     /**
@@ -195,6 +196,7 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
     }
 
     public double getSpectralPixelWidth() {
+        log.info("getSpectralPixelWidth, getSampling: " + getSampling());
         return _gratingOptics.getPixelWidth();
     }
 
@@ -215,9 +217,9 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
     }
 
 
-    public IFU_Trans getIFU_trans() {
+    /*public IFU_Trans getIFU_trans() {
         return _ifuTrans;
-    }
+    }*/
 
     public Option<IfuMethod> getIfuMethod() {
         return (odp.analysisMethod() instanceof IfuMethod) ? Option.apply((IfuMethod) odp.analysisMethod()): Option.empty();

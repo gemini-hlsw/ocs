@@ -34,9 +34,11 @@ object DatFile {
                         readNoise: Double,          // [electrons/pixel]
                         darkCurrent: Double)        // [electrons/s/pixel]
 
-  case class Grating(name: String, resolvingPower: Int, blaze: Int, dispersion: Double, resolution: Double)
+  case class Grating(name: String, resolvingPower: Int, blaze: Int, dispersion: Double, dispersionArray: Array[Array[Double]], resolution: Double)
 
-  case class GratingGhost(order: Int, resolvingPower :Double, blaze: Int, resolution: Double)
+  //case class GratingDefDis(name: String, resolvingPower: Int, blaze: Int, dispersion: String, resolution: Double)
+
+  //case class GratingGhost(order: Int, resolvingPower :Double, blaze: Int, resolution: Double)
 
   // ===== Parse utils
 // EXPERIMENTAL; May or may not be used in a later stage.
@@ -96,6 +98,8 @@ object DatFile {
     Filter(s.nextDouble(), scanArray(s))
   }
 
+
+
   val gratings = cache { s =>
     val l = mutable.MutableList[Grating]()
     while (s.hasNext) {
@@ -103,9 +107,25 @@ object DatFile {
       val blaze          = s.nextInt()
       val resolvingPower = s.nextInt()
       val resolution     = s.nextDouble()
-      val dispersion     = s.nextDouble()
-      l.+=(Grating(name, resolvingPower, blaze, dispersion, resolution))
+      //val dispersion     = s.nextDouble()
+      val tmp     = s.next()
+      var dispersion: Double = 0
+      try {
+        dispersion = tmp.toDouble
+        l.+=(Grating(name, resolvingPower, blaze, dispersion, null, resolution))
+      } catch {
+        case e : NumberFormatException => {
+          val dDis = arrays.apply(tmp)
+          l.+=(Grating(name, resolvingPower, blaze, -999999, dDis, resolution))
+        }
+        case e : Exception => {
+          //l.+=(Grating(name, resolvingPower, blaze, -999999, arrays.apply(tmp), resolution))
+          println("NOT ANALYZED THE EXCEPTION, PLEASE CONTACT WITH A PROGRAMMER. LINE 125 OF THE DatFile.scala")
+        }
+      }
+
     }
+    //println("Frommmmmmmmmmmmmmmmm scala printing lenght " + l.length);
     l.map(l => l.name -> l).toMap
   }
 
@@ -117,12 +137,14 @@ object DatFile {
     val l = mutable.MutableList[(Double, Double)]()
     while (s.hasNext) {
       val pair = (s.next().toDouble, s.next().toDouble)
+      //println("pair is "+ pair.toString());
       l.+=(pair)
     }
     val data = new Array[Array[Double]](2)
     data(0) = l.map(_._1).toArray
     data(1) = l.map(_._2).toArray
     data
+
   }
 
   /** Loads a file and parses it using the given scanner unless it is already available in the cache. */

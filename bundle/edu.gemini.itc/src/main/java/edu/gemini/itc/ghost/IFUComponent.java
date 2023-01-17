@@ -49,7 +49,7 @@ public final class IFUComponent extends TransmissionElement {
             ifu_spacing =  IFU_SPACING_SR;
             radius = RADIUS_SR;
         }
-        Log.info("Calculating IFU elements for " + res.displayValue() + ". Radius: " + radius + " mm, ifu_diameter: "+ ifu_diameter + " ifu_spacing: " + ifu_spacing);
+        //Log.info("Calculating IFU elements for " + res.displayValue() + ". Radius: " + radius + " mm, ifu_diameter: "+ ifu_diameter + " ifu_spacing: " + ifu_spacing);
         int numX=8;
         int numY=9;
         int numIFUs = 0;
@@ -62,7 +62,7 @@ public final class IFUComponent extends TransmissionElement {
                 double y = (2*j - numY + Math.abs(i)%2 - 1) * distY;
                 double r = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
                 if (r < radius) {
-                    Log.info("x: "+ x + " y: "+ y + " r: " + r + " radious: "+ radius);
+                    //Log.info("x: "+ x + " y: "+ y + " r: " + r + " radious: "+ radius);
                     IFUApertures.addAperture(new HexagonalAperture(x, y, ifu_diameter));
                     IFUOffsets.add(r);
                     numIFUs++;
@@ -70,11 +70,11 @@ public final class IFUComponent extends TransmissionElement {
                 //Log.info("  discarded");
             }
         }
-        Log.info("-> will sum HR " + numIFUs + " IFU elements");
+        //Log.info("-> will sum HR " + numIFUs + " IFU elements");
         List<ApertureComponent> list = IFUApertures.getApertureList();
         for( ApertureComponent ac : list) {
             HexagonalAperture h = (HexagonalAperture) ac;
-            Log.info("(" +h.getIfuPosX() + ","+ h.getIfuPosY() + "): "+  h.getFractionOfSourceInAperture());
+            //Log.info("(" +h.getIfuPosX() + ","+ h.getIfuPosY() + "): "+  h.getFractionOfSourceInAperture());
         }
         this._res = res;
     }

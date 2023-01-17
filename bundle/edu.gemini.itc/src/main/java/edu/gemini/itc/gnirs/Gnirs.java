@@ -322,7 +322,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
     }
 
     public double getGratingDispersion() {
-        return _gratingOptics.dispersion();
+        return _gratingOptics.dispersion(-1);
     }
 
     public double getReadNoise() {

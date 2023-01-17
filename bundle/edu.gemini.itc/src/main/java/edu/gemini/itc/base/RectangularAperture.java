@@ -2,6 +2,7 @@ package edu.gemini.itc.base;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * This is the concrete class is one type of aperture supported by the itc
@@ -15,6 +16,7 @@ public final class RectangularAperture extends ApertureComponent {
     private final double IFUlenY;
     private final double IFUposX;
     private final double IFUposY;
+    private static final Logger Log = Logger.getLogger(RectangularAperture.class.getName());
 
     public RectangularAperture(final double IFUlenX, final double IFUlenY, final double IFUposX, final double IFUposY) {
         this.IFUlenX = IFUlenX;
@@ -31,6 +33,7 @@ public final class RectangularAperture extends ApertureComponent {
         final double yLower = IFUposY - IFUlenY / 2;
         final double yUpper = IFUposY + IFUlenY / 2;
         final double fractionOfSourceInAperture = morphology.get2DSquareIntegral(xLower, xUpper, yLower, yUpper);
+        Log.fine("Gaussian fractionOfSourceInAperture (" + xLower + " < x < " + xUpper + ", " + yLower + " < y < " + yUpper + ") = " + fractionOfSourceInAperture);
         sourceFraction.add(fractionOfSourceInAperture);
     }
 
@@ -40,12 +43,15 @@ public final class RectangularAperture extends ApertureComponent {
         final double yLower = IFUposY - IFUlenY / 2;
         final double yUpper = IFUposY + IFUlenY / 2;
         final double fractionOfSourceInAperture = morphology.get2DSquareIntegral(xLower, xUpper, yLower, yUpper);
+        Log.fine("AO fractionOfSourceInAperture (" + xLower + " < x < " + xUpper + ", " + yLower + " < y < " + yUpper + ") = " + fractionOfSourceInAperture);
         sourceFraction.add(fractionOfSourceInAperture);
     }
 
     public void visitUSB(final Morphology3D morphology) {
         // Original ancient comment: "Might work, not sure."
-        sourceFraction.add(IFUlenX * IFUlenY * Math.PI / 4);
+        final double fractionOfSourceInAperture = IFUlenX * IFUlenY * Math.PI / 4.0;  // Why * Pi/4 ?
+        Log.fine("USB fractionOfSourceInAperture (" + IFUlenX + " x " + IFUlenY + ") = " + fractionOfSourceInAperture);
+        sourceFraction.add(fractionOfSourceInAperture);
     }
 
     //Method for returning the Sourcefraction for this Aperture

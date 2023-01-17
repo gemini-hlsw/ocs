@@ -4,8 +4,6 @@ import edu.gemini.shared.util.immutable.DefaultImList;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.gemini.calunit.smartgcal.ConfigurationKey;
 import edu.gemini.spModel.gemini.ghost.GhostType;
-import edu.gemini.spModel.gemini.gmos.GmosCommonType;
-import edu.gemini.spModel.gemini.gmos.GmosSouthType;
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 
 /**

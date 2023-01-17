@@ -6,16 +6,13 @@ import scala.Option;
 import scala.collection.Iterator;
 import edu.gemini.itc.base.DatFile;
 
-public class GhostGratingOptics extends GratingOptics {
+import java.util.logging.Logger;
 
+public class GhostGratingOptics extends GratingOptics {
+    private static final Logger log = Logger.getLogger(GhostGratingOptics.class.getName());
     public GhostGratingOptics(String directory, String gratingName, String gratingsName, double centralWavelength, int detectorPixels, int spectralBinning) {
         super(directory, gratingName, gratingsName, centralWavelength, detectorPixels, spectralBinning);
-        System.out.println("######## keySet ");
-        System.out.println(data.keySet());
         data.keySet();
-        //for (Iterator it = data.iterator();  it.hasNext();)
-        //   System.out.println(it);
-
     }
 
     public double getStart() {
@@ -24,5 +21,15 @@ public class GhostGratingOptics extends GratingOptics {
 
     public double getEnd() {
         return get_trans().getEnd();
+    }
+
+    public double getPixelWidth() {
+        double disp = dispersion(-1);
+        log.warning("ANDY TALK Getting the dispersion with -1 to specified the getPixelWidth "+ disp + " using 0.004");
+        //return data.apply(gratingName).dispersionArray() * _spectralBinning;
+        //return dispersion(-1) * _spectralBinning;
+        //return disp * _spectralBinning;
+        return 0.004 * _spectralBinning;
+
     }
 }

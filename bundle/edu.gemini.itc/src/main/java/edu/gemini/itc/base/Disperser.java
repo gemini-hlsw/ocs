@@ -23,7 +23,8 @@ public interface Disperser {
     double getEnd();
 
     /** Dispersion of this disperser in [nm/pixel]. */
-    double dispersion();
+    double dispersion(double wv);
+
 
     /** Spectral resolution in nm for a 0.5-arcsec slit.
      *  This value can be used to extrapolate the resolution for any given slit which is the default

@@ -27,16 +27,16 @@
         $('form').on('submit',function(){
             $("[name*=nSkyMicrolens]").removeAttr('disabled')
         });
-        $("[name*='spatialBinning']").change(function () {
-           optSpaInt = parseInt($("[name*='spatialBinning'] > option:selected").text(), 10)
-           $("[name*='spectralBinning'] > option").each(function(i) {
-               optSpeInt = parseInt(this.text, 10)
-               if (optSpeInt >= optSpaInt)
+        $("[name*='spectralBinning']").change(function () {
+           optSpeInt = parseInt($("[name*='spectralBinning'] > option:selected").text(), 10)
+           $("[name*='spatialBinning'] > option").each(function(i) {
+               optSpaInt = parseInt(this.text, 10)
+               if ((optSpaInt >= optSpeInt) && (!((optSpeInt == 4) && ( optSpaInt == 8))))
                  $(this).removeAttr('disabled');
               else
                  $(this).attr('disabled', 'disabled');
 
-              if (optSpeInt == optSpaInt)
+              if (optSpaInt == optSpeInt)
                   $(this).attr('selected', 'selected');
               else
                  $(this).removeAttr('selected');
@@ -350,19 +350,19 @@
             <tr stype="padding-top:2%;"><td colspan="2"><b>Detector Binning:</b></td></tr>
             <tr stype="padding-top:2%;">
                <td colspan="1">
-                    Spatial Resolution
-                    <select name="spatialBinning" size="1">
-                        <option value="ONE" selected>1</option>
-                        <option value="TWO">2</option>
-                        <option value="FOUR">4</option>
-                    </select>
                     Spectral Resolution
                     <select name="spectralBinning" size="1">
                         <option value="ONE" selected>1</option>
                         <option value="TWO">2</option>
                         <option value="FOUR">4</option>
-                        <option value="EIGHT">8</option>
                     </select>
+                   Spatial Resolution
+                   <select name="spatialBinning" size="1">
+                       <option value="ONE" selected>1</option>
+                       <option value="TWO">2</option>
+                       <option value="FOUR">4</option>
+                       <option value="EIGHT">8</option>
+                   </select>
                 </td>
             </tr>
             <tr style="padding-top:2%"><td colspan="3"><b>Read Modes:</b></td></tr>

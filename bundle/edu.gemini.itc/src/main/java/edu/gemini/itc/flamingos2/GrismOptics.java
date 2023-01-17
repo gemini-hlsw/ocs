@@ -75,10 +75,10 @@ public class GrismOptics extends TransmissionElement implements Disperser {
     }
 
     public double resolutionHalfArcsecSlit() {
-        return 0.5 / plateScale * dispersion();
+        return 0.5 / plateScale * dispersion(-1);
     }
 
-    public double dispersion() {
+    public double dispersion(double wv) {
         return getPixelWidth();
     }
 

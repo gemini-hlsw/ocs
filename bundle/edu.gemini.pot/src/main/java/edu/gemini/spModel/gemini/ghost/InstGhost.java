@@ -88,19 +88,11 @@ public class InstGhost
     private GhostType.AmpGain _gainChoice = GhostType.AmpGain.DEFAULT;
     private GhostType.ReadMode _readMode = GhostType.ReadMode.DEFAULT;
 
-    private static final Duration SETUP_TIME_IFU_ARM         = Duration.ofMinutes(1);  // Talking with Cristian and his experience with the Arm movement.
-    private static final Duration SETUP_TIME_INST_GUIDING    = Duration.ofSeconds(30);  // This value corresponds the time spent by the instrument to starting to guide
-    // with its owner guiding fibers.
-
-    private static final Duration SETUP_TIME = Duration.ofSeconds(900); // This value was provided by Venus
+   private static final Duration SETUP_TIME = Duration.ofSeconds(900); // This value was provided by Venus
     // should be added 900 seconds of the SETUP_TIME
-    public static final Duration REACQUISTION_TIME = Duration.ofSeconds(200);
-    private static final Duration SETUP_AVG_TIME_ADQ    = Duration.ofMinutes(15);
+    public static final Duration REACQUISITION_TIME = Duration.ofSeconds(300);
 
     private IssPort _port = IssPort.SIDE_LOOKING;
-
-    //public static final PropertyDescriptor POS_ANGLE_CONSTRAINT_PROP;
-
 
     private static PropertyDescriptor initProp(String propName, boolean query, boolean iter) {
         PropertyDescriptor pd;
@@ -111,29 +103,21 @@ public class InstGhost
 
     // Initialize the properties.
     static {
-        System.out.println("********** Initial static block  *****************");
         final boolean query_yes = true;
         final boolean iter_yes = true;
         final boolean query_no = false;
         final boolean iter_no = false;
 
-        System.out.println("after RuntimeExeception ");
         PORT_PROP = initProp(IssPortProvider.PORT_PROPERTY_NAME, query_no, iter_no);
 
         AMP_GAIN_CHOICE_PROP = initProp("gainChoice", false, true);
         AMP_GAIN_CHOICE_PROP.setDisplayName("Gain Choice");
-
-        //POS_ANGLE_CONSTRAINT_PROP = initProp("posAngleConstraint", query_no, iter_no);
-
         CCD_X_BIN_PROP = initProp(X_BIN_KEY.getName(), query_yes, iter_yes);
         CCD_X_BIN_PROP.setDisplayName("X Bin");
         CCD_X_BIN_PROP.setShortDescription("X Binning Factor");
         CCD_Y_BIN_PROP = initProp(Y_BIN_KEY.getName(), query_yes, iter_yes);
         CCD_Y_BIN_PROP.setDisplayName("Y Bin");
         CCD_Y_BIN_PROP.setShortDescription("Y Binning Factor");
-
-        System.out.println("Finish the static method ");
-
     }
 
 
@@ -147,8 +131,6 @@ public class InstGhost
 
         // check order and wavelength (values will only be present in case of spectroscopy)
         Double wavelength = getWavelength(instrument) * 1000.; // adjust scaling of wavelength from um to nm (as used in config tables)
-        IParameter orderParameter = instrument.getParameter("disperserOrder");
-
         ConfigKeyGhost config = new ConfigKeyGhost(xBin, yBin, ampGain);
         return new CalibrationKeyImpl.WithWavelength(config, wavelength);
     }
@@ -159,30 +141,9 @@ public class InstGhost
         return PROPERTY_MAP;
     }
 
-
-    private int _detectorRows;
-
-
     public InstGhost() {
         super(SPComponentType.INSTRUMENT_GHOST);
     }
-
-
-    /**
-     * Constructor
-     */
-    public InstGhost(SPComponentType type) {
-        super(type);
-    }
-
-    private void initParamDefault() {
-        // Override the default exposure time
-        _exposureTime = DEF_EXPOSURE_TIME;
-        _coadds = DEF_COADDS;
-        // calculate these values from the defaults
-        //  _updateDetectorRows();
-    }
-
 
     /**
      * Implementation of the clone method.
@@ -224,7 +185,6 @@ public class InstGhost
         //return GhostScienceAreaGeometry.javaScienceAreaDimensions(this.getFPUnit());
         System.out.println("TODO. Not implemented yet");
         return GhostScienceAreaGeometry.javaScienceAreaDimensions(1.0);
-
     }
 
 
@@ -234,22 +194,6 @@ public class InstGhost
     public GhostType.ReadMode getReadMode() {
         return _readMode;
     }
-
-
-
-    /**
-     * This convenience method implements the algorithm for determining
-     * the actual CCD Gain value based upon the CCD choices actually
-     * selected.
-     */
-    public static int getActualGain(final GhostType.AmpGain gain,
-                                       final GhostType.ReadMode readMode) {
-
-        LOG.info("TODO. Not implemented. It is necessary to set the different gain for each CCD type");
-        return 1;
-    }
-
-
 
     /**
      * Return the current CCD amp gain range.
@@ -282,16 +226,6 @@ public class InstGhost
         System.out.println("TODO. calculateParallacticAngle is not implemented the default values is 90");
         return super.calculateParallacticAngle(obs).map(angle -> angle.$plus(Angle$.MODULE$.fromDegrees(90)));
     }
-
-    /**
-     * Is Ghost in imaging mode.
-     */
-    public boolean isImaging() {
-
-        return true;
-    }
-
-
     /**
      * Set the X CCD binning.
      */
@@ -392,7 +326,7 @@ public class InstGhost
             return Duration.ZERO;
         return Duration.ofSeconds(t*SETUP_TIME.getSeconds());
          */
-        return REACQUISTION_TIME;
+        return REACQUISITION_TIME;
     }
 
     @Override
@@ -407,7 +341,7 @@ public class InstGhost
 
         return Duration.ofSeconds(t*SETUP_TIME.getSeconds());
          */
-        return REACQUISTION_TIME;
+        return REACQUISITION_TIME;
 
     }
 

@@ -25,7 +25,8 @@ public final class GhostPrinter extends PrinterBase implements OverheadTablePrin
 
     public GhostPrinter(final ItcParameters p, final GhostParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         //
-        super(out, 18000, 9000);
+        //super(out, 18000, 9000);
+        super(out, 7200, 3600);
         this.recipe         = new GHostRecipe(p, instr);
         this.pdp            = pdp;
         this.p              = p;

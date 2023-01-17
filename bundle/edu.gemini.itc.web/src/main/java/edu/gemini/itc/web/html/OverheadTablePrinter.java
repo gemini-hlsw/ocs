@@ -210,10 +210,10 @@ public class OverheadTablePrinter {
          *    - as target "Recentering" on the slit for all instruments but GSAOI
          *    - as "LGS Reacquisition" for GSAOI after large unguided sky offsets
          */
-        System.out.println("Going to calculate the recenterrrrrrrrrrrrr ");
+        //System.out.println("Going to calculate the recenterrrrrrrrrrrrr ");
         int numReacq = getNumRecenter();
-        System.out.println("Recender: " + numReacq );
-        System.out.println("------------------------------ ");
+        //System.out.println("Recender: " + numReacq );
+        //System.out.println("------------------------------ ");
         int numLgsReacq = getGsaoiLgsReacqNum();
         String  reacqStr;
         if (numReacq > 0) {

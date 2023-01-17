@@ -70,17 +70,17 @@ object Slit {
 
       case UserAperture(slitLength, _)      =>
         // user aperture slits are defined by mask width and the user defined slit length
-        System.out.println("GMOSSSSSS slitlength:  "+slitLength );
+        //System.out.println("GMOSSSSSS slitlength:  "+slitLength );
         RectangleSlit(slitWidth, slitLength, instrument.getPixelSize)
 
       case AutoAperture(_) if src.isUniform =>
         // auto aperture slits for uniform sources are defined by mask width and an area of 1 arcsec²
-        System.out.println("GMOSSSSSS OneArcsecSlit:  "+instrument.getPixelSize );
+        //System.out.println("GMOSSSSSS OneArcsecSlit:  "+instrument.getPixelSize );
         OneArcsecSlit(slitWidth, instrument.getPixelSize)
 
       case AutoAperture(_)                  =>
         // auto aperture slits for non-uniform sources are defined by mask width and the image quality
-        System.out.println("GMOSSSSSS AutoAperture slitLength:  "+1.4 * imageQuality );
+        //System.out.println("GMOSSSSSS AutoAperture slitLength:  "+1.4 * imageQuality );
         RectangleSlit(slitWidth, 1.4 * imageQuality, instrument.getPixelSize)
     }
 

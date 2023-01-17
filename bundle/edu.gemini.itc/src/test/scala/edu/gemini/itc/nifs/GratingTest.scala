@@ -16,7 +16,7 @@ class GratingTest {
     assertEquals(1200.0525, g.getEnd,                         0.00001)
     assertEquals(6600.0,    g.getGratingBlaze,                0.00001)
     assertEquals(1.093,     g.resolutionHalfArcsecSlit,       0.00001)
-    assertEquals(0.105,     g.dispersion,                     0.00001)
+    assertEquals(0.105,     g.dispersion(-1),            0.00001)
     assertEquals(6040.0,    g.getGratingResolvingPower,       0.00001)
     assertEquals(0.105,     g.getPixelWidth,                  0.00001)
   }
