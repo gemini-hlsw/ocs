@@ -101,6 +101,14 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
                 gp.resolution().get_displayValue() + "_dispersion",
                 "gratings",
                 gp.centralWavelength().toNanometers(), _detector.getDetectorPixels(), gp.spectralBinning().getValue());
+
+        /*_gratingOptics = new GhostGratingOptics(
+                getDirectory() + "/" +Ghost.INSTR_PREFIX,
+                "blaze" + gp.resolution().get_displayValue() ,
+                "gratings",
+                gp.centralWavelength().toNanometers(), _detector.getDetectorPixels(), gp.spectralBinning().getValue());
+
+         */
         _gratingOptics.setDescription("Grating Resolution");
         addDisperser(_gratingOptics);
         _sampling = super.getSampling();

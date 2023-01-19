@@ -76,8 +76,8 @@ public abstract class GratingOptics extends TransmissionElement implements Dispe
             return 0;
         }
         if (v[v.length-1] < val) {
-            log.warning("The wavelength requested is lower than the last element of the vector. " +
-                              "The last element of the vector will be returned. wv: "+ val + " lastElement: "+ v[v.length-1]);
+            //log.warning("The wavelength requested is lower than the last element of the vector. " +
+            //                  "The last element of the vector will be returned. wv: "+ val + " lastElement: "+ v[v.length-1]);
             return v.length-1;
         }
 
