@@ -90,6 +90,6 @@ public abstract class GhostSeqRepeatExp extends SeqRepeat implements GhostExpSeq
         setRedExposureTime(Pio.getDoubleValue(paramSet, Ghost$.MODULE$.RED_EXPOSURE_TIME_PROP().getName(), InstConstants.DEF_EXPOSURE_TIME));
         setRedExposureCount(Pio.getIntValue(paramSet, Ghost$.MODULE$.RED_EXPOSURE_COUNT_PROP().getName(), InstConstants.DEF_REPEAT_COUNT));
         setBlueExposureTime(Pio.getDoubleValue(paramSet, Ghost$.MODULE$.BLUE_EXPOSURE_TIME_PROP().getName(), InstConstants.DEF_EXPOSURE_TIME));
-        setRedExposureCount(Pio.getIntValue(paramSet, Ghost$.MODULE$.BLUE_EXPOSURE_COUNT_PROP().getName(), InstConstants.DEF_REPEAT_COUNT));
+        setBlueExposureCount(Pio.getIntValue(paramSet, Ghost$.MODULE$.BLUE_EXPOSURE_COUNT_PROP().getName(), InstConstants.DEF_REPEAT_COUNT));
     }
 }
