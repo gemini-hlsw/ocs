@@ -13,42 +13,72 @@ import java.util.TreeSet;
 import java.util.function.Supplier;
 
 public enum AsterismType implements DisplayableSpType {
-    Single("single", "Single Target", None.instance(), Asterism$.MODULE$::createSingleAsterism),
 
-    GhostSingleTarget("ghostSingleTarget", "Single Target",
-            new Some<>(AsterismConverters.GhostSingleTargetConverter$.MODULE$),
-            GhostAsterism$.MODULE$::createEmptySingleTargetAsterism),
+    Single(
+        "single",
+        "Single Target",
+        ResolutionMode.Standard,
+        None.instance()
+    ),
 
-    GhostDualTarget("ghostDualTarget", "Dual Target",
-            new Some<>(AsterismConverters.GhostDualTargetConverter$.MODULE$),
-            GhostAsterism$.MODULE$::createEmptyDualTargetAsterism),
+    GhostSingleTarget(
+        "ghostSingleTarget",
+         "Single Target",
+         ResolutionMode.GhostStandard,
+         new Some<>(AsterismConverters.GhostSingleTargetConverter$.MODULE$)
+    ),
 
-    GhostTargetPlusSky("ghostTargetPlusSky", "SRIFU1 Target, SRIFU2 Sky",
-            new Some<>(AsterismConverters.GhostTargetPlusSkyConverter$.MODULE$),
-            GhostAsterism$.MODULE$::createEmptyTargetPlusSkyAsterism),
+    GhostDualTarget(
+        "ghostDualTarget",
+        "Dual Target",
+        ResolutionMode.GhostStandard,
+        new Some<>(AsterismConverters.GhostDualTargetConverter$.MODULE$)
+    ),
 
-    GhostSkyPlusTarget("ghostSkyPlusTarget", "SRIFU1 Sky, SRIFU2 Target",
-            new Some<>(AsterismConverters.GhostSkyPlusTargetConverter$.MODULE$),
-            GhostAsterism$.MODULE$::createEmptySkyPlusTargetAsterism),
+    GhostTargetPlusSky(
+        "ghostTargetPlusSky",
+        "SRIFU1 Target, SRIFU2 Sky",
+        ResolutionMode.GhostStandard,
+        new Some<>(AsterismConverters.GhostTargetPlusSkyConverter$.MODULE$)
+    ),
 
-    GhostHighResolutionTargetPlusSky("ghostHRTargetPlusSky", "HRIFU Target, Sky",
-            new Some<>(AsterismConverters.GhostHRTargetPlusSkyConverter$.MODULE$),
-            GhostAsterism$.MODULE$::createEmptyTargetPlusSkyAsterism)
+    GhostSkyPlusTarget(
+        "ghostSkyPlusTarget",
+        "SRIFU1 Sky, SRIFU2 Target",
+        ResolutionMode.GhostStandard,
+        new Some<>(AsterismConverters.GhostSkyPlusTargetConverter$.MODULE$)
+    ),
 
+    GhostHighResolutionTargetPlusSky(
+        "ghostHRTargetPlusSky",
+        "HRIFU Target, Sky",
+        ResolutionMode.GhostHigh,
+        new Some<>(AsterismConverters.GhostHRTargetPlusSkyConverter$.MODULE$)
+    ),
+
+    GhostHighResolutionTargetPlusSkyPrv(
+        "ghostHRTargetPlusSkyPrv",
+        "HRIFU Target, Sky (PRV)",
+        ResolutionMode.GhostPRV,
+        new Some<>(AsterismConverters.GhostHRTargetPlusSkyPrvConverter$.MODULE$)
+    )
     ;
 
     public final String tag;
-    public final Option<AsterismConverters.AsterismConverter> converter;
     public final String displayName;
-    public final Supplier<Asterism> emptyAsterismCreator;
+    public final ResolutionMode resolutionMode;
+    public final Option<AsterismConverters.AsterismConverter> converter;
 
-    AsterismType(final String tag, final String displayName,
-                 final Option<AsterismConverters.AsterismConverter> converter,
-                 final Supplier<Asterism> emptyAsterismCreator) {
-        this.tag                  = tag;
-        this.displayName          = displayName;
-        this.converter            = converter;
-        this.emptyAsterismCreator = emptyAsterismCreator;
+    AsterismType(
+        String tag,
+        String displayName,
+        ResolutionMode resolutionMode,
+        Option<AsterismConverters.AsterismConverter> converter
+    ) {
+        this.tag            = tag;
+        this.displayName    = displayName;
+        this.resolutionMode = resolutionMode;
+        this.converter      = converter;
     }
 
     @Override
@@ -72,6 +102,7 @@ public enum AsterismType implements DisplayableSpType {
             s.add(GhostTargetPlusSky);
             s.add(GhostSkyPlusTarget);
             s.add(GhostHighResolutionTargetPlusSky);
+            s.add(GhostHighResolutionTargetPlusSkyPrv);
             result = Collections.unmodifiableSortedSet(s);
         } else {
             final SortedSet<AsterismType> s = new TreeSet<>();

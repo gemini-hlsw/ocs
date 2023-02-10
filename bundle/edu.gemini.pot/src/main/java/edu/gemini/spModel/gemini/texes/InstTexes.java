@@ -5,6 +5,7 @@ import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.init.ComponentNodeInitializer;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.pio.ParamSet;
@@ -236,7 +237,7 @@ public final class InstTexes extends SPInstObsComp implements PropertyProvider {
     private static final Angle PWFS1_VIG = Angle.arcmins(4.8);
     private static final Angle PWFS2_VIG = Angle.arcmins(4.0);
 
-    @Override public Angle pwfs1VignettingClearance() { return PWFS1_VIG; }
-    @Override public Angle pwfs2VignettingClearance() { return PWFS2_VIG; }
+    @Override public Angle pwfs1VignettingClearance(ObsContext ctx) { return PWFS1_VIG; }
+    @Override public Angle pwfs2VignettingClearance(ObsContext ctx) { return PWFS2_VIG; }
 
 }

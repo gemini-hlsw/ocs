@@ -62,8 +62,5 @@ metals.sbt
 *.swp
 
 #Test FR
-bundle/edu.gemini.itc/src/main/resources/ghost/ghost_SR_dispersion_andy-workAround.dat
-bundle/edu.gemini.itc/src/main/resources/ghost/ghost_SR_dispersion_bck.dat
-bundle/edu.gemini.itc/src/main/resources/ghost/ghost_nmperpix.dat
-bundle/edu.gemini.itc/src/main/resources/ghost/ghost_nmperpix3.dat
-bundle/edu.gemini.itc/src/main/resources/ghost/showData.py
+bundle/.bsp/
+.Trash-3906

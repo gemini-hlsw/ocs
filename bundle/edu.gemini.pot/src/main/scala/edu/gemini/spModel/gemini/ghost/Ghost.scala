@@ -8,6 +8,7 @@ import edu.gemini.shared.util.immutable.{Option => JOption}
 import edu.gemini.skycalc.Angle
 import edu.gemini.spModel.config.ConfigPostProcessor
 import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
+import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.data.config.{DefaultParameter, DefaultSysConfig, ISysConfig, StringParameter}
@@ -237,9 +238,9 @@ final class Ghost
   }
 
   /**
-   * Fiber agitator 1: default is enabled.
+   * Fiber agitator 1: default is disabled.
    */
-  private var enableFiberAgitator1: Boolean = true
+  private var enableFiberAgitator1: Boolean = false
 
   def isEnableFiberAgitator1: Boolean = enableFiberAgitator1
 
@@ -252,9 +253,9 @@ final class Ghost
   }
 
   /**
-   * Fiber agitator 2: default is enabled.
+   * Fiber agitator 2: default is disabled
    */
-  private var enableFiberAgitator2: Boolean = true
+  private var enableFiberAgitator2: Boolean = false
 
   def isEnableFiberAgitator2: Boolean = enableFiberAgitator2
 
@@ -305,7 +306,7 @@ final class Ghost
     }
   }
 
-  private var redReadNoiseGain: GhostReadNoiseGain = GhostReadNoiseGain.DEFAULT
+  private var redReadNoiseGain: GhostReadNoiseGain = GhostReadNoiseGain.DEFAULT_RED
 
   def getRedReadNoiseGain: GhostReadNoiseGain = redReadNoiseGain
 
@@ -354,7 +355,7 @@ final class Ghost
     }
   }
 
-  private var blueReadNoiseGain: GhostReadNoiseGain = GhostReadNoiseGain.DEFAULT
+  private var blueReadNoiseGain: GhostReadNoiseGain = GhostReadNoiseGain.DEFAULT_BLUE
 
   def getBlueReadNoiseGain: GhostReadNoiseGain = blueReadNoiseGain
 
@@ -396,9 +397,24 @@ final class Ghost
     CommonStepCalculator.instance.calc(cur, prev).addAll(times)
   }
 
-  override def getVignettableScienceArea: ScienceAreaGeometry = GhostScienceAreaGeometry
+  override def getVignettableScienceArea: ScienceAreaGeometry =
+    GhostScienceAreaGeometry
 
-  override def pwfs2VignettingClearance: Angle = Angle.arcmins(5.5)
+  override def pwfs1VignettingClearance(ctx: ObsContext): Angle = {
+    val limit = ctx.getTargets.getAsterism match {
+      case GhostAsterism.SingleTarget(_, _) => 4.7
+      case _                                => 5.75
+    }
+    edu.gemini.skycalc.Angle.arcmins(limit)
+  }
+
+  override def pwfs2VignettingClearance(ctx: ObsContext): Angle = {
+    val limit = ctx.getTargets.getAsterism match {
+      case GhostAsterism.SingleTarget(_, _) => 4.0
+      case _                                => 5.25
+    }
+    edu.gemini.skycalc.Angle.arcmins(limit)
+  }
 
 }
 
@@ -517,6 +533,10 @@ object Ghost {
   val HRIFU2_DEC_DEG: String   = "hrifu2CoordsDecDeg"
   val HRIFU2_RA_HMS: String    = "hrifu2CoordsRAHMS"
   val HRIFU2_DEC_DMS: String   = "hrifu2CoordsDecDMS"
+
+  val RESOLUTION_MODE: String  = "resolutionMode"
+  val MAG_G_PROP               = "magG"
+  val MAG_V_PROP               = "magV"
 
   // Property names for user targets
   def userTargetParams(index: Int): (String, String, String, String, String) =

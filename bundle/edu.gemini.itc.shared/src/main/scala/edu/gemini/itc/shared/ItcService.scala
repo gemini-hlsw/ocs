@@ -67,6 +67,21 @@ sealed trait ItcResult extends Serializable {
 
 }
 
+object ItcResult {
+
+  import edu.gemini.itc.shared.ItcService._
+
+  /** Creates an ITC result in case of an error. */
+  def forException(e: Throwable): Result = ItcError(e.getMessage).left
+
+  /** Creates an ITC result with a single problem/error message. */
+  def forMessage(msg: String): Result = ItcError(msg).left
+
+  /** Creates an ITC result for a result. */
+  def forResult(result: ItcResult): Result = result.right
+
+}
+
 // === IMAGING RESULTS
 
 final case class ItcImagingResult(ccds: List[ItcCcd]) extends ItcResult
@@ -77,16 +92,20 @@ final case class ItcImagingResult(ccds: List[ItcCcd]) extends ItcResult
 sealed trait SpcChartType
 case object SignalChart       extends SpcChartType { val instance: SpcChartType = this } // signal and background over wavelength [nm]
 case object S2NChart          extends SpcChartType { val instance: SpcChartType = this } // single and final S2N over wavelength [nm]
+case object S2NChartPerRes    extends SpcChartType { val instance: SpcChartType = this } // single and final S2N over wavelength [nm]
 case object SignalPixelChart  extends SpcChartType { val instance: SpcChartType = this } // single and final S2N over wavelength [nm]
+
 
 // There are four different data sets
 sealed trait SpcDataType
-case object SignalData        extends SpcDataType { val instance: SpcDataType = this }  // signal over wavelength [nm]
-case object BackgroundData    extends SpcDataType { val instance: SpcDataType = this }  // background over wavelength [nm]
-case object SingleS2NData     extends SpcDataType { val instance: SpcDataType = this }  // single S2N over wavelength [nm]
-case object FinalS2NData      extends SpcDataType { val instance: SpcDataType = this }  // final S2N over wavelength [nm]
-case object PixSigData        extends SpcDataType { val instance: SpcDataType = this }  // signal over pixels
-case object PixBackData       extends SpcDataType { val instance: SpcDataType = this }  // background over pixels
+case object SignalData              extends SpcDataType { val instance: SpcDataType = this }  // signal over wavelength [nm]
+case object BackgroundData          extends SpcDataType { val instance: SpcDataType = this }  // background over wavelength [nm]
+case object SingleS2NData           extends SpcDataType { val instance: SpcDataType = this }  // single S2N over wavelength [nm] SN2 per pixel
+case object FinalS2NData            extends SpcDataType { val instance: SpcDataType = this }  // final S2N over wavelength [nm]. SN2 per pixel
+case object PixSigData              extends SpcDataType { val instance: SpcDataType = this }  // signal over pixels
+case object PixBackData             extends SpcDataType { val instance: SpcDataType = this }  // background over pixels
+case object FinalS2NPerResEle       extends SpcDataType { val instance: SpcDataType = this }  // final S2N over wavelength [nm]. SN2 per resolution element
+case object SingleS2NPerResEle      extends SpcDataType { val instance: SpcDataType = this }  // single S2N over wavelength [nm]. SN2 per resolution element
 
 /** Series of (x,y) data points used to create charts and text data files. */
 final case class SpcSeriesData(dataType: SpcDataType, title: String, data: Array[Array[Double]], color: Option[Color] = None) {
@@ -170,21 +189,6 @@ object SpcChartData {
     new SpcChartData(chartType, title, ChartAxis(xAxisLabel), ChartAxis(yAxisLabel), series, List())
 }
 
-object ItcResult {
-
-  import edu.gemini.itc.shared.ItcService._
-
-  /** Creates an ITC result in case of an error. */
-  def forException(e: Throwable): Result = ItcError(e.getMessage).left
-
-  /** Creates an ITC result with a single problem/error message. */
-  def forMessage(msg: String): Result = ItcError(msg).left
-
-  /** Creates an ITC result for a result. */
-  def forResult(result: ItcResult): Result = result.right
-
-}
-
 /**
  * Service interface for ITC calculations.
  */
@@ -198,6 +202,8 @@ trait ItcService {
    * @param headless pass `true` for headless applications that do not require chart data.
    */
   def calculate(p: ItcParameters, headless: Boolean): Result
+
+  def calculateCharts(p: ItcParameters): Result
 
 }
 

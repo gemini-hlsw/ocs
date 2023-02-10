@@ -53,4 +53,18 @@
         <url-pattern>/servlet/json</url-pattern>
     </servlet-mapping>
 
+    <!-- This maps itc/servlet/calc to the ITC calculation servlet class -->
+    <servlet>
+        <servlet-name>
+            jsonchart
+        </servlet-name>
+        <servlet-class>
+            edu.gemini.itc.web.servlets.JsonChartServlet
+        </servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>jsonchart</servlet-name>
+        <url-pattern>/servlet/jsonchart</url-pattern>
+    </servlet-mapping>
 </web-app>

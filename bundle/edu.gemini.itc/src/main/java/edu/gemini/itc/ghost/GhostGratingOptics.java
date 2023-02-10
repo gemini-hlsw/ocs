@@ -24,12 +24,7 @@ public class GhostGratingOptics extends GratingOptics {
     }
 
     public double getPixelWidth() {
-        double disp = dispersion(-1);
-        log.warning("ANDY TALK Getting the dispersion with -1 to specified the getPixelWidth "+ disp + " using 0.004");
-        //return data.apply(gratingName).dispersionArray() * _spectralBinning;
         //return dispersion(-1) * _spectralBinning;
-        //return disp * _spectralBinning;
-        return 0.004 * _spectralBinning;
-
+        return dispersion(-1);
     }
 }

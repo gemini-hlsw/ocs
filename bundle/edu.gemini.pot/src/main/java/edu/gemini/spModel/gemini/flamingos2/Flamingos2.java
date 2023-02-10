@@ -31,6 +31,7 @@ import edu.gemini.spModel.ictd.*;
 import edu.gemini.spModel.inst.ElectronicOffsetProvider;
 import edu.gemini.spModel.inst.ScienceAreaGeometry;
 import edu.gemini.spModel.inst.VignettableScienceAreaInstrument;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
@@ -78,8 +79,8 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     public enum Disperser implements DisplayableSpType, SequenceableSpType, LoggableSpType {
 
         NONE("None", "none", None.DOUBLE),
-        R1200JH("R=1200 (J + H) grism", "R1200JH", new Some<>(1.39)),
-        R1200HK("R=1200 (H + K) grism", "R1200HK", new Some<>(1.871)),
+        R1200JH("R=1200 (J + H) grism", "R1200JH", new Some<>(1.3385)),
+        R1200HK("R=1200 (H + K) grism", "R1200HK", new Some<>(1.9)),
         R3000("R=3000 (J or H or K) grism", "R3000", new Some<>(1.65)),
         ;
 
@@ -148,8 +149,8 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         K_SHORT("K-short (2.15 um)", "K-short", new Some<>(2.15), Ictd.track("K-short")),
         K_BLUE("K-blue (2.06 um)", "K-blue", new Some<>(2.06),    Ictd.track("K-blue")),
         K_RED("K-red (2.31 um)", "K-red", new Some<>(2.31),       Ictd.track("K-red")),
-        JH("JH (spectroscopic)", "JH", new Some<>(1.39),          Ictd.track("JH")),
-        HK("HK (spectroscopic)", "HK", new Some<>(1.871),         Ictd.track("HK")),
+        JH("JH (spectroscopic)", "JH", new Some<>(1.3385),        Ictd.track("JH")),
+        HK("HK (spectroscopic)", "HK", new Some<>(1.9),           Ictd.track("HK")),
         DARK("Dark", "Dark", None.DOUBLE,                         Ictd.track("Dark")) {
             @Override public boolean isObsolete() {
                 return true;
@@ -1358,8 +1359,8 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     private static final Angle PWFS1_VIG = Angle.arcmins(5.8);
     private static final Angle PWFS2_VIG = Angle.arcmins(5.3);
 
-    @Override public Angle pwfs1VignettingClearance() { return PWFS1_VIG; }
-    @Override public Angle pwfs2VignettingClearance() { return PWFS2_VIG; }
+    @Override public Angle pwfs1VignettingClearance(ObsContext ctx) { return PWFS1_VIG; }
+    @Override public Angle pwfs2VignettingClearance(ObsContext ctx) { return PWFS2_VIG; }
 
     /**
      * Return the configuration for this component.

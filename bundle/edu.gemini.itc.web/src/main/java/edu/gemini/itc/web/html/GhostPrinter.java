@@ -75,6 +75,8 @@ public final class GhostPrinter extends PrinterBase implements OverheadTablePrin
 
         _print("<HR align=left SIZE=3>");
 
+
+        System.out.println("SEEEEEE  result.length: " +result.specS2N().length);
         //for (int i = 0; i < results.length; i++) {
         for (int i = 0; i < 1; i++) { // If the user want to plot the SNR for each detector,
                                       // it would have to use the previous instruction. This has been commented
@@ -89,92 +91,17 @@ public final class GhostPrinter extends PrinterBase implements OverheadTablePrin
             _println("");
             _printFileLink(id, SingleS2NData.instance(), i);
             _printFileLink(id, FinalS2NData.instance(), i);
+            _println("");
+            _printImageLink(id, S2NChartPerRes.instance(), i, pdp);
+            _printFileLink(id, SingleS2NPerResEle.instance(), i);
+            _printFileLink(id, FinalS2NPerResEle.instance(), i);
+
+
         }
 
         printConfiguration(results[0].parameters(), mainInstrument, iqAtSource);
         _println(HtmlPrinter.printParameterSummary(pdp));
     }
-
-    /*
-    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult[] results, final ItcSpectroscopyResult s) {
-
-        final Ghost mainInstrument = (Ghost) results[0].instrument(); // main instrument
-
-        _println("");
-
-        final Ghost[] ccdArray           = mainInstrument.getDetectorCcdInstruments();
-        final SpectroscopyResult result = results[0];
-        final double iqAtSource = result.iqCalc().getImageQuality();
-
-        _println("Read noise: " + mainInstrument.getReadNoise());
-
-
-        _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", iqAtSource));
-        _printSkyAperture(result);
-        _println("");
-
-        _printRequestedIntegrationTime(result);
-        _println("");
-
-        _printPeakPixelInfo(s.ccd(0));
-        _printWarnings(s.warnings());
-
-        _print(OverheadTablePrinter.print(this, p, results[0], s));
-
-        _print("<HR align=left SIZE=3>");
-
-        _printImageLink(id, SignalChart.instance(), pdp);
-        _println("");
-
-        _printFileLink(id, SignalData.instance());
-        _printFileLink(id, BackgroundData.instance());
-        _printImageLink(id, S2NChart.instance(), pdp);
-        _println("");
-
-        _printFileLink(id, SingleS2NData.instance());
-        _printFileLink(id, FinalS2NData.instance());
-
-        printConfiguration(results[0].parameters(), mainInstrument, iqAtSource);
-        _println(HtmlPrinter.printParameterSummary(pdp));
-    }
-
-
-     */
-    /*
-
-    private void writeImagingOutput(final ImagingResult[] results, final ItcImagingResult s) {
-        // use instrument of ccd 0 to represent Ghost (this is a design flaw: instead of using one instrument
-        // with 3 ccds the current implementation uses three instruments to represent the different ccds).
-        final Ghost instrument = (Ghost) results[0].instrument();
-        final double iqAtSource = results[0].iqCalc().getImageQuality();
-
-        _println("");
-        _print(CalculatablePrinter.getTextResult(results[0].sfCalc()));
-        _println(CalculatablePrinter.getTextResult(results[0].iqCalc()));
-        _printSkyAperture(results[0]);
-        _println("Read noise: " + instrument.getReadNoise());
-
-        final Ghost[] ccdArray = instrument.getDetectorCcdInstruments();
-
-        for (final Ghost ccd : ccdArray) {
-
-            if (ccdArray.length > 1) {
-                printCcdTitle(ccd);
-            }
-
-            final int ccdIndex = ccd.getDetectorCcdIndex();
-            _println(CalculatablePrinter.getTextResult(results[ccdIndex].is2nCalc(), results[ccdIndex].observation()));
-            if (s.ccd(ccdIndex).isDefined()) {
-                _printPeakPixelInfo(s.ccd(ccdIndex), instrument.getGhostSaturLimitWarning());
-                _printWarnings(s.ccd(ccdIndex).get().warnings());
-            }
-        }
-
-        _print(OverheadTablePrinter.print(this, p, results[0]));
-
-        printConfiguration(results[0].parameters(), instrument, iqAtSource);
-    }
-     */
 
     private void printCcdTitle(final Ghost ccd) {
         final String ccdName = ccd.getDetectorCcdName();

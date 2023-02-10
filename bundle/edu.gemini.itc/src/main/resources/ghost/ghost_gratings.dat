@@ -1,5 +1,6 @@
 # Author: Venu Kalahari
 # Created: 22 Agust 2022
+# Modified the nm/pixel column Fran. R. and Andrew Stephens
 #
 # d_lambda is the resolution in nm - constant with wavelength
 # d_lambda and R_at_blaze are for 0.5 arcsec slitwidth
@@ -7,12 +8,7 @@
 #
 # Grating  blaze  R_at_blaze  d_lambda  nm/pixel
 #          [nm]               [nm]
+SR         529    50000       0.01058    /ghost/ghost_nmperpix.dat
+HR         529    75000       0.007058   /ghost/ghost_nmperpix.dat
 
-# These values are for the 
-#SR_dispersion      529    50000        0.01058    0.02782876
-#SR_dispersion      529    50000        0.01058    0.004
-SR_dispersion      529    50000        0.01058    /ghost/ghost_nmperpix2.dat
-HR_dispersion      529    75000        0.007058   0.02782876
-#blazeSR             529    50000        0.01058    /ghost/ghost_nmperpix2.dat
-#blazeHR             529    75000        0.007058   0.02782876
 

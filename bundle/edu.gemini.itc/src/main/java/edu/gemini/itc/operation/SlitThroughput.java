@@ -3,6 +3,7 @@ package edu.gemini.itc.operation;
 import edu.gemini.itc.base.DatFile;
 import edu.gemini.itc.base.ITCConstants;
 import edu.gemini.itc.shared.*;
+import java.util.logging.Logger;
 
 import java.util.Scanner;
 
@@ -11,6 +12,7 @@ public final class SlitThroughput {
     private static final double[] x_axis;
     private static final double[] y_axis;
     private static final double[][] _data;
+    private static final Logger Log = Logger.getLogger(SlitThroughput.class.getName());
     static {
         final String file = ITCConstants.CALC_LIB + ITCConstants.SLIT_THROUGHPUT_FILENAME + ITCConstants.DATA_SUFFIX;
         try (final Scanner scan = DatFile.scanFile(file)) {
@@ -79,6 +81,7 @@ public final class SlitThroughput {
             // find the slit width
             final double sigma = im_qual / 2.355;
             final double slit_spec_ratio = slit.width() / sigma;
+            Log.fine("Slit width / Image quality (sigma) = " + slit_spec_ratio);
 
             // deal with values that are outside the range of the x- and y-axes
             // defined in slit_throughput.dat
@@ -91,6 +94,7 @@ public final class SlitThroughput {
 
             // Do a 2D interpolation to find the return value using x= slit_spatial_ratio and y= slit_spec_ratio
             final double slitThroughput = getSTvalue(slit_spatial_ratio, slit_spec_ratio);
+            Log.fine("slitThroughput (" + slit.width() + " x " + slit.lengthPixels() * slit.pixelSize() + ") = " + slitThroughput);
 
             // return a value in the range 0..1
             return Math.min(1, slitThroughput);

@@ -3,13 +3,18 @@ package edu.gemini.spModel.gemini.ghost
 import java.time.Instant
 import java.util.{Map => JMap}
 import edu.gemini.pot.sp.ISPObsComponent
+import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.spModel.config.AbstractObsComponentCB
+import edu.gemini.spModel.core.Magnitude
+import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.data.config._
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostTarget
 import edu.gemini.spModel.obscomp.InstConstants
 import edu.gemini.spModel.seqcomp.SeqConfigNames
+import edu.gemini.spModel.target.env.Asterism
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.spModel.target.{SPCoordinates, SPSkyObject, SPTarget}
+import edu.gemini.spModel.util.SPTreeUtil
 
 import scala.collection.JavaConverters._
 import scalaz.Scalaz._
@@ -97,6 +102,7 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
             coordParam(ut.target, Some(a), b, c, d, e)
             config.putParameter(systemName, DefaultParameter.getInstance(s"userTarget${i+1}Type", ut.`type`))
           }
+          config.putParameter(systemName, DefaultParameter.getInstance(Ghost.RESOLUTION_MODE, t.getAsterism.resolutionMode))
           t.getAsterism match {
 
             /** STANDARD RESOLUTION
@@ -161,6 +167,42 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
             case _ =>
               // The asterism may not have been configured by this point.
         }}
+
+      val mags = GhostCB.magnitudes(getObsComponent().getContextObservation())
+      GhostCB.MagProperties.foreach { case (band, prop) =>
+        mags.get(band).foreach { value =>
+          config.putParameter(systemName, DefaultParameter.getInstance(prop, value))
+        }
+      }
     }
   }
+}
+
+object GhostCB {
+
+  val MagProperties: Map[MagnitudeBand, String] = Map(
+    MagnitudeBand._g -> Ghost.MAG_G_PROP,
+    MagnitudeBand.V  -> Ghost.MAG_V_PROP
+  )
+
+  def asterism(o: ISPObservation): Option[Asterism] =
+    Option(SPTreeUtil.findTargetEnvNode(o))
+      .flatMap(t => Option(t.getDataObject()).collect {
+        case toc: TargetObsComp => toc.getAsterism
+      })
+
+  def targets(o: ISPObservation): List[SPTarget] =
+    asterism(o).fold(List.empty[SPTarget]) { a =>
+      a.allSpTargets.toList
+    }
+
+  def magnitudes(o: ISPObservation): Map[MagnitudeBand, Double] =
+    targets(o).foldLeft(Map.empty[MagnitudeBand, Double]) { (m, t) =>
+      t.getMagnitudes.filter(m => MagProperties.contains(m.band)).foldLeft(m) { (map, mag) =>
+        // no map.updatedWith :-/
+        map.updated(mag.band, map.get(mag.band).fold(mag.value)(math.max(_, mag.value)))
+      }
+    }
+
+
 }

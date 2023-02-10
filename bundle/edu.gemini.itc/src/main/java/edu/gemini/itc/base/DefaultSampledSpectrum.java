@@ -275,10 +275,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     @Override public void smoothY(int smoothing_element) {
         double[] _y_temp;
         _y_temp = new double[_y.length];
-
-        //System.out.println("Smoothing: " + smoothing_element);
         if (smoothing_element == 1.0) return;
-        //System.out.print("Start:");
         for (int i = 0; i < getLength() - 1; ++i) {
             try {
                 if (i + smoothing_element / 2 >= getLength())

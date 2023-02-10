@@ -23,6 +23,7 @@ import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeConsumer;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.guide.StandardGuideOptions;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
@@ -2313,7 +2314,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     private static final Angle PWFS1_VIG = Angle.arcmins(5.3);
     private static final Angle PWFS2_VIG = Angle.arcmins(4.3);
 
-    @Override public Angle pwfs1VignettingClearance() { return PWFS1_VIG; }
-    @Override public Angle pwfs2VignettingClearance() { return PWFS2_VIG; }
+    @Override public Angle pwfs1VignettingClearance(ObsContext ctx) { return PWFS1_VIG; }
+    @Override public Angle pwfs2VignettingClearance(ObsContext ctx) { return PWFS2_VIG; }
 
 }

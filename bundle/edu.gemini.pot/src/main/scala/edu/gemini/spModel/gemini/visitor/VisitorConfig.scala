@@ -26,6 +26,12 @@ sealed trait VisitorConfig extends Product with Serializable {
   def displayValue: String =
     instrument.display
 
+  def tccInstrumentName =
+    "VISITOR"
+
+  def tccInstrumentOrigin =
+    "visitor"
+
   def wavelength: Wavelength =
     DefaultWavelength
 
@@ -68,6 +74,12 @@ object VisitorConfig {
     override val instrument: Instrument =
       Instrument.Alopeke
 
+    override def tccInstrumentName =
+      "ALOPEKE2"
+
+    override def tccInstrumentOrigin =
+      "alopeke"
+
     override val wavelength: Wavelength =
       Wavelength.fromMicrons(0.674)
 
@@ -94,6 +106,12 @@ object VisitorConfig {
     override val instrument: Instrument =
       Instrument.Igrins
 
+    override def tccInstrumentName =
+      "IGRINS"
+
+    override def tccInstrumentOrigin =
+      "igrins"
+
     override val wavelength: Wavelength =
       Wavelength.fromMicrons(2.1)
 
@@ -119,7 +137,13 @@ object VisitorConfig {
     override val instrument: Instrument =
       Instrument.MaroonX
 
-    override val wavelength: Wavelength =
+      override def tccInstrumentName =
+        "MAROONX"
+
+      override def tccInstrumentOrigin =
+        "maroonx"
+
+      override val wavelength: Wavelength =
       Wavelength.fromMicrons(0.7)
 
     override val setupTime: Duration =
@@ -137,6 +161,12 @@ object VisitorConfig {
 
     override val instrument: Instrument =
       Instrument.Zorro
+
+    override def tccInstrumentName =
+      "ZORRO2"
+
+    override def tccInstrumentOrigin =
+      "zorro"
 
     override val wavelength: Wavelength =
       Wavelength.fromMicrons(0.674)

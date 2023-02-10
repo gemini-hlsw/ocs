@@ -24,6 +24,7 @@ import scala.Option;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.sql.Timestamp;
+import java.util.logging.Logger;
 
 /**
  * This class encapsulates the process of creating a Spectral Energy
@@ -35,6 +36,7 @@ import java.sql.Timestamp;
  * the scale is arbitrary.
  */
 public final class SEDFactory {
+    private static final Logger Log = Logger.getLogger( SEDFactory.class.getName() );
 
     /**
      * The resulting source intensity, sky intensity and, if applicable, the halo produced by the AO system.
@@ -194,7 +196,7 @@ public final class SEDFactory {
     public static void creatingFile(double sampling,  VisitableSampledSpectrum sed, String fName) {
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         String fileName = fName + "_"+ sampling + "_" + timestamp.toString().replace(' ', '_') +".dat";
-
+        Log.fine("Writing spectrum: " + fileName);
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
             double[][] data = sed.getData();
@@ -209,7 +211,13 @@ public final class SEDFactory {
         }
     }
 
-    public static SourceResult calculate(final Instrument instrument, final SourceDefinition sdp, final ObservingConditions odp, final TelescopeDetails tp, final Option<AOSystem> ao) {
+    public static SourceResult calculate(final Instrument instrument,
+                                         final SourceDefinition sdp,
+                                         final ObservingConditions odp,
+                                         final TelescopeDetails tp,
+                                         final Option<AOSystem> ao) {
+        Log.fine("Calculating...");
+
         // Module 1b
         // Define the source energy (as function of wavelength).
         //
@@ -219,10 +227,9 @@ public final class SEDFactory {
 
         final VisitableSampledSpectrum sed = SEDFactory.getSED(sdp, instrument);
 
-        //creatingFile(instrument.getSampling(),  sed, "initialSignal.dat");
+
         final SampledSpectrumVisitor redshift = new RedshiftVisitor(sdp.redshift());
         sed.accept(redshift);
-        //creatingFile(instrument.getSampling(),  sed, "signalRedshift.dat");
         // Must check to see if the redshift has moved the spectrum beyond
         // useful range. The shifted spectrum must completely overlap
         // both the normalization waveband and the observation waveband
@@ -254,9 +261,8 @@ public final class SEDFactory {
         // Module 2
         // Convert input into standard internally-used units.
         //
-        // inputs: instrument,redshifted SED, waveband, normalization flux,
-        // units
-        // calculates: normalized SED, resampled SED, SED adjusted for aperture
+        // inputs: instrument, redshifted SED, waveband, normalization flux, units
+        // calculates: normalized SED, resampled SED, SED adjusted for telescope aperture
         // output: SED in common internal units
         if (!(sdp.distribution() instanceof EmissionLine)) {
             final SampledSpectrumVisitor norm = new NormalizeVisitor(
@@ -266,11 +272,9 @@ public final class SEDFactory {
             sed.accept(norm);
         }
 
-        //creatingFile(instrument.getSampling(),  sed, "signalWithoutAperture.dat");
         final SampledSpectrumVisitor tel = new TelescopeApertureVisitor();
         sed.accept(tel);
 
-        //creatingFile(instrument.getSampling(),  sed, "signalWithAperture.dat");
         // SED is now in units of photons/s/nm
 
         // Module 3b
@@ -330,16 +334,15 @@ public final class SEDFactory {
         // The AO module affects source and background SEDs.
 
         // Module 5b
-        // The instrument with its detectors modifies the source and
-        // background spectra.
+        // The instrument with its detectors modifies the source and background spectra.
         // input: instrument, source and background SED
         // output: total flux of source and background.
 
         //double[][] data = sed.getData();
 
-        //creatingFile(instrument.getSampling(),  sed, "signalBeforeConv.dat");
         if (!(instrument instanceof Gsaoi) && !(instrument instanceof Niri) && !(instrument instanceof Gnirs)) {
             // TODO: for any instrument other than GSAOI and NIRI convolve here, why?
+            Log.fine("Applying instrument throughput...");
             instrument.convolveComponents(sed);
         }
         //creatingFile(instrument.getSampling(),  sed, "signalConv.dat");

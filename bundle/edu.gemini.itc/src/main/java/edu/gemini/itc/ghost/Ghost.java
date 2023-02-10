@@ -6,6 +6,7 @@ import edu.gemini.itc.shared.GhostParameters;
 import edu.gemini.itc.shared.IfuMethod;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.gemini.ghost.GhostCamera;
 import edu.gemini.spModel.gemini.ghost.GhostType;
 import org.jfree.util.Log;
 import scala.Option;
@@ -19,16 +20,17 @@ import java.util.logging.Logger;
  */
 public final class Ghost extends Instrument implements BinningProvider, SpectroscopyInstrument {
 
-    private static final Logger log = Logger.getLogger(Ghost.class.getName());
+    private static final Logger Log = Logger.getLogger(Ghost.class.getName());
 
     public static final String INSTR_DIR = "ghost";
 
     public static final double PLATE_SCALE = 1.64;  // arcsec/mm
 
     private static final double WellDepth = 350000;  // VENU has to confirm the correct value.
-    private final TransmissionElement _blazeThrougthput;
+    //private final TransmissionElement _blazeThrougthput;
     //private final IFU_Trans _ifuTrans;
     private final IFUComponent _ifu;
+    private final TransmissionElement _ghostResolution;
 
     protected DetectorsTransmissionVisitor _dtv;
 
@@ -77,7 +79,8 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
     public Ghost(final GhostParameters gp, final ObservationDetails odp, final GhostType.DetectorManufacturer ccdColor) {
         super(Site.GS, Bands.VISIBLE, INSTR_DIR, FILENAME);
 
-        Log.info("###### New ghost resolution: "+gp.resolution() + " ccd_color: "+ ccdColor.displayValue() +  " ##### ");
+        Log.fine("Resolution: " + gp.resolution());
+        Log.fine("ccd_color: " + ccdColor.displayValue());
         this.odp    = odp;
         this.gp     = gp;
 
@@ -92,40 +95,28 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
         _fixedOptics = new TransmissionElement(getDirectory()+"/" + Ghost.INSTR_PREFIX + "fixedOptics"+getSuffix());
         _fixedOptics.setDescription("Fix Optics");
         addComponent(_fixedOptics);
-        _blazeThrougthput = new TransmissionElement(getDirectory()+"/" + Ghost.INSTR_PREFIX + "blaze"+getSuffix());
-        _blazeThrougthput.setDescription("Echelle Blaze function for individuals orders");
-        addComponent(_blazeThrougthput);
-        Log.info("*********** Directory "+ getDirectory() + "/ghost_" + gp.resolution().get_displayValue() + Instrument.getSuffix());
+
         _gratingOptics = new GhostGratingOptics(
-                getDirectory() + "/" +Ghost.INSTR_PREFIX,
-                gp.resolution().get_displayValue() + "_dispersion",
-                "gratings",
-                gp.centralWavelength().toNanometers(), _detector.getDetectorPixels(), gp.spectralBinning().getValue());
-
-        /*_gratingOptics = new GhostGratingOptics(
-                getDirectory() + "/" +Ghost.INSTR_PREFIX,
-                "blaze" + gp.resolution().get_displayValue() ,
-                "gratings",
-                gp.centralWavelength().toNanometers(), _detector.getDetectorPixels(), gp.spectralBinning().getValue());
-
-         */
+                getDirectory() + "/" + Ghost.INSTR_PREFIX,
+                gp.resolution().get_displayValue(),                        // ghost_{SR,HR}.dat
+                "gratings",                                                // ghost_gratings.dat
+                gp.centralWavelength().toNanometers(),
+                _detector.getDetectorPixels(),
+                gp.spectralBinning().getValue());
         _gratingOptics.setDescription("Grating Resolution");
         addDisperser(_gratingOptics);
         _sampling = super.getSampling();
         _ifu = new IFUComponent(gp.resolution());
         addComponent(_ifu);
-        // TODO. REMOVE after talking with Andy
-        _resolutionElement = new TransmissionElement (getDirectory()+"/" + Ghost.INSTR_PREFIX + "resElement_"+ gp.resolution().get_displayValue() +getSuffix());
-        addComponent(_resolutionElement);
+
         _ghostSaturLimitWarning = new GhostSaturLimitRule(AD_SATURATION, WellDepth, getSpatialBinning(), getSpectralBinning(), gain() , 0.90);
+
+        _ghostResolution = new TransmissionElement(getDirectory()+"/" + Ghost.INSTR_PREFIX + gp.resolution().get_displayValue()+ "_perResolution" +getSuffix());
     }
 
     public GhostType.DetectorManufacturer getDetManufacture() {
         return _ccdColor;
     }
-
-
-
 
     /**
      * Returns an array containing this instrument, or, if there are multiple detector CCDs,
@@ -157,13 +148,13 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
      * @return Effective wavelength in nm
      */
     public int getEffectiveWavelength() {
-        Log.info("ghost getEffectiveWavelength: "+ _gratingOptics.getEffectiveWavelength());
+        Log.fine("ghost getEffectiveWavelength: "+ _gratingOptics.getEffectiveWavelength());
         return (int) _gratingOptics.getEffectiveWavelength();
 
     }
 
     public double getGratingDispersion() {
-        System.out.println("getGratingDispersionnnnnnnnnnnnnnnnn " + _gratingOptics.dispersion(-1));
+        Log.fine("dispersion: " + _gratingOptics.dispersion(-1));
         return _gratingOptics.dispersion(-1);
     }
 
@@ -176,7 +167,7 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
 
     @Override
     public double wellDepth() {
-        Log.info("TODO. VENU has to give thist information. Not implemented yet Ghost.java wellDepth ");
+        Log.info("TODO. VENU has to give this information. Not implemented yet Ghost.java wellDepth ");
         return WellDepth;
     }
 
@@ -186,13 +177,19 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
         Log.info("TODO. Venu has to confirm the gain for each read Mode");
         switch (gp.readMode()) {
             case BRIGTHTARGETS:
-                return 1;
+                if (_ccdColor == GhostType.DetectorManufacturer.BLUE)
+                    return 0.75;
+                return 0.7;
             case FAST:
-                return 2;
+                if (_ccdColor == GhostType.DetectorManufacturer.BLUE)
+                    return 0.63;
+                return 0.57;
             case STANDARD:
-                return 3;
+                if (_ccdColor == GhostType.DetectorManufacturer.BLUE)
+                    return 0.58;
+                return 0.53;
             default:
-                log.warning("Bad definition of the readMode");
+                Log.warning("Bad definition of the readMode");
                 return 0;
         }
     }
@@ -204,7 +201,7 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
     }
 
     public double getSpectralPixelWidth() {
-        log.info("getSpectralPixelWidth, getSampling: " + getSampling());
+        Log.fine("getSpectralPixelWidth, getSampling: " + getSampling());
         return _gratingOptics.getPixelWidth();
     }
 
@@ -224,11 +221,6 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
         return AD_SATURATION;
     }
 
-
-    /*public IFU_Trans getIFU_trans() {
-        return _ifuTrans;
-    }*/
-
     public Option<IfuMethod> getIfuMethod() {
         return (odp.analysisMethod() instanceof IfuMethod) ? Option.apply((IfuMethod) odp.analysisMethod()): Option.empty();
     }
@@ -246,7 +238,7 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
     }
 
     private void validate() {
-        log.info("Not implemented because Ghost form doesn't allow a bad configuration");
+        Log.warning("Not implemented because Ghost form doesn't allow a bad configuration");
     }
 
 
@@ -269,7 +261,7 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
             case HIGH:
                 return 0.19;
             default:
-                log.warning("Incorrect option defined in the GhostParameter resolution, please check this issue. It is used the DEFAULT value (0.32)");
+                Log.warning("Incorrect option defined in the GhostParameter resolution, please check this issue. It is used the DEFAULT value (0.32)");
                 return 0.32;
         }
     }
@@ -285,9 +277,9 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
                 slitLength = GhostType.SIZE_ONE_FIBER_HR_PIXELS * 19;  // SIZE_ONE_FIBER_HR_PIXELS = 1.62
                 break;
             default:
-                log.warning("Incorrect option defined in the GhostParameter resolution, please check this issue. It is used the DEFAULT value ("+slitLength+")");
+                Log.warning("Incorrect option defined in the GhostParameter resolution, please check this issue. It is used the DEFAULT value ("+slitLength+")");
         }
-        Log.info("getSlitLength " + slitLength );
+        Log.info("slitLength: " + slitLength );
         return slitLength;
     }
 
@@ -309,30 +301,30 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
             case RED: {
                 switch (gp.readMode()) {
                     case BRIGTHTARGETS:
-                        return 4.5;
+                        return 4.5;  // electrons
                     case FAST:
                         return 4.5;
                     case STANDARD:
                         return 2.3;
                     default:
-                        Log.error("Bad option provided by GhostParamenter read Mode, return 0 for read noise in the Detector Red");
+                        Log.warning("Bad option provided by GhostParamenter read Mode, return 0 for read noise in the Detector Red");
                         return 0;
                 }
             }
             case BLUE:
                 switch (gp.readMode()) {
                     case BRIGTHTARGETS:
-                        return 4.5;
+                        return 4.5;  // electrons
                     case FAST:
                         return 4.5;
                     case STANDARD:
                         return 2.3;
                     default:
-                        Log.error("Bad option provided by GhostParamenter read Mode, return 0 for read noise in the Detector Blue");
+                        Log.warning("Bad option provided by GhostParamenter read Mode, return 0 for read noise in the Detector Blue");
                         return 0;
                 }
             default:
-                Log.error("Bad CCD field built. Please check the class definition. ");
+                Log.warning("Bad CCD field built. Please check the class definition. ");
                 return 0;
         }
     }
@@ -347,8 +339,11 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
     }
 
     public IFUComponent getIFU() {
-        Log.info("getIFUUUUUUU ");
         return _ifu;
+    }
+
+    public void transPerResolutionElement(VisitableSampledSpectrum finalS2NSpectrum) {
+        _ghostResolution.visit(finalS2NSpectrum);
     }
 
     public String getCCDType() {
