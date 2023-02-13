@@ -193,21 +193,19 @@ public final class SEDFactory {
         return calculate(instrument, sdp, odp, tp, Option.apply((AOSystem) null));
     }
 
-    public static void creatingFile(double sampling,  VisitableSampledSpectrum sed, String fName) {
+    public static void writeFile(VisitableSampledSpectrum sed, String filename) {
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        String fileName = fName + "_"+ sampling + "_" + timestamp.toString().replace(' ', '_') +".dat";
+        String fileName = "/tmp/" + filename + "_" + timestamp.toString().replace(' ', '_') + ".dat";
         Log.fine("Writing spectrum: " + fileName);
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
             double[][] data = sed.getData();
             for (int i = 0; i < data[0].length; i++) {
-                if (data[0][i] < 1200)
-                   writer.append(data[0][i] + "\t" + data[1][i] + "\n");
+                if (data[0][i] < 1000) writer.append(data[0][i] + "\t" + data[1][i] + "\n");
             }
             writer.close();
-            System.out.println("File created " + fileName);
         } catch (Exception e) {
-            System.out.println("Error creating the file " + fName);
+            System.out.println("Error creating file");
         }
     }
 
@@ -230,6 +228,7 @@ public final class SEDFactory {
 
         final SampledSpectrumVisitor redshift = new RedshiftVisitor(sdp.redshift());
         sed.accept(redshift);
+
         // Must check to see if the redshift has moved the spectrum beyond
         // useful range. The shifted spectrum must completely overlap
         // both the normalization waveband and the observation waveband
@@ -247,8 +246,6 @@ public final class SEDFactory {
                         sed.getStart(), sed.getEnd(), instrument.getObservingStart(), instrument.getObservingEnd()));
             }
         }
-
-        //System.out.println("sed-Start: " + sed.getStart() + " sedEnd: " + sed.getEnd() + " instrStart " + instrument.getObservingStart() + " inst-end: " + instrument.getObservingEnd());
 
         // any sed except BBODY and ELINE have normalization regions
         if (!(sdp.distribution() instanceof EmissionLine) && !(sdp.distribution() instanceof BlackBody)) {
@@ -338,29 +335,15 @@ public final class SEDFactory {
         // input: instrument, source and background SED
         // output: total flux of source and background.
 
-        //double[][] data = sed.getData();
 
         if (!(instrument instanceof Gsaoi) && !(instrument instanceof Niri) && !(instrument instanceof Gnirs)) {
             // TODO: for any instrument other than GSAOI and NIRI convolve here, why?
             Log.fine("Applying instrument throughput...");
             instrument.convolveComponents(sed);
         }
-        //creatingFile(instrument.getSampling(),  sed, "signalConv.dat");
-
-        /*double[][] data2 = sed.getData();
-        System.out.println("**** sed   beforeConvolveEleemnt   afterConvolveElement **** ");
-        for (int i = 0; i < data[0].length; i++) {
-            if (data[0][i] > 500 && data[0][i] < 510)
-                System.out.println(data[0][i] + " -> " + data[1][i] + ";  "+ data2[1][i] );
-        }
-
-        System.out.println("******************************************************** ");
-
-         */
-
         //creatingFile(instrument.getSampling(),  sky, "skyBconv");
         instrument.convolveComponents(sky);
-        //creatingFile(instrument.getSampling(),  sky, "skyConv");
+
         // TODO: AO (FOR NIFS DONE AT THE VERY END, WHY DIFFERENT FROM GSAOI/NIRI?)
         if (instrument instanceof Nifs && ao.isDefined()) {
             halo = Option.apply(SEDFactory.applyAoSystem(ao.get(), sky, sed));

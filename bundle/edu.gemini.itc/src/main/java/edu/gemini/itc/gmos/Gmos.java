@@ -197,13 +197,10 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
      * @return Effective wavelength in nm
      */
     public int getEffectiveWavelength() {
-
         if (disperser.isEmpty()) return (int) _Filter.getEffectiveWavelength();
 
 
         return (int) _gratingOptics.getEffectiveWavelength();
-
-
     }
 
     public GmosCommonType.Disperser getGrating() {

@@ -42,7 +42,6 @@ public final class PlannedTimeMath {
         } else if ((obsTime > reacqInterval) && (obsTime % reacqInterval != 0)) {
             numReacq = (int) (obsTime / reacqInterval);
         }
-        //System.out.println("numReacq, obsTime: "+ obsTime + " reacqInterval: " + reacqInterval + " numReacq: "+ numReacq);
         return numReacq;
     }
 
@@ -59,9 +58,6 @@ public final class PlannedTimeMath {
     //             it is assumed that the target will be observed on multiple nights.
     public static int numRecenter(PlannedTime pt, Config config, double visit_time, double recenterInterval) {
         int numRecenter = 0;
-
-        //System.out.println("numRecenter, visit_time: " + visit_time + " ; recenterInterval: " + recenterInterval);
-
         ItemKey guideWithPWFS2 = new ItemKey("telescope:guideWithPWFS2");
 
         if (config.containsItem(guideWithPWFS2) &&
@@ -74,17 +70,12 @@ public final class PlannedTimeMath {
             // number of re-centerings in the last visit
             int lastVisitRecenteringNum = numReacq(lastVisitTime, recenterInterval);
 
-            //System.out.println("lastVisitRecenteringNum: " + lastVisitRecenteringNum + " visitRecenteringNum: " + visitRecenteringNum );
-            //System.out.println("visitRecenteringNum: " + visitRecenteringNum + " visitTime2: " + visitTime );
-            //System.out.println("lastVisitTime: " + lastVisitTime + " scienceTime: " + scienceTime );
-
             if (visit_time > recenterInterval) {
                 numRecenter = (numAcq(pt, visit_time) - 1) * visitRecenteringNum + lastVisitRecenteringNum;
             } else {
                 throw new Error("Visit time is smaller than re-centering time");
             }
         }
-        //System.out.println("numRecenter: " + numRecenter );
         return numRecenter;
     }
 

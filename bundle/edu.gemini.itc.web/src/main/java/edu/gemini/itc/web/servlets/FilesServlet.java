@@ -127,7 +127,6 @@ public final class FilesServlet extends HttpServlet {
 
     private static BufferedImage toImage(final String id, final String filename, final int index, final PlottingDetails pd) {
         final ItcSpectroscopyResult results = result(id);
-        System.out.println("Number of chartGroups: " + results.chartGroups().length() + " filename: "+ filename + " index: "+ index);
         final ITCChart chart;
         switch (filename) {
             case "SignalChart":       chart = ITCChart.forSpcDataSet(results.chart(SignalChart.instance(),      index), pd); break;

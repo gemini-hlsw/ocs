@@ -504,15 +504,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * the specified range.
      */
     @Override public double getAverage(double x_start, double x_end) {
-        //if (x_start >= 700 && x_start <= 703) {
-        //    System.out.println("avgMethod. x_start: " + x_start + " x_end: " + x_end
-        //            + " dInterval: " + (x_end - x_start));
-        //}
-        double val = getIntegral(x_start, x_end) / (x_end - x_start);
-        //if (x_start >= 700 && x_start <= 703)
-        //    System.out.println("Integral Value: "+ val);
-        //return getIntegral(x_start, x_end) / (x_end - x_start);
-        return val;
+        return getIntegral(x_start, x_end) / (x_end - x_start);
     }
 
     /**

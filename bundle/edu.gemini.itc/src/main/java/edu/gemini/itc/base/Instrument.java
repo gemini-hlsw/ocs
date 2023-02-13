@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * The Instrument class is the class that any instrument should extend.
@@ -19,6 +20,7 @@ import java.util.List;
  * that contains all of the Components that make up the instrument.
  */
 public abstract class Instrument {
+    private static final Logger Log = Logger.getLogger(Instrument.class.getName());
 
     public enum Bands {
         VISIBLE("03-08"),
@@ -88,7 +90,9 @@ public abstract class Instrument {
      * accept method of each component to a sed.
      */
     public void convolveComponents(VisitableSampledSpectrum sed) {
+        Log.fine("Applying each instrument component...");
         for (final TransmissionElement te : components) {
+            Log.fine("Accepting " + te._file);
             sed.accept(te);
         }
     }

@@ -67,5 +67,4 @@ public final class HexagonalAperture extends ApertureComponent {
     public void clearFractionOfSourceInAperture() {
         sourceFraction.clear();
     }
-
 }

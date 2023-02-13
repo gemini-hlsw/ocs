@@ -185,7 +185,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
             //     that we expect.  Using a smoothing element of  = smoothingElement + 1
             //     May need to take this out in the future.
             ///////////////////////////////////////////////////////////////////////////////////////
-            if (haloSmoothingElement > 1) {
+            if (haloSmoothingElement > 1 || this.forceResample) {
                 Log.fine("Smoothing halo; element = " + (haloSmoothingElement + 1));
                 haloFlux.smoothY(haloSmoothingElement + 1);
             }
@@ -299,7 +299,6 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
         //Shot noise on background flux in aperture
         for (int i = firstCcdPixel; i <= lastPixel; ++i) {
-            double tmp = backgroundFlux.getY(i);
             background.setY(i,
                     backgroundFlux.getY(i) *
                             slit.width() * slit.pixelSize() * slit.lengthPixels() *
@@ -368,10 +367,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
     // Calculate the flux per pixel given the input flux, the slit throughput, and the dispersion:
     private double totalFlux(final double flux, final double throughput, final double wv) {
-        //double disp = disperser.dispersion(wv);
-        //System.out.println("disp: " + disp);
         return flux * throughput * exposureTime * disperser.dispersion(wv);
-        //return flux * throughput * exposureTime * disp;
     }
 
 
