@@ -337,6 +337,7 @@ object ITCRequest {
 
   def observationParameters(r: ITCRequest, i: InstrumentDetails): ObservationDetails = {
     val calcMethod = r.parameter("calcMethod")
+    Log.fine("calcMethod = " + calcMethod)
     val calculationMethod = calcMethod match {
       case "intTime"  if InstrumentDetails.isImaging(i)     =>
         ImagingInt(
@@ -344,6 +345,14 @@ object ITCRequest {
           r.doubleParameter("expTimeC"),
           coadds(r, CoaddsC),
           r.doubleParameter("fracOnSourceC"),
+          r.doubleParameter("offset")
+        )
+      case "expTime"  if InstrumentDetails.isImaging(i)     =>
+        ImagingExp(
+          r.doubleParameter("sigmaD"),
+          r.doubleParameter("expTimeD"),        // not used
+          coadds(r, CoaddsC),                   // not used
+          r.doubleParameter("fracOnSourceD"),   // not used
           r.doubleParameter("offset")
         )
       case "s2n"      if InstrumentDetails.isImaging(i)     =>

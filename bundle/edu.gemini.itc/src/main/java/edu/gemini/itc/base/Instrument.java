@@ -1,6 +1,5 @@
 package edu.gemini.itc.base;
 
-import edu.gemini.itc.niri.GrismOptics;
 import edu.gemini.itc.shared.ItcWarning;
 import edu.gemini.spModel.core.Site;
 import scala.Option;
@@ -13,7 +12,7 @@ import java.util.List;
 
 /**
  * The Instrument class is the class that any instrument should extend.
- * It defines the common properties of any given Instrumnet.
+ * It defines the common properties of any given Instrument.
  * <p/>
  * The important piece of data is the _list. This is a linked list
  * that contains all of the Components that make up the instrument.
@@ -241,6 +240,7 @@ public abstract class Instrument {
     // to deal with one instrument that has several CCDs, if I may say so.
     public abstract double wellDepth();
     public abstract double gain();
+    public abstract double maxFlux();
 
     // === Warnings
 

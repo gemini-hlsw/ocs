@@ -525,12 +525,26 @@
 			<tr>
 				<td><input value="s2n" name="calcMethod" checked="checked" type="radio" /></td>
 				<td>Total S/N ratio resulting from <input name="numExpA" size="5" value="1" type="text" />
-				exposures each having an exposure time of <input name="expTimeA" size="5" value="900" type="text" /> secs and with a fraction <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
+					exposures each having an exposure time of <input name="expTimeA" size="5" value="900" type="text" />
+					secs and with a fraction <input name="fracOnSourceA" size="4" value="1.0" type="text" />
+					of exposures that observe the source </td>
 			</tr>
 			<tr>
 				<td><input value="intTime" name="calcMethod" type="radio" /></td>
-				<td>Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" /> using an exposure time for each exposure of <input name="expTimeC" size="5" value="900" type="text" /> secs and with a fraction <input name="fracOnSourceC" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
+				<td>Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" />
+					using an exposure time for each exposure of<input name="expTimeC" size="5" value="900" type="text" />
+					secs and with a fraction <input name="fracOnSourceC" size="4" value="1.0" type="text" />
+					of exposures that observe the source </td>
 			</tr>
+			<tr>
+				<td><input value="expTime" name="calcMethod" type="radio" /></td>
+				<td>Single-image exposure time to achieve a S/N ratio of
+					<input name="sigmaD" size="3" value="5" type="text" />
+					<input name="expTimeD" value="60" type="hidden"/>
+					<input name="fracOnSourceD" value="1" type="hidden"/>
+				</td>
+			</tr>
+
 			<tr>
 				<td colspan="2" height="40" valign="bottom"><b>Telescope offset:</b><i><span>(<a href="#" onclick="window.open('https://www.gemini.edu/sciops/instruments/gmos','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
 			</tr>

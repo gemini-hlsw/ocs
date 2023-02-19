@@ -5,9 +5,10 @@ import edu.gemini.itc.base.ITCConstants;
 import edu.gemini.itc.base.Instrument;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.shared.SourceDefinition;
+import java.util.logging.Logger;
 
 public final class PeakPixelFlux {
-
+    private static final Logger Log = Logger.getLogger(PeakPixelFlux.class.getName());
     private final double im_qual;
     private final double pixel_size;
     private final double exp_time;
@@ -24,6 +25,23 @@ public final class PeakPixelFlux {
                                    final double sed_integral,
                                    final double sky_integral) {
         final PeakPixelFlux ppfc  = new PeakPixelFlux(im_qual, instrument.getPixelSize(), _obsDetailParameters.exposureTime(), sed_integral, sky_integral, instrument.getDarkCurrent());
+        if (!_sdParameters.isUniform()) {
+            return ppfc.getFluxInPeakPixel();
+        } else {
+            return ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix());
+        }
+    }
+
+    public static double calculate(final Instrument instrument,
+                                   final SourceDefinition _sdParameters,
+                                   final double exposureTime,
+                                   final SourceFraction SFcalc,
+                                   final double im_qual,
+                                   final double sed_integral,
+                                   final double sky_integral) {
+
+        final PeakPixelFlux ppfc = new PeakPixelFlux(im_qual, instrument.getPixelSize(), exposureTime, sed_integral, sky_integral, instrument.getDarkCurrent());
+
         if (!_sdParameters.isUniform()) {
             return ppfc.getFluxInPeakPixel();
         } else {
@@ -80,7 +98,9 @@ public final class PeakPixelFlux {
         }
         final double source_in_peak = summed_source * source_fraction_in_peak * exp_time;
         final double background_in_peak = summed_background * exp_time * pixel_size * pixel_size;
-        return source_in_peak + background_in_peak + dark_current * exp_time;
+        final double total_in_peak = source_in_peak + background_in_peak + dark_current * exp_time;
+        Log.fine(String.format("Flux in peak = %.0f e-", total_in_peak));
+        return total_in_peak;
     }
 
     private double getFluxInPeakPixelUSB(final double source_fraction, final double enclosedPixels) {

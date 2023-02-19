@@ -69,6 +69,9 @@ public class AcquisitionCamera extends Instrument {
         return INSTR_PREFIX;
     }
 
+    public double maxFlux() {
+        return WellDepth;
+    }
 
     @Override public double wellDepth() {
         return WellDepth;

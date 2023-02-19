@@ -505,6 +505,10 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
         return 13.5;
     }
 
+    public double maxFlux() {
+        return _linearityLimit;
+    }
+
     @Override public List<WarningRule> warnings() {
         return new ArrayList<WarningRule>() {{
             add(new LinearityLimitRule(_linearityLimit, 0.80));

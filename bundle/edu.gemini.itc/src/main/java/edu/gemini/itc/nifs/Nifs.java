@@ -233,6 +233,10 @@ public final class Nifs extends Instrument implements SpectroscopyInstrument {
         return 2.8; // electrons / ADU
     }
 
+    public double maxFlux() {
+        return LinearityLimit;
+    }
+
     @Override public List<WarningRule> warnings() {
         return new ArrayList<WarningRule>() {{
             add(new LinearityLimitRule(LinearityLimit, 0.80));

@@ -161,6 +161,10 @@ public final class Flamingos2 extends Instrument implements SpectroscopyInstrume
         return _grismOptics.get();
     }
 
+    public double maxFlux() {
+        return LinearityLimit;
+    }
+
     @Override public double wellDepth() {
         return WellDepth;
     }

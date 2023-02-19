@@ -12,13 +12,14 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 
 import java.io.PrintWriter;
+import java.util.logging.Logger;
 import java.util.*;
 
 /**
  * Helper class for printing GMOS calculation results to an output stream.
  */
 public final class GmosPrinter extends PrinterBase implements OverheadTablePrinter.PrinterWithOverhead {
-
+    private static final Logger Log = Logger.getLogger(GmosPrinter.class.getName());
     private final GmosRecipe recipe;
     private final PlottingDetails pdp;
     private final boolean isImaging;
@@ -158,6 +159,7 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
         _println("Read noise: " + instrument.getReadNoise());
 
         final Gmos[] ccdArray = instrument.getDetectorCcdInstruments();
+        Log.fine("ccdArray.length = " + ccdArray.length);
 
         for (final Gmos ccd : ccdArray) {
 

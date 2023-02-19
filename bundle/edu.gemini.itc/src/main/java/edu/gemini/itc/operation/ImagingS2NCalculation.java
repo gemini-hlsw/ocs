@@ -10,13 +10,13 @@ import edu.gemini.itc.trecs.TRecs;
 
 public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
 
-    private final double Npix;
-    private final double source_fraction;
-    private final double dark_current;
-    private final double sed_integral;
-    private final double sky_integral;
-    private final double skyAper;
-    private final int    elfinParam;
+    protected final double Npix;
+    protected final double source_fraction;
+    protected final double dark_current;
+    protected final double sed_integral;
+    protected final double sky_integral;
+    protected final double skyAper;
+    protected final int elfinParam;
 
     protected double var_source;
     protected double var_background;
@@ -92,5 +92,7 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
     public double singleSNRatio() {
         return Math.sqrt(coadds) * signal / noise;
     }
+
+    @Override public double getExposureTime() { return exposure_time; }
 
 }

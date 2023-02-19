@@ -255,6 +255,10 @@ public class Niri extends Instrument implements SpectroscopyInstrument {
         return 12.3;
     }
 
+    @Override public double maxFlux() {
+        return params.wellDepth().linearityLimit();
+    }
+
     @Override public List<WarningRule> warnings() {
         return new ArrayList<WarningRule>() {{
             add(new LinearityLimitRule(params.wellDepth().linearityLimit(), 0.80));

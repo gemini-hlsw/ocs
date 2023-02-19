@@ -1,52 +1,82 @@
 package edu.gemini.itc.operation;
 
 import edu.gemini.itc.base.Instrument;
-import edu.gemini.itc.operation.PeakPixelFlux;
 import edu.gemini.itc.shared.ImagingExp;
 import edu.gemini.itc.shared.ObservationDetails;
+import edu.gemini.itc.shared.SourceDefinition;
 import java.util.logging.Logger;
 
 public final class ImagingMethodExptime extends ImagingS2NCalculation {
 
+    private final Instrument instrument;
+    private final SourceDefinition _sdParameters;
+    private final SourceFraction srcFrac;
     private final double frac_with_source;
+    //private final double well_depth;
+    //private final double sat_limit;
+    //private final double gain;
+    private final double max_flux;
     private final double req_s2n;
-    private int int_req_source_exposures;
-    private double req_number_exposures;
-    private double req_exptime;
+    //private int int_req_source_exposures;
+    //private double req_number_exposures;
+    private final double im_qual;
+    //private final boolean is_uniform;
     private static final Logger Log = Logger.getLogger(ImagingMethodExptime.class.getName());
 
-    public ImagingMethodExptime(final ObservationDetails obs,
+    //private ObservationDetails obs;
+
+    public ImagingMethodExptime(ObservationDetails obs,
                                 final Instrument instrument,
                                 final SourceFraction srcFrac,
                                 final double sed_integral,
-                                final double sky_integral) {
+                                final double sky_integral,
+                                final SourceDefinition _sdParameters,
+                                final double im_qual) {
         super(obs, instrument, srcFrac, sed_integral, sky_integral);
+        this.instrument = instrument;
+        this._sdParameters = _sdParameters;
+        this.srcFrac = srcFrac;
         this.frac_with_source = obs.sourceFraction();
         this.exposure_time = obs.exposureTime();  // defined to be 60s in ITCgmos.html
         this.coadds = 1;   // obs.calculationMethod().coaddsOrElse(1);
         this.read_noise = instrument.getReadNoise();
         this.pixel_size = instrument.getPixelSize();
+        //this.well_depth = instrument.wellDepth();
+        //this.sat_limit = (instrument instanceof BinningProvider) ?
+        //        well_depth * ((BinningProvider) instrument).getSpatialBinning() * ((BinningProvider) instrument).getSpectralBinning() :
+        //        well_depth;
+        this.max_flux = instrument.maxFlux();
+        //this.gain = instrument.gain();
         this.req_s2n = ((ImagingExp) obs.calculationMethod()).sigma();
+        //this.is_uniform = _sdParameters.isUniform();
+        this.im_qual = im_qual;
+
     }
 
     public void calculate() {
 
-        // ? Could we make it so that this calculation is ONLY done for the middle CCD ?
-
         Log.fine("Calculating with initial guess for exptime...");
         super.calculate();
-
         Log.fine("singleSNRatio = " + singleSNRatio());
+
+
+        // Calculate the exposure time that will give the max flux:
+        double peak_flux = PeakPixelFlux.calculate(instrument, _sdParameters, exposure_time, srcFrac, im_qual, sed_integral, sky_integral);
+        Log.fine(String.format("Peak Pixel Flux = %.0f e-", peak_flux));
+        Log.fine(String.format("Max acceptable flux = %.0f e-", max_flux));
+        double exposure_time_max_flux = max_flux / peak_flux * exposure_time;
+        Log.fine(String.format("Exposure time that would yield the max flux = %.2f seconds", exposure_time_max_flux));
+
 
         // Calculate the exposure time that should give the desired S/N
 
         // In general, S/N ~ sqrt(t), so t ~ (S/N)^2
-        final double req_exptime = exposure_time * (req_s2n / singleSNRatio()) * (req_s2n / singleSNRatio());
-        Log.fine("Estimated exposure time = " + req_exptime);
+        //final double req_exptime = exposure_time * (req_s2n / singleSNRatio()) * (req_s2n / singleSNRatio());
+        //Log.fine("Estimated exposure time = " + req_exptime);
         // well, that didn't work very well...
 
-        Log.fine("frac_with_source = " + frac_with_source);  // fraction of images which include the source
-        Log.fine("source_fraction = " + source_fraction);  // fraction of source in aperture?
+        //Log.fine("frac_with_source = " + frac_with_source);  // fraction of images which include the source
+        //Log.fine("source_fraction = " + source_fraction);  // fraction of source in aperture?
 
         // Try again:
         final double vs = sed_integral * source_fraction + secondary_integral * secondary_source_fraction;
@@ -80,15 +110,8 @@ public final class ImagingMethodExptime extends ImagingS2NCalculation {
             exposure_time = 1.0;
         }
 
-
-        final double peak_flux = PeakPixelFlux.calculate(pixel_size, dark_current, _sdParameters, exposure_time, source_fraction, Npix, im_qual, sed_integral, sky_integral);
-        Log.fine("Peak Pixel Flux = " + peak_flux);
-
-
-        // final double req_source_exposures = (req_s2n / signal) * (req_s2n / signal) *
-        //        (signal + noiseFactor * sourceless_noise * sourceless_noise) / coadds;
-
-        // Calculate the exposure time that will give the max allowed counts (half-well?)
+        //peak_flux = PeakPixelFlux.calculate(instrument, _sdParameters, exposure_time, srcFrac, im_qual, sed_integral, sky_integral);
+        //Log.fine("Peak Pixel Flux = " + peak_flux);
 
         // Take the smaller of the two?
 
@@ -111,8 +134,6 @@ public final class ImagingMethodExptime extends ImagingS2NCalculation {
         return 1;
     }
 
-    public double exposureTime() {
-        return exposure_time;
-    }
+    @Override public double getExposureTime() { return exposure_time; }
 
 }
