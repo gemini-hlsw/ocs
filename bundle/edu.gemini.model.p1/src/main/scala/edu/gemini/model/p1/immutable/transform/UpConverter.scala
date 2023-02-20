@@ -225,7 +225,7 @@ case object SemesterConverter2022BTo2023A extends SemesterConverter {
     }
     transform
   }
-  override val transformers: List[TransformFunction] = List(upgradeClassical, removeGNIRSRedCameraBlueprint)
+  override val transformers: List[TransformFunction] = List(/*upgradeClassical,*/ removeGNIRSRedCameraBlueprint)
 }
 
 /**

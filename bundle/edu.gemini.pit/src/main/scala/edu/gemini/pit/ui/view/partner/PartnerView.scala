@@ -126,7 +126,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
       val b3 = m.flatMap(_.proposalClass match {
         case q: QueueProposalClass => q.band3request.map(r => (r.time.hours, r.minTime.hours))
-        case s: SpecialProposalClass if s.sub.specialType == SpecialProposalType.GUARANTEED_TIME => 
+        case s: SpecialProposalClass if s.sub.specialType == SpecialProposalType.GUARANTEED_TIME =>
           s.band3request.map(r => (r.time.hours, r.minTime.hours))
         case _                     => None
       })
@@ -229,7 +229,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     }
 
     // The proposal class combo is always visible
-    object proposalClass extends ComboBox(ProposalClassSelection.values.filterNot(_ == ProposalClassSelection.Classical).toSeq) with Bound.Self[Proposal] {
+    object proposalClass extends ComboBox(ProposalClassSelection.values.toSeq) with Bound.Self[Proposal] {
 
       selection.reactions += {
         case SelectionChanged(_) =>
@@ -696,7 +696,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           (r, _, _) <- SubmissionRequestEditor.open(r, None, Nil, None, button)
         } yield FastTurnaroundProgramClass.band3request.set(ft, Some(r))
 
-        
+
         def stEditor: Option[SpecialProposalClass] = for {
           sp @ SpecialProposalClass(_, _, _, _, Some(r), _, _) <- model
           (r, _, _) <- SubmissionRequestEditor.open(r, None, Nil, None, button)
