@@ -170,7 +170,34 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter supports migrating to 2023B
  */
 case object SemesterConverter2023ATo2023B extends SemesterConverter {
-  override val transformers: List[TransformFunction] = Nil
+  lazy val niriToGNIRSZorroMessage: String = "NIRI Gemini North proposal has been migrated to GNIRS instead."
+  val niriToGNIRS: TransformFunction = {
+    case p @ <niri>{ns @ _*}</niri> if (p \\ "Dssi" \\ "site").map(_.text).exists(_.equals(Site.GS.name)) =>
+      object DssiGSZorroTransformer extends BasicTransformer {
+        override def transform(n: xml.Node): xml.NodeSeq = n match {
+          case p @ <Dssi>{q @ _*}</Dssi> => <Zorro id={p.attribute("id")}>{q.map(transform) +: <mode>{ZorroMode.SPECKLE.value}</mode>}</Zorro>
+          case <name>{_}</name>          => <name>{MaroonXBlueprint().name}</name>
+          case elem: xml.Elem            => elem.copy(child = elem.child.flatMap(transform))
+          case _                         => n
+        }
+      }
+      StepResult(niriToGNIRSZorroMessage, <zorro>{DssiGSZorroTransformer.transform(ns)}</zorro>).successNel
+  }
+
+  lazy val gracesToMaroonXMessage: String = "Graces Gemini North proposal has been migrated to Maroon-X instead."
+  val gracesToMaroonX: TransformFunction = {
+    case p @ <graces>{ns @ _*}</graces> =>
+      object GracesToMaroonXTransformer extends BasicTransformer {
+        override def transform(n: xml.Node): xml.NodeSeq = n match {
+          case p @ <Graces>{q @ _*}</Graces> => <MaroonX id={p.attribute("id")}><name>{MaroonXBlueprint().name}</name><visitor>true</visitor></MaroonX>
+          case elem: xml.Elem            => elem.copy(child = elem.child.flatMap(transform))
+          case _                         => n
+        }
+      }
+      StepResult(gracesToMaroonXMessage, <maroonx>{GracesToMaroonXTransformer.transform(ns)}</maroonx>).successNel
+  }
+
+  override val transformers: List[TransformFunction] = List(niriToGNIRS, gracesToMaroonX)
 }
 
 /**

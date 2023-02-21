@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2023.1.1">
+    <meta band3optionChosen="false" overrideAffiliate="false"/>
+    <semester year="2023" half="A"/>
+    <title></title>
+    <abstract></abstract>
+    <scheduling></scheduling>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName></firstName>
+            <lastName></lastName>
+            <status>PhD</status>
+            <gender>None selected</gender>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets/>
+    <conditions/>
+    <blueprints>
+        <graces>
+            <Graces id="blueprint-0">
+                <name>Graces 1 fiber (target only, R~67.5k) Normal (Gain=1.3e/ADU, Read noise=4.3e)</name>
+                <visitor>true</visitor>
+                <fiberMode>1 fiber (target only, R~67.5k)</fiberMode>
+                <readMode>Normal (Gain=1.3e/ADU, Read noise=4.3e)</readMode>
+            </Graces>
+        </graces>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" blueprint="blueprint-0"/>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None" jwstSynergy="false"/>
+    </proposalClass>
+</proposal>

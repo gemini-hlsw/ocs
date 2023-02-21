@@ -678,20 +678,6 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           result must \\("name") \> "GMOS-N IFU None B600 i + CaT (815 nm) IFU 1 slit"
       }
     }
-    "proposal with Graces blueprints must be preserved, REL-2200" in {
-      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_graces.xml")))
-
-      val converted = UpConverter.convert(xml)
-      converted must beSuccessful.like {
-        case StepResult(changes, result) =>
-          changes must have length 9
-          result \\ "graces" must \\("fiberMode") \> "2 fibers (target+sky, R~40k)"
-          result \\ "graces" must \\("name") \> "Graces 2 fibers (target+sky, R~40k)"
-          result \\ "graces" must \\("fiberMode") \> "1 fiber (target only, R~67.5k)"
-          result \\ "graces" must \\("name") \> "Graces 1 fiber (target only, R~67.5k)"
-          result \\ "graces" must \\("readMode") \> "Fast (Gain=1.6e/ADU, Read noise=4.7e)"
-      }
-    }
     "proposal with NIRI blueprints should remove unavailable filters, REL-2390" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_niri_removed_filters.xml")))
 
@@ -858,6 +844,17 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
             res.investigators.cois.headOption.map(_.institution) must beSome("Gemini Observatory/NSF’s NOIRLab (North)")
             res.investigators.cois(1).institution must contain("NSF's NOIRLab")
             res.investigators.cois(2).institution must contain("Cerro Tololo Inter-American Observatory/NSF’s NOIRLab")
+      }
+    }
+    "REL-4267 graces conversion" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("graces_proposal.xml")))
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+          case StepResult(changes, result) =>
+            changes must contain(SemesterConverter2023ATo2023B.gracesToMaroonXMessage)
+            result must \\("MaroonX", "id")
+            result must \\("MaroonX") \\ "name" \> MaroonXBlueprint().name
+            result must \\("MaroonX") \\ "visitor" \> "true"
       }
     }
   }
