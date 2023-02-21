@@ -44,6 +44,6 @@ object Root {
 
   // REL-3769: GPI not available in 2020B.
   // GHOST not yet available
-  val choices: List[Instrument] = List(Alopeke, Flamingos2, Ghost, GmosNorth, GmosSouth, Gnirs, Graces, Gsaoi, Igrins, MaroonX, Nifs, Niri, Visitor, Zorro)
+  val choices: List[Instrument] = List(Alopeke, Flamingos2, /*Ghost,*/ GmosNorth, GmosSouth, Gnirs, Graces, Gsaoi, Igrins, MaroonX, Nifs, Niri, Visitor, Zorro)
 
 }
