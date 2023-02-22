@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2023.1.1">
+    <meta band3optionChosen="false" overrideAffiliate="false"/>
+    <semester year="2023" half="B"/>
+    <title></title>
+    <abstract></abstract>
+    <scheduling></scheduling>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName></firstName>
+            <lastName></lastName>
+            <status>PhD</status>
+            <gender>None selected</gender>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets/>
+    <conditions/>
+    <blueprints>
+        <niri>
+            <niri id="blueprint-0">
+                <name>NIRI Altair Natural Guidestar f/32 (0.02"/pix, 22" FoV) M(prime) (4.68 um)</name>
+                <visitor>false</visitor>
+                <altair>
+                    <ngs fieldLens="false"/>
+                </altair>
+                <camera>f/32 (0.02"/pix, 22" FoV)</camera>
+                <filter>M(prime) (4.68 um)</filter>
+            </niri>
+        </niri>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" blueprint="blueprint-0"/>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None" jwstSynergy="false"/>
+    </proposalClass>
+</proposal>

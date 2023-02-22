@@ -678,33 +678,6 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           result must \\("name") \> "GMOS-N IFU None B600 i + CaT (815 nm) IFU 1 slit"
       }
     }
-    "proposal with Graces blueprints must be preserved, REL-2200" in {
-      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_graces.xml")))
-
-      val converted = UpConverter.convert(xml)
-      converted must beSuccessful.like {
-        case StepResult(changes, result) =>
-          changes must have length 9
-          result \\ "graces" must \\("fiberMode") \> "2 fibers (target+sky, R~40k)"
-          result \\ "graces" must \\("name") \> "Graces 2 fibers (target+sky, R~40k)"
-          result \\ "graces" must \\("fiberMode") \> "1 fiber (target only, R~67.5k)"
-          result \\ "graces" must \\("name") \> "Graces 1 fiber (target only, R~67.5k)"
-          result \\ "graces" must \\("readMode") \> "Fast (Gain=1.6e/ADU, Read noise=4.7e)"
-      }
-    }
-    "proposal with NIRI blueprints should remove unavailable filters, REL-2390" in {
-      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_niri_removed_filters.xml")))
-
-      val converted = UpConverter.convert(xml)
-      converted must beSuccessful.like {
-        case StepResult(changes, result) =>
-          changes must have length 7
-          result \\ "niri" must \\("filter") \> "HeI (1.083 um)"
-          result \\ "niri" must not(\\("filter") \> "J-continuum (1.122 um)")
-          result \\ "niri" must not(\\("filter") \> "Jcont (1.065 um)")
-          result \\ "niri" must \\("name") \> "NIRI Altair Laser Guidestar f/32 (0.02\"/pix, 22\" FoV) HeI (1.083 um)"
-      }
-    }
     "proposal with GPI and HStar and HLiwa modes should become H direct, REL-2671" in {
       skipped {
         // GPI is not offered in 2020B.
@@ -859,6 +832,40 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
             res.investigators.cois(1).institution must contain("NSF's NOIRLab")
             res.investigators.cois(2).institution must contain("Cerro Tololo Inter-American Observatory/NSF’s NOIRLab")
       }
+    }
+    "REL-4267 graces conversion" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("graces_proposal.xml")))
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+          case StepResult(changes, result) =>
+            changes must contain(SemesterConverter2023ATo2023B.gracesToMaroonXMessage)
+            result must \\("MaroonX", "id")
+            result must \\("MaroonX") \\ "name" \> MaroonXBlueprint().name
+            result must \\("MaroonX") \\ "visitor" \> "true"
+      }
+    }
+    "REL-4267 niri conversion" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("graces_proposal.xml")))
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+          case StepResult(changes, result) =>
+            changes must contain(SemesterConverter2023ATo2023B.gracesToMaroonXMessage)
+            result must \\("MaroonX", "id")
+            result must \\("MaroonX") \\ "name" \> MaroonXBlueprint().name
+            result must \\("MaroonX") \\ "visitor" \> "true"
+      }
+    }
+    "REL-4267 convert niri to gnirs" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("niri_proposal.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 4
+          result \\ "gnirs" must \\("filter") \> "H (1.65um)"
+          result \\ "gnirs" must \\("name") \> "GNIRS Altair Natural Guidestar 0.05\"/pix H (1.65um)"
+          result \\ "gnirs" must \\("pixelScale") \> "0.05\"/pix"
+      } 
     }
   }
 
