@@ -4,6 +4,7 @@ import xml.{Text, Node => XMLNode}
 import scalaz._
 import Scalaz._
 import edu.gemini.model.p1.immutable._
+import edu.gemini.model.p1.{mutable => M}
 import edu.gemini.model.p1.immutable.transform.XMLConverter._
 
 import scala.xml.transform.BasicTransformer
@@ -170,18 +171,41 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter supports migrating to 2023B
  */
 case object SemesterConverter2023ATo2023B extends SemesterConverter {
-  lazy val niriToGNIRSZorroMessage: String = "NIRI Gemini North proposal has been migrated to GNIRS instead."
+  private val niriFilterMapping: M.NiriFilter => M.GnirsFilter = _ match {
+    case M.NiriFilter.BBF_Y    => M.GnirsFilter.Y
+    case M.NiriFilter.BBF_J    => M.GnirsFilter.ORDER_5 // J
+    case M.NiriFilter.BBF_H    => M.GnirsFilter.ORDER_4 // H\
+    case M.NiriFilter.BBF_K | M.NiriFilter.BBF_KPRIME | M.NiriFilter.BBF_KSHORT 
+                               => M.GnirsFilter.ORDER_3 // K
+    case M.NiriFilter.NBF_H210 => M.GnirsFilter.H2
+    case M.NiriFilter.NBF_HC   => M.GnirsFilter.PAH
+    case _                     => M.GnirsFilter.ORDER_4 // H
+  }
+
+  private val niriCameraMapping: M.NiriCamera => M.GnirsPixelScale = _ match {
+    case M.NiriCamera.F6                     => M.GnirsPixelScale.PS_015
+    case M.NiriCamera.F14 | M.NiriCamera.F32 => M.GnirsPixelScale.PS_005
+  }
+
+  lazy val niriToGNIRSMessage: String = "NIRI Gemini North proposal has been migrated to GNIRS instead."
+  val niriNameRegex = """NIRI (.*) (f/\d* \(.* FoV\)) (.*)""".r //(None|Altair .*)(f/\\d*).*".r
+  def transformNiriName(name: String) = name match {
+    case niriNameRegex(a, b, c) => s"GNIRS $a ${niriCameraMapping(M.NiriCamera.fromValue(b)).value()} ${niriFilterMapping(M.NiriFilter.fromValue(c)).value()}"
+    case _                      => name
+  }
   val niriToGNIRS: TransformFunction = {
-    case p @ <niri>{ns @ _*}</niri> if (p \\ "Dssi" \\ "site").map(_.text).exists(_.equals(Site.GS.name)) =>
-      object DssiGSZorroTransformer extends BasicTransformer {
+    case p @ <niri>{ns @ _*}</niri> =>
+      object NiriToGnirsTransformer extends BasicTransformer {
         override def transform(n: xml.Node): xml.NodeSeq = n match {
-          case p @ <Dssi>{q @ _*}</Dssi> => <Zorro id={p.attribute("id")}>{q.map(transform) +: <mode>{ZorroMode.SPECKLE.value}</mode>}</Zorro>
-          case <name>{_}</name>          => <name>{MaroonXBlueprint().name}</name>
+          case p @ <niri>{q @ _*}</niri> => <imaging id={p.attribute("id")}>{q.map(transform)}<visitor>false</visitor></imaging>
+          case <name>{n}</name>          => <name>{transformNiriName(n.text)}</name>
+          case <camera>{f}</camera>      => <pixelScale>{niriCameraMapping(M.NiriCamera.fromValue(f.text)).value()}</pixelScale>
+          case <filter>{f}</filter>      => <filter>{niriFilterMapping(M.NiriFilter.fromValue(f.text)).value()}</filter>
           case elem: xml.Elem            => elem.copy(child = elem.child.flatMap(transform))
           case _                         => n
         }
       }
-      StepResult(niriToGNIRSZorroMessage, <zorro>{DssiGSZorroTransformer.transform(ns)}</zorro>).successNel
+      StepResult(niriToGNIRSMessage, <gnirs>{NiriToGnirsTransformer.transform(ns)}</gnirs>).successNel
   }
 
   lazy val gracesToMaroonXMessage: String = "Graces Gemini North proposal has been migrated to Maroon-X instead."
