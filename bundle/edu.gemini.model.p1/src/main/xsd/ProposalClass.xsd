@@ -86,6 +86,7 @@
                 </xsd:sequence>
                 <xsd:attribute name="tooOption"   type="TooOption" use="required"/>
                 <xsd:attribute name="jwstSynergy" type="xsd:boolean" use="required"/>
+                <xsd:attribute name="usLongTerm"  type="xsd:boolean" use="required"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
@@ -102,6 +103,7 @@
                     <xsd:element name="visitor" type="Visitor" minOccurs="0" maxOccurs="unbounded"/>
                 </xsd:sequence>
                 <xsd:attribute name="jwstSynergy" type="xsd:boolean" use="required"/>
+                <xsd:attribute name="usLongTerm"  type="xsd:boolean" use="required"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>

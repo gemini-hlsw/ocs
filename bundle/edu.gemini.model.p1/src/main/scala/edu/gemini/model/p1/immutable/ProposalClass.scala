@@ -100,10 +100,11 @@ object QueueProposalClass {
     Option(m.getBand3Request).map(SubmissionRequest(_)),
     m.getTooOption,
     Option(m.getMultiFacility).map(MultiFacility(_)),
-    m.isJwstSynergy
+    m.isJwstSynergy,
+    m.isUsLongTerm
   )
 
-  val empty: QueueProposalClass = apply(None, None, None, Left(Nil), None, ToOChoice.None, None, false)
+  val empty: QueueProposalClass = apply(None, None, None, Left(Nil), None, ToOChoice.None, None, false, false)
 
 }
 
@@ -114,7 +115,8 @@ case class QueueProposalClass(itac: Option[Itac],
                               band3request: Option[SubmissionRequest],
                               tooOption: ToOChoice,
                               multiFacility: Option[MultiFacility],
-                              jwstSynergy: Boolean) extends GeminiNormalProposalClass {
+                              jwstSynergy: Boolean,
+                              usLongTerm: Boolean) extends GeminiNormalProposalClass {
 
   override val isSpecial = false
 
@@ -129,6 +131,7 @@ case class QueueProposalClass(itac: Option[Itac],
     m.setTooOption(tooOption)
     m.setMultiFacility(multiFacility.map(_.mutable).orNull)
     m.setJwstSynergy(jwstSynergy)
+    m.setUsLongTerm(usLongTerm)
     m
   }
 
@@ -151,10 +154,11 @@ object ClassicalProposalClass {
     GeminiNormalProposalClass.extractSubs(m),
     m.getVisitor.asScala.map(_.getRef).map(Investigator(_).ref).toList,
     Option(m.getMultiFacility).map(MultiFacility(_)),
-    m.isJwstSynergy
+    m.isJwstSynergy,
+    m.isUsLongTerm
   )
 
-  val empty: ClassicalProposalClass = apply(None, None, None, Left(Nil), Nil, None, false)
+  val empty: ClassicalProposalClass = apply(None, None, None, Left(Nil), Nil, None, false, false)
 
 }
 
@@ -168,7 +172,8 @@ case class ClassicalProposalClass(itac: Option[Itac],
                                   subs: Either[List[NgoSubmission], ExchangeSubmission],
                                   visitors: List[InvestigatorRef],
                                   multiFacility: Option[MultiFacility],
-                                  jwstSynergy: Boolean)
+                                  jwstSynergy: Boolean,
+                                  usLongTerm: Boolean)
   extends GeminiNormalProposalClass {
 
   def mutable(p:Proposal, n:Namer) = {
@@ -187,6 +192,7 @@ case class ClassicalProposalClass(itac: Option[Itac],
     }.asJava)
     m.setMultiFacility(multiFacility.map(_.mutable).orNull)
     m.setJwstSynergy(jwstSynergy)
+    m.setUsLongTerm(usLongTerm)
 
     m
   }

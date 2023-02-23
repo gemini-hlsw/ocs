@@ -1,5 +1,9 @@
 Gemini Phase I Schema Changes
 
+# Version 2023.2.1 - 2022B
+##########################
+* Add a usLongTerm flag to Queue/Classical proposal
+
 # Version 2023.1.1 - 2023A
 ##########################
 * Support GMOS B480 Grating
