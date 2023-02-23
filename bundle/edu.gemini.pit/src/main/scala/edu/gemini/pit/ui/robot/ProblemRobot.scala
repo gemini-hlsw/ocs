@@ -603,7 +603,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     }
 
     private lazy val usLongTermCheck = for {
-      o <- p.nonEmptyObservations
+      _ <- List(p.proposalClass)
       if (p.proposalClass match {
         case q: QueueProposalClass     => q.usLongTerm
         case c: ClassicalProposalClass => c.usLongTerm
@@ -616,7 +616,6 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       new Problem(Severity.Error,
         "US Long Term status only applies to US proposals.", "Observations", {
         s.showPartnersView()
-        s.inObsListView(o.band, v => v.Fixes.indicateObservation(o))
       })
     }
 

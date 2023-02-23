@@ -243,7 +243,7 @@ object P1PDF {
     val home = System.getProperty("user.home")
     val in = new File(s"$home/pitsource.xml")
     val out = new File(s"$home/pittarget.pdf")
-    createFromFile(in, GeminiDefaultListAtTheEnd, out)
+    createFromFile(in, NOIRLabDARP, out)
 
     val ok = Runtime.getRuntime.exec(Array("open", out.getAbsolutePath)).waitFor
     println("Exec returned " + ok)

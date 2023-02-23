@@ -248,6 +248,14 @@
                     </xsl:choose>
                 </xsl:variable>
 
+                <xsl:variable name="us-long-term">
+                    <xsl:choose>
+                        <xsl:when test="proposalClass/queue[@usLongTerm='true']">&#160;US Long Term</xsl:when>
+                        <xsl:when test="proposalClass/classical[@usLongTerm='true']">&#160;US Long Term</xsl:when>
+                        <xsl:otherwise>&#160;</xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+
                 <fo:table table-layout="fixed" space-after="1cm">
                     <fo:table-column column-width="11.5cm"/>
                     <fo:table-column column-width="4.5cm"/>
@@ -261,6 +269,7 @@
                                     </fo:inline>
                                     <xsl:value-of select="$obs-mode"/>
                                     <xsl:value-of select="$obs-mode-aeon"/>
+                                    <xsl:value-of select="$us-long-term"/>
                                 </fo:block>
                                 <!-- END observing mode -->
                             </fo:table-cell>

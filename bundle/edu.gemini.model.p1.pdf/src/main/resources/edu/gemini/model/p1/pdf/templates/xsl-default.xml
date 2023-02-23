@@ -98,6 +98,14 @@
                 </xsl:choose>
             </xsl:variable>
 
+            <xsl:variable name="us-long-term">
+                <xsl:choose>
+                    <xsl:when test="proposalClass/queue[@usLongTerm='true']">&#160;US Long Term</xsl:when>
+                    <xsl:when test="proposalClass/classical[@usLongTerm='true']">&#160;US Long Term</xsl:when>
+                    <xsl:otherwise>&#160;</xsl:otherwise>
+                </xsl:choose>
+            </xsl:variable>
+
             <!-- Is the thesis work of one of the investigators? -->
             <xsl:variable name="thesis">
                 <xsl:choose>
@@ -273,6 +281,7 @@
                                                 <xsl:text>&#160;</xsl:text>
                                                 <xsl:value-of select="$obs-mode"/>
                                                 <xsl:value-of select="$obs-mode-aeon"/>
+                                                <xsl:value-of select="$us-long-term"/>
                                             </fo:block>
                                         </fo:table-cell>
                                         <fo:table-cell>
