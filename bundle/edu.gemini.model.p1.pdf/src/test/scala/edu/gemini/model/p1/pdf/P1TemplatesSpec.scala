@@ -21,17 +21,17 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
       /*(XML.loadString(result) \\ ("block")) foreach {
         e => println("'" + e.text + "'")
       }*/
-      XML.loadString(result) must \\("block") \>~ """\s*Observing Mode: Queue\s*"""
+      XML.loadString(result) must \\("block") \>~ """\s*Observing Mode: Queue.\s*"""
     }
     "write on the ObservingMode Queue + Rapid ToO, REL-646" in {
       val result = transformProposal("proposal_rapid_too.xml")
 
-      XML.loadString(result) must \\("block") \>~ """\s*Observing Mode: Queue \+ Rapid ToO\s*"""
+      XML.loadString(result) must \\("block") \>~ """\s*Observing Mode: Queue \+ Rapid ToO.\s*"""
     }
     "write on the ObservingMode Queue + Standard ToO, REL-646" in {
       val result = transformProposal("proposal_standard_too.xml")
 
-      XML.loadString(result) must \\("block") \>~ """\s*Observing Mode: Queue \+ Standard ToO\s*"""
+      XML.loadString(result) must \\("block") \>~ """\s*Observing Mode: Queue \+ Standard ToO.\s*"""
     }
     "include TAC information in case all are approved, REL-677" in {
       val result = transformProposal("proposal_submitted_to_tac_all_approved.xml")
@@ -212,8 +212,9 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
       val result = transformProposal("large_program.xml")
       val proposalXml = XML.loadString(result)
       // Check that the Observing Mode is Large Program
+      println(proposalXml \\ "table-cell" \ "block")
       val largeProgramMode = (proposalXml \\ "table-cell" \ "block") collect {
-        case e if e.text.matches( """\s*Observing Mode:.Large Program\s*""") => true
+        case e if e.text.matches( """\s*Observing Mode:.Large Program.\s*""") => true
       }
       largeProgramMode must be size 1
       // LPTAC table
@@ -234,7 +235,7 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
       val proposalXml = XML.loadString(result)
       // Check that Observing Mode is correct
       val ftMode = (proposalXml \\ "table-cell" \ "block") collect {
-        case e if e.text.matches( """\s*Observing Mode:.Fast Turnaround\s*""") => true
+        case e if e.text.matches( """\s*Observing Mode:.Fast Turnaround.\s*""") => true
       }
       ftMode must be size 1
     }

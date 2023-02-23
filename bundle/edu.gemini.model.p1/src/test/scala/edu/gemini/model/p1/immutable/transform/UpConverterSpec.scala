@@ -778,7 +778,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
         case Success(StepResult(changes, result)) =>
           changes must contain(SemesterConverter2020BTo2021A.AuSubmissionMessage)
           ProposalIo.read(result.toString()).proposalClass match {
-            case QueueProposalClass(_, _, _, Left(List(NgoSubmission(_, _, NgoPartner.US, _))), _, _, _, _) => success("ok!") // AU is gone!
+            case QueueProposalClass(_, _, _, Left(List(NgoSubmission(_, _, NgoPartner.US, _))), _, _, _, _, _) => success("ok!") // AU is gone!
             case x => failure(x.toString)
           }
         case x => failure(x.toString)
@@ -865,7 +865,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           result \\ "gnirs" must \\("filter") \> "H (1.65um)"
           result \\ "gnirs" must \\("name") \> "GNIRS Altair Natural Guidestar 0.05\"/pix H (1.65um)"
           result \\ "gnirs" must \\("pixelScale") \> "0.05\"/pix"
-      } 
+      }
     }
   }
 
