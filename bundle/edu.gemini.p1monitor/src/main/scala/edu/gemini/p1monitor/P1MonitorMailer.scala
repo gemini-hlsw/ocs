@@ -111,29 +111,29 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
 
   private def getReferenceString(propClass: ProposalClass): String = {
     val string = propClass match {
-      case pc: SpecialProposalClass                               => pc.sub.response.map(_.receipt.id).mkString(" ")
-      case ft: FastTurnaroundProgramClass                         => ft.sub.response.map(_.receipt.id).mkString(" ")
-      case sip: SubaruIntensiveProgramClass                       => sip.sub.response.map(_.receipt.id).mkString(" ")
-      case lp: LargeProgramClass                                  => lp.sub.response.map(_.receipt.id).mkString(" ")
-      case t @ QueueProposalClass(_, _, _, Right(p), _, _, _, _)  => t.subs.right.get.response.map(_.receipt.id).mkString(" ")
-      case t @ ClassicalProposalClass(_, _, _, Right(p), _, _, _) => t.subs.right.get.response.map(_.receipt.id).mkString(" ")
-      case q:  GeminiNormalProposalClass                          => ~q.subs.left.getOrElse(Nil).flatMap(_.response.map(_.receipt.id)).headOption
-      case _                                                      => ""
+      case pc: SpecialProposalClass                                  => pc.sub.response.map(_.receipt.id).mkString(" ")
+      case ft: FastTurnaroundProgramClass                            => ft.sub.response.map(_.receipt.id).mkString(" ")
+      case sip: SubaruIntensiveProgramClass                          => sip.sub.response.map(_.receipt.id).mkString(" ")
+      case lp: LargeProgramClass                                     => lp.sub.response.map(_.receipt.id).mkString(" ")
+      case t @ QueueProposalClass(_, _, _, Right(p), _, _, _, _, _)  => t.subs.right.get.response.map(_.receipt.id).mkString(" ")
+      case t @ ClassicalProposalClass(_, _, _, Right(p), _, _, _, _) => t.subs.right.get.response.map(_.receipt.id).mkString(" ")
+      case q:  GeminiNormalProposalClass                             => ~q.subs.left.getOrElse(Nil).flatMap(_.response.map(_.receipt.id)).headOption
+      case _                                                         => ""
     }
     string.trim
   }
 
   private def getTypeString(propClass: ProposalClass): String = propClass match {
-      case pc: SpecialProposalClass                                  => pc.sub.specialType.value()
-      case _:  FastTurnaroundProgramClass                            => "Fast Turnaround"
-      case _:  SubaruIntensiveProgramClass                           => "Intensive Observing Program at Subaru"
-      case _:  LargeProgramClass                                     => "Large Program"
-      case QueueProposalClass(_, _, _, Right(_), _, _, _, _)         => "Exchange"
-      case _:  QueueProposalClass                                    => "Queue"
-      case ClassicalProposalClass(_, _, _, Right(_), _, _, _)        => "Exchange"
-      case _:  ClassicalProposalClass                                => "Classical"
-      case ExchangeProposalClass(_, _, _, ExchangePartner.SUBARU, _) => "Subaru"
-      case _                                                         => ""
+      case pc: SpecialProposalClass                                     => pc.sub.specialType.value()
+      case _:  FastTurnaroundProgramClass                               => "Fast Turnaround"
+      case _:  SubaruIntensiveProgramClass                              => "Intensive Observing Program at Subaru"
+      case _:  LargeProgramClass                                        => "Large Program"
+      case QueueProposalClass(_, _, _, Right(_), _, _, _, _, _)         => "Exchange"
+      case _:  QueueProposalClass                                       => "Queue"
+      case ClassicalProposalClass(_, _, _, Right(_), _, _, _, _)        => "Exchange"
+      case _:  ClassicalProposalClass                                   => "Classical"
+      case ExchangeProposalClass(_, _, _, ExchangePartner.SUBARU, _)    => "Subaru"
+      case _                                                            => ""
     }
 
   private def getTypeName(dir: String, propClass: ProposalClass): String = propClass match {
