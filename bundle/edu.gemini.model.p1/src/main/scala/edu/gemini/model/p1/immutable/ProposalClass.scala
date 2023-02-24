@@ -136,7 +136,7 @@ case class QueueProposalClass(itac: Option[Itac],
   }
 
   def reset: QueueProposalClass = subs match {
-    case Left(ss) => copy(key = None, itac = None, subs = Left(Nil))
+    case Left(ss) => copy(key = None, itac = None, subs = Left(ss.map(_.reset)))
     case Right(s) => copy(key = None, itac = None, subs = Right(s.reset))
   }
 
