@@ -614,7 +614,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       } === 0)
     } yield {
       new Problem(Severity.Error,
-        "US Long Term status only applies to US proposals.", "Observations", {
+        "US Long Term status only applies to proposals requesting time from the US.", "Observations", {
         s.showPartnersView()
       })
     }
