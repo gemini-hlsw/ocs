@@ -115,6 +115,11 @@ sealed trait ExpMethod extends CalculationMethod {
   def sigma: Double
 }
 
+sealed trait SpecIntMethod extends CalculationMethod {
+  def sigma: Double
+  def wavelength: Double
+}
+
 // Return the Signal-to-Noise given the number of exposures, exposure time, etc.
 final case class ImagingS2N(
                     exposures: Int,
@@ -131,7 +136,7 @@ final case class ImagingInt(
                     sourceFraction: Double,
                     offset: Double) extends Imaging with IntMethod
 
-// Return the exposure time given the desired S/N
+// Return the exposure time and number of exposures given the desired S/N
 final case class ImagingExp(
                     sigma: Double,
                     exposureTime: Double,
@@ -145,6 +150,16 @@ final case class SpectroscopyS2N(
                     exposureTime: Double,
                     sourceFraction: Double,
                     offset: Double) extends Spectroscopy with S2NMethod
+
+// Return the spectroscopic integration time (exposure time & number of exposures) given the desired S/N
+final case class SpectroscopyInt(
+                    sigma: Double,
+                    wavelength: Double,
+                    coadds: Option[Int],
+                    exposureTime: Double,
+                    exposures: Int,
+                    sourceFraction: Double,
+                    offset: Double) extends Spectroscopy with SpecIntMethod
 
 
 // ==== Analysis method

@@ -5,7 +5,6 @@ import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.shared.S2NMethod;
 import edu.gemini.shared.util.immutable.*;
 import java.util.logging.Logger;
-
 /*
  * A helper class that collects some printing methods that used to be defined on the calculatable objects directly
  * but had to be moved somewhere else in order to be able to separate the calculation from the presentation logic.
@@ -89,11 +88,12 @@ public final class CalculatablePrinter {
 
     private static String getTextResult(final ObservationDetails obs, final ImagingMethodExptime s2n) {
         final StringBuilder sb = new StringBuilder(CalculatablePrinter.getTextResult(s2n));
-        sb.append(String.format("Derived exposure time = %.2f seconds", s2n.getExposureTime()));
+        sb.append(String.format("Derived integration time = %.2f seconds (%d x %.2f seconds)",
+                s2n.numberSourceExposures() * s2n.getExposureTime(), s2n.numberSourceExposures(), s2n.getExposureTime()));
         if (obs.calculationMethod().coaddsOrElse(1) > 1) {
             sb.append(String.format(" each having %d coadds", obs.calculationMethod().coaddsOrElse(1)));
         }
-        sb.append(String.format(".\nThe resulting S/N is %.2f\n\n", s2n.singleSNRatio()));
+        sb.append(String.format(".\n\nThe resulting S/N is %.2f\n", s2n.totalSNRatio()));
         return sb.toString();
     }
 
@@ -110,6 +110,7 @@ public final class CalculatablePrinter {
             throw new Error("Unsupported calculation method");
         }
     }
+
 
     private static String getTextResult(final ImagingS2NCalculation s2n) {
         return

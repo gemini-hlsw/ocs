@@ -143,7 +143,6 @@ public final class HtmlPrinter {
         sb.append("<LI>Mode: ");
         sb.append((odp.calculationMethod() instanceof Imaging ? "imaging" : "spectroscopy"));
         sb.append("\n");
-
         sb.append("<LI>Calculation of ");
         if (odp.calculationMethod() instanceof S2NMethod) {
             sb.append(String.format("S/N ratio with %d", ((S2NMethod) odp.calculationMethod()).exposures()));
@@ -151,10 +150,13 @@ public final class HtmlPrinter {
             sb.append(String.format("integration time from a S/N ratio of %.2f for", ((ImagingInt) odp.calculationMethod()).sigma()));
         } else if (odp.calculationMethod() instanceof ExpMethod) {
             sb.append(String.format("exposure time for a S/N ratio of %.2f.", ((ImagingExp) odp.calculationMethod()).sigma()));
+        } else if (odp.calculationMethod() instanceof SpectroscopyInt) {
+            sb.append(String.format("exposure time and number of exposures for a S/N ratio of %.1f at wavelength %.2f nm.",
+                    ((SpectroscopyInt) odp.calculationMethod()).sigma(), ((SpectroscopyInt) odp.calculationMethod()).wavelength()));
         } else {
             throw new Error("Unsupported calculation method");
         }
-        if (! (odp.calculationMethod() instanceof ExpMethod)) {
+        if ( (odp.calculationMethod() instanceof S2NMethod) || (odp.calculationMethod() instanceof IntMethod)) {
             sb.append(String.format(" exposures of %.2f secs", odp.exposureTime()));
             if (odp.calculationMethod().coaddsOrElse(1) > 1) {
                 sb.append(String.format(" and %d coadds", odp.calculationMethod().coaddsOrElse(1)));

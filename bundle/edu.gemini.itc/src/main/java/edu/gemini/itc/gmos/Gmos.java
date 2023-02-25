@@ -99,7 +99,6 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
                 String name = getCcdNames()[detectorCcdIndex];
                 _detector = new Detector(getDirectory() + "/", getPrefix(), fileName, "Hamamatsu array", name);
                 _detector.setDetectorPixels(detectorPixels());
-                Log.fine("detectorCcdIndex = " + detectorCcdIndex);
                 if (detectorCcdIndex == 0)
                     _instruments = createCcdArray();
                 break;

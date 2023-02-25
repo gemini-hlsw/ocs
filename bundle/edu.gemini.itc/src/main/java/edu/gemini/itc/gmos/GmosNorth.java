@@ -1,19 +1,15 @@
 package edu.gemini.itc.gmos;
 
 import edu.gemini.itc.shared.GmosParameters;
-import edu.gemini.itc.shared.ImagingExp;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 
-import java.util.logging.Logger;
 
 /**
  * Gmos specification class
  */
 public final class GmosNorth extends Gmos {
-
-    private static final Logger Log = Logger.getLogger(GmosNorth.class.getName());
 
     // value taken from instrument's web documentation
     private static final double WellDepth = 105000;
@@ -51,14 +47,7 @@ public final class GmosNorth extends Gmos {
 
     @Override
     protected Gmos[] createCcdArray() {
-        if (odp.calculationMethod() instanceof ImagingExp) {  // Only use the central CCD to speed up calculations
-            Log.fine("Returning CCD1 only");                  // This should return CCD2 only.
-            return new Gmos[]{this};                          // This line is not correct,
-            //return new Gmos[]{new GmosNorth(gp, odp, 1)};   // but this line does not work.
-        } else {
-            Log.fine("Returning array of all 3 CCDs");
-            return new Gmos[]{this, new GmosNorth(gp, odp, 1), new GmosNorth(gp, odp, 2)};
-        }
+        return new Gmos[]{this, new GmosNorth(gp, odp, 1), new GmosNorth(gp, odp, 2)};
     }
 
     @Override

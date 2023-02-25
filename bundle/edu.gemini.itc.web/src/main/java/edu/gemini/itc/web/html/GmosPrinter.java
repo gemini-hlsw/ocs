@@ -12,14 +12,13 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 
 import java.io.PrintWriter;
-import java.util.logging.Logger;
 import java.util.*;
 
 /**
  * Helper class for printing GMOS calculation results to an output stream.
  */
 public final class GmosPrinter extends PrinterBase implements OverheadTablePrinter.PrinterWithOverhead {
-    private static final Logger Log = Logger.getLogger(GmosPrinter.class.getName());
+
     private final GmosRecipe recipe;
     private final PlottingDetails pdp;
     private final boolean isImaging;
@@ -54,6 +53,7 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
     private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult[] results, final ItcSpectroscopyResult s) {
 
         final Gmos mainInstrument = (Gmos) results[0].instrument(); // main instrument
+        final CalculationMethod calcMethod = p.observation().calculationMethod();
 
         _println("");
 
@@ -70,7 +70,16 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
         _printSkyAperture(result);
         _println("");
 
-        _printRequestedIntegrationTime(result);
+        if (calcMethod instanceof SpectroscopyInt) {
+            int exposureTime = recipe.getExposureTime();
+            int numberExposures = recipe.getNumberExposures();
+            _println(String.format(
+                "Total integration time = %d seconds (%d x %d s), of which %d seconds is on source.",
+                numberExposures * exposureTime, numberExposures, exposureTime,
+                (int) (exposureTime * numberExposures * result.observation().sourceFraction())));
+        } else {
+            _printRequestedIntegrationTime(result);
+        }
         _println("");
 
         scala.Option<ItcCcd> ccdWithMaxPeak = scala.Option.empty();
@@ -159,7 +168,6 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
         _println("Read noise: " + instrument.getReadNoise());
 
         final Gmos[] ccdArray = instrument.getDetectorCcdInstruments();
-        Log.fine("ccdArray.length = " + ccdArray.length);
 
         for (final Gmos ccd : ccdArray) {
 

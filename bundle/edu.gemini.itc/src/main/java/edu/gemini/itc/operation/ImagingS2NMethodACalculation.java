@@ -42,8 +42,8 @@ public final class ImagingS2NMethodACalculation extends ImagingS2NCalculation {
 
     }
 
-    @Override public double numberSourceExposures() {
-        return number_exposures * frac_with_source * coadds;
+    @Override public int numberSourceExposures() {
+        return (int) (number_exposures * frac_with_source * coadds);
     }
 
 }

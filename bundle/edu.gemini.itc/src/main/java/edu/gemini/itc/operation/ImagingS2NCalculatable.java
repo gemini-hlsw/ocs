@@ -12,7 +12,7 @@ public interface ImagingS2NCalculatable extends Calculatable {
     double getVarReadout();
     double getExposureTime();
 
-    double numberSourceExposures();
+    int numberSourceExposures();
 
     double singleSNRatio();
     double totalSNRatio();
