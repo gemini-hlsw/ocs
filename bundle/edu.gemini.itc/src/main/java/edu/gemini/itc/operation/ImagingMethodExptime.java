@@ -46,7 +46,6 @@ public final class ImagingMethodExptime extends ImagingS2NCalculation {
         // 3. Calculate the number of exposures, if more than one are required.
         // 4. Calculate the exposure time.
 
-        Log.fine(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         super.calculate();  // perform an initial S/N calculation using the default values from the HTML form
         double snr = totalSNRatio();
         Log.fine(String.format("Total S/N = %.2f from %d x %.2f second exposures", snr, numberExposures, exposure_time));
@@ -59,10 +58,10 @@ public final class ImagingMethodExptime extends ImagingS2NCalculation {
         double timeToHalfMax = maxFlux / 2. / peakFlux * exposure_time;  // time to reach half of the maximum (our goal)
         Log.fine(String.format("timeToHalfMax = %.2f seconds", timeToHalfMax));
 
-        if (timeToHalfMax < 1.0) {
-            throw new RuntimeException(String.format("This target is too bright for this configuration.\n" +
-                    "The detector well is half filled in %.2f seconds.", timeToHalfMax));
-        }
+        if (timeToHalfMax < 1.0) throw new RuntimeException(String.format(
+                "This target is too bright for this configuration.\n" +
+                "The detector well is half filled in %.2f seconds.", timeToHalfMax));
+
         int maxExptime = Math.min(1200, (int) timeToHalfMax);  // 1200s is the (GMOS) maximum due to cosmic rays
         Log.fine(String.format("maxExptime = %d seconds", maxExptime));
 
@@ -82,7 +81,6 @@ public final class ImagingMethodExptime extends ImagingS2NCalculation {
 
         super.calculate();
         Log.fine("totalSNRatio = " + totalSNRatio());
-        Log.fine("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
     }
 
     @Override public int numberSourceExposures() { return numberExposures; }

@@ -193,10 +193,10 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             Log.fine(String.format("exposureTime = %d seconds", exposureTime));
             double timeToHalfMax = maxFlux / 2. / peakFlux * exposureTime;  // time to reach half of the maximum (our goal)
             Log.fine(String.format("timeToHalfMax = %.2f seconds", timeToHalfMax));
-            if (timeToHalfMax < 1.0) {
-                throw new RuntimeException(String.format("This target is too bright for this configuration.\n" +
-                        "The detector well is half filled in %.2f seconds.", timeToHalfMax));
-            }
+            if (timeToHalfMax < 1.0) throw new RuntimeException(String.format(
+                    "This target is too bright for this configuration.\n" +
+                    "The detector well is half filled in %.2f seconds.", timeToHalfMax));
+
             int maxExptime = Math.min(1200, (int) timeToHalfMax);     // 1200s is maximum due to cosmic rays
             Log.fine(String.format("maxExptime = %d seconds", maxExptime));
             double desiredSNR = ((SpectroscopyInt) calcMethod).sigma();
