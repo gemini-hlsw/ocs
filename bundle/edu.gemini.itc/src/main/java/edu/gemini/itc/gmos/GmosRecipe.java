@@ -85,7 +85,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         _obsDetailParameters    = p.observation();
         _obsConditionParameters = p.conditions();
         _telescope              = p.telescope();
-
+        this.exposureTime       = (int) p.observation().exposureTime();
         // some general validations
         Validation.validate(mainInstrument, _obsDetailParameters, _sdParameters);
     }
@@ -119,7 +119,6 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final CalculationMethod calcMethod = _obsDetailParameters.calculationMethod();
         Log.fine("calcMethod = " + calcMethod);
 
-        int numberExposures;
         if (calcMethod instanceof SpectroscopyS2N) {
             numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
         } else if (calcMethod instanceof SpectroscopyInt) {
@@ -130,8 +129,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
         for (int i = 0; i < ccdArray.length; i++) {
             final Gmos instrument = ccdArray[i];
-            results[i] = calculateSpectroscopy(mainInstrument, instrument, ccdArray.length,
-                    calcMethod.exposureTime(), numberExposures);
+            results[i] = calculateSpectroscopy(mainInstrument, instrument, ccdArray.length, exposureTime, numberExposures);
         }
 
         if (calcMethod instanceof SpectroscopyInt) {
@@ -189,7 +187,6 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             Log.fine("-> peakFlux over all CCDs = " + peakFlux);
             double maxFlux = mainInstrument.maxFlux();  // maximum useful flux
             Log.fine(String.format("maxFlux = %.0f electrons", maxFlux));
-            int exposureTime = (int) calcMethod.exposureTime();
             Log.fine(String.format("exposureTime = %d seconds", exposureTime));
             double timeToHalfMax = maxFlux / 2. / peakFlux * exposureTime;  // time to reach half of the maximum (our goal)
             Log.fine(String.format("timeToHalfMax = %.2f seconds", timeToHalfMax));
@@ -205,7 +202,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             int oldNumberExposures = 0;
             int oldExposureTime = 0;
             int iterations = 0;
-            while ((numberExposures != oldNumberExposures) || (exposureTime != oldExposureTime)) {
+            while ((numberExposures != oldNumberExposures || exposureTime != oldExposureTime) && iterations <= 5) {
                 iterations += 1;
                 Log.fine(String.format("--- ITERATION %d (%d != %d) or (%d != %d) ---",
                         iterations, oldNumberExposures, numberExposures, oldExposureTime, exposureTime));
@@ -219,15 +216,8 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 exposureTime = (int) Math.ceil(totalTime / numberExposures);
                 Log.fine(String.format("exposureTime = %d", exposureTime));
 
-                if ((numberExposures == oldNumberExposures) && (exposureTime == oldExposureTime)) {
-                    Log.fine("No change since the last iteration, so calculating final results for all CCDS...");
-                    this.exposureTime = exposureTime;
-                    this.numberExposures = numberExposures;
-                    for (int i = 0; i < ccdArray.length; i++) {
-                        final Gmos instrument = ccdArray[i];
-                        results[i] = calculateSpectroscopy(mainInstrument, instrument, ccdArray.length, exposureTime, numberExposures);
-                    }
-                } else { // Recalculate the S/N on the relevant CCD and see how we did
+                if ((numberExposures != oldNumberExposures || exposureTime != oldExposureTime) && iterations <= 5) {
+                    // Try one more iteration to see if we can get closer to the requested S/N
                     final Gmos instrument = ccdArray[ccd];
                     final SpectroscopyResult newresult = calculateSpectroscopy(mainInstrument, instrument, ccdArray.length, exposureTime, numberExposures);
                     final GmosSpecS2N specS2N = (GmosSpecS2N) newresult.specS2N()[0];
@@ -235,6 +225,16 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                     snr = fins2n.getY(wavelength);
                     Log.fine(String.format("Iteration %d: %d x %d sec -> S/N @ %.2f nm = %.2f",
                             iterations, numberExposures, exposureTime, wavelength, snr));
+                } else {
+                    if (iterations > 5) {
+                        Log.fine("Stopping and calculating the results for all CCDs");
+                    } else {
+                        Log.fine("No change since the last iteration, so calculating final results for all CCDs");
+                    }
+                    for (int i = 0; i < ccdArray.length; i++) {
+                        final Gmos instrument = ccdArray[i];
+                        results[i] = calculateSpectroscopy(mainInstrument, instrument, ccdArray.length, exposureTime, numberExposures);
+                    }
                 }
             }
         }
@@ -581,9 +581,10 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument, SFcalc, im_qual, sed_integral, sky_integral);
         IS2Ncalc.calculate();
+        exposureTime = (int) IS2Ncalc.getExposureTime();
+        numberExposures = IS2Ncalc.numberSourceExposures();
 
         // Calculate the Peak Pixel Flux
-        double exposureTime = IS2Ncalc.getExposureTime();
         final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, exposureTime, SFcalc, im_qual, sed_integral, sky_integral);
 
         return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);

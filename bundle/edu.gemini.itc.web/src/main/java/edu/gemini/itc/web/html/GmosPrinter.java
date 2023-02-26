@@ -19,7 +19,7 @@ import java.util.*;
  */
 public final class GmosPrinter extends PrinterBase implements OverheadTablePrinter.PrinterWithOverhead {
 
-    private final GmosRecipe recipe;
+    final GmosRecipe recipe;
     private final PlottingDetails pdp;
     private final boolean isImaging;
     private final ItcParameters p;
@@ -260,7 +260,7 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
 
     public ConfigCreator.ConfigCreatorResult createInstConfig(int numberExposures) {
         ConfigCreator cc = new ConfigCreator(p);
-        return cc.createGmosConfig(instr, numberExposures);
+        return cc.createGmosConfig(instr, numberExposures, recipe.getExposureTime());
     }
 
     public ItcOverheadProvider getInst() {

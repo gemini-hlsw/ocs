@@ -385,7 +385,10 @@ object ITCRequest {
           r.doubleParameter("offset")
         )
 
-      case _ => throw new IllegalArgumentException("Unsupported analysis mode.")
+      case _ => throw new IllegalArgumentException(
+        "An incompatible calculation method is selected.\n" +
+        "Please select a spectroscopic calculation method for\n" +
+        "spectroscopy or an imaging calculation method for imaging.")
     }
 
     ObservationDetails(calculationMethod, analysisMethod(r))
