@@ -48,7 +48,6 @@
     <type name="SIP">
         <dir>/home/software/proposals/subaru_intensive_program/proposals/2023B</dir>
         <to>pitlp@gemini.edu</to>
-        <template>da</template>
     </type>
 
     <type name="ar">
@@ -95,7 +94,6 @@
     <type name="subaru">
         <dir>/home/software/proposals/subaru/proposals/2023B</dir>
         <to>pit.subaru@gemini.edu</to>
-        <template>da</template>
     </type>
 
     <filetranslation>
