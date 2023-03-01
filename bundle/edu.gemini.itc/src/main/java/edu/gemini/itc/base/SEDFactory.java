@@ -289,7 +289,6 @@ public final class SEDFactory {
                 odp.wv(),
                 odp.airmass(),
                 getWater(instrument));
-
         sed.accept(water);
 
         // Background spectrum is introduced here.

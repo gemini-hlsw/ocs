@@ -4,6 +4,7 @@
 
 package edu.gemini.wdba.tcc;
 
+import edu.gemini.spModel.gemini.visitor.VisitorConfig;
 import edu.gemini.spModel.gemini.visitor.VisitorInstrument;
 
 import org.junit.Test;
@@ -23,6 +24,11 @@ public final class VisitorInstrumentSupportTest extends InstrumentSupportTestBas
         setInstrument(visitor);
 
         verifyInstrumentConfig(getSouthResults(), "VISITOR");
+
+        visitor.setVisitorConfig(VisitorConfig.Alopeke$.MODULE$);
+        setInstrument(visitor);
+
+        verifyInstrumentConfig(getSouthResults(), "ALOPEKE2");
     }
 
     @Test public void testChopState() throws Exception {
@@ -37,6 +43,11 @@ public final class VisitorInstrumentSupportTest extends InstrumentSupportTestBas
         setInstrument(visitor);
 
         verifyPointOrig(getSouthResults(), "visitor");
+
+        visitor.setVisitorConfig(VisitorConfig.Alopeke$.MODULE$);
+        setInstrument(visitor);
+
+        verifyPointOrig(getSouthResults(), "alopeke");
     }
 
     @Test public void testWavelength() throws Exception {

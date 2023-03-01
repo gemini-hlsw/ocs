@@ -84,7 +84,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           List(incompleteInvestigator, missingObsElementCheck, emptyTargetCheck,
             emptyEphemerisCheck, singlePointEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
             badGuiding, cwfsCorrectionsIssue, badVisibility, iffyVisibility, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsIQ70Check, lgsGemsIQ85Check,
-            lgsCC50Check, texesCCCheck, texesWVCheck, gmosWVCheck, gmosR600Check, dssiObsolete, band3IQ, band3LGS, band3RapidToO, sbIrObservation).flatten
+            lgsCC50Check, texesCCCheck, texesWVCheck, gmosWVCheck, gmosR600Check, dssiObsolete, ghostTargetCheck, band3IQ, band3LGS, band3RapidToO, sbIrObservation, usLongTermCheck).flatten
       ps.sorted
     }
 
@@ -153,6 +153,16 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if a.length > MaxAttachmentSizeBytes
     } yield new Problem(Severity.Error, s"Attachment '${a.getName}' is larger than ${MaxAttachmentSize}MB.", "Overview", if (i == 1) s.inOverview(_.attachment1.select.doClick()) else s.inOverview(_.attachment2.select.doClick()))
 
+
+    private lazy val ghostTargetCheck = for {
+      o  <- p.nonEmptyObservations
+      b <- o.blueprint
+      if b.isInstanceOf[GhostBlueprint]
+      t <- p.targets.collect {
+        case t @ NonSiderealTarget(_, _, _, _, _, _, _) => t
+      }.headOption
+      msg = s"""GHOST cannot be used at the moment with Non Sidereal target "${t.name}".""""
+    } yield new Problem(Severity.Error, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private lazy val emptyTargetCheck = for {
       t <- p.targets
@@ -542,19 +552,19 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         "Observations",
         indicateObservation(o))
 
-    private lazy val minTimeCheck = {
-
-      val subs:List[Submission] = p.proposalClass match {
-        case n: GeminiNormalProposalClass   => n.subs match {
-          case Left(ss)  => ss
-          case Right(ss) => List(ss)
-        }
-        case e: ExchangeProposalClass       => e.subs
-        case s: SpecialProposalClass        => List(s.sub)
-        case l: LargeProgramClass           => List(l.sub)
-        case i: SubaruIntensiveProgramClass => List(i.sub)
-        case f: FastTurnaroundProgramClass  => List(f.sub)
+    val subs:List[Submission] = p.proposalClass match {
+      case n: GeminiNormalProposalClass   => n.subs match {
+        case Left(ss)  => ss
+        case Right(ss) => List(ss)
       }
+      case e: ExchangeProposalClass       => e.subs
+      case s: SpecialProposalClass        => List(s.sub)
+      case l: LargeProgramClass           => List(l.sub)
+      case i: SubaruIntensiveProgramClass => List(i.sub)
+      case f: FastTurnaroundProgramClass  => List(f.sub)
+    }
+
+    private lazy val minTimeCheck = {
 
       subs.filter(sub => sub.request.time.hours < sub.request.minTime.hours).map {
         sub =>
@@ -581,6 +591,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       o <- p.nonEmptyObservations
       if o.band == Band.BAND_3 && (p.proposalClass match {
         case q: QueueProposalClass if q.band3request.isDefined => false
+        case s: SpecialProposalClass if s.band3request.isDefined && s.sub.specialType == SpecialProposalType.GUARANTEED_TIME => false
         case _                                                 => true
       })
     } yield {
@@ -588,6 +599,23 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         "Allow consideration for Band 3 or delete the Band 3 observation.", "Observations", {
         s.showPartnersView()
         s.inObsListView(o.band, v => v.Fixes.indicateObservation(o))
+      })
+    }
+
+    private lazy val usLongTermCheck = for {
+      _ <- List(p.proposalClass)
+      if (p.proposalClass match {
+        case q: QueueProposalClass     => q.usLongTerm
+        case c: ClassicalProposalClass => c.usLongTerm
+        case _                         => false
+      })
+      if (subs.count {
+        case p: NgoSubmission => p.partner === NgoPartner.US
+      } === 0)
+    } yield {
+      new Problem(Severity.Error,
+        "US Long Term status only applies to proposals requesting time from the US.", "Observations", {
+        s.showPartnersView()
       })
     }
 
@@ -707,7 +735,7 @@ object TimeProblems {
 
   // REL-3493: All CFH exchange time will now be done in queue.
   def noCFHClassical(p: Proposal, s: ShellAdvisor): Option[ProblemRobot.Problem] = p.proposalClass match {
-    case ClassicalProposalClass(_, _, _, Right(ExchangeSubmission(_, _, ExchangePartner.CFH, _)), _, _, _) =>
+    case ClassicalProposalClass(_, _, _, Right(ExchangeSubmission(_, _, ExchangePartner.CFH, _)), _, _, _, _) =>
       Some(new Problem(Severity.Error, "All CFH exchange time will now be done in queue.", SCHEDULING_SECTION, s.inPartnersView(_.editProposalClass())))
     case _ => None
   }

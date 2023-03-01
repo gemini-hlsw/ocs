@@ -17,6 +17,9 @@
       in {
         devShell = pkgs.devshell.mkShell {
           imports = [ typelevel-nix.typelevelShell ];
+          packages = [
+            pkgs.subversion
+          ];
           typelevelShell = { jdk.package = pkgs.jdk8; };
         };
       }

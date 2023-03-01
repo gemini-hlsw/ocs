@@ -353,7 +353,7 @@ object SubmissionDecision {
 }
 
 case class SubmissionDecision(decision:Either[SubmissionReject, SubmissionAccept]) {
-  def update(m:M.SubmissionResponse) {
+  def update(m:M.SubmissionResponse): Unit = {
     m.setAccept(decision.right.map(_.mutable).right.getOrElse(null))
     m.setReject(decision.left.map(_.mutable).left.getOrElse(null))
   }

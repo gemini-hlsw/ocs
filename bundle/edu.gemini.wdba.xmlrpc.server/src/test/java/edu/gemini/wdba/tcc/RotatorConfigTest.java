@@ -13,6 +13,8 @@ import edu.gemini.spModel.gemini.gpi.Gpi;
 import edu.gemini.spModel.gemini.nici.InstNICI;
 import edu.gemini.spModel.gemini.nici.NICIParams;
 import edu.gemini.spModel.gemini.niri.InstNIRI;
+import edu.gemini.spModel.gemini.visitor.VisitorConfig;
+import edu.gemini.spModel.gemini.visitor.VisitorInstrument;
 import org.dom4j.Document;
 import org.dom4j.Element;
 
@@ -52,6 +54,14 @@ public class RotatorConfigTest extends TestBase {
 
     private Gpi addGpi() throws Exception {
         return (Gpi) addInstrument(Gpi.SP_TYPE).getDataObject();
+    }
+
+    private VisitorInstrument addMaroonX() throws Exception {
+        final ISPObsComponent   oc = addInstrument(SPComponentType.INSTRUMENT_VISITOR);
+        final VisitorInstrument vi = (VisitorInstrument) oc.getDataObject();
+        vi.setVisitorConfig(VisitorConfig.MaroonX$.MODULE$);
+        oc.setDataObject(vi);
+        return vi;
     }
 
     private InstGmosSouth addGmos() throws Exception {
@@ -265,6 +275,20 @@ public class RotatorConfigTest extends TestBase {
         val.type  = Type.rotator;
         val.name  = "GPIFixed";
         val.ipa   = "180";
+        val.cosys = TccNames.FIXED;
+        val.validate();
+    }
+
+    @Test public void testMaroonXFixed() throws Exception {
+        VisitorInstrument vi = addMaroonX();
+        vi.setPosAngleDegrees(15.0); // this should be ignored due to Maroon X position angle mode
+        instObsComp.setDataObject(vi);
+
+        RotConfigValidator val = new RotConfigValidator();
+        val.site  = Site.north;
+        val.type  = Type.rotator;
+        val.name  = "fixed";
+        val.ipa   = "0"; // should always be 0 for Maroon X
         val.cosys = TccNames.FIXED;
         val.validate();
     }

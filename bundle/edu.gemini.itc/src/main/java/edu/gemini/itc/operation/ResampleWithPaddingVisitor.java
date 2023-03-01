@@ -3,10 +3,6 @@ package edu.gemini.itc.operation;
 import edu.gemini.itc.base.SampledSpectrum;
 import edu.gemini.itc.base.SampledSpectrumVisitor;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.sql.Timestamp;
-
 /**
  * A resampling operation can move the start or end of the spectrum
  * and change the sampling wavelength interval.
@@ -70,13 +66,10 @@ public class ResampleWithPaddingVisitor implements SampledSpectrumVisitor {
         // Sed is going to get a new array
         double[] data = new double[num_elements];
 
-        //System.out.println("sed.getStart(): " + sed.getStart() + "  getStart: " +  getStart() + " sed.getEnd(): " + sed.getEnd() + " getEnd(): " + getEnd());
         // If No padding is needed revert back to the old code for
         // resample visitor.
         if ((sed.getStart() <= getStart()) && (sed.getEnd() >= getEnd())) {
             int startIndex = sed.getLowerIndex(getStart());
-
-            //System.out.println("sed.getSampling(): " + sed.getSampling() + "  getSampling(): " +  getSampling() + " sed.getX(startIndex): " + sed.getX(startIndex) + " getStart(): " + getStart());
 
             if (sed.getSampling() == getSampling() &&
                     sed.getX(startIndex) == getStart()) {
@@ -90,36 +83,15 @@ public class ResampleWithPaddingVisitor implements SampledSpectrumVisitor {
 
             } else {
                 // Loop to go assign values to each element of the new array
-                //System.out.println("resampling requires interpolation " +  num_elements);
-                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-                //String fileName = "ResampleWithPadding_" + timestamp.toString().replace(' ', '_') +".dat";
-                try {
-                    //BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
-                    for (int i = 1; i < num_elements; i++) {
-                        // interpolate new values
-                        //data[i] = sed.getY(getStart() + i * getSampling());
-                        //data[i] = sed.getSum(getStart() + i * getSampling(), getStart() + i * getSampling()+ getSampling())/(getSampling()/sed.getSampling()+1);
-
-                        data[i] = sed.getAverage(getStart() + i * getSampling() - getSampling(), getStart() + i * getSampling() + getSampling());
-
-                        /*writer.append(i + "\txstar: " + (getStart() + i * getSampling() - getSampling())
-                                         + "\txEnd: " + (getStart() + i * getSampling() + getSampling())
-                                         + "\tinitInt: "+ sed.getLowerIndex((getStart() + i * getSampling() - getSampling()))
-                                         + "\tendInt: "+ sed.getLowerIndex(getStart() + i * getSampling() + getSampling())
-                                         + "\tnewVal: " + data[i] + "\n");
-
-                         */
-
-                    }
-                    //writer.close();
-                }
-                catch (Exception e) {
-                    //System.out.println("error creating the file: " + fileName);
-                }
-
+                //System.out.println("resampling requires interpolation" );
+                for (int i = 1; i < num_elements; i++) {
+                    // interpolate new values
+                    //data[i] = sed.getY(getStart() + i * getSampling());
+                    //data[i] = sed.getSum(getStart() + i * getSampling(), getStart() + i * getSampling()+ getSampling())/(getSampling()/sed.getSampling()+1);
+                    data[i] = sed.getAverage(getStart() + i * getSampling() - getSampling(), getStart() + i * getSampling() + getSampling());
                     //System.out.println("point:" + sed.getY(getStart() + i * getSampling())+ "next: "+ sed.getY(getStart() + i * getSampling()+ getSampling()) + "INT: " + data[i]);
 
-
+                }
 
             }
         } else {

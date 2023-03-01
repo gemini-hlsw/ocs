@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2013.2.1">
+    <meta band3optionChosen="false"/>
+    <semester half="B" year="2013"/>
+    <title></title>
+    <abstract></abstract>
+    <scheduling></scheduling>
+    <keywords/>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets>
+        <sidereal epoch="J2000" id="target-0">
+            <name>vega</name>
+            <degDeg>
+                <ra>279.23473479</ra>
+                <dec>38.78368896</dec>
+            </degDeg>
+            <properMotion deltaDec="286.23" deltaRA="200.94"/>
+            <magnitudes>
+                <magnitude system="Vega" band="B">0.029999999329447746</magnitude>
+                <magnitude system="Vega" band="V">0.029999999329447746</magnitude>
+                <magnitude system="Vega" band="R">0.10000000149011612</magnitude>
+                <magnitude system="Vega" band="J">-0.18000000715255737</magnitude>
+                <magnitude system="Vega" band="H">-0.029999999329447746</magnitude>
+                <magnitude system="Vega" band="K">0.12999999523162842</magnitude>
+            </magnitudes>
+        </sidereal>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC Any, IQ Any, SB Any/Bright, WV Any</name>
+            <cc>Any</cc>
+            <iq>Any</iq>
+            <sb>Any/Bright</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <ghost>
+            <Ghost id="blueprint-0">
+                <name>Ghost Precision Radial Velocity Target + Sky</name>
+                <visitor>false</visitor>
+                <resolutionMode>Precision Radial Velocity</resolutionMode>
+                <targetMode>Target + Sky</targetMode>
+            </Ghost>
+        </ghost>
+    </blueprints>
+    <observations>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" enabled="true" band="Band 1/2">
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>0</percentage>
+                    <evaluation>Failure</evaluation>
+                </guiding>
+                <visibility>Limited</visibility>
+                <gsa>6</gsa>
+            </meta>
+        </observation>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None"/>
+    </proposalClass>
+</proposal>

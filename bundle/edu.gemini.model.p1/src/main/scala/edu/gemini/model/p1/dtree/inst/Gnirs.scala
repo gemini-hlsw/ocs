@@ -22,12 +22,12 @@ object Gnirs {
     val description = "Please select pixel scale."
     val choices = GnirsPixelScale.values.toList
     def apply(ps:GnirsPixelScale) = Left(new ModeNode((a, ps)))
-    
+
     override def default = a match {
       case AltairNone => Some(GnirsPixelScale.PS_015)
       case _          => Some(GnirsPixelScale.PS_005)
     }
-    
+
     def unapply = {
       case b:GnirsBlueprintBase => b.pixelScale
     }
@@ -87,7 +87,10 @@ object Gnirs {
     extends SingleSelectNode[(Altair, GnirsPixelScale, GnirsDisperser, GnirsCrossDisperser), GnirsFpu, (Altair, GnirsPixelScale, GnirsDisperser, GnirsCrossDisperser, GnirsFpu)](s) {
     val title = "Focal Plane Unit"
     val description = "Please select a focal plane unit."
-    val choices = GnirsFpu.values.toList
+    // REL-4149 Allow LR_IFU only for pixel scale 0.15 and No crossdisperser
+    // REL-4149 was reverted but let's keep the code until LR-IFU is available
+    // val choices = GnirsFpu.values.filterNot(f => (!(s._2 == GnirsPixelScale.PS_015 && s._4 == GnirsCrossDisperser.No) && f == GnirsFpu.LR_IFU) || f == GnirsFpu.HR_IFU).toList
+    val choices = GnirsFpu.values.filterNot(f => f == GnirsFpu.LR_IFU || f == GnirsFpu.HR_IFU).toList
     def apply(f:GnirsFpu) = Left(new CentralWavelengthNode((s._1, s._2, s._3, s._4, f)))
     def unapply = {
       case b:GnirsBlueprintSpectroscopy => b.fpu
@@ -98,7 +101,11 @@ object Gnirs {
     extends SingleSelectNode[(Altair, GnirsPixelScale, GnirsDisperser, GnirsCrossDisperser, GnirsFpu), GnirsCentralWavelength, GnirsBlueprintSpectroscopy](s) {
     val title = "Central Wavelength"
     val description = "Please select a central wavelength range."
-    val choices = GnirsCentralWavelength.values .toList
+    def choices = s._2 match {
+      case GnirsPixelScale.PS_005 => GnirsCentralWavelength.values.toList
+      case GnirsPixelScale.PS_015 => List(GnirsCentralWavelength.LT_25)
+    }
+    override def default = Option(GnirsCentralWavelength.LT_25)
     def apply(c:GnirsCentralWavelength) = Right(GnirsBlueprintSpectroscopy(s._1, s._2, s._3, s._4, s._5, c))
     def unapply = {
       case b:GnirsBlueprintSpectroscopy => b.centralWavelength

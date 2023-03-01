@@ -22,7 +22,14 @@ ocsAppManifest := {
     configs = List(
       common(v), // note, each config extends xxx_credentials, defined in $TOP/project/OcsCredentials.scala
         with_gogo(v),
+          rnorris(v),
+          swalker(v),
+          jluhrs(v),
           cquiroz(v),
+          sraaphorst(v),
+          anunez(v),
+          astephens(v),
+          osmirnova(v),
           with_remote_gogo(v),
             odbtest(v),
               gsodbtest(v),
@@ -269,8 +276,8 @@ def cquiroz(version: Version) = AppConfig(
     "-Dedu.gemini.site=south"
   ),
   props = Map(
-    "edu.gemini.spdb.dir"                  -> "/Users/cquiroz/.spdb/",
-    "edu.gemini.auxfile.root"              -> "/Users/cquiroz/.auxfile",
+    "edu.gemini.spdb.dir"                  -> "/Users/carlos.quiroz/.spdb/",
+    "edu.gemini.auxfile.root"              -> "/Users/carlos.quiroz/.auxfile",
     "edu.gemini.dataman.gsa.summit.host"   -> "cpofits-lv1new.cl.gemini.edu",
     "edu.gemini.services.server.start"     -> "false",
     "edu.gemini.util.trpc.name"            -> "Carlos's ODB (Test)",

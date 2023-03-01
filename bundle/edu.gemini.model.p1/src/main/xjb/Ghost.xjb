@@ -1,0 +1,37 @@
+<jxb:bindings version="2.0"
+              xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <!-- Custom bindings for GHOST -->
+    <jxb:bindings schemaLocation="../xsd/Ghost.xsd" node="/xsd:schema">
+
+        <!-- GhostResolutionMode => Ghost.ResolutionMode -->
+        <jxb:bindings node="./xsd:simpleType[@name='GhostResolutionMode']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='Standard']">
+                <jxb:typesafeEnumMember name="STANDARD"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='High']">
+                <jxb:typesafeEnumMember name="HIGH"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Precision Radial Velocity']">
+                <jxb:typesafeEnumMember name="PRECISION_RADIAL_VELOCITY"/>
+            </jxb:bindings>
+        </jxb:bindings>
+        <!-- GhostTargetMode => Ghost.TargetMode -->
+        <jxb:bindings node="./xsd:simpleType[@name='GhostTargetMode']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='Single']">
+                <jxb:typesafeEnumMember name="SINGLE"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='Dual']">
+                <jxb:typesafeEnumMember name="DUAL"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='SRIFU1 Target + SRIFU2 Sky']">
+                <jxb:typesafeEnumMember name="TARGET_AND_SKY"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='SRIFU1 Sky + SRIFU2 Target']">
+                <jxb:typesafeEnumMember name="SKY_AND_TARGET"/>
+            </jxb:bindings>
+        </jxb:bindings>
+    </jxb:bindings>
+
+</jxb:bindings>

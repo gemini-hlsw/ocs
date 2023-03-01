@@ -175,11 +175,12 @@ class SubmitView(ph: ProblemRobot, newShellHandler: (Model,Option[File]) => Unit
       override def refresh(m:Option[SubmitStatus]): Unit = {
         val wasRolled = panel.model map rolledLens.get
         enabled = ~m.map {
-          case _ if tac => false
-          case Partial  => true
-          case Success  => true
+          case _ if tac   => false
+          case Partial    => true
+          case Success    => true
+          case Incomplete => true
           // REL-693 We need to allow opening editable copies of rolled proposals
-          case _        => ~wasRolled
+          case _          => ~wasRolled
         }
       }
 

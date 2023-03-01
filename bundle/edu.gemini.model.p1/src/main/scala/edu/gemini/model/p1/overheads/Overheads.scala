@@ -63,7 +63,8 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
 
     case _: NifsBlueprintBase                                      => NIRSpectroscopyOverheads(TimeAmount(0.25, TimeUnit.HR)).some
     case _: GsaoiBlueprint                                         => SimpleOverheads(0.00).some
-    case _: GracesBlueprint                                        => SimpleOverheads(0.00).some
+    case _: GracesBlueprint                                         => SimpleOverheads(0.00).some
+    case _: GhostBlueprint                                         => SimpleOverheads(0.00).some
     case _: GpiBlueprint                                           => SimpleOverheads(0.05).some
     case _: PhoenixBlueprint                                       => NIRSpectroscopyOverheads(TimeAmount(0.1667, TimeUnit.HR)).some
     case _: TexesBlueprint                                         => SimpleOverheads(0.00).some

@@ -39,7 +39,6 @@ public final class SetupTime implements Serializable {
         assert !full.isNegative();
         assert !reacquisition.isNegative();
 
-        //System.out.println("SetupTimeeeeee "+ full.getSeconds() + "  reacquisitionOnlyTime: " + reacquisition.getSeconds() + "  setupType: "+ setupType.name());
         this.fullSetupTime         = full;
         this.reacquisitionOnlyTime = reacquisition;
         this.acquisitionType       = setupType;

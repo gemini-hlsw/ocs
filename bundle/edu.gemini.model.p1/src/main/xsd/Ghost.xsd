@@ -1,0 +1,56 @@
+<!--
+  Schema definition for GHOST blueprints.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+
+    <!-- Options for GHOST Blueprint. -->
+    <xsd:complexType name="GhostBlueprintChoice">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="null"   type="GhostBlueprintNull"/>
+                <xsd:element name="Ghost"    type="GhostBlueprint"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- GHOST null. Empty blueprint, not available in PIT. -->
+    <xsd:complexType name="GhostBlueprintNull"/>
+
+    <!--
+      GHOST Blueprint
+    -->
+    <xsd:complexType name="GhostBlueprint">
+        <xsd:complexContent>
+            <xsd:extension base="BlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="resolutionMode" type="GhostResolutionMode" maxOccurs="1" minOccurs="0"/>
+                    <xsd:element name="targetMode"     type="GhostTargetMode"     maxOccurs="1" minOccurs="0"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      GHOST Disperser options
+    -->
+    <xsd:simpleType name="GhostResolutionMode">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Standard"/>
+            <xsd:enumeration value="High"/>
+            <xsd:enumeration value="Precision Radial Velocity"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      GHOST Disperser options
+    -->
+    <xsd:simpleType name="GhostTargetMode">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Single"/>
+            <xsd:enumeration value="Dual"/>
+            <xsd:enumeration value="SRIFU1 Target + SRIFU2 Sky"/>
+            <xsd:enumeration value="SRIFU1 Sky + SRIFU2 Target"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:schema>

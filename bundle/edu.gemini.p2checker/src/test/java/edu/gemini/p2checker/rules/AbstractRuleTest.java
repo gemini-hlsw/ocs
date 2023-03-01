@@ -11,6 +11,7 @@ import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
+import edu.gemini.spModel.gemini.calunit.CalUnitParams;
 import edu.gemini.spModel.gemini.ghost.Ghost;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
@@ -208,16 +209,24 @@ public class AbstractRuleTest {
         obs.getSeqComponent().addSeqComponent(observeSeqComponent);
     }
 
-    protected void addSimpleFlatObserve(int count, double exposureTime, int coadds) throws SPUnknownIDException, SPTreeStateException, SPNodeNotLocalException {
+    protected void addSimpleFlatArcObserve(int count, double exposureTime, int coadds, CalUnitParams.Lamp lamp) throws SPUnknownIDException, SPTreeStateException, SPNodeNotLocalException {
         assert (obs != null);
         ISPSeqComponent observeSeqComponent = fact.createSeqComponent(prog, SeqRepeatFlatObs.SP_TYPE, null);
         SeqRepeatFlatObs seqObserve = (SeqRepeatFlatObs) observeSeqComponent.getDataObject();
         seqObserve.setStepCount(count);
         seqObserve.setExposureTime(exposureTime);
         seqObserve.setCoaddsCount(coadds);
+        seqObserve.setLamp(lamp);
         observeSeqComponent.setDataObject(seqObserve);
         obs.getSeqComponent().addSeqComponent(observeSeqComponent);
+    }
 
+    protected void addSimpleFlatObserve(int count, double exposureTime, int coadds) throws SPUnknownIDException, SPTreeStateException, SPNodeNotLocalException {
+        addSimpleFlatArcObserve(count, exposureTime, coadds, CalUnitParams.Lamp.IR_GREY_BODY_HIGH);
+    }
+
+    protected void addSimpleArcObserve(int count, double exposureTime, int coadds) throws SPUnknownIDException, SPTreeStateException, SPNodeNotLocalException {
+        addSimpleFlatArcObserve(count, exposureTime, coadds, CalUnitParams.Lamp.AR_ARC);
     }
 
     /**

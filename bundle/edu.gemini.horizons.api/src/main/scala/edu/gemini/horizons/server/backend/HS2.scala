@@ -154,12 +154,6 @@ object HorizonsService2 {
     def formatDate(date: Date): String =
       s"'${DateFormat.format(date.toInstant)}'"
 
-    def siteCoord(site: Site): String =
-      site match {
-        case Site.GN => SITE_COORD_GN
-        case Site.GS => SITE_COORD_GS
-      }
-
     def toEphemeris(r: HorizonsReply): Long ==>> E =
       ==>>.fromList {
         r.getEphemeris.asScala.toList.map { e =>
@@ -178,12 +172,13 @@ object HorizonsService2 {
         CENTER           -> CENTER_COORD,
         COORD_TYPE       -> COORD_TYPE_GEO,
         COMMAND          -> s"'${target.queryString}'",
-        SITE_COORD       -> siteCoord(site),
+        SITE_COORD       -> formatSiteCoord(site),
         START_TIME       -> formatDate(start),
         STOP_TIME        -> formatDate(stop),
         STEP_SIZE        -> s"${stepSize}m",
         EXTRA_PRECISION  -> YES,
-        TIME_DIGITS      -> FRACTIONAL_SEC
+        TIME_DIGITS      -> FRACTIONAL_SEC,
+        QUANTITIES       -> "'1,3,8,9'" // see 3. Observer Table at https://ssd.jpl.nasa.gov/horizons/manual.html#output
       )
 
     val replyType = target match {
@@ -225,12 +220,16 @@ object HorizonsService2 {
         }
     })
 
-  // Split into header/tail, parse
-  private def parseHeader[A](lines: List[String])(f: (String, List[String]) => String \/ List[A]): String \/ List[A] =
-    lines match {
-      case _ :: _ :: _ :: _ :: h :: t => f(h, t)
-      case _                          => "Fewer than 5 lines!".left
+  // Split into header/tail, and then parse. We don't know how many metadata lines precede the
+  // start-of-data marker (which is a line with a bunch of asterisks on it) so we search for the
+  // asterisks and drop all of the top material. The header is the following line and the tail is
+  // the remainder.
+  private def parseHeader[A](lines: List[String])(f: (String, List[String]) => String \/ List[A]): String \/ List[A] = {
+    lines.span(s => !s.contains("**********"))._2 match {
+      case _ :: h :: t => f(h, t)
+      case other => "Could not find delimiter (asterisk) line.".left
     }
+  }
 
   // Parse the result of the given search
   private def parseResponse[A](s: Search[A], lines: List[String]): \/[String, List[Row[A]]] =

@@ -14,6 +14,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.target.SPSkyObject
 import edu.gemini.spModel.target.env.{Asterism, AsterismType, TargetEnvironment, TargetEnvironmentDiff}
+
 import javax.swing.{Icon, JLabel, JPanel, SwingConstants}
 import jsky.app.ot.tpe._
 import jsky.app.ot.tpe.feat.TpeGhostIfuFeature.{HrIfuTargetColor, SrIfuSkyColor, SrIfuTargetColor, highResolutionIfuArcsec, highResolutionSkyArcsec, standardResolutionIfuArcsec, standardResolutionSkyArcsec}
@@ -129,17 +130,16 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
               val p2 = pm.getLocationFromTag(t.spTarget)
               drawStandardResolutionIfu(g2d, p2, Ifu2, AsTarget)
 
-            case GhostAsterism.HighResolutionTargetPlusSky(t, s, _) =>
+            case GhostAsterism.HighResolutionTargetPlusSky(t, s, _, _) =>
               // IFU1
               val p1 = pm.getLocationFromTag(t.spTarget)
               drawHighResolutionIfu(g2d, p1)
 
               // IFU2
               val p2 = pm.getLocationFromTag(s)
-              // We don't draw the SRIFU2, apparently, even though its position
-              // determines the position of the HR sky fibers
-              // drawStandardResolutionIfu(g2d, p2, Ifu2, AsSky)
-              drawHighResolutionSky(g2d, p2)
+              // We draw the SRIFU2 as Sky
+              drawStandardResolutionIfu(g2d, p2, Ifu2, AsSky)
+              //drawHighResolutionSky(g2d, p2)
           }
         }
 
@@ -167,13 +167,13 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
   private case object AsSky    extends IfuDisposition
 
   private def drawHighResolutionIfu(g2d: Graphics2D, p: Point2D): Unit =
-    drawIfu(g2d, p, "H", highResolutionIfuArcsec, HrIfuTargetColor)
+    drawIfu(g2d, p, "HRIFU", highResolutionIfuArcsec, HrIfuTargetColor)
 
   private def drawStandardResolutionIfu(g2d: Graphics2D, p: Point2D, i: IfuNumber, d: IfuDisposition): Unit =
     drawIfu(
       g2d,
       p,
-      s"S${i.toInt}",
+      if (d == AsTarget) s"SRIFU${i.toInt}" else "Sky",
       standardResolutionIfuArcsec,
       if (d == AsTarget) SrIfuTargetColor else SrIfuSkyColor
     )
@@ -194,33 +194,20 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
     val ifuBounds = aʹ.getBounds2D
     val origFont  = g2d.getFont
 
-    @tailrec def drawLabel(fontSize: Int): Unit = {
-
-      if (fontSize > 7) {
-        val curFont = g2d.getFont
-        g2d.setFont(curFont.deriveFont(fontSize.toFloat))
-        val fontMet = g2d.getFontMetrics
-        val iniBounds = fontMet.getStringBounds(label, g2d)
-        val strWidth = iniBounds.getWidth
-        val strHeight = iniBounds.getHeight
-        val strBounds = new Rectangle2D.Double(
-          ifuBounds.getCenterX - strWidth / 2.0,
-          ifuBounds.getCenterY - strHeight / 2.0,
-          strWidth,
-          strHeight
-        )
-
-        if (ifuBounds.contains(strBounds)) {
-          g2d.setColor(Color.black)
-          val x = strBounds.getX.toFloat
-          val y = strBounds.getY.toFloat + fontMet.getAscent
-          g2d.drawString(label, x, y)
-        } else
-          drawLabel(fontSize - 1)
-      }
+    def drawLabel(): Unit = {
+      val fontMet = g2d.getFontMetrics
+      val strBounds = fontMet.getStringBounds(label, g2d)
+      val strWidth = strBounds.getWidth
+      val strHeight = strBounds.getHeight
+      g2d.setColor(Color.yellow)
+      val x = p.getX + math.max(ifuBounds.getWidth - strWidth / 2, TpeImageFeature.MARKER_SIZE + 2)
+      val y = p.getY + math.min(strHeight, math.max(ifuBounds.getHeight - strHeight, TpeImageFeature.MARKER_SIZE * 2))
+      g2d.drawString(label, x.toFloat, y.toFloat)
     }
 
-    drawLabel(origFont.getSize)
+    // Use same font as other targets
+    g2d.setFont(TpeImageFeature.FONT)
+    drawLabel()
     g2d.setFont(origFont)
   }
 
@@ -308,7 +295,7 @@ final class TpeGhostIfuFeature extends TpeImageFeature("GHOST", "Show the patrol
    * Determine if IFU2 is in use.
    */
   private def usingIFU2(env: TargetEnvironment): Boolean = env.getAsterism.asterismType match {
-    case AsterismType.GhostDualTarget | AsterismType.GhostTargetPlusSky | AsterismType.GhostSkyPlusTarget | AsterismType.GhostHighResolutionTargetPlusSky => true
+    case AsterismType.GhostDualTarget | AsterismType.GhostTargetPlusSky | AsterismType.GhostSkyPlusTarget | AsterismType.GhostHighResolutionTargetPlusSky | AsterismType.GhostHighResolutionTargetPlusSkyPrv => true
     case AsterismType.GhostSingleTarget => false
     case AsterismType.Single => sys.error("Invalid asterism type for GHOST")
   }
@@ -494,8 +481,8 @@ object TpeGhostIfuFeature {
 
 
   // Color for IFU limts.
-  private val IfuFovColor: Color = Color.RED
-  private val PatrolRangeColor: Color = OtColor.SALMON
+  val IfuFovColor: Color = Color.RED
+  val PatrolRangeColor: Color = OtColor.SALMON
 
   // The color to draw the patrol fields.
   private[feat] val PatrolFieldBorderColor: Color = OtColor.makeTransparent(IfuFovColor, 0.3)

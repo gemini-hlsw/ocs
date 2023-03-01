@@ -3,9 +3,12 @@ package jsky.app.ot.gemini.tpe;
 import edu.gemini.catalog.api.RadiusConstraint$;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.skycalc.Offset;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.Coordinates;
+import edu.gemini.spModel.gemini.ghost.GhostAsterism;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.gemini.gmos.InstGmosCommon;
 import edu.gemini.spModel.guide.GuideProbe;
@@ -15,11 +18,13 @@ import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPSkyObject;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.WatchablePos;
+import edu.gemini.spModel.target.env.AsterismType;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.env.TargetEnvironmentDiff;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
+import edu.gemini.spModel.target.offset.OffsetPos;
 import edu.gemini.spModel.target.offset.OffsetPosList;
 import edu.gemini.spModel.util.Angle;
 import jsky.app.ot.gemini.inst.WFS_FeatureBase;
@@ -33,6 +38,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.beans.PropertyChangeListener;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -240,6 +246,28 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
         return (gtOpt.isEmpty()) ? none : gtOpt.getValue().getPrimary();
     }
 
+    // Single Target GHOST asterisms are handled as if the IFU position were an
+    // offset from the base.  Extract this (dummy) offset position from the
+    // asterism if applicable.
+    private static Option<OffsetPos> ghostOffset(TpeContext ctx) {
+        return ImOption.apply(ctx.targets().asterismOrNull()).flatMap(a -> {
+            switch (a.asterismType()) {
+                case GhostSingleTarget:
+                    final GhostAsterism.SingleTarget st = (GhostAsterism.SingleTarget) a;
+                    return ImOption.fromScalaOpt(st.overriddenBase()).flatMap(b ->
+                        ImOption
+                            .fromScalaOpt(st.target().coordinates(ctx.schedulingBlockStartJava().map(timestamp -> Instant.ofEpochMilli(timestamp)).toScalaOpt()))
+                            .map(c -> {
+                                final Coordinates c0 = b.getCoordinates();
+                                final edu.gemini.spModel.core.Offset o = Coordinates.difference(c0, c).offset();
+                                return new OffsetPos("GHOST", o.p().toSignedArcsecs(), o.q().toSignedArcsecs());
+                             })
+                    );
+                default:
+                    return ImOption.<OffsetPos>empty();
+            }
+        });
+    }
 
     // Add the figures representing the PWFS patrol area and probe arms to the display list
     private void _addPWFSFigures(SPInstObsComp inst, TpeImageInfo tii) {
@@ -260,6 +288,9 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
 
         OffsetPosList<OffsetPosBase> selectedOffsetPosList = ctx.offsets().selectedPosListOrNull();
         OffsetPosBase selectedOffsetPos = ctx.offsets().selectedPosOrNull();
+        if (selectedOffsetPos == null) {
+            selectedOffsetPos = ghostOffset(ctx).getOrNull();
+        }
 
         // If an offset position is selected, use it as the base position
         if (selectedOffsetPos != null) {

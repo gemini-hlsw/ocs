@@ -132,6 +132,7 @@
             <xsd:enumeration value="R831"/>
             <xsd:enumeration value="B600"/>
             <xsd:enumeration value="R600"/>
+            <xsd:enumeration value="B480"/>
             <xsd:enumeration value="R400"/>
             <xsd:enumeration value="R150"/>
         </xsd:restriction>

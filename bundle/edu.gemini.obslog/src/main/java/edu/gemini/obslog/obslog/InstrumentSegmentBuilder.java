@@ -129,6 +129,8 @@ public class InstrumentSegmentBuilder {
             return new VisitorInstrumentLogSegment(logData.getLogTableData(), _getObsLogOptions());
         } else if (type.equals(GpiLogSegment.SEG_TYPE)) {
             return new GpiLogSegment(logData.getLogTableData(), _getObsLogOptions());
+        } else if (type.equals(GHOSTLogSegment.SEG_TYPE)) {
+            return new GHOSTLogSegment(logData.getLogTableData(), _getObsLogOptions());
         }
         // Default catches unknown instruments
         return new UnknownLogSegment(logData.getLogTableData(), _getObsLogOptions());

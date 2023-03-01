@@ -35,12 +35,14 @@ public class VisitorInstrumentSupport implements ITccInstrumentSupport {
 
     @Override
     public String getTccConfigInstrument() {
-        return "VISITOR";
+        final VisitorInstrument inst = (VisitorInstrument) _oe.getInstrument();
+        return inst.getVisitorConfig().tccInstrumentName();
     }
 
     @Override
     public String getTccConfigInstrumentOrigin() {
-        return "visitor";
+        final VisitorInstrument inst = (VisitorInstrument) _oe.getInstrument();
+        return inst.getVisitorConfig().tccInstrumentOrigin();
     }
 
     @Override

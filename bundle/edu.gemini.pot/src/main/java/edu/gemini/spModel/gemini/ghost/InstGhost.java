@@ -1,17 +1,12 @@
 package edu.gemini.spModel.gemini.ghost;
 
 import edu.gemini.pot.sp.ISPObservation;
-import edu.gemini.pot.sp.SPComponentBroadType;
 import edu.gemini.pot.sp.SPComponentType;
-import edu.gemini.shared.util.immutable.DefaultImList;
-import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.core.Angle$;
 import edu.gemini.spModel.core.Site;
-import edu.gemini.spModel.data.config.*;
 import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
 import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKey;
@@ -25,17 +20,13 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTimeGroup;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.Category;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.StepCalculator;
 import edu.gemini.spModel.obscomp.ItcOverheadProvider;
-import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 import edu.gemini.spModel.telescope.IssPort;
 import edu.gemini.spModel.telescope.IssPortProvider;
 import edu.gemini.spModel.telescope.PosAngleConstraint;
-import edu.gemini.spModel.telescope.PosAngleConstraintAware;
 import edu.gemini.spModel.gemini.calunit.smartgcal.keys.ConfigKeyGhost;
 
-import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
-import java.text.NumberFormat;
 import java.time.Duration;
 import java.util.*;
 import java.util.logging.Logger;
@@ -179,16 +170,6 @@ public class InstGhost
     }
 
     /**
-     * Return the science area based upon the current camera.
-     */
-    public double[] getScienceArea() {
-        //return GhostScienceAreaGeometry.javaScienceAreaDimensions(this.getFPUnit());
-        System.out.println("TODO. Not implemented yet");
-        return GhostScienceAreaGeometry.javaScienceAreaDimensions(1.0);
-    }
-
-
-    /**
      * Return the current ccd amp readout speed.
      */
     public GhostType.ReadMode getReadMode() {
@@ -320,27 +301,12 @@ public class InstGhost
     public Duration getReacquisitionTime(ISPObservation obs) {
         LOG.info("TODO, ######################### getReacquisitonTime(ConISPObservation obs) method");
         // Venu described that for each 120 minutes of observation the setup time is increased with 900 seconds.
-        /*
-        int t = (int) ( _exposureTime / REACQUISTION_TIME.getSeconds());
-        if (t == 0)
-            return Duration.ZERO;
-        return Duration.ofSeconds(t*SETUP_TIME.getSeconds());
-         */
         return REACQUISITION_TIME;
     }
 
     @Override
     public Duration getReacquisitionTime(Config conf) {
         LOG.info("TODO, &&&&&&&&&&&&&&&&&& getReacquisitonTime(Config conf) method &&&&&&&&&&&&");
-        /*double exposureTime = ExposureCalculator.instance.exposureTimeSec(conf);
-        System.out.println("exposureTime is: "+ exposureTime);
-        System.out.println("$$$$$$$$$$$$$$$$$$$$$");
-        int t = (int) ( exposureTime / REACQUISTION_TIME.getSeconds());
-        if (t == 0)
-            return Duration.ZERO;
-
-        return Duration.ofSeconds(t*SETUP_TIME.getSeconds());
-         */
         return REACQUISITION_TIME;
 
     }

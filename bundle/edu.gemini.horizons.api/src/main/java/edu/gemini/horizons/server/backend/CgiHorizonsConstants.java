@@ -1,5 +1,8 @@
 package edu.gemini.horizons.server.backend;
 
+import edu.gemini.spModel.core.Angle$;
+import edu.gemini.spModel.core.Site;
+
 /**
  * Define a set of constants to be used to talk to the CGI
  * offered by the JPL Horizons service
@@ -27,12 +30,20 @@ public final class CgiHorizonsConstants {
     public static final String COORD_TYPE = "COORD_TYPE";
     public static final String COORD_TYPE_GEO = "GEODETIC";
     public static final String SITE_COORD = "SITE_COORD";
-    public static final String SITE_COORD_GS = "'289.23944,-30.237778,2.743'";
-    public static final String SITE_COORD_GN = "'204.53094,19.823806,4.2134'";
+
+    public static String formatSiteCoord(Site site) {
+        return String.format(
+            "'%1.6f,%1.6f,%1.3f'",
+            Angle$.MODULE$.fromDegrees(site.longitude).toDegrees(),
+            site.latitude,
+            site.altitude / 1000.0
+        );
+    }
 
     public static final String EXTRA_PRECISION = "extra_prec";
     public static final String TIME_DIGITS     = "time_digits";
     public static final String FRACTIONAL_SEC  = "FRACSEC";
+    public static final String QUANTITIES      = "QUANTITIES";
 
     public static final String YES = "YES";
     public static final String NO = "NO";

@@ -111,6 +111,7 @@ package object immutable {
   object GmosNDisperser extends EnumObject[M.GmosNDisperser] {
     val B1200 = M.GmosNDisperser.B1200_G5301
     val R831  = M.GmosNDisperser.R831_G5302
+    val B480  = M.GmosNDisperser.B480_G5309
     val B600  = M.GmosNDisperser.B600_G5307
     val R600  = M.GmosNDisperser.R600_G5304
     val R400  = M.GmosNDisperser.R400_G5305
@@ -233,6 +234,7 @@ package object immutable {
 
   type GnirsCrossDisperser = M.GnirsCrossDisperser
   object GnirsCrossDisperser extends EnumObject[M.GnirsCrossDisperser] {
+    val No  = M.GnirsCrossDisperser.NO
     val LXD = M.GnirsCrossDisperser.LXD
   }
 
@@ -245,7 +247,17 @@ package object immutable {
   object GnirsFilter extends EnumObject[M.GnirsFilter]
 
   type GnirsFpu = M.GnirsFpu
-  object GnirsFpu extends EnumObject[M.GnirsFpu]
+  object GnirsFpu extends EnumObject[M.GnirsFpu] {
+    val SW1    = M.GnirsFpu.SW_1
+    val SW2    = M.GnirsFpu.SW_2
+    val SW3    = M.GnirsFpu.SW_3
+    val SW4    = M.GnirsFpu.SW_4
+    val SW5    = M.GnirsFpu.SW_5
+    val SW6    = M.GnirsFpu.SW_6
+    val SW7    = M.GnirsFpu.SW_7
+    val LR_IFU = M.GnirsFpu.LR_IFU
+    val HR_IFU = M.GnirsFpu.HR_IFU
+  }
 
   type GnirsPixelScale = M.GnirsPixelScale
   object GnirsPixelScale extends EnumObject[M.GnirsPixelScale] {
@@ -254,7 +266,10 @@ package object immutable {
   }
 
   type GnirsCentralWavelength = M.GnirsCentralWavelength
-  object GnirsCentralWavelength extends EnumObject[M.GnirsCentralWavelength]
+  object GnirsCentralWavelength extends EnumObject[M.GnirsCentralWavelength] {
+    val LT_25  = M.GnirsCentralWavelength.LT_25
+    val GTE_25 = M.GnirsCentralWavelength.GTE_25
+  }
 
   type GracesFiberMode = M.GracesFiberMode
   object GracesFiberMode extends EnumObject[M.GracesFiberMode]
@@ -290,6 +305,21 @@ package object immutable {
 
   type GpiDisperser = M.GpiDisperser
   object GpiDisperser extends EnumObject[M.GpiDisperser]
+
+  type GhostResolutionMode = M.GhostResolutionMode
+  object GhostResolutionMode extends EnumObject[M.GhostResolutionMode] {
+    val Standard                = M.GhostResolutionMode.STANDARD
+    val High                    = M.GhostResolutionMode.HIGH
+    val PrecisionRadialVelocity = M.GhostResolutionMode.PRECISION_RADIAL_VELOCITY
+  }
+
+  type GhostTargetMode = M.GhostTargetMode
+  object GhostTargetMode extends EnumObject[M.GhostTargetMode] {
+    val Single       = M.GhostTargetMode.SINGLE
+    val Dual         = M.GhostTargetMode.DUAL
+    val TargetAndSky = M.GhostTargetMode.TARGET_AND_SKY
+    val SkyAndTarget = M.GhostTargetMode.SKY_AND_TARGET
+  }
 
   type GuidingEvaluation = M.GuidingEvaluation
   object GuidingEvaluation extends EnumObject[M.GuidingEvaluation] {

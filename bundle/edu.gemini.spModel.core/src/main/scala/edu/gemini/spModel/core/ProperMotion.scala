@@ -24,10 +24,8 @@ case class ProperMotion(
   /** Coordinates `elapsedYears` fractional epoch-years after `epoch`. */
   def plusYears(t: Target, elapsedYears: Double): Coordinates = {
     val baseCoordinates = t.coords(None).getOrElse(Coordinates.zero)
-
-    val properVelocity: Offset = Offset(OffsetP(Angle.fromDegrees(deltaRA.velocity.toDegreesPerYear)),
-                                        OffsetQ(Angle.fromDegrees(deltaDec.velocity.toDegreesPerYear)))
-
+    val properVelocity: Offset = Offset(OffsetP(Angle.fromDegrees(Angle.signedDegrees(deltaRA.velocity.toDegreesPerYear))),
+                                        OffsetQ(Angle.fromDegrees(Angle.signedDegrees(deltaDec.velocity.toDegreesPerYear))))
     val radialVelocity: Double = {
       val redshift: Option[Redshift] = Target.redshift.get(t).flatten
       redshift.getOrElse(Redshift.zero).toRadialVelocity.toKilometersPerSecond
@@ -82,9 +80,15 @@ object ProperMotion {
                              radialVelocity: Double,
                              parallax: Double,
                              elapsedYears: Double): Coordinates = {
+
+    val (pmra, pmdec): Vec2 = (properVelocity.p.toAngle.toSignedDegrees.toRadians, properVelocity.q.toAngle.toSignedDegrees.toRadians)
     // We want the baseCoordinates in radians.
-    val (ra,  dec)  = (baseCoordinates.ra.toAngle.toSignedDegrees.toRadians, baseCoordinates.dec.toAngle.toSignedDegrees.toRadians)
-    val (dRa, dDec) = (properVelocity.p.toAngle.toSignedDegrees.toRadians,   properVelocity.q.toAngle.toSignedDegrees.toRadians)
+    val (ra,  dec)  = (baseCoordinates.ra.toAngle.toRadians, baseCoordinates.dec.toAngle.toRadians)
+    // at dec 90 this gets undetermined, while we never observe at dec 90 it wouldn't be nice to have
+    // a division by zero error. At dec 90 we don't correct by cos(dec)
+    val (dRa, dDec) = 
+      if (cos(dec) == 0.0) (pmra, pmdec) 
+      else (pmra / cos(dec), pmdec)
 
     val pos: Vec3 = {
       val cd = cos(dec)

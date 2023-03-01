@@ -100,10 +100,11 @@ object QueueProposalClass {
     Option(m.getBand3Request).map(SubmissionRequest(_)),
     m.getTooOption,
     Option(m.getMultiFacility).map(MultiFacility(_)),
-    m.isJwstSynergy
+    m.isJwstSynergy,
+    m.isUsLongTerm
   )
 
-  val empty: QueueProposalClass = apply(None, None, None, Left(Nil), None, ToOChoice.None, None, false)
+  val empty: QueueProposalClass = apply(None, None, None, Left(Nil), None, ToOChoice.None, None, false, false)
 
 }
 
@@ -114,7 +115,8 @@ case class QueueProposalClass(itac: Option[Itac],
                               band3request: Option[SubmissionRequest],
                               tooOption: ToOChoice,
                               multiFacility: Option[MultiFacility],
-                              jwstSynergy: Boolean) extends GeminiNormalProposalClass {
+                              jwstSynergy: Boolean,
+                              usLongTerm: Boolean) extends GeminiNormalProposalClass {
 
   override val isSpecial = false
 
@@ -129,12 +131,13 @@ case class QueueProposalClass(itac: Option[Itac],
     m.setTooOption(tooOption)
     m.setMultiFacility(multiFacility.map(_.mutable).orNull)
     m.setJwstSynergy(jwstSynergy)
+    m.setUsLongTerm(usLongTerm)
     m
   }
 
   def reset: QueueProposalClass = subs match {
-    case Left(ss) => copy(key = None, subs = Left(ss.map(_.reset)))
-    case Right(s) => copy(key = None, subs = Right(s.reset))
+    case Left(ss) => copy(key = None, itac = None, subs = Left(ss.map(_.reset)))
+    case Right(s) => copy(key = None, itac = None, subs = Right(s.reset))
   }
 
   def classLabel = "Queue Proposal"
@@ -151,10 +154,11 @@ object ClassicalProposalClass {
     GeminiNormalProposalClass.extractSubs(m),
     m.getVisitor.asScala.map(_.getRef).map(Investigator(_).ref).toList,
     Option(m.getMultiFacility).map(MultiFacility(_)),
-    m.isJwstSynergy
+    m.isJwstSynergy,
+    m.isUsLongTerm
   )
 
-  val empty: ClassicalProposalClass = apply(None, None, None, Left(Nil), Nil, None, false)
+  val empty: ClassicalProposalClass = apply(None, None, None, Left(Nil), Nil, None, false, false)
 
 }
 
@@ -168,7 +172,8 @@ case class ClassicalProposalClass(itac: Option[Itac],
                                   subs: Either[List[NgoSubmission], ExchangeSubmission],
                                   visitors: List[InvestigatorRef],
                                   multiFacility: Option[MultiFacility],
-                                  jwstSynergy: Boolean)
+                                  jwstSynergy: Boolean,
+                                  usLongTerm: Boolean)
   extends GeminiNormalProposalClass {
 
   def mutable(p:Proposal, n:Namer) = {
@@ -187,6 +192,7 @@ case class ClassicalProposalClass(itac: Option[Itac],
     }.asJava)
     m.setMultiFacility(multiFacility.map(_.mutable).orNull)
     m.setJwstSynergy(jwstSynergy)
+    m.setUsLongTerm(usLongTerm)
 
     m
   }
@@ -204,19 +210,21 @@ case class ClassicalProposalClass(itac: Option[Itac],
 object SpecialProposalClass {
 
   // Lens
-  val tooOption: Lens[SpecialProposalClass,ToOChoice] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
-  val sub: Lens[SpecialProposalClass,SpecialSubmission] = Lens.lensu((a, b) => a.copy(sub = b), _.sub)
+  val tooOption: Lens[SpecialProposalClass, ToOChoice] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
+  val sub: Lens[SpecialProposalClass, SpecialSubmission] = Lens.lensu((a, b) => a.copy(sub = b), _.sub)
+  val band3request: Lens[SpecialProposalClass, Option[SubmissionRequest]] = Lens.lensu((a, b) => a.copy(band3request = b), _.band3request)
 
   def apply(m: M.SpecialProposalClass): SpecialProposalClass = apply(
     Option(m.getItac).map(Itac(_)),
     Option(m.getComment),
     Option(m.getKey).map(UUID.fromString),
     SpecialSubmission(m.getSubmission),
+    Option(m.getBand3Request).map(SubmissionRequest(_)),
     m.getTooOption,
     m.isJwstSynergy
   )
 
-  val empty: SpecialProposalClass = apply(None, None, None, SpecialSubmission.empty, ToOChoice.None, false)
+  val empty: SpecialProposalClass = apply(None, None, None, SpecialSubmission.empty, None, ToOChoice.None, false)
 
 }
 
@@ -224,6 +232,7 @@ case class SpecialProposalClass(itac: Option[Itac],
                                 comment: Option[String],
                                 key: Option[UUID],
                                 sub: SpecialSubmission,
+                                band3request: Option[SubmissionRequest],
                                 tooOption: ToOChoice,
                                 jwstSynergy: Boolean) extends ProposalClass {
 
@@ -233,6 +242,7 @@ case class SpecialProposalClass(itac: Option[Itac],
     m.setComment(comment.orNull)
     m.setKey(key.map(_.toString).orNull)
     m.setSubmission(sub.mutable)
+    m.setBand3Request(band3request.map(_.mutable).orNull)
     m.setTooOption(tooOption)
     m.setJwstSynergy(jwstSynergy)
     m

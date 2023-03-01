@@ -415,6 +415,11 @@ public class CgiReplyBuilder {
         } catch (NumberFormatException ex) {
             airmass = -1;
         }
+
+        // Next quantity is extinction (which we get for free along with airmass) but we don't
+        // care about it so we skip it.
+        scanner.next();
+
         double magnitude;
         String strMag;
         try {

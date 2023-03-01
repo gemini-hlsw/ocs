@@ -21,7 +21,7 @@ final class TimeAcctEditor implements ProgramTypeListener {
     private static final long MS_PER_HOUR = Duration.ofHours(1).toMillis();
 
     // Used to format values as strings
-    private final static DecimalFormat nf = new DecimalFormat("0.#");
+    private final static DecimalFormat nf = new DecimalFormat("0.##");
 
     private static Duration toDuration(double hours) {
         return Duration.ofMillis(Math.round(hours * MS_PER_HOUR));

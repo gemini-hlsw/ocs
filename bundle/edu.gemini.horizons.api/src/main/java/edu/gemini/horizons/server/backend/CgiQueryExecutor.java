@@ -111,10 +111,8 @@ public enum CgiQueryExecutor implements IQueryExecutor {
      * @param query the query to be executed. Contains the site information
      */
     private void _initSite(final HorizonsQuery query, final Map<String, String> queryParams) {
-        queryParams.put(CgiHorizonsConstants.SITE_COORD,
-                query.getSite() == Site.GN ?
-                        CgiHorizonsConstants.SITE_COORD_GN :
-                        CgiHorizonsConstants.SITE_COORD_GS);
+        final Site site = query.getSite();
+        queryParams.put(CgiHorizonsConstants.SITE_COORD, CgiHorizonsConstants.formatSiteCoord(site));
     }
 
     /**

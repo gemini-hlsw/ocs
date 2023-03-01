@@ -359,11 +359,6 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
             y2 = getY(start_index);
             area += (x2 - x1) * (y1 + y2) / 2.0;
 
-            /*if (x_start >= 700 && x_start <= 703) {
-                System.out.println("start_index: " + start_index + " x1: " + x1 + " x2: " + x2 + " y1: " + y1
-                        + " y2: " + y2 + " delta_x: " + (x2 - x1) + " area: " + area);
-            }
-            */
             // calculate the area between the last sample point and x_end:
             x2 = x_end;
             end_index = getLowerIndex(x2);  // left side of last trapezoid
@@ -371,12 +366,6 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
             y2 = getY(x2);
             y1 = getY(end_index);
             area += (x2 - x1) * (y1 + y2) / 2.0;
-            /*if (x_start >= 700 && x_start <= 703) {
-                System.out.println("end_index: " + end_index + " x1: " + x1 + " x2: " + x2 + " y1: " + y1
-                        + " y2: " + y2 + " delta_x: " + (x2 - x1) + " area: " + area);
-            }
-
-             */
 
             // add to the area inside the grid:
             area += getIntegral(start_index, end_index);
@@ -396,81 +385,9 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         //    System.out.println("x1: " + x1 + " y1: " + y1 + " x2: " + x2 + " y2: " + y2 + " area: " + ( (x2 - x1) * (y1 + y2) / 2.0));
        return (x2 - x1) * (y1 + y2) / 2.0;
     }
-  /*
-    public double getIntegral(double x_start, double x_end) {
-        assert x_start <= x_end;
-        assert x_start >= getStart() && x_start <= getEnd();
-        assert x_end   >= getStart() && x_end   <= getEnd();
-        double x2 = 0.0;
-        double area = 0.0;
-        int end_index = getLowerIndex(x_end);
-        int start_index = getLowerIndex(x_start);
 
-        if (x_start >= 700 && x_start <= 703) {
-            System.out.println("start_index: " + start_index + " end_index: " + end_index);
-        }
-        // Add up trapezoid areas. x1 and x2 may not be exactly on sampling points so do first and last trapezoid separately.
-        // Calculate the area between x_start and the first sample point
-        if (start_index == end_index) {
-            x2 = getX(start_index + 1);  // right side of first trapezoid
-        } else {
-            x2 = getX(end_index);
-        }
 
-        area += calculateArea(x_start, getY(x_start), x2, getY(x2));
 
-        // calculate the area between the last sample point and x_end:
-
-        //area += calculateArea(getX(end_index), getY(end_index), x2, getY(x2));
-        area += calculateArea(getX(start_index), getY(start_index), x_end, getY(x_end));
-        // add to the area inside the grid
-        area += getIntegral(start_index, end_index);
-
-        if (x_start >= 700 && x_start <= 703)
-            System.out.println("Final area: " + area);
-        return area;
-    }
-    */
-
-    /*
-    public double getIntegral(double x_start, double x_end) {
-        assert x_start <= x_end;
-        assert x_start >= getStart() && x_start <= getEnd();
-        assert x_end   >= getStart() && x_end   <= getEnd();
-        double x2;
-        double area = 0.0;
-        int end_index = getLowerIndex(x_end);
-        int start_index = getLowerIndex(x_start);
-
-        if (x_start >= 700 && x_start <= 703) {
-            System.out.println("start_index: " + start_index + " end_index: " + end_index);
-        }
-        // Add up trapezoid areas. x1 and x2 may not be exactly on sampling points so do first and last trapezoid separately.
-        // Calculate the area between x_start and the first sample point
-        //start_index++;  // right side of first trapezoid
-        //area += calculateArea(x_start, getY(x_start), getX(start_index), getY(start_index));
-        if (start_index == end_index) {
-            x2 = getX(start_index + 1);  // right side of first trapezoid
-        } else {
-            x2 = getX(end_index);
-        }
-        area += calculateArea(x_start, getY(x_start), x2, getY(end_index));
-        // calculate the area between the last sample point and x_end:
-       // x2 = x_end;
-        //if (start_index == end_index) // This fix the problem when the start_index and the end_index are equals.
-            // This happens because the start_index was increase by one at the beginning.
-        //    end_index--;
-        //area += calculateArea(getX(end_index), getY(end_index), x2, getY(x2));
-        area += calculateArea(getX(start_index), getY(start_index), x_end, getY(x_end));
-        // add to the area inside the grid
-        area += getIntegral(start_index, end_index);
-
-        if (x_start >= 700 && x_start <= 703)
-            System.out.println("Final area: " + area);
-        return area;
-    }
-
-*/
 
     /**
      * Returns the integral of values in the SampledSpectrum in the
