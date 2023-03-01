@@ -61,11 +61,5 @@ metals.sbt
 # Vim
 *.swp
 
-<<<<<<< HEAD
-#Test FR
-bundle/.bsp/
-.Trash-3906
-=======
 .sdkmanrc
 .jvmopts
->>>>>>> eaf3c3bfd879b3418dcf9599b22c9e006cd7af32
