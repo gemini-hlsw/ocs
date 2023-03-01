@@ -1,11 +1,13 @@
-# GNIRS LR-IFU transmission
-# Columns are (1) wavelength in nm, (2) transmission.
+# GNIRS LR-IFU
+# Ray Sharples, 2023-Feb-28
+# Derived via comparison with long-slit flats
+# Measured values:  X 0.70, J 0.72, H 0.78, K 0.85
+# Columns are (1) wavelength in nm, (2) transmission
 #
- 900 1.0
-1000 1.0
-2000 1.0
-3000 1.0
-4000 1.0
-5000 1.0
-6000 1.0
-
+ 900 0.68
+1434 0.73
+1435 0.78
+1869 0.78
+1870 0.85
+2650 0.85
+6000 0.90
