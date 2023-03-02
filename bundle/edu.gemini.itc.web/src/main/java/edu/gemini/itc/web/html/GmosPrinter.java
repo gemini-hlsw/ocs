@@ -19,7 +19,7 @@ import java.util.*;
  */
 public final class GmosPrinter extends PrinterBase implements OverheadTablePrinter.PrinterWithOverhead {
 
-    private final GmosRecipe recipe;
+    final GmosRecipe recipe;
     private final PlottingDetails pdp;
     private final boolean isImaging;
     private final ItcParameters p;
@@ -53,6 +53,7 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
     private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult[] results, final ItcSpectroscopyResult s) {
 
         final Gmos mainInstrument = (Gmos) results[0].instrument(); // main instrument
+        final CalculationMethod calcMethod = p.observation().calculationMethod();
 
         _println("");
 
@@ -69,7 +70,16 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
         _printSkyAperture(result);
         _println("");
 
-        _printRequestedIntegrationTime(result);
+        if (calcMethod instanceof SpectroscopyInt) {
+            int exposureTime = recipe.getExposureTime();
+            int numberExposures = recipe.getNumberExposures();
+            _println(String.format(
+                "Total integration time = %d seconds (%d x %d s), of which %d seconds is on source.",
+                numberExposures * exposureTime, numberExposures, exposureTime,
+                (int) (exposureTime * numberExposures * result.observation().sourceFraction())));
+        } else {
+            _printRequestedIntegrationTime(result);
+        }
         _println("");
 
         scala.Option<ItcCcd> ccdWithMaxPeak = scala.Option.empty();
@@ -250,7 +260,7 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
 
     public ConfigCreator.ConfigCreatorResult createInstConfig(int numberExposures) {
         ConfigCreator cc = new ConfigCreator(p);
-        return cc.createGmosConfig(instr, numberExposures);
+        return cc.createGmosConfig(instr, numberExposures, recipe.getExposureTime());
     }
 
     public ItcOverheadProvider getInst() {

@@ -10,11 +10,13 @@ import scala.Option;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Gmos specification class
  */
 public abstract class Gmos extends Instrument implements BinningProvider, SpectroscopyInstrument {
+    private static final Logger Log = Logger.getLogger(Gmos.class.getName());
 
     //Plate scales for original and Hamamatsu CCD's (temporary)
     public static final double ORIG_PLATE_SCALE = 0.0727;
@@ -279,6 +281,13 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
         } else {
             return getObservingEnd();
         }
+    }
+
+    // The maximum useful flux in a (binned) pixel: the minimum of the (binned) well-depth or ADC saturation value.
+    public double maxFlux() {
+        double wellSatLimit = wellDepth() * getSpatialBinning() * getSpectralBinning();
+        double adcSatLimit = AD_SATURATION * gain();
+        return Math.min(wellSatLimit, adcSatLimit);
     }
 
     //Abstract class for Detector Pixel Transmission  (i.e.  Create Detector gaps)

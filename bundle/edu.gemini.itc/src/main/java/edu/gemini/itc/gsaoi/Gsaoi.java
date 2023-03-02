@@ -111,6 +111,10 @@ public final class Gsaoi extends Instrument {
         return 2.4;
     }
 
+    public double maxFlux() {
+        return LinearityLimit;
+    }
+
     @Override public List<WarningRule> warnings() {
         return new ArrayList<WarningRule>() {{
             add(new LinearityLimitRule(LinearityLimit, 0.80));

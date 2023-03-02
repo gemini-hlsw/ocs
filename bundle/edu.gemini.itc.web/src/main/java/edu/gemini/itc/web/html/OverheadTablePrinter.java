@@ -76,13 +76,17 @@ public class OverheadTablePrinter {
         final ObservationDetails obs = result.observation();
         final CalculationMethod calcMethod = obs.calculationMethod();
 
-
         if (calcMethod instanceof ImagingInt) {
             this.numOfExposures = (int)(((ImagingResult) result).is2nCalc().numberSourceExposures() / obs.sourceFraction());
         } else if (calcMethod instanceof ImagingS2N) {
             this.numOfExposures = ((ImagingS2N) calcMethod).exposures();
         } else if (calcMethod instanceof SpectroscopyS2N) {
             this.numOfExposures = ((SpectroscopyS2N) calcMethod).exposures();
+        } else if (calcMethod instanceof ImagingExp) {
+            this.numOfExposures = ((GmosPrinter) printer).recipe.getNumberExposures();
+        } else if (calcMethod instanceof SpectroscopyInt) {
+            this.numOfExposures = ((GmosPrinter) printer).recipe.getNumberExposures();
+
         } else {
             this.numOfExposures = 1;
         }

@@ -233,6 +233,10 @@ public final class TRecs extends Instrument implements SpectroscopyInstrument {
         return 1.0;
     }
 
+    @Override public double maxFlux() {
+        return WELL_DEPTH;
+    }
+
     @Override public List<WarningRule> warnings() {
         return new ArrayList<WarningRule>() {{
             add(new SaturationLimitRule(WELL_DEPTH, 0.80));

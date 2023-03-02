@@ -25,6 +25,7 @@ import edu.gemini.itc.operation.SourceFractionFactory;
 import edu.gemini.itc.operation.SpecS2N;
 import edu.gemini.itc.operation.SpecS2NSlitVisitor;
 import edu.gemini.itc.shared.BackgroundData;
+import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.ChartAxis;
 import edu.gemini.itc.shared.ChartAxisRange;
 import edu.gemini.itc.shared.FinalS2NData;
@@ -41,6 +42,8 @@ import edu.gemini.itc.shared.SignalChart;
 import edu.gemini.itc.shared.SignalData;
 import edu.gemini.itc.shared.SignalPixelChart;
 import edu.gemini.itc.shared.SingleS2NData;
+import edu.gemini.itc.shared.SpectroscopyInt;
+import edu.gemini.itc.shared.SpectroscopyS2N;
 import edu.gemini.itc.shared.SourceDefinition;
 import edu.gemini.itc.shared.SpcChartData;
 import edu.gemini.itc.shared.SpcSeriesData;
@@ -67,6 +70,8 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     private final ObservationDetails _obsDetailParameters;
     private final ObservingConditions _obsConditionParameters;
     private final TelescopeDetails _telescope;
+    private int exposureTime;
+    private int numberExposures;
 
     /**
      * Constructs a GmosRecipe given the parameters. Useful for testing.
@@ -80,7 +85,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         _obsDetailParameters    = p.observation();
         _obsConditionParameters = p.conditions();
         _telescope              = p.telescope();
-
+        this.exposureTime       = (int) p.observation().exposureTime();
         // some general validations
         Validation.validate(mainInstrument, _obsDetailParameters, _sdParameters);
     }
@@ -111,9 +116,127 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     public SpectroscopyResult[] calculateSpectroscopy() {
         final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
         final SpectroscopyResult[] results = new SpectroscopyResult[ccdArray.length];
+        final CalculationMethod calcMethod = _obsDetailParameters.calculationMethod();
+        Log.fine("calcMethod = " + calcMethod);
+
+        if (calcMethod instanceof SpectroscopyS2N) {
+            numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
+        } else if (calcMethod instanceof SpectroscopyInt) {
+            numberExposures = ((SpectroscopyInt) calcMethod).exposures();
+        } else {
+            throw new Error("Unsupported calculation method");
+        }
+
         for (int i = 0; i < ccdArray.length; i++) {
             final Gmos instrument = ccdArray[i];
-            results[i] = calculateSpectroscopy(mainInstrument, instrument, ccdArray.length);
+            results[i] = calculateSpectroscopy(mainInstrument, instrument, ccdArray.length, exposureTime, numberExposures);
+        }
+
+        if (calcMethod instanceof SpectroscopyInt) {
+            // 1. Process all CCDs to get the peak flux and derive the maximum exposure time.
+            // 2. Figure out which CCD includes the wavelength of interest.
+            // 3. Iteratively determine exposureTime & numberExposures that will give the requested S/N at wavelength.
+            // 4. Process all the CCDs using the final exposureTime & numberExposures and return the result.
+
+            double wavelength = ((SpectroscopyInt) _obsDetailParameters.calculationMethod()).wavelength();
+            Log.fine(String.format("Wavelength = %.2f nm", wavelength));
+            final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
+            double peakFlux = 0.0;
+            double snr = -1.0;
+            int ccd = -1;   // CCD index that includes the requested wavelength
+            int slit = -1;  // Slit index that includes the requested wavelength
+
+            for (int ccdIndex=0; ccdIndex < results.length; ccdIndex++) {
+                Log.fine("CCD index = " + ccdIndex);
+                final SpectroscopyResult result = results[ccdIndex];
+                final GmosSpecS2N specS2N = (GmosSpecS2N) result.specS2N()[0];  // Is GMOS always [0] ?
+                // specS2N.getFinalS2NSpectrum(0).accept(tv);  // this seems unnecessary?
+                Log.fine("Number of Slits = " + specS2N.getNumberOfSlits());
+                for (int slitIndex = 0; slitIndex < specS2N.getNumberOfSlits(); slitIndex++) {
+                    Log.fine("Slit index = " + slitIndex);
+                    peakFlux = Math.max(specS2N.getPeakPixelCount(slitIndex), peakFlux);
+                    final VisitableSampledSpectrum fins2n = specS2N.getFinalS2NSpectrum(slitIndex);
+                    double start = fins2n.getX(tv.getDetectorCcdStartIndex(ccdIndex));
+                    double end = fins2n.getX(tv.getDetectorCcdEndIndex(ccdIndex, ccdArray.length));
+                    Log.fine(String.format("ccd %d slit %d covers wavelengths %.2f - %.2f", ccdIndex, slitIndex, start, end));
+                    if (wavelength >= start && wavelength <= end) {
+                        Log.fine(String.format("S/N @ %.2f nm = %.2f", wavelength, fins2n.getY(wavelength)));
+                        if (snr == -1) {  // this is the first slit to include the measurement wavelength
+                            ccd = ccdIndex;
+                            slit = slitIndex;
+                            snr = fins2n.getY(wavelength);
+                        } else {  // the previous slit also covered this wavelength
+                            if (fins2n.getY(wavelength) > snr) {  // use the slit with the highest S/N
+                                Log.fine("Choosing this CCD & Slit as the one to optimize");
+                                ccd = ccdIndex;
+                                slit = slitIndex;
+                                snr = fins2n.getY(wavelength);
+                            } else {
+                                Log.fine("Ignoring this CCD & Slit since the S/N is lower than the other");
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (ccd == -1) throw new RuntimeException(
+                    "The wavelength where the S/N will be measured is not in the output.\n" +
+                    "Try changing the grating central wavelength or the wavelength at which to measure the S/N.");
+
+            Log.fine(String.format("Requested wavelength falls on CCD %d Slit %d", ccd, slit));
+            Log.fine("-> peakFlux over all CCDs = " + peakFlux);
+            double maxFlux = mainInstrument.maxFlux();  // maximum useful flux
+            Log.fine(String.format("maxFlux = %.0f electrons", maxFlux));
+            Log.fine(String.format("exposureTime = %d seconds", exposureTime));
+            double timeToHalfMax = maxFlux / 2. / peakFlux * exposureTime;  // time to reach half of the maximum (our goal)
+            Log.fine(String.format("timeToHalfMax = %.2f seconds", timeToHalfMax));
+            if (timeToHalfMax < 1.0) throw new RuntimeException(String.format(
+                    "This target is too bright for this configuration.\n" +
+                    "The detector well is half filled in %.2f seconds.", timeToHalfMax));
+
+            int maxExptime = Math.min(1200, (int) timeToHalfMax);     // 1200s is maximum due to cosmic rays
+            Log.fine(String.format("maxExptime = %d seconds", maxExptime));
+            double desiredSNR = ((SpectroscopyInt) calcMethod).sigma();
+            Log.fine(String.format("desiredSNR = %.2f", desiredSNR));
+
+            int oldNumberExposures = 0;
+            int oldExposureTime = 0;
+            int iterations = 0;
+            while ((numberExposures != oldNumberExposures || exposureTime != oldExposureTime) && iterations <= 5) {
+                iterations += 1;
+                Log.fine(String.format("--- ITERATION %d (%d != %d) or (%d != %d) ---",
+                        iterations, oldNumberExposures, numberExposures, oldExposureTime, exposureTime));
+                oldNumberExposures = numberExposures;
+                oldExposureTime = exposureTime;
+                // Estimate the time required to achieve the requested S/N assuming S/N scales as sqrt(t):
+                double totalTime = exposureTime * numberExposures * (desiredSNR / snr) * (desiredSNR / snr);
+                Log.fine(String.format("totalTime = %.2f", totalTime));
+                numberExposures = (int) Math.ceil(totalTime / maxExptime);
+                Log.fine(String.format("numberExposures = %d", numberExposures));
+                exposureTime = (int) Math.ceil(totalTime / numberExposures);
+                Log.fine(String.format("exposureTime = %d", exposureTime));
+
+                if ((numberExposures != oldNumberExposures || exposureTime != oldExposureTime) && iterations <= 5) {
+                    // Try one more iteration to see if we can get closer to the requested S/N
+                    final Gmos instrument = ccdArray[ccd];
+                    final SpectroscopyResult newresult = calculateSpectroscopy(mainInstrument, instrument, ccdArray.length, exposureTime, numberExposures);
+                    final GmosSpecS2N specS2N = (GmosSpecS2N) newresult.specS2N()[0];
+                    final VisitableSampledSpectrum fins2n = specS2N.getFinalS2NSpectrum(slit);
+                    snr = fins2n.getY(wavelength);
+                    Log.fine(String.format("Iteration %d: %d x %d sec -> S/N @ %.2f nm = %.2f",
+                            iterations, numberExposures, exposureTime, wavelength, snr));
+                } else {
+                    if (iterations > 5) {
+                        Log.fine("Stopping and calculating the results for all CCDs");
+                    } else {
+                        Log.fine("No change since the last iteration, so calculating final results for all CCDs");
+                    }
+                    for (int i = 0; i < ccdArray.length; i++) {
+                        final Gmos instrument = ccdArray[i];
+                        results[i] = calculateSpectroscopy(mainInstrument, instrument, ccdArray.length, exposureTime, numberExposures);
+                    }
+                }
+            }
         }
         return results;
     }
@@ -136,7 +259,12 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     }
 
     // TODO: bring mainInstrument and instrument together
-    private SpectroscopyResult calculateSpectroscopy(final Gmos mainInstrument, final Gmos instrument, final int detectorCount) {
+    private SpectroscopyResult calculateSpectroscopy(
+            final Gmos mainInstrument,
+            final Gmos instrument,
+            final int detectorCount,
+            final double exposureTime,
+            final int numberExposures) {
 
         SpecS2NSlitVisitor specS2N;
         final SpecS2N[] specS2Narr;
@@ -254,7 +382,9 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                             im_qual,
                             read_noise,
                             dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
-                            _obsDetailParameters);
+                            _obsDetailParameters,
+                            exposureTime,
+                            numberExposures);
 
                     specS2N.setCcdPixelRange(firstCcdIndex, lastCcdIndex);
 
@@ -294,8 +424,9 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                     im_qual,
                     read_noise,
                     dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
-                    _obsDetailParameters);
-
+                    _obsDetailParameters,
+                    exposureTime,
+                    numberExposures);
 
             specS2N.setCcdPixelRange(firstCcdIndex, lastCcdIndex);
             specS2N.setSourceSpectrum(src[0].sed);
@@ -444,15 +575,17 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         // Calculate the Fraction of source in the aperture
         final SourceFraction SFcalc = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, im_qual);
 
-        // Calculate the Peak Pixel Flux
-        final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, sed_integral, sky_integral);
-
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
 
-        final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
+        final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument, SFcalc, im_qual, sed_integral, sky_integral);
         IS2Ncalc.calculate();
+        exposureTime = (int) IS2Ncalc.getExposureTime();
+        numberExposures = IS2Ncalc.numberSourceExposures();
+
+        // Calculate the Peak Pixel Flux
+        final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, exposureTime, SFcalc, im_qual, sed_integral, sky_integral);
 
         return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
 
@@ -754,4 +887,13 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         data[1][0]                  = 0.0;
         data[1][data[1].length - 1] = 0.0;
     }
+
+    public int getExposureTime() {
+        return exposureTime;
+    }
+
+    public int getNumberExposures() {
+        return numberExposures;
+    }
+
 }

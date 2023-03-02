@@ -18,6 +18,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
     private static final Logger Log = Logger.getLogger( SpecS2NSlitVisitor.class.getName() );
     private final ObservationDetails odp;
+    private final CalculationMethod calcMethod;
     private final Slit input_slit;
     private final Slit output_slit;
     private Disperser disperser;
@@ -77,14 +78,42 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         this.imgQuality     = imgQuality;
         this.darkCurrent    = darkCurrent;
         this.readNoise      = readNoise;
-
-        // Currently SpectroscopySN is the only supported calculation method for spectroscopy.
-        final CalculationMethod calcMethod = odp.calculationMethod();
-        if (!(calcMethod instanceof SpectroscopyS2N)) throw new Error("Unsupported calculation method");
-        this.coadds = calcMethod.coaddsOrElse(1);
+        this.calcMethod      = odp.calculationMethod();
+        this.coadds          = calcMethod.coaddsOrElse(1);
         this.numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
         this.sourceFraction  = calcMethod.sourceFraction();
         this.exposureTime    = calcMethod.exposureTime();
+    }
+
+    // Constructor using custom exposureTime and numberExposures (not from input form)
+    public SpecS2NSlitVisitor(final Slit slit,
+                              final Disperser disperser,
+                              final SlitThroughput throughput,
+                              final double pixelWidth,
+                              final double obsWaveLow,
+                              final double obsEnd,
+                              final double imgQuality,
+                              final double readNoise,
+                              final double darkCurrent,
+                              final ObservationDetails odp,
+                              final double exposureTime,
+                              final int numberExposures) {
+        this.odp            = odp;
+        this.input_slit     = slit;
+        this.output_slit    = slit;
+        this.disperser      = disperser;
+        this.throughput     = throughput;
+        this.pixelWidth     = pixelWidth;
+        this.obsStart       = obsWaveLow;
+        this.obsEnd         = obsEnd;
+        this.imgQuality     = imgQuality;
+        this.darkCurrent    = darkCurrent;
+        this.readNoise      = readNoise;
+        this.calcMethod      = odp.calculationMethod();
+        this.coadds          = calcMethod.coaddsOrElse(1);
+        this.numberExposures = numberExposures;
+        this.sourceFraction  = calcMethod.sourceFraction();
+        this.exposureTime    = exposureTime;
     }
 
     // Constructor for cases where the input slit dimensions are different from the output slit dimensions
@@ -111,11 +140,8 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         this.imgQuality     = imgQuality;
         this.darkCurrent    = darkCurrent;
         this.readNoise      = readNoise;
-
-        // Currently SpectroscopySN is the only supported calculation method for spectroscopy.
-        final CalculationMethod calcMethod = odp.calculationMethod();
-        if (!(calcMethod instanceof SpectroscopyS2N)) throw new Error("Unsupported calculation method");
-        this.coadds = calcMethod.coaddsOrElse(1);
+        this.calcMethod      = odp.calculationMethod();
+        this.coadds          = calcMethod.coaddsOrElse(1);
         this.numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
         this.sourceFraction  = calcMethod.sourceFraction();
         this.exposureTime    = calcMethod.exposureTime();
@@ -299,12 +325,14 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
         // total noise in the aperture
         final VisitableSampledSpectrum noise = (VisitableSampledSpectrum) sourceFlux.clone();
+        for (int i = 0; i < noise.getLength(); ++i) { noise.setY(i, 0); }
         for (int i = firstCcdPixel; i <= lastCcdPixel(noise.getLength()); ++i) {
             noise.setY(i, Math.sqrt(signal.getY(i)+ background.getY(i) + darkNoise + readNoise));
         }
 
         // calculate signal to noise
         final VisitableSampledSpectrum singleS2N = (VisitableSampledSpectrum) sourceFlux.clone();
+        for (int i = 0; i < singleS2N.getLength(); ++i) { singleS2N.setY(i, 0); }
         for (int i = firstCcdPixel; i <= lastCcdPixel(singleS2N.getLength()); ++i) {
             singleS2N.setY(i, Math.sqrt(coadds) * signal.getY(i) / noise.getY(i));
         }
@@ -334,12 +362,14 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
         // noise in aperture
         final VisitableSampledSpectrum spec_sourceless_noise = (VisitableSampledSpectrum) sourceFlux.clone();
+        for (int i = 0; i < spec_sourceless_noise.getLength(); ++i) { spec_sourceless_noise.setY(i, 0); }
         int spec_sourceless_noise_last = lastCcdPixel(spec_sourceless_noise.getLength());
         for (int i = firstCcdPixel; i <= spec_sourceless_noise_last; ++i) {
             spec_sourceless_noise.setY(i, Math.sqrt(background.getY(i) + darkNoise + readNoise));
         }
 
         final VisitableSampledSpectrum finalS2N = (VisitableSampledSpectrum) sourceFlux.clone();
+        for (int i = 0; i < finalS2N.getLength(); ++i) { finalS2N.setY(i, 0); }
         for (int i = firstCcdPixel; i <= lastCcdPixel(finalS2N.getLength()); ++i)
             finalS2N.setY(i, Math.sqrt(spec_number_source_exposures) *
                     signal.getY(i) /

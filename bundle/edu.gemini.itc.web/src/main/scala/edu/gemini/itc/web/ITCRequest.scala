@@ -319,12 +319,16 @@ object ITCRequest {
   sealed trait CoaddsType
   case object CoaddsA extends CoaddsType
   case object CoaddsC extends CoaddsType
+  case object CoaddsD extends CoaddsType
+  case object CoaddsE extends CoaddsType
 
   def coadds(r: ITCRequest, t: CoaddsType): Option[Int] = {
     try {
       val ret = t match {
         case CoaddsA => r.intParameter("numCoaddsA")
         case CoaddsC => r.intParameter("numCoaddsC")
+        case CoaddsD => r.intParameter("numCoaddsD")
+        case CoaddsE => r.intParameter("numCoaddsE")
       }
       Some(ret)
     } catch {
@@ -346,6 +350,14 @@ object ITCRequest {
           r.doubleParameter("fracOnSourceC"),
           r.doubleParameter("offset")
         )
+      case "expTime"  if InstrumentDetails.isImaging(i)     =>
+        ImagingExp(
+          r.doubleParameter("sigmaD"),
+          r.doubleParameter("expTimeD"),
+          coadds(r, CoaddsD),
+          r.doubleParameter("fracOnSourceD"),
+          r.doubleParameter("offset")
+        )
       case "s2n"      if InstrumentDetails.isImaging(i)     =>
         ImagingS2N(
           r.intParameter("numExpA"),
@@ -362,7 +374,21 @@ object ITCRequest {
           r.doubleParameter("fracOnSourceA"),
           r.doubleParameter("offset")
         )
-      case _ => throw new IllegalArgumentException("Total integration time to achieve a specific \nS/N ratio is not supported in spectroscopy mode.  \nPlease select the Total S/N method.")
+      case "intTimeSpec" if InstrumentDetails.isSpectroscopy(i) =>
+        SpectroscopyInt(
+          r.doubleParameter("sigmaE"),
+          r.doubleParameter("wavelengthE"),
+          coadds(r, CoaddsE),
+          r.doubleParameter("expTimeE"),
+          r.intParameter("numExpE"),
+          r.doubleParameter("fracOnSourceE"),
+          r.doubleParameter("offset")
+        )
+
+      case _ => throw new IllegalArgumentException(
+        "An incompatible calculation method is selected.\n" +
+        "Please select a spectroscopic calculation method for\n" +
+        "spectroscopy or an imaging calculation method for imaging.")
     }
 
     ObservationDetails(calculationMethod, analysisMethod(r))

@@ -95,8 +95,12 @@ public final class ConfigCreator {
         this.obsDetailParams = p.observation();
     }
 
-    // create part of config common for all instruments
     private ConfigCreatorResult createCommonConfig(final int numberExposures) {
+        return createCommonConfig(numberExposures, obsDetailParams.exposureTime());
+    }
+
+    // create part of config common for all instruments
+    private ConfigCreatorResult createCommonConfig(final int numberExposures, final double exposureTime) {
         if (numberExposures <= 0) {
             throw new IllegalArgumentException("The number of exposures must be at least 1.");
         }
@@ -124,7 +128,7 @@ public final class ConfigCreator {
         for (int i = 0; i < numberExposures; i++) {
             final Config step = new DefaultConfig();
 
-            step.putItem(ExposureTimeKey, obsDetailParams.exposureTime());
+            step.putItem(ExposureTimeKey, exposureTime);
             step.putItem(ObserveTypeKey, InstConstants.SCIENCE_OBSERVE_TYPE);
             step.putItem(ObserveClassKey, ObsClass.SCIENCE);
             step.putItem(CoaddsKey, numberCoadds);
@@ -186,8 +190,8 @@ public final class ConfigCreator {
         return result;
     }
 
-    public final ConfigCreatorResult createGmosConfig(final GmosParameters gmosParams, final int numExp) {
-        final ConfigCreatorResult result = createCommonConfig(numExp);
+    public final ConfigCreatorResult createGmosConfig(final GmosParameters gmosParams, final int numExp, final int exposureTime) {
+        final ConfigCreatorResult result = createCommonConfig(numExp, exposureTime);
 
         for (final Config step : result.getConfig()) {
             if (gmosParams.site().equals(Site.GN)) {

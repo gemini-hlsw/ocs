@@ -526,14 +526,39 @@
             <tr>
                 <td><input value="s2n" name="calcMethod" checked="checked" type="radio" /></td>
                 <td>Total S/N ratio resulting from <input name="numExpA" size="5" value="1" type="text" />
-                exposures each having an exposure time of <input name="expTimeA" size="5" value="900" type="text" /> secs and with a fraction <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
-
+                exposures each having an exposure time of <input name="expTimeA" size="5" value="900" type="text" />
+                secs and with a fraction <input name="fracOnSourceA" size="4" value="1.0" type="text" />
+                of exposures that observe the source </td>
             </tr>
             <tr>
                 <td><input value="intTime" name="calcMethod" type="radio" /></td>
-                <td>Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" /> using an exposure time for each exposure of <input name="expTimeC" size="5" value="900" type="text" /> secs and with a fraction <input name="fracOnSourceC" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
-
+                <td>Imaging integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" />
+                using an exposure time for each exposure of <input name="expTimeC" size="5" value="900" type="text" />
+                secs and with a fraction <input name="fracOnSourceC" size="4" value="1.0" type="text" />
+                of exposures that observe the source </td>
             </tr>
+			<tr>
+				<td><input value="expTime" name="calcMethod" type="radio" /></td>
+				<td>Imaging integration time to achieve a S/N ratio of
+					<input name="sigmaD" size="3" value="5" type="text" />
+					<input name="expTimeD" value="60" type="hidden"/>
+					<input name="coaddsD" value="1" type="hidden"/>
+					<input name="fracOnSourceD" value="1" type="hidden"/>
+					<input name="numExpD" value="1" type="hidden" />
+				</td>
+			</tr>
+			<tr>
+				<td><input value="intTimeSpec" name="calcMethod" type="radio" /></td>
+				<td>Spectroscopy integration time to achieve a S/N ratio of
+					<input name="sigmaE" size="3" value="5" type="text" />
+					measured at <input name="wavelengthE" size="3" value="600" type="text" /> nm.
+					<input name="expTimeE" value="1200" type="hidden"/>
+					<input name="coaddsE" value="1" type="hidden"/>
+					<input name="fracOnSourceE" value="1" type="hidden"/>
+					<input name="numExpE" value="1" type="hidden" />
+				</td>
+			</tr>
+
             <tr>
                 <td colspan="2" height="40" valign="bottom"><b>Telescope offset:</b><i><span>(<a href="#" onclick="window.open('https://www.gemini.edu/sciops/instruments/gmos-0','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
             </tr>
@@ -545,15 +570,13 @@
                 <td colspan="2" height="50" valign="bottom"><b>Analysis method (non IFU):</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256#analysis','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
             </tr>
             <tr>
-
-                <td colspan="2"><input value="autoAper" name="analysisMethod" checked="checked" type="radio" /> Software
-                aperture that gives 'optimum' S/N ratio and with a sky aperture <input name="autoSkyAper" size="4" value="5" type="text" /> times the target aperture</td>
+                <td><input value="autoAper" name="analysisMethod" checked="checked" type="radio" /> </td>
+                <td>Software aperture that gives 'optimum' S/N ratio and with a sky aperture <input name="autoSkyAper" size="4" value="5" type="text" /> times the target aperture</td>
             </tr>
             <tr>
-                <td colspan="2"><input value="userAper" name="analysisMethod" type="radio" /> Software aperture of
-                diameter (or slit length) <input name="userAperDiam" size="4" value="2" type="text" />
+                <td><input value="userAper" name="analysisMethod" type="radio" /></td>
+                <td>Software aperture of diameter (or slit length) <input name="userAperDiam" size="4" value="2" type="text" />
                 arcsec and with a sky aperture <input name="userSkyAper" size="4" value="5" type="text" /> times the target aperture</td>
-
             </tr>
             <tr>
                 <td colspan="2" height="50" valign="bottom"><b>Analysis Method for Integral Field Unit (IFU) spectroscopy:</b><br />
