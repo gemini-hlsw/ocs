@@ -137,4 +137,13 @@ public final class NifsPrinter extends PrinterBase implements OverheadTablePrint
         return instr.readMode().getMinExp() + InstNIFS.COADD_CONSTANT;
     }
 
+    @Override
+    public double getVisitTime() {
+        return this.getVisit_time();
+    }
+
+    @Override
+    public double getRecenterInterval() {
+        return this.getRecentInterval();
+    }
 }

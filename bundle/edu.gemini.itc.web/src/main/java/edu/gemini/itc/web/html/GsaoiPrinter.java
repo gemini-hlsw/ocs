@@ -111,4 +111,13 @@ public final class GsaoiPrinter extends PrinterBase
         return gsaoi.readout(1, gsaoi.getNonDestructiveReads());
     }
 
+    @Override
+    public double getVisitTime() {
+        return this.getVisit_time();
+    }
+
+    @Override
+    public double getRecenterInterval() {
+        return this.getRecentInterval();
+    }
 }

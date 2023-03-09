@@ -176,4 +176,14 @@ public final class NiriPrinter extends PrinterBase implements OverheadTablePrint
         NiriReadoutTime nrt = NiriReadoutTime.lookup(instr.builtinROI(), instr.readMode()).getValue();
         return nrt.getReadout(1);
     }
+
+    @Override
+    public double getVisitTime() {
+        return this.getVisit_time();
+    }
+
+    @Override
+    public double getRecenterInterval() {
+        return this.getRecentInterval();
+    }
 }

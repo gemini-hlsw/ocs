@@ -14,6 +14,8 @@ import java.util.stream.Stream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import scala.collection.JavaConversions;
+
 /**
  * This servlet provides data files and charts for spectroscopy results that have previously
  * been calculated and are cached by this servlet.
@@ -128,7 +130,29 @@ public final class FilesServlet extends HttpServlet {
         final ITCChart chart;
         switch (filename) {
             case "SignalChart":       chart = ITCChart.forSpcDataSet(results.chart(SignalChart.instance(),      index), pd); break;
-            case "S2NChart":          chart = ITCChart.forSpcDataSet(results.chart(S2NChart.instance(),         index), pd); break;
+            case "S2NChart": {
+                scala.collection.immutable.List<SpcChartGroup> list = results.chartGroups();
+                Iterable<SpcChartGroup> it = JavaConversions.asJavaIterable(list);
+                Iterator<SpcChartGroup> it2 = it.iterator();
+                while(it2.hasNext()){
+                    SpcChartGroup spcChartGroup = it2.next();
+                    System.out.println("lenght of charGroup: " + spcChartGroup.charts().length());
+                }
+                chart = ITCChart.forSpcDataSet(results.chart(S2NChart.instance(),         index), pd);
+                break;
+            }
+            case "S2NChartPerRes": {
+                scala.collection.immutable.List<SpcChartGroup> list = results.chartGroups();
+                Iterable<SpcChartGroup> it = JavaConversions.asJavaIterable(list);
+                Iterator<SpcChartGroup> it2 = it.iterator();
+                while(it2.hasNext()){
+                    SpcChartGroup spcChartGroup = it2.next();
+                    System.out.println("lenght2 of charGroup: " + spcChartGroup.charts().length());
+                }
+                chart = ITCChart.forSpcDataSet(results.chart(S2NChartPerRes.instance(),         index), pd);
+                break;
+            }
+
             case "SignalPixelChart":  chart = ITCChart.forSpcDataSet(results.chart(SignalPixelChart.instance(), index), pd); break;
             default:            throw new Error();
         }
@@ -144,6 +168,8 @@ public final class FilesServlet extends HttpServlet {
             case "BackgroundData": file = toFile(result.chart(SignalChart.instance(), chartIndex).allSeriesAsJava(BackgroundData.instance()), seriesIndex); break;
             case "SingleS2NData":  file = toFile(result.chart(S2NChart.instance(),    chartIndex).allSeriesAsJava(SingleS2NData.instance()),  seriesIndex); break;
             case "FinalS2NData":   file = toFile(result.chart(S2NChart.instance(),    chartIndex).allSeriesAsJava(FinalS2NData.instance()),   seriesIndex); break;
+            case "SingleS2NPerResEle":  file = toFile(result.chart(S2NChartPerRes.instance(),    chartIndex).allSeriesAsJava(SingleS2NPerResEle.instance()),  seriesIndex); break;
+            case "FinalS2NPerResEle":   file = toFile(result.chart(S2NChartPerRes.instance(),    chartIndex).allSeriesAsJava(FinalS2NPerResEle.instance()),   seriesIndex); break;
             case "PixSigData":     file = toFile(result.chart(SignalPixelChart.instance(),    chartIndex).allSeriesAsJava(SignalData.instance()),  seriesIndex); break;
             case "PixBackData":    file = toFile(result.chart(SignalPixelChart.instance(),    chartIndex).allSeriesAsJava(BackgroundData.instance()),   seriesIndex); break;
             default:               throw new Error();

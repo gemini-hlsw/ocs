@@ -1,0 +1,25 @@
+# this file describe the quantum efficiencies for the 
+# E2V CCD231-C6-1-G58 CCD which corresponds to the Red CCD.
+# The data has been gotten from the "GHOST Verification Report  GVR-5326-1" document.
+# The document can be found in the https://docs.google.com/document/d/1EzdZ25a02gg-IrFIzXdB-iXkehR2iu8c/edit 
+#
+# Author: Fran. R. 
+#
+# lambda     QE
+#  [nm]      
+#
+   350       0.42
+   400       0.86
+   450       0.95
+   500       0.92
+   550       0.91
+   600       0.92
+   650       0.94
+   700       0.95
+   750       0.98
+   800       0.91
+   850       0.78
+   900       0.60
+   950       0.26
+  1000       0.14
+  1050       0.03

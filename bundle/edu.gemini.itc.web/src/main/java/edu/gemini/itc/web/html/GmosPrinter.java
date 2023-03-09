@@ -276,4 +276,14 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
     public double getReadoutTimePerCoadd() {
         return 0;
     }
+
+    @Override
+    public double getVisitTime() {
+        return this.getVisit_time();
+    }
+
+    @Override
+    public double getRecenterInterval() {
+        return this.getRecentInterval();
+    }
 }

@@ -14,9 +14,27 @@ import java.util.*;
 public abstract class PrinterBase {
 
     private final PrintWriter _out;
+    private final double visit_time;
+
+    private final double recenterInterval;
 
     protected PrinterBase(final PrintWriter pr) {
         _out = pr;
+        visit_time = 7200;
+        recenterInterval = 3600;
+    }
+
+    protected PrinterBase(final PrintWriter pr, int visit_time, double recenterInterval) {
+        _out = pr;
+        this.visit_time = visit_time;
+        this.recenterInterval = recenterInterval;
+    }
+
+    public double getVisit_time() {
+        return visit_time;
+    }
+    public double getRecentInterval() {
+        return recenterInterval;
     }
 
     public abstract void writeOutput();
@@ -210,6 +228,7 @@ public abstract class PrinterBase {
         if      (type == SignalChart.instance())        return "Signal/Background Chart";
         else if (type == S2NChart.instance())           return "Signal to Noise Chart";
         else if (type == SignalPixelChart.instance())   return "Signal/Background Pixel Chart";
+        else if (type == S2NChartPerRes.instance())   return "Signal/Background Per Element Resolution Chart";
         else    throw new Error();
     }
 
@@ -218,6 +237,8 @@ public abstract class PrinterBase {
         else if (type == BackgroundData.instance())     return "ASCII background spectrum";
         else if (type == SingleS2NData.instance())      return "Single Exposure S/N ASCII data";
         else if (type == FinalS2NData.instance())       return "Final S/N ASCII data";
+        else if (type == SingleS2NPerResEle.instance()) return "Single Exposure S/N per resolution element ASCII data";
+        else if (type == FinalS2NPerResEle.instance())  return "Final S/N per resolution element ASCII data";
         else if (type == PixSigData.instance())         return "Pixel ASCII signal spectrum";
         else if (type == PixBackData.instance())        return "Pixel ASCII SQRT(background) spectrum";
         else    throw new Error();

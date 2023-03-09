@@ -34,7 +34,8 @@ object DatFile {
                         readNoise: Double,          // [electrons/pixel]
                         darkCurrent: Double)        // [electrons/s/pixel]
 
-  case class Grating(name: String, resolvingPower: Int, blaze: Int, dispersion: Double, resolution: Double)
+  case class Grating(name: String, resolvingPower: Int, blaze: Int, dispersion: Double, dispersionArray: Array[Array[Double]], resolution: Double)
+
 
   // ===== Parse utils
 // EXPERIMENTAL; May or may not be used in a later stage.
@@ -101,8 +102,23 @@ object DatFile {
       val blaze          = s.nextInt()
       val resolvingPower = s.nextInt()
       val resolution     = s.nextDouble()
-      val dispersion     = s.nextDouble()
-      l.+=(Grating(name, resolvingPower, blaze, dispersion, resolution))
+      //val dispersion     = s.nextDouble()
+      val tmp     = s.next()
+      var dispersion: Double = 0
+      try {
+        dispersion = tmp.toDouble
+        l.+=(Grating(name, resolvingPower, blaze, dispersion, null, resolution))
+      } catch {
+        case e : NumberFormatException => {
+          val dDis = arrays.apply(tmp)
+          l.+=(Grating(name, resolvingPower, blaze, -999999, dDis, resolution))
+        }
+        case e : Exception => {
+          //l.+=(Grating(name, resolvingPower, blaze, -999999, arrays.apply(tmp), resolution))
+          println("NOT ANALYZED THE EXCEPTION, PLEASE CONTACT WITH A PROGRAMMER. LINE 125 OF THE DatFile.scala")
+        }
+      }
+
     }
     l.map(l => l.name -> l).toMap
   }

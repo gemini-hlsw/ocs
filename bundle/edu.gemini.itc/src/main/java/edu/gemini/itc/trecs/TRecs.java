@@ -112,7 +112,7 @@ public final class TRecs extends Instrument implements SpectroscopyInstrument {
             final TrecsGratingOptics gratingOptics = new TrecsGratingOptics(getDirectory() + "/" + TRecs.getPrefix(), _grating.name(),
                     _centralWavelength,
                     detector.getDetectorPixels());
-            _sampling = gratingOptics.dispersion();
+            _sampling = gratingOptics.dispersion(-1);
 
             if (getGrating().equals(Disperser.LOW_RES_20) && !(instrumentWindow.equals(WindowWheel.KRS_5))) {
                 throw new RuntimeException("The " + getGrating().displayValue() + " grating must be " +
@@ -150,7 +150,7 @@ public final class TRecs extends Instrument implements SpectroscopyInstrument {
     }
 
     public double getGratingDispersion() {
-        return _gratingOptics.get().dispersion();
+        return _gratingOptics.get().dispersion(-1);
     }
 
 

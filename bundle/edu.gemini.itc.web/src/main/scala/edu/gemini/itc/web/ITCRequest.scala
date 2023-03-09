@@ -13,6 +13,7 @@ import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.GmosCommonType
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.{AmpGain, AmpReadMode, DetectorManufacturer}
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FPUnitNorth, FilterNorth}
+import edu.gemini.spModel.gemini.ghost.GhostType
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FPUnitSouth, FilterSouth}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
@@ -194,9 +195,25 @@ object ITCRequest {
     Flamingos2Parameters(filter, grism, fpMask, None, readMode)
   }
 
-  // TODO-GHOSTITC
+  // GHOST
   def ghostParameters(r: ITCRequest): GhostParameters = {
-    GhostParameters()
+
+    def extractGain(r:GhostType.ReadMode) : GhostType.AmpGain = r match {
+      case GhostType.ReadMode.SLOW_LOW => GhostType.AmpGain.LOW
+      case GhostType.ReadMode.MEDIUM_LOW => GhostType.AmpGain.LOW
+      case GhostType.ReadMode.FAST_LOW => GhostType.AmpGain.LOW
+    }
+
+    val spatBinning              = r.enumParameter(classOf[GhostType.Binning],"spatialBinning");
+    Log.info("spatBinning: " + spatBinning);
+    val centralWl                = r.centralWavelengthInNanometers();
+    val specBinning              = r.enumParameter(classOf[GhostType.Binning],"spectralBinning");
+    val readMode                 = r.enumParameter(classOf[GhostType.ReadMode]);
+    val ampGain                  = extractGain(readMode);
+    val resolution               = r.enumParameter(classOf[GhostType.Resolution],"instResolution");
+    val nSkyMicrolens            =  ghostGetNumSky(r); //r.intParameter("nSkyMicrolens");
+
+    GhostParameters(centralWl, nSkyMicrolens, resolution, ampGain, readMode, spatBinning, specBinning);
   }
 
   def gmosParameters(r: ITCRequest): GmosParameters = {
@@ -473,6 +490,14 @@ object ITCRequest {
     SourceDefinition(spatialProfile, sourceDefinition, norm, units, normBand, redshift)
   }
 
+  def ghostGetNumSky(r:ITCRequest): Int = {
+    val res = r.enumParameter(classOf[GhostType.Resolution],"instResolution")
+    if (res == GhostType.Resolution.STANDARD)
+      r.intParameter("nSkyMicrolens");
+    else
+      7
+  }
+
   def analysisMethod(r: ITCRequest): AnalysisMethod = r.parameter("analysisMethod") match {
     case "autoAper"   => AutoAperture(r.doubleParameter("autoSkyAper"))
     case "userAper"   => UserAperture(r.doubleParameter("userAperDiam"), r.doubleParameter("userSkyAper"))
@@ -480,6 +505,9 @@ object ITCRequest {
     case "radialIFU"  => IfuRadial(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuMinOffset"), r.doubleParameter("ifuMaxOffset"))
     case "summedIFU"  => IfuSummed(r.intParameter("ifuSkyFibres"), r.intParameter("ifuNumX"), r.intParameter("ifuNumY"), r.doubleParameter("ifuCenterX"), r.doubleParameter("ifuCenterY"))
     case "sumIFU"     => IfuSum(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuNum"), r.parameter("instrumentFPMask")=="IFU_1") // IFU_1 = IFU-2
+    case "ifuSky"     => Ifu(ghostGetNumSky(r)) // This new class is created to the first aproximation to Ghost
+                                                // where the number of fibers to sky depending of the Number of sky microlens choose.
+                                                // This value is only taken in account in the finalS2N function as a element of the noise factor. noiseFactor = 1 + (1 / skyAper);
     case _            => throw new NoSuchElementException(s"Unknown analysis method ${r.parameter("analysisMethod")}")
   }
 

@@ -24,6 +24,7 @@ import edu.gemini.spModel.target.env.{Asterism, GuideProbeTargets, TargetEnviron
 import edu.gemini.spModel.telescope.IssPort
 import edu.gemini.spModel.core.WavelengthConversions._
 import edu.gemini.shared.util.immutable.{Option => GOption}
+import edu.gemini.spModel.gemini.ghost.GhostType
 
 import scala.reflect.ClassTag
 import scalaz.Scalaz._
@@ -60,12 +61,14 @@ object ConfigExtractor {
   private val AoSystemKey         = new ItemKey("adaptive optics:aoSystem")
   private val AoFieldLensKey      = new ItemKey("adaptive optics:fieldLens")
   private val AoGuideStarTypeKey  = new ItemKey("adaptive optics:guideStarType")
+  private val InsResolution       = new ItemKey("instrument:instResolution")
+  private val InsNskyMicrolens    = new ItemKey("instrument:nSkyMicrolens")
 
   def extractInstrumentDetails(instrument: SPInstObsComp, probe: GuideProbe, targetEnv: TargetEnvironment, when: GOption[java.lang.Long], c: Config, cond: ObservingConditions): String \/ InstrumentDetails =
     instrument.getType match {
       case INSTRUMENT_ACQCAM                      => extractAcqCam(c)
       case INSTRUMENT_FLAMINGOS2                  => extractF2(c)
-      case INSTRUMENT_GHOST                       => extractGhost(c) // TODO-GHOSTITC: may need more here?
+      case INSTRUMENT_GHOST                       => extractGhost(c)
       case INSTRUMENT_GNIRS                       => extractGnirs(targetEnv, probe, when, c)
       case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => extractGmos(c)
       case INSTRUMENT_GSAOI                       => extractGsaoi(c, cond)
@@ -105,10 +108,7 @@ object ConfigExtractor {
     } yield Flamingos2Parameters(filter, grism, mask, customSlit, readMode)
   }
 
-  // TODO-GHOSTITC
-  private def extractGhost(c: Config): String \/ GhostParameters = {
-    GhostParameters().right[String]
-  }
+
 //    for {
 //      _ <- Some(Unit)
 //    } yield {
@@ -140,6 +140,30 @@ object ConfigExtractor {
       altair      <- extractAltair             (targetEnv, probe, when, c)
       wavelen     <- extractObservingWavelength(c)
     } yield GnirsParameters(pixelScale, filter, grating, readMode, xDisp, wavelen, slitWidth, camera, wellDepth, altair)
+  }
+
+  // TODO-GHOSTITC
+  private def extractGhost(c: Config): String \/ GhostParameters = {
+    // Gets the optional custom slit width
+    import GhostType._
+
+    def extractGain(r:ReadMode) : AmpGain = r match {
+      case GhostType.ReadMode.SLOW_LOW => GhostType.AmpGain.LOW
+      case GhostType.ReadMode.MEDIUM_LOW => GhostType.AmpGain.LOW
+      case GhostType.ReadMode.FAST_LOW => GhostType.AmpGain.LOW
+    }
+
+    for {
+      readMode      <- extract[ReadMode]      (c, ReadModeKey)
+      specBin       <- extract[Binning]       (c, CcdXBinKey)
+      spatBin       <- extract[Binning]       (c, CcdYBinKey)
+      resolution    <- extract[Resolution]    (c, InsResolution)
+      nSkyMicrolens <- extract[Int]           (c, InsNskyMicrolens)
+      wavelen       <- extractObservingWavelength(c)
+    } yield {
+      var gain = extractGain(readMode);
+      GhostParameters(wavelen, nSkyMicrolens, resolution, gain, readMode, spatBin, specBin);
+    }
   }
 
   private def extractGmos(c: Config): String \/ GmosParameters = {

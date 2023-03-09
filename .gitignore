@@ -63,3 +63,6 @@ metals.sbt
 
 .sdkmanrc
 .jvmopts
+
+#FR IDE
+.Trash-3906/

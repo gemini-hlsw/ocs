@@ -1,11 +1,12 @@
 package edu.gemini.itc.shared
 
-import edu.gemini.spModel.core.{Wavelength, Site}
+import edu.gemini.spModel.core.{Site, Wavelength}
 import edu.gemini.spModel.data.YesNoType
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
-import edu.gemini.spModel.gemini.gmos.{GmosSouthType, GmosNorthType, GmosCommonType}
+import edu.gemini.spModel.gemini.ghost.GhostType
+import edu.gemini.spModel.gemini.gmos.{GmosCommonType, GmosNorthType, GmosSouthType}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.michelle.MichelleParams
@@ -31,8 +32,15 @@ final case class Flamingos2Parameters(
                      customSlitWidth:   Option[Flamingos2.CustomSlitWidth],
                      readMode:          Flamingos2.ReadMode) extends InstrumentDetails
 
-// TODO-GHOSTITC
-final case class GhostParameters() extends InstrumentDetails
+
+final case class GhostParameters(
+                centralWavelength: Wavelength,
+                nSkyMicrolens    : Int,
+                resolution       : GhostType.Resolution,
+                ampGain          : GhostType.AmpGain,
+                readMode         : GhostType.ReadMode,
+                spatialBinning   : GhostType.Binning,
+                spectralBinning  : GhostType.Binning) extends InstrumentDetails
 
 final case class GmosParameters(
                      filter:            GmosCommonType.Filter,
@@ -126,6 +134,7 @@ object InstrumentDetails {
     case i: NifsParameters            => false                                      // NIFS is spectroscopy only
     case i: NiriParameters            => i.grism.equals(Niri.Disperser.NONE)
     case i: TRecsParameters           => i.grating.equals(TReCSParams.Disperser.MIRROR)
+    case i: GhostParameters           => false
     case i: GmosParameters            =>
       i.grating.equals(GmosNorthType.DisperserNorth.MIRROR) ||
       i.grating.equals(GmosSouthType.DisperserSouth.MIRROR)
