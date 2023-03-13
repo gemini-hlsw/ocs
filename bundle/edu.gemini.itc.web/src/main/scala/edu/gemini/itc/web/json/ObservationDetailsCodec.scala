@@ -40,9 +40,19 @@ trait ObservationDetailsCodec {
       "offset"
     )
 
+  private val SpectroscopyIntCodec: CodecJson[SpectroscopyInt] =
+    casecodec5(SpectroscopyInt.apply, SpectroscopyInt.unapply)(
+      "sigma",
+      "wavelength",
+      "coadds",
+      "sourceFraction",
+      "offset"
+    )
+
   private val S2NMethodCodec: CodecJson[S2NMethod] =
     CoproductCodec[S2NMethod]
       .withCase("ImagingS2N",      ImagingS2NCodec)      { case a: ImagingS2N      => a }
+      .withCase("SpectroscopyInt", SpectroscopyIntCodec) { case a: SpectroscopyInt => a }
       .withCase("SpectroscopyS2N", SpectroscopyS2NCodec) { case a: SpectroscopyS2N => a }
       .asCodecJson
 

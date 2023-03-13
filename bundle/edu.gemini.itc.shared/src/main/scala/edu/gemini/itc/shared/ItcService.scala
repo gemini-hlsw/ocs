@@ -166,11 +166,13 @@ final case class SpcChartData(chartType: SpcChartType, title: String, xAxis: Cha
   def allSeriesAsJava(t: SpcDataType): java.util.List[SpcSeriesData] = series.filter(_.dataType == t)
 }
 
+case class ExposureCalculation(exposureTime: Double, exposures: Int, signalToNoise: Double)
+
 /** The result of a spectroscopy ITC calculation contains some numbers per CCD and a set of groups of charts.
   * Individual charts and data series can be referenced by their types and group index. For most instruments there
   * is only one chart and data series of each type, however for NIFS and GMOS there will be several charts
   * of each type for each IFU element. */
-final case class ItcSpectroscopyResult(ccds: List[ItcCcd], chartGroups: List[SpcChartGroup]) extends ItcResult {
+final case class ItcSpectroscopyResult(ccds: List[ItcCcd], chartGroups: List[SpcChartGroup], exposureCalculation: Option[ExposureCalculation]) extends ItcResult {
 
   /** Gets chart data by type and its group index.
     * This method will fail if the result you're looking for does not exist.

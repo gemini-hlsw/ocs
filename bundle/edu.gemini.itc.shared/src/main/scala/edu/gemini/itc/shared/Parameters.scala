@@ -92,7 +92,7 @@ sealed trait Imaging
 sealed trait Spectroscopy
 
 sealed trait CalculationMethod {
-  def exposureTime: Double
+  def exposureTime: Double // in secs
   def coadds: Option[Int]
   /*
      It seems that using .getOrElse is not straightforward to use from Java,
@@ -117,7 +117,7 @@ sealed trait ExpMethod extends CalculationMethod {
 
 sealed trait SpecIntMethod extends CalculationMethod {
   def sigma: Double
-  def wavelength: Double
+  def wavelength: Double // nanometers
 }
 
 // Return the Signal-to-Noise given the number of exposures, exposure time, etc.
@@ -139,10 +139,11 @@ final case class ImagingInt(
 // Return the exposure time and number of exposures given the desired S/N
 final case class ImagingExp(
                     sigma: Double,
-                    exposureTime: Double,
                     coadds: Option[Int],
                     sourceFraction: Double,
-                    offset: Double) extends Imaging with ExpMethod
+                    offset: Double) extends Imaging with ExpMethod {
+  val exposureTime: Double = 60
+}
 
 final case class SpectroscopyS2N(
                     exposures: Int,
@@ -156,13 +157,14 @@ final case class SpectroscopyInt(
                     sigma: Double,
                     wavelength: Double,
                     coadds: Option[Int],
-                    exposureTime: Double,
-                    exposures: Int,
                     sourceFraction: Double,
-                    offset: Double) extends Spectroscopy with SpecIntMethod
+                    offset: Double) extends Spectroscopy with SpecIntMethod with S2NMethod {
+  val exposureTime: Double = 1200
+  val exposures: Int = 1
+}
 
 
-// ==== Analysis method
+  // ==== Analysis method
 
 sealed trait AnalysisMethod
 

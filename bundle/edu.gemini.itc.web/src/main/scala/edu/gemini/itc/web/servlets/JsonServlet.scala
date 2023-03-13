@@ -12,7 +12,7 @@ import scalaz._, Scalaz._
 /**
  * This object is used to expose the itc core calculation as if it were the servlet
  * but called locally via reflection.
- * To avoid conflicts params are passed as Json encoded strings and the return is 
+ * To avoid conflicts params are passed as Json encoded strings and the return is
  * a json encoded string too.
  * This is certainly not the most efficient and other encodings maybe tested. In
  * particular passing the graph data as doubles should be explored
@@ -20,13 +20,22 @@ import scalaz._, Scalaz._
  * This will be used by the scala-3 based itc graphql server for gpp
  */
 object ItcCalculation extends ItcParametersCodec with ItcResultCodec {
-  def calculation(json: String, versionToken: String): String = {
+  def calculateCharts(json: String): String = {
     val itc: ItcService = new ItcServiceImpl
 
     (for {
       itcReq <- Parse.decodeEither[ItcParameters](json)
       itcRes <- itc.calculateCharts(itcReq).toEither.leftMap(_.msg)
-    } yield (itcRes.asJson.->:(("versionToken", jString(versionToken)))).nospaces).toString
+    } yield itcRes.asJson.nospaces).toString
+  }
+
+  def calculateExposureTime(json: String): String = {
+    val itc: ItcService = new ItcServiceImpl
+
+    (for {
+      itcReq <- Parse.decodeEither[ItcParameters](json)
+      itcRes <- itc.calculate(itcReq, true).toEither.leftMap(_.msg)
+    } yield itcRes.asJson.nospaces).toString
   }
 }
 
@@ -38,7 +47,7 @@ object ItcCalculation extends ItcParametersCodec with ItcResultCodec {
 class JsonServlet(versionToken: String) extends HttpServlet with ItcParametersCodec with ItcResultCodec {
   def this() = this("")
 
-  override def doPost(req: HttpServletRequest, res: HttpServletResponse) = {
+  override def doPost(req: HttpServletRequest, res: HttpServletResponse): Unit = {
 
     // I don't know if this is threadsafe so we'll forge one per-request.
     val itc: ItcService = new ItcServiceImpl

@@ -361,7 +361,6 @@ object ITCRequest {
       case "expTime"  if InstrumentDetails.isImaging(i)     =>
         ImagingExp(
           r.doubleParameter("sigmaD"),
-          r.doubleParameter("expTimeD"),
           coadds(r, CoaddsD),
           r.doubleParameter("fracOnSourceD"),
           r.doubleParameter("offset")
@@ -387,8 +386,6 @@ object ITCRequest {
           r.doubleParameter("sigmaE"),
           r.doubleParameter("wavelengthE"),
           coadds(r, CoaddsE),
-          r.doubleParameter("expTimeE"),
-          r.intParameter("numExpE"),
           r.doubleParameter("fracOnSourceE"),
           r.doubleParameter("offset")
         )

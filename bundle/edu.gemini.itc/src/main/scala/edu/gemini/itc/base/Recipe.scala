@@ -109,14 +109,16 @@ object Recipe {
   def serviceResult(r: SpectroscopyResult, charts: JList[SpcChartData], headless: Boolean): ItcSpectroscopyResult =
     ItcSpectroscopyResult(
       List(toCcdData(r, charts.toList)),
-      if (headless) Nil else List(SpcChartGroup(charts.toList))
+      if (headless) Nil else List(SpcChartGroup(charts.toList)),
+      r.exposureCalculation
     )
 
   // One result (CCD) and a set of groups of charts, this covers NIFS (1 CCD and separate groups for IFU cases).
   def serviceGroupedResult(r: SpectroscopyResult, charts: JList[JList[SpcChartData]], headless: Boolean): ItcSpectroscopyResult =
     ItcSpectroscopyResult(
       List(toCcdData(r, charts.toList.flatten)),
-      if (headless) Nil else charts.toList.map(l => SpcChartGroup(l.toList))
+      if (headless) Nil else charts.toList.map(l => SpcChartGroup(l.toList)),
+      r.exposureCalculation
     )
 
   // A set of results and a set of groups of charts, this covers GMOS (3 CCDs and potentially separate groups
@@ -124,7 +126,8 @@ object Recipe {
   def serviceGroupedResult(rs: Array[SpectroscopyResult], charts: JList[JList[SpcChartData]], headless: Boolean): ItcSpectroscopyResult = {
     ItcSpectroscopyResult(
       rs.map(r => toCcdData(r, charts.toList.flatten)).toList,
-      if (headless) Nil else charts.toList.map(l => SpcChartGroup(l.toList))
+      if (headless) Nil else charts.toList.map(l => SpcChartGroup(l.toList)),
+      rs.headOption.flatMap(_.exposureCalculation) // all the array items have the same exposure calculation
     )
 
   }
