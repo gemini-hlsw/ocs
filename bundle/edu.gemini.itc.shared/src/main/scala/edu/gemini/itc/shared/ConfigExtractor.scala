@@ -1,7 +1,6 @@
 package edu.gemini.itc.shared
 
 import java.time.Instant
-
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.spModel.config2.{Config, ItemKey}
@@ -24,7 +23,7 @@ import edu.gemini.spModel.target.env.{Asterism, GuideProbeTargets, TargetEnviron
 import edu.gemini.spModel.telescope.IssPort
 import edu.gemini.spModel.core.WavelengthConversions._
 import edu.gemini.shared.util.immutable.{Option => GOption}
-import edu.gemini.spModel.gemini.ghost.GhostType
+import edu.gemini.spModel.gemini.ghost.{GhostBinning, GhostType}
 
 import scala.reflect.ClassTag
 import scalaz.Scalaz._
@@ -153,17 +152,14 @@ object ConfigExtractor {
       case GhostType.ReadMode.FAST_LOW => GhostType.AmpGain.LOW
     }
 
+    // FIXME
     for {
       readMode      <- extract[ReadMode]      (c, ReadModeKey)
-      specBin       <- extract[Binning]       (c, CcdXBinKey)
-      spatBin       <- extract[Binning]       (c, CcdYBinKey)
+      binning       <- extract[GhostBinning]       (c, CcdXBinKey)
       resolution    <- extract[Resolution]    (c, InsResolution)
       nSkyMicrolens <- extract[Int]           (c, InsNskyMicrolens)
       wavelen       <- extractObservingWavelength(c)
-    } yield {
-      var gain = extractGain(readMode);
-      GhostParameters(wavelen, nSkyMicrolens, resolution, gain, readMode, spatBin, specBin);
-    }
+    } yield GhostParameters(wavelen, nSkyMicrolens, resolution, extractGain(readMode), readMode, binning)
   }
 
   private def extractGmos(c: Config): String \/ GmosParameters = {

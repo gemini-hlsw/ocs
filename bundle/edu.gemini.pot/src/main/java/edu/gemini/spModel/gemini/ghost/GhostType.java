@@ -262,59 +262,59 @@ public class GhostType {
     /**
      * CCD Bin factor.
      */
-    public enum Binning implements DisplayableSpType, LoggableSpType, SequenceableSpType {
-        ONE(1),
-        TWO(2),
-        FOUR(4),
-        EIGHT(8),
-        ;
-
-        public static final Binning DEFAULT = Binning.ONE;
-
-        private int _value;
-
-        Binning(int value) {
-            _value = value;
-        }
-
-        public String displayValue() {
-            return String.valueOf(_value);
-        }
-
-        public String sequenceValue() {
-            return displayValue();
-        }
-
-        public String logValue() {
-            return displayValue();
-        }
-
-        /** Return the integer binning value **/
-        public int getValue() {
-            return _value;
-        }
-
-        /** Return a Binning by name **/
-        public static Binning getBinning(String name) {
-            return Binning.getBinning(name, Binning.DEFAULT);
-        }
-
-        /** Return a Binning by name giving a value to return upon error **/
-        public static Binning getBinning(String name, Binning nvalue) {
-            return SpTypeUtil.oldValueOf(Binning.class, name, nvalue);
-        }
-
-        public static Binning getBinningByValue(int value) {
-            for(Binning constant : Binning.class.getEnumConstants()) {
-                if (constant.getValue() == value)
-                    return constant;
-            }
-            return DEFAULT;
-        }
-
-        /** Return a Binning value by index **/
-        public static Binning getBinningByIndex(int index) {
-            return SpTypeUtil.valueOf(Binning.class, index, DEFAULT);
-        }
-    }
+//    public enum Binning implements DisplayableSpType, LoggableSpType, SequenceableSpType {
+//        ONE(1),
+//        TWO(2),
+//        FOUR(4),
+//        EIGHT(8),
+//        ;
+//
+//        public static final Binning DEFAULT = Binning.ONE;
+//
+//        private int _value;
+//
+//        Binning(int value) {
+//            _value = value;
+//        }
+//
+//        public String displayValue() {
+//            return String.valueOf(_value);
+//        }
+//
+//        public String sequenceValue() {
+//            return displayValue();
+//        }
+//
+//        public String logValue() {
+//            return displayValue();
+//        }
+//
+//        /** Return the integer binning value **/
+//        public int getValue() {
+//            return _value;
+//        }
+//
+//        /** Return a Binning by name **/
+//        public static Binning getBinning(String name) {
+//            return Binning.getBinning(name, Binning.DEFAULT);
+//        }
+//
+//        /** Return a Binning by name giving a value to return upon error **/
+//        public static Binning getBinning(String name, Binning nvalue) {
+//            return SpTypeUtil.oldValueOf(Binning.class, name, nvalue);
+//        }
+//
+//        public static Binning getBinningByValue(int value) {
+//            for(Binning constant : Binning.class.getEnumConstants()) {
+//                if (constant.getValue() == value)
+//                    return constant;
+//            }
+//            return DEFAULT;
+//        }
+//
+//        /** Return a Binning value by index **/
+//        public static Binning getBinningByIndex(int index) {
+//            return SpTypeUtil.valueOf(Binning.class, index, DEFAULT);
+//        }
+//    }
 }

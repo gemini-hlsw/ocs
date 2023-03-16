@@ -71,8 +71,8 @@ public class InstGhost
     public static final ItemKey Y_BIN_KEY = new ItemKey(SeqConfigNames.INSTRUMENT_KEY, "ccdYBinning");
 
 
-    private GhostType.Binning _xBin = GhostType.Binning.DEFAULT;
-    private GhostType.Binning _yBin = GhostType.Binning.DEFAULT;
+    //private GhostType.Binning _xBin = GhostType.Binning.DEFAULT;
+    //private GhostType.Binning _yBin = GhostType.Binning.DEFAULT;
     private PosAngleConstraint _posAngleConstraint = PosAngleConstraint.FIXED;
 
     private GhostType.AmpGain _ampGain = GhostType.AmpGain.DEFAULT;
@@ -212,50 +212,50 @@ public class InstGhost
     /**
      * Set the X CCD binning.
      */
-    public void setCcdXBinning(GhostType.Binning newValue) {
-        GhostType.Binning oldValue = getCcdXBinning();
-        if (newValue != oldValue) {
-            _xBin = newValue;
-            firePropertyChange(CCD_X_BIN_PROP.getName(), oldValue, newValue);
-        }
-    }
-
-    /**
-     * Return the current X CCD binning value.
-     */
-    public GhostType.Binning getCcdXBinning() {
-        return _xBin;
-    }
-
-    /**
-     * Set the Y CCD binning.
-     */
-    public void setCcdYBinning(GhostType.Binning newValue) {
-        GhostType.Binning oldValue = getCcdYBinning();
-        if (newValue != oldValue) {
-            _yBin = newValue;
-            firePropertyChange(CCD_Y_BIN_PROP.getName(), oldValue, newValue);
-        }
-    }
-
-    /**
-     * Return the current Y CCD binning value.
-     */
-    public GhostType.Binning getCcdYBinning() {
-        return _yBin;
-    }
-
-    // Private routine to set x binning with String
-    private void _setXBinning(String newXValue) {
-        GhostType.Binning oldXValue = getCcdXBinning();
-        setCcdXBinning(GhostType.Binning.getBinning(newXValue, oldXValue));
-    }
-
+//    public void setCcdXBinning(GhostType.Binning newValue) {
+//        GhostType.Binning oldValue = getCcdXBinning();
+//        if (newValue != oldValue) {
+//            _xBin = newValue;
+//            firePropertyChange(CCD_X_BIN_PROP.getName(), oldValue, newValue);
+//        }
+//    }
+//
+//    /**
+//     * Return the current X CCD binning value.
+//     */
+//    public GhostType.Binning getCcdXBinning() {
+//        return _xBin;
+//    }
+//
+//    /**
+//     * Set the Y CCD binning.
+//     */
+//    public void setCcdYBinning(GhostType.Binning newValue) {
+//        GhostType.Binning oldValue = getCcdYBinning();
+//        if (newValue != oldValue) {
+//            _yBin = newValue;
+//            firePropertyChange(CCD_Y_BIN_PROP.getName(), oldValue, newValue);
+//        }
+//    }
+//
+//    /**
+//     * Return the current Y CCD binning value.
+//     */
+//    public GhostType.Binning getCcdYBinning() {
+//        return _yBin;
+//    }
+//
+//    // Private routine to set x binning with String
+//    private void _setXBinning(String newXValue) {
+//        GhostType.Binning oldXValue = getCcdXBinning();
+//        setCcdXBinning(GhostType.Binning.getBinning(newXValue, oldXValue));
+//    }
+//
     // Private routine to set y binning with String
-    private void _setYBinning(String newYValue) {
-        GhostType.Binning oldYValue = getCcdYBinning();
-        setCcdYBinning(GhostType.Binning.getBinning(newYValue, oldYValue));
-    }
+//    private void _setYBinning(String newYValue) {
+//        GhostType.Binning oldYValue = getCcdYBinning();
+//        setCcdYBinning(GhostType.Binning.getBinning(newYValue, oldYValue));
+//    }
 
     /**
      * Get the Ghost Port

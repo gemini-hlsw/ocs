@@ -5,7 +5,7 @@ import edu.gemini.spModel.data.YesNoType
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
-import edu.gemini.spModel.gemini.ghost.GhostType
+import edu.gemini.spModel.gemini.ghost.{GhostBinning, GhostType}
 import edu.gemini.spModel.gemini.gmos.{GmosCommonType, GmosNorthType, GmosSouthType}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
@@ -39,8 +39,7 @@ final case class GhostParameters(
                 resolution       : GhostType.Resolution,
                 ampGain          : GhostType.AmpGain,
                 readMode         : GhostType.ReadMode,
-                spatialBinning   : GhostType.Binning,
-                spectralBinning  : GhostType.Binning) extends InstrumentDetails
+                binning: GhostBinning) extends InstrumentDetails
 
 final case class GmosParameters(
                      filter:            GmosCommonType.Filter,

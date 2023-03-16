@@ -102,7 +102,7 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
                 "gratings",                                                // ghost_gratings.dat
                 gp.centralWavelength().toNanometers(),
                 _detector.getDetectorPixels(),
-                gp.spectralBinning().getValue());
+                gp.binning().getSpectralBinning());
         _gratingOptics.setDescription("Grating Resolution");
         addDisperser(_gratingOptics);
         _sampling = super.getSampling();
@@ -197,7 +197,7 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
     public double getPixelSize() {
         //return (double) super.getPixelSize() * gp.spectralBinning().getValue();
         // The E2V_PIXEL_SIZE should be in arcsecs/pixel.
-        return GhostType.E2V_PIXEL_SIZE * gp.spectralBinning().getValue();  // Both detectors has the same pixel size.
+        return GhostType.E2V_PIXEL_SIZE * gp.binning().getSpectralBinning();  // Both detectors has the same pixel size.
     }
 
     public double getSpectralPixelWidth() {
@@ -210,11 +210,11 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
     }
 
     public int getSpectralBinning() {
-        return gp.spectralBinning().getValue();
+        return gp.binning().getSpectralBinning();
     }
 
     public int getSpatialBinning() {
-        return gp.spatialBinning().getValue();
+        return gp.binning().getSpatialBinning();
     }
 
     public double getADSaturation() {
