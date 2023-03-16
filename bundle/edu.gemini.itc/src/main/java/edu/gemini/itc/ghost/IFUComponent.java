@@ -4,6 +4,7 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.ghost.Ghost;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.gemini.ghost.GhostType;
+import edu.gemini.spModel.target.env.ResolutionMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +35,9 @@ public final class IFUComponent extends TransmissionElement {
 
     private final double RADIUS_SR=0.3409428;
 
-    private GhostType.Resolution _res;
+    private ResolutionMode _res;
 
-    public IFUComponent(GhostType.Resolution res) {
+    public IFUComponent(ResolutionMode res) {
 
         super(ITCConstants.LIB + "/" + Ghost.INSTR_DIR + "/" +Ghost.INSTR_PREFIX + "ifu" + Instrument.DATA_SUFFIX);
         IFUApertures = new ApertureComposite();
@@ -44,7 +45,7 @@ public final class IFUComponent extends TransmissionElement {
         double ifu_diameter =  IFU_DIAMETER_HR;
         double ifu_spacing =  IFU_SPACING_HR;
         double radius= RADIUS_HR;
-        if (res == GhostType.Resolution.STANDARD) {
+        if (res == ResolutionMode.GhostStandard) {
             ifu_diameter = IFU_DIAMETER_SR;
             ifu_spacing =  IFU_SPACING_SR;
             radius = RADIUS_SR;
@@ -96,7 +97,7 @@ public final class IFUComponent extends TransmissionElement {
         double ifu_diameter =  IFU_DIAMETER_HR;
         double ifu_spacing =  IFU_SPACING_HR;
         double radius= RADIUS_HR;
-        if (_res == GhostType.Resolution.STANDARD) {
+        if (_res == ResolutionMode.Standard) {
             ifu_diameter = IFU_DIAMETER_SR;
             ifu_spacing =  IFU_SPACING_SR;
             radius = RADIUS_SR;

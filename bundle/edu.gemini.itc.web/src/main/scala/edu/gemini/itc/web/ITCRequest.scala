@@ -30,6 +30,7 @@ import squants.radio.IrradianceConversions._
 import squants.radio.SpectralIrradianceConversions._
 import scalaz.{Enum => _, _}
 import Scalaz._
+import edu.gemini.spModel.target.env.ResolutionMode
 
 /**
  * ITC requests define a generic mechanism to look up values by their parameter names.
@@ -209,7 +210,7 @@ object ITCRequest {
     //val specBinning              = r.enumParameter(classOf[GhostBinning],"spectralBinning");
     val readMode                 = r.enumParameter(classOf[GhostReadNoiseGain]);
     //val ampGain                  = extractGain(readMode);
-    val resolution               = r.enumParameter(classOf[GhostType.Resolution],"instResolution");
+    val resolution               = r.enumParameter(classOf[ResolutionMode],"instResolution");
     val nSkyMicrolens            =  ghostGetNumSky(r); //r.intParameter("nSkyMicrolens");
 
     GhostParameters(centralWl, nSkyMicrolens, resolution, readMode, binning);
@@ -490,8 +491,8 @@ object ITCRequest {
   }
 
   def ghostGetNumSky(r:ITCRequest): Int = {
-    val res = r.enumParameter(classOf[GhostType.Resolution],"instResolution")
-    if (res == GhostType.Resolution.STANDARD)
+    val res = r.enumParameter(classOf[ResolutionMode],"instResolution")
+    if (res == ResolutionMode.GhostStandard)
       r.intParameter("nSkyMicrolens");
     else
       7

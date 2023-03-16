@@ -8,6 +8,7 @@ import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.ghost.GhostCamera;
 import edu.gemini.spModel.gemini.ghost.GhostType;
+import edu.gemini.spModel.target.env.ResolutionMode;
 import org.jfree.util.Log;
 import scala.Option;
 
@@ -98,7 +99,7 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
 
         _gratingOptics = new GhostGratingOptics(
                 getDirectory() + "/" + Ghost.INSTR_PREFIX,
-                gp.resolution().get_displayValue(),                        // ghost_{SR,HR}.dat
+                resolutionFileEnding(gp),
                 "gratings",                                                // ghost_gratings.dat
                 gp.centralWavelength().toNanometers(),
                 _detector.getDetectorPixels(),
@@ -111,7 +112,17 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
 
         _ghostSaturLimitWarning = new GhostSaturLimitRule(AD_SATURATION, WellDepth, getSpatialBinning(), getSpectralBinning(), gain() , 0.90);
 
-        _ghostResolution = new TransmissionElement(getDirectory()+"/" + Ghost.INSTR_PREFIX + gp.resolution().get_displayValue()+ "_perResolution" +getSuffix());
+        _ghostResolution = new TransmissionElement(getDirectory()+"/" + Ghost.INSTR_PREFIX + resolutionFileEnding(gp)+ "_perResolution" +getSuffix());
+    }
+
+    private String resolutionFileEnding(GhostParameters gp) {
+        switch (gp.resolution()) {
+            case GhostStandard: return "SR";
+            case GhostPRV:
+            case GhostHigh:
+                return "HR";
+            default: throw new RuntimeException("Cannot find an extension for resolution type");
+        }
     }
 
     public GhostType.DetectorManufacturer getDetManufacture() {
@@ -256,9 +267,10 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
     @Override
     public double getSlitWidth() {
         switch (gp.resolution()) {
-            case STANDARD:
+            case GhostStandard:
                 return  0.32;
-            case HIGH:
+            case GhostPRV:
+            case GhostHigh:
                 return 0.19;
             default:
                 Log.warning("Incorrect option defined in the GhostParameter resolution, please check this issue. It is used the DEFAULT value (0.32)");
@@ -270,10 +282,11 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
         double slitLength=0.0;
 
         switch (gp.resolution()) {
-            case STANDARD:
+            case GhostStandard:
                 slitLength = GhostType.SIZE_ONE_FIBER_SR_PIXELS * 7;  // SIZE_ONE_FIBER_SR_PIXELS = 2.7
                 break;
-            case HIGH:
+            case GhostPRV:
+            case GhostHigh:
                 slitLength = GhostType.SIZE_ONE_FIBER_HR_PIXELS * 19;  // SIZE_ONE_FIBER_HR_PIXELS = 1.62
                 break;
             default:
@@ -331,7 +344,7 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
 
     public void applySkyCoeff(VisitableSampledSpectrum sky) {
         double skyCoeff = 1 + 7/ gp.nSkyMicrolens();
-        if (gp.resolution() == GhostType.Resolution.HIGH)
+        if (gp.resolution() == ResolutionMode.GhostHigh)
             skyCoeff = 3.714;  // i.e 1 + 19/7
         for (int i = 0; i < sky.getLength(); i++) {
             sky.setY(i, sky.getY(i) * skyCoeff);

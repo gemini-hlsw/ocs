@@ -13,6 +13,7 @@ import edu.gemini.spModel.gemini.michelle.MichelleParams
 import edu.gemini.spModel.gemini.nifs.NIFSParams
 import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.gemini.trecs.TReCSParams
+import edu.gemini.spModel.target.env.ResolutionMode
 
 /*
  * A collection of objects that define subsets of instrument configuration parameters
@@ -34,11 +35,11 @@ final case class Flamingos2Parameters(
 
 
 final case class GhostParameters(
-                centralWavelength: Wavelength,
-                nSkyMicrolens    : Int,
-                resolution       : GhostType.Resolution,
-                readMode         : GhostReadNoiseGain,
-                binning: GhostBinning) extends InstrumentDetails
+                                  centralWavelength: Wavelength,
+                                  nSkyMicrolens    : Int,
+                                  resolution       : ResolutionMode,
+                                  readMode         : GhostReadNoiseGain,
+                                  binning: GhostBinning) extends InstrumentDetails
 
 final case class GmosParameters(
                      filter:            GmosCommonType.Filter,

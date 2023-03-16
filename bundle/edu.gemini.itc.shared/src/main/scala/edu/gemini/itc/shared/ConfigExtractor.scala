@@ -19,7 +19,7 @@ import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.env.{Asterism, GuideProbeTargets, TargetEnvironment}
+import edu.gemini.spModel.target.env.{Asterism, GuideProbeTargets, ResolutionMode, TargetEnvironment}
 import edu.gemini.spModel.telescope.IssPort
 import edu.gemini.spModel.core.WavelengthConversions._
 import edu.gemini.shared.util.immutable.{Option => GOption}
@@ -150,7 +150,7 @@ object ConfigExtractor {
     for {
       readMode      <- extract[GhostReadNoiseGain]      (c, ReadModeKey)
       binning       <- extract[GhostBinning]       (c, CcdXBinKey)
-      resolution    <- extract[Resolution]    (c, InsResolution)
+      resolution    <- extract[ResolutionMode]    (c, InsResolution)
       nSkyMicrolens <- extract[Int]           (c, InsNskyMicrolens)
       wavelen       <- extractObservingWavelength(c)
     } yield GhostParameters(wavelen, nSkyMicrolens, resolution,  readMode, binning)

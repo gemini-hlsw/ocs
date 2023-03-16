@@ -3,6 +3,7 @@ package edu.gemini.itc.ghost;
 import edu.gemini.itc.base.SampledSpectrum;
 import edu.gemini.itc.base.SampledSpectrumVisitor;
 import edu.gemini.spModel.gemini.ghost.GhostType;
+import edu.gemini.spModel.target.env.ResolutionMode;
 import org.jfree.util.Log;
 import java.lang.Math;
 
@@ -15,11 +16,11 @@ public class IFU_Trans implements SampledSpectrumVisitor {
     private final double SR_IFU_tx = 0.93;  // SR IFU lenslet throughput factor (Ross, GVR-5124.4)
     private final double HR_IFU_tx = 0.85;  // Equivalent for HR
 
-    private GhostType.Resolution _res;
+    private ResolutionMode _res;
 
     private double _fwhm;
 
-    public IFU_Trans(GhostType.Resolution  res) {
+    public IFU_Trans(ResolutionMode  res) {
         _res = res;
         _fwhm = 0;
     }
@@ -42,7 +43,7 @@ public class IFU_Trans implements SampledSpectrumVisitor {
 
     public double getInjectionLoss(){
         switch (_res) {
-            case STANDARD: {
+            case GhostStandard: {
                 if (_fwhm < 0.28) {
                     double alpha = 0.701 * _fwhm + 5 * Math.ulp(1);  //% for best seeing use integration in equiv circle
                     return (1 - Math.pow(1 + Math.pow((0.333 / alpha), 2), -3)) * SR_IFU_tx;
@@ -57,20 +58,22 @@ public class IFU_Trans implements SampledSpectrumVisitor {
                 double alpha = 0.701 * _fwhm;     // for really bad seeing use integration in equiv circle
                 return (1 - Math.pow(1 + Math.pow((0.333 / alpha), 2), -3)) * SR_IFU_tx;
             }
-            case HIGH:
+            case GhostPRV:
+            case GhostHigh: {
                 if (_fwhm < 0.28) {
                     double alpha = 0.701 * _fwhm + 5 * Math.ulp(1);
-                    return (1 - Math.pow(1 + Math.pow((0.333/alpha),2),-3)) * HR_IFU_tx;
+                    return (1 - Math.pow(1 + Math.pow((0.333 / alpha), 2), -3)) * HR_IFU_tx;
                 }
 
                 if (_fwhm <= 1.55)
-                   return polyVal(POLY_HR,_fwhm) * HR_IFU_tx;
+                    return polyVal(POLY_HR, _fwhm) * HR_IFU_tx;
 
                 if (_fwhm < 3)
-                    return polyVal(POLY_HR_bad,_fwhm) * HR_IFU_tx;
+                    return polyVal(POLY_HR_bad, _fwhm) * HR_IFU_tx;
 
                 double alpha = 0.701 * _fwhm;
-                return (1 - Math.pow(1 + Math.pow((0.333/alpha),2),-3)) * HR_IFU_tx ;
+                return (1 - Math.pow(1 + Math.pow((0.333 / alpha), 2), -3)) * HR_IFU_tx;
+            }
 
             default:
                 Log.error("Wrong resolution param provided to get the IFU throughput");

@@ -88,55 +88,55 @@ public class GhostType {
 
     }
 
-    public enum Resolution implements DisplayableSpType, LoggableSpType, SequenceableSpType {
-        STANDARD("SR"),
-        HIGH("HR");
-
-        public static final GhostType.Resolution DEFAULT = Resolution.STANDARD;
-
-        private String _displayValue;
-
-
-        Resolution(String displayValue) {
-            _displayValue = displayValue;
-        }
-        public String displayValue() {
-            return String.valueOf(_displayValue);
-        }
-
-        public String sequenceValue() {
-            return displayValue();
-        }
-        public String logValue() {
-            return displayValue();
-        }
-        public String get_displayValue() {
-            return _displayValue;
-        }
-
-        public static GhostType.Resolution getResolution(String name) {
-            return Resolution.getResolution(name, Resolution.DEFAULT);
-        }
-
-        /** Return a Binning by name giving a value to return upon error **/
-        public static GhostType.Resolution getResolution(String name, GhostType.Resolution nvalue) {
-            return SpTypeUtil.oldValueOf(GhostType.Resolution.class, name, nvalue);
-        }
-
-        public static GhostType.Resolution getResolutionByDisplayValue(String value) {
-            for(GhostType.Resolution constant : GhostType.Resolution.class.getEnumConstants()) {
-                if (constant.get_displayValue().equals(value))
-                    return constant;
-            }
-            return DEFAULT;
-        }
-
-        /** Return a Binning value by index **/
-        public static GhostType.Resolution getResolutionByIndex(int index) {
-            return SpTypeUtil.valueOf(GhostType.Resolution.class, index, DEFAULT);
-        }
-
-    }
+//    public enum Resolution implements DisplayableSpType, LoggableSpType, SequenceableSpType {
+//        STANDARD("SR"),
+//        HIGH("HR");
+//
+//        public static final GhostType.Resolution DEFAULT = Resolution.STANDARD;
+//
+//        private String _displayValue;
+//
+//
+//        Resolution(String displayValue) {
+//            _displayValue = displayValue;
+//        }
+//        public String displayValue() {
+//            return String.valueOf(_displayValue);
+//        }
+//
+//        public String sequenceValue() {
+//            return displayValue();
+//        }
+//        public String logValue() {
+//            return displayValue();
+//        }
+//        public String get_displayValue() {
+//            return _displayValue;
+//        }
+//
+//        public static GhostType.Resolution getResolution(String name) {
+//            return Resolution.getResolution(name, Resolution.DEFAULT);
+//        }
+//
+//        /** Return a Binning by name giving a value to return upon error **/
+//        public static GhostType.Resolution getResolution(String name, GhostType.Resolution nvalue) {
+//            return SpTypeUtil.oldValueOf(GhostType.Resolution.class, name, nvalue);
+//        }
+//
+//        public static GhostType.Resolution getResolutionByDisplayValue(String value) {
+//            for(GhostType.Resolution constant : GhostType.Resolution.class.getEnumConstants()) {
+//                if (constant.get_displayValue().equals(value))
+//                    return constant;
+//            }
+//            return DEFAULT;
+//        }
+//
+//        /** Return a Binning value by index **/
+//        public static GhostType.Resolution getResolutionByIndex(int index) {
+//            return SpTypeUtil.valueOf(GhostType.Resolution.class, index, DEFAULT);
+//        }
+//
+//    }
 
 //    public enum AmpGain implements LoggableSpType, SequenceableSpType {
 //        LOW("LOW"),
