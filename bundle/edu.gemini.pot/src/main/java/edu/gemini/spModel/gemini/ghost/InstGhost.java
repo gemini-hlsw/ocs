@@ -75,9 +75,9 @@ public class InstGhost
     //private GhostType.Binning _yBin = GhostType.Binning.DEFAULT;
     private PosAngleConstraint _posAngleConstraint = PosAngleConstraint.FIXED;
 
-    private GhostType.AmpGain _ampGain = GhostType.AmpGain.DEFAULT;
-    private GhostType.AmpGain _gainChoice = GhostType.AmpGain.DEFAULT;
-    private GhostType.ReadMode _readMode = GhostType.ReadMode.DEFAULT;
+//    private GhostType.AmpGain _ampGain = GhostType.AmpGain.DEFAULT;
+//    private GhostType.AmpGain _gainChoice = GhostType.AmpGain.DEFAULT;
+//    private GhostType.ReadMode _readMode = GhostType.ReadMode.DEFAULT;
 
    private static final Duration SETUP_TIME = Duration.ofSeconds(900); // This value was provided by Venus
     // should be added 900 seconds of the SETUP_TIME
@@ -174,35 +174,35 @@ public class InstGhost
     /**
      * Return the current ccd amp readout speed.
      */
-    public GhostType.ReadMode getReadMode() {
-        return _readMode;
-    }
+//    public GhostType.ReadMode getReadMode() {
+//        return _readMode;
+//    }
 
     /**
      * Return the current CCD amp gain range.
      */
-    public GhostType.AmpGain getGainChoice() {
-        return _gainChoice;
-    }
-
-    /**
-     * Set the CCD amp gain choice.
-     */
-    public void setGainChoice(GhostType.AmpGain newValue) {
-        GhostType.AmpGain oldValue = getGainChoice();
-        if (newValue != oldValue) {
-            _gainChoice = newValue;
-            firePropertyChange(AMP_GAIN_CHOICE_PROP.getName(), oldValue, newValue);
-        }
-    }
-
-    /**
-     * Set the AmpGain with a String.
-     */
-    protected void _setGainChoice(String name) {
-        GhostType.AmpGain oldValue = getGainChoice();
-        setGainChoice(GhostType.AmpGain.getAmpGain(name, oldValue));
-    }
+//    public GhostType.AmpGain getGainChoice() {
+//        return _gainChoice;
+//    }
+//
+//    /**
+//     * Set the CCD amp gain choice.
+//     */
+//    public void setGainChoice(GhostType.AmpGain newValue) {
+//        GhostType.AmpGain oldValue = getGainChoice();
+//        if (newValue != oldValue) {
+//            _gainChoice = newValue;
+//            firePropertyChange(AMP_GAIN_CHOICE_PROP.getName(), oldValue, newValue);
+//        }
+//    }
+//
+//    /**
+//     * Set the AmpGain with a String.
+//     */
+//    protected void _setGainChoice(String name) {
+//        GhostType.AmpGain oldValue = getGainChoice();
+//        setGainChoice(GhostType.AmpGain.getAmpGain(name, oldValue));
+//    }
 
     @Override
     public Option<edu.gemini.spModel.core.Angle> calculateParallacticAngle(ISPObservation obs) {

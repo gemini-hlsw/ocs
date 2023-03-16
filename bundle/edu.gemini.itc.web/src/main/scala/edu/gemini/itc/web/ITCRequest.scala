@@ -13,7 +13,7 @@ import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.GmosCommonType
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.{AmpGain, AmpReadMode, DetectorManufacturer}
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FPUnitNorth, FilterNorth}
-import edu.gemini.spModel.gemini.ghost.GhostType
+import edu.gemini.spModel.gemini.ghost.{GhostBinning, GhostReadNoiseGain, GhostType}
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FPUnitSouth, FilterSouth}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
@@ -28,7 +28,6 @@ import squants.motion.KilometersPerSecond
 import squants.motion.VelocityConversions._
 import squants.radio.IrradianceConversions._
 import squants.radio.SpectralIrradianceConversions._
-
 import scalaz.{Enum => _, _}
 import Scalaz._
 
@@ -198,22 +197,22 @@ object ITCRequest {
   // GHOST
   def ghostParameters(r: ITCRequest): GhostParameters = {
 
-    def extractGain(r:GhostType.ReadMode) : GhostType.AmpGain = r match {
-      case GhostType.ReadMode.SLOW_LOW => GhostType.AmpGain.LOW
-      case GhostType.ReadMode.MEDIUM_LOW => GhostType.AmpGain.LOW
-      case GhostType.ReadMode.FAST_LOW => GhostType.AmpGain.LOW
-    }
+//    def extractGain(r:GhostType.ReadMode) : GhostType.AmpGain = r match {
+//      case GhostType.ReadMode.SLOW_LOW => GhostType.AmpGain.LOW
+//      case GhostType.ReadMode.MEDIUM_LOW => GhostType.AmpGain.LOW
+//      case GhostType.ReadMode.FAST_LOW => GhostType.AmpGain.LOW
+//    }LOW
 
-    val spatBinning              = r.enumParameter(classOf[GhostType.Binning],"spatialBinning");
-    Log.info("spatBinning: " + spatBinning);
+    val binning              = r.enumParameter(classOf[GhostBinning],"spatialBinning");
+    //Log.info("spatBinning: " + spatBinning);
     val centralWl                = r.centralWavelengthInNanometers();
-    val specBinning              = r.enumParameter(classOf[GhostType.Binning],"spectralBinning");
-    val readMode                 = r.enumParameter(classOf[GhostType.ReadMode]);
-    val ampGain                  = extractGain(readMode);
+    //val specBinning              = r.enumParameter(classOf[GhostBinning],"spectralBinning");
+    val readMode                 = r.enumParameter(classOf[GhostReadNoiseGain]);
+    //val ampGain                  = extractGain(readMode);
     val resolution               = r.enumParameter(classOf[GhostType.Resolution],"instResolution");
     val nSkyMicrolens            =  ghostGetNumSky(r); //r.intParameter("nSkyMicrolens");
 
-    GhostParameters(centralWl, nSkyMicrolens, resolution, ampGain, readMode, spatBinning, specBinning);
+    GhostParameters(centralWl, nSkyMicrolens, resolution, readMode, binning);
   }
 
   def gmosParameters(r: ITCRequest): GmosParameters = {

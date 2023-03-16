@@ -138,43 +138,43 @@ public class GhostType {
 
     }
 
-    public enum AmpGain implements LoggableSpType, SequenceableSpType {
-        LOW("LOW"),
-        HIGH("HIGH"),
-        ;
-
-        public static final GhostType.AmpGain DEFAULT = GhostType.AmpGain.LOW;
-        public static final ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "gainChoice");
-
-        private String _displayValue;
-
-        AmpGain(String displayValue) {
-            _displayValue = displayValue;
-        }
-
-        public String displayValue() {
-            return _displayValue;
-        }
-
-        public String sequenceValue() {
-            return _displayValue;
-        }
-
-        public String logValue() {
-            return _displayValue;
-        }
-
-        /** Return an AmpName by name **/
-        public static GhostType.AmpGain getAmpGain(String name) {
-            return GhostType.AmpGain.getAmpGain(name, GhostType.AmpGain.DEFAULT);
-        }
-
-        /** Return an AmpGain by name giving a value to return upon error **/
-        public static GhostType.AmpGain getAmpGain(String name, GhostType.AmpGain nvalue) {
-            return SpTypeUtil.oldValueOf(GhostType.AmpGain.class, name, nvalue);
-        }
-    }
-
+//    public enum AmpGain implements LoggableSpType, SequenceableSpType {
+//        LOW("LOW"),
+//        HIGH("HIGH"),
+//        ;
+//
+//        public static final GhostType.AmpGain DEFAULT = GhostType.AmpGain.LOW;
+//        public static final ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "gainChoice");
+//
+//        private String _displayValue;
+//
+//        AmpGain(String displayValue) {
+//            _displayValue = displayValue;
+//        }
+//
+//        public String displayValue() {
+//            return _displayValue;
+//        }
+//
+//        public String sequenceValue() {
+//            return _displayValue;
+//        }
+//
+//        public String logValue() {
+//            return _displayValue;
+//        }
+//
+//        /** Return an AmpName by name **/
+//        public static GhostType.AmpGain getAmpGain(String name) {
+//            return GhostType.AmpGain.getAmpGain(name, GhostType.AmpGain.DEFAULT);
+//        }
+//
+//        /** Return an AmpGain by name giving a value to return upon error **/
+//        public static GhostType.AmpGain getAmpGain(String name, GhostType.AmpGain nvalue) {
+//            return SpTypeUtil.oldValueOf(GhostType.AmpGain.class, name, nvalue);
+//        }
+//    }
+//
 
     /**
      * CCD ReadoutSpead indicates speed of CCD readout.
@@ -183,82 +183,82 @@ public class GhostType {
      * BrightTargets --> Fast read and high gain.
      */
 
-    public enum DetectorReadMode {
-        SLOW,
-        MED,
-        FAST;
-    }
-    public enum ReadMode implements DisplayableSpType, SequenceableSpType {
-        SLOW_LOW("Standard Science", DetectorReadMode.SLOW, AmpGain.LOW, 10),
-        MEDIUM_LOW("Medim Read", DetectorReadMode.MED, AmpGain.LOW, 5),
-        FAST_LOW("Bright Targets", DetectorReadMode.FAST, AmpGain.LOW, 2),
-        ;
-
-        private String _displayValue;
-
-        private DetectorReadMode _readMode;
-
-        public String get_displayValue() {
-            return _displayValue;
-        }
-
-        public void set_displayValue(String _displayValue) {
-            this._displayValue = _displayValue;
-        }
-
-        public DetectorReadMode get_readMode() {
-            return _readMode;
-        }
-
-        public void set_readMode(DetectorReadMode _readMode) {
-            this._readMode = _readMode;
-        }
-
-        public AmpGain get_ampGain() {
-            return _ampGain;
-        }
-
-        public void set_ampGain(AmpGain _ampGain) {
-            this._ampGain = _ampGain;
-        }
-
-        private AmpGain _ampGain;
-
-        public int getReadRate() {
-            return _readRate;
-        }
-
-        public void set_readRate(int _readRate) {
-            this._readRate = _readRate;
-        }
-
-        private int _readRate;
-
-        public static final ReadMode DEFAULT = SLOW_LOW;
-        public static final ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "readMode");
-
-        ReadMode(String displayValue, DetectorReadMode detReadMode, AmpGain amp, int readRate) {
-            _displayValue = displayValue;
-            _readMode = detReadMode;
-            _ampGain = amp;
-            _readRate = readRate;
-        }
-
-        public String displayValue() {
-            return _displayValue;
-        }
-
-        public String sequenceValue() {
-            return _displayValue;
-        }
-
-
-        /** Return an AmpSpeed by name giving a value to return upon error **/
-        public static ReadMode getReadMode(String name, ReadMode nvalue) {
-            return SpTypeUtil.oldValueOf(ReadMode.class, name, nvalue);
-        }
-    }
-
+//    public enum DetectorReadMode {
+//        SLOW,
+//        MED,
+//        FAST;
+//    }
+//    public enum ReadMode implements DisplayableSpType, SequenceableSpType {
+//        SLOW_LOW("Standard Science", DetectorReadMode.SLOW, AmpGain.LOW, 10),
+//        MEDIUM_LOW("Medim Read", DetectorReadMode.MED, AmpGain.LOW, 5),
+//        FAST_LOW("Bright Targets", DetectorReadMode.FAST, AmpGain.LOW, 2),
+//        ;
+//
+//        private String _displayValue;
+//
+//        private DetectorReadMode _readMode;
+//
+//        public String get_displayValue() {
+//            return _displayValue;
+//        }
+//
+//        public void set_displayValue(String _displayValue) {
+//            this._displayValue = _displayValue;
+//        }
+//
+//        public DetectorReadMode get_readMode() {
+//            return _readMode;
+//        }
+//
+//        public void set_readMode(DetectorReadMode _readMode) {
+//            this._readMode = _readMode;
+//        }
+//
+//        public AmpGain get_ampGain() {
+//            return _ampGain;
+//        }
+//
+//        public void set_ampGain(AmpGain _ampGain) {
+//            this._ampGain = _ampGain;
+//        }
+//
+//        private AmpGain _ampGain;
+//
+//        public int getReadRate() {
+//            return _readRate;
+//        }
+//
+//        public void set_readRate(int _readRate) {
+//            this._readRate = _readRate;
+//        }
+//
+//        private int _readRate;
+//
+//        public static final ReadMode DEFAULT = SLOW_LOW;
+//        public static final ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "readMode");
+//
+//        ReadMode(String displayValue, DetectorReadMode detReadMode, AmpGain amp, int readRate) {
+//            _displayValue = displayValue;
+//            _readMode = detReadMode;
+//            _ampGain = amp;
+//            _readRate = readRate;
+//        }
+//
+//        public String displayValue() {
+//            return _displayValue;
+//        }
+//
+//        public String sequenceValue() {
+//            return _displayValue;
+//        }
+//
+//
+//        /** Return an AmpSpeed by name giving a value to return upon error **/
+//        public static ReadMode getReadMode(String name, ReadMode nvalue) {
+//            return SpTypeUtil.oldValueOf(ReadMode.class, name, nvalue);
+//        }
+//    }
+//
     /**
      * CCD Bin factor.
      */

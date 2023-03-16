@@ -23,7 +23,7 @@ import edu.gemini.spModel.target.env.{Asterism, GuideProbeTargets, TargetEnviron
 import edu.gemini.spModel.telescope.IssPort
 import edu.gemini.spModel.core.WavelengthConversions._
 import edu.gemini.shared.util.immutable.{Option => GOption}
-import edu.gemini.spModel.gemini.ghost.{GhostBinning, GhostType}
+import edu.gemini.spModel.gemini.ghost.{GhostBinning, GhostReadNoiseGain, GhostType}
 
 import scala.reflect.ClassTag
 import scalaz.Scalaz._
@@ -146,20 +146,14 @@ object ConfigExtractor {
     // Gets the optional custom slit width
     import GhostType._
 
-    def extractGain(r:ReadMode) : AmpGain = r match {
-      case GhostType.ReadMode.SLOW_LOW => GhostType.AmpGain.LOW
-      case GhostType.ReadMode.MEDIUM_LOW => GhostType.AmpGain.LOW
-      case GhostType.ReadMode.FAST_LOW => GhostType.AmpGain.LOW
-    }
-
     // FIXME
     for {
-      readMode      <- extract[ReadMode]      (c, ReadModeKey)
+      readMode      <- extract[GhostReadNoiseGain]      (c, ReadModeKey)
       binning       <- extract[GhostBinning]       (c, CcdXBinKey)
       resolution    <- extract[Resolution]    (c, InsResolution)
       nSkyMicrolens <- extract[Int]           (c, InsNskyMicrolens)
       wavelen       <- extractObservingWavelength(c)
-    } yield GhostParameters(wavelen, nSkyMicrolens, resolution, extractGain(readMode), readMode, binning)
+    } yield GhostParameters(wavelen, nSkyMicrolens, resolution,  readMode, binning)
   }
 
   private def extractGmos(c: Config): String \/ GmosParameters = {
