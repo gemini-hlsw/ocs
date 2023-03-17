@@ -4,7 +4,6 @@ import edu.gemini.itc.ghost.GHostRecipe;
 import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.ghost.GhostSaturLimitRule;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.gemini.ghost.InstGhost;
 import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 import edu.gemini.itc.ghost.Ghost;
 
@@ -154,7 +153,7 @@ public final class GhostPrinter extends PrinterBase implements OverheadTablePrin
 
 
     public ItcOverheadProvider getInst() {
-        return new  InstGhost ();
+        return new edu.gemini.spModel.gemini.ghost.Ghost();
     }
 
 

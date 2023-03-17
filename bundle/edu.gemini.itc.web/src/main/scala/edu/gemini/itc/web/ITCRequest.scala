@@ -198,19 +198,10 @@ object ITCRequest {
   // GHOST
   def ghostParameters(r: ITCRequest): GhostParameters = {
 
-//    def extractGain(r:GhostType.ReadMode) : GhostType.AmpGain = r match {
-//      case GhostType.ReadMode.SLOW_LOW => GhostType.AmpGain.LOW
-//      case GhostType.ReadMode.MEDIUM_LOW => GhostType.AmpGain.LOW
-//      case GhostType.ReadMode.FAST_LOW => GhostType.AmpGain.LOW
-//    }LOW
-
-    val binning              = r.enumParameter(classOf[GhostBinning],"spatialBinning");
-    //Log.info("spatBinning: " + spatBinning);
-    val centralWl                = r.centralWavelengthInNanometers();
-    //val specBinning              = r.enumParameter(classOf[GhostBinning],"spectralBinning");
-    val readMode                 = r.enumParameter(classOf[GhostReadNoiseGain]);
-    //val ampGain                  = extractGain(readMode);
-    val resolution               = r.enumParameter(classOf[ResolutionMode],"instResolution");
+    val binning              = r.enumParameter(classOf[GhostBinning],"binning")
+    val centralWl                = r.centralWavelengthInNanometers()
+    val readMode                 = r.enumParameter(classOf[GhostReadNoiseGain], "ReadMode")
+    val resolution               = r.enumParameter(classOf[ResolutionMode],"instResolution")
     val nSkyMicrolens            =  ghostGetNumSky(r); //r.intParameter("nSkyMicrolens");
 
     GhostParameters(centralWl, nSkyMicrolens, resolution, readMode, binning);

@@ -328,8 +328,8 @@
 
             <tr>
                 <td colspan="1">
-                    <input value="STANDARD" name="instResolution" id="stdRes" type="radio" checked="checked"/> Standard Resolution
-                    <input value="HIGH" name="instResolution" id="highRes" type="radio" /> High Resolution
+                    <input value="GhostStandard" name="instResolution" id="stdRes" type="radio" checked="checked"/> Standard Resolution
+                    <input value="GhostHigh" name="instResolution" id="highRes" type="radio" /> High Resolution
                 </td>
                 <td colspan="1" style="visibility:hidden">Spectrum central wavelength:
                     <input name="instrumentCentralWavelength" size="5" value="530" type="text" /> nm
@@ -350,19 +350,31 @@
             <tr stype="padding-top:2%;"><td colspan="2"><b>Detector Binning:</b></td></tr>
             <tr stype="padding-top:2%;">
                <td colspan="1">
-                    Spectral Direction
-                    <select name="spectralBinning" size="1">
-                        <option value="ONE" selected>1</option>
-                        <option value="TWO">2</option>
-                        <option value="FOUR">4</option>
-                    </select>
-                   Spatial Direction
-                   <select name="spatialBinning" size="1">
+                   Binning
+                   <select name="binning" size="1">
+                       <option value="ONE_BY_ONE" selected>1 x 1</option>
+                       <option value="ONE_BY_TWO">1 x 2</option>
+                       <option value="ONE_BY_FOUR">1 x 4</option>
+                       <option value="ONE_BY_EIGHT">1 x 8</option>
+                       <option value="TWO_BY_TWO">2 x 2</option>
+                       <option value="TWO_BY_FOUR">2 x 4</option>
+                       <option value="TWO_BY_EIGHT">2 x 8</option>
+                       <option value="FOUR_BY_FOUR">4 x 4</option>
+                   </select>
+                   <!---Spectral Direction
+                   <select name="spectralBinning" size="1">
                        <option value="ONE" selected>1</option>
                        <option value="TWO">2</option>
                        <option value="FOUR">4</option>
-                       <option value="EIGHT">8</option>
                    </select>
+                  Spatial Direction
+                  <select name="spatialBinning" size="1">
+                      <option value="ONE" selected>1</option>
+                      <option value="TWO">2</option>
+                      <option value="FOUR">4</option>
+                      <option value="EIGHT">8</option>
+                  </select>
+                  -->
                 </td>
             </tr>
             <tr style="padding-top:2%"><td colspan="3"><b>Read Modes:</b></td></tr>

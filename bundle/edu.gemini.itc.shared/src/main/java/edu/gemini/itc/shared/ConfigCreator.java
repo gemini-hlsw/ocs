@@ -5,6 +5,7 @@ import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.DefaultConfig;
 import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.gemini.ghost.DetectorManufacturer;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.guide.GuideOption;
 import edu.gemini.spModel.guide.GuideProbe;
@@ -155,7 +156,7 @@ public final class ConfigCreator {
             step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GHOST);
             step.putItem(CcdXBinning, ghostParameters.binning());
             step.putItem(ReadModeKey, ghostParameters.readMode());
-            //step.putItem(DetectorManufacturerKey, (GhostType.DetectorManufacturer.DEFAULT));
+            step.putItem(DetectorManufacturerKey, (DetectorManufacturer.DEFAULT));
 
         }
         return result;

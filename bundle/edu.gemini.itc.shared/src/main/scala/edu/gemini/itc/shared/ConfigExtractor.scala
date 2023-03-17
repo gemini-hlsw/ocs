@@ -1,11 +1,9 @@
 package edu.gemini.itc.shared
 
 import java.time.Instant
-import edu.gemini.pot.ModelConverters._
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.spModel.config2.{Config, ItemKey}
 import edu.gemini.spModel.core._
-import edu.gemini.spModel.data.YesNoType
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
@@ -147,10 +145,10 @@ object ConfigExtractor {
 
     // FIXME
     for {
-      readMode      <- extract[GhostReadNoiseGain]      (c, ReadModeKey)
-      binning       <- extract[GhostBinning]       (c, CcdXBinKey)
+      readMode      <- extract[GhostReadNoiseGain](c, ReadModeKey)
+      binning       <- extract[GhostBinning]      (c, CcdXBinKey)
       resolution    <- extract[ResolutionMode]    (c, InsResolution)
-      nSkyMicrolens <- extract[Int]           (c, InsNskyMicrolens)
+      nSkyMicrolens <- extract[Int]               (c, InsNskyMicrolens)
       wavelen       <- extractObservingWavelength(c)
     } yield GhostParameters(wavelen, nSkyMicrolens, resolution, readMode, binning)
   }
