@@ -18,12 +18,12 @@ import java.util.Calendar;
  * Base class for ITC servlets.  Derive servlets for each instrument or
  * instrument configuration.  Override the writeOutput() method to
  * follow a recipe and perform a calculation.
- * Some of the look of the output document is controled from here.
+ * Some of the look of the output document is controlled from here.
  */
 public final class CalculationServlet extends HttpServlet {
 
-    private static final String HELP_URL        = "http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help";
-    private static final String TITLE           = "Gemini Integration Time Calculator";
+    private static final String HELP_URL = "http://www.gemini.edu/observing/resources/itc/itc-help";
+    private static final String TITLE = "Gemini Integration Time Calculator";
 
     private static final int MAX_CONTENT_LENGTH = 1000000;  // Max file size 1MB
 
