@@ -5,7 +5,7 @@ import edu.gemini.spModel.data.YesNoType
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
-import edu.gemini.spModel.gemini.ghost.{GhostBinning, GhostReadNoiseGain, GhostType}
+import edu.gemini.spModel.gemini.ghost.{GhostBinning, GhostReadNoiseGain}
 import edu.gemini.spModel.gemini.gmos.{GmosCommonType, GmosNorthType, GmosSouthType}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi

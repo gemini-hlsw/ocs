@@ -2,7 +2,6 @@ package edu.gemini.itc.ghost;
 
 import edu.gemini.itc.base.SampledSpectrum;
 import edu.gemini.itc.base.SampledSpectrumVisitor;
-import edu.gemini.spModel.gemini.ghost.GhostType;
 import edu.gemini.spModel.target.env.ResolutionMode;
 import org.jfree.util.Log;
 import java.lang.Math;

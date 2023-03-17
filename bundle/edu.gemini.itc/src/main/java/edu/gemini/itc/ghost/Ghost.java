@@ -7,7 +7,6 @@ import edu.gemini.itc.shared.IfuMethod;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.ghost.DetectorManufacturer;
-import edu.gemini.spModel.gemini.ghost.GhostType;
 import edu.gemini.spModel.target.env.ResolutionMode;
 import scala.Option;
 
@@ -207,7 +206,7 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
     public double getPixelSize() {
         //return (double) super.getPixelSize() * gp.spectralBinning().getValue();
         // The E2V_PIXEL_SIZE should be in arcsecs/pixel.
-        return GhostType.E2V_PIXEL_SIZE * gp.binning().getSpectralBinning();  // Both detectors has the same pixel size.
+        return DetectorManufacturer.E2V_PIXEL_SIZE * gp.binning().getSpectralBinning();  // Both detectors has the same pixel size.
     }
 
     public double getSpectralPixelWidth() {
@@ -277,16 +276,19 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
         }
     }
 
+    public static final double SIZE_ONE_FIBER_SR_PIXELS = 2.7;  // Size of one fiber in pixels.
+    public static final double SIZE_ONE_FIBER_HR_PIXELS = 1.62;  // Size of one fiber in pixels.
+
     public double getSlitLength() {
         double slitLength=0.0;
 
         switch (gp.resolution()) {
             case GhostStandard:
-                slitLength = GhostType.SIZE_ONE_FIBER_SR_PIXELS * 7;  // SIZE_ONE_FIBER_SR_PIXELS = 2.7
+                slitLength = SIZE_ONE_FIBER_SR_PIXELS * 7;  // SIZE_ONE_FIBER_SR_PIXELS = 2.7
                 break;
             case GhostPRV:
             case GhostHigh:
-                slitLength = GhostType.SIZE_ONE_FIBER_HR_PIXELS * 19;  // SIZE_ONE_FIBER_HR_PIXELS = 1.62
+                slitLength = SIZE_ONE_FIBER_HR_PIXELS * 19;  // SIZE_ONE_FIBER_HR_PIXELS = 1.62
                 break;
             default:
                 Log.warning("Incorrect option defined in the GhostParameter resolution, please check this issue. It is used the DEFAULT value ("+slitLength+")");

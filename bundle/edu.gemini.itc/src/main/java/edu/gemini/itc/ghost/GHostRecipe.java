@@ -4,16 +4,11 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.ghost.DetectorManufacturer;
-import edu.gemini.spModel.gemini.ghost.GhostType;
 import scala.Option;
-import scala.Some;
-import scala.collection.JavaConversions;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.IntStream;
 
 /**
  * This class performs the calculations for Ghost used for imaging.

@@ -23,7 +23,7 @@ import edu.gemini.spModel.target.env.{Asterism, GuideProbeTargets, ResolutionMod
 import edu.gemini.spModel.telescope.IssPort
 import edu.gemini.spModel.core.WavelengthConversions._
 import edu.gemini.shared.util.immutable.{Option => GOption}
-import edu.gemini.spModel.gemini.ghost.{GhostBinning, GhostReadNoiseGain, GhostType}
+import edu.gemini.spModel.gemini.ghost.{GhostBinning, GhostReadNoiseGain}
 
 import scala.reflect.ClassTag
 import scalaz.Scalaz._
@@ -144,7 +144,6 @@ object ConfigExtractor {
   // TODO-GHOSTITC
   private def extractGhost(c: Config): String \/ GhostParameters = {
     // Gets the optional custom slit width
-    import GhostType._
 
     // FIXME
     for {

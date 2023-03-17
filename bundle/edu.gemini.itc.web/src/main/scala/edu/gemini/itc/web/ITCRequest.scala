@@ -13,7 +13,7 @@ import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.GmosCommonType
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.{AmpGain, AmpReadMode, DetectorManufacturer}
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FPUnitNorth, FilterNorth}
-import edu.gemini.spModel.gemini.ghost.{GhostBinning, GhostReadNoiseGain, GhostType}
+import edu.gemini.spModel.gemini.ghost.{GhostBinning, GhostReadNoiseGain}
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FPUnitSouth, FilterSouth}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi

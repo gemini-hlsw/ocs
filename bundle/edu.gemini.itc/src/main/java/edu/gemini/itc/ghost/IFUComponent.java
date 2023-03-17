@@ -1,9 +1,6 @@
 package edu.gemini.itc.ghost;
 
 import edu.gemini.itc.base.*;
-import edu.gemini.itc.ghost.Ghost;
-import edu.gemini.spModel.core.MagnitudeBand;
-import edu.gemini.spModel.gemini.ghost.GhostType;
 import edu.gemini.spModel.target.env.ResolutionMode;
 
 import java.util.ArrayList;
