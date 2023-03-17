@@ -27,12 +27,9 @@ public class GhostReadoutTime {
      */
 
     public static double getReadoutOverhead(Config config) {
-        //
         final GhostReadNoiseGain readMode                = (GhostReadNoiseGain) config.getItemValue(null);
-        //final GhostType.DetectorManufacturer detMan      = (GhostType.DetectorManufacturer) config.getItemValue(GhostType.DetectorManufacturer.KEY);
         // I understand RED is the limiting factor
         final GhostBinning              bin        = (GhostBinning) config.getItemValue(Ghost.RED_BINNING_KEY());
-        //final GhostBinning              yBin        = (GhostBinning) config.getItemValue(InstGhost.Y_BIN_KEY);
         return calcReadOut(bin.getSpectralBinning(), bin.getSpectralBinning(), readMode.getReadRate())/1000000.0;
     }
 

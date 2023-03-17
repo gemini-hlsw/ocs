@@ -202,7 +202,7 @@ object ITCRequest {
     val centralWl     = r.centralWavelengthInNanometers()
     val readMode      = r.enumParameter(classOf[GhostReadNoiseGain], "ReadMode")
     val resolution    = r.enumParameter(classOf[ResolutionMode],"instResolution")
-    val nSkyMicrolens =  ghostGetNumSky(r)
+    val nSkyMicrolens = ghostGetNumSky(r)
 
     GhostParameters(centralWl, nSkyMicrolens, resolution, readMode, binning)
   }
