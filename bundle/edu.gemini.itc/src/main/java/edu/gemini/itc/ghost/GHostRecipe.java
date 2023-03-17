@@ -3,6 +3,7 @@ package edu.gemini.itc.ghost;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.gemini.ghost.DetectorManufacturer;
 import edu.gemini.spModel.gemini.ghost.GhostType;
 import scala.Option;
 import scala.Some;
@@ -140,8 +141,8 @@ public final class GHostRecipe  {
 
 
     private Ghost[] createGhost(final GhostParameters parameters, final ObservationDetails observationDetails) {
-        return new Ghost[] {new Ghost(parameters, observationDetails, GhostType.DetectorManufacturer.BLUE),
-                            new Ghost(parameters, observationDetails, GhostType.DetectorManufacturer.RED)};
+        return new Ghost[] {new Ghost(parameters, observationDetails, DetectorManufacturer.BLUE),
+                            new Ghost(parameters, observationDetails, DetectorManufacturer.RED)};
     }
 
 

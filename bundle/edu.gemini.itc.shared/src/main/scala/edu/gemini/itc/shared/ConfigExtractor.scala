@@ -153,7 +153,7 @@ object ConfigExtractor {
       resolution    <- extract[ResolutionMode]    (c, InsResolution)
       nSkyMicrolens <- extract[Int]           (c, InsNskyMicrolens)
       wavelen       <- extractObservingWavelength(c)
-    } yield GhostParameters(wavelen, nSkyMicrolens, resolution,  readMode, binning)
+    } yield GhostParameters(wavelen, nSkyMicrolens, resolution, readMode, binning)
   }
 
   private def extractGmos(c: Config): String \/ GmosParameters = {

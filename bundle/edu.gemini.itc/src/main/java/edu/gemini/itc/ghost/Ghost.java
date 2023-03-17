@@ -6,10 +6,9 @@ import edu.gemini.itc.shared.GhostParameters;
 import edu.gemini.itc.shared.IfuMethod;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.core.Site;
-import edu.gemini.spModel.gemini.ghost.GhostCamera;
+import edu.gemini.spModel.gemini.ghost.DetectorManufacturer;
 import edu.gemini.spModel.gemini.ghost.GhostType;
 import edu.gemini.spModel.target.env.ResolutionMode;
-import org.jfree.util.Log;
 import scala.Option;
 
 import java.util.ArrayList;
@@ -70,14 +69,14 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
 
     // These are the limits of observable wavelength with this configuration.
 
-    private GhostType.DetectorManufacturer _ccd;
+    private DetectorManufacturer _ccd;
 
 
-    private GhostType.DetectorManufacturer _ccdColor;
+    private DetectorManufacturer _ccdColor;
 
     private GhostSaturLimitRule _ghostSaturLimitWarning;  // GHOST-specific saturation limit warning
 
-    public Ghost(final GhostParameters gp, final ObservationDetails odp, final GhostType.DetectorManufacturer ccdColor) {
+    public Ghost(final GhostParameters gp, final ObservationDetails odp, final DetectorManufacturer ccdColor) {
         super(Site.GS, Bands.VISIBLE, INSTR_DIR, FILENAME);
 
         Log.fine("Resolution: " + gp.resolution());
@@ -125,9 +124,9 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
         }
     }
 
-    public GhostType.DetectorManufacturer getDetManufacture() {
-        return _ccdColor;
-    }
+//    public GhostType.DetectorManufacturer getDetManufacture() {
+//        return _ccdColor;
+//    }
 
     /**
      * Returns an array containing this instrument, or, if there are multiple detector CCDs,
@@ -188,15 +187,15 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
         Log.info("TODO. Venu has to confirm the gain for each read Mode");
         switch (gp.readMode()) {
             case SLOW_LOW:
-                if (_ccdColor == GhostType.DetectorManufacturer.BLUE)
+                if (_ccdColor == DetectorManufacturer.BLUE)
                     return 0.75;
                 return 0.7;
             case MEDIUM_LOW:
-                if (_ccdColor == GhostType.DetectorManufacturer.BLUE)
+                if (_ccdColor == DetectorManufacturer.BLUE)
                     return 0.63;
                 return 0.57;
             case FAST_LOW:
-                if (_ccdColor == GhostType.DetectorManufacturer.BLUE)
+                if (_ccdColor == DetectorManufacturer.BLUE)
                     return 0.58;
                 return 0.53;
             default:
@@ -298,9 +297,9 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
 
 
     public double getDarkCurrent() {
-        if (_ccdColor == GhostType.DetectorManufacturer.RED)
-            return GhostType.DetectorManufacturer.RED.get_darkCurrent(); //  0.00022916666666666666; // red dark noise, e- /pix /s (NRC rep Jun 2019; av of 4)
-        return GhostType.DetectorManufacturer.BLUE.get_darkCurrent();    // 0.0003263888888888889   blue dark noise, e- /pix /s (NRC rep Jun 2019; av of 4)
+        if (_ccdColor == DetectorManufacturer.RED)
+            return DetectorManufacturer.RED.getDarkCurrent(); //  0.00022916666666666666; // red dark noise, e- /pix /s (NRC rep Jun 2019; av of 4)
+        return DetectorManufacturer.BLUE.getDarkCurrent();    // 0.0003263888888888889   blue dark noise, e- /pix /s (NRC rep Jun 2019; av of 4)
     }
 
     /*

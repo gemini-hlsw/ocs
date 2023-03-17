@@ -29,7 +29,7 @@ public class GhostReadoutTime {
     public static double getReadoutOverhead(Config config) {
         //
         final GhostReadNoiseGain readMode                = (GhostReadNoiseGain) config.getItemValue(null);
-        final GhostType.DetectorManufacturer detMan      = (GhostType.DetectorManufacturer) config.getItemValue(GhostType.DetectorManufacturer.KEY);
+        //final GhostType.DetectorManufacturer detMan      = (GhostType.DetectorManufacturer) config.getItemValue(GhostType.DetectorManufacturer.KEY);
         // FIXME
         final GhostBinning              bin        = (GhostBinning) config.getItemValue(InstGhost.X_BIN_KEY);
         //final GhostBinning              yBin        = (GhostBinning) config.getItemValue(InstGhost.Y_BIN_KEY);

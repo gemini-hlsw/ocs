@@ -156,7 +156,7 @@ public final class ConfigCreator {
             step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GHOST);
             step.putItem(CcdXBinning, ghostParameters.binning());
             step.putItem(ReadModeKey, ghostParameters.readMode());
-            step.putItem(DetectorManufacturerKey, (GhostType.DetectorManufacturer.DEFAULT));
+            //step.putItem(DetectorManufacturerKey, (GhostType.DetectorManufacturer.DEFAULT));
 
         }
         return result;
