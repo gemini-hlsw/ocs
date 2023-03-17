@@ -198,13 +198,13 @@ object ITCRequest {
   // GHOST
   def ghostParameters(r: ITCRequest): GhostParameters = {
 
-    val binning              = r.enumParameter(classOf[GhostBinning],"binning")
-    val centralWl                = r.centralWavelengthInNanometers()
-    val readMode                 = r.enumParameter(classOf[GhostReadNoiseGain], "ReadMode")
-    val resolution               = r.enumParameter(classOf[ResolutionMode],"instResolution")
-    val nSkyMicrolens            =  ghostGetNumSky(r); //r.intParameter("nSkyMicrolens");
+    val binning       = r.enumParameter(classOf[GhostBinning],"binning")
+    val centralWl     = r.centralWavelengthInNanometers()
+    val readMode      = r.enumParameter(classOf[GhostReadNoiseGain], "ReadMode")
+    val resolution    = r.enumParameter(classOf[ResolutionMode],"instResolution")
+    val nSkyMicrolens =  ghostGetNumSky(r)
 
-    GhostParameters(centralWl, nSkyMicrolens, resolution, readMode, binning);
+    GhostParameters(centralWl, nSkyMicrolens, resolution, readMode, binning)
   }
 
   def gmosParameters(r: ITCRequest): GmosParameters = {

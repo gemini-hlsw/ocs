@@ -26,8 +26,6 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
     public static final double PLATE_SCALE = 1.64;  // arcsec/mm
 
     private static final double WellDepth = 350000;  // VENU has to confirm the correct value.
-    //private final TransmissionElement _blazeThrougthput;
-    //private final IFU_Trans _ifuTrans;
     private final IFUComponent _ifu;
     private final TransmissionElement _ghostResolution;
 
@@ -69,7 +67,6 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
     // These are the limits of observable wavelength with this configuration.
 
     private DetectorManufacturer _ccd;
-
 
     private DetectorManufacturer _ccdColor;
 
@@ -122,10 +119,6 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
             default: throw new RuntimeException("Cannot find an extension for resolution type");
         }
     }
-
-//    public GhostType.DetectorManufacturer getDetManufacture() {
-//        return _ccdColor;
-//    }
 
     /**
      * Returns an array containing this instrument, or, if there are multiple detector CCDs,
@@ -276,8 +269,8 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
         }
     }
 
-    public static final double SIZE_ONE_FIBER_SR_PIXELS = 2.7;  // Size of one fiber in pixels.
-    public static final double SIZE_ONE_FIBER_HR_PIXELS = 1.62;  // Size of one fiber in pixels.
+    private static final double SIZE_ONE_FIBER_SR_PIXELS = 2.7;  // Size of one fiber in pixels.
+    private static final double SIZE_ONE_FIBER_HR_PIXELS = 1.62;  // Size of one fiber in pixels.
 
     public double getSlitLength() {
         double slitLength=0.0;
