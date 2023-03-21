@@ -49,7 +49,6 @@ public final class GhostPrinter extends PrinterBase implements OverheadTablePrin
 
         _println("");
 
-        final Ghost[] ccdArray           = mainInstrument.getDetectorCcdInstruments();
         final SpectroscopyResult result = results[0];
         final double iqAtSource = result.iqCalc().getImageQuality();
 

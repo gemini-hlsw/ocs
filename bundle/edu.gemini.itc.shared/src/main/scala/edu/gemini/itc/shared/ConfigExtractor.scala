@@ -40,6 +40,7 @@ object ConfigExtractor {
   private val DisperserKey        = new ItemKey("instrument:disperser")
   private val AmpReadModeKey      = new ItemKey("instrument:ampReadMode")
   private val AmpGainKey          = new ItemKey("instrument:gainChoice")
+  private val BinningKey          = new ItemKey("instrument:binning")               // spectral x spatial binning
   private val CcdXBinKey          = new ItemKey("instrument:ccdXBinning")           // X aka spectral binning
   private val CcdYBinKey          = new ItemKey("instrument:ccdYBinning")           // Y aka spatial binning
   private val ReadModeKey         = new ItemKey("instrument:readMode")
@@ -146,7 +147,7 @@ object ConfigExtractor {
     // FIXME
     for {
       readMode      <- extract[GhostReadNoiseGain](c, ReadModeKey)
-      binning       <- extract[GhostBinning]      (c, CcdXBinKey)
+      binning       <- extract[GhostBinning]      (c, BinningKey)
       resolution    <- extract[ResolutionMode]    (c, InsResolution)
       nSkyMicrolens <- extract[Int]               (c, InsNskyMicrolens)
       wavelen       <- extractObservingWavelength(c)

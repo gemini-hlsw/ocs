@@ -1,10 +1,6 @@
 package edu.gemini.itc.ghost;
 
-import edu.gemini.itc.base.DatFile;
 import edu.gemini.itc.base.GratingOptics;
-import scala.Option;
-import scala.collection.Iterator;
-import edu.gemini.itc.base.DatFile;
 
 import java.util.logging.Logger;
 
