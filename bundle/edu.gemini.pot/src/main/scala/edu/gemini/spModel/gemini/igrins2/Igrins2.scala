@@ -3,7 +3,7 @@ package edu.gemini.spModel.gemini.igrins2
 import edu.gemini.pot.sp.{ISPNodeInitializer, ISPObsComponent, ISPObservation, SPComponentType}
 import edu.gemini.shared.util.immutable
 import edu.gemini.shared.util.immutable.{DefaultImList, ImList}
-import edu.gemini.spModel.core.{Angle, Site}
+import edu.gemini.spModel.core.{Angle, Site, Wavelength}
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.data.config.{DefaultParameter, DefaultSysConfig, ISysConfig, StringParameter}
 
@@ -16,6 +16,8 @@ import edu.gemini.spModel.obscomp.{InstConstants, SPInstObsComp}
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
 import edu.gemini.spModel.seqcomp.SeqConfigNames
 import edu.gemini.spModel.telescope.{PosAngleConstraint, PosAngleConstraintAware}
+import squants.time.Time
+import squants.time.TimeConversions.TimeConversions
 
 import java.beans.PropertyDescriptor
 import scala.collection.immutable.TreeMap
@@ -26,6 +28,8 @@ import scala.collection.JavaConverters._
  * Note that we do not override clone since private variables are immutable.
  */
 final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE) with PropertyProvider with PosAngleConstraintAware with Igrins2Mixin {
+  _exposureTime = Igrins2.DefaultExposureTime.toSeconds
+
   private var _posAngleConstraint = PosAngleConstraint.PARALLACTIC_ANGLE
 
   /**
@@ -59,6 +63,7 @@ override def getParamSet(factory: PioFactory): ParamSet = {
     val sc = new DefaultSysConfig(SeqConfigNames.INSTRUMENT_CONFIG_NAME)
     sc.putParameter(StringParameter.getInstance(ISPDataObject.VERSION_PROP, getVersion))
     sc.putParameter(DefaultParameter.getInstance(InstConstants.POS_ANGLE_PROP, getPosAngleDegrees))
+    sc.putParameter(DefaultParameter.getInstance(InstConstants.EXPOSURE_TIME_PROP, getExposureTime))
     sc
   }
 
@@ -100,6 +105,11 @@ override def getParamSet(factory: PioFactory): ParamSet = {
 
 object Igrins2 {
   val SP_TYPE: SPComponentType = SPComponentType.INSTRUMENT_IGNRIS2
+  val DefaultExposureTime: Time = 30.seconds // sec (by default settings)
+
+
+  val WavelengthCoverageLowerBound: Wavelength = Wavelength.fromMicrons(1.49)
+  val WavelengthCoverageUpperBound: Wavelength = Wavelength.fromMicrons(2.46)
 
   private val query_yes = true
   private val query_no  = false
@@ -113,7 +123,8 @@ object Igrins2 {
   // The name of the Ghost instrument configuration.
   val INSTRUMENT_NAME_PROP: String = "IGRINS2"
 
-  var POS_ANGLE_CONSTRAINT_PROP: PropertyDescriptor = initProp("posAngleConstraint", query=query_no, iter=iter_no)
+  val POS_ANGLE_CONSTRAINT_PROP: PropertyDescriptor = initProp("posAngleConstraint", query = query_no, iter = iter_no)
+  val EXPOSURE_TIME_PROP: PropertyDescriptor = initProp(InstConstants.EXPOSURE_TIME_PROP, query = query_no, iter = iter_yes)
 
   // Unfortunately we need a Java "Supplier" and "Function" which makes it
   // awkward to create the NodeInitializer via ComponentNodeInitializer.
