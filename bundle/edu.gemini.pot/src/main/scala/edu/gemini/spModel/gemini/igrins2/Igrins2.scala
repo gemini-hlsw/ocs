@@ -107,9 +107,15 @@ object Igrins2 {
   val SP_TYPE: SPComponentType = SPComponentType.INSTRUMENT_IGNRIS2
   val DefaultExposureTime: Time = 30.seconds // sec (by default settings)
 
-
   val WavelengthCoverageLowerBound: Wavelength = Wavelength.fromMicrons(1.49)
   val WavelengthCoverageUpperBound: Wavelength = Wavelength.fromMicrons(2.46)
+
+  val AllowedFowlerSamples: List[Int] = List(1, 2, 4, 8, 16)
+
+  def fowlerSamples(expTime: Time): Int = {
+    val nFowler = ((expTime.toSeconds - 0.168)/1.45479).toInt
+    AllowedFowlerSamples.minBy(cur => math.abs (cur - nFowler))
+  }
 
   private val query_yes = true
   private val query_no  = false
