@@ -4,6 +4,7 @@ import edu.gemini.pot.sp.{ISPObsComponent, SPComponentType}
 import edu.gemini.shared.gui.bean.TextFieldPropertyCtrl
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.igrins2.{Igrins2, Igrins2Geometry}
+import edu.gemini.spModel.telescope.IssPort
 import jsky.app.ot.OTOptions
 import jsky.app.ot.gemini.editor.ComponentEditor
 import jsky.app.ot.gemini.ghost.GhostEditor.LabelPadding
@@ -14,7 +15,8 @@ import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import javax.swing.JPanel
 import javax.swing.event.{DocumentEvent, DocumentListener}
 import scala.swing.GridBagPanel.{Anchor, Fill}
-import scala.swing.{Alignment, Component, FlowPanel, GridBagPanel, Insets, Label, Separator, Swing}
+import scala.swing.event.ButtonClicked
+import scala.swing.{Alignment, ButtonGroup, Component, FlowPanel, GridBagPanel, Insets, Label, RadioButton, Separator, Swing}
 
 class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
 
@@ -111,6 +113,38 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
       gridwidth = 3
       insets = new Insets(10, 0, 0, 0)
     }
+    row += 1
+    val upLookingButton = new RadioButton("Up-looking")
+    val sideLookingButton = new RadioButton("Sidelooking")
+    listenTo(upLookingButton, sideLookingButton)
+    reactions += {
+      case ButtonClicked(button) =>
+        if (button == upLookingButton) {
+          changeIssPort(IssPort.UP_LOOKING)
+        }
+        if (button == sideLookingButton) {
+          changeIssPort(IssPort.SIDE_LOOKING)
+        }
+    }
+    new ButtonGroup(upLookingButton, sideLookingButton)
+    private val portPanel = new FlowPanel(new Label("ISS Port:"), upLookingButton, sideLookingButton)
+    layout(portPanel) = new Constraints() {
+      anchor = Anchor.West
+      fill = Fill.Horizontal
+      gridx = 0
+      gridy = row
+      gridwidth = 2
+      insets = new Insets(10, 0, 0, 0)
+    }
+    row += 1
+    layout(new Separator()) = new Constraints() {
+      anchor = Anchor.West
+      fill = Fill.Horizontal
+      gridx = 0
+      gridy = row
+      gridwidth = 3
+      insets = new Insets(10, 0, 0, 0)
+    }
     /**
      * Position angle components.
      **/
@@ -123,15 +157,6 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
       insets = new Insets(3, 10, 0, Igrins2Editor.LabelPadding)
     }
 
-//    val posAngleCtrl: TextFieldPropertyCtrl[Igrins2, java.lang.Double] = TextFieldPropertyCtrl.createDoubleInstance(Igrins2.POS_ANGLE_PROP, 1)
-//    posAngleCtrl.setColumns(10)
-//    layout(Component.wrap(posAngleCtrl.getTextField)) = new Constraints() {
-//      anchor = Anchor.NorthWest
-//      gridx = 1
-//      gridy = row
-//      insets = new Insets(0, 0, 0, LabelPadding)
-//    }
-
     val posAngleUnits: Label = new Label("deg E of N")
     posAngleUnits.horizontalAlignment = Alignment.Left
     val posAnglePanel: PositionAnglePanel[Igrins2, Igrins2Editor] = PositionAnglePanel.apply[Igrins2, Igrins2Editor](SPComponentType.INSTRUMENT_IGNRIS2)
@@ -141,19 +166,30 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
       gridy = row
       insets = new Insets(3, 0, 0, 0)
     }
-    def updateFowlerSamples(): Unit =
-      ui.fowlerSamples.text = Igrins2.fowlerSamples(expTimeCtrl.getBean.getExposureTime.seconds).toString
-    expTimeCtrl.getTextField.getDocument.addDocumentListener(new DocumentListener {
-      override def insertUpdate(e: DocumentEvent): Unit =
-        updateFowlerSamples()
+  }
 
-      override def removeUpdate(e: DocumentEvent): Unit =
-        updateFowlerSamples()
+  def updateFowlerSamples(): Unit =
+    ui.fowlerSamples.text = Igrins2.fowlerSamples(ui.expTimeCtrl.getBean.getExposureTime.seconds).toString
+    ui.expTimeCtrl.getTextField.getDocument.addDocumentListener(new DocumentListener {
+    override def insertUpdate(e: DocumentEvent): Unit =
+      updateFowlerSamples()
 
-      override def changedUpdate(e: DocumentEvent): Unit =
-        updateFowlerSamples()
-    })
+    override def removeUpdate(e: DocumentEvent): Unit =
+      updateFowlerSamples()
 
+    override def changedUpdate(e: DocumentEvent): Unit =
+      updateFowlerSamples()
+  })
+
+  def changeIssPort(port: IssPort): Unit = Swing.onEDT {
+    getDataObject.setIssPort(port)
+  }
+
+  // Display the current ISS port settings
+  def updateIssPort(): Unit = {
+    val port = getDataObject.getIssPort
+    if (port == IssPort.SIDE_LOOKING) ui.sideLookingButton.selected = true
+    else if (port == IssPort.UP_LOOKING) ui.upLookingButton.selected = true
   }
 
   /**
@@ -168,7 +204,8 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
 
     inst.addPropertyChangeListener(Igrins2.POS_ANGLE_CONSTRAINT_PROP.getName, ui.updateParallacticAnglePCL)
     ui.expTimeCtrl.setBean(inst)
-    ui.updateFowlerSamples()
+    updateFowlerSamples()
+    updateIssPort()
   }
 
   override def handlePreDataObjectUpdate (inst: Igrins2): Unit = {

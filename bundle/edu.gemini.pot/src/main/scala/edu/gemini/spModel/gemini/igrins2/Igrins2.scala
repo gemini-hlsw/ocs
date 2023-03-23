@@ -15,7 +15,7 @@ import edu.gemini.spModel.inst.ParallacticAngleSupport
 import edu.gemini.spModel.obscomp.{InstConstants, SPInstObsComp}
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
 import edu.gemini.spModel.seqcomp.SeqConfigNames
-import edu.gemini.spModel.telescope.{PosAngleConstraint, PosAngleConstraintAware}
+import edu.gemini.spModel.telescope.{IssPort, IssPortProvider, PosAngleConstraint, PosAngleConstraintAware}
 import squants.time.Time
 import squants.time.TimeConversions.TimeConversions
 
@@ -27,9 +27,9 @@ import scala.collection.JavaConverters._
  ** The Igrins2 instrument SP model.
  * Note that we do not override clone since private variables are immutable.
  */
-final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE) with PropertyProvider with PosAngleConstraintAware with Igrins2Mixin {
+final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE) with PropertyProvider with PosAngleConstraintAware with Igrins2Mixin with IssPortProvider {
   _exposureTime = Igrins2.DefaultExposureTime.toSeconds
-
+  private var _port = IssPort.UP_LOOKING
   private var _posAngleConstraint = PosAngleConstraint.PARALLACTIC_ANGLE
 
   /**
@@ -49,14 +49,19 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE) with Pr
   override def getProperties: JMap[String, PropertyDescriptor] =
     Igrins2.PropertyMap
 
-override def getParamSet(factory: PioFactory): ParamSet = {
+  override def getParamSet(factory: PioFactory): ParamSet = {
     val paramSet = super.getParamSet(factory)
     Pio.addParam(factory, paramSet, Igrins2.POS_ANGLE_CONSTRAINT_PROP.getName(), getPosAngleConstraint().name());
-  paramSet
+    Pio.addParam(factory, paramSet, Igrins2.PORT_PROP.getName, getIssPort.name)
+
+    paramSet
   }
 
   override def setParamSet(paramSet: ParamSet): Unit = {
-    Option(Pio.getValue(paramSet, Igrins2.POS_ANGLE_CONSTRAINT_PROP)).map(_.toDouble).foreach(setPosAngleDegrees)
+    super.setParamSet(paramSet)
+    Option(Pio.getValue(paramSet, Igrins2.POS_ANGLE_CONSTRAINT_PROP)).flatMap(v => Option(PosAngleConstraint.valueOf(v))).foreach(_setPosAngleConstraint)
+    //Option(Pio.getValue(paramSet, .POS_ANGLE_PROP)).map(_.toDouble).foreach(setPosAngleDegrees)
+    Option(Pio.getValue(paramSet, Igrins2.PORT_PROP.getName)).foreach(_setPort)
   }
 
   override def getSysConfig: ISysConfig = {
@@ -64,6 +69,7 @@ override def getParamSet(factory: PioFactory): ParamSet = {
     sc.putParameter(StringParameter.getInstance(ISPDataObject.VERSION_PROP, getVersion))
     sc.putParameter(DefaultParameter.getInstance(InstConstants.POS_ANGLE_PROP, getPosAngleDegrees))
     sc.putParameter(DefaultParameter.getInstance(InstConstants.EXPOSURE_TIME_PROP, getExposureTime))
+    sc.putParameter(DefaultParameter.getInstance(Igrins2.PORT_PROP, getIssPort))
     sc
   }
 
@@ -75,6 +81,37 @@ override def getParamSet(factory: PioFactory): ParamSet = {
       _posAngleConstraint = newValue
       firePropertyChange(Igrins2.POS_ANGLE_CONSTRAINT_PROP.getName, oldValue, newValue)
     }
+  }
+
+  private def _setPosAngleConstraint(newValue: PosAngleConstraint): Unit = {
+    _posAngleConstraint = newValue
+  }
+
+  /**
+   * Get the GMOS Port
+   */
+  override def getIssPort: IssPort = {
+    if (_port == null) _port = IssPort.DEFAULT
+    _port
+  }
+
+  /**
+   * Set the Port.
+   */
+  override def setIssPort(newValue: IssPort): Unit = {
+    val oldValue = getIssPort
+    if (oldValue != newValue) {
+      _port = newValue
+      firePropertyChange(Igrins2.PORT_PROP.getName, oldValue, newValue)
+    }
+  }
+
+  /**
+   * Set the Port with a String.
+   */
+  private def _setPort(name: String): Unit = {
+    val oldValue = getIssPort
+    setIssPort(IssPort.getPort(name, oldValue))
   }
 
   /**
@@ -131,6 +168,7 @@ object Igrins2 {
 
   val POS_ANGLE_CONSTRAINT_PROP: PropertyDescriptor = initProp("posAngleConstraint", query = query_no, iter = iter_no)
   val EXPOSURE_TIME_PROP: PropertyDescriptor = initProp(InstConstants.EXPOSURE_TIME_PROP, query = query_no, iter = iter_yes)
+  var PORT_PROP: PropertyDescriptor = initProp(IssPortProvider.PORT_PROPERTY_NAME, query_no, iter_no)
 
   // Unfortunately we need a Java "Supplier" and "Function" which makes it
   // awkward to create the NodeInitializer via ComponentNodeInitializer.
