@@ -2,22 +2,20 @@ package jsky.app.ot.gemini.igrins2
 
 import edu.gemini.pot.sp.{ISPObsComponent, SPComponentType}
 import edu.gemini.shared.gui.bean.TextFieldPropertyCtrl
-import edu.gemini.spModel.core.Site
+import edu.gemini.spModel.core.{MagnitudeBand, Site}
 import edu.gemini.spModel.gemini.igrins2.{Igrins2, Igrins2Geometry, SlitViewingCamera}
 import edu.gemini.spModel.telescope.IssPort
 import jsky.app.ot.OTOptions
 import jsky.app.ot.gemini.editor.ComponentEditor
-import jsky.app.ot.gemini.ghost.GhostEditor.LabelPadding
 import jsky.app.ot.gemini.parallacticangle.PositionAnglePanel
 import squants.time.TimeConversions.TimeConversions
 
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import javax.swing.JPanel
-import javax.swing.border.Border
 import javax.swing.event.{DocumentEvent, DocumentListener}
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing.event.{ButtonClicked, SelectionChanged}
-import scala.swing.{Alignment, ButtonGroup, ComboBox, Component, FlowPanel, GridBagPanel, Insets, Label, RadioButton, Separator, Swing}
+import scala.swing.{Alignment, BorderPanel, ButtonGroup, ComboBox, Component, FlowPanel, GridBagPanel, Insets, Label, RadioButton, Separator, Swing}
 
 class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
 
@@ -32,7 +30,7 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     border = ComponentEditor.PANEL_BORDER
 
     layout(new Label("Science FOV: ")) = new Constraints() {
-      anchor = Anchor.West
+      anchor = Anchor.NorthWest
       gridx = 0
       gridy = row
       weightx = 1.0
@@ -40,7 +38,7 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     }
 
     layout(new Label("Wavelength Coverage: ")) = new Constraints() {
-      anchor = Anchor.West
+      anchor = Anchor.NorthWest
       gridx = 1
       gridy = row
       weightx = 1.0
@@ -52,7 +50,7 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
      * Science FOV (Read-only)
      */
     layout(new Label(s"${Igrins2Geometry.ScienceFovHeight.toArcseconds} x ${Igrins2Geometry.ScienceFovWidth.toArcseconds} arcsec" )) = new Constraints() {
-      anchor = Anchor.West
+      anchor = Anchor.NorthWest
       gridx = 0
       gridy = row
       weightx = 1.0
@@ -63,7 +61,7 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
      * Wavelength coverage (Read-only)
      */
     layout(new Label(s"${Igrins2.WavelengthCoverageLowerBound.toMicrons} - ${Igrins2.WavelengthCoverageUpperBound.toMicrons} μm" )) = new Constraints() {
-      anchor = Anchor.West
+      anchor = Anchor.NorthWest
       gridx = 1
       gridy = row
       weightx = 1.0
@@ -71,7 +69,7 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     }
     row += 1
     layout(new Separator()) = new Constraints() {
-      anchor = Anchor.West
+      anchor = Anchor.NorthWest
       fill = Fill.Horizontal
       gridx = 0
       gridy = row
@@ -81,14 +79,14 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
 
     row += 1
     layout(new Label("Exposure Time (1.63 - 13000s):")) = new Constraints() {
-      anchor = Anchor.West
+      anchor = Anchor.NorthWest
       gridx = 0
       gridy = row
       weightx = 1.0
       insets = new Insets(3, Igrins2Editor.LabelPadding, 0, 0)
     }
     layout(new Label("Fowler Samples:")) = new Constraints() {
-      anchor = Anchor.West
+      anchor = Anchor.NorthWest
       gridx = 1
       gridy = row
       weightx = 1.0
@@ -101,14 +99,13 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
      */
     val expTimeCtrl: TextFieldPropertyCtrl[Igrins2, java.lang.Double] = TextFieldPropertyCtrl.createDoubleInstance(Igrins2.EXPOSURE_TIME_PROP, 1)
     expTimeCtrl.setColumns(10)
-    //expTimeCtrl.
 
     val expTimeUnits = new Label("sec")
     expTimeUnits.horizontalAlignment = Alignment.Left
 
     private val expTimePanel = new FlowPanel(Component.wrap(expTimeCtrl.getComponent), expTimeUnits)
     layout(expTimePanel) = new Constraints() {
-      anchor = Anchor.West
+      anchor = Anchor.NorthWest
       gridx = 0
       gridy = row
       insets = new Insets(3, Igrins2Editor.ControlPadding, 0, 0)
@@ -119,14 +116,14 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
      */
     val fowlerSamples = new Label("-")
     layout(fowlerSamples) = new Constraints() {
-      anchor = Anchor.West
+      anchor = Anchor.NorthWest
       gridx = 1
       gridy = row
       insets = new Insets(3, Igrins2Editor.ControlPadding, 0, 0)
     }
     row += 1
     layout(new Separator()) = new Constraints() {
-      anchor = Anchor.West
+      anchor = Anchor.NorthWest
       fill = Fill.Horizontal
       gridx = 0
       gridy = row
@@ -142,8 +139,8 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     val sideLookingButton = new RadioButton("Side-looking")
 
     new ButtonGroup(upLookingButton, sideLookingButton)
-    listenTo(upLookingButton, sideLookingButton)
 
+    listenTo(upLookingButton, sideLookingButton)
     reactions += {
       case ButtonClicked(`upLookingButton`) =>
         changeIssPort(IssPort.UP_LOOKING)
@@ -153,21 +150,21 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
 
     private val portPanel = new FlowPanel(upLookingButton, sideLookingButton)
     layout(new Label("ISS Port:")) = new Constraints() {
-      anchor = Anchor.West
+      anchor = Anchor.NorthWest
       gridx = 0
       gridy = row
       insets = new Insets(3, Igrins2Editor.LabelPadding, 0, 0)
     }
     row += 1
     layout(portPanel) = new Constraints() {
-      anchor = Anchor.West
+      anchor = Anchor.NorthWest
       gridx = 0
       gridy = row
       insets = new Insets(3, Igrins2Editor.ControlPadding, 0, 0)
     }
     row += 1
     layout(new Separator()) = new Constraints() {
-      anchor = Anchor.West
+      anchor = Anchor.NorthWest
       fill = Fill.Horizontal
       gridx = 0
       gridy = row
@@ -182,7 +179,7 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     val posAngleLabel: Label = new Label("Position Angle:")
     posAngleLabel.horizontalAlignment = Alignment.Left
     layout(posAngleLabel) = new Constraints() {
-      anchor = Anchor.West
+      anchor = Anchor.NorthWest
       gridx = 0
       gridy = row
       insets = new Insets(3, Igrins2Editor.LabelPadding, 0, 0)
@@ -191,7 +188,7 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     row += 1
     val posAnglePanel: PositionAnglePanel[Igrins2, Igrins2Editor] = PositionAnglePanel.apply[Igrins2, Igrins2Editor](SPComponentType.INSTRUMENT_IGNRIS2)
     layout(posAnglePanel) = new Constraints() {
-      anchor = Anchor.West
+      anchor = Anchor.NorthWest
       gridx = 0
       gridy = row
       insets = new Insets(3, Igrins2Editor.ControlPadding, 0, 0)
@@ -199,7 +196,7 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     row += 1
 
     layout(new Separator()) = new Constraints() {
-      anchor = Anchor.West
+      anchor = Anchor.NorthWest
       fill = Fill.Horizontal
       gridx = 0
       gridy = row
@@ -210,11 +207,20 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     val viewingModeLabel: Label = new Label("Viewing Mode:")
     viewingModeLabel.horizontalAlignment = Alignment.Left
     layout(viewingModeLabel) = new Constraints() {
-      anchor = Anchor.West
+      anchor = Anchor.NorthWest
       gridx = 0
       gridy = row
       insets = new Insets(3, Igrins2Editor.LabelPadding, 0, 0)
     }
+    val readNoiseLabel: Label = new Label("Read Noise:")
+    readNoiseLabel.horizontalAlignment = Alignment.Left
+    layout(readNoiseLabel) = new Constraints() {
+      anchor = Anchor.NorthWest
+      gridx = 1
+      gridy = row
+      insets = new Insets(3, Igrins2Editor.LabelPadding, 0, 0)
+    }
+
     row += 1
 
     /**
@@ -226,29 +232,65 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
       gridx = 0
       gridy = row
       gridwidth = 1
-      insets = new Insets(3, Igrins2Editor.ControlPadding, 0, 0)
+      insets = new Insets(6, Igrins2Editor.ControlPadding, 0, 0)
     }
-    row += 1
     listenTo(viewingModeComboBox.selection)
     reactions += {
       case SelectionChanged(`viewingModeComboBox`) => Swing.onEDT {
         Option(getDataObject).foreach(_.setSlitViewingCamera(viewingModeComboBox.selection.item))
       }
     }
+
+    val readNoiseH: Label = new Label("-")
+    readNoiseH.horizontalAlignment = Alignment.Left
+    layout(readNoiseH) = new Constraints() {
+      anchor = Anchor.NorthWest
+      gridx = 1
+      gridy = row
+      insets = new Insets(6, Igrins2Editor.ControlPadding, 0, 0)
+    }
+    row += 1
+    val readNoiseK: Label = new Label("-")
+    readNoiseK.horizontalAlignment = Alignment.Left
+    layout(readNoiseK) = new Constraints() {
+      anchor = Anchor.NorthWest
+      gridx = 1
+      gridy = row
+      insets = new Insets(6, Igrins2Editor.ControlPadding, 0, 0)
+    }
+    row += 1
+    // empty but it pushes the rest of the controls to the top
+    layout(new Label()) = new Constraints() {
+      anchor = Anchor.NorthWest
+      gridx = 0
+      gridy = row
+      weighty = 1
+    }
   }
 
-  def updateFowlerSamples(): Unit =
-    ui.fowlerSamples.text = Igrins2.fowlerSamples(ui.expTimeCtrl.getBean.getExposureTime.seconds).toString
+  def updateFowlerSamples(): Unit = {
+    val expTime = ui.expTimeCtrl.getBean.getExposureTime.seconds
+    val fowlerSamples = Igrins2.fowlerSamples(expTime)
+
+    def readNoiseAt(band: MagnitudeBand) =
+      Igrins2.readNoise(expTime)
+        .find(_._1 == band)
+        .map(a => f"Band ${band.name}: ${a._2}%.1f e-")
+        .getOrElse("")
+    ui.readNoiseH.text = readNoiseAt(MagnitudeBand.H)
+    ui.readNoiseK.text = readNoiseAt(MagnitudeBand.K)
+    ui.fowlerSamples.text = fowlerSamples.toString
     ui.expTimeCtrl.getTextField.getDocument.addDocumentListener(new DocumentListener {
-    override def insertUpdate(e: DocumentEvent): Unit =
-      updateFowlerSamples()
+      override def insertUpdate(e: DocumentEvent): Unit =
+        updateFowlerSamples()
 
-    override def removeUpdate(e: DocumentEvent): Unit =
-      updateFowlerSamples()
+      override def removeUpdate(e: DocumentEvent): Unit =
+        updateFowlerSamples()
 
-    override def changedUpdate(e: DocumentEvent): Unit =
-      updateFowlerSamples()
-  })
+      override def changedUpdate(e: DocumentEvent): Unit =
+        updateFowlerSamples()
+    })
+  }
 
   def changeIssPort(port: IssPort): Unit = Swing.onEDT {
     getDataObject.setIssPort(port)

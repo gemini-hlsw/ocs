@@ -13,11 +13,6 @@ import edu.gemini.spModel.core.Site;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 
 /**
  * This class holds UI and display properties for SP items.

@@ -48,7 +48,6 @@ object FeatureGeometry {
       new Point2D.Double(-o.p.arcsecs, -o.q.arcsecs)
 
     def rotate(posAngle: Angle): Offset = {
-
       val result = new Point2D.Double
       posAngleTransform(posAngle).transform(o.toPoint, result)
       result.toOffset

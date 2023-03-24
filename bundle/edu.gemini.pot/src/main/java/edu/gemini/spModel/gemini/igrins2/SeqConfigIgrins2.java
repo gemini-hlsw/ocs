@@ -17,7 +17,7 @@ import java.util.Map;
 final public class SeqConfigIgrins2 extends SeqConfigObsBase implements PropertyProvider {
 
     public static final SPComponentType SP_TYPE =
-        SPComponentType.ITERATOR_GHOST;
+        SPComponentType.ITERATOR_IGRINS2;
 
     public static final ISPNodeInitializer<ISPSeqComponent, SeqConfigIgrins2> NI =
         new ComponentNodeInitializer<>(SP_TYPE, SeqConfigIgrins2::new, SeqConfigIgrins2CB::new);

@@ -3,7 +3,7 @@ package edu.gemini.spModel.gemini.igrins2
 import edu.gemini.pot.sp.{ISPNodeInitializer, ISPObsComponent, ISPObservation, SPComponentType}
 import edu.gemini.shared.util.immutable
 import edu.gemini.shared.util.immutable.{DefaultImList, ImList}
-import edu.gemini.spModel.core.{Angle, Site, Wavelength}
+import edu.gemini.spModel.core.{Angle, MagnitudeBand, Site, Wavelength}
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.data.config.{DefaultParameter, DefaultSysConfig, ISysConfig, StringParameter}
 
@@ -11,8 +11,7 @@ import java.util.{Collections, Map => JMap, Set => JSet}
 import edu.gemini.spModel.data.property.{PropertyProvider, PropertySupport}
 import edu.gemini.spModel.gemini.init.ComponentNodeInitializer
 import edu.gemini.spModel.gemini.parallacticangle.ParallacticAngleSupportInst
-import edu.gemini.spModel.inst.ParallacticAngleSupport
-import edu.gemini.spModel.obscomp.{InstConstants, SPInstObsComp}
+import edu.gemini.spModel.obscomp.InstConstants
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
 import edu.gemini.spModel.seqcomp.SeqConfigNames
 import edu.gemini.spModel.telescope.{IssPort, IssPortProvider, PosAngleConstraint, PosAngleConstraintAware}
@@ -22,6 +21,7 @@ import squants.time.TimeConversions.TimeConversions
 import java.beans.PropertyDescriptor
 import scala.collection.immutable.TreeMap
 import scala.collection.JavaConverters._
+import scala.math.sqrt
 
 /*
  ** The Igrins2 instrument SP model.
@@ -31,7 +31,7 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE) with Pr
   _exposureTime = Igrins2.DefaultExposureTime.toSeconds
   private var _port = IssPort.UP_LOOKING
   private var _posAngleConstraint = PosAngleConstraint.PARALLACTIC_ANGLE
-  private[this] var _slitViewingCamera: SlitViewingCamera = SlitViewingCamera.DEFAULT
+  private var _slitViewingCamera: SlitViewingCamera = SlitViewingCamera.DEFAULT
 
   /**
    * Get the site in which the instrument resides.
@@ -63,9 +63,13 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE) with Pr
   override def setParamSet(paramSet: ParamSet): Unit = {
     // The parent takes care of exposure and posangle
     super.setParamSet(paramSet)
-    Option(Pio.getValue(paramSet, Igrins2.POS_ANGLE_CONSTRAINT_PROP)).flatMap(v => Option(PosAngleConstraint.valueOf(v))).foreach(_setPosAngleConstraint)
+    Option(Pio.getValue(paramSet, Igrins2.POS_ANGLE_CONSTRAINT_PROP))
+      .flatMap(v => Option(PosAngleConstraint.valueOf(v)))
+      .foreach(_setPosAngleConstraint)
     Option(Pio.getValue(paramSet, Igrins2.PORT_PROP.getName)).foreach(_setPort)
-    Option(Pio.getValue(paramSet, Igrins2.SLIT_VIEWING_PROP)).flatMap(v => Option(SlitViewingCamera.valueOf(v))).foreach(_setSlitViewingCamera)
+    Option(Pio.getValue(paramSet, Igrins2.SLIT_VIEWING_PROP))
+      .flatMap(v => Option(SlitViewingCamera.valueOf(v)))
+      .foreach(_setSlitViewingCamera)
   }
 
   override def getSysConfig: ISysConfig = {
@@ -79,7 +83,8 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE) with Pr
     sc
   }
 
-  override def getPosAngleConstraint: PosAngleConstraint = if (_posAngleConstraint == null) PosAngleConstraint.PARALLACTIC_ANGLE else _posAngleConstraint
+  override def getPosAngleConstraint: PosAngleConstraint =
+    if (_posAngleConstraint == null) PosAngleConstraint.PARALLACTIC_ANGLE else _posAngleConstraint
 
   override def setPosAngleConstraint(newValue: PosAngleConstraint): Unit = {
     val oldValue = getPosAngleConstraint
@@ -89,9 +94,8 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE) with Pr
     }
   }
 
-  private def _setPosAngleConstraint(newValue: PosAngleConstraint): Unit = {
+  private def _setPosAngleConstraint(newValue: PosAngleConstraint): Unit =
     _posAngleConstraint = newValue
-  }
 
   /**
    * Get the GMOS Port
@@ -146,9 +150,8 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE) with Pr
 
   def getSlitViewingCamera: SlitViewingCamera = _slitViewingCamera
 
-  private def _setSlitViewingCamera(value: SlitViewingCamera): Unit = {
+  private def _setSlitViewingCamera(value: SlitViewingCamera): Unit =
     _slitViewingCamera = value
-  }
 
   def setSlitViewingCamera(newValue: SlitViewingCamera): Unit = {
     val oldValue = getSlitViewingCamera
@@ -174,15 +177,21 @@ object Igrins2 {
     AllowedFowlerSamples.minBy(cur => math.abs (cur - nFowler))
   }
 
+  def readNoise(expTime: Time): List[(MagnitudeBand, Double)] = {
+    val fowlerSamples0 = fowlerSamples(expTime)
+    def rn(rnAt16: Double) = rnAt16 * sqrt(16) / sqrt(fowlerSamples0)
+    List((MagnitudeBand.H, rn(3.8)), (MagnitudeBand.K, rn(5.0)))
+  }
+
   private val query_yes = true
   private val query_no  = false
   private val iter_yes  = true
   private val iter_no   = false
 
   /** The properties supported by this class. */
-  private def initProp(propName: String, query: Boolean, iter: Boolean): PropertyDescriptor = {
+  private def initProp(propName: String, query: Boolean, iter: Boolean): PropertyDescriptor =
     PropertySupport.init(propName, classOf[Igrins2], query, iter)
-  }
+
   // The name of the Igrins2 instrument configuration.
   val INSTRUMENT_NAME_PROP: String = "IGRINS2"
   val SLIT_VIEWING_CAMERA: String = "slitViewingCamera"
@@ -193,9 +202,9 @@ object Igrins2 {
   var SLIT_VIEWING_PROP: PropertyDescriptor = initProp(SLIT_VIEWING_CAMERA, query_yes, iter_no)
 
   private val Igrins2Supplier: java.util.function.Supplier[Igrins2] =
-  new java.util.function.Supplier[Igrins2] {
-    def get(): Igrins2 = new Igrins2()
-  }
+    new java.util.function.Supplier[Igrins2] {
+      def get(): Igrins2 = new Igrins2()
+    }
 
   private val Igrins2CbFactory: java.util.function.Function[ISPObsComponent, Igrins2CB] =
     new java.util.function.Function[ISPObsComponent, Igrins2CB] {
