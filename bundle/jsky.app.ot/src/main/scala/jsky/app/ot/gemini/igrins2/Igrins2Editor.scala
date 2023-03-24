@@ -78,7 +78,7 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     }
 
     row += 1
-    layout(new Label("Exposure Time (1.63 - 13000s):")) = new Constraints() {
+    layout(new Label("Exposure Time (1.63 - 600s):")) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 0
       gridy = row
@@ -275,7 +275,7 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     def readNoiseAt(band: MagnitudeBand) =
       Igrins2.readNoise(expTime)
         .find(_._1 == band)
-        .map(a => f"Band ${band.name}: ${a._2}%.1f e-")
+        .map(a => f"${band.name}: ${a._2}%.1f e-")
         .getOrElse("")
     ui.readNoiseH.text = readNoiseAt(MagnitudeBand.H)
     ui.readNoiseK.text = readNoiseAt(MagnitudeBand.K)
