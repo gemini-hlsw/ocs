@@ -8,10 +8,11 @@ import org.junit.Assert._
 import org.junit._
 
 import java.io.{StringReader, StringWriter}
+import scala.xml.Elem
 
 class IOTest {
 
-  val expTime = <paramset name="IGRINS-2" kind="dataObj">
+  val expTime: Elem = <paramset name="IGRINS-2" kind="dataObj">
     <param name="exposureTime" value="17.0"/>
     <param name="posAngle" value="15"/>
     <param name="posAngleConstraint" value="PARALLACTIC_OVERRIDE"/>
@@ -33,7 +34,7 @@ class IOTest {
     assertEquals(15, igrins2.getPosAngleDegrees, 0.0)
   }
 
-  val sideLooking = <paramset name="IGRINS-2" kind="dataObj">
+  val sideLooking: Elem = <paramset name="IGRINS-2" kind="dataObj">
     <param name="exposureTime" value="17.0"/>
     <param name="posAngle" value="15"/>
     <param name="posAngleConstraint" value="PARALLACTIC_OVERRIDE"/>
@@ -47,6 +48,22 @@ class IOTest {
     igrins2.setParamSet(pset)
     assertEquals(IssPort.SIDE_LOOKING, igrins2.getIssPort)
   }
+
+  val continuosSVC: Elem = <paramset name="IGRINS-2" kind="dataObj">
+    <param name="exposureTime" value="17.0"/>
+    <param name="posAngle" value="15"/>
+    <param name="posAngleConstraint" value="PARALLACTIC_OVERRIDE"/>
+    <param name="slitViewingCamera" value="CONTINUOUS" />
+  </paramset>
+
+  @Test def testSVC(): Unit = {
+    val pio = PioXmlUtil.read(new StringReader(continuosSVC.toString))
+    val pset = pio.asInstanceOf[ParamSet]
+    val igrins2 = new Igrins2()
+    igrins2.setParamSet(pset)
+    assertEquals(SlitViewingCamera.CONTINUOUS, igrins2.getSlitViewingCamera)
+  }
+
   val defaultValues =
     <paramset kind="dataObj" name="IGRINS2">
       <param value="30.0" name="exposureTime"/>
@@ -54,6 +71,7 @@ class IOTest {
       <param value="1" name="coadds"/>
       <param value="PARALLACTIC_ANGLE" name="posAngleConstraint"/>
       <param value="UP_LOOKING" name="issPort"/>
+      <param value="ONE_IMAGE_EXPOSURE" name="slitViewingCamera"/>
     </paramset>
 
   @Test def testWrite(): Unit = {
