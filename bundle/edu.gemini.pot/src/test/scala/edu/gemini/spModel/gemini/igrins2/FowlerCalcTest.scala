@@ -13,6 +13,7 @@ class FowlerCalcTest {
     assertEquals(1, Igrins2.fowlerSamples(0.seconds))
     assertEquals(1, Igrins2.fowlerSamples(1.63.seconds))
     assertEquals(2, Igrins2.fowlerSamples(5.seconds))
+    assertEquals(4, Igrins2.fowlerSamples(8.seconds))
     assertEquals(4, Igrins2.fowlerSamples(10.seconds))
     assertEquals(8, Igrins2.fowlerSamples(15.seconds))
     assertEquals(16, Igrins2.fowlerSamples(25.seconds))
