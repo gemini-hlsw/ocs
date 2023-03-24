@@ -88,6 +88,7 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.spModel.gemini.graces.blueprint",
   "edu.gemini.spModel.gemini.gsaoi",
   "edu.gemini.spModel.gemini.gsaoi.blueprint",
+  "edu.gemini.spModel.gemini.igrins2",
   "edu.gemini.spModel.gemini.init",
   "edu.gemini.spModel.gemini.inst",
   "edu.gemini.spModel.gemini.michelle",

@@ -26,6 +26,7 @@ public enum Instrument {
     Gnirs(INSTRUMENT_GNIRS, GS),
     Gpi(INSTRUMENT_GPI, GS),
     Gsaoi(INSTRUMENT_GSAOI, GS),
+    Igrins2(INSTRUMENT_IGNRIS2, GN),
     Michelle(INSTRUMENT_MICHELLE, GN),
     Nici(INSTRUMENT_NICI, GS),
     Nifs(INSTRUMENT_NIFS, GN),

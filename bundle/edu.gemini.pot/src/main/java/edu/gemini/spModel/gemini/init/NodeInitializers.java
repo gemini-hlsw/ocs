@@ -27,6 +27,8 @@ import edu.gemini.spModel.gemini.gpi.SeqRepeatGpiOffset;
 import edu.gemini.spModel.gemini.gpol.SeqConfigGPOL;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.gsaoi.GsaoiSeqConfig;
+import edu.gemini.spModel.gemini.igrins2.Igrins2;
+import edu.gemini.spModel.gemini.igrins2.SeqConfigIgrins2;
 import edu.gemini.spModel.gemini.michelle.InstMichelle;
 import edu.gemini.spModel.gemini.michelle.SeqConfigMichelle;
 import edu.gemini.spModel.gemini.nici.InstNICI;
@@ -147,6 +149,7 @@ public enum NodeInitializers {
                     InstGmosNorth.NI,
                     InstGmosSouth.NI,
                     InstGNIRSNI.instance,
+                    Igrins2.NI(),
                     InstMichelle.NI,
                     InstNICI.NI,
                     InstNIFS.NI,
@@ -181,6 +184,7 @@ public enum NodeInitializers {
                     SeqConfigGNIRS.NI,
                     SeqConfigGpi.NI,
                     SeqConfigGPOL.NI,
+                    SeqConfigIgrins2.NI,
                     SeqConfigMichelle.NI,
                     SeqConfigNICI.NI,
                     SeqConfigNIRI.NI,
