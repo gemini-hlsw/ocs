@@ -1,26 +1,25 @@
 package edu.gemini.ags.impl
 
 import java.awt.geom.Area
-
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.acqcam.InstAcqCam
-import edu.gemini.spModel.gemini.altair.{AltairParams, AltairAowfsGuider}
-import edu.gemini.spModel.gemini.flamingos2.{Flamingos2OiwfsGuideProbe, Flamingos2}
-import edu.gemini.spModel.gemini.gmos.{InstGmosNorth, GmosOiwfsGuideProbe, InstGmosSouth}
+import edu.gemini.spModel.gemini.altair.{AltairAowfsGuider, AltairParams}
+import edu.gemini.spModel.gemini.flamingos2.{Flamingos2, Flamingos2OiwfsGuideProbe}
+import edu.gemini.spModel.gemini.gmos.{GmosOiwfsGuideProbe, InstGmosNorth, InstGmosSouth}
 import edu.gemini.spModel.gemini.gnirs.{GnirsOiwfsGuideProbe, InstGNIRS}
+import edu.gemini.spModel.gemini.igrins2.Igrins2Mixin
 import edu.gemini.spModel.gemini.michelle.InstMichelle
 import edu.gemini.spModel.gemini.nici.InstNICI
-import edu.gemini.spModel.gemini.nifs.{NifsOiwfsGuideProbe, InstNIFS}
-import edu.gemini.spModel.gemini.niri.{NiriOiwfsGuideProbe, InstNIRI}
+import edu.gemini.spModel.gemini.nifs.{InstNIFS, NifsOiwfsGuideProbe}
+import edu.gemini.spModel.gemini.niri.{InstNIRI, NiriOiwfsGuideProbe}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions._
 import edu.gemini.spModel.gemini.texes.InstTexes
 import edu.gemini.spModel.gemini.trecs.InstTReCS
 import edu.gemini.spModel.gemini.visitor.VisitorInstrument
-import edu.gemini.spModel.guide.{PatrolField, GuideProbe}
+import edu.gemini.spModel.guide.{GuideProbe, PatrolField}
 import edu.gemini.spModel.guide.GuideSpeed._
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
-
 import org.junit.{Ignore, Test}
 
 /* OUTSTANDING ISSUES:
@@ -62,56 +61,58 @@ class SingleProbeTest {
 //    outer
 //  }
 
-  val AcqCamNorthPwfs1 = AgsTest(InstAcqCam.SP_TYPE,        PwfsGuideProbe.pwfs1, Site.GN).withValidArea(pwfsArea)
-  val AcqCamNorthPwfs2 = AgsTest(InstAcqCam.SP_TYPE,        PwfsGuideProbe.pwfs2, Site.GN).withValidArea(pwfsArea)
-  val AcqCamSouthPwfs1 = AgsTest(InstAcqCam.SP_TYPE,        PwfsGuideProbe.pwfs1, Site.GS).withValidArea(pwfsArea)
-  val AcqCamSouthPwfs2 = AgsTest(InstAcqCam.SP_TYPE,        PwfsGuideProbe.pwfs2, Site.GS).withValidArea(pwfsArea)
+  val AcqCamNorthPwfs1: AgsTest = AgsTest(InstAcqCam.SP_TYPE,        PwfsGuideProbe.pwfs1, Site.GN).withValidArea(pwfsArea)
+  val AcqCamNorthPwfs2: AgsTest = AgsTest(InstAcqCam.SP_TYPE,        PwfsGuideProbe.pwfs2, Site.GN).withValidArea(pwfsArea)
+  val AcqCamSouthPwfs1: AgsTest = AgsTest(InstAcqCam.SP_TYPE,        PwfsGuideProbe.pwfs1, Site.GS).withValidArea(pwfsArea)
+  val AcqCamSouthPwfs2: AgsTest = AgsTest(InstAcqCam.SP_TYPE,        PwfsGuideProbe.pwfs2, Site.GS).withValidArea(pwfsArea)
 
-  val F2               = AgsTest(Flamingos2.SP_TYPE,        Flamingos2OiwfsGuideProbe.instance)
-  val F2Pwfs1          = AgsTest(Flamingos2.SP_TYPE,        PwfsGuideProbe.pwfs1).withValidArea(pwfsArea)
-  val F2Pwfs2          = AgsTest(Flamingos2.SP_TYPE,        PwfsGuideProbe.pwfs2).withValidArea(pwfsArea)
+  val F2: AgsTest = AgsTest(Flamingos2.SP_TYPE,        Flamingos2OiwfsGuideProbe.instance)
+  val F2Pwfs1: AgsTest = AgsTest(Flamingos2.SP_TYPE,        PwfsGuideProbe.pwfs1).withValidArea(pwfsArea)
+  val F2Pwfs2: AgsTest = AgsTest(Flamingos2.SP_TYPE,        PwfsGuideProbe.pwfs2).withValidArea(pwfsArea)
 
-  val GmosNorth        = AgsTest(InstGmosNorth.SP_TYPE,     GmosOiwfsGuideProbe.instance)
-  val GmosNorthPwfs1   = AgsTest(InstGmosNorth.SP_TYPE,     PwfsGuideProbe.pwfs1).withValidArea(pwfsArea)
-  val GmosNorthPwfs2   = AgsTest(InstGmosNorth.SP_TYPE,     PwfsGuideProbe.pwfs2).withValidArea(pwfsArea)
-  val GmosSouth        = AgsTest(InstGmosSouth.SP_TYPE,     GmosOiwfsGuideProbe.instance)
-  val GmosSouthPwfs1   = AgsTest(InstGmosSouth.SP_TYPE,     PwfsGuideProbe.pwfs1).withValidArea(pwfsArea)
-  val GmosSouthPwfs2   = AgsTest(InstGmosSouth.SP_TYPE,     PwfsGuideProbe.pwfs2).withValidArea(pwfsArea)
+  val GmosNorth: AgsTest = AgsTest(InstGmosNorth.SP_TYPE,     GmosOiwfsGuideProbe.instance)
+  val GmosNorthPwfs1: AgsTest = AgsTest(InstGmosNorth.SP_TYPE,     PwfsGuideProbe.pwfs1).withValidArea(pwfsArea)
+  val GmosNorthPwfs2: AgsTest = AgsTest(InstGmosNorth.SP_TYPE,     PwfsGuideProbe.pwfs2).withValidArea(pwfsArea)
+  val GmosSouth: AgsTest = AgsTest(InstGmosSouth.SP_TYPE,     GmosOiwfsGuideProbe.instance)
+  val GmosSouthPwfs1: AgsTest = AgsTest(InstGmosSouth.SP_TYPE,     PwfsGuideProbe.pwfs1).withValidArea(pwfsArea)
+  val GmosSouthPwfs2: AgsTest = AgsTest(InstGmosSouth.SP_TYPE,     PwfsGuideProbe.pwfs2).withValidArea(pwfsArea)
 
-  val Gnirs            = AgsTest(InstGNIRS.SP_TYPE,         GnirsOiwfsGuideProbe.instance).withStrategyOverride(Strategy.GnirsOiwfs)
-  val GnirsAltairLGS   = AgsTest(InstGNIRS.SP_TYPE,         AltairAowfsGuider.instance).withAltair(AltairParams.Mode.LGS)
-  val GnirsAltairNGS   = AgsTest(InstGNIRS.SP_TYPE,         AltairAowfsGuider.instance).withAltair(AltairParams.Mode.NGS)
-  val GnirsPwfs1       = AgsTest(InstGNIRS.SP_TYPE,         PwfsGuideProbe.pwfs1).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs1North)
-  val GnirsPwfs2       = AgsTest(InstGNIRS.SP_TYPE,         PwfsGuideProbe.pwfs2).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs1South)
+  val Gnirs: AgsTest = AgsTest(InstGNIRS.SP_TYPE,         GnirsOiwfsGuideProbe.instance).withStrategyOverride(Strategy.GnirsOiwfs)
+  val GnirsAltairLGS: AgsTest = AgsTest(InstGNIRS.SP_TYPE,         AltairAowfsGuider.instance).withAltair(AltairParams.Mode.LGS)
+  val GnirsAltairNGS: AgsTest = AgsTest(InstGNIRS.SP_TYPE,         AltairAowfsGuider.instance).withAltair(AltairParams.Mode.NGS)
+  val GnirsPwfs1: AgsTest = AgsTest(InstGNIRS.SP_TYPE,         PwfsGuideProbe.pwfs1).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs1North)
+  val GnirsPwfs2: AgsTest = AgsTest(InstGNIRS.SP_TYPE,         PwfsGuideProbe.pwfs2).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs1South)
 
-  val MichellePwfs1    = AgsTest(InstMichelle.SP_TYPE,      PwfsGuideProbe.pwfs1).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs1North)
-  val MichellePwfs2    = AgsTest(InstMichelle.SP_TYPE,      PwfsGuideProbe.pwfs2).withValidArea(pwfsArea)
+  val Igrins2Pwfs2: AgsTest = AgsTest(Igrins2Mixin.SP_TYPE,       PwfsGuideProbe.pwfs2).withValidArea(pwfsArea).withValidArea(pwfsArea)
 
-  val NiciPwfs1        = AgsTest(InstNICI.SP_TYPE,          PwfsGuideProbe.pwfs1).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs1South)
-  val NiciPwfs2        = AgsTest(InstNICI.SP_TYPE,          PwfsGuideProbe.pwfs2).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs2South)
+  val MichellePwfs1: AgsTest = AgsTest(InstMichelle.SP_TYPE,      PwfsGuideProbe.pwfs1).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs1North)
+  val MichellePwfs2: AgsTest = AgsTest(InstMichelle.SP_TYPE,      PwfsGuideProbe.pwfs2).withValidArea(pwfsArea)
 
-  val Nifs             = AgsTest(InstNIFS.SP_TYPE,          NifsOiwfsGuideProbe.instance).withStrategyOverride(Strategy.NifsOiwfs)
-  val NifsAltairLGS    = AgsTest(InstNIFS.SP_TYPE,          AltairAowfsGuider.instance).withAltair(AltairParams.Mode.LGS)
-  val NifsAltairNGS    = AgsTest(InstNIFS.SP_TYPE,          AltairAowfsGuider.instance).withAltair(AltairParams.Mode.NGS)
-  val NifsPwfs1        = AgsTest(InstNIFS.SP_TYPE,          PwfsGuideProbe.pwfs1).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs1North)
-  val NifsPwfs2        = AgsTest(InstNIFS.SP_TYPE,          PwfsGuideProbe.pwfs2).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs2North)
+  val NiciPwfs1: AgsTest = AgsTest(InstNICI.SP_TYPE,          PwfsGuideProbe.pwfs1).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs1South)
+  val NiciPwfs2: AgsTest = AgsTest(InstNICI.SP_TYPE,          PwfsGuideProbe.pwfs2).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs2South)
 
-  val Niri             = AgsTest(InstNIRI.SP_TYPE,          NiriOiwfsGuideProbe.instance)
-  val NiriAltairLGS    = AgsTest(InstNIRI.SP_TYPE,          AltairAowfsGuider.instance).withAltair(AltairParams.Mode.LGS)
-  val NiriAltairNGS    = AgsTest(InstNIRI.SP_TYPE,          AltairAowfsGuider.instance).withAltair(AltairParams.Mode.NGS)
-  val NiriPwfs1        = AgsTest(InstNIRI.SP_TYPE,          PwfsGuideProbe.pwfs1).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs1North)
-  val NiriPwfs2        = AgsTest(InstNIRI.SP_TYPE,          PwfsGuideProbe.pwfs2).withValidArea(pwfsArea)
+  val Nifs: AgsTest = AgsTest(InstNIFS.SP_TYPE,          NifsOiwfsGuideProbe.instance).withStrategyOverride(Strategy.NifsOiwfs)
+  val NifsAltairLGS: AgsTest = AgsTest(InstNIFS.SP_TYPE,          AltairAowfsGuider.instance).withAltair(AltairParams.Mode.LGS)
+  val NifsAltairNGS: AgsTest = AgsTest(InstNIFS.SP_TYPE,          AltairAowfsGuider.instance).withAltair(AltairParams.Mode.NGS)
+  val NifsPwfs1: AgsTest = AgsTest(InstNIFS.SP_TYPE,          PwfsGuideProbe.pwfs1).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs1North)
+  val NifsPwfs2: AgsTest = AgsTest(InstNIFS.SP_TYPE,          PwfsGuideProbe.pwfs2).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs2North)
 
-  val TexesPwfs1       = AgsTest(InstTexes.SP_TYPE,         PwfsGuideProbe.pwfs1).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs1North)
-  val TexesPwfs2       = AgsTest(InstTexes.SP_TYPE,         PwfsGuideProbe.pwfs2).withValidArea(pwfsArea)
+  val Niri: AgsTest = AgsTest(InstNIRI.SP_TYPE,          NiriOiwfsGuideProbe.instance)
+  val NiriAltairLGS: AgsTest = AgsTest(InstNIRI.SP_TYPE,          AltairAowfsGuider.instance).withAltair(AltairParams.Mode.LGS)
+  val NiriAltairNGS: AgsTest = AgsTest(InstNIRI.SP_TYPE,          AltairAowfsGuider.instance).withAltair(AltairParams.Mode.NGS)
+  val NiriPwfs1: AgsTest = AgsTest(InstNIRI.SP_TYPE,          PwfsGuideProbe.pwfs1).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs1North)
+  val NiriPwfs2: AgsTest = AgsTest(InstNIRI.SP_TYPE,          PwfsGuideProbe.pwfs2).withValidArea(pwfsArea)
 
-  val TReCSPwfs1       = AgsTest(InstTReCS.SP_TYPE,         PwfsGuideProbe.pwfs1).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs1South)
-  val TReCSPwfs2       = AgsTest(InstTReCS.SP_TYPE,         PwfsGuideProbe.pwfs2).withValidArea(pwfsArea)
+  val TexesPwfs1: AgsTest = AgsTest(InstTexes.SP_TYPE,         PwfsGuideProbe.pwfs1).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs1North)
+  val TexesPwfs2: AgsTest = AgsTest(InstTexes.SP_TYPE,         PwfsGuideProbe.pwfs2).withValidArea(pwfsArea)
 
-  val VisitNorthPwfs1  = AgsTest(VisitorInstrument.SP_TYPE, PwfsGuideProbe.pwfs1, Site.GN).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs1North)
-  val VisitNorthPwfs2  = AgsTest(VisitorInstrument.SP_TYPE, PwfsGuideProbe.pwfs2, Site.GN).withValidArea(pwfsArea)
-  val VisitSouthPwfs1  = AgsTest(VisitorInstrument.SP_TYPE, PwfsGuideProbe.pwfs1, Site.GS).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs1South)
-  val VisitSouthPwfs2  = AgsTest(VisitorInstrument.SP_TYPE, PwfsGuideProbe.pwfs2, Site.GS).withValidArea(pwfsArea)
+  val TReCSPwfs1: AgsTest = AgsTest(InstTReCS.SP_TYPE,         PwfsGuideProbe.pwfs1).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs1South)
+  val TReCSPwfs2: AgsTest = AgsTest(InstTReCS.SP_TYPE,         PwfsGuideProbe.pwfs2).withValidArea(pwfsArea)
+
+  val VisitNorthPwfs1: AgsTest = AgsTest(VisitorInstrument.SP_TYPE, PwfsGuideProbe.pwfs1, Site.GN).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs1North)
+  val VisitNorthPwfs2: AgsTest = AgsTest(VisitorInstrument.SP_TYPE, PwfsGuideProbe.pwfs2, Site.GN).withValidArea(pwfsArea)
+  val VisitSouthPwfs1: AgsTest = AgsTest(VisitorInstrument.SP_TYPE, PwfsGuideProbe.pwfs1, Site.GS).withValidArea(pwfsArea).withStrategyOverride(Strategy.Pwfs1South)
+  val VisitSouthPwfs2: AgsTest = AgsTest(VisitorInstrument.SP_TYPE, PwfsGuideProbe.pwfs2, Site.GS).withValidArea(pwfsArea)
 
   val All = List(
     AcqCamNorthPwfs1,
@@ -136,6 +137,8 @@ class SingleProbeTest {
     GnirsAltairNGS,
     GnirsPwfs1,
     GnirsPwfs2,
+
+    Igrins2Pwfs2,
 
     MichellePwfs1,
     MichellePwfs2,
@@ -199,12 +202,12 @@ class SingleProbeTest {
     All.foreach(f)
 
 
-  @Test def testBase()                              = testAll(_.testBase())
-  @Test def testBaseOneOffset()                     = testAll(_.testBaseOneOffset())
-  @Test def testBaseTwoDisjointOffsets()            = testAll(_.testBaseTwoDisjointOffsets())
-  @Test def testBaseTwoIntersectingOffsets()        = testAll(_.testBaseTwoIntersectingOffsets())
-  @Test def testBaseRotated()                       = testAll(_.testBaseRotated())
-  @Test def testBaseRotatedOneOffset()              = testAll(_.testBaseRotatedOneOffset())
-  @Test def testBaseRotatedTwoIntersectingOffsets() = testAll(_.testBaseRotatedTwoIntersectingOffsets())
-  @Test def testBaseUnboundedPosAngleConstraint()   = testAll(_.testBaseUnboundedPosAngleConstraint())
+  @Test def testBase(): Unit = testAll(_.testBase())
+  @Test def testBaseOneOffset(): Unit = testAll(_.testBaseOneOffset())
+  @Test def testBaseTwoDisjointOffsets(): Unit = testAll(_.testBaseTwoDisjointOffsets())
+  @Test def testBaseTwoIntersectingOffsets(): Unit = testAll(_.testBaseTwoIntersectingOffsets())
+  @Test def testBaseRotated(): Unit = testAll(_.testBaseRotated())
+  @Test def testBaseRotatedOneOffset(): Unit = testAll(_.testBaseRotatedOneOffset())
+  @Test def testBaseRotatedTwoIntersectingOffsets(): Unit = testAll(_.testBaseRotatedTwoIntersectingOffsets())
+  @Test def testBaseUnboundedPosAngleConstraint(): Unit = testAll(_.testBaseUnboundedPosAngleConstraint())
 }
