@@ -167,6 +167,9 @@ object Igrins2 {
   val SP_TYPE: SPComponentType = SPComponentType.INSTRUMENT_IGNRIS2
   val DefaultExposureTime: Time = 30.seconds // sec (by default settings)
 
+  val MinExposureTime: Time = 1.63.seconds
+  val MaxExposureTime: Time = 600.seconds
+
   val WavelengthCoverageLowerBound: Wavelength = Wavelength.fromMicrons(1.49)
   val WavelengthCoverageUpperBound: Wavelength = Wavelength.fromMicrons(2.46)
 

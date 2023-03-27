@@ -10,12 +10,13 @@ import jsky.app.ot.gemini.editor.ComponentEditor
 import jsky.app.ot.gemini.parallacticangle.PositionAnglePanel
 import squants.time.TimeConversions.TimeConversions
 
+import java.awt.Color
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import javax.swing.JPanel
 import javax.swing.event.{DocumentEvent, DocumentListener}
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing.event.{ButtonClicked, SelectionChanged}
-import scala.swing.{Alignment, BorderPanel, ButtonGroup, ComboBox, Component, FlowPanel, GridBagPanel, Insets, Label, RadioButton, Separator, Swing}
+import scala.swing.{Alignment, ButtonGroup, ComboBox, Component, FlowPanel, GridBagPanel, Insets, Label, RadioButton, Separator, Swing}
 
 class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
 
@@ -78,7 +79,7 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     }
 
     row += 1
-    layout(new Label("Exposure Time (1.63 - 600s):")) = new Constraints() {
+    layout(new Label(s"Exposure Time (${Igrins2.MinExposureTime.toSeconds}s - ${Igrins2.MaxExposureTime.toSeconds}s):")) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 0
       gridy = row
@@ -204,7 +205,7 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
       insets = new Insets(10, 0, 0, 0)
     }
     row += 1
-    val viewingModeLabel: Label = new Label("Viewing Mode:")
+    val viewingModeLabel: Label = new Label("Slit Viewing Camera Mode:")
     viewingModeLabel.horizontalAlignment = Alignment.Left
     layout(viewingModeLabel) = new Constraints() {
       anchor = Anchor.NorthWest
@@ -212,6 +213,11 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
       gridy = row
       insets = new Insets(3, Igrins2Editor.LabelPadding, 0, 0)
     }
+    val viewingModeWarning: Label = new Label("Warning: this may generate very large file sizes.")
+    viewingModeWarning.horizontalAlignment = Alignment.Left
+    viewingModeWarning.visible = false
+    viewingModeWarning.foreground = Color.red
+
     val readNoiseLabel: Label = new Label("Read Noise:")
     readNoiseLabel.horizontalAlignment = Alignment.Left
     layout(readNoiseLabel) = new Constraints() {
@@ -238,6 +244,7 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     reactions += {
       case SelectionChanged(`viewingModeComboBox`) => Swing.onEDT {
         Option(getDataObject).foreach(_.setSlitViewingCamera(viewingModeComboBox.selection.item))
+        ui.viewingModeWarning.visible = viewingModeComboBox.selection.item == SlitViewingCamera.CONTINUOUS
       }
     }
 
@@ -250,6 +257,12 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
       insets = new Insets(6, Igrins2Editor.ControlPadding, 0, 0)
     }
     row += 1
+    layout(viewingModeWarning) = new Constraints() {
+      anchor = Anchor.NorthWest
+      gridx = 0
+      gridy = row
+      insets = new Insets(3, Igrins2Editor.LabelPadding, 0, 0)
+    }
     val readNoiseK: Label = new Label("-")
     readNoiseK.horizontalAlignment = Alignment.Left
     layout(readNoiseK) = new Constraints() {
@@ -305,7 +318,10 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
 
   // Set the viewing camera selection
   def updateSlitViewingCamera(): Unit = {
-    Option(getDataObject).map(_.getSlitViewingCamera).foreach(ui.viewingModeComboBox.selection.item = _)
+    Option(getDataObject).map(_.getSlitViewingCamera).foreach { c =>
+      ui.viewingModeComboBox.selection.item = c
+      ui.viewingModeWarning.visible = c == SlitViewingCamera.CONTINUOUS
+    }
   }
   /**
    * Return the window containing the editor.
