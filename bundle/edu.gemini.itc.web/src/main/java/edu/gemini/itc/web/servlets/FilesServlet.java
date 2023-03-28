@@ -136,7 +136,6 @@ public final class FilesServlet extends HttpServlet {
                 Iterator<SpcChartGroup> it2 = it.iterator();
                 while(it2.hasNext()){
                     SpcChartGroup spcChartGroup = it2.next();
-                    System.out.println("lenght of charGroup: " + spcChartGroup.charts().length());
                 }
                 chart = ITCChart.forSpcDataSet(results.chart(S2NChart.instance(),         index), pd);
                 break;
@@ -147,7 +146,6 @@ public final class FilesServlet extends HttpServlet {
                 Iterator<SpcChartGroup> it2 = it.iterator();
                 while(it2.hasNext()){
                     SpcChartGroup spcChartGroup = it2.next();
-                    System.out.println("lenght2 of charGroup: " + spcChartGroup.charts().length());
                 }
                 chart = ITCChart.forSpcDataSet(results.chart(S2NChartPerRes.instance(),         index), pd);
                 break;

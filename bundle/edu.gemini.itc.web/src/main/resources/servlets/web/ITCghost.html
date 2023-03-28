@@ -8,40 +8,17 @@
     <link rel="stylesheet" type="text/css" href="itc_test.css" />
     <script type="text/javascript">
     $( document ).ready(function() {
-        function showOpts(listEl, opt) {
-           for (e2 of l) {
-              if (parseInt($(e2).text, 10) >= parseInt(opt, 10))
-                 $(e2).removeAttr(disabled);
-              else
-                 $(e2).attr('disabled', 'disabled');
-           }
-        }
-
         $("[name*='instResolution']").change(function () {
-           if (this.value == 'HIGH') {
+           if (this.value == 'GhostHigh') {
               $("[name*=nSkyMicrolens]").attr('disabled', 'disabled');
-           } else if (this.value == 'STANDARD') {
+           } else if (this.value == 'GhostStandard') {
               $("[name*=nSkyMicrolens]").removeAttr('disabled')
            }
         });
         $('form').on('submit',function(){
             $("[name*=nSkyMicrolens]").removeAttr('disabled')
         });
-        $("[name*='spectralBinning']").change(function () {
-           optSpeInt = parseInt($("[name*='spectralBinning'] > option:selected").text(), 10)
-           $("[name*='spatialBinning'] > option").each(function(i) {
-               optSpaInt = parseInt(this.text, 10)
-               if ((optSpaInt >= optSpeInt) && (!((optSpeInt == 4) && ( optSpaInt == 8))))
-                 $(this).removeAttr('disabled');
-              else
-                 $(this).attr('disabled', 'disabled');
 
-              if (optSpaInt == optSpeInt)
-                  $(this).attr('selected', 'selected');
-              else
-                 $(this).removeAttr('selected');
-            });
-        });
 
     });
     </script>
@@ -367,9 +344,9 @@
             <tr>
                 <td colspan="2">
                     <select name="ReadMode"  id="ReadMode" size="1">
-                        <option value="SLOW_LOW" selected>Standard Science</option>
-                        <option value="MEDIUM_LOW">Fast Read </option>
-                        <option value="FAST_LOW">Bright Targets </option>
+                        <option value="SLOW_LOW" selected>Slow</option>
+                        <option value="MEDIUM_LOW">Medium</option>
+                        <option value="FAST_LOW">Fast</option>
                     </select> &nbsp;&nbsp;
 
                 </td>

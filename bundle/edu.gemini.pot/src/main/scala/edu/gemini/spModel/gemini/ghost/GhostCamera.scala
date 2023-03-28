@@ -22,7 +22,7 @@ sealed trait GhostCamera extends Product with Serializable {
     oneExposure.multipliedBy(count.toLong)
 
   /** Read gain. */
-  def gain: GhostReadNoiseGain
+  def readNoiseGain: GhostReadNoiseGain
 
   /** Binning. */
   def binning: GhostBinning
@@ -60,17 +60,17 @@ object GhostCamera {
     Duration.ofSeconds(sec.toLong, deciSeconds.toLong * 100000000L)
 
   final case class Red(
-    count:       Int,
-    oneExposure: Duration,
-    gain:        GhostReadNoiseGain,
-    binning:     GhostBinning
+                        count:         Int,
+                        oneExposure:   Duration,
+                        readNoiseGain: GhostReadNoiseGain,
+                        binning:        GhostBinning
   ) extends GhostCamera {
 
     // Red camera, 1x1 binning
     // Slow readout: 95.1 sec
     // Fast readout: 20.7 sec
     override protected def oneByOneReadout: Duration =
-      gain match {
+      readNoiseGain match {
         case GhostReadNoiseGain.SLOW_LOW   => duration(95, 1)
         case GhostReadNoiseGain.MEDIUM_LOW => duration(50, 0)
         case GhostReadNoiseGain.FAST_LOW |
@@ -79,16 +79,16 @@ object GhostCamera {
   }
 
   final case class Blue(
-    count:       Int,
-    oneExposure: Duration,
-    gain:        GhostReadNoiseGain,
-    binning:     GhostBinning
+                         count:         Int,
+                         oneExposure:   Duration,
+                         readNoiseGain: GhostReadNoiseGain,
+                         binning:       GhostBinning
   ) extends GhostCamera {
     // Blue camera, 1x1 binning
     // Slow readout: 45.6 sec
     // Fast readout: 10.3 sec
     override protected def oneByOneReadout: Duration =
-      gain match {
+      readNoiseGain match {
         case GhostReadNoiseGain.SLOW_LOW   => duration(45, 6)
         case GhostReadNoiseGain.MEDIUM_LOW => duration(24, 2)
         case GhostReadNoiseGain.FAST_LOW |

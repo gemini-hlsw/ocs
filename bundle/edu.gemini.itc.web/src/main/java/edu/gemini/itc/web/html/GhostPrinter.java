@@ -52,7 +52,7 @@ public final class GhostPrinter extends PrinterBase implements OverheadTablePrin
         final SpectroscopyResult result = results[0];
         final double iqAtSource = result.iqCalc().getImageQuality();
 
-        Log.info("***** 222 calculateSpectroscopy getImageQuality[0]: " + results[0].iqCalc().getImageQuality() + " [1]: "+ results[1].iqCalc().getImageQuality() + "  " + iqAtSource);
+        Log.info("calculateSpectroscopy getImageQuality[0]: " + results[0].iqCalc().getImageQuality() + " [1]: "+ results[1].iqCalc().getImageQuality() + "  " + iqAtSource);
 
         _println("Read noise: " + mainInstrument.getReadNoise());
 

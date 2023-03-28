@@ -1332,7 +1332,7 @@ public abstract class InstGmosCommon<
         double readoutTime = GmosReadoutTime.getReadoutOverhead(cur, getCustomROIs());
         times.add(CategorizedTime.fromSeconds(Category.READOUT, readoutTime));
 
-        times.add(getDhsWriteTime());
+        times.add(getWriteTime());
 
         return CommonStepCalculator.instance.calc(cur, prev).addAll(times);
     }

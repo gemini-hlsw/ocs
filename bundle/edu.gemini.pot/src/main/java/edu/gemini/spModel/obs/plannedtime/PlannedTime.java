@@ -57,7 +57,7 @@ public final class PlannedTime implements Serializable {
         CONFIG_CHANGE("Config Change"),
         EXPOSURE("Exposure"),
         READOUT("Readout"),
-        DHS_WRITE("DHS Write"),
+        WRITE("Write"),
         ;
 
         public final String display;

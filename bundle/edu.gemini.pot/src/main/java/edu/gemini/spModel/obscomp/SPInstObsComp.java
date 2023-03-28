@@ -435,24 +435,25 @@ public abstract class SPInstObsComp extends AbstractDataObject {
     // REL-1678: 7 seconds DHS write overhead
     // REL-1934: 10 seconds DHS write overhead for F2
 
-    public static final Map<Instrument, PlannedTime.CategorizedTime> DHS_WRITE_TIMES;
+    public static final Map<Instrument, PlannedTime.CategorizedTime> WRITE_TIMES;
 
     static {
         Map<Instrument, Duration> m =
             Arrays.stream(Instrument.values()).collect(Collectors.toMap(Function.identity(), i -> Duration.ofSeconds(7)));
 
+
         m.put(Instrument.Flamingos2, Duration.ofSeconds(10));
-        m.put(Instrument.Ghost,      Duration.ofSeconds(10));
         m.put(Instrument.GmosNorth,  Duration.ofSeconds(10));
         m.put(Instrument.GmosSouth,  Duration.ofSeconds(10));
+        m.put(Instrument.Ghost,      Duration.ofSeconds(10));
         m.put(Instrument.Gnirs,      Duration.ofMillis(8500));
         m.put(Instrument.Nifs,       Duration.ofMillis(9800));
         m.put(Instrument.Niri,       Duration.ofMillis(5070));
 
-        DHS_WRITE_TIMES = Collections.unmodifiableMap(
+        WRITE_TIMES = Collections.unmodifiableMap(
           m.entrySet()
            .stream()
-           .collect(Collectors.toMap(Map.Entry::getKey, e -> PlannedTime.CategorizedTime.apply(PlannedTime.Category.DHS_WRITE, e.getValue().toMillis())))
+           .collect(Collectors.toMap(Map.Entry::getKey, e -> PlannedTime.CategorizedTime.apply(PlannedTime.Category.WRITE, e.getValue().toMillis())))
         );
     }
 
@@ -461,18 +462,22 @@ public abstract class SPInstObsComp extends AbstractDataObject {
     // DHS_WRITE_TIME. The class has a `serialVersionUID` and not-updated
     // clients will be expecting a DHS_WRITE_TIME field. Adding a `readObject`
     // to initialize the value for not-updated clients.
-    private PlannedTime.CategorizedTime DHS_WRITE_TIME;
+    /*
+    This method is not being used. I have commented to check it on the pull-request.
+    private PlannedTime.CategorizedTime WRITE_TIME;
+
 
     private void readObject(java.io.ObjectInputStream in)
         throws IOException, ClassNotFoundException {
 
         in.defaultReadObject();
 
-        DHS_WRITE_TIME = getDhsWriteTime();
+        WRITE_TIME = getWriteTime();
+    }
+    */
+    public final PlannedTime.CategorizedTime getWriteTime() {
+        return WRITE_TIMES.get(getInstrument());
     }
 
-    public final PlannedTime.CategorizedTime getDhsWriteTime() {
-        return DHS_WRITE_TIMES.get(getInstrument());
-    }
 
 }

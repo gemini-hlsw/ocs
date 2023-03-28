@@ -1006,7 +1006,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
         final int coadds = ExposureCalculator.instance.coadds(cur);
         final double secs = GnirsReadoutTime.getReadoutOverhead(readMode, coadds);
         final CategorizedTime readout = CategorizedTime.fromSeconds(Category.READOUT, secs);
-        final CategorizedTime dhs = CategorizedTime.fromSeconds(Category.DHS_WRITE, GnirsReadoutTime.getDhsWriteTime()); // REL-1678
+        final CategorizedTime dhs = CategorizedTime.fromSeconds(Category.WRITE, GnirsReadoutTime.getDhsWriteTime()); // REL-1678
         return DefaultStepCalculator.instance.calc(cur, prev).addAll(readout, dhs);
     }
 

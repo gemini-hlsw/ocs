@@ -22,9 +22,6 @@ import java.util.List;
 
 public final class PlannedTimeMath {
 
-    //public static final double VISIT_TIME = 7200; // visit time, sec
-    //public static final double RECENTERING_INTERVAL = 3600; // sec
-
     private PlannedTimeMath() {
     }
 
@@ -49,7 +46,6 @@ public final class PlannedTimeMath {
     // visit_time: It is the maximum time per night allowed for the instrument. If more than this time is needed,
     //             it is assumed that the target will be observed on multiple nights.
     public static int numAcq(PlannedTime pt, double visit_time) {
-        //System.out.println("numAcq: " + pt.totalTime() + " visit_time: " + visit_time);
         return numReacq(scienceTime(pt), visit_time) + 1;
     }
 
@@ -105,10 +101,9 @@ public final class PlannedTimeMath {
             setupTime = SetupTime.fromDuration(s, r, SetupTime.Type.FULL)
                                  .getOrElse(PlannedTimeCalculator.DEFAULT_SETUP);
         }
-        System.out.println("setupTime, reacquisitionOnlyTime: " + setupTime.reacquisitionOnlyTime + " fullSetupTime: " + setupTime.fullSetupTime);
+
         final PlannedTime.Setup setup = PlannedTime.Setup.apply(setupTime, obsChargeClass);
 
-        System.out.println("setup.time: " + setup.time);
         // Calculate the overhead time
         Option<Config> prev = None.instance();
         List<PlannedTime.Step> steps = new ArrayList<>();

@@ -261,7 +261,7 @@ public class OverheadTablePrinter {
             if (cts == null) continue;
             PlannedTime.CategorizedTime ct = cts.max(Comparator.naturalOrder());
             int coadds = p.observation().calculationMethod().coaddsOrElse(1);
-            String category = ct.detail.getOrElse(ct.category.display);
+            String category = ct.category.display;
 
             buf.append("<tr>");
             buf.append("<td>").append(category).append("</td>");

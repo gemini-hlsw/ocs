@@ -405,7 +405,7 @@ final class Ghost
       label(dominantCamera.oneReadout.fractionalSeconds)
     ))
 
-    times.add(getDhsWriteTime)
+    times.add(getWriteTime)
 
     CommonStepCalculator.instance.calc(cur, prev).addAll(times)
   }

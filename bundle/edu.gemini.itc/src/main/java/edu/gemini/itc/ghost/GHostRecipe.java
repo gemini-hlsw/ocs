@@ -48,14 +48,14 @@ public final class GHostRecipe  {
         for (SpectroscopyResult r1 : r){
             final List<SpcChartData> dataSets1 = new ArrayList<SpcChartData>();
             dataSets1.add(Recipe$.MODULE$.createSignalChart(r1, 0));
-            dataSets1.add(Recipe$.MODULE$.createS2NChart(r1, _mainInstrument[0].getCCDType() + " CCD. S/N per pixel",0));
+            dataSets1.add(Recipe$.MODULE$.createS2NChart(r1, " CCD. S/N per pixel",0));
             VisitableSampledSpectrum finalS2N = (VisitableSampledSpectrum) r1.specS2N()[0].getFinalS2NSpectrum().clone();
             Ghost inst = (Ghost) r1.instrument();
             inst.transPerResolutionElement(finalS2N);
             VisitableSampledSpectrum sigleS2N = (VisitableSampledSpectrum) r1.specS2N()[0].getExpS2NSpectrum().clone();
             inst.transPerResolutionElement(sigleS2N);
             dataSets1.add(Recipe$.MODULE$.createS2NChart(sigleS2N, finalS2N,
-                                                         _mainInstrument[0].getCCDType() + " CCD. S/N per resolution Element",
+                                                         " CCD. S/N per resolution Element",
                                                          ITCChart.DarkGreen, ITCChart.DarkRed));
             groups.add(dataSets1);
 
