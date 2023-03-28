@@ -7,26 +7,25 @@ import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.votable.{CannedBackend, TestVoTableBackend}
 import edu.gemini.skycalc.{Angle => SkycalcAngle, Offset => SkycalcOffset}
 import edu.gemini.spModel.ags.AgsStrategyKey._
-import edu.gemini.spModel.core.MagnitudeBand.{_r, R, UC}
+import edu.gemini.spModel.core.MagnitudeBand.{R, UC, _r}
 import edu.gemini.spModel.core.MagnitudeSystem.Vega
 import edu.gemini.spModel.core._
 import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
 import edu.gemini.spModel.gemini.altair.{AltairAowfsGuider, AltairParams, InstAltair}
 import edu.gemini.spModel.gemini.flamingos2.{Flamingos2, Flamingos2OiwfsGuideProbe}
-import edu.gemini.spModel.gemini.gmos.{GmosNorthType, InstGmosSouth, GmosOiwfsGuideProbe, InstGmosNorth}
+import edu.gemini.spModel.gemini.gmos.{GmosNorthType, GmosOiwfsGuideProbe, InstGmosNorth, InstGmosSouth}
 import edu.gemini.spModel.gemini.gnirs.{GnirsOiwfsGuideProbe, InstGNIRS}
-import edu.gemini.spModel.gemini.niri.{NiriOiwfsGuideProbe, InstNIRI}
+import edu.gemini.spModel.gemini.niri.{InstNIRI, NiriOiwfsGuideProbe}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.phoenix.InstPhoenix
 import edu.gemini.spModel.gemini.visitor.VisitorInstrument
-import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe}
+import edu.gemini.spModel.guide.{GuideProbe, ValidatableGuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
 import edu.gemini.spModel.telescope.IssPort
 import edu.gemini.spModel.telescope.PosAngleConstraint.FIXED_180
-
 import org.specs2.matcher.MatchResult
 import org.specs2.mutable.Specification
 
@@ -34,9 +33,9 @@ import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.collection.JavaConverters._
-
 import scalaz._
 import Scalaz._
+import edu.gemini.spModel.gemini.igrins2.Igrins2
 
 class SingleProbeStrategySpec extends Specification {
   private val magTable = ProbeLimitsTable.loadOrThrow()
@@ -325,6 +324,24 @@ class SingleProbeStrategySpec extends Specification {
       val selection = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
 
       verifyGuideStarSelection(strategy, ctx, selection, "302-000084", PwfsGuideProbe.pwfs2)
+    }
+    "find a guide star for IGRINS2" in {
+      // Pleiades target
+      val ra = Angle.fromHMS(3, 47, 0).getOrElse(Angle.zero)
+      val dec = Declination.fromAngle(Angle.fromDMS(24, 7, 0).getOrElse(Angle.zero)).getOrElse(Declination.zero)
+      val target = new SPTarget(ra.toDegrees, dec.toDegrees)
+      val guiders = Set[GuideProbe](GnirsOiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
+      val env = TargetEnvironment.create(target)
+      val inst = new Igrins2() <| {_.setPosAngle(0.0)}
+
+      val strategy = SingleProbeStrategy(Pwfs2NorthKey, SingleProbeStrategyParams.PwfsParams(Site.GN, PwfsGuideProbe.pwfs2), Some(TestVoTableBackend("/gnirs_1.xml")))
+
+      val conditions = SPSiteQuality.Conditions.NOMINAL.cc(SPSiteQuality.CloudCover.PERCENT_70).sb(SPSiteQuality.SkyBackground.ANY)
+      val ctx = ObsContext.create(env, inst, new JSome(Site.GN), conditions, null, null, JNone.instance())
+
+      val selection = Await.result(strategy.select(ctx, magTable)(implicitly), 10.seconds)
+
+      verifyGuideStarSelection(strategy, ctx, selection, "571-008701", PwfsGuideProbe.pwfs2)
     }
     "find a guide star for GNIRS, OCSADV-255" in {
       // Pleiades target

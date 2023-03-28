@@ -5,19 +5,19 @@ import edu.gemini.spModel.guide.GuideSpeed
 
 package object conf {
 
-  val AltairLgs  = MagLimitsId("Altair LGS")
-  val AltairNgs  = MagLimitsId("Altair NGS")
-  val F2Oiwfs    = MagLimitsId("F2 OIWFS")
-  val GmosNOiwfs = MagLimitsId("GMOS-N OIWFS")
-  val GmosSOiwfs = MagLimitsId("GMOS-S OIWFS")
-  val GnirsOiwfs = MagLimitsId("GNIRS OIWFS")
-  val GnPwfs1    = MagLimitsId("GN PWFS1")
-  val GnPwfs2    = MagLimitsId("GN PWFS2")
-  val GsPwfs1    = MagLimitsId("GS PWFS1")
-  val GsPwfs2    = MagLimitsId("GS PWFS2")
-  val NiciOiwfs  = MagLimitsId("NICI OIWFS")
-  val NifsOiwfs  = MagLimitsId("NIFS OIWFS")
-  val NiriOiwfs  = MagLimitsId("NIRI OIWFS")
+  val AltairLgs: MagLimitsId = MagLimitsId("Altair LGS")
+  val AltairNgs: MagLimitsId = MagLimitsId("Altair NGS")
+  val F2Oiwfs: MagLimitsId = MagLimitsId("F2 OIWFS")
+  val GmosNOiwfs: MagLimitsId = MagLimitsId("GMOS-N OIWFS")
+  val GmosSOiwfs: MagLimitsId = MagLimitsId("GMOS-S OIWFS")
+  val GnirsOiwfs: MagLimitsId = MagLimitsId("GNIRS OIWFS")
+  val GnPwfs1: MagLimitsId = MagLimitsId("GN PWFS1")
+  val GnPwfs2: MagLimitsId = MagLimitsId("GN PWFS2")
+  val GsPwfs1: MagLimitsId = MagLimitsId("GS PWFS1")
+  val GsPwfs2: MagLimitsId = MagLimitsId("GS PWFS2")
+  val NiciOiwfs: MagLimitsId = MagLimitsId("NICI OIWFS")
+  val NifsOiwfs: MagLimitsId = MagLimitsId("NIFS OIWFS")
+  val NiriOiwfs: MagLimitsId = MagLimitsId("NIRI OIWFS")
 
   val AllLimitsIds = List(
     AltairLgs,

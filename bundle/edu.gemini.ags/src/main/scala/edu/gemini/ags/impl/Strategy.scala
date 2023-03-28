@@ -22,24 +22,24 @@ import scalaz.syntax.foldable._
 object Strategy {
   import SingleProbeStrategyParams._
 
-  val AltairAowfs     = SingleProbeStrategy(AltairAowfsKey,     AltairAowfsParams)
-  val Flamingos2Oiwfs = SingleProbeStrategy(Flamingos2OiwfsKey, Flamingos2OiwfsParams)
-  val GmosNorthOiwfs  = SingleProbeStrategy(GmosNorthOiwfsKey,  GmosOiwfsParams(Site.GN))
-  val GmosSouthOiwfs  = SingleProbeStrategy(GmosSouthOiwfsKey,  GmosOiwfsParams(Site.GS))
-  val GnirsOiwfs      = SingleProbeStrategy(GnirsOiwfsKey,      GnirsOiwfsParams)
-  val NifsOiwfs       = SingleProbeStrategy(NifsOiwfsKey,       NifsOiwfsParams)
-  val NiriOiwfs       = SingleProbeStrategy(NiriOiwfsKey,       NiriOiwfsParams)
-  val Pwfs1North      = SingleProbeStrategy(Pwfs1NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs1))
-  val Pwfs2North      = SingleProbeStrategy(Pwfs2NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs2))
-  val Pwfs1South      = SingleProbeStrategy(Pwfs1SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs1))
-  val GhostPwfs1      = GhostStrategy(GhostPwfs1Key,            Pwfs1South)
-  val Pwfs2South      = SingleProbeStrategy(Pwfs2SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs2))
-  val GhostPwfs2      = GhostStrategy(GhostPwfs2Key,            Pwfs2South)
+  val AltairAowfs: SingleProbeStrategy = SingleProbeStrategy(AltairAowfsKey,     AltairAowfsParams)
+  val Flamingos2Oiwfs: SingleProbeStrategy = SingleProbeStrategy(Flamingos2OiwfsKey, Flamingos2OiwfsParams)
+  val GmosNorthOiwfs: SingleProbeStrategy = SingleProbeStrategy(GmosNorthOiwfsKey,  GmosOiwfsParams(Site.GN))
+  val GmosSouthOiwfs: SingleProbeStrategy = SingleProbeStrategy(GmosSouthOiwfsKey,  GmosOiwfsParams(Site.GS))
+  val GnirsOiwfs: SingleProbeStrategy = SingleProbeStrategy(GnirsOiwfsKey,      GnirsOiwfsParams)
+  val NifsOiwfs: SingleProbeStrategy = SingleProbeStrategy(NifsOiwfsKey,       NifsOiwfsParams)
+  val NiriOiwfs: SingleProbeStrategy = SingleProbeStrategy(NiriOiwfsKey,       NiriOiwfsParams)
+  val Pwfs1North: SingleProbeStrategy = SingleProbeStrategy(Pwfs1NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs1))
+  val Pwfs2North: SingleProbeStrategy = SingleProbeStrategy(Pwfs2NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs2))
+  val Pwfs1South: SingleProbeStrategy = SingleProbeStrategy(Pwfs1SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs1))
+  val Pwfs2South: SingleProbeStrategy = SingleProbeStrategy(Pwfs2SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs2))
+  val GhostPwfs1: GhostStrategy = GhostStrategy(GhostPwfs1Key,            Pwfs1South)
+  val GhostPwfs2: GhostStrategy = GhostStrategy(GhostPwfs2Key,            Pwfs2South)
 
-  val NiciOiwfs       = ScienceTargetStrategy(NiciOiwfsKey,     NiciOiwfsGuideProbe.instance, NiciBandsList)
-  val Off             = OffStrategy
+  val NiciOiwfs: ScienceTargetStrategy = ScienceTargetStrategy(NiciOiwfsKey,     NiciOiwfsGuideProbe.instance, NiciBandsList)
+  val Off: OffStrategy.type = OffStrategy
 
-  val GemsNgs2        = Ngs2Strategy(GaiaGemini, None)
+  val GemsNgs2: Ngs2Strategy = Ngs2Strategy(GaiaGemini, None)
 
   /**
    * All strategies that correspond to top-level AGS queries. Internally, some
@@ -88,7 +88,7 @@ object Strategy {
   private def allSidereal(ctx: ObsContext): Boolean =
     ctx.getTargets.getAsterism.allSidereal
 
-  val InstMap = Map[SPComponentType, ObsContext => List[AgsStrategy]](
+  val InstMap: Map[SPComponentType, ObsContext => List[AgsStrategy]] = Map[SPComponentType, ObsContext => List[AgsStrategy]](
     SPComponentType.INSTRUMENT_ACQCAM     -> const(List(Pwfs1North, Pwfs2North, Pwfs1South, Pwfs2South)),
 
     SPComponentType.INSTRUMENT_FLAMINGOS2 -> ((ctx: ObsContext) =>
@@ -112,6 +112,7 @@ object Strategy {
 
     SPComponentType.INSTRUMENT_GNIRS      -> const(List(AltairAowfs, Pwfs2North, Pwfs1North, GnirsOiwfs)),
     SPComponentType.INSTRUMENT_GSAOI      -> const(List(GemsNgs2, Pwfs1South)),
+    SPComponentType.INSTRUMENT_IGNRIS2    -> const(List(Pwfs2North, Pwfs1North)),
     SPComponentType.INSTRUMENT_MICHELLE   -> const(List(Pwfs2North, Pwfs1North)),
     SPComponentType.INSTRUMENT_NICI       -> const(List(NiciOiwfs, Pwfs2South, Pwfs1South)),
     SPComponentType.INSTRUMENT_NIFS       -> const(List(AltairAowfs, Pwfs2North, Pwfs1North, NifsOiwfs)),

@@ -3,14 +3,18 @@ package edu.gemini.spModel.gemini.igrins2
 import edu.gemini.pot.sp.{ISPNodeInitializer, ISPObsComponent, ISPObservation, SPComponentType}
 import edu.gemini.shared.util.immutable
 import edu.gemini.shared.util.immutable.{DefaultImList, ImList}
+import edu.gemini.skycalc.{Angle => SkyAngle}
 import edu.gemini.spModel.core.{Angle, MagnitudeBand, Site, Wavelength}
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.data.config.{DefaultParameter, DefaultSysConfig, ISysConfig, StringParameter}
 
 import java.util.{Collections, Map => JMap, Set => JSet}
 import edu.gemini.spModel.data.property.{PropertyProvider, PropertySupport}
+import edu.gemini.spModel.gemini.ghost.{GhostAsterism, GhostScienceAreaGeometry}
 import edu.gemini.spModel.gemini.init.ComponentNodeInitializer
 import edu.gemini.spModel.gemini.parallacticangle.ParallacticAngleSupportInst
+import edu.gemini.spModel.inst.{ScienceAreaGeometry, VignettableScienceAreaInstrument}
+import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.InstConstants
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
 import edu.gemini.spModel.seqcomp.SeqConfigNames
@@ -27,7 +31,12 @@ import scala.math.sqrt
  ** The Igrins2 instrument SP model.
  * Note that we do not override clone since private variables are immutable.
  */
-final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE) with PropertyProvider with PosAngleConstraintAware with Igrins2Mixin with IssPortProvider {
+final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
+  with PropertyProvider
+  with PosAngleConstraintAware
+  with Igrins2Mixin
+  with IssPortProvider
+  with VignettableScienceAreaInstrument {
   _exposureTime = Igrins2.DefaultExposureTime.toSeconds
   private var _port = IssPort.UP_LOOKING
   private var _posAngleConstraint = PosAngleConstraint.PARALLACTIC_ANGLE
@@ -161,6 +170,15 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE) with Pr
     }
     _slitViewingCamera = newValue
   }
+
+  override def getVignettableScienceArea: ScienceAreaGeometry =
+    GhostScienceAreaGeometry
+
+  override def pwfs1VignettingClearance(ctx: ObsContext): SkyAngle =
+    edu.gemini.skycalc.Angle.arcmins(5.0)
+
+  override def pwfs2VignettingClearance(ctx: ObsContext): SkyAngle =
+    edu.gemini.skycalc.Angle.arcmins(4.75)
 }
 
 object Igrins2 {

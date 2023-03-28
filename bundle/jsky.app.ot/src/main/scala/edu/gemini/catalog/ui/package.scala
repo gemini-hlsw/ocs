@@ -43,6 +43,7 @@ import scalaz._
 import Scalaz._
 import edu.gemini.spModel.gemini.gems.CanopusWfs
 import edu.gemini.spModel.gemini.ghost.Ghost
+import edu.gemini.spModel.gemini.igrins2.Igrins2
 
 /**
  * Locally describe an ags strategy including its limits and the query that would trigger
@@ -152,6 +153,7 @@ object ObservationInfo {
     Ghost.INSTRUMENT_NAME_PROP             -> SPComponentType.INSTRUMENT_GHOST,
     GNIRSConstants.INSTRUMENT_NAME_PROP    -> SPComponentType.INSTRUMENT_GNIRS,
     //Gpi.INSTRUMENT_NAME_PROP               -> SPComponentType.INSTRUMENT_GPI, GPI Doesn't have AGS Strategies defined
+    Igrins2.INSTRUMENT_NAME_PROP           -> SPComponentType.INSTRUMENT_IGNRIS2,
     InstMichelle.INSTRUMENT_NAME_PROP      -> SPComponentType.INSTRUMENT_MICHELLE,
     InstNICI.INSTRUMENT_NAME_PROP          -> SPComponentType.INSTRUMENT_NICI,
     InstNIFS.INSTRUMENT_NAME_PROP          -> SPComponentType.INSTRUMENT_NIFS,
