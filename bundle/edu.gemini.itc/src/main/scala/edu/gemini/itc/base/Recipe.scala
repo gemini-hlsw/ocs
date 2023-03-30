@@ -73,7 +73,7 @@ object Recipe {
     val data: JList[SpcSeriesData] = new ArrayList[SpcSeriesData]
     data.add(SpcSeriesData(SingleS2NPerResEle, "Single Exp S/N", singleS2N.getData, Option(color1)))
     data.add(SpcSeriesData(FinalS2NPerResEle,  "Final S/N  ",    finalS2N.getData, Option(color2)))
-    new SpcChartData(S2NChartPerRes, title, ChartAxis("Wavelength (nm)"), ChartAxis("Signal / Noise per spectral pixel"), data.toList)
+    new SpcChartData(S2NChartPerRes, title, ChartAxis("Wavelength (nm)"), ChartAxis("Signal / Noise per resolution element"), data.toList)
   }
 
   // === Imaging

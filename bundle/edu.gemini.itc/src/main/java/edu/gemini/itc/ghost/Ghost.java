@@ -76,7 +76,7 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
         _cableThrougthput.setDescription("GHOST Cass unit and science cable");
         addComponent(_cableThrougthput);
         TransmissionElement _fixedOptics = new TransmissionElement(getDirectory() + "/" + Ghost.INSTR_PREFIX + "fixedOptics" + getSuffix());
-        _fixedOptics.setDescription("Fix Optics");
+        _fixedOptics.setDescription("Fixed Optics");
         addComponent(_fixedOptics);
 
         _gratingOptics = new GhostGratingOptics(

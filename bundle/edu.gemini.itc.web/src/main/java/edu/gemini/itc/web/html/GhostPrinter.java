@@ -130,8 +130,8 @@ public final class GhostPrinter extends PrinterBase implements OverheadTablePrin
         s += "\n";
         s += "Spatial Binning (y-binning): " + instrument.getSpatialBinning() + "\n";
         s += "Spectral Binning (x-binning): " + instrument.getSpectralBinning() + "\n";
-        s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + " arcsec\n";
-        s += "Pixel Size in Spectral Direction: " + instrument.getGratingDispersion() + " nm\n";
+        s += String.format("Pixel Size in Spatial Direction: %.5f arcsec \n", instrument.getPixelSize());
+        s += String.format("Pixel Size in Spectral Direction: %.5f nm \n", instrument.getGratingDispersion());
 
         return s;
     }
