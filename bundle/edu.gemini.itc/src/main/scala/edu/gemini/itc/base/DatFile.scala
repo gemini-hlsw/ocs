@@ -1,9 +1,8 @@
 package edu.gemini.itc.base
 
 import java.util.Scanner
-import java.util.logging.Logger
+import java.util.logging.{Level, Logger}
 import java.util.regex.Pattern
-
 import scala.collection._
 import scalaz._
 
@@ -102,7 +101,6 @@ object DatFile {
       val blaze          = s.nextInt()
       val resolvingPower = s.nextInt()
       val resolution     = s.nextDouble()
-      //val dispersion     = s.nextDouble()
       val tmp     = s.next()
       var dispersion: Double = 0
       try {
@@ -114,8 +112,8 @@ object DatFile {
           l +=(Grating(name, resolvingPower, blaze, -999999, dDis, resolution))
         }
         case e : Exception => {
-
-          Log.severe("NOT ANALYZED THE EXCEPTION, PLEASE CONTACT WITH A PROGRAMMER. LINE 125 OF THE DatFile.scala")
+          Log.log(Level.SEVERE, "The grating configuration is not correct. ", e)
+          throw e
         }
       }
 
