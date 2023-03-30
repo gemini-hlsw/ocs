@@ -462,11 +462,7 @@ public abstract class SPInstObsComp extends AbstractDataObject {
     // DHS_WRITE_TIME. The class has a `serialVersionUID` and not-updated
     // clients will be expecting a DHS_WRITE_TIME field. Adding a `readObject`
     // to initialize the value for not-updated clients.
-    /*
-    This method is not being used. I have commented to check it on the pull-request.
     private PlannedTime.CategorizedTime WRITE_TIME;
-
-
     private void readObject(java.io.ObjectInputStream in)
         throws IOException, ClassNotFoundException {
 
@@ -474,7 +470,7 @@ public abstract class SPInstObsComp extends AbstractDataObject {
 
         WRITE_TIME = getWriteTime();
     }
-    */
+
     public final PlannedTime.CategorizedTime getWriteTime() {
         return WRITE_TIMES.get(getInstrument());
     }

@@ -368,17 +368,6 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         return area;
     }
 
-
-
-    public double calculateArea(double x1, double y1, double x2, double y2) {
-        //if (x1 >= 700 && x1 <= 703)
-        //    System.out.println("x1: " + x1 + " y1: " + y1 + " x2: " + x2 + " y2: " + y2 + " area: " + ( (x2 - x1) * (y1 + y2) / 2.0));
-       return (x2 - x1) * (y1 + y2) / 2.0;
-    }
-
-
-
-
     /**
      * Returns the integral of values in the SampledSpectrum in the
      * specified range between specified indices.

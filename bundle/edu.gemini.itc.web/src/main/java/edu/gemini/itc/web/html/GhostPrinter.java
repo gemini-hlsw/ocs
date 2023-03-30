@@ -23,8 +23,6 @@ public final class GhostPrinter extends PrinterBase implements OverheadTablePrin
     private final GhostParameters instr;
 
     public GhostPrinter(final ItcParameters p, final GhostParameters instr, final PlottingDetails pdp, final PrintWriter out) {
-        //
-        //super(out, 18000, 9000);
         super(out, 7200, 3600);
         this.recipe         = new GHostRecipe(p, instr);
         this.pdp            = pdp;
@@ -38,7 +36,6 @@ public final class GhostPrinter extends PrinterBase implements OverheadTablePrin
     public void writeOutput() {
         final SpectroscopyResult[] r = recipe.calculateSpectroscopy();
         final ItcSpectroscopyResult s = recipe.serviceResult(r, false);
-        //final ItcSpectroscopyResult s[] = recipe.serviceResult(r, false);
         final UUID id = cache(s);
         writeSpectroscopyOutput(id, r, s);
     }
@@ -73,10 +70,7 @@ public final class GhostPrinter extends PrinterBase implements OverheadTablePrin
 
         _print("<HR align=left SIZE=3>");
 
-        //for (int i = 0; i < results.length; i++) {
-        for (int i = 0; i < 1; i++) { // If the user want to plot the SNR for each detector,
-                                      // it would have to use the previous instruction. This has been commented
-                                      // because the QE of the CCD is the same for both. Therefore, the SNR are similar.
+        for (int i = 0; i < 1; i++) {
             _println("<p style=\"page-break-inside: never\">");
             Log.info("Plotting results, index: "+i);
             _printImageLink(id, SignalChart.instance(), i, pdp);

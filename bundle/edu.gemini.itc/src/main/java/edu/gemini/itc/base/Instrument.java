@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 /**
  * The Instrument class is the class that any instrument should extend.
- * It defines the common properties of any given Instrumnet.
+ * It defines the common properties of any given Instrument.
  * <p/>
  * The important piece of data is the _list. This is a linked list
  * that contains all of the Components that make up the instrument.

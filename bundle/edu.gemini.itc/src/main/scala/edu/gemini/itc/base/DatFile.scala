@@ -107,15 +107,15 @@ object DatFile {
       var dispersion: Double = 0
       try {
         dispersion = tmp.toDouble
-        l.+=(Grating(name, resolvingPower, blaze, dispersion, null, resolution))
+        l +=(Grating(name, resolvingPower, blaze, dispersion, null, resolution))
       } catch {
         case e : NumberFormatException => {
           val dDis = arrays.apply(tmp)
-          l.+=(Grating(name, resolvingPower, blaze, -999999, dDis, resolution))
+          l +=(Grating(name, resolvingPower, blaze, -999999, dDis, resolution))
         }
         case e : Exception => {
-          //l.+=(Grating(name, resolvingPower, blaze, -999999, arrays.apply(tmp), resolution))
-          println("NOT ANALYZED THE EXCEPTION, PLEASE CONTACT WITH A PROGRAMMER. LINE 125 OF THE DatFile.scala")
+
+          Log.severe("NOT ANALYZED THE EXCEPTION, PLEASE CONTACT WITH A PROGRAMMER. LINE 125 OF THE DatFile.scala")
         }
       }
 

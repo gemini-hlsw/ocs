@@ -107,13 +107,6 @@ object ConfigExtractor {
   }
 
 
-//    for {
-//      _ <- Some(Unit)
-//    } yield {
-//      GhostParameters()
-//    }
-//  }
-
   private def extractGnirs(targetEnv: TargetEnvironment, probe: GuideProbe, when: GOption[java.lang.Long], c: Config): String \/ GnirsParameters = {
     import GNIRSParams._
 
@@ -140,11 +133,7 @@ object ConfigExtractor {
     } yield GnirsParameters(pixelScale, filter, grating, readMode, xDisp, wavelen, slitWidth, camera, wellDepth, altair)
   }
 
-  // TODO-GHOSTITC
   private def extractGhost(c: Config): String \/ GhostParameters = {
-    // Gets the optional custom slit width
-
-    // FIXME
     for {
       readMode      <- extract[GhostReadNoiseGain](c, ReadModeKey)
       binning       <- extract[GhostBinning]      (c, BinningKey)

@@ -30,7 +30,6 @@ public enum ExposureCalculator {
      * @return time in seconds
      */
     public double totalExposureTimeSec(Config stepConfig) {
-        System.out.println("*** totalExposureTimeSec: exposureTimeSec(stepConfig): "+ exposureTimeSec(stepConfig) + " coadds(stepConfig): "+ coadds(stepConfig));
         return exposureTimeSec(stepConfig) * coadds(stepConfig);
     }
 

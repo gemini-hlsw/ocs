@@ -20,7 +20,6 @@ public class GhostGratingOptics extends GratingOptics {
     }
 
     public double getPixelWidth() {
-        //return dispersion(-1) * _spectralBinning;
         return dispersion(-1);
     }
 }

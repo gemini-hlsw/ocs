@@ -22,7 +22,9 @@ public interface Disperser {
     /** Wavelength in [nm] at which this element stop letting light through. */
     double getEnd();
 
-    /** Dispersion of this disperser in [nm/pixel]. */
+    /** Dispersion of this disperser in [nm/pixel].
+     * wv: wavelength. Units nm.
+     **/
     double dispersion(double wv);
 
 
