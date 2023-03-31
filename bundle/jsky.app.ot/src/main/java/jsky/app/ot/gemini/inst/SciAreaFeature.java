@@ -65,7 +65,6 @@ public class SciAreaFeature extends TpeImageFeature
     private Michelle_SciAreaFeature _michelleFeat;
     private GNIRS_SciAreaFeature _gnirsFeat;
     private SciAreaPlotFeature _ghost2Feat;
-    private SciAreaPlotFeature _igrins2Feat;
     private SciAreaPlotFeature _flamingos2Feat;
     private NICI_SciAreaFeature _niciFeat;
     private Texes_SciAreaFeature _texesFeat;
@@ -250,11 +249,6 @@ public class SciAreaFeature extends TpeImageFeature
                 _ghost2Feat = new SciAreaPlotFeature(GhostScienceAreaGeometry$.MODULE$);
             }
             _feat = _ghost2Feat;
-        } else if (inst instanceof Igrins2) {
-            if (_igrins2Feat== null) {
-                _igrins2Feat = new SciAreaPlotFeature(GhostScienceAreaGeometry$.MODULE$);
-            }
-            _feat = _igrins2Feat;
         } else if (inst instanceof Flamingos2) {
             if (_flamingos2Feat == null) {
                 _flamingos2Feat = new SciAreaPlotFeature(F2ScienceAreaGeometry$.MODULE$);
