@@ -9,6 +9,7 @@ import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
 import edu.gemini.spModel.gemini.gpi.Gpi;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
+import edu.gemini.spModel.gemini.igrins2.Igrins2;
 import edu.gemini.spModel.gemini.michelle.InstMichelle;
 import edu.gemini.spModel.gemini.nici.InstNICI;
 import edu.gemini.spModel.gemini.nifs.InstNIFS;
@@ -229,6 +230,7 @@ public final class ObsCatalogInfo {
             InstGNIRS.SP_TYPE.readableStr,
             Gsaoi.SP_TYPE.readableStr,
             Gpi.SP_TYPE.readableStr,
+            Igrins2.SP_TYPE.readableStr,
             InstMichelle.SP_TYPE.readableStr,
             InstNICI.SP_TYPE.readableStr,
             InstNIFS.SP_TYPE.readableStr,
@@ -318,6 +320,8 @@ public final class ObsCatalogInfo {
             instConfigInfoList = Gpi.getInstConfigInfo();
         else if (instName.equals(Ghost.SP_TYPE.readableStr))
             instConfigInfoList = Ghost.getInstConfigInfo();
+        else if (instName.equals(Igrins2.SP_TYPE.readableStr))
+            instConfigInfoList = Igrins2.getInstConfigInfo();
         return instConfigInfoList;
     }
 

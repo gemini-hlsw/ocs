@@ -187,7 +187,7 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     }
 
     row += 1
-    val posAnglePanel: PositionAnglePanel[Igrins2, Igrins2Editor] = PositionAnglePanel.apply[Igrins2, Igrins2Editor](SPComponentType.INSTRUMENT_IGNRIS2)
+    val posAnglePanel: PositionAnglePanel[Igrins2, Igrins2Editor] = PositionAnglePanel.apply[Igrins2, Igrins2Editor](SPComponentType.INSTRUMENT_IGRINS2)
     layout(posAnglePanel) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 0

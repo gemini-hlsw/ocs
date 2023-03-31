@@ -102,6 +102,7 @@ case class ObservationInfo(ctx: Option[ObsContext],
       case SPComponentType.INSTRUMENT_GNIRS      => new InstGNIRS()
       case SPComponentType.INSTRUMENT_GPI        => new Gpi()
       case SPComponentType.INSTRUMENT_GSAOI      => new Gsaoi()
+      case SPComponentType.INSTRUMENT_IGRINS2    => new Igrins2()
       case SPComponentType.INSTRUMENT_MICHELLE   => new InstMichelle()
       case SPComponentType.INSTRUMENT_NICI       => new InstNICI()
       case SPComponentType.INSTRUMENT_NIFS       => new InstNIFS()
@@ -153,7 +154,7 @@ object ObservationInfo {
     Ghost.INSTRUMENT_NAME_PROP             -> SPComponentType.INSTRUMENT_GHOST,
     GNIRSConstants.INSTRUMENT_NAME_PROP    -> SPComponentType.INSTRUMENT_GNIRS,
     //Gpi.INSTRUMENT_NAME_PROP               -> SPComponentType.INSTRUMENT_GPI, GPI Doesn't have AGS Strategies defined
-    Igrins2.INSTRUMENT_NAME_PROP           -> SPComponentType.INSTRUMENT_IGNRIS2,
+    Igrins2.INSTRUMENT_NAME_PROP           -> SPComponentType.INSTRUMENT_IGRINS2,
     InstMichelle.INSTRUMENT_NAME_PROP      -> SPComponentType.INSTRUMENT_MICHELLE,
     InstNICI.INSTRUMENT_NAME_PROP          -> SPComponentType.INSTRUMENT_NICI,
     InstNIFS.INSTRUMENT_NAME_PROP          -> SPComponentType.INSTRUMENT_NIFS,

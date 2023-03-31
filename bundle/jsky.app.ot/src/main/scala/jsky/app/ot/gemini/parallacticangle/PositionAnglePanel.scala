@@ -109,7 +109,7 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
     // supports parallactic angle by its type.
     val parallacticAngleControlsOpt: Option[ParallacticAngleControls] = {
       val supportsParallacticAngle = Set(SPComponentType.INSTRUMENT_FLAMINGOS2,
-                                         SPComponentType.INSTRUMENT_IGNRIS2,
+                                         SPComponentType.INSTRUMENT_IGRINS2,
                                          SPComponentType.INSTRUMENT_GMOS,
                                          SPComponentType.INSTRUMENT_GMOSSOUTH,
                                          SPComponentType.INSTRUMENT_GNIRS).contains(instType)
