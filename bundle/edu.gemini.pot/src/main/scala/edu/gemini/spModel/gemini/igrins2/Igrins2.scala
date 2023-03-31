@@ -4,17 +4,20 @@ import edu.gemini.pot.sp.{ISPNodeInitializer, ISPObsComponent, ISPObservation, S
 import edu.gemini.shared.util.immutable
 import edu.gemini.shared.util.immutable.{DefaultImList, ImList}
 import edu.gemini.skycalc.{Angle => SkyAngle}
+import edu.gemini.spModel.config2.Config
 import edu.gemini.spModel.core.{Angle, MagnitudeBand, Site, Wavelength}
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.data.config.{DefaultParameter, DefaultSysConfig, ISysConfig, StringParameter}
 
 import java.util.{Collections, Map => JMap, Set => JSet}
 import edu.gemini.spModel.data.property.{PropertyProvider, PropertySupport}
-import edu.gemini.spModel.gemini.ghost.{GhostAsterism, GhostScienceAreaGeometry}
+import edu.gemini.spModel.gemini.ghost.GhostScienceAreaGeometry
 import edu.gemini.spModel.gemini.init.ComponentNodeInitializer
 import edu.gemini.spModel.gemini.parallacticangle.ParallacticAngleSupportInst
 import edu.gemini.spModel.inst.{ScienceAreaGeometry, VignettableScienceAreaInstrument}
 import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.obs.plannedtime.{CommonStepCalculator, ExposureCalculator, PlannedTime}
+import edu.gemini.spModel.obs.plannedtime.PlannedTime.{CategorizedTime, Category}
 import edu.gemini.spModel.obscomp.InstConstants
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
 import edu.gemini.spModel.seqcomp.SeqConfigNames
@@ -23,6 +26,7 @@ import squants.time.Time
 import squants.time.TimeConversions.TimeConversions
 
 import java.beans.PropertyDescriptor
+import java.time.Duration
 import scala.collection.immutable.TreeMap
 import scala.collection.JavaConverters._
 import scala.math.sqrt
@@ -36,6 +40,7 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
   with PosAngleConstraintAware
   with Igrins2Mixin
   with IssPortProvider
+  with PlannedTime.StepCalculator
   with VignettableScienceAreaInstrument {
   _exposureTime = Igrins2.DefaultExposureTime.toSeconds
   private var _port = IssPort.UP_LOOKING
@@ -179,6 +184,31 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
 
   override def pwfs2VignettingClearance(ctx: ObsContext): SkyAngle =
     edu.gemini.skycalc.Angle.arcmins(4.75)
+
+  override def getSetupTime(obs: ISPObservation): Duration =
+    Duration.ofMinutes(8)
+
+  override def calc(cur: Config, prev: immutable.Option[Config]): PlannedTime.CategorizedTimeGroup = {
+    val times = new java.util.ArrayList[CategorizedTime]()
+
+    val rawExposureTime = ExposureCalculator.instance.exposureTimeSec(cur)
+
+    times.add(CategorizedTime.fromSeconds(
+      Category.EXPOSURE,
+      rawExposureTime
+    ))
+
+    val readoutTime = Igrins2.readoutTime(rawExposureTime.seconds)
+
+    times.add(CategorizedTime.fromSeconds(
+      Category.READOUT,
+      readoutTime.toSeconds
+    ))
+
+    times.add(getDhsWriteTime)
+
+    CommonStepCalculator.instance.calc(cur, prev).addAll(times)
+  }
 }
 
 object Igrins2 {
@@ -196,6 +226,11 @@ object Igrins2 {
   def fowlerSamples(expTime: Time): Int = {
     val nFowler = ((expTime.toSeconds - 0.168)/1.45479).toInt
     AllowedFowlerSamples.minBy(cur => math.abs (cur - nFowler))
+  }
+
+  def readoutTime(expTime: Time): Time = {
+    val nFowler = fowlerSamples(expTime)
+    1.45479.seconds / nFowler
   }
 
   def readNoise(expTime: Time): List[(MagnitudeBand, Double)] = {
