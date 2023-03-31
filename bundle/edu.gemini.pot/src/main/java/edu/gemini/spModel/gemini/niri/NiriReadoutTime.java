@@ -8,6 +8,7 @@ import edu.gemini.pot.sp.Instrument;
 import edu.gemini.spModel.data.config.IConfig;
 import edu.gemini.spModel.gemini.niri.Niri.BuiltinROI;
 import edu.gemini.spModel.gemini.niri.Niri.ReadMode;
+import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 import edu.gemini.shared.util.immutable.Option;
@@ -56,7 +57,7 @@ public final class NiriReadoutTime {
     // 2017-12-15: Modified according to the latest read time measurements.
 
     private static final double DHS_WRITE_TIME =
-        SPInstObsComp.WRITE_TIMES.get(Instrument.Niri).timeSeconds();
+        SPInstObsComp.DHS_WRITE_TIMES.get(Instrument.Niri).timeSeconds();
 
     private static final NiriReadoutTime[] _readoutTimes = new NiriReadoutTime[]{
         new NiriReadoutTime(BuiltinROI.FULL_FRAME, ReadMode.IMAG_SPEC_3TO5, 0.20),

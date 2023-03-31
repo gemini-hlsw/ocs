@@ -86,7 +86,7 @@ public final class PlannedTimeTest {
         verify(Gpi.getImagingSetup().getSeconds() +
                 Gpi.READOUT_PER_EXPOSURE_MS/1000.0 +
                 Gpi.READOUT_OVERHEAD_SEC +
-                gpiDataObject.getWriteTime().timeSeconds());
+                gpiDataObject.getDhsWriteTime().timeSeconds());
     }
 
     /*
@@ -145,7 +145,7 @@ public final class PlannedTimeTest {
         double time = Gpi.getImagingSetup().getSeconds();
         time += (EXP_TIME + Gpi.READOUT_PER_EXPOSURE_MS/1000.0) * 2;
         time += Gpi.READOUT_OVERHEAD_SEC * 2;
-        time += gpiDataObject.getWriteTime().timeSeconds() * 2;
+        time += gpiDataObject.getDhsWriteTime().timeSeconds() * 2;
 
         // Account for the change
         verify(time + overhead);
@@ -187,7 +187,7 @@ public final class PlannedTimeTest {
 
         time += (Gpi.READOUT_PER_EXPOSURE_MS/1000.0 + EXP_TIME) * 2;
         time += Gpi.READOUT_OVERHEAD_SEC * 2;
-        time += gpiDataObject.getWriteTime().timeSeconds() * 2;
+        time += gpiDataObject.getDhsWriteTime().timeSeconds() * 2;
 
         double over = Gpi.MULTI_CHANGE_OVERHEAD_SECS;
         verify(time + over);
@@ -211,7 +211,7 @@ public final class PlannedTimeTest {
 
         time += (Gpi.READOUT_PER_EXPOSURE_MS/1000.0 + EXP_TIME) * 3;
         time += Gpi.READOUT_OVERHEAD_SEC * 3;
-        time += gpiDataObject.getWriteTime().timeSeconds() * 3;
+        time += gpiDataObject.getDhsWriteTime().timeSeconds() * 3;
 
         double overhead = 2 * Gpi.HALFWAVE_PLATE_CHANGE_OVERHEAD_SECS;
         verify(time + overhead);
@@ -236,7 +236,7 @@ public final class PlannedTimeTest {
 
         time += (Gpi.READOUT_PER_EXPOSURE_MS/1000.0 + EXP_TIME) * 2;
         time += Gpi.READOUT_OVERHEAD_SEC * 2;
-        time += gpiDataObject.getWriteTime().timeSeconds() * 2;
+        time += gpiDataObject.getDhsWriteTime().timeSeconds() * 2;
 
         // The filter change dominates the half wave plate angle change
         double overhead = Gpi.SINGLE_CHANGE_OVERHEAD_SECS;
@@ -264,7 +264,7 @@ public final class PlannedTimeTest {
 
         time += (Gpi.READOUT_PER_EXPOSURE_MS/1000.0 + EXP_TIME) * 3;
         time += Gpi.READOUT_OVERHEAD_SEC * 3;
-        time += gpiDataObject.getWriteTime().timeSeconds() * 3;
+        time += gpiDataObject.getDhsWriteTime().timeSeconds() * 3;
 
         double over = Gpi.SINGLE_CHANGE_OVERHEAD_SECS;
         verify(time + over);
@@ -297,7 +297,7 @@ public final class PlannedTimeTest {
         double time = Gpi.getImagingSetup().getSeconds();
         time += (2.0 + Gpi.READOUT_PER_EXPOSURE_MS/1000.0) * 5;
         time += Gpi.READOUT_OVERHEAD_SEC;
-        time += gpiDataObject.getWriteTime().timeSeconds();
+        time += gpiDataObject.getDhsWriteTime().timeSeconds();
         time += GcalStepCalculator.SCIENCE_FOLD_MOVE_TIME/1000.0;
 
         verify(time);

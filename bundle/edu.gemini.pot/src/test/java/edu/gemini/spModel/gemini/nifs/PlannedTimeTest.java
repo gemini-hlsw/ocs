@@ -1,5 +1,6 @@
 package edu.gemini.spModel.gemini.nifs;
 
+import edu.gemini.pot.sp.Instrument;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.data.config.IParameter;
 import edu.gemini.spModel.data.config.ISysConfig;
@@ -29,7 +30,7 @@ public class PlannedTimeTest extends InstrumentSequenceTestBase<InstNIFS, SeqCon
 
         final double base = getInstDataObj().getSetupTime(getObs()).getSeconds()
                 + 100.0 + InstNIFS.COADD_CONSTANT
-                + getInstDataObj().getWriteTime().timeSeconds();
+                + getInstDataObj().getDhsWriteTime().timeSeconds();
 
         for (final ReadMode mode : ReadMode.values()) {
             getInstDataObj().setReadMode(mode);
@@ -51,7 +52,7 @@ public class PlannedTimeTest extends InstrumentSequenceTestBase<InstNIFS, SeqCon
 
         final double base = getInstDataObj().getSetupTime(getObs()).getSeconds();
         final double coaddConst = InstNIFS.COADD_CONSTANT;
-        final double dhs = getInstDataObj().getWriteTime().timeSeconds();
+        final double dhs = getInstDataObj().getDhsWriteTime().timeSeconds();
 
         final double exp1 = dhs + 2*(88.0 + ReadMode.FAINT_OBJECT_SPEC.getMinExp()  + coaddConst);
         final double exp2 = dhs + 3*(22.0 + ReadMode.MEDIUM_OBJECT_SPEC.getMinExp() + coaddConst);
@@ -74,7 +75,7 @@ public class PlannedTimeTest extends InstrumentSequenceTestBase<InstNIFS, SeqCon
         final double base = getInstDataObj().getSetupTime(getObs()).getSeconds();
 
         final double minExp = getInstDataObj().getReadMode().getMinExp();
-        final double dhs = getInstDataObj().getWriteTime().timeSeconds();
+        final double dhs = getInstDataObj().getDhsWriteTime().timeSeconds();
         final double exp1 = dhs + 3*(10.0 + minExp + InstNIFS.COADD_CONSTANT);
         final double exp2 = dhs + 5*(12.0 + minExp + InstNIFS.COADD_CONSTANT);
 
@@ -96,7 +97,7 @@ public class PlannedTimeTest extends InstrumentSequenceTestBase<InstNIFS, SeqCon
         getObserveSeqComp().setDataObject(sro);
 
         final double base = getInstDataObj().getSetupTime(getObs()).getSeconds();
-        final double dhs = getInstDataObj().getWriteTime().timeSeconds();
+        final double dhs = getInstDataObj().getDhsWriteTime().timeSeconds();
         final double common = 100.0 + dhs + InstNIFS.COADD_CONSTANT;
         final double bright = common + ReadMode.BRIGHT_OBJECT_SPEC.getMinExp();
         final double faint  = common + ReadMode.FAINT_OBJECT_SPEC.getMinExp();

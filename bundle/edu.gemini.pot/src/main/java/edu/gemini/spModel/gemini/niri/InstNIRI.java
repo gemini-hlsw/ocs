@@ -334,7 +334,7 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
 
         final Option<NiriReadoutTime> nrt = NiriReadoutTime.lookup(roi, readMode);
         nrt.foreach(niriReadoutTime -> {
-            times.add(CategorizedTime.fromSeconds(Category.WRITE, NiriReadoutTime.getDhsWriteTime()));
+            times.add(CategorizedTime.fromSeconds(Category.DHS_WRITE, NiriReadoutTime.getDhsWriteTime()));
             times.add(CategorizedTime.fromSeconds(Category.READOUT, niriReadoutTime.getReadout(coadds)));
         });
 

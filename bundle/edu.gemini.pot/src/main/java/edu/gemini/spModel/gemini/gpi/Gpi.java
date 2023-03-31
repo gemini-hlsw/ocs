@@ -2298,7 +2298,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         final double totalExposureTime = rawExposureTime * coadds;
         times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, totalExposureTime));
 
-        times.add(getWriteTime()); // REL-1678
+        times.add(getDhsWriteTime()); // REL-1678
 
         return CommonStepCalculator.instance.calc(cur, prev).addAll(times);
     }

@@ -179,7 +179,7 @@ public final class InstNIFS extends SPInstObsComp implements PropertyProvider, G
         final double readoutTime      = (readMode.getMinExp() + COADD_CONSTANT) * coadds;
         final CategorizedTime readOut = CategorizedTime.fromSeconds(Category.READOUT, readoutTime);
 
-        return CommonStepCalculator.instance.calc(cur, prev).addAll(expTime, readOut, getWriteTime());
+        return CommonStepCalculator.instance.calc(cur, prev).addAll(expTime, readOut, getDhsWriteTime());
     }
 
     /**
