@@ -2,7 +2,7 @@ package edu.gemini.spModel.gemini.ghost
 
 import java.beans.PropertyDescriptor
 import java.util.logging.Logger
-import java.util.{Collections, List => JList, Map => JMap, Set => JSet}
+import java.util.{ArrayList, Collection, Collections, List => JList, Map => JMap, Set => JSet}
 import edu.gemini.pot.sp._
 import edu.gemini.shared.util.immutable.{Option => JOption}
 import edu.gemini.skycalc.Angle
@@ -17,11 +17,10 @@ import edu.gemini.spModel.gemini.ghost.Ghost.{AsterismTypeConfigInfo, Resolution
 import edu.gemini.spModel.gemini.init.{ComponentNodeInitializer, ObservationNI}
 import edu.gemini.spModel.inst.{ScienceAreaGeometry, VignettableScienceAreaInstrument}
 import edu.gemini.spModel.obs.SPObservation
-import edu.gemini.spModel.obs.plannedtime.{CommonStepCalculator, PlannedTime}
+import edu.gemini.spModel.obs.plannedtime.{CommonStepCalculator, ExposureCalculator, PlannedTime}
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.{CategorizedTime, CategorizedTimeGroup, Category}
-import edu.gemini.spModel.obscomp.{InstConfigInfo, InstConstants, SPInstObsComp}
+import edu.gemini.spModel.obscomp.{InstConfigInfo, InstConstants, ItcOverheadProvider, SPInstObsComp}
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
-import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.seqcomp.SeqConfigNames
 import edu.gemini.spModel.seqcomp.SeqConfigNames.{INSTRUMENT_KEY, OBSERVE_KEY}
 import edu.gemini.spModel.syntax.duration._
@@ -30,7 +29,6 @@ import edu.gemini.spModel.target.obsComp.{TargetObsComp, TargetObsCompCB}
 import edu.gemini.spModel.telescope.{IssPort, IssPortProvider}
 
 import java.time.Duration
-
 import scala.collection.immutable.TreeMap
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
@@ -49,7 +47,8 @@ final class Ghost
      with IssPortProvider
      with PlannedTime.StepCalculator
      with PropertyProvider
-     with VignettableScienceAreaInstrument {
+    with ItcOverheadProvider
+    with VignettableScienceAreaInstrument {
 
   override def getSite: JSet[Site] = {
     Site.SET_GS
@@ -370,6 +369,20 @@ final class Ghost
   override def getSetupTime(obs: ISPObservation): Duration =
     Duration.ofMinutes(20)
 
+  // Formula used on the ITC
+//  override def calc(cur: Config, prev: Option[Config]): PlannedTime.CategorizedTimeGroup = {
+//    val times: util.Collection[PlannedTime.CategorizedTime] = new util.ArrayList[PlannedTime.CategorizedTime]
+//    val exposureTime: Double = ExposureCalculator.instance.exposureTimeSec(cur)
+//    times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, exposureTime))
+//    val readoutTime: Double = GhostReadoutTime.getReadoutOverhead(cur)
+//    System.out.println("*** readoutTime: " + readoutTime)
+//    times.add(CategorizedTime.fromSeconds(Category.READOUT, readoutTime))
+//    System.out.println("DHS suppouse value: " + getDhsWriteTime.time)
+//    //times.add(getDhsWriteTime());
+//    CommonStepCalculator.instance.calc(cur, prev).addAll(times)
+//  }
+
+
   override def calc(cur: Config, prev: JOption[Config]): CategorizedTimeGroup = {
     val times = new java.util.ArrayList[CategorizedTime]()
 
@@ -416,10 +429,19 @@ final class Ghost
     edu.gemini.skycalc.Angle.arcmins(limit)
   }
 
+  override def getSetupTime(conf: Config): Duration =
+    Ghost.SetupTime
+
+  override def getReacquisitionTime(conf: Config): Duration =
+    Ghost.ReaquisitionTime
 }
 
 object Ghost {
   val LOG: Logger = Logger.getLogger(classOf[Ghost].getName)
+  val SetupTime: Duration = Duration.ofSeconds(900) // This value was provided by Venus
+
+  // should be added 900 seconds of the SETUP_TIME
+  val ReaquisitionTime: Duration = Duration.ofSeconds(300)
 
   // Unfortunately we need a Java "Supplier" and "Function" which makes it
   // awkward to create the NodeInitializer via ComponentNodeInitializer.

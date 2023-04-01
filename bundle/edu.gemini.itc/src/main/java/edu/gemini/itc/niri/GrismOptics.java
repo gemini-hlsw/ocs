@@ -135,7 +135,7 @@ public final class GrismOptics extends TransmissionElement implements Disperser 
         return resolution(slit);
     }
 
-    public double dispersion() {
+    public double dispersion(double wv) {
         return coverage.get(getGrismNumber()).pixelWidth;
     }
 

@@ -1,13 +1,15 @@
 package edu.gemini.itc.base
 
-import java.util. { ArrayList, List => JList }
-
+import java.util.{ArrayList, List => JList}
 import edu.gemini.itc.shared._
+import edu.gemini.itc.shared.ITCChart
 
 import scala.collection.JavaConversions._
 
 import scalaz._
 import Scalaz._
+
+import java.awt.Color
 
 sealed trait Recipe
 
@@ -65,6 +67,13 @@ object Recipe {
     data.add(SpcSeriesData(SingleS2NData, "Single Exp S/N", result.specS2N(index).getExpS2NSpectrum.getData))
     data.add(SpcSeriesData(FinalS2NData,  "Final S/N  ",    result.specS2N(index).getFinalS2NSpectrum.getData))
     new SpcChartData(S2NChart, title, ChartAxis("Wavelength (nm)"), ChartAxis("Signal / Noise per spectral pixel"), data.toList)
+  }
+
+  def createS2NChart(singleS2N: VisitableSampledSpectrum, finalS2N: VisitableSampledSpectrum, title: String, color1: Color, color2: Color): SpcChartData = {
+    val data: JList[SpcSeriesData] = new ArrayList[SpcSeriesData]
+    data.add(SpcSeriesData(SingleS2NPerResEle, "Single Exp S/N", singleS2N.getData, Option(color1)))
+    data.add(SpcSeriesData(FinalS2NPerResEle,  "Final S/N  ",    finalS2N.getData, Option(color2)))
+    new SpcChartData(S2NChartPerRes, title, ChartAxis("Wavelength (nm)"), ChartAxis("Signal / Noise per resolution element"), data.toList)
   }
 
   // === Imaging

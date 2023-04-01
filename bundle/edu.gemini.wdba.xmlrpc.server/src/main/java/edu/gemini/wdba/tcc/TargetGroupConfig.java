@@ -42,5 +42,5 @@ public final class TargetGroupConfig extends ParamSet {
 
         final List<String> targetNames = targets.toList().stream().map(SPSkyObject::getName).collect(Collectors.toList());
         putParameter(TccNames.TARGETS, targetNames);
-    }
+}
 }

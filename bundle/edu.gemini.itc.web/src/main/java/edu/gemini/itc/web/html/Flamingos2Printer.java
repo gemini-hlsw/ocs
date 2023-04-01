@@ -162,4 +162,14 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
     public double getReadoutTimePerCoadd() {
         return 0;
     }
+
+    @Override
+    public double getVisitTime() {
+        return this.getVisit_time();
+    }
+
+    @Override
+    public double getRecenterInterval() {
+        return this.getRecentInterval();
+    }
 }

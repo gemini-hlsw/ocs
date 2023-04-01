@@ -22,9 +22,6 @@ import java.util.List;
 
 public final class PlannedTimeMath {
 
-    public static final double VISIT_TIME = 7200; // visit time, sec
-    public static final double RECENTERING_INTERVAL = 3600; // sec
-
     private PlannedTimeMath() {
     }
 
@@ -45,28 +42,32 @@ public final class PlannedTimeMath {
         return numReacq;
     }
 
-    // number of acquisitions (setups) per observation
-    public static int numAcq(PlannedTime pt) {
-        return numReacq(scienceTime(pt), VISIT_TIME) + 1;
+    // number of acquisitions (setups) per observation.
+    // visit_time: It is the maximum time per night allowed for the instrument. If more than this time is needed,
+    //             it is assumed that the target will be observed on multiple nights.
+    public static int numAcq(PlannedTime pt, double visit_time) {
+        return numReacq(scienceTime(pt), visit_time) + 1;
     }
 
     // Number of re-centerings on the slit for spectroscopic observations using PWFS2
-    public static int numRecenter(PlannedTime pt, Config config) {
+    // visit_time: It is the maximum time per night allowed for the instrument. If more than this time is needed,
+    //             it is assumed that the target will be observed on multiple nights.
+    public static int numRecenter(PlannedTime pt, Config config, double visit_time, double recenterInterval) {
         int numRecenter = 0;
         ItemKey guideWithPWFS2 = new ItemKey("telescope:guideWithPWFS2");
 
         if (config.containsItem(guideWithPWFS2) &&
                 config.getItemValue(guideWithPWFS2).equals(StandardGuideOptions.Value.guide)) {
             long scienceTime = scienceTime(pt);
-            double visitTime = (numAcq(pt) == 1) ? scienceTime : VISIT_TIME;
-            double lastVisitTime = scienceTime % VISIT_TIME;
+            double visitTime = (numAcq(pt, visit_time) == 1) ? scienceTime : visit_time;
+            double lastVisitTime = scienceTime % visit_time;
             // number of re-centerings per visit
-            int visitRecenteringNum = numReacq(visitTime, RECENTERING_INTERVAL);
+            int visitRecenteringNum = numReacq(visitTime, recenterInterval);
             // number of re-centerings in the last visit
-            int lastVisitRecenteringNum = numReacq(lastVisitTime, RECENTERING_INTERVAL);
+            int lastVisitRecenteringNum = numReacq(lastVisitTime, recenterInterval);
 
-            if (VISIT_TIME > RECENTERING_INTERVAL) {
-                numRecenter = (numAcq(pt) - 1) * visitRecenteringNum + lastVisitRecenteringNum;
+            if (visit_time > recenterInterval) {
+                numRecenter = (numAcq(pt, visit_time) - 1) * visitRecenteringNum + lastVisitRecenteringNum;
             } else {
                 throw new Error("Visit time is smaller than re-centering time");
             }
@@ -76,9 +77,9 @@ public final class PlannedTimeMath {
 
     // total time with acquisitions and re-acquisitions.
     // Uses the parameter because of GSAOI LGS re-acquisitions.
-    public static long totalTimeWithReacq(PlannedTime pt, int numReacq) {
+    public static long totalTimeWithReacq(PlannedTime pt, int numReacq, int visit_time) {
         long totalTimeWithReacq =
-                pt.setup.time.fullSetupTime.toMillis() * numAcq(pt) +
+                pt.setup.time.fullSetupTime.toMillis() * numAcq(pt, visit_time) +
                 pt.setup.time.reacquisitionOnlyTime.toMillis() * numReacq;
         for (PlannedTime.Step step : pt.steps) totalTimeWithReacq += step.totalTime();
         return totalTimeWithReacq;
@@ -100,6 +101,7 @@ public final class PlannedTimeMath {
             setupTime = SetupTime.fromDuration(s, r, SetupTime.Type.FULL)
                                  .getOrElse(PlannedTimeCalculator.DEFAULT_SETUP);
         }
+
         final PlannedTime.Setup setup = PlannedTime.Setup.apply(setupTime, obsChargeClass);
 
         // Calculate the overhead time
@@ -109,7 +111,6 @@ public final class PlannedTimeMath {
         for (Config c : cs.getAllSteps()) {
             PlannedTime.CategorizedTimeGroup gtc    = instr.calc(c, prev);
             prev = new Some<>(c);
-
             steps.add(PlannedTime.Step.apply(gtc));
         }
 

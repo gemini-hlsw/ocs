@@ -5,12 +5,14 @@ import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.DefaultConfig;
 import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.gemini.ghost.*;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.guide.GuideOption;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.StandardGuideOptions;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
+import edu.gemini.spModel.gemini.ghost.Ghost;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -149,9 +151,23 @@ public final class ConfigCreator {
     /**
      * Instrument-specific configs
      */
-    // TODO-GHOSTITC
     public final ConfigCreatorResult createGhostConfig(final GhostParameters ghostParameters, final int numExp) {
         final ConfigCreatorResult result = createCommonConfig(numExp);
+        for (final Config step : result.getConfig()) {
+            step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GHOST);
+            step.putItem(CcdXBinning, ghostParameters.binning());
+            step.putItem(ReadModeKey, ghostParameters.readMode());
+            step.putItem(DetectorManufacturerKey, (Detector.DEFAULT));
+            step.putItem(Ghost.RED_EXPOSURE_COUNT_OBS_KEY(), 1);
+            step.putItem(Ghost.RED_EXPOSURE_TIME_OBS_KEY(),obsDetailParams.exposureTime() );
+            step.putItem(Ghost.RED_READ_NOISE_GAIN_KEY(), ghostParameters.readMode());
+            step.putItem(Ghost.RED_BINNING_KEY(), ghostParameters.binning());
+
+            step.putItem(Ghost.BLUE_EXPOSURE_COUNT_OBS_KEY(), 1);
+            step.putItem(Ghost.BLUE_EXPOSURE_TIME_OBS_KEY(),obsDetailParams.exposureTime() );
+            step.putItem(Ghost.BLUE_READ_NOISE_GAIN_KEY(), ghostParameters.readMode());
+            step.putItem(Ghost.BLUE_BINNING_KEY(), ghostParameters.binning());
+        }
         return result;
     }
 

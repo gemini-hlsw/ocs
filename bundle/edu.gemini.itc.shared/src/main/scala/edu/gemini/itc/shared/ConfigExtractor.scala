@@ -1,12 +1,9 @@
 package edu.gemini.itc.shared
 
 import java.time.Instant
-
-import edu.gemini.pot.ModelConverters._
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.spModel.config2.{Config, ItemKey}
 import edu.gemini.spModel.core._
-import edu.gemini.spModel.data.YesNoType
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
@@ -20,10 +17,11 @@ import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.env.{Asterism, GuideProbeTargets, TargetEnvironment}
+import edu.gemini.spModel.target.env.{Asterism, GuideProbeTargets, ResolutionMode, TargetEnvironment}
 import edu.gemini.spModel.telescope.IssPort
 import edu.gemini.spModel.core.WavelengthConversions._
 import edu.gemini.shared.util.immutable.{Option => GOption}
+import edu.gemini.spModel.gemini.ghost.{GhostBinning, GhostReadNoiseGain}
 
 import scala.reflect.ClassTag
 import scalaz.Scalaz._
@@ -42,6 +40,7 @@ object ConfigExtractor {
   private val DisperserKey        = new ItemKey("instrument:disperser")
   private val AmpReadModeKey      = new ItemKey("instrument:ampReadMode")
   private val AmpGainKey          = new ItemKey("instrument:gainChoice")
+  private val BinningKey          = new ItemKey("instrument:binning")               // spectral x spatial binning
   private val CcdXBinKey          = new ItemKey("instrument:ccdXBinning")           // X aka spectral binning
   private val CcdYBinKey          = new ItemKey("instrument:ccdYBinning")           // Y aka spatial binning
   private val ReadModeKey         = new ItemKey("instrument:readMode")
@@ -60,12 +59,14 @@ object ConfigExtractor {
   private val AoSystemKey         = new ItemKey("adaptive optics:aoSystem")
   private val AoFieldLensKey      = new ItemKey("adaptive optics:fieldLens")
   private val AoGuideStarTypeKey  = new ItemKey("adaptive optics:guideStarType")
+  private val InsResolution       = new ItemKey("instrument:instResolution")
+  private val InsNskyMicrolens    = new ItemKey("instrument:nSkyMicrolens")
 
   def extractInstrumentDetails(instrument: SPInstObsComp, probe: GuideProbe, targetEnv: TargetEnvironment, when: GOption[java.lang.Long], c: Config, cond: ObservingConditions): String \/ InstrumentDetails =
     instrument.getType match {
       case INSTRUMENT_ACQCAM                      => extractAcqCam(c)
       case INSTRUMENT_FLAMINGOS2                  => extractF2(c)
-      case INSTRUMENT_GHOST                       => extractGhost(c) // TODO-GHOSTITC: may need more here?
+      case INSTRUMENT_GHOST                       => extractGhost(c)
       case INSTRUMENT_GNIRS                       => extractGnirs(targetEnv, probe, when, c)
       case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => extractGmos(c)
       case INSTRUMENT_GSAOI                       => extractGsaoi(c, cond)
@@ -105,16 +106,6 @@ object ConfigExtractor {
     } yield Flamingos2Parameters(filter, grism, mask, customSlit, readMode)
   }
 
-  // TODO-GHOSTITC
-  private def extractGhost(c: Config): String \/ GhostParameters = {
-    GhostParameters().right[String]
-  }
-//    for {
-//      _ <- Some(Unit)
-//    } yield {
-//      GhostParameters()
-//    }
-//  }
 
   private def extractGnirs(targetEnv: TargetEnvironment, probe: GuideProbe, when: GOption[java.lang.Long], c: Config): String \/ GnirsParameters = {
     import GNIRSParams._
@@ -140,6 +131,16 @@ object ConfigExtractor {
       altair      <- extractAltair             (targetEnv, probe, when, c)
       wavelen     <- extractObservingWavelength(c)
     } yield GnirsParameters(pixelScale, filter, grating, readMode, xDisp, wavelen, slitWidth, camera, wellDepth, altair)
+  }
+
+  private def extractGhost(c: Config): String \/ GhostParameters = {
+    for {
+      readMode      <- extract[GhostReadNoiseGain](c, ReadModeKey)
+      binning       <- extract[GhostBinning]      (c, BinningKey)
+      resolution    <- extract[ResolutionMode]    (c, InsResolution)
+      nSkyMicrolens <- extract[Int]               (c, InsNskyMicrolens)
+      wavelen       <- extractObservingWavelength(c)
+    } yield GhostParameters(wavelen, nSkyMicrolens, resolution, readMode, binning)
   }
 
   private def extractGmos(c: Config): String \/ GmosParameters = {

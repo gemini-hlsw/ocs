@@ -30,8 +30,8 @@ public final class GnirsGratingOptics extends GratingOptics {
     }
 
     // Take camera scale factor and order into account.
-    public double dispersion() {
-        return super.dispersion() / scale / order;
+    public double dispersion(double wv) {
+        return super.dispersion(wv) / scale / order;
     }
 
 }

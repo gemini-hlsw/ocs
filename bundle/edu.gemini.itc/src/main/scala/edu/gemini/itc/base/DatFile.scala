@@ -1,9 +1,8 @@
 package edu.gemini.itc.base
 
 import java.util.Scanner
-import java.util.logging.Logger
+import java.util.logging.{Level, Logger}
 import java.util.regex.Pattern
-
 import scala.collection._
 import scalaz._
 
@@ -34,7 +33,8 @@ object DatFile {
                         readNoise: Double,          // [electrons/pixel]
                         darkCurrent: Double)        // [electrons/s/pixel]
 
-  case class Grating(name: String, resolvingPower: Int, blaze: Int, dispersion: Double, resolution: Double)
+  case class Grating(name: String, resolvingPower: Int, blaze: Int, dispersion: Double, dispersionArray: Array[Array[Double]], resolution: Double)
+
 
   // ===== Parse utils
 // EXPERIMENTAL; May or may not be used in a later stage.
@@ -101,8 +101,22 @@ object DatFile {
       val blaze          = s.nextInt()
       val resolvingPower = s.nextInt()
       val resolution     = s.nextDouble()
-      val dispersion     = s.nextDouble()
-      l.+=(Grating(name, resolvingPower, blaze, dispersion, resolution))
+      val tmp     = s.next()
+      var dispersion: Double = 0
+      try {
+        dispersion = tmp.toDouble
+        l +=(Grating(name, resolvingPower, blaze, dispersion, null, resolution))
+      } catch {
+        case e : NumberFormatException => {
+          val dDis = arrays.apply(tmp)
+          l +=(Grating(name, resolvingPower, blaze, -999999, dDis, resolution))
+        }
+        case e : Exception => {
+          Log.log(Level.SEVERE, "The grating configuration is not correct. ", e)
+          throw e
+        }
+      }
+
     }
     l.map(l => l.name -> l).toMap
   }

@@ -7,18 +7,20 @@ import edu.gemini.spModel.type.SpTypeUtil;
 import edu.gemini.spModel.type.StandardSpType;
 
 public enum GhostReadNoiseGain implements StandardSpType {
-    SLOW_LOW("Slow / Low", "Slow Read / Low Gain: Slow Readout"),
-    MEDIUM_LOW("Medium / Low", "Medium Read / Low Gain: Medium Readout"),
-    FAST_LOW("Fast / Low", "Fast Read / Low Gain: Rapid Readout"),
-    FAST_HIGH("Fast / High", "Fast Read / High Gain: Bright Targets")
+    SLOW_LOW("Slow / Low", "Slow Read / Low Gain: Slow Readout", 10),
+    MEDIUM_LOW("Medium / Low", "Medium Read / Low Gain: Medium Readout", 5),
+    FAST_LOW("Fast / Low", "Fast Read / Low Gain: Rapid Readout", 2),
+    FAST_HIGH("Fast / High", "Fast Read / High Gain: Bright Targets", -1)
     ;
 
     private final String displayValue;
     private final String description;
+    private final int readRate;
 
-    GhostReadNoiseGain(final String displayValue, final String description) {
+    GhostReadNoiseGain(final String displayValue, final String description, final int readRate) {
         this.displayValue = displayValue;
         this.description = description;
+        this.readRate = readRate;
     }
 
     @Override
@@ -34,6 +36,10 @@ public enum GhostReadNoiseGain implements StandardSpType {
     @Override
     public String logValue() {
         return displayValue;
+    }
+
+    public int getReadRate() {
+        return readRate;
     }
 
     @Override

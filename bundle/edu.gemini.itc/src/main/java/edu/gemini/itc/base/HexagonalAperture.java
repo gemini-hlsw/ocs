@@ -16,6 +16,18 @@ public final class HexagonalAperture extends ApertureComponent {
     private double ifuPosX;
     private double ifuPosY;
 
+    public double getIfuDiam() {
+        return ifuDiam;
+    }
+
+    public double getIfuPosX() {
+        return ifuPosX;
+    }
+
+    public double getIfuPosY() {
+        return ifuPosY;
+    }
+
     public HexagonalAperture(final double ifuPosX, final double ifuPosY, final double ifuDiam) {
         this.ifuDiam = ifuDiam;
         this.ifuPosX = ifuPosX;

@@ -33,6 +33,7 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.itc.flamingos2",
   "edu.gemini.itc.gems",
   "edu.gemini.itc.gmos",
+  "edu.gemini.itc.ghost",
   "edu.gemini.itc.gnirs",
   "edu.gemini.itc.gsaoi",
   "edu.gemini.itc.michelle",

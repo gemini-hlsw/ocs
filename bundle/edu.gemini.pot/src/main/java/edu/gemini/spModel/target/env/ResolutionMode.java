@@ -38,6 +38,6 @@ public enum ResolutionMode implements DisplayableSpType {
         return Arrays
             .stream(AsterismType.values())
             .filter(a -> a.resolutionMode == this)
-            .collect(Collectors.toCollection(() -> new TreeSet<AsterismType>()));
+            .collect(Collectors.toCollection(() -> new TreeSet<>()));
     }
 }

@@ -300,4 +300,13 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
         return GnirsReadoutTime.getReadoutOverheadPerCoadd(instr.readMode());
     }
 
+    @Override
+    public double getVisitTime() {
+        return this.getVisit_time();
+    }
+
+    @Override
+    public double getRecenterInterval() {
+        return this.getRecentInterval();
+    }
 }

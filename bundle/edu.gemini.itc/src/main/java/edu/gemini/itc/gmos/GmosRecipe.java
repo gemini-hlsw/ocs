@@ -382,9 +382,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                             im_qual,
                             read_noise,
                             dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
-                            _obsDetailParameters,
-                            exposureTime,
-                            numberExposures);
+                            _obsDetailParameters);
 
                     specS2N.setCcdPixelRange(firstCcdIndex, lastCcdIndex);
 
