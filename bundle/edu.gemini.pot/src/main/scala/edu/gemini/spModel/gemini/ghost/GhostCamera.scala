@@ -27,15 +27,8 @@ sealed trait GhostCamera extends Product with Serializable {
   /** Binning. */
   def binning: GhostBinning
 
-  /** Cost for a single 1x1 readout for this camera at the associated speed. */
-  protected def oneByOneReadout: Duration
-
   /** Cost for the a single exposure readout using the associated speed and binning. */
-  def oneReadout: Duration =
-    //The readout time scales with the binning so,
-    //readout = readout(1x1) / (xbin * ybin)
-    oneByOneReadout
-      .dividedBy((binning.getSpatialBinning * binning.getSpectralBinning).toLong)
+  def oneReadout: Duration
 
   /** Total readout time, ignoring exposure time */
   def totalReadout: Duration =
@@ -56,8 +49,8 @@ sealed trait GhostCamera extends Product with Serializable {
 
 object GhostCamera {
 
-  private def duration(sec: Int, deciSeconds: Int): Duration =
-    Duration.ofSeconds(sec.toLong, deciSeconds.toLong * 100000000L)
+  private def duration(sec: Int, milliSeconds: Int): Duration =
+    Duration.ofSeconds(sec.toLong, milliSeconds.toLong * 1000000L)
 
   final case class Red(
                         count:         Int,
@@ -66,16 +59,8 @@ object GhostCamera {
                         binning:        GhostBinning
   ) extends GhostCamera {
 
-    // Red camera, 1x1 binning
-    // Slow readout: 95.1 sec
-    // Fast readout: 20.7 sec
-    override protected def oneByOneReadout: Duration =
-      readNoiseGain match {
-        case GhostReadNoiseGain.SLOW_LOW   => duration(95, 1)
-        case GhostReadNoiseGain.MEDIUM_LOW => duration(50, 0)
-        case GhostReadNoiseGain.FAST_LOW |
-             GhostReadNoiseGain.FAST_HIGH  => duration(20, 7)
-      }
+    override def oneReadout: Duration =
+      Red.ReadoutTime((binning, readNoiseGain))
   }
 
   final case class Blue(
@@ -84,16 +69,10 @@ object GhostCamera {
                          readNoiseGain: GhostReadNoiseGain,
                          binning:       GhostBinning
   ) extends GhostCamera {
-    // Blue camera, 1x1 binning
-    // Slow readout: 45.6 sec
-    // Fast readout: 10.3 sec
-    override protected def oneByOneReadout: Duration =
-      readNoiseGain match {
-        case GhostReadNoiseGain.SLOW_LOW   => duration(45, 6)
-        case GhostReadNoiseGain.MEDIUM_LOW => duration(24, 2)
-        case GhostReadNoiseGain.FAST_LOW |
-             GhostReadNoiseGain.FAST_HIGH  => duration(10, 3)
-      }
+
+    override def oneReadout: Duration =
+      Blue.ReadoutTime((binning, readNoiseGain))
+
   }
 
   private def secondsToDuration(secs: Double): Duration =
@@ -139,6 +118,46 @@ object GhostCamera {
         configToBinning(c, Ghost.RED_BINNING_KEY)
       )
 
+    val ReadoutTime: Map[(GhostBinning, GhostReadNoiseGain), Duration] = {
+      import GhostBinning._
+      import GhostReadNoiseGain._
+      val m = Map(
+        (ONE_BY_ONE, SLOW_LOW)     -> duration(100, 675),
+        (ONE_BY_ONE, MEDIUM_LOW)   -> duration( 58, 994),
+        (ONE_BY_ONE, FAST_LOW)     -> duration( 23, 520),
+
+        (ONE_BY_TWO, SLOW_LOW)     -> duration( 51, 271),
+        (ONE_BY_TWO, MEDIUM_LOW)   -> duration( 30, 230),
+        (ONE_BY_TWO, FAST_LOW)     -> duration( 12, 341),
+
+        (ONE_BY_FOUR, SLOW_LOW)    -> duration( 26, 564),
+        (ONE_BY_FOUR, MEDIUM_LOW)  -> duration( 15, 838),
+        (ONE_BY_FOUR, FAST_LOW)    -> duration(  6, 773),
+
+        (ONE_BY_EIGHT, SLOW_LOW)   -> duration( 14, 198),
+        (ONE_BY_EIGHT, MEDIUM_LOW) -> duration(  8, 686),
+        (ONE_BY_EIGHT, FAST_LOW)   -> duration(  3, 977),
+
+        (TWO_BY_TWO, SLOW_LOW)     -> duration( 28, 364),
+        (TWO_BY_TWO, MEDIUM_LOW)   -> duration( 17, 696),
+        (TWO_BY_TWO, FAST_LOW)     -> duration(  8, 577),
+
+        (TWO_BY_FOUR, SLOW_LOW)    -> duration( 15, 146),
+        (TWO_BY_FOUR, MEDIUM_LOW)  -> duration(  9, 638),
+        (TWO_BY_FOUR, FAST_LOW)    -> duration(  4, 929),
+
+        (TWO_BY_EIGHT, SLOW_LOW)   -> duration(  8, 534),
+        (TWO_BY_EIGHT, MEDIUM_LOW) -> duration(  5, 580),
+        (TWO_BY_EIGHT, FAST_LOW)   -> duration(  3, 578),
+
+        (FOUR_BY_FOUR, SLOW_LOW)   -> duration(  9, 536),
+        (FOUR_BY_FOUR, MEDIUM_LOW) -> duration(  6, 581),
+        (FOUR_BY_FOUR, FAST_LOW)   -> duration(  4, 770)
+      )
+      GhostBinning.values.foldLeft(m) { (m, b) =>
+        m.updated((b, FAST_HIGH), m(b, FAST_LOW))
+      }
+    }
   }
 
   object Blue {
@@ -150,6 +169,47 @@ object GhostCamera {
         configToGain(c, Ghost.BLUE_READ_NOISE_GAIN_KEY, GhostReadNoiseGain.DEFAULT_BLUE),
         configToBinning(c, Ghost.BLUE_BINNING_KEY)
       )
+
+    val ReadoutTime: Map[(GhostBinning, GhostReadNoiseGain), Duration] = {
+      import GhostBinning._
+      import GhostReadNoiseGain._
+      val m = Map(
+        (ONE_BY_ONE, SLOW_LOW)     -> duration(45, 957),
+        (ONE_BY_ONE, MEDIUM_LOW)   -> duration(27, 118),
+        (ONE_BY_ONE, FAST_LOW)     -> duration(11,  78),
+
+        (ONE_BY_TWO, SLOW_LOW)     -> duration(23, 808),
+        (ONE_BY_TWO, MEDIUM_LOW)   -> duration(14, 237),
+        (ONE_BY_TWO, FAST_LOW)     -> duration( 6,  72),
+
+        (ONE_BY_FOUR, SLOW_LOW)    -> duration(12, 741),
+        (ONE_BY_FOUR, MEDIUM_LOW)  -> duration( 7, 784),
+        (ONE_BY_FOUR, FAST_LOW)    -> duration( 3, 575),
+
+        (ONE_BY_EIGHT, SLOW_LOW)   -> duration( 7, 229),
+        (ONE_BY_EIGHT, MEDIUM_LOW) -> duration( 4, 574),
+        (ONE_BY_EIGHT, FAST_LOW)   -> duration( 3,  75),
+
+        (TWO_BY_TWO, SLOW_LOW)     -> duration(13, 644),
+        (TWO_BY_TWO, MEDIUM_LOW)   -> duration( 8, 633),
+        (TWO_BY_TWO, FAST_LOW)     -> duration( 4, 425),
+
+        (TWO_BY_FOUR, SLOW_LOW)    -> duration( 7,  68),
+        (TWO_BY_FOUR, MEDIUM_LOW)  -> duration( 5,  24),
+        (TWO_BY_FOUR, FAST_LOW)    -> duration( 3,  71),
+
+        (TWO_BY_EIGHT, SLOW_LOW)   -> duration( 4, 722),
+        (TWO_BY_EIGHT, MEDIUM_LOW) -> duration( 3, 223),
+        (TWO_BY_EIGHT, FAST_LOW)   -> duration( 3,  42),
+
+        (FOUR_BY_FOUR, SLOW_LOW)   -> duration( 5, 226),
+        (FOUR_BY_FOUR, MEDIUM_LOW) -> duration( 3, 722),
+        (FOUR_BY_FOUR, FAST_LOW)   -> duration( 3,  44)
+      )
+      GhostBinning.values.foldLeft(m) { (m, b) =>
+        m.updated((b, FAST_HIGH), m(b, FAST_LOW))
+      }
+    }
 
   }
 
