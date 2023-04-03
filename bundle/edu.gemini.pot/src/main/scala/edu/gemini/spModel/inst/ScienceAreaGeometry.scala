@@ -1,6 +1,5 @@
 package edu.gemini.spModel.inst
 
-import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.Offset
 import edu.gemini.spModel.inst.FeatureGeometry._
 import edu.gemini.spModel.obs.context.ObsContext

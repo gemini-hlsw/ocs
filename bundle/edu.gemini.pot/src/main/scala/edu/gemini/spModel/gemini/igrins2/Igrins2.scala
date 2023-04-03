@@ -11,7 +11,6 @@ import edu.gemini.spModel.data.config.{DefaultParameter, DefaultSysConfig, ISysC
 
 import java.util.{Collections, List => JList, Map => JMap, Set => JSet}
 import edu.gemini.spModel.data.property.{PropertyProvider, PropertySupport}
-import edu.gemini.spModel.gemini.ghost.GhostScienceAreaGeometry
 import edu.gemini.spModel.gemini.init.ComponentNodeInitializer
 import edu.gemini.spModel.gemini.parallacticangle.ParallacticAngleSupportInst
 import edu.gemini.spModel.inst.{ScienceAreaGeometry, VignettableScienceAreaInstrument}
@@ -67,7 +66,7 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
   override def getParamSet(factory: PioFactory): ParamSet = {
     // The parent takes care of exposure and posangle
     val paramSet = super.getParamSet(factory)
-    Pio.addParam(factory, paramSet, Igrins2.POS_ANGLE_CONSTRAINT_PROP.getName, getPosAngleConstraint().name());
+    Pio.addParam(factory, paramSet, Igrins2.POS_ANGLE_CONSTRAINT_PROP.getName, getPosAngleConstraint().name())
     Pio.addParam(factory, paramSet, Igrins2.PORT_PROP.getName, getIssPort.name)
 
     paramSet
@@ -158,7 +157,7 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
     super.calculateParallacticAngle(obs)
 
   override def getVignettableScienceArea: ScienceAreaGeometry =
-    GhostScienceAreaGeometry
+    Igrins2ScienceAreaGeometry
 
   override def pwfs1VignettingClearance(ctx: ObsContext): SkyAngle =
     edu.gemini.skycalc.Angle.arcmins(5.0)
