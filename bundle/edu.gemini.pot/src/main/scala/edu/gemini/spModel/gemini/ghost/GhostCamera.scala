@@ -122,37 +122,37 @@ object GhostCamera {
       import GhostBinning._
       import GhostReadNoiseGain._
       val m = Map(
-        (ONE_BY_ONE, SLOW_LOW)     -> duration(100, 675), // 45.957
-        (ONE_BY_ONE, MEDIUM_LOW)   -> duration( 58, 994), // 27.118
-        (ONE_BY_ONE, FAST_LOW)     -> duration( 23, 520), // 11.078
+        (ONE_BY_ONE, SLOW_LOW)     -> duration(100, 675),
+        (ONE_BY_ONE, MEDIUM_LOW)   -> duration( 58, 994),
+        (ONE_BY_ONE, FAST_LOW)     -> duration( 23, 520),
 
-        (ONE_BY_TWO, SLOW_LOW)     -> duration( 51, 271), // 23.808
-        (ONE_BY_TWO, MEDIUM_LOW)   -> duration( 30, 230), // 14.237
-        (ONE_BY_TWO, FAST_LOW)     -> duration( 12, 341), // 6.072
+        (ONE_BY_TWO, SLOW_LOW)     -> duration( 51, 271),
+        (ONE_BY_TWO, MEDIUM_LOW)   -> duration( 30, 230),
+        (ONE_BY_TWO, FAST_LOW)     -> duration( 12, 341),
 
-        (ONE_BY_FOUR, SLOW_LOW)    -> duration( 26, 564), //12.741
-        (ONE_BY_FOUR, MEDIUM_LOW)  -> duration( 15, 838), //7.784
-        (ONE_BY_FOUR, FAST_LOW)    -> duration(  6, 773), //3.575
+        (ONE_BY_FOUR, SLOW_LOW)    -> duration( 26, 564),
+        (ONE_BY_FOUR, MEDIUM_LOW)  -> duration( 15, 838),
+        (ONE_BY_FOUR, FAST_LOW)    -> duration(  6, 773),
 
-        (ONE_BY_EIGHT, SLOW_LOW)   -> duration( 14, 198), //7.229
-        (ONE_BY_EIGHT, MEDIUM_LOW) -> duration(  8, 686), //4.574
-        (ONE_BY_EIGHT, FAST_LOW)   -> duration(  3, 977), //3.075
+        (ONE_BY_EIGHT, SLOW_LOW)   -> duration( 14, 198),
+        (ONE_BY_EIGHT, MEDIUM_LOW) -> duration(  8, 686),
+        (ONE_BY_EIGHT, FAST_LOW)   -> duration(  3, 977),
 
-        (TWO_BY_TWO, SLOW_LOW)     -> duration( 28, 364), //13.644
-        (TWO_BY_TWO, MEDIUM_LOW)   -> duration( 17, 696), //8.633
-        (TWO_BY_TWO, FAST_LOW)     -> duration(  8, 577), //4.425
+        (TWO_BY_TWO, SLOW_LOW)     -> duration( 28, 364),
+        (TWO_BY_TWO, MEDIUM_LOW)   -> duration( 17, 696),
+        (TWO_BY_TWO, FAST_LOW)     -> duration(  8, 577),
 
-        (TWO_BY_FOUR, SLOW_LOW)    -> duration( 15, 146), //7.68
-        (TWO_BY_FOUR, MEDIUM_LOW)  -> duration(  9, 638), //5.024
-        (TWO_BY_FOUR, FAST_LOW)    -> duration(  4, 929), //3.071
+        (TWO_BY_FOUR, SLOW_LOW)    -> duration( 15, 146),
+        (TWO_BY_FOUR, MEDIUM_LOW)  -> duration(  9, 638),
+        (TWO_BY_FOUR, FAST_LOW)    -> duration(  4, 929),
 
-        (TWO_BY_EIGHT, SLOW_LOW)   -> duration(  8, 534), //4.722
-        (TWO_BY_EIGHT, MEDIUM_LOW) -> duration(  5, 580), //3.223
-        (TWO_BY_EIGHT, FAST_LOW)   -> duration(  3, 578), //3.042
+        (TWO_BY_EIGHT, SLOW_LOW)   -> duration(  8, 534),
+        (TWO_BY_EIGHT, MEDIUM_LOW) -> duration(  5, 580),
+        (TWO_BY_EIGHT, FAST_LOW)   -> duration(  3, 578),
 
-        (FOUR_BY_FOUR, SLOW_LOW)   -> duration(  9, 536), //5.226
-        (FOUR_BY_FOUR, MEDIUM_LOW) -> duration(  6, 581), //3.722
-        (FOUR_BY_FOUR, FAST_LOW)   -> duration(  4, 770) //3.044
+        (FOUR_BY_FOUR, SLOW_LOW)   -> duration(  9, 536),
+        (FOUR_BY_FOUR, MEDIUM_LOW) -> duration(  6, 581),
+        (FOUR_BY_FOUR, FAST_LOW)   -> duration(  4, 770)
       )
       GhostBinning.values.foldLeft(m) { (m, b) =>
         m.updated((b, FAST_HIGH), m(b, FAST_LOW))
