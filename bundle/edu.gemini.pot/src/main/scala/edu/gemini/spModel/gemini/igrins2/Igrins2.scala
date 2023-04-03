@@ -9,7 +9,7 @@ import edu.gemini.spModel.core.{Angle, MagnitudeBand, Site, Wavelength}
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.data.config.{DefaultParameter, DefaultSysConfig, ISysConfig, StringParameter}
 
-import java.util.{Collections, Map => JMap, Set => JSet}
+import java.util.{Collections, List => JList, Map => JMap, Set => JSet}
 import edu.gemini.spModel.data.property.{PropertyProvider, PropertySupport}
 import edu.gemini.spModel.gemini.ghost.GhostScienceAreaGeometry
 import edu.gemini.spModel.gemini.init.ComponentNodeInitializer
@@ -18,8 +18,9 @@ import edu.gemini.spModel.inst.{ScienceAreaGeometry, VignettableScienceAreaInstr
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obs.plannedtime.{CommonStepCalculator, ExposureCalculator, PlannedTime}
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.{CategorizedTime, Category}
-import edu.gemini.spModel.obscomp.InstConstants
+import edu.gemini.spModel.obscomp.{InstConfigInfo, InstConstants}
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
+
 import edu.gemini.spModel.seqcomp.SeqConfigNames
 import edu.gemini.spModel.telescope.{IssPort, IssPortProvider, PosAngleConstraint, PosAngleConstraintAware}
 import squants.time.Time
@@ -212,7 +213,7 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
 }
 
 object Igrins2 {
-  val SP_TYPE: SPComponentType = SPComponentType.INSTRUMENT_IGNRIS2
+  val SP_TYPE: SPComponentType = SPComponentType.INSTRUMENT_IGRINS2
   val DefaultExposureTime: Time = 30.seconds // sec (by default settings)
 
   val MinExposureTime: Time = 1.63.seconds
@@ -268,7 +269,7 @@ object Igrins2 {
     }
 
   val NI: ISPNodeInitializer[ISPObsComponent, Igrins2] =
-    new ComponentNodeInitializer(SPComponentType.INSTRUMENT_IGNRIS2, Igrins2Supplier, Igrins2CbFactory)
+    new ComponentNodeInitializer(SPComponentType.INSTRUMENT_IGRINS2, Igrins2Supplier, Igrins2CbFactory)
 
   private val Properties: List[(String, PropertyDescriptor)] = List[PropertyDescriptor](
     POS_ANGLE_CONSTRAINT_PROP,
@@ -276,6 +277,9 @@ object Igrins2 {
     PORT_PROP,
     SLIT_VIEWING_PROP
   ).map(p => (p.getName, p))
+
+  val getInstConfigInfo: JList[InstConfigInfo] =
+    List[InstConfigInfo]().asJava
 
   private[igrins2] val PropertyMap: JMap[String, PropertyDescriptor] = {
     Collections.unmodifiableMap(TreeMap(Properties: _*).asJava)

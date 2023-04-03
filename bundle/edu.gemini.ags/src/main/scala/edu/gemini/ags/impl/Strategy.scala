@@ -112,7 +112,7 @@ object Strategy {
 
     SPComponentType.INSTRUMENT_GNIRS      -> const(List(AltairAowfs, Pwfs2North, Pwfs1North, GnirsOiwfs)),
     SPComponentType.INSTRUMENT_GSAOI      -> const(List(GemsNgs2, Pwfs1South)),
-    SPComponentType.INSTRUMENT_IGNRIS2    -> const(List(Pwfs2North, Pwfs1North)),
+    SPComponentType.INSTRUMENT_IGRINS2    -> const(List(Pwfs2North, Pwfs1North)),
     SPComponentType.INSTRUMENT_MICHELLE   -> const(List(Pwfs2North, Pwfs1North)),
     SPComponentType.INSTRUMENT_NICI       -> const(List(NiciOiwfs, Pwfs2South, Pwfs1South)),
     SPComponentType.INSTRUMENT_NIFS       -> const(List(AltairAowfs, Pwfs2North, Pwfs1North, NifsOiwfs)),

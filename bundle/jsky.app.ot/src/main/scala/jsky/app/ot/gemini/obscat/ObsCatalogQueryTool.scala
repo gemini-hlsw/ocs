@@ -1,6 +1,5 @@
 package jsky.app.ot.gemini.obscat
 
-import java.io.File
 import javax.swing.{DefaultComboBoxModel, ImageIcon, JComponent, JTextField}
 
 import edu.gemini.catalog.ui.PreferredSizeFrame
@@ -11,7 +10,7 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 import jsky.app.ot.userprefs.ui.{PreferenceDialog, PreferencePanel}
 import jsky.catalog.{Catalog, FieldDescAdapter}
 import jsky.util.Preferences
-import jsky.util.gui.{DialogUtil, MultiSelectComboBox, Resources}
+import jsky.util.gui.{DialogUtil, MultiSelectComboBox}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -132,12 +131,14 @@ class OTBrowserQueryPanel(catalog: Catalog) extends ObsCatalogQueryPanel(catalog
   */
 final class ObsCatalogQueryTool(catalog: Catalog) {
   import OTBrowserPresetChoice._
+  println("QURPY TOEO?")
 
-  val PREF_KEY = classOf[ObsCatalogQueryTool].getName
+  val PREF_KEY: String = classOf[ObsCatalogQueryTool].getName
 
+  println(ObsCatalog.INSTANCE.getConfigEntry)
   val queryPanel = new OTBrowserQueryPanel(catalog)
   val queryResults = new ObsCatalogQueryResultDisplay(new ObsCatalogQueryResult(ObsCatalog.INSTANCE.getConfigEntry, new java.util.Vector(), new java.util.Vector(), new java.util.ArrayList(), Array[FieldDescAdapter]()))
-  val remote = new CheckBox("Include Remote Programs") {
+  val remote: CheckBox = new CheckBox("Include Remote Programs") {
         tooltip = "Check to include programs in the remote database in query results."
         selected = Preferences.get(PREF_KEY + ".remote", true)
 
@@ -147,7 +148,7 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
         }
       }
 
-  val presetsCB = new ComboBox[ObsQueryPreset](List(SaveNewPreset)) with TextRenderer[ObsQueryPreset] {
+  val presetsCB: ComboBox[ObsQueryPreset] with TextRenderer[ObsQueryPreset] = new ComboBox[ObsQueryPreset](List(SaveNewPreset)) with TextRenderer[ObsQueryPreset] {
     override def text(a: ObsQueryPreset): String = ~Option(a).map(_.name)
 
     listenTo(selection)
@@ -226,7 +227,7 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
     presetsCB.peer.setModel(model)
   }
 
-  val toolsButton = new Button("") {
+  val toolsButton: Button = new Button("") {
     tooltip = "Preferences..."
     icon = new ImageIcon(getClass.getResource("/resources/images/eclipse/engineering.gif"))
 
