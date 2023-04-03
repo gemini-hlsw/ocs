@@ -367,7 +367,10 @@ final class Ghost
   }
 
   override def getSetupTime(obs: ISPObservation): Duration =
-    Duration.ofMinutes(20)
+    Duration.ofMinutes(15)
+
+  override def getReacquisitionTime(obs: ISPObservation): Duration =
+    Duration.ofMinutes(5)
 
   // Formula used on the ITC
 //  override def calc(cur: Config, prev: Option[Config]): PlannedTime.CategorizedTimeGroup = {

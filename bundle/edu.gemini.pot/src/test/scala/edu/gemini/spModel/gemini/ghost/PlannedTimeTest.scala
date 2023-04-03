@@ -47,7 +47,7 @@ class PlannedTimeTest extends InstrumentSequenceTestBase[Ghost, SeqConfigGhost] 
 
     // Red dominates here because of its slow readout
     verifyMs(
-      20 * 60 * 1000 + // setup
+      15 * 60 * 1000 + // setup
       11000          + // exposure
       50000          + // 1 1x1 medium (red) readout
       10000            // DHS write
@@ -63,7 +63,7 @@ class PlannedTimeTest extends InstrumentSequenceTestBase[Ghost, SeqConfigGhost] 
     setExposure(1, 11, 1, 12)
 
     verifyMs(
-      20 * 60 * 1000 + // setup
+      15 * 60 * 1000 + // setup
       12000          + // exposure
       45600          + // 1 1x1 slow (blue) readout
       10000            // DHS write
@@ -79,7 +79,7 @@ class PlannedTimeTest extends InstrumentSequenceTestBase[Ghost, SeqConfigGhost] 
     setExposure(1, 11, 1, 12)
 
     verifyMs(
-      20 * 60 * 1000 + // setup
+      15 * 60 * 1000 + // setup
       12000          + // exposure
       45600          + // 1 1x1 slow (blue) readout
       10000            // DHS write
@@ -96,7 +96,7 @@ class PlannedTimeTest extends InstrumentSequenceTestBase[Ghost, SeqConfigGhost] 
     setExposure(1, 11, 1, 100)
 
     verifyMs(
-      20 * 60 * 1000 + // setup
+      15 * 60 * 1000 + // setup
 
       // science step
       100000         + // exposure
