@@ -4,6 +4,7 @@ import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -167,17 +168,26 @@ public final class SpTypeUtil {
     }
 
     public static <T extends Enum<T>> List<T> getSelectableItems(Class<T> c) {
-        T[] members = c.getEnumConstants();
+        return ObsoletableSpType.class.isAssignableFrom(c)                      ?
+                getFilteredItems(c, t -> !((ObsoletableSpType) t).isObsolete()) :
+                getFilteredItems(c, t -> true);
+    }
+
+    public static <T extends Enum<T>> List<T> getObsoleteItems(Class<T> c) {
+        return ObsoletableSpType.class.isAssignableFrom(c)                     ?
+                getFilteredItems(c, t -> ((ObsoletableSpType) t).isObsolete()) :
+                getFilteredItems(c, t -> false);
+    }
+
+    private static <T extends Enum<T>> List<T> getFilteredItems(Class<T> c, Predicate<T> filter) {
+        final T[] members = c.getEnumConstants();
         if (members == null) {
             throw new IllegalArgumentException("Class " + c + " is not an Enum type.");
         }
 
-        List<T> res = new ArrayList<>(Arrays.asList(members));
-        if (ObsoletableSpType.class.isAssignableFrom(c)) {
-            for (Iterator<T> it=res.iterator(); it.hasNext(); ) {
-                if (((ObsoletableSpType) it.next()).isObsolete()) it.remove();
-            }
-        }
+        final Predicate<T> shouldRemove = filter.negate();
+        final List<T> res = new ArrayList<>(Arrays.asList(members));
+        res.removeIf(shouldRemove);
         return res;
     }
 }

@@ -4,13 +4,19 @@ import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.type.SpTypeUtil;
+import edu.gemini.spModel.type.ObsoletableSpType;
 import edu.gemini.spModel.type.StandardSpType;
 
-public enum GhostReadNoiseGain implements StandardSpType {
+public enum GhostReadNoiseGain implements StandardSpType, ObsoletableSpType {
     SLOW_LOW("Slow / Low", "Slow Read / Low Gain: Slow Readout", 10),
     MEDIUM_LOW("Medium / Low", "Medium Read / Low Gain: Medium Readout", 5),
     FAST_LOW("Fast / Low", "Fast Read / Low Gain: Rapid Readout", 2),
-    FAST_HIGH("Fast / High", "Fast Read / High Gain: Bright Targets", -1)
+    FAST_HIGH("Fast / High", "Fast Read / High Gain: Bright Targets", -1) {
+        @Override
+        public boolean isObsolete() {
+            return true;
+        }
+    }
     ;
 
     private final String displayValue;
