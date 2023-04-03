@@ -482,7 +482,8 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
         row += 1
 
         /** OIWFS guide star. */
-        panel.layout(new Label("Enable Guide Fibers:")) = new panel.Constraints() {
+        val gfLabel: Label = new Label("Enable Guide Fibers:")
+        panel.layout(gfLabel) = new panel.Constraints() {
           anchor = Anchor.NorthEast
           gridx = 0
           gridy = row
@@ -495,6 +496,11 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
           gridy = row
           insets = new Insets(3, 0, 0, 0)
         }
+
+        // REL-4203: hide the guide fiber option
+        gfLabel.visible               = false
+        ifuGuideFiberCheckBox.visible = false
+
         row += 1
         panel
       }
