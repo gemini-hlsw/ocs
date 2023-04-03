@@ -1,21 +1,26 @@
 package edu.gemini.shared.gui.bean;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
+import java.awt.*;
 import java.awt.event.ActionListener;
+import java.awt.font.TextAttribute;
 import java.beans.PropertyDescriptor;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A PropertyCtrl implementation for associating a a set of radio buttons with a bean
  * property whose type is an enum.
  */
-public final class RadioPropertyCtrl<B, T extends Enum> extends PropertyCtrl<B, T> {
+public final class RadioPropertyCtrl<B, T extends Enum<T>> extends PropertyCtrl<B, T> {
 
     private final JPanel pan;
     private final JRadioButton[] radio;
+    private final Set<T> obsolete;
 
-
-    private ActionListener actionListener = e -> {
+    private final ActionListener actionListener = e -> {
         T oldVal = getVal();
         T newVal = getSelectedRadioButtonValue();
         setVal(newVal);
@@ -31,21 +36,39 @@ public final class RadioPropertyCtrl<B, T extends Enum> extends PropertyCtrl<B, 
      * property.
      */
     public RadioPropertyCtrl(final PropertyDescriptor pd, boolean vertical) {
+        this(pd, vertical, Collections.emptyList());
+    }
+
+    public RadioPropertyCtrl(final PropertyDescriptor pd, boolean vertical, Iterable<T> obsoleteElements) {
         super(pd);
 
         pan   = new JPanel();
         pan.setLayout(new BoxLayout(pan, vertical ? BoxLayout.PAGE_AXIS : BoxLayout.LINE_AXIS));
         ButtonGroup group = new ButtonGroup();
 
-        Class c = pd.getPropertyType();
+        Class<?> c = pd.getPropertyType();
         @SuppressWarnings({"unchecked"}) T[] vals = (T[]) c.getEnumConstants();
 
         radio = new JRadioButton[vals.length];
 
+        final Set<T> s = new HashSet<T>();
+        obsoleteElements.forEach(s::add);
+        obsolete = Collections.unmodifiableSet(s);
+
         int i=0;
         for (T val : vals) {
-            JRadioButton btn = new JRadioButton(val.toString());
+            final JRadioButton btn = new JRadioButton(val.toString());
+            btn.setVisible(!obsolete.contains(val));
             btn.putClientProperty(getClass(), val);
+
+            if (obsolete.contains(val)) {
+                btn.setForeground(Color.gray);
+                final Font f = btn.getFont();
+                final Map attributes = f.getAttributes();
+                attributes.put(TextAttribute.STRIKETHROUGH, TextAttribute.STRIKETHROUGH_ON);
+                btn.setFont(new Font(attributes));
+            }
+
             group.add(btn);
             pan.add(btn);
             radio[i++] = btn;
@@ -91,18 +114,19 @@ public final class RadioPropertyCtrl<B, T extends Enum> extends PropertyCtrl<B, 
         return pan;
     }
 
-
     /**
      * Updates the value displayed in the radio buttons based upon the value of
      * the property in the bean.
      */
     public void updateComponent() {
-        T val = getVal();
+        final T val = getVal();
 
         for (JRadioButton btn : radio) {
-            if (getAssociatedValue(btn) == val) {
-                btn.setSelected(true);
-            }
+            final T btnValue = getAssociatedValue(btn);
+            final boolean selected = btnValue == val;
+            btn.setSelected(selected);
+            final boolean visible  = selected || !obsolete.contains(btnValue);
+            btn.setVisible(visible);
         }
     }
 

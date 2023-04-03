@@ -2,8 +2,8 @@ package jsky.app.ot.gemini.ghost
 
 import java.awt.Font
 import java.util.logging.Logger
-
 import com.jgoodies.forms.factories.DefaultComponentFactory
+
 import javax.swing.{DefaultComboBoxModel, JPanel, JSpinner}
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.shared.gui.bean.{CheckboxPropertyCtrl, ComboPropertyCtrl, RadioPropertyCtrl, TextFieldPropertyCtrl}
@@ -29,6 +29,7 @@ import scala.swing.TabbedPane.Page
 import scala.swing.event.{ButtonClicked, SelectionChanged}
 import scalaz._
 import Scalaz._
+import edu.gemini.spModel.`type`.SpTypeUtil
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.GuideFiberState.Enabled
 import jsky.app.ot.editor.SpinnerEditor
 
@@ -250,7 +251,12 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       }
       row += 1
 
-      val redReadNoiseGain: RadioPropertyCtrl[Ghost, GhostReadNoiseGain] = new RadioPropertyCtrl[Ghost, GhostReadNoiseGain](Ghost.RED_READ_NOISE_GAIN_PROP)
+      val redReadNoiseGain: RadioPropertyCtrl[Ghost, GhostReadNoiseGain] =
+        new RadioPropertyCtrl[Ghost, GhostReadNoiseGain](
+          Ghost.RED_READ_NOISE_GAIN_PROP,
+          true,
+          SpTypeUtil.getObsoleteItems(classOf[GhostReadNoiseGain])
+        )
       layout(Component.wrap(redReadNoiseGain.getComponent)) = new Constraints() {
         anchor = Anchor.NorthWest
         gridx = 0
@@ -349,7 +355,12 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       }
       row += 1
 
-      val blueReadNoiseGain: RadioPropertyCtrl[Ghost, GhostReadNoiseGain] = new RadioPropertyCtrl[Ghost, GhostReadNoiseGain](Ghost.BLUE_READ_NOISE_GAIN_PROP)
+      val blueReadNoiseGain: RadioPropertyCtrl[Ghost, GhostReadNoiseGain] =
+        new RadioPropertyCtrl[Ghost, GhostReadNoiseGain](
+          Ghost.BLUE_READ_NOISE_GAIN_PROP,
+          true,
+          SpTypeUtil.getObsoleteItems(classOf[GhostReadNoiseGain])
+        )
       layout(Component.wrap(blueReadNoiseGain.getComponent)) = new Constraints() {
         anchor = Anchor.NorthWest
         gridx = 0
