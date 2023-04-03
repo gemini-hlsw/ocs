@@ -441,14 +441,14 @@ public abstract class SPInstObsComp extends AbstractDataObject {
         Map<Instrument, Duration> m =
             Arrays.stream(Instrument.values()).collect(Collectors.toMap(Function.identity(), i -> Duration.ofSeconds(7)));
 
-        m.put(Instrument.Flamingos2, Duration.ofSeconds(10));
-        m.put(Instrument.Ghost,      Duration.ofSeconds(10));
-        m.put(Instrument.GmosNorth,  Duration.ofSeconds(10));
-        m.put(Instrument.GmosSouth,  Duration.ofSeconds(10));
-        m.put(Instrument.Gnirs,      Duration.ofMillis(8500));
-        m.put(Instrument.Igrins2,    Duration.ofSeconds(10));
-        m.put(Instrument.Nifs,       Duration.ofMillis(9800));
-        m.put(Instrument.Niri,       Duration.ofMillis(5070));
+        m.put(Instrument.Flamingos2, Duration.ofSeconds( 10));
+        m.put(Instrument.Ghost,      Duration.ofSeconds(  5));
+        m.put(Instrument.GmosNorth,  Duration.ofSeconds( 10));
+        m.put(Instrument.GmosSouth,  Duration.ofSeconds( 10));
+        m.put(Instrument.Gnirs,      Duration.ofMillis(   8500));
+        m.put(Instrument.Igrins2,    Duration.ofSeconds( 10));
+        m.put(Instrument.Nifs,       Duration.ofMillis(   9800));
+        m.put(Instrument.Niri,       Duration.ofMillis(   5070));
 
         DHS_WRITE_TIMES = Collections.unmodifiableMap(
           m.entrySet()

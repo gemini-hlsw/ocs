@@ -49,8 +49,8 @@ class PlannedTimeTest extends InstrumentSequenceTestBase[Ghost, SeqConfigGhost] 
     verifyMs(
       15 * 60 * 1000 + // setup
       11000          + // exposure
-      50000          + // 1 1x1 medium (red) readout
-      10000            // DHS write
+      58994          + // 1 1x1 medium (red) readout
+       5000            // DHS write
     )
   }
 
@@ -65,8 +65,8 @@ class PlannedTimeTest extends InstrumentSequenceTestBase[Ghost, SeqConfigGhost] 
     verifyMs(
       15 * 60 * 1000 + // setup
       12000          + // exposure
-      45600          + // 1 1x1 slow (blue) readout
-      10000            // DHS write
+      45957          + // 1 1x1 slow (blue) readout
+       5000            // DHS write
     )
   }
 
@@ -81,8 +81,8 @@ class PlannedTimeTest extends InstrumentSequenceTestBase[Ghost, SeqConfigGhost] 
     verifyMs(
       15 * 60 * 1000 + // setup
       12000          + // exposure
-      45600          + // 1 1x1 slow (blue) readout
-      10000            // DHS write
+      45957          + // 1 1x1 slow (blue) readout
+       5000            // DHS write
     )
   }
 
@@ -100,12 +100,12 @@ class PlannedTimeTest extends InstrumentSequenceTestBase[Ghost, SeqConfigGhost] 
 
       // science step
       100000         + // exposure
-       45600         + // 1 1x1 slow (blue) readout
-       10000         + // DHS write
+       45957         + // 1 1x1 slow (blue) readout
+        5000         + // DHS write
 
       // bias step
-       50000         + // 1 1x1 medium (red) readout
-       10000           // DHS write
+       58994         + // 1 1x1 medium (red) readout
+        5000           // DHS write
     )
 
   }
