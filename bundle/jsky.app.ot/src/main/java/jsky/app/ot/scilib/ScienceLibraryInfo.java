@@ -5,6 +5,7 @@ import edu.gemini.spModel.core.SPBadIDException;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
+import edu.gemini.spModel.gemini.ghost.Ghost;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
@@ -48,6 +49,7 @@ final class ScienceLibraryInfo {
         //SOUTH
         _libInfo.put(Flamingos2.SP_TYPE, new ScienceLibraryInfo(Site.GS, "GS-Flamingos2-library"));
         _libInfo.put(InstGmosSouth.SP_TYPE, new ScienceLibraryInfo(Site.GS, "GS-GMOS-library"));
+        _libInfo.put(Ghost.SP_TYPE, new ScienceLibraryInfo(Site.GS, "GS-GHOST-library"));
         _libInfo.put(Gpi.SP_TYPE, new ScienceLibraryInfo(Site.GS, "GS-GPI-library"));
         _libInfo.put(Gsaoi.SP_TYPE, new ScienceLibraryInfo(Site.GS, "GS-GSAOI-library"));
         _libInfo.put(InstNICI.SP_TYPE, new ScienceLibraryInfo(Site.GS, "GS-NICI-library"));
