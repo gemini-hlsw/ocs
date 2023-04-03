@@ -5,7 +5,6 @@ import java.util.{Map => JMap}
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.spModel.config.AbstractObsComponentCB
-import edu.gemini.spModel.core.Magnitude
 import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.data.config._
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostTarget
@@ -83,8 +82,10 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
       /**
        * Add the guiding information for an SRIFU or HRIFU pointing at a target.
        */
-      def guiding(name: String, t: GhostTarget): Unit =
-        config.putParameter(systemName, DefaultParameter.getInstance(name, t.guideFiberState))
+      def guiding(name: String, t: GhostTarget): Unit = {
+        // REL-4203: Removing from the sequence config for now at least.
+        //config.putParameter(systemName, DefaultParameter.getInstance(name, t.guideFiberState))
+      }
 
       /** Add the target information for the observation for GHOST to the
         * sequence.
