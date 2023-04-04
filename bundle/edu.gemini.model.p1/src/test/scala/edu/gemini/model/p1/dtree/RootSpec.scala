@@ -29,7 +29,7 @@ class RootSpec extends Specification {
     }
     "include Ghost" in {
       val root = new Root(Semester(2023, B))
-      root.choices.contains(Instrument.Ghost) must beFalse
+      root.choices.contains(Instrument.Ghost) must beTrue
     }
     "include Graces" in {
       val root = new Root(Semester(2016, A))
