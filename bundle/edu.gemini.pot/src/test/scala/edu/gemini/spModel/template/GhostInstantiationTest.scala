@@ -76,7 +76,7 @@ class GhostInstantiationTest extends TestBase {
     assertEquals(AsterismType.GhostDualTarget, a.asterismType)
     a match {
       case GhostAsterism.DualTarget(ifu1, ifu2, None) =>
-        
+
         // IFU1 at 1 arcmin (in p) from base
         checkDiff(ct, ifu1.coordinates(None).get,1,0)
 
