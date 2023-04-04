@@ -1,7 +1,7 @@
-# F2 R3K grism order m=5 (J)
-# Wavelength (nm) Transmission
-1130 0.00
-1180 0.28
-1280 0.58
-1330 0.58
-1380 0.00
+# F2 R3K grism order m=5
+# Wavelength (nm) Efficiency
+1150 0.00
+1180 0.29
+1270 0.59
+1330 0.59
+1350 0.00
