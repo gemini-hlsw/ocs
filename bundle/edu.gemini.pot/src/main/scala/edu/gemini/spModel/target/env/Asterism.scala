@@ -9,10 +9,14 @@ import edu.gemini.spModel.target.{SPCoordinates, SPTarget, TargetParamSetCodecs}
 import edu.gemini.spModel.pio.{ParamSet, Pio}
 import edu.gemini.spModel.pio.codec.{MissingKey, ParamSetCodec, PioError, UnknownTag}
 import edu.gemini.spModel.pio.xml.PioXmlFactory
-import java.time.Instant
 
+import java.time.Instant
 import scalaz._
 import Scalaz._
+import edu.gemini.spModel.core.Angle
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostTarget
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.GuideFiberState
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.PrvMode
 
 
 /** Collection of stars that make up the science target(s) for an observation,
@@ -189,5 +193,73 @@ object Asterism {
   // classes results cannot be resolved.
   def createSingleAsterism: Single = {
     Single(new SPTarget())
+  }
+
+  def fromTypeAndTemplateTarget(
+    asterismType: AsterismType,
+    target:       SPTarget
+  ): Asterism = {
+
+    def targetPlus(am: Int, name: String): SPTarget = {
+      val res = new SPTarget()
+      res.setTarget(
+        Target.ra.mod(_.offset(Angle.fromArcmin(am.toDouble)), target.getTarget)
+      )
+      res.setName(name)
+      res
+    }
+
+    def coordinatesPlus(am: Int): SPCoordinates =
+      target.getCoordinates(None).fold(new SPCoordinates()) { c =>
+        new SPCoordinates(c.offset(Angle.fromArcmin(am.toDouble), Angle.zero))
+      }
+
+    def ghostTarget(sp: SPTarget): GhostTarget =
+      GhostTarget(sp, GuideFiberState.Enabled)
+
+    asterismType match {
+      case AsterismType.Single                              =>
+        Single(target)
+
+      case AsterismType.GhostSingleTarget                   =>
+        GhostAsterism.SingleTarget(ghostTarget(target), None)
+
+      case AsterismType.GhostDualTarget                     =>
+        GhostAsterism.DualTarget(
+          ghostTarget(target),
+          ghostTarget(targetPlus(-2, "Target 2")),
+          None
+        )
+
+      case AsterismType.GhostTargetPlusSky                  =>
+        GhostAsterism.TargetPlusSky(
+          ghostTarget(target),
+          coordinatesPlus(-2),
+          None
+        )
+
+      case AsterismType.GhostSkyPlusTarget                  =>
+        GhostAsterism.SkyPlusTarget(
+          coordinatesPlus(2),
+          ghostTarget(target),
+          None
+        )
+
+      case AsterismType.GhostHighResolutionTargetPlusSky    =>
+        GhostAsterism.HighResolutionTargetPlusSky(
+          ghostTarget(target),
+          coordinatesPlus(-2),
+          PrvMode.PrvOff,
+          None
+        )
+
+      case AsterismType.GhostHighResolutionTargetPlusSkyPrv =>
+        GhostAsterism.HighResolutionTargetPlusSky(
+          ghostTarget(target),
+          coordinatesPlus(-2),
+          PrvMode.PrvOn,
+          None
+        )
+    }
   }
 }

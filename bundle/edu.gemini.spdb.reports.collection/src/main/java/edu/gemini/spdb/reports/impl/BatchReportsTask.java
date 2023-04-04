@@ -133,7 +133,7 @@ public class BatchReportsTask implements CronJob {
      * @throws IOException if anything goes wrong during the copy(i.e. file not found, wrong password, etc...)
      */
     private static void sftp(final Logger log, final File f, final String username, final String password, final String host, final String remoteDirectory) throws Exception {
-        DefaultSshConfig config = new DefaultSshConfig(host, username, password, SshConfig$.MODULE$.DEFAULT_TIMEOUT());
+        DefaultSshConfig config = new DefaultSshConfig(host, username, password, SshConfig$.MODULE$.DEFAULT_TIMEOUT(), true);
         log.info(String.format("sftp %s starting", config.toString()));
         long startTime = System.currentTimeMillis();
         Try<SftpSession> sftpSessionTry = SftpSession$.MODULE$.connect(config);

@@ -11,6 +11,7 @@ import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
+import edu.gemini.spModel.util.AsterismEditUtil;
 
 import java.security.Principal;
 import java.util.*;
@@ -121,6 +122,7 @@ public final class ReapplicationFunctor extends DBAbstractFunctor {
 
         // Restore old target and conditions if not already present
         addIfNotPresent(obs, oldTarget);
+        AsterismEditUtil.matchAsterismToInstrument(obs);
         addIfNotPresent(obs, oldConditions);
 
         // Restore the position angle, if any

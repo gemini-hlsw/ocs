@@ -1,9 +1,6 @@
 package edu.gemini.spModel.template;
 
 import edu.gemini.pot.sp.*;
-
-
-import java.util.List;
 import java.util.logging.Logger;
 
 class FunctorHelpers {

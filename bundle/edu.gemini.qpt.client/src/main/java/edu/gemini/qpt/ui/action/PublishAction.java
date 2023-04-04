@@ -230,7 +230,7 @@ public class PublishAction extends AbstractAsyncAction implements PropertyChange
         final String httpRoot;
 
         public Destination(String host, String user, String root, String httpRoot) {
-            this(new DefaultSshConfig(host, user, "", SshConfig$.MODULE$.DEFAULT_TIMEOUT()), root, httpRoot);
+            this(new DefaultSshConfig(host, user, "", SshConfig$.MODULE$.DEFAULT_TIMEOUT(), true), root, httpRoot);
         }
 
         private Destination(SshConfig config, String root, String httpRoot) {
@@ -240,7 +240,7 @@ public class PublishAction extends AbstractAsyncAction implements PropertyChange
         }
 
         public Destination withPassword(String password) {
-            final SshConfig c = new DefaultSshConfig(config.getHost(), config.getUser(), password, config.getTimeout());
+            final SshConfig c = new DefaultSshConfig(config.getHost(), config.getUser(), password, config.getTimeout(), true);
             return new Destination(c, root, httpRoot);
         }
     }

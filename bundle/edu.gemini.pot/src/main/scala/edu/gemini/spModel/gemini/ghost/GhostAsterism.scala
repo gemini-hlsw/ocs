@@ -299,6 +299,16 @@ object GhostAsterism {
     StandardResolution.emptySingleTarget.copyWithClonedTargets
   }
 
+  def createEmptyAsterism(t: AsterismType): Asterism =
+    (t match {
+      case AsterismType.GhostDualTarget                     => StandardResolution.emptyDualTarget
+      case AsterismType.GhostTargetPlusSky                  => StandardResolution.emptyTargetPlusSky
+      case AsterismType.GhostSkyPlusTarget                  => StandardResolution.emptySkyPlusTarget
+      case AsterismType.GhostHighResolutionTargetPlusSky    => HighResolution.emptyHRTargetPlusSky(PrvMode.PrvOff)
+      case AsterismType.GhostHighResolutionTargetPlusSkyPrv => HighResolution.emptyHRTargetPlusSky(PrvMode.PrvOn)
+      case _                                                => StandardResolution.emptySingleTarget
+    }).copyWithClonedTargets
+
   // Names of the IFUs.
   val SRIFU1: String = "SRIFU1"
   val SRIFU2: String = "SRIFU2"

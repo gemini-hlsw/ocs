@@ -52,7 +52,7 @@ final public class FtpProps extends Props {
         String user     = getString(FTP_USER_PROP);
         String password = getString(FTP_PASSWORD_PROP);
         int timeout     = getInt(FTP_TIMEOUT_PROP, SshConfig$.MODULE$.DEFAULT_TIMEOUT());
-        sshConfig = new DefaultSshConfig(host, user, password, timeout);
+        sshConfig = new DefaultSshConfig(host, user, password, timeout, true);
         dir = getString(FTP_DEST_DIR_PROP);
     }
 

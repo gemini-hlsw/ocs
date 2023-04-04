@@ -10,7 +10,11 @@ import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.SPGroup;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.Asterism;
+import edu.gemini.spModel.target.env.Asterism$;
+import edu.gemini.spModel.target.env.AsterismType;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
+import edu.gemini.spModel.util.AsterismEditUtil;
 import edu.gemini.spModel.util.DefaultSchedulingBlock;
 
 
@@ -110,17 +114,19 @@ public class InstantiationFunctor extends DBAbstractFunctor {
 
             // Done
             group.addObservation(newObs);
-
         }
     }
 
     // Copy the specified target into the specified observation
     private static void copyTarget(ISPFactory fact, ISPProgram prog, SPTarget targetData, ISPObservation newObs) throws SPUnknownIDException, SPNodeNotLocalException, SPTreeStateException {
         final ISPObsComponent comp = fact.createObsComponent(prog, TargetObsComp.SP_TYPE, null);
-        final TargetObsComp toc = (TargetObsComp) comp.getDataObject();
-        toc.setTargetEnvironment(toc.getTargetEnvironment().setBasePosition(targetData));
+        final TargetObsComp    toc = (TargetObsComp) comp.getDataObject();
+        final AsterismType astType = AsterismType.forObservation(newObs);
+        final Asterism         ast = Asterism$.MODULE$.fromTypeAndTemplateTarget(astType, targetData);
+        toc.setTargetEnvironment(toc.getTargetEnvironment().setAsterism(ast));
         comp.setDataObject(toc);
         addIfNotPresent(newObs, comp);
+        AsterismEditUtil.matchAsterismToInstrument(newObs);
     }
 
     // Copy the specified site quality into the specified observation

@@ -1,16 +1,15 @@
 package jsky.app.ot.gemini.ghost
 
-import java.awt.Font
-import java.util.logging.Logger
 import com.jgoodies.forms.factories.DefaultComponentFactory
 
-import javax.swing.{DefaultComboBoxModel, JPanel, JSpinner}
 import edu.gemini.pot.sp.ISPObsComponent
+import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.gui.bean.{CheckboxPropertyCtrl, ComboPropertyCtrl, RadioPropertyCtrl, TextFieldPropertyCtrl}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost, GhostAsterism, GhostBinning, GhostReadNoiseGain}
 import edu.gemini.spModel.gemini.ghost.AsterismConverters._
 import edu.gemini.spModel.gemini.ghost.GhostAsterism._
+import edu.gemini.spModel.gemini.ghost.GhostAsterism.GuideFiberState.Enabled
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.HighResolution._
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.StandardResolution._
 import edu.gemini.spModel.rich.pot.sp._
@@ -20,8 +19,13 @@ import edu.gemini.spModel.target.env.AsterismType._
 import edu.gemini.spModel.target.env.ResolutionMode._
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.spModel.telescope.IssPort
+import edu.gemini.spModel.`type`.SpTypeUtil
+import jsky.app.ot.editor.SpinnerEditor
 import jsky.app.ot.gemini.editor.ComponentEditor
 
+import java.awt.Font
+import java.util.logging.Logger
+import javax.swing.{DefaultComboBoxModel, JPanel, JSpinner}
 import scala.collection.JavaConverters._
 import scala.swing._
 import scala.swing.GridBagPanel.{Anchor, Fill}
@@ -29,9 +33,6 @@ import scala.swing.TabbedPane.Page
 import scala.swing.event.{ButtonClicked, SelectionChanged}
 import scalaz._
 import Scalaz._
-import edu.gemini.spModel.`type`.SpTypeUtil
-import edu.gemini.spModel.gemini.ghost.GhostAsterism.GuideFiberState.Enabled
-import jsky.app.ot.editor.SpinnerEditor
 
 
 final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
@@ -645,6 +646,10 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       case SelectionChanged(`asterismComboBox`) => Swing.onEDT {
         val converter = asterismComboBox.selection.item.converter.asScalaOpt
         converter.foreach(convertAsterism)
+
+        val dataObj = getDataObject
+        dataObj.setPreferredAsterismType(asterismComboBox.selection.item)
+        getNode.setDataObject(dataObj)
       }
     }
 
@@ -737,9 +742,21 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] {
       ui.resolutionModeComboBox.selection.item = resolutionMode
 
       // We only allow asterism types in the asterism list populating the combo box.
-      val selection = getContextObservation.findTargetObsComp
-        .map(_.getAsterism.asterismType)
-        .filter(asterismList.contains)
+      val obs = getContextObservation
+      val selection =
+        obs
+          .findTargetObsComp
+          .map(_.getAsterism.asterismType)
+          .orElse(
+            // No target component, so ask the GHOST component itself.  Note,
+            // This comes up in the template group observations, which have no
+            // target component.
+            obs
+              .findObsComponentByType(SPComponentType.INSTRUMENT_GHOST)
+              .flatMap(_.dataObject)
+              .map(_.asInstanceOf[Ghost].getPreferredAsterismType)
+          )
+          .filter(asterismList.contains)
 
       // Set the asterism types to match those available to the resolution mode.
       // We need to set a new model: we cannot modify the model directly as per Scala Swing.

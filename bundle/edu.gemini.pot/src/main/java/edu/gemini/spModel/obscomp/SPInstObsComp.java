@@ -13,6 +13,7 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
+import edu.gemini.spModel.target.env.AsterismType;
 import edu.gemini.spModel.util.Angle;
 
 import java.beans.PropertyDescriptor;
@@ -335,34 +336,6 @@ public abstract class SPInstObsComp extends AbstractDataObject {
         }
     }
 
-    /**
-     * Are two SPInstObsComp objects are equal.
-     */
-    /*  equals / hashCode for mutable objects is not well defined and this
-        is problematic anyway because it is not defined in the subclasses
-    public boolean equals(Object obj) {
-        if (obj == null || (!(obj instanceof SPInstObsComp))) {
-            return false;
-        }
-        SPInstObsComp oc = (SPInstObsComp) obj;
-
-		// RCN: this had not been serialization-safe.
-		String v1 = getVersion(), v2 = oc.getVersion();
-		if (v1 == null && v2 == null) {
-			// this is apparently ok, if it ever happens.
-		} else {
-			if (v1 == null || !v1.equals(v2))
-				return false;
-		}
-
-	    if (_exposureTime != oc._exposureTime)
-            return false;
-        if (_positionAngle != oc._positionAngle)
-            return false;
-        return _coadds == oc._coadds;
-    }
-    */
-
     /** Return true if this instrument has an OIWFS */
     public boolean hasOIWFS() {
         return true;  //  redefine in a derived class if not
@@ -430,6 +403,10 @@ public abstract class SPInstObsComp extends AbstractDataObject {
      */
     public Instrument getInstrument() {
         return Instrument.fromComponentType(getType()).getValue();
+    }
+
+    public AsterismType getPreferredAsterismType() {
+        return AsterismType.Single;
     }
 
     // REL-1678: 7 seconds DHS write overhead

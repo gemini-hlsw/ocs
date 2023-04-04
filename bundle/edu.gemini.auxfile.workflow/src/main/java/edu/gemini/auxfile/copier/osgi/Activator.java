@@ -15,7 +15,7 @@ public class Activator implements BundleActivator {
     private ServiceRegistration<AuxFileCopier> _reg;
 
     public synchronized void start(BundleContext ctx) throws Exception {
-        final Map<AuxFileType, CopyConfig> configs = new HashMap<AuxFileType, CopyConfig>();
+        final Map<AuxFileType, CopyConfig> configs = new HashMap<>();
         for (AuxFileType t : AuxFileType.values()) {
             configs.put(t, OsgiCopyConfig.create(t, ctx));
         }

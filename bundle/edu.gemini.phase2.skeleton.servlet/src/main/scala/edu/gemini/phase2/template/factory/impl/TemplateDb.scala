@@ -29,6 +29,7 @@ object TemplateDb {
   // URLs of xml files, filtered by name
   def xmls(f: String => Boolean) = List(
     "F2_BP.xml",
+    "GHOST_BP.xml",
     "GMOS_N_BP.xml",
     "GMOS_S_BP.xml",
     "GNIRS_BP.xml",

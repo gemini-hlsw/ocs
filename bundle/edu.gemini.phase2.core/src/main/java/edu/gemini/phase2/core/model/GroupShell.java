@@ -63,7 +63,10 @@ public final class GroupShell extends BaseGroupShell {
         return toTemplateGroupShell(pig.blueprintId, pig.argsList);
     }
 
-    public TemplateGroupShell toTemplateGroupShell(String blueprintId, Collection<TemplateParameters> argList) {
+    public TemplateGroupShell toTemplateGroupShell(
+        String blueprintId,
+        Collection<TemplateParameters> argList
+    ) {
         final TemplateGroup dataObj = new TemplateGroup();
         dataObj.setBlueprintId(blueprintId);
         dataObj.setTitle(group.getTitle());
