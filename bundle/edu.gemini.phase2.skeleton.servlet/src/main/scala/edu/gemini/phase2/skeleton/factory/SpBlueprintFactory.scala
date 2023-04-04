@@ -126,7 +126,6 @@ object SpBlueprintFactory {
         case (Standard,                Single)       => AsterismType.GhostSingleTarget
         case (Standard,                Dual)         => AsterismType.GhostDualTarget
         case (Standard,                TargetAndSky) => AsterismType.GhostTargetPlusSky
-        case (Standard,                SkyAndTarget) => AsterismType.GhostSkyPlusTarget
         case (High,                    _)            => AsterismType.GhostHighResolutionTargetPlusSky
         case (PrecisionRadialVelocity, _)            => AsterismType.GhostHighResolutionTargetPlusSkyPrv
         case _                                       => AsterismType.Single

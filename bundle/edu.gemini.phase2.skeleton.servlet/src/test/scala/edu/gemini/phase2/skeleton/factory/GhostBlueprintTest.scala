@@ -52,7 +52,7 @@ class GhostBlueprintTest extends TemplateSpec("GHOST_BP.xml") with Specification
               case AsterismType.GhostTargetPlusSky                  =>
                 b.resolutionMode == GhostResolutionMode.Standard && b.targetMode == GhostTargetMode.TargetAndSky
               case AsterismType.GhostSkyPlusTarget                  =>
-                b.resolutionMode == GhostResolutionMode.Standard && b.targetMode == GhostTargetMode.SkyAndTarget
+                b.resolutionMode == GhostResolutionMode.Standard && b.targetMode == GhostTargetMode.TargetAndSky
               case AsterismType.GhostHighResolutionTargetPlusSky    =>
                 b.resolutionMode == GhostResolutionMode.High
               case AsterismType.GhostHighResolutionTargetPlusSkyPrv =>
