@@ -71,14 +71,12 @@ class GhostInstantiationTest extends TestBase {
   }
 
   private def checkDualTarget(a: Asterism): Unit = {
-    val ct = newTarget(ScienceTargetName).getCoordinates(None).get
+    val ct = a.basePosition(None).get
 
     assertEquals(AsterismType.GhostDualTarget, a.asterismType)
     a match {
-      case GhostAsterism.DualTarget(ifu1, ifu2, base) =>
-        // Overridden base at the template target coordinates
-         checkDiff(base.get.coordinates, ct,0,0)
-
+      case GhostAsterism.DualTarget(ifu1, ifu2, None) =>
+        
         // IFU1 at 1 arcmin (in p) from base
         checkDiff(ct, ifu1.coordinates(None).get,1,0)
 

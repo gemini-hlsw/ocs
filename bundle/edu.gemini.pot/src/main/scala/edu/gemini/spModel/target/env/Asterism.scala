@@ -200,11 +200,12 @@ object Asterism {
     target:       SPTarget
   ): Asterism = {
 
-    def targetPlus(am: Int): SPTarget = {
+    def targetPlus(am: Int, name: String): SPTarget = {
       val res = new SPTarget()
       res.setTarget(
         Target.ra.mod(_.offset(Angle.fromArcmin(am.toDouble)), target.getTarget)
       )
+      res.setName(name)
       res
     }
 
@@ -225,9 +226,9 @@ object Asterism {
 
       case AsterismType.GhostDualTarget                     =>
         GhostAsterism.DualTarget(
-          ghostTarget(targetPlus(1)),
-          ghostTarget(targetPlus(-1)),
-          target.getCoordinates(None).map(new SPCoordinates(_))
+          ghostTarget(target),
+          ghostTarget(targetPlus(-2, "Target 2")),
+          None
         )
 
       case AsterismType.GhostTargetPlusSky                  =>

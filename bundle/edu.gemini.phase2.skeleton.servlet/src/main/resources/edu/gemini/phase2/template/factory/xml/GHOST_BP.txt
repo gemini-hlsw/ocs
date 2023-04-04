@@ -1,6 +1,6 @@
 Instrument: GHOST
 Blueprint templates : GHOST_BP.xml
-Last update: 2022 December 19, Bryan Miller, single position from PIT for dual-target
+Last update: 2023 March 1, Bryan Miller, single position from PIT for dual-target is one of the targets, not a middle position
 
 Observations identified by Library IDs, indicated with {}
 
@@ -11,28 +11,23 @@ Phase I = PI
 
 INCLUDE {1}     # Science
 
-SET RESOLUTION MODE FROM PI  # Possible w/o a target component?
+SET RESOLUTION MODE FROM PI
 
-SET TARGET MODE FROM PI      # Possible w/o a target component?
+SET TARGET MODE FROM PI
 
 ON TEMPATE INSTANTIATION (adding the target(s))
 	IF RESOLUTION MODE == STANDARD
 	    IF TARGET MODE == 'Single'
 	    	Add target from PI to SRIFU1
-	    IF TARGET MODE == 'Dual'  # Position from PI is the Base position
-	    	Add target1 from PI with RA + 1 arcmin to SRIFU1
-	    	Add target2 from PI with RA - 1 arcmin to SRIFU2	
-	    	    
-		IF TARGET MODE ==  'SRIFU1 Sky + SRIFU2 Target'
-			Add target from PI to SRIFU2
-			Add target from PI with ra + 2 arcmin to SRIFU1
-		ELSE
+
+	    IF TARGET MODE == 'Dual'  # Position from PI is the fainter target
+	    	Add target from PI to SRIFU1
+	    	Add target from PI with RA - 2 arcmin to SRIFU2, set target name to 'Target 2'
+
+		IF TARGET MODE ==  'SRIFU + Sky'
 			Add target from PI to SRIFU1
-			IF TARGET MODE ==  'SRIFU1 Target + SRIFU2 Sky'
-				Add target from PI with ra - 2 arcmin to SRIFU2
+			Add target from PI with ra - 2 arcmin to SRIFU2, set target name to 'Sky'
 
 	IF RESOLUTION MODE == HIGH or PRECISION RADIAL VELOCITY
 		Add target from PI to HRIFU
-		Add target from PI with ra - 2 arcmin to HRSKY
-		
-
+		Add target from PI with ra - 2 arcmin to HRSKY, the target name should be 'Sky'
