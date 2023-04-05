@@ -5,8 +5,6 @@ import edu.gemini.spModel.config.HelperSeqCompCB;
 import edu.gemini.spModel.data.config.DefaultParameter;
 import edu.gemini.spModel.data.config.IConfig;
 import edu.gemini.spModel.data.config.StringParameter;
-import edu.gemini.spModel.gemini.ghost.Ghost;
-import edu.gemini.spModel.gemini.gpi.Gpi;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 

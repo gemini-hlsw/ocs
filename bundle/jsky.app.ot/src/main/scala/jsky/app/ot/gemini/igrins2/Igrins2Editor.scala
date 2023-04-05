@@ -99,6 +99,16 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
      */
     val expTimeCtrl: TextFieldPropertyCtrl[Igrins2, java.lang.Double] = TextFieldPropertyCtrl.createDoubleInstance(Igrins2.EXPOSURE_TIME_PROP, 1)
     expTimeCtrl.setColumns(10)
+    expTimeCtrl.getTextField.getDocument.addDocumentListener(new DocumentListener {
+      override def insertUpdate(e: DocumentEvent): Unit =
+        updateFowlerSamples()
+
+      override def removeUpdate(e: DocumentEvent): Unit =
+        updateFowlerSamples()
+
+      override def changedUpdate(e: DocumentEvent): Unit =
+        updateFowlerSamples()
+    })
 
     val expTimeUnits = new Label("sec")
     expTimeUnits.horizontalAlignment = Alignment.Left
@@ -243,16 +253,6 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     ui.readNoiseH.text = readNoiseAt(MagnitudeBand.H)
     ui.readNoiseK.text = readNoiseAt(MagnitudeBand.K)
     ui.fowlerSamples.text = fowlerSamples.toString
-    ui.expTimeCtrl.getTextField.getDocument.addDocumentListener(new DocumentListener {
-      override def insertUpdate(e: DocumentEvent): Unit =
-        updateFowlerSamples()
-
-      override def removeUpdate(e: DocumentEvent): Unit =
-        updateFowlerSamples()
-
-      override def changedUpdate(e: DocumentEvent): Unit =
-        updateFowlerSamples()
-    })
   }
 
   def changeIssPort(port: IssPort): Unit = Swing.onEDT {
