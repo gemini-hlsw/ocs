@@ -227,6 +227,15 @@
 
     <UIInfo
             site="GN"
+            dataObject="edu.gemini.spModel.gemini.igrins2.SeqConfigIgrins2"
+            name="IGRINS-2 Sequence Component"
+            type="iterComp"
+            imageKey="seqcomp.gif"
+            shortDescription="Iterate over Igrins2 configurations with this component."
+            uiClassName="jsky.app.ot.editor.EdIterGenericConfig"/>
+
+    <UIInfo
+            site="GN"
             dataObject="edu.gemini.spModel.gemini.igrins2.Igrins2"
             name="IGRINS-2 Instrument"
             type="instrument"

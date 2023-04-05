@@ -67,7 +67,7 @@ public enum SPComponentType implements Serializable {
     ITERATOR_GPIOFFSET(ITERATOR, "gpioffset", "GPI IFS Offset"),
     ITERATOR_GPOL(ITERATOR, "gpol", "GPOL Sequence"),
     ITERATOR_GSAOI(ITERATOR, "GSAOI", "GSAOI Sequence"),
-    ITERATOR_IGRINS2(ITERATOR, "IGRINS2", "Igrins2 Sequence"),
+    ITERATOR_IGRINS2(ITERATOR, "IGRINS2", "IGRINS-2 Sequence"),
     ITERATOR_MICHELLE(ITERATOR, "Michelle", "Michelle Sequence"),
     ITERATOR_NICI(ITERATOR, "NICI", "NICI Sequence"),
     ITERATOR_NICIOFFSET(ITERATOR, "nicioffset", "NICI Offset"),

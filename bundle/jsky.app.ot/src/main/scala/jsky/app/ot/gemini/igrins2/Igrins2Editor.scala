@@ -3,20 +3,19 @@ package jsky.app.ot.gemini.igrins2
 import edu.gemini.pot.sp.{ISPObsComponent, SPComponentType}
 import edu.gemini.shared.gui.bean.TextFieldPropertyCtrl
 import edu.gemini.spModel.core.{MagnitudeBand, Site}
-import edu.gemini.spModel.gemini.igrins2.{Igrins2, Igrins2Geometry, SlitViewingCamera}
+import edu.gemini.spModel.gemini.igrins2.{Igrins2, Igrins2Geometry}
 import edu.gemini.spModel.telescope.IssPort
 import jsky.app.ot.OTOptions
 import jsky.app.ot.gemini.editor.ComponentEditor
 import jsky.app.ot.gemini.parallacticangle.PositionAnglePanel
 import squants.time.TimeConversions.TimeConversions
 
-import java.awt.Color
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import javax.swing.JPanel
 import javax.swing.event.{DocumentEvent, DocumentListener}
 import scala.swing.GridBagPanel.{Anchor, Fill}
-import scala.swing.event.{ButtonClicked, SelectionChanged}
-import scala.swing.{Alignment, ButtonGroup, ComboBox, Component, FlowPanel, GridBagPanel, Insets, Label, RadioButton, Separator, Swing}
+import scala.swing.event.ButtonClicked
+import scala.swing.{Alignment, ButtonGroup, Component, FlowPanel, GridBagPanel, Insets, Label, RadioButton, Separator, Swing}
 
 class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
 
@@ -100,6 +99,16 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
      */
     val expTimeCtrl: TextFieldPropertyCtrl[Igrins2, java.lang.Double] = TextFieldPropertyCtrl.createDoubleInstance(Igrins2.EXPOSURE_TIME_PROP, 1)
     expTimeCtrl.setColumns(10)
+    expTimeCtrl.getTextField.getDocument.addDocumentListener(new DocumentListener {
+      override def insertUpdate(e: DocumentEvent): Unit =
+        updateFowlerSamples()
+
+      override def removeUpdate(e: DocumentEvent): Unit =
+        updateFowlerSamples()
+
+      override def changedUpdate(e: DocumentEvent): Unit =
+        updateFowlerSamples()
+    })
 
     val expTimeUnits = new Label("sec")
     expTimeUnits.horizontalAlignment = Alignment.Left
@@ -156,10 +165,37 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
       gridy = row
       insets = new Insets(3, Igrins2Editor.LabelPadding, 0, 0)
     }
+    val readNoiseLabel: Label = new Label("Read Noise:")
+    readNoiseLabel.horizontalAlignment = Alignment.Left
+    layout(readNoiseLabel) = new Constraints() {
+      anchor = Anchor.NorthWest
+      gridx = 1
+      gridy = row
+      insets = new Insets(3, Igrins2Editor.LabelPadding, 0, 0)
+    }
+
     row += 1
     layout(portPanel) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 0
+      gridy = row
+      insets = new Insets(3, Igrins2Editor.ControlPadding, 0, 0)
+    }
+
+    val readNoiseH: Label = new Label("-")
+    readNoiseH.horizontalAlignment = Alignment.Left
+    layout(readNoiseH) = new Constraints() {
+      anchor = Anchor.NorthWest
+      gridx = 1
+      gridy = row
+      insets = new Insets(3, Igrins2Editor.ControlPadding, 0, 0)
+    }
+    row += 1
+    val readNoiseK: Label = new Label("-")
+    readNoiseK.horizontalAlignment = Alignment.Left
+    layout(readNoiseK) = new Constraints() {
+      anchor = Anchor.NorthWest
+      gridx = 1
       gridy = row
       insets = new Insets(3, Igrins2Editor.ControlPadding, 0, 0)
     }
@@ -194,83 +230,7 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
       gridy = row
       insets = new Insets(3, Igrins2Editor.ControlPadding, 0, 0)
     }
-    row += 1
 
-    layout(new Separator()) = new Constraints() {
-      anchor = Anchor.NorthWest
-      fill = Fill.Horizontal
-      gridx = 0
-      gridy = row
-      gridwidth = 3
-      insets = new Insets(10, 0, 0, 0)
-    }
-    row += 1
-    val viewingModeLabel: Label = new Label("Slit Viewing Camera Mode:")
-    viewingModeLabel.horizontalAlignment = Alignment.Left
-    layout(viewingModeLabel) = new Constraints() {
-      anchor = Anchor.NorthWest
-      gridx = 0
-      gridy = row
-      insets = new Insets(3, Igrins2Editor.LabelPadding, 0, 0)
-    }
-    val viewingModeWarning: Label = new Label("Warning: this may generate very large file sizes.")
-    viewingModeWarning.horizontalAlignment = Alignment.Left
-    viewingModeWarning.visible = false
-    viewingModeWarning.foreground = Color.red
-
-    val readNoiseLabel: Label = new Label("Read Noise:")
-    readNoiseLabel.horizontalAlignment = Alignment.Left
-    layout(readNoiseLabel) = new Constraints() {
-      anchor = Anchor.NorthWest
-      gridx = 1
-      gridy = row
-      insets = new Insets(3, Igrins2Editor.LabelPadding, 0, 0)
-    }
-
-    row += 1
-
-    /**
-     * Slit viewing mode
-     */
-    val viewingModeComboBox: ComboBox[SlitViewingCamera] = new ComboBox[SlitViewingCamera](SlitViewingCamera.values())
-    layout(viewingModeComboBox) = new Constraints() {
-      anchor = Anchor.NorthWest
-      gridx = 0
-      gridy = row
-      gridwidth = 1
-      insets = new Insets(6, Igrins2Editor.ControlPadding, 0, 0)
-    }
-    listenTo(viewingModeComboBox.selection)
-    reactions += {
-      case SelectionChanged(`viewingModeComboBox`) => Swing.onEDT {
-        Option(getDataObject).foreach(_.setSlitViewingCamera(viewingModeComboBox.selection.item))
-        ui.viewingModeWarning.visible = viewingModeComboBox.selection.item == SlitViewingCamera.CONTINUOUS
-      }
-    }
-
-    val readNoiseH: Label = new Label("-")
-    readNoiseH.horizontalAlignment = Alignment.Left
-    layout(readNoiseH) = new Constraints() {
-      anchor = Anchor.NorthWest
-      gridx = 1
-      gridy = row
-      insets = new Insets(6, Igrins2Editor.ControlPadding, 0, 0)
-    }
-    row += 1
-    layout(viewingModeWarning) = new Constraints() {
-      anchor = Anchor.NorthWest
-      gridx = 0
-      gridy = row
-      insets = new Insets(3, Igrins2Editor.LabelPadding, 0, 0)
-    }
-    val readNoiseK: Label = new Label("-")
-    readNoiseK.horizontalAlignment = Alignment.Left
-    layout(readNoiseK) = new Constraints() {
-      anchor = Anchor.NorthWest
-      gridx = 1
-      gridy = row
-      insets = new Insets(6, Igrins2Editor.ControlPadding, 0, 0)
-    }
     row += 1
     // empty but it pushes the rest of the controls to the top
     layout(new Label()) = new Constraints() {
@@ -293,16 +253,6 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     ui.readNoiseH.text = readNoiseAt(MagnitudeBand.H)
     ui.readNoiseK.text = readNoiseAt(MagnitudeBand.K)
     ui.fowlerSamples.text = fowlerSamples.toString
-    ui.expTimeCtrl.getTextField.getDocument.addDocumentListener(new DocumentListener {
-      override def insertUpdate(e: DocumentEvent): Unit =
-        updateFowlerSamples()
-
-      override def removeUpdate(e: DocumentEvent): Unit =
-        updateFowlerSamples()
-
-      override def changedUpdate(e: DocumentEvent): Unit =
-        updateFowlerSamples()
-    })
   }
 
   def changeIssPort(port: IssPort): Unit = Swing.onEDT {
@@ -316,13 +266,6 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     else if (port == IssPort.UP_LOOKING) ui.upLookingButton.selected = true
   }
 
-  // Set the viewing camera selection
-  def updateSlitViewingCamera(): Unit = {
-    Option(getDataObject).map(_.getSlitViewingCamera).foreach { c =>
-      ui.viewingModeComboBox.selection.item = c
-      ui.viewingModeWarning.visible = c == SlitViewingCamera.CONTINUOUS
-    }
-  }
   /**
    * Return the window containing the editor.
    */
@@ -337,7 +280,6 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     ui.expTimeCtrl.setBean(inst)
     updateFowlerSamples()
     updateIssPort()
-    updateSlitViewingCamera()
   }
 
   override def handlePreDataObjectUpdate (inst: Igrins2): Unit = {

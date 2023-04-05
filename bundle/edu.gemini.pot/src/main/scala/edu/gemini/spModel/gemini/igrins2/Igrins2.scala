@@ -46,7 +46,6 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
   _exposureTime = Igrins2.DefaultExposureTime.toSeconds
   private var _port = IssPort.UP_LOOKING
   private var _posAngleConstraint = PosAngleConstraint.PARALLACTIC_ANGLE
-  private var _slitViewingCamera: SlitViewingCamera = SlitViewingCamera.DEFAULT
 
   /**
    * Get the site in which the instrument resides.
@@ -68,9 +67,8 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
   override def getParamSet(factory: PioFactory): ParamSet = {
     // The parent takes care of exposure and posangle
     val paramSet = super.getParamSet(factory)
-    Pio.addParam(factory, paramSet, Igrins2.POS_ANGLE_CONSTRAINT_PROP.getName(), getPosAngleConstraint().name());
+    Pio.addParam(factory, paramSet, Igrins2.POS_ANGLE_CONSTRAINT_PROP.getName, getPosAngleConstraint().name());
     Pio.addParam(factory, paramSet, Igrins2.PORT_PROP.getName, getIssPort.name)
-    Pio.addParam(factory, paramSet, Igrins2.SLIT_VIEWING_PROP.getName, getSlitViewingCamera.name)
 
     paramSet
   }
@@ -82,9 +80,6 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
       .flatMap(v => Option(PosAngleConstraint.valueOf(v)))
       .foreach(_setPosAngleConstraint)
     Option(Pio.getValue(paramSet, Igrins2.PORT_PROP.getName)).foreach(_setPort)
-    Option(Pio.getValue(paramSet, Igrins2.SLIT_VIEWING_PROP))
-      .flatMap(v => Option(SlitViewingCamera.valueOf(v)))
-      .foreach(_setSlitViewingCamera)
   }
 
   override def getSysConfig: ISysConfig = {
@@ -94,7 +89,6 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
     sc.putParameter(DefaultParameter.getInstance(InstConstants.EXPOSURE_TIME_PROP, getExposureTime))
     sc.putParameter(DefaultParameter.getInstance(Igrins2.POS_ANGLE_CONSTRAINT_PROP, getPosAngleConstraint))
     sc.putParameter(DefaultParameter.getInstance(Igrins2.PORT_PROP, getIssPort))
-    sc.putParameter(DefaultParameter.getInstance(Igrins2.SLIT_VIEWING_PROP, getSlitViewingCamera))
     sc
   }
 
@@ -163,20 +157,6 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
   override def calculateParallacticAngle(obs: ISPObservation): immutable.Option[Angle] =
     super.calculateParallacticAngle(obs)
 
-  def getSlitViewingCamera: SlitViewingCamera = _slitViewingCamera
-
-  private def _setSlitViewingCamera(value: SlitViewingCamera): Unit =
-    _slitViewingCamera = value
-
-  def setSlitViewingCamera(newValue: SlitViewingCamera): Unit = {
-    val oldValue = getSlitViewingCamera
-    if (oldValue != newValue) {
-      _slitViewingCamera = newValue
-      firePropertyChange(Igrins2.SLIT_VIEWING_PROP.getName, oldValue, newValue)
-    }
-    _slitViewingCamera = newValue
-  }
-
   override def getVignettableScienceArea: ScienceAreaGeometry =
     GhostScienceAreaGeometry
 
@@ -240,7 +220,6 @@ object Igrins2 {
     List((MagnitudeBand.H, rn(3.8)), (MagnitudeBand.K, rn(5.0)))
   }
 
-  private val query_yes = true
   private val query_no  = false
   private val iter_yes  = true
   private val iter_no   = false
@@ -251,12 +230,10 @@ object Igrins2 {
 
   // The name of the Igrins2 instrument configuration.
   val INSTRUMENT_NAME_PROP: String = "IGRINS2"
-  val SLIT_VIEWING_CAMERA: String = "slitViewingCamera"
 
   val POS_ANGLE_CONSTRAINT_PROP: PropertyDescriptor = initProp("posAngleConstraint", query = query_no, iter = iter_no)
   val EXPOSURE_TIME_PROP: PropertyDescriptor = initProp(InstConstants.EXPOSURE_TIME_PROP, query = query_no, iter = iter_yes)
   var PORT_PROP: PropertyDescriptor = initProp(IssPortProvider.PORT_PROPERTY_NAME, query_no, iter_no)
-  var SLIT_VIEWING_PROP: PropertyDescriptor = initProp(SLIT_VIEWING_CAMERA, query_yes, iter_no)
 
   private val Igrins2Supplier: java.util.function.Supplier[Igrins2] =
     new java.util.function.Supplier[Igrins2] {
@@ -274,8 +251,7 @@ object Igrins2 {
   private val Properties: List[(String, PropertyDescriptor)] = List[PropertyDescriptor](
     POS_ANGLE_CONSTRAINT_PROP,
     EXPOSURE_TIME_PROP,
-    PORT_PROP,
-    SLIT_VIEWING_PROP
+    PORT_PROP
   ).map(p => (p.getName, p))
 
   val getInstConfigInfo: JList[InstConfigInfo] =
