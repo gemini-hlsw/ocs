@@ -28,6 +28,7 @@ object SeqConstraint {
     case INSTRUMENT_GNIRS      => ITERATOR_GNIRS
     case INSTRUMENT_GPI        => ITERATOR_GPI
     case INSTRUMENT_GSAOI      => ITERATOR_GSAOI
+    case INSTRUMENT_IGRINS2    => ITERATOR_IGRINS2
     case INSTRUMENT_MICHELLE   => ITERATOR_MICHELLE
     case INSTRUMENT_NICI       => ITERATOR_NICI
     case INSTRUMENT_NIFS       => ITERATOR_NIFS
@@ -92,6 +93,7 @@ case class SeqConstraint private(val types: Types) extends Constraint {
       case ITERATOR_GPI        => forInstrument(INSTRUMENT_GPI)
       case ITERATOR_GPIOFFSET  => forInstrument(INSTRUMENT_GPI) // NOTE
       case ITERATOR_GSAOI      => forInstrument(INSTRUMENT_GSAOI)
+      case ITERATOR_IGRINS2    => forInstrument(INSTRUMENT_IGRINS2)
       case ITERATOR_MICHELLE   => forInstrument(INSTRUMENT_MICHELLE)
       case ITERATOR_NICI       => forInstrument(INSTRUMENT_NICI)
       case ITERATOR_NICIOFFSET => forInstrument(INSTRUMENT_NICI) // NOTE
