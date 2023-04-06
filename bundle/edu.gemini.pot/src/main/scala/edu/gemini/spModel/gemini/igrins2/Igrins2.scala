@@ -210,7 +210,7 @@ object Igrins2 {
 
   def readoutTime(expTime: Time): Time = {
     val nFowler = fowlerSamples(expTime)
-    1.45479.seconds / nFowler
+    1.45479.seconds * nFowler
   }
 
   def readNoise(expTime: Time): List[(MagnitudeBand, Double)] = {
