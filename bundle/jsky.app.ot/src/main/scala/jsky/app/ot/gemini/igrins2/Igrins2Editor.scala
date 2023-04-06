@@ -3,7 +3,7 @@ package jsky.app.ot.gemini.igrins2
 import edu.gemini.pot.sp.{ISPObsComponent, SPComponentType}
 import edu.gemini.shared.gui.bean.TextFieldPropertyCtrl
 import edu.gemini.spModel.core.{MagnitudeBand, Site}
-import edu.gemini.spModel.gemini.igrins2.{Igrins2, Igrins2Geometry}
+import edu.gemini.spModel.gemini.igrins2.{Igrins2, Igrins2ScienceAreaGeometry}
 import edu.gemini.spModel.telescope.IssPort
 import jsky.app.ot.OTOptions
 import jsky.app.ot.gemini.editor.ComponentEditor
@@ -49,7 +49,7 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     /**
      * Science FOV (Read-only)
      */
-    layout(new Label(s"${Igrins2Geometry.ScienceFovHeight.toArcseconds} x ${Igrins2Geometry.ScienceFovWidth.toArcseconds} arcsec" )) = new Constraints() {
+    layout(new Label(s"${Igrins2ScienceAreaGeometry.ScienceFovHeight.toArcsecs} x ${Igrins2ScienceAreaGeometry.ScienceFovWidth.toArcsecs} arcsec" )) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 0
       gridy = row
