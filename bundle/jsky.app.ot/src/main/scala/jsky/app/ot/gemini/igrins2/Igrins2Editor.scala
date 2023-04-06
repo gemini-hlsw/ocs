@@ -49,7 +49,7 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     /**
      * Science FOV (Read-only)
      */
-    layout(new Label(s"${Igrins2ScienceAreaGeometry.ScienceFovHeight.toArcsecs} x ${Igrins2ScienceAreaGeometry.ScienceFovWidth.toArcsecs} arcsec" )) = new Constraints() {
+    layout(new Label(f"${Igrins2ScienceAreaGeometry.ScienceFovHeight.toArcsecs}%.1f x ${Igrins2ScienceAreaGeometry.ScienceFovWidth.toArcsecs}%.1f arcsec" )) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 0
       gridy = row

@@ -4,7 +4,8 @@ import edu.gemini.pot.sp.{ISPNodeInitializer, ISPObsComponent, ISPObservation, S
 import edu.gemini.shared.util.immutable
 import edu.gemini.shared.util.immutable.{DefaultImList, ImList}
 import edu.gemini.skycalc.{Angle => SkyAngle}
-import edu.gemini.spModel.config2.Config
+import edu.gemini.spModel.config.ConfigPostProcessor
+import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
 import edu.gemini.spModel.core.{Angle, MagnitudeBand, Site, Wavelength}
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.data.config.{DefaultParameter, DefaultSysConfig, ISysConfig, StringParameter}
@@ -19,7 +20,6 @@ import edu.gemini.spModel.obs.plannedtime.{CommonStepCalculator, ExposureCalcula
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.{CategorizedTime, Category}
 import edu.gemini.spModel.obscomp.{InstConfigInfo, InstConstants}
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
-
 import edu.gemini.spModel.seqcomp.SeqConfigNames
 import edu.gemini.spModel.telescope.{IssPort, IssPortProvider, PosAngleConstraint, PosAngleConstraintAware}
 import squants.time.Time
@@ -41,6 +41,7 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
   with Igrins2Mixin
   with IssPortProvider
   with PlannedTime.StepCalculator
+  with ConfigPostProcessor
   with VignettableScienceAreaInstrument {
   _exposureTime = Igrins2.DefaultExposureTime.toSeconds
   private var _port = IssPort.UP_LOOKING
@@ -189,6 +190,18 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
 
     CommonStepCalculator.instance.calc(cur, prev).addAll(times)
   }
+
+  override def postProcessSequence(in: ConfigSequence): ConfigSequence = {
+    val configs = in.getAllSteps
+    for (c <- configs) {
+      Option(c.getItemValue(InstConstants.EXPOSURE_TIME_KEY)).foreach {
+        case expTime: java.lang.Double =>
+          c.putItem(Igrins2.FOWLER_SAMPLES_KEY, Igrins2.fowlerSamples(expTime.doubleValue().seconds))
+        case _ =>
+      }
+    }
+    new ConfigSequence(configs)
+  }
 }
 
 object Igrins2 {
@@ -232,7 +245,9 @@ object Igrins2 {
 
   val POS_ANGLE_CONSTRAINT_PROP: PropertyDescriptor = initProp("posAngleConstraint", query = query_no, iter = iter_no)
   val EXPOSURE_TIME_PROP: PropertyDescriptor = initProp(InstConstants.EXPOSURE_TIME_PROP, query = query_no, iter = iter_yes)
-  var PORT_PROP: PropertyDescriptor = initProp(IssPortProvider.PORT_PROPERTY_NAME, query_no, iter_no)
+  val PORT_PROP: PropertyDescriptor = initProp(IssPortProvider.PORT_PROPERTY_NAME, query_no, iter_no)
+
+  val FOWLER_SAMPLES_KEY =  new ItemKey("instrument:fowlerSamples")
 
   private val Igrins2Supplier: java.util.function.Supplier[Igrins2] =
     new java.util.function.Supplier[Igrins2] {
