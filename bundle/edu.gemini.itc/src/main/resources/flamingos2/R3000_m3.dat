@@ -1,24 +1,18 @@
-# Predicted R3K grism throughput @ order m=3
-# Extracted from http://www.gemini.edu/sciops/instruments/flamingos2/PredThroughput_R3Kg_only_03Oct2008.png
-# The first and last data points are made up for the ITC.
-# Wavelength Transmission
-1550.0   0.000
-1699.7   0.216
-1750.0   0.306
-1774.8   0.333
-1799.9   0.378
-1824.7   0.378
-1849.9   0.378
-1874.6   0.450
-1899.8   0.468
-1924.5   0.477
-1949.2   0.495
-1974.4   0.495
-1999.7   0.504
-2024.4   0.513
-2049.1   0.504
-2074.4   0.495
-2099.1   0.486
-2150.1   0.423
-2199.7   0.360
-2500.0   0.000
+# F2 R3K grism order m=3
+# < 2000nm from http://www.gemini.edu/sciops/instruments/flamingos2/PredThroughput_R3Kg_only_03Oct2008.png
+# > 2000nm from observation
+# Wavelength (nm) Efficiency
+1650   0.00
+1700   0.22
+1750   0.31
+1800   0.38
+1850   0.43
+1900   0.48
+2000   0.59
+2050   0.59
+2100   0.55
+2150   0.48
+2200   0.45
+2255   0.27
+2300   0.21
+2340   0.00
