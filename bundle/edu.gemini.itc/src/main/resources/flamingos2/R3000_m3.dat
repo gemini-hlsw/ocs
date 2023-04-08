@@ -2,17 +2,17 @@
 # < 2000nm from http://www.gemini.edu/sciops/instruments/flamingos2/PredThroughput_R3Kg_only_03Oct2008.png
 # > 2000nm from observation
 # Wavelength (nm) Efficiency
-1600   0.00
+1650   0.00
 1700   0.22
 1750   0.31
 1800   0.38
 1850   0.43
 1900   0.48
-2000   0.57
-2050   0.57
-2100   0.53
-2150   0.46
-2200   0.43
-2250   0.27
-2300   0.20
+2000   0.59
+2050   0.59
+2100   0.55
+2150   0.48
+2200   0.45
+2255   0.27
+2300   0.21
 2340   0.00
