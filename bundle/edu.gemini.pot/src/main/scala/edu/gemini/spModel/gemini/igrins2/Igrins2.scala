@@ -218,7 +218,7 @@ object Igrins2 {
 
   def fowlerSamples(expTime: Time): Int = {
     val nFowler = ((expTime.toSeconds - 0.168)/1.45479).toInt
-    AllowedFowlerSamples.minBy(cur => math.abs (cur - nFowler))
+    AllowedFowlerSamples.reverse.find(cur => nFowler >= cur).getOrElse(AllowedFowlerSamples.head)
   }
 
   def readoutTime(expTime: Time): Time = {
