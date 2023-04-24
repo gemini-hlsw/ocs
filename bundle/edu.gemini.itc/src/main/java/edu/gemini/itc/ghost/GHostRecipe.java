@@ -131,7 +131,7 @@ public final class GHostRecipe  {
         sed.sed.accept(specS2N);
 
         final SpecS2N[] specS2Narr = new SpecS2N[] {specS2N};
-        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty());
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.empty());
     }
 
 

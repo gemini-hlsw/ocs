@@ -62,11 +62,19 @@ trait ItcSpectroscopyResultCodec {
       "charts"
     )
 
-  val ItcSpectroscopyResultCodec: CodecJson[ItcSpectroscopyResult] =
-    casecodec2(ItcSpectroscopyResult.apply, ItcSpectroscopyResult.unapply)(
-      "ccds",
-      "chartGroups"
+  private implicit val ExposureCalculationCodec: CodecJson[ExposureCalculation] =
+    casecodec3(ExposureCalculation.apply, ExposureCalculation.unapply)(
+      "exposureTime",
+      "exposures",
+      "signalToNoise"
     )
+
+  val ItcSpectroscopyResultCodec: CodecJson[ItcSpectroscopyResult] =
+    casecodec3(ItcSpectroscopyResult.apply, ItcSpectroscopyResult.unapply)(
+      "ccds",
+      "chartGroups",
+      "exposureCalculation"
+  )
 
 }
 

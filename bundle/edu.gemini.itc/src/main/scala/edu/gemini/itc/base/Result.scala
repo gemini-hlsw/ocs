@@ -1,7 +1,7 @@
 package edu.gemini.itc.base
 
 import edu.gemini.itc.operation._
-import edu.gemini.itc.shared.{ItcParameters, ItcWarning}
+import edu.gemini.itc.shared.{ExposureCalculation, ItcParameters, ItcWarning}
 
 /*
  * Helper objects that are used to pass around detailed results of imaging and spectroscopy calculations internally.
@@ -52,8 +52,7 @@ final case class SpectroscopyResult(
                       specS2N:          Array[SpecS2N],   // Array is used for IFU cases (GMOS and NIFS)
                       slit:             Slit,
                       slitThrougput:    Double,
-                      aoSystem:         Option[AOSystem]) extends Result {
+                      aoSystem:         Option[AOSystem],
+                      exposureCalculation: Option[ExposureCalculation]) extends Result {
   lazy val peakPixelCount: Double = specS2N.map(_.getPeakPixelCount).max
 }
-
-
