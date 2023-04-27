@@ -24,10 +24,10 @@ object Igrins2ScienceAreaGeometry extends ScienceAreaGeometry {
 
   val scienceSlitFOV: Shape =
     new Rectangle2D.Double(
-      -ScienceFovWidth.toArcsecs / 2.0,
       -ScienceFovHeight.toArcsecs / 2.0,
-      ScienceFovWidth.toArcsecs,
-      ScienceFovHeight.toArcsecs
+      -ScienceFovWidth.toArcsecs / 2.0,
+      ScienceFovHeight.toArcsecs,
+      ScienceFovWidth.toArcsecs
     )
 
   /** Create the shape for the science area based on the instrument configuration.
