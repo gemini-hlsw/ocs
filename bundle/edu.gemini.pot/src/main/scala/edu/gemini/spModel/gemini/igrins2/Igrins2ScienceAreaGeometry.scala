@@ -9,8 +9,8 @@ import java.awt.Shape
 import java.awt.geom.{Area, Ellipse2D, Rectangle2D}
 
 object Igrins2ScienceAreaGeometry extends ScienceAreaGeometry {
-  val ScienceFovHeight: Angle = Angle.fromArcsecs(0.3)
-  val ScienceFovWidth: Angle = Angle.fromArcsecs(5.0)
+  val ScienceFovHeight: Angle = Angle.fromArcsecs(5.0)
+  val ScienceFovWidth: Angle = Angle.fromArcsecs(0.3)
   val SVCSize: Angle   = Angle.fromArcsecs(40)
   val SVCRadius: Angle = (SVCSize / 2).get
 
