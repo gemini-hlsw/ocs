@@ -141,7 +141,7 @@ final case class ImagingExp(
                     sigma: Double,
                     coadds: Option[Int],
                     sourceFraction: Double,
-                    offset: Double) extends Imaging with ExpMethod {
+                    offset: Double) extends Imaging with IntMethod {
   val exposureTime: Double = 60
 }
 

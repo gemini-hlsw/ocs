@@ -54,6 +54,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         _obsConditionParameters = p.conditions();
         _telescope              = p.telescope();
         this.exposureTime       = (int) p.observation().exposureTime();
+
         // some general validations
         Validation.validate(mainInstrument, _obsDetailParameters, _sdParameters);
     }
@@ -555,7 +556,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         // Calculate the Peak Pixel Flux
         final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, exposureTime, SFcalc, im_qual, sed_integral, sky_integral);
 
-        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
+        return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, Recipe$.MODULE$.noAOSystem(), ExposureCalculation$.MODULE$.option(IS2Ncalc.getExposureTime(), numberExposures, IS2Ncalc.totalSNRatio()));
 
     }
 
