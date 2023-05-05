@@ -201,14 +201,20 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         //     that we expect.  Using a smoothing element of  = smoothingElement + 1
         //     May need to take this out in the future.
         ///////////////////////////////////////////////////////////////////////////////////////
-        // TODO. The forceResample attribute has been created so that it does not introduce a change to the rest of the instruments.
-        // Andy detected this problem working on Ghost implementation. A jira ticket will be created to find a good solution.
-        if (smoothingElement > 1 || this.forceResample) {
+
+        // TODO:
+        // A perfectly sampled SED will have resElement / sampling = 2.
+        // Smoothing should only be required if resElement / sampling is > 2.
+        // Previously we _always_ smoothed.
+        // In order to do the calculation correctly for GHOST without breaking old tests the
+        // forceResample attribute was introduced and a jira ticket will be created to find a good solution.
+
+        if (smoothingElement > 2 || this.forceResample) {
             Log.fine("Smoothing source; element = " + (smoothingElement + 1));
             sourceFlux.smoothY(smoothingElement + 1);
         }
 
-        if (backgroundSmoothingElement > 1 || this.forceResample) {
+        if (backgroundSmoothingElement > 2 || this.forceResample) {
             Log.fine("Smoothing background; element = " + (backgroundSmoothingElement + 1));
             backgroundFlux.smoothY(backgroundSmoothingElement + 1);
         }
@@ -225,7 +231,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
             //     that we expect.  Using a smoothing element of  = smoothingElement + 1
             //     May need to take this out in the future.
             ///////////////////////////////////////////////////////////////////////////////////////
-            if (haloSmoothingElement > 1 || this.forceResample) {
+            if (haloSmoothingElement > 2 || this.forceResample) {
                 Log.fine("Smoothing halo; element = " + (haloSmoothingElement + 1));
                 haloFlux.smoothY(haloSmoothingElement + 1);
             }
@@ -278,7 +284,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         final VisitableSampledSpectrum signal = haloIsUsed ? signalWithHalo(throughput.onePixelThroughput(), haloThroughput.onePixelThroughput()) : signal(throughput.onePixelThroughput());
         final VisitableSampledSpectrum sqrtBackground = background(new OnePixelSlit(input_slit.width(), input_slit.pixelSize())); // background(slit); REL-508
 
-        // For debugging purposes, uncomment this to plot the TOTAL signal in the aperture:
+        // For testing purposes, uncomment this bit to plot the TOTAL signal in the aperture:
         //Log.warning("Calculating the TOTAL signal and background in the aperture.");
         //final VisitableSampledSpectrum signal = haloIsUsed ? signalWithHalo(throughput.throughput(), haloThroughput.throughput()) : signal(throughput.throughput());
         //final VisitableSampledSpectrum sqrtBackground = background(input_slit);
