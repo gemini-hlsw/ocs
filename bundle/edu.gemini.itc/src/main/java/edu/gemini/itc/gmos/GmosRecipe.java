@@ -248,6 +248,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final SEDFactory.SourceResult[] src = new SEDFactory.SourceResult[numberOfSlits];
 
         for (int i = 0; i < numberOfSlits; i++) {
+            Log.fine("Starting slit " + i);
             src[i] = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
         }
 
@@ -318,6 +319,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             double shift = 0;
 
             for (int i = 0; i < ifusToShow; i++) {
+                Log.fine(String.format("Processing IFU element %d of %d -----", i, ifusToShow));
                 GmosSpecS2N s2n = new GmosSpecS2N(numberOfSlits);
 
                 double spsf;

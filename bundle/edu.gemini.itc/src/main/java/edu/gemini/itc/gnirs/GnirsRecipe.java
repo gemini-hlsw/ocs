@@ -142,6 +142,8 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             //
             // inputs: source morphology specification
 
+            sed.accept(instrument.getGratingOrderNTransmission(instrument.getOrder()));
+
             // Morphology section
             final VisitableMorphology morph, haloMorphology;
             if (_sdParameters.profile() == PointSource$.MODULE$) {
@@ -187,6 +189,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             final SpecS2N[] specS2Narr = new SpecS2N[_obsDetailParameters.analysisMethod() instanceof IfuSummed ? 1 : sf_list.size()];
 
             while (src_frac_it.hasNext()) {
+                Log.fine(String.format("Processing IFU element %d of %d -----", i, ap_offset_list.size() - 1));
                 double slitLength = 1.0;  // pixel
 
                 if (_obsDetailParameters.analysisMethod() instanceof IfuSummed) {
@@ -221,9 +224,9 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                         im_qual1,
                         instrument.getReadNoise(),
                         instrument.getDarkCurrent(),
-                        _obsDetailParameters);
+                        _obsDetailParameters,
+                        false);
 
-                sed.accept(instrument.getGratingOrderNTransmission(instrument.getOrder()));
                 specS2N.setSourceSpectrum(sed);
                 specS2N.setBackgroundSpectrum(sky);
                 if (altair.isDefined()) {
