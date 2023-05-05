@@ -23,14 +23,15 @@
 	</p>
 	<table background="https://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0" height="101" width="100%">
 		<tbody>
+
 			<tr>
 				<td colspan="3"><b>Spatial profile and brightness:</b><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10257','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i><br />
 				<i>Choose one of point, extended or user-defined source profile and the brightness in any
 				filter/wavelength </i></td>
-
 			</tr>
+
 			<tr>
-				<td><input name="Profile" value="POINT" checked="checked" type="radio" /></td>
+				<td width="20"><input name="Profile" value="POINT" checked="checked" type="radio" /></td>
 				<td colspan="2"><b>Point source</b> (<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10257#spatial','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">nominal
 				PSF</a>) with spatially integrated brightness <input name="psSourceNorm" size="8" value="17.0" type="text" />
 					<select name="psSourceUnits" size="1">
@@ -43,16 +44,18 @@
 					</select> (e.g. 19.3 mag or 2e-17 W/m²/µm)
 				</td>
 			</tr>
+
 			<tr>
 				<td valign="top"></td>
-
 				<td colspan="2"><b>Extended source</b> having ...(When this option is selected the image
 				quality selection in section 3 of the ITC is disabled.) </td>
 			</tr>
+
 			<tr>
-				<td> </td>
-				<td><img src="/spacer.gif" height="1" width="40" style="opacity:0.0"/><input name="Profile" value="GAUSSIAN" type="radio" /></td>
-				<td>Gaussian profile with full width half maximum of <input name="gaussFwhm" size="5" value="1.0" type="text" /> arcsec and spatially integrated brightness of <input name="gaussSourceNorm" size="8" value="1.0e-3" type="text" />
+				<td>&nbsp;</td>
+				<td width="20"><input name="Profile" value="GAUSSIAN" type="radio" /></td>
+				<td>Gaussian profile with full width half maximum of <input name="gaussFwhm" size="5" value="1.0" type="text" /> arcsec
+					and spatially integrated brightness of <input name="gaussSourceNorm" size="8" value="1.0e-3" type="text" />
                     <select name="gaussSourceUnits" size="1">
                         <option value="MAG">mag</option>
                         <option value="ABMAG">AB mag</option>
@@ -62,11 +65,11 @@
                         <option value="ERGS_FREQUENCY">erg/s/cm²/Hz</option>
                     </select> (e.g. 19.3 mag or 2e-17 W/m²/µm)
                 </td>
-
 			</tr>
+
 			<tr>
-				<td> </td>
-				<td><img src="/spacer.gif" height="1" width="40" style="opacity:0.0"/><input name="Profile" value="UNIFORM" type="radio" /></td>
+				<td>&nbsp;</td>
+				<td><input name="Profile" value="UNIFORM" type="radio" /></td>
 				<td>Uniform surface brightness <input name="usbSourceNorm" size="8" value="22.0" type="text" />
                     <select name="usbSourceUnits" size="1">
                         <option selected value="MAG_PSA">mag/arcsec²</option>
@@ -80,7 +83,7 @@
 			</tr>
 
 			<tr>
-				<td colspan="3"><img src="/spacer.gif" height="40" width="1" style="opacity:0.0"/>with the above <b>brightness normalisation</b> applied in filter
+				<td colspan="3">with the above <b>brightness normalisation</b> applied in filter
 					<select name="WavebandDefinition" size="1">
 						<option value="U">U (0.36 µm)</option>
 						<option value="B">B (0.44 µm)</option>
@@ -104,22 +107,19 @@
 			</tr>
 
 			<tr>
-				<td colspan="3">
-				<p align="right"> <!--<input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" /> -->
-					<input value="Calculate" type="submit" style="background-color: gold; padding: 3px 8px;">
-				</p>
-			</td>
+				<td colspan="3"><p align="right"><input value="Calculate" type="submit" style="background-color: gold; padding: 3px 8px;"></p></td>
 			</tr>
 
 			<tr>
-				<td colspan="3">
-				<hr />
-				</td>
+				<td colspan="3"><hr /></td>
 			</tr>
+
 			<!-- Spectrum definition-->
 			<tr>
-				<td colspan="3"><b>Spectral distribution:</b> <i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10257#spectral','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i><br />
-				<i>Choose one SED, the redshift and extinction</i></td>
+				<td colspan="3"><b>Spectral distribution:</b>
+					<i>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10257#spectral','mywindow',
+					'width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)
+					Choose one SED, the redshift and extinction</i></td>
 			</tr>
 
 			<tr>
@@ -298,8 +298,8 @@
 						<option value="SW_5">0.45 arcsec slit</option>
 						<option value="SW_6">0.675 arcsec slit</option>
 						<option value="SW_7">1.0 arcsec slit</option>
-						<option value="LR_IFU">LR-IFU</option>
-						<option value="HR_IFU">HR-IFU</option>
+						<option value="LR_IFU">LR-IFU (4.8" &times; 3.2")</option>
+						<option value="HR_IFU">HR-IFU (1.8" &times; 1.25")</option>
 						<option value="ACQUISITION">imaging</option>
 					</select>
 				</td>
@@ -510,93 +510,125 @@
 	</p>
 	<table background="https://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0" height="70" width="100%">
 		<tbody>
+
 			<tr>
-				<td colspan="2" height="40" valign="bottom"><b>Calculation method:</b> <i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
+				<td colspan="3" height="40" valign="bottom"><b>Calculation method:</b>
+					<i>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256','mywindow',
+					'width=1000,height=700,toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</i>
 				<i>Select the calculation method (note: second method is not available for spectroscopy)</i></td>
 			</tr>
+
 			<tr>
-
-			<td><input value="s2n" name="calcMethod" checked="checked" type="radio" /></td>
-			<td>Total S/N ratio resulting from <input name="numExpA" size="5" value="30" type="text" />
-				exposures each having <input name="numCoaddsA" size="5" value="1" type="text" /> coadds with exposure time of <input name="expTimeA" size="5" value="120" type="text" /> secs, and with a fraction <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
-
+			<td width="20"><input value="s2n" name="calcMethod" checked="checked" type="radio" /></td>
+			<td colspan="2">Total S/N ratio resulting from <input name="numExpA" size="5" value="30" type="text" />
+				exposures each having <input name="numCoaddsA" size="5" value="1" type="text" /> coadds
+				with exposure time of <input name="expTimeA" size="5" value="120" type="text" /> secs,
+				and with a fraction <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
 			</tr>
+
 			<tr>
 				<td><input value="intTime" name="calcMethod" type="radio" /></td>
-				<td>Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" /> using an exposure time for each exposure of <input name="expTimeC" size="5" value="120" type="text" /> secs and <input name="numCoaddsC" size="5" value="1" type="text" /> coadds, and with a fraction <input name="fracOnSourceC" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
-
+				<td colspan="2">Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" />
+					using an exposure time for each exposure of <input name="expTimeC" size="5" value="120" type="text" /> secs
+					and <input name="numCoaddsC" size="5" value="1" type="text" /> coadds,
+					and with a fraction <input name="fracOnSourceC" size="4" value="1.0" type="text" /> of exposures that observe the source</td>
 			</tr>
 
 			<tr>
-				<td colspan="2" height="40" valign="bottom"><b>Telescope offset:</b><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/sciops/instruments/gnirs/spectroscopy/observing-strategies#offsetting','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
+				<td colspan="3" height="40" valign="bottom"><b>Telescope offset:</b>
+					<i>(<a href="#" onclick="window.open('http://www.gemini.edu/sciops/instruments/gnirs/spectroscopy/observing-strategies#offsetting',
+					'mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</i></td>
 			</tr>
+
 			<tr>
-				<td colspan="2">Dither offset size: <input name="offset" size="5" value="5.0" type="text" />  arcsec</td>
+				<td>&nbsp;</td>
+				<td colspan="2">Dither size: <input name="offset" size="5" value="5.0" type="text" /> arcsec</td>
 			</tr>
 
 			<!-- calc method C--><!-- analysis methods-->
+
 			<tr>
-				<td colspan="2" height="50" valign="bottom"><b>Analysis method:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256#analysis','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
-				<input value="1" name="autoSkyAper" type="hidden">
-				<input value="1" name="userSkyAper" type="hidden">
-				<input value="1" name="ifuSkyFibres" type="hidden">
+				<td colspan="3" height="40" valign="bottom"><b>Analysis method:</b>
+					<i>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256#analysis','mywindow',
+					'width=1000,height=700,toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</i>
+					<input value="1" name="autoSkyAper" type="hidden">
+					<input value="1" name="userSkyAper" type="hidden">
+					<input value="1" name="ifuSkyFibres" type="hidden">
+				</td>
 			</tr>
 
 			<tr>
-				<td><input value="autoAper" name="analysisMethod" checked="checked" type="radio" /></td>
+				<td>&nbsp;</td>
+				<td colspan="2" height="30" valign="bottom"><b>Imaging & Slit Spectroscopy:</b></td>
+			</tr>
+
+			<tr>
+				<td>&nbsp;</td>
+				<td width="20"><input value="autoAper" name="analysisMethod" checked="checked" type="radio" /></td>
 				<td>Software aperture that gives 'optimum' S/N ratio </td>
 			</tr>
 
 			<tr>
+				<td>&nbsp;</td>
 				<td><input value="userAper" name="analysisMethod" type="radio" /></td>
 				<td>Software aperture of diameter (or slit length) <input name="userAperDiam" size="4" value="2" type="text" /> arcsec </td>
 			</tr>
 
 			<tr>
-				<td><input value="singleIFU" name="analysisMethod" type="radio" /></td>
-				<td>IFU: Select an individual element offset by
-					<input name="ifuOffset" size="5" value="0.0" type="text" /> arcsec from the center</td>
+				<td>&nbsp;</td>
+				<td colspan="2" height="30" valign="bottom"><b>IFU:</b>
+				&nbsp; (elements = spaxels, LR-IFU elements are 0.15" &times; 0.15" and HR-IFU elements are 0.05" &times; 0.05", &nbsp;
+				<i><a href="#" onclick="window.open('http://www.gemini.edu/instrumentation/gnirs/components/#IFU','mywindow',
+				'width=1000,height=700,toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</i>
+				</td>
 			</tr>
 
 			<tr>
+				<td>&nbsp;</td>
+				<td><input value="singleIFU" name="analysisMethod" type="radio" /></td>
+				<td>Individual element offset by <input name="ifuOffset" size="5" value="0.0" type="text" /> arcsec from the center</td>
+			</tr>
+
+			<tr>
+				<td>&nbsp;</td>
 				<td><input value="summedIFU" name="analysisMethod" type="radio" /></td>
-				<td>IFU: Sum multiple elements:
-					<input name="ifuNumX" size="5" value="5" type="text" /> by
-					<input name="ifuNumY" size="5" value="5" type="text" /> apertures
+				<td>Sum of
+					<input name="ifuNumX" size="3" value="5" type="text" /> &times;
+					<input name="ifuNumY" size="3" value="5" type="text" /> elements at the center
 					<input name="ifuCenterX" size="5" value="0.0" type="hidden" />
 					<input name="ifuCenterY" size="5" value="0.0" type="hidden" /></td>
 			</tr>
 
 			<tr>
+				<td>&nbsp;</td>
 				<td><input value="radialIFU" name="analysisMethod" type="radio" /></td>
-				<td>IFU: Select multiple elements along a radius with offsets from
-					<input name="ifuMinOffset" size="5" value="0.0" type="text" />  to
-					<input name="ifuMaxOffset" size="5" value="1.0" type="text" /> arcsec </td>
+				<td>Multiple elements along a radius from
+					<input name="ifuMinOffset" size="5" value="0.0" type="text" /> to
+					<input name="ifuMaxOffset" size="5" value="1.0" type="text" /> arcsec from the center</td>
 			</tr>
 
 			<tr>
-				<td colspan="2" height="50" valign="bottom"><b>Output:</b> (spectroscopy) </td>
+				<td colspan="3" height="40" valign="bottom"><b>Output:</b> (spectroscopy) </td>
 			</tr>
 
 			<tr>
 				<td><input value="AUTO" name="PlotLimits" checked="checked" type="radio" /></td>
-				<td>Autoscale</td>
+				<td colspan="2">Autoscale</td>
 			</tr>
-			<tr><td><input value="USER" name="PlotLimits" type="radio" /></td>
-				<td>Display the range <input name="plotWavelengthL" size="6" value="2.10" type="text" /> to
+
+			<tr>
+				<td><input value="USER" name="PlotLimits" type="radio" /></td>
+				<td colspan="2">Display the range <input name="plotWavelengthL" size="6" value="2.10" type="text" /> to
 					<input name="plotWavelengthU" size="6" value="2.20" type="text" /> microns</td>
 			</tr>
 
 			<tr>
-				<td colspan="2">
-					<p align="right"> <!--<input src="https://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" /> -->
-						<input value="Calculate" type="submit" style="background-color: gold; padding: 3px 8px;">
-					</p>
-				</td>
+				<td colspan="3"> <p align="right"> <input value="Calculate" type="submit" style="background-color: gold; padding: 3px 8px;"></p></td>
 			</tr>
 
 		</tbody>
 	</table>
+
 	<div align="center">
 	<center>
 	<p>
