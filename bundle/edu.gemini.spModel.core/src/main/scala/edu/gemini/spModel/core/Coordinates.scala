@@ -17,6 +17,9 @@ final case class Coordinates(ra: RightAscension, dec: Declination) {
     Coordinates(ra0, dec0)
   }
 
+  def offset(o: Offset): Coordinates =
+    angularOffset(o.bearing, o.distance)
+
   /**
    * Compute the offset require to transform this `Coordinates` to the given one, such that
    * c1 offset (c1 diff c2) == c2.

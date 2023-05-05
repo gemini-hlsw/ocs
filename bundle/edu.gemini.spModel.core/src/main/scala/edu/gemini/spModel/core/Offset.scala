@@ -12,6 +12,7 @@ import Scalaz._
  * base position and a second position.
  */
 case class Offset(p: OffsetP, q: OffsetQ) {
+
   /**
    * Calculates the absolute distance between this Offset position and the
    * given position
@@ -27,6 +28,15 @@ case class Offset(p: OffsetP, q: OffsetQ) {
     val d = sqrt(pd*pd + qd*qd)
 
     Angle.fromDegrees(d)
+  }
+
+  /**
+   * Calculates the bearing from 0,0 as an Angle clockwise from north 0º.
+   */
+  def bearing: Angle = {
+    val x = -p.toAngle.toSignedDegrees
+    val y =  q.toAngle.toSignedDegrees
+    Angle.fromRadians(atan2(x, y))
   }
 
   /**
