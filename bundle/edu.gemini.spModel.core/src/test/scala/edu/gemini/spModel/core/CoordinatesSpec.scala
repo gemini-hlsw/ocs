@@ -63,6 +63,30 @@ object CoordinatesSpec extends Specification with ScalaCheck with Arbitraries wi
         c.angularDistance(newCoordinates) ~= distance
       }
 
+    "calculate offset in angular separation" ! {
+
+      val o = Offset(OffsetP(Angle.fromArcmin(2.0)), OffsetQ(Angle.zero))
+
+      val ra   = RightAscension.fromHours(12.0)
+      val d0   = Declination.fromDegrees(0).get
+      val d45  = Declination.fromDegrees(45).get
+      val dm45 = Declination.fromDegrees(-45).get
+
+      // At the equator there is no correction
+      val c0 = Coordinates(ra, d0)
+      val c1 = Coordinates(ra.offset(Angle.fromArcmin(2.0)), d0)
+      c0.offset(o) ~= c1
+
+      // Further away we correct by cos(dec)
+      val c2 = Coordinates(ra, d45)
+      val c3 = Coordinates(ra.offset(Angle.fromArcmin(2.0/Math.cos(45.0.toRadians))), d45)
+      c2.offset(o) ~= c3
+
+      // Further away we correct by cos(dec)
+      val c4 = Coordinates(ra, dm45)
+      val c5 = Coordinates(ra.offset(Angle.fromArcmin(2.0/Math.cos(-45.0.toRadians))), dm45)
+      c4.offset(o) ~= c5
+    }
   }
 
   "Coordinates Angular Separation" should {

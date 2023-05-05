@@ -14,6 +14,9 @@ import java.time.Instant
 import scalaz._
 import Scalaz._
 import edu.gemini.spModel.core.Angle
+import edu.gemini.spModel.core.Offset
+import edu.gemini.spModel.core.OffsetP
+import edu.gemini.spModel.core.OffsetQ
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostTarget
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.GuideFiberState
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.PrvMode
@@ -200,18 +203,22 @@ object Asterism {
     target:       SPTarget
   ): Asterism = {
 
-    def targetPlus(am: Int, name: String): SPTarget = {
+    def offset(arcMin: Int): Offset =
+      Offset(OffsetP(Angle.fromArcmin(arcMin)), OffsetQ.Zero)
+
+    val plus2: Offset  = offset(2)
+    val minus2: Offset = offset(-2)
+
+    def targetPlus(o: Offset, name: String): SPTarget = {
       val res = new SPTarget()
-      res.setTarget(
-        Target.ra.mod(_.offset(Angle.fromArcmin(am.toDouble)), target.getTarget)
-      )
+      res.setTarget(Target.coords.mod(_.offset(o), target.getTarget))
       res.setName(name)
       res
     }
 
-    def coordinatesPlus(am: Int): SPCoordinates =
+    def coordinatesPlus(o: Offset): SPCoordinates =
       target.getCoordinates(None).fold(new SPCoordinates()) { c =>
-        new SPCoordinates(c.offset(Angle.fromArcmin(am.toDouble), Angle.zero))
+        new SPCoordinates(c.offset(o))
       }
 
     def ghostTarget(sp: SPTarget): GhostTarget =
@@ -227,20 +234,20 @@ object Asterism {
       case AsterismType.GhostDualTarget                     =>
         GhostAsterism.DualTarget(
           ghostTarget(target),
-          ghostTarget(targetPlus(-2, "Target 2")),
+          ghostTarget(targetPlus(plus2, "Target 2")),
           None
         )
 
       case AsterismType.GhostTargetPlusSky                  =>
         GhostAsterism.TargetPlusSky(
           ghostTarget(target),
-          coordinatesPlus(-2),
+          coordinatesPlus(plus2),
           None
         )
 
       case AsterismType.GhostSkyPlusTarget                  =>
         GhostAsterism.SkyPlusTarget(
-          coordinatesPlus(2),
+          coordinatesPlus(minus2),
           ghostTarget(target),
           None
         )
@@ -248,7 +255,7 @@ object Asterism {
       case AsterismType.GhostHighResolutionTargetPlusSky    =>
         GhostAsterism.HighResolutionTargetPlusSky(
           ghostTarget(target),
-          coordinatesPlus(-2),
+          coordinatesPlus(plus2),
           PrvMode.PrvOff,
           None
         )
@@ -256,7 +263,7 @@ object Asterism {
       case AsterismType.GhostHighResolutionTargetPlusSkyPrv =>
         GhostAsterism.HighResolutionTargetPlusSky(
           ghostTarget(target),
-          coordinatesPlus(-2),
+          coordinatesPlus(plus2),
           PrvMode.PrvOn,
           None
         )

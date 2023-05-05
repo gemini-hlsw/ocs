@@ -68,5 +68,26 @@ class OffsetSpec extends Specification with ScalaCheck with Arbitraries {
         o1.distance(o2) ~= o2.distance(o1)
       }
     }
+
+    "calculate bearing" in {
+      val tests = List(
+        ( 0,  1,   0),
+        ( 1,  1, 315),
+        ( 1,  0, 270),
+        ( 1, -1, 225),
+        ( 0, -1, 180),
+        (-1, -1, 135),
+        (-1,  0,  90),
+        (-1,  1,  45)
+      )
+
+      tests.forall { case (p, q, b) =>
+        val p0 = p.arcsecs[OffsetP]
+        val q0 = q.arcsecs[OffsetQ]
+        val o  = Offset(p0, q0)
+        val e  = ~Angle.fromDMS(b, 0, 0)
+        o.bearing ~= e
+      }
+    }
   }
 }
