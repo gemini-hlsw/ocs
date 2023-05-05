@@ -152,7 +152,7 @@ object GhostCamera {
 
         (FOUR_BY_FOUR, SLOW_LOW)   -> duration(  9, 536),
         (FOUR_BY_FOUR, MEDIUM_LOW) -> duration(  6, 581),
-        (FOUR_BY_FOUR, FAST_LOW)   -> duration(  4, 770)
+        (FOUR_BY_FOUR, FAST_LOW)   -> duration(  4,  77)
       )
       GhostBinning.values.foldLeft(m) { (m, b) =>
         m.updated((b, FAST_HIGH), m(b, FAST_LOW))

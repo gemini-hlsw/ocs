@@ -47,6 +47,7 @@ public class IFUComponent extends TransmissionElement {
         int Napps = new Double((IFURadialMax - IFURadialMin) / (ifuElementSize) + 1).intValue();
 
         if (Napps < 0) Napps = 1;
+        Log.fine("Number of apertures & offsets = " + Napps);
 
         IFUApertures = new ApertureComposite();
         IFUOffsets = new ArrayList<>();
