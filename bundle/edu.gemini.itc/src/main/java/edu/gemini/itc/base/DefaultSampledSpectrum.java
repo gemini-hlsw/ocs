@@ -1,4 +1,5 @@
 package edu.gemini.itc.base;
+import java.util.logging.Logger;
 
 /**
  * Default implementation of SampledSpectrum interface.
@@ -20,6 +21,7 @@ package edu.gemini.itc.base;
  * DefaultSampledSpectrum plays the role of a Concrete Element.
  */
 public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
+    private static final Logger Log = Logger.getLogger(DefaultSampledSpectrum.class.getName());
     private double[] _y; //Array containing flux values in relative units
 
     //Values of start and end points
@@ -248,7 +250,8 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     /**
      * Rescales X axis by specified factor. Doesn't change sampling size.
      */
-    @Override public void rescaleX(double factor) {
+    public void rescaleXwithFixedSampleSize(double factor) {
+        Log.fine(String.format("Rescaling X by %.5f", factor));
         if (factor == 1.0) return;
         double xStart = getStart() * factor;
         double xEnd = getEnd() * factor;
@@ -263,16 +266,38 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     }
 
     /**
+     * Rescales X axis by specified factor.  Doesn't change the number of samples.
+     */
+    public void rescaleX(double factor) {
+        Log.fine(String.format("Rescaling X by %.5f", factor));
+        if (factor == 1.0) return;
+        int numIntervals = getLength();
+        double xStart = getStart() * factor;
+        double xEnd = getEnd() * factor;
+        double sampling = (xEnd - xStart) / numIntervals;
+        Log.fine(String.format("New sampling = %.5f nm", sampling));
+        double[] data = new double[numIntervals];
+        double x;
+        for (int i = 0; i < numIntervals; ++i) {
+            x = (double) i * sampling + xStart;
+            data[i] = getY(x / factor);
+        }
+        reset(data, xStart, sampling);
+    }
+
+    /**
      * Rescales Y axis by specified factor.
      */
     @Override public void rescaleY(double factor) {
         if (factor == 1.0) return;
+        Log.fine(String.format("Rescaling Y by %.5f", factor));
         for (int i = 0; i < getLength(); ++i) {
             _y[i] *= factor;
         }
     }
 
     @Override public void smoothY(int smoothing_element) {
+        Log.fine(String.format("Smoothing Y by %d pix", smoothing_element));
         double[] _y_temp;
         _y_temp = new double[_y.length];
         if (smoothing_element == 1.0) return;

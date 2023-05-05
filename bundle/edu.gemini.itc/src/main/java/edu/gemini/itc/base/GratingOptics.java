@@ -108,7 +108,7 @@ public abstract class GratingOptics extends TransmissionElement implements Dispe
         // if an array is not defined then use the scalar value:
         if (data.apply(gratingName).dispersionArray() == null) {
             final double disp =data.apply(gratingName).dispersion() * _spectralBinning;
-            Log.fine(String.format("Dispersion = %7.5f nm/pix", disp));
+            //Log.fine(String.format("Dispersion = %7.5f nm/pix", disp));
             return disp;
         }
         final double[][] data2 = data.apply(gratingName).dispersionArray();

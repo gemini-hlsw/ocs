@@ -117,10 +117,14 @@ public final class SEDFactory {
     private static VisitableSampledSpectrum getSED(final SourceDefinition sdp, final Instrument instrument) {
 
         final VisitableSampledSpectrum temp;
+
+        final double sampling = instrument.getSampling() / (1.0 + sdp.redshift().z());
+        Log.fine(String.format("Sampling = %.5f nm", sampling));
+
         if (sdp.distribution() instanceof BlackBody) {
             return BlackBodySpectrum.apply(
                     ((BlackBody) sdp.distribution()).temperature(),
-                    instrument.getSampling(),
+                    sampling,
                     sdp.norm(),
                     sdp.units(),
                     sdp.normBand(),
@@ -136,14 +140,14 @@ public final class SEDFactory {
                     eLine.flux(),
                     eLine.continuum(),
                     sdp.redshift(),
-                    instrument.getSampling());
+                    sampling);
 
         } else if (sdp.distribution() instanceof PowerLaw) {
             return new PowerLawSpectrum(
                     ((PowerLaw) sdp.distribution()).index(),
                     instrument.getObservingStart(),
                     instrument.getObservingEnd(),
-                    instrument.getSampling(),
+                    sampling,
                     sdp.redshift());
 
         } else if (sdp.distribution() instanceof UserDefinedSpectrum) {
@@ -165,18 +169,18 @@ public final class SEDFactory {
             temp = getUserSED(userDefined,
                     Math.min(inst_start_wave, band.start().toNanometers()),
                     Math.max(inst_end_wave, band.end().toNanometers()),
-                    instrument.getSampling(),
+                    sampling,
                     sdp.redshift().z());
             temp.applyWavelengthCorrection();
             return temp;
 
         } else if (sdp.distribution() instanceof LibraryStar) {
-            temp = getSED(getLibraryResource(STELLAR_LIB, sdp).toLowerCase(), instrument.getSampling());
+            temp = getSED(getLibraryResource(STELLAR_LIB, sdp).toLowerCase(), sampling);
             temp.applyWavelengthCorrection();
             return temp;
 
         } else if (sdp.distribution() instanceof LibraryNonStar) {
-            temp = getSED(getLibraryResource(NON_STELLAR_LIB, sdp), instrument.getSampling());
+            temp = getSED(getLibraryResource(NON_STELLAR_LIB, sdp), sampling);
             temp.applyWavelengthCorrection();
             return temp;
 
@@ -225,6 +229,7 @@ public final class SEDFactory {
 
         final VisitableSampledSpectrum sed = SEDFactory.getSED(sdp, instrument);
         final SampledSpectrumVisitor redshift = new RedshiftVisitor(sdp.redshift());
+        Log.fine("Accepting redshift...");
         sed.accept(redshift);
 
         // Must check to see if the redshift has moved the spectrum beyond

@@ -1,6 +1,7 @@
 package edu.gemini.itc.base;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Default implementation of Spectrum interface.
@@ -9,6 +10,7 @@ import java.util.List;
  * x intervals.
  */
 public final class DefaultArraySpectrum implements ArraySpectrum {
+    private static final Logger Log = Logger.getLogger(DefaultArraySpectrum.class.getName());
     // The spectral data.  _data = new double[2][num_data_points]
     // data[0][i] = x values
     // data[1][i] = y values
@@ -165,6 +167,7 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
      * Rescales X axis by specified factor.
      */
     @Override public void rescaleX(double factor) {
+        Log.fine(String.format("Rescaling X by %.5f", factor));
         if (factor == 1.0) return;
         for (int i = 0; i < getLength(); ++i) {
             _data[0][i] *= factor;
@@ -175,6 +178,7 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
      * Rescales Y axis by specified factor.
      */
     @Override public void rescaleY(double factor) {
+        Log.fine(String.format("Scaling Y by %.5f", factor));
         if (factor == 1.0) return;
         for (int i = 0; i < getLength(); ++i) {
             _data[1][i] *= factor;
@@ -182,6 +186,7 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
     }
 
     @Override public void smoothY(int smoothing_element) {
+        Log.fine(String.format("Smoothing Y by %.5f pix", smoothing_element));
         if (smoothing_element == 1.0) return;
         for (int i = 0; i < getLength(); ++i) {
             try {

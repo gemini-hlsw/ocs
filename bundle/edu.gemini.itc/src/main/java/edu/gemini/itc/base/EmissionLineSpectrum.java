@@ -5,6 +5,7 @@ import edu.gemini.spModel.core.Wavelength;
 import squants.motion.Velocity;
 import squants.radio.Irradiance;
 import squants.radio.SpectralIrradiance;
+import java.util.logging.Logger;
 
 /**
  * This class creates a EmissionLine spectrum over the interval defined by the
@@ -13,7 +14,7 @@ import squants.radio.SpectralIrradiance;
  */
 
 public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
-
+    private static final Logger Log = Logger.getLogger(EmissionLineSpectrum.class.getName());
     private final DefaultSampledSpectrum _spectrum;
 
     // Private c'tor to support clone()
@@ -28,7 +29,7 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
         final double z     = redshift.z();
         final double start = 300 / (1 + z);
         final double end = 30000 / (1 + z);
-
+        Log.fine(String.format("Generating emission line SED from %.2f - %.2f nm with %.3f nm steps", start, end, interval));
         final int n = (int) ((end - start) / interval + 1);
         final double[] fluxArray = new double[n];
 
@@ -39,10 +40,9 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
 
         // calculate sigma
         final double sigma = width.toKilometersPerSecond() * _wavelength / 7.05e5;
-        int i = 0;
-        for (double lam = start; lam <= end; lam += interval) {
-            fluxArray[i] = _elineFlux(lam, sigma, _flux, _continuumFlux, _wavelength);
-            i++;
+
+        for (int i = 0; i < n; ++i) {
+            fluxArray[i] = _elineFlux(start + i * interval, sigma, _flux, _continuumFlux, _wavelength);
         }
 
         _spectrum = new DefaultSampledSpectrum(fluxArray, start, interval);
@@ -52,10 +52,10 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
 
     private double _elineFlux(final double lambda, final double sigma, final double flux,
                               final double continuumFlux, final double wave) {
-        //this funtion will calculate the eline spectum for a given wavelen
-        // and sigme (specified by the user. The flux is just the line flux
+        // This function calculates the eline spectrum for a given wavelength
+        // and sigma (specified by the user). The flux is just the line flux
         // of the object in question.  The units are returned internal units.
-        // That is good so we dont have to do any thing to the result.
+        // That is good so we don't have to do anything to the result.
 
         double returnFlux;
 
