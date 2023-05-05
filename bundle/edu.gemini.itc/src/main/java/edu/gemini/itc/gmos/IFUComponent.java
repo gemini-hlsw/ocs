@@ -31,12 +31,14 @@ public final class IFUComponent extends TransmissionElement {
 
         int Napps = new Double((IFURadialMax - IFURadialMin) / (IFU_DIAMETER + IFU_SPACING) + 1).intValue();
         if (Napps < 0) Napps = 1;
+        Log.fine("Number of apertures & offsets = " + Napps);
 
         for (int i = 0; i < Napps; i++) {
             final double Xpos = IFURadialMin + (IFU_DIAMETER + IFU_SPACING) * i;
             IFUApertures.addAperture(new HexagonalAperture(Xpos, 0, IFU_DIAMETER));
             IFUOffsets.add(Xpos);
         }
+        Log.fine("IFU Offsets = " + IFUOffsets);
     }
 
     public IFUComponent(final String prefix, final double IFUOffsetX) {
