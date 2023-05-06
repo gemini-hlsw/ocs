@@ -12,6 +12,7 @@ import edu.gemini.spModel.gemini.gmos.GmosCommonType.Binning;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.BuiltinROI;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer;
 
+import java.util.Comparator;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -899,7 +900,7 @@ public class GmosReadoutTime {
      * there is one overhead value associated. The GmosReadoutKey groups those parameters that
      * are associated with one specific overhead (a Double value)
      */
-    private static final class GmosReadoutKey {
+    private static final class GmosReadoutKey implements Comparable<GmosReadoutKey> {
         private final AmpCount _ampCount;
         private final AmpReadMode _ampSpeed;
         private final BuiltinROI _builtinROI;
@@ -969,6 +970,21 @@ public class GmosReadoutTime {
             if (!this._detectorManufacturer.equals(that._detectorManufacturer)) return false;
             return this._ampGain.equals(that._ampGain);
         }
+
+        @Override
+        public int compareTo(GmosReadoutKey o) {
+            return COMPARATOR.compare(this, o);
+        }
+
+        public static final Comparator<GmosReadoutKey> COMPARATOR =
+          Comparator
+              .<GmosReadoutKey, AmpCount>comparing(k -> k._ampCount)
+              .thenComparing(k -> k._ampSpeed)
+              .thenComparing(k -> k._ampGain)
+              .thenComparing(k -> k._builtinROI)
+              .thenComparing(k -> k._xBin)
+              .thenComparing(k -> k._yBin)
+              .thenComparing(k -> k._detectorManufacturer);
     }
 
 
@@ -1010,5 +1026,51 @@ public class GmosReadoutTime {
             }
         }
         return overhead;
+    }
+
+    private static String capitalize(String input) {
+        return input.substring(0, 1).toUpperCase() + input.substring(1);
+    }
+
+    private static String roi(GmosCommonType.BuiltinROI roi) {
+        switch (roi) {
+            case FULL_FRAME:       return "FullFrame";
+            case CCD2:             return "Ccd2";
+            case CENTRAL_SPECTRUM: return "CentralSpectrum";
+            case CENTRAL_STAMP:    return "CentralStamp";
+            case TOP_SPECTRUM:     return "TopSpectrum";
+            case BOTTOM_SPECTRUM:  return "BottomSpectrum";
+            case CUSTOM:           return "Custom";
+            default: throw new RuntimeException("Unexpected GMOS ROI: " + roi);
+        }
+    }
+
+    public static void main(String[] args) {
+        final Comparator<Map.Entry<GmosReadoutKey, Double>> order = (o1, o2) -> {
+            int k = o1.getKey().compareTo(o2.getKey());
+            if (k == 0) return o1.getValue().compareTo(o2.getValue());
+            else return k;
+        };
+
+        GmosReadoutTime
+                .map
+                .entrySet()
+                .stream()
+                .filter(entry -> entry.getKey()._detectorManufacturer.equals(DetectorManufacturer.HAMAMATSU))
+                .sorted(order)
+                .forEach(entry -> {
+            GmosReadoutKey key = entry.getKey();
+            Double value       = entry.getValue();
+            System.out.printf(
+                "%s\t%s\t%s\t%s\t%s\t%s\t%1.4f seconds%n",
+                key._ampCount.displayValue(),
+                key._ampSpeed.displayValue(),
+                key._ampGain.displayValue(),
+                roi(key._builtinROI),
+                capitalize(GmosCommonType.Binning.getBinningByValue(key._xBin).name().toLowerCase()),
+                capitalize(GmosCommonType.Binning.getBinningByValue(key._yBin).name().toLowerCase()),
+                value
+            );
+        });
     }
 }
