@@ -94,7 +94,7 @@ public final class WdbaGlueService implements WdbaDatabaseAccessService {
     public List<QueuedObservation> getCheckedObservationList(List<String> obsIDs) throws WdbaGlueException {
         List<QueuedObservation> result;
         // First check for no obsIDs - save a little time
-        if (obsIDs.size() == 0) return new ArrayList<QueuedObservation>();
+        if (obsIDs.size() == 0) return new ArrayList<>();
         try {
             result = QueuedObservationFunctor.getQueuedObservations(getDatabase(), obsIDs, _user);
         } catch (SPBadIDException ex) {
