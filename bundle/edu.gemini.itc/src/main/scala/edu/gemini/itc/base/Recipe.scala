@@ -37,6 +37,8 @@ trait SpectroscopyArrayRecipe extends Recipe {
 }
 
 object Recipe {
+  def noExposureTime: Option[ExposureCalculation] = None
+  def noAOSystem: Option[AOSystem] = None
 
   // =============
   // GENERIC CHART CREATION
@@ -82,11 +84,11 @@ object Recipe {
     ItcCcd(r.is2nCalc.singleSNRatio(), r.is2nCalc.totalSNRatio(), r.peakPixelCount, r.instrument.wellDepth, r.instrument.gain, Warning.collectWarnings(r))
 
   def serviceResult(r: ImagingResult): ItcImagingResult =
-    ItcImagingResult(List(toCcdData(r)))
+    ItcImagingResult(List(toCcdData(r)), r.exposureCalculation.toList)
 
   def serviceResult(r: Array[ImagingResult]): ItcImagingResult = {
     val ccds = r.map(toCcdData).toList
-    ItcImagingResult(ccds)
+    ItcImagingResult(ccds, r.map(_.exposureCalculation).toList.flatten)
   }
 
   // === Spectroscopy

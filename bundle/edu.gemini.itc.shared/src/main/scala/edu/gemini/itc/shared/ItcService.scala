@@ -84,7 +84,7 @@ object ItcResult {
 
 // === IMAGING RESULTS
 
-final case class ItcImagingResult(ccds: List[ItcCcd]) extends ItcResult
+final case class ItcImagingResult(ccds: List[ItcCcd], exposureCalculation: List[ExposureCalculation]) extends ItcResult
 
 // === SPECTROSCOPY RESULTS
 
@@ -167,6 +167,11 @@ final case class SpcChartData(chartType: SpcChartType, title: String, xAxis: Cha
 }
 
 case class ExposureCalculation(exposureTime: Double, exposures: Int, signalToNoise: Double)
+
+object ExposureCalculation {
+  def option(exposureTime: Double, exposures: Int, signalToNoise: Double): Option[ExposureCalculation] = 
+    Some(ExposureCalculation(exposureTime, exposures, signalToNoise))
+}
 
 /** The result of a spectroscopy ITC calculation contains some numbers per CCD and a set of groups of charts.
   * Individual charts and data series can be referenced by their types and group index. For most instruments there

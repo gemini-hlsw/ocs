@@ -18,41 +18,78 @@ sealed trait Result {
   def peakPixelCount: Double
 
   // Accessors for convenience.
-  val source      = parameters.source
+  val source = parameters.source
   val observation = parameters.observation
-  val telescope   = parameters.telescope
-  val conditions  = parameters.conditions
+  val telescope = parameters.telescope
+  val conditions = parameters.conditions
 }
 
 /* Internal object for imaging results. */
 final case class ImagingResult(
-                      parameters:       ItcParameters,
-                      instrument:       Instrument,
-                      iqCalc:           ImageQualityCalculatable,
-                      sfCalc:           SourceFraction,
-                      peakPixelCount:   Double,
-                      is2nCalc:         ImagingS2NCalculatable,
-                      aoSystem:         Option[AOSystem]) extends Result
+    parameters: ItcParameters,
+    instrument: Instrument,
+    iqCalc: ImageQualityCalculatable,
+    sfCalc: SourceFraction,
+    peakPixelCount: Double,
+    is2nCalc: ImagingS2NCalculatable,
+    aoSystem: Option[AOSystem],
+    exposureCalculation: Option[ExposureCalculation]
+) extends Result
 
 object ImagingResult {
 
-  def apply(parameters: ItcParameters, instrument: Instrument, iqCalc: ImageQualityCalculatable, sfCalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable) =
-    new ImagingResult(parameters, instrument, iqCalc, sfCalc, peakPixelCount, IS2Ncalc, None)
+  def apply(
+      parameters: ItcParameters,
+      instrument: Instrument,
+      iqCalc: ImageQualityCalculatable,
+      sfCalc: SourceFraction,
+      peakPixelCount: Double,
+      IS2Ncalc: ImagingS2NCalculatable
+  ) =
+    new ImagingResult(
+      parameters,
+      instrument,
+      iqCalc,
+      sfCalc,
+      peakPixelCount,
+      IS2Ncalc,
+      None,
+      None
+    )
 
-  def apply(parameters: ItcParameters, instrument: Instrument, IQcalc: ImageQualityCalculatable, SFcalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable, aoSystem: AOSystem) =
-    new ImagingResult(parameters, instrument, IQcalc, SFcalc, peakPixelCount, IS2Ncalc, Some(aoSystem))
+  def apply(
+      parameters: ItcParameters,
+      instrument: Instrument,
+      IQcalc: ImageQualityCalculatable,
+      SFcalc: SourceFraction,
+      peakPixelCount: Double,
+      IS2Ncalc: ImagingS2NCalculatable,
+      aoSystem: AOSystem
+  ) =
+    new ImagingResult(
+      parameters,
+      instrument,
+      IQcalc,
+      SFcalc,
+      peakPixelCount,
+      IS2Ncalc,
+      Some(aoSystem),
+      None
+    )
 
 }
 
 /* Internal object for generic spectroscopy results. */
 final case class SpectroscopyResult(
-                      parameters:       ItcParameters,
-                      instrument:       Instrument,
-                      iqCalc:           ImageQualityCalculatable,
-                      specS2N:          Array[SpecS2N],   // Array is used for IFU cases (GMOS and NIFS)
-                      slit:             Slit,
-                      slitThrougput:    Double,
-                      aoSystem:         Option[AOSystem],
-                      exposureCalculation: Option[ExposureCalculation]) extends Result {
+    parameters: ItcParameters,
+    instrument: Instrument,
+    iqCalc: ImageQualityCalculatable,
+    specS2N: Array[SpecS2N], // Array is used for IFU cases (GMOS and NIFS)
+    slit: Slit,
+    slitThrougput: Double,
+    aoSystem: Option[AOSystem],
+    exposureCalculation: Option[ExposureCalculation]
+) extends Result {
   lazy val peakPixelCount: Double = specS2N.map(_.getPeakPixelCount).max
 }
+

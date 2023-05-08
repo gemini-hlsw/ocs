@@ -17,9 +17,18 @@ trait ObservationDetailsCodec {
       "offset"
     )
 
+  private val ImagingExpCodec: CodecJson[ImagingExp] =
+    casecodec4(ImagingExp.apply, ImagingExp.unapply)(
+      "sigma",
+      "coadds",
+      "sourceFraction",
+      "offset"
+    )
+
   private val IntMethodCodec: CodecJson[IntMethod] =
     CoproductCodec[IntMethod]
       .withCase("ImagingInt", ImagingIntCodec) { case a: ImagingInt => a }
+      .withCase("ImagingExp", ImagingExpCodec) { case a: ImagingExp => a }
       .asCodecJson
 
   private val ImagingS2NCodec: CodecJson[ImagingS2N] =

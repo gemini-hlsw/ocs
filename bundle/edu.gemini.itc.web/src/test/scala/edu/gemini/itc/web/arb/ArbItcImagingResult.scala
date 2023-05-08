@@ -7,14 +7,24 @@ import scalaz.\/
 
 trait ArbItcImagingResult {
   import itcccd._
+  import exposurecalculation._
   import small._
 
-  val genItcImagingResult: Gen[ItcImagingResult] =
-    Gen.smallNonEmptyListOf(arbitrary[ItcCcd]).map(ItcImagingResult)
+  val genItcCcd: Gen[List[ItcCcd]] =
+    Gen.smallNonEmptyListOf(arbitrary[ItcCcd])
+
+  val genExposureCalculation: Gen[List[ExposureCalculation]] =
+    Gen.smallNonEmptyListOf(arbitrary[ExposureCalculation])
 
   implicit val arbItcImagingResult: Arbitrary[ItcImagingResult] =
-    Arbitrary(genItcImagingResult)
+    Arbitrary {
+      for {
+        ccds  <- genItcCcd
+        calcs <- genExposureCalculation
+      } yield ItcImagingResult(ccds, calcs)
+    }
 
 }
 
 object itcimagingresult extends ArbItcImagingResult
+
