@@ -28,7 +28,7 @@ final public class Igrins2Support implements ITccInstrumentSupport {
     @Override
     public String getWavelength() {
         // in microns
-        return "2.15";
+        return "2.1";
     }
 
     @Override
