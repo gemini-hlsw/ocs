@@ -50,12 +50,14 @@ public final class MemObsExecLog extends MemProgramNodeBase implements ISPObsExe
     @Override public PropagationId putClientData(String name, Object obj) {
         getProgramWriteLock();
 
+        final Level logLevel = Level.FINE;
+
         try {
             final Option<String>        oid = getObsId();
             final StringBuilder         buf = new StringBuilder();
             final List<ObsExecEvent> before = getVisitEvents(name, getDataObject());
             final List<ObsExecEvent>  after = getVisitEvents(name, obj);
-            final boolean         logEvents = !before.equals(after);
+            final boolean         logEvents = LOG.isLoggable(logLevel) && !before.equals(after);
 
             if (logEvents) {
                 buf.append(String.format("Updating ObsExecRecord for %s (%s)\n", oid.getOrElse("<unknown>"), getDocumentData().getLifespanId()));
@@ -69,7 +71,7 @@ public final class MemObsExecLog extends MemProgramNodeBase implements ISPObsExe
                 buf.append(String.format("After.....: %s\n", getDocumentData().versionVector(this.getNodeKey())));
                 buf.append(ObsExecLog.formatEvents(after));
 
-                LOG.log(Level.INFO, buf.toString(), new Throwable());
+                LOG.log(logLevel, buf.toString(), new Throwable());
             }
 
             return propid;
