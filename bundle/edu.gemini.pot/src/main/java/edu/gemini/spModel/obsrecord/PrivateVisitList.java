@@ -90,7 +90,7 @@ final class PrivateVisitList implements Serializable {
 
     private void _rebuild(List<ObsExecEvent> eventList) {
         final String ids = eventList.stream().map(ObsExecEvent::getObsId).distinct().map(SPObservationID::stringValue).reduce((a, b) -> a + ", " + b).orElse("");
-        LOG.info("Rebuilding visit list for: " + ids);
+        LOG.fine("Rebuilding visit list for: " + ids);
 
         eventList.sort(ExecEvent.TIME_COMPARATOR);
         _visits.clear();
