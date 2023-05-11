@@ -58,7 +58,7 @@ scalacOptions in ThisBuild ++= Seq(
 javacOptions in ThisBuild ++= Seq(
   "-source", "1.8",
   "-target", "1.8",
-  "-Xlint:all,-serial,-path,-deprecation,-unchecked,-fallthrough" // TOOD: turn all on except maybe -serial and -path
+  "-Xlint:all,-serial,-path,-deprecation,-unchecked,-fallthrough" // TODO: turn all on except maybe -serial and -path
 )
 
 val specs2Version = "4.8.3"
