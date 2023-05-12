@@ -978,13 +978,13 @@ public class GmosReadoutTime {
 
         public static final Comparator<GmosReadoutKey> COMPARATOR =
           Comparator
-              .<GmosReadoutKey, AmpCount>comparing(k -> k._ampCount)
-              .thenComparing(k -> k._ampSpeed)
-              .thenComparing(k -> k._ampGain)
-              .thenComparing(k -> k._builtinROI)
+              .<GmosReadoutKey, DetectorManufacturer>comparing(k -> k._detectorManufacturer)
               .thenComparing(k -> k._xBin)
               .thenComparing(k -> k._yBin)
-              .thenComparing(k -> k._detectorManufacturer);
+              .thenComparing(k -> k._ampCount)
+              .thenComparing(k -> k._ampGain)
+              .thenComparing(k -> k._ampSpeed)
+              .thenComparing(k -> k._builtinROI);
     }
 
 
@@ -1056,19 +1056,19 @@ public class GmosReadoutTime {
                 .map
                 .entrySet()
                 .stream()
-                .filter(entry -> entry.getKey()._detectorManufacturer.equals(DetectorManufacturer.HAMAMATSU))
                 .sorted(order)
                 .forEach(entry -> {
             GmosReadoutKey key = entry.getKey();
             Double value       = entry.getValue();
             System.out.printf(
-                "%s\t%s\t%s\t%s\t%s\t%s\t%1.4f seconds%n",
-                key._ampCount.displayValue(),
-                key._ampSpeed.displayValue(),
-                key._ampGain.displayValue(),
-                roi(key._builtinROI),
+                "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%1.4f seconds%n",
+                key._detectorManufacturer.displayValue(),
                 capitalize(GmosCommonType.Binning.getBinningByValue(key._xBin).name().toLowerCase()),
                 capitalize(GmosCommonType.Binning.getBinningByValue(key._yBin).name().toLowerCase()),
+                key._ampCount.displayValue(),
+                key._ampGain.displayValue(),
+                key._ampSpeed.displayValue(),
+                roi(key._builtinROI),
                 value
             );
         });
