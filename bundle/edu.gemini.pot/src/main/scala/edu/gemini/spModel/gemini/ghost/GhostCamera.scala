@@ -194,7 +194,7 @@ object GhostCamera {
         (TWO_BY_TWO, MEDIUM_LOW)   -> duration( 8, 633),
         (TWO_BY_TWO, FAST_LOW)     -> duration( 4, 425),
 
-        (TWO_BY_FOUR, SLOW_LOW)    -> duration( 7,  68),
+        (TWO_BY_FOUR, SLOW_LOW)    -> duration( 7, 680),
         (TWO_BY_FOUR, MEDIUM_LOW)  -> duration( 5,  24),
         (TWO_BY_FOUR, FAST_LOW)    -> duration( 3,  71),
 
