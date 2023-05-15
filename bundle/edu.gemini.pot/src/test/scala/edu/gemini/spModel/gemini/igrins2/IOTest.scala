@@ -50,7 +50,7 @@ class IOTest {
   }
 
   val defaultValues =
-    <paramset kind="dataObj" name="IGRINS2">
+    <paramset kind="dataObj" name="IGRINS-2">
       <param value="30.0" name="exposureTime"/>
       <param value="0" name="posAngle"/>
       <param value="1" name="coadds"/>
