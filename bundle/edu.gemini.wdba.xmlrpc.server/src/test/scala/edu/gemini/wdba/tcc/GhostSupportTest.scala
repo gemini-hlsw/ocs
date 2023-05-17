@@ -7,8 +7,10 @@ package edu.gemini.wdba.tcc;
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.gemini.ghost.Ghost
 import edu.gemini.spModel.gemini.ghost.GhostAsterism
+import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.target.SPCoordinates
 import edu.gemini.spModel.target.env.TargetEnvironment
+import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
 import org.junit.Test;
 
 /**
@@ -19,38 +21,80 @@ class GhostSupportTest extends InstrumentSupportTestBase[Ghost](SPComponentType.
   private val emptySky    = new SPCoordinates()
 
   @Test
-  def testSingleTarget() {
-    setTargetEnvironment(TargetEnvironment.create(GhostAsterism.SingleTarget(emptyTarget, None)));
-    verifyInstrumentConfig(getSouthResults, "GHOST_SINGLE_TARGET");
+  def testSingleTarget(): Unit = {
+    setTargetEnvironment(TargetEnvironment.create(GhostAsterism.SingleTarget(emptyTarget, None)))
+    verifyInstrumentConfig(getSouthResults, "GHOST_SINGLE_TARGET")
   }
 
   @Test
-  def testDualTarget() {
-    setTargetEnvironment(TargetEnvironment.create(GhostAsterism.DualTarget(emptyTarget, emptyTarget, None)));
-    verifyInstrumentConfig(getSouthResults, "GHOST_DUAL_TARGET");
+  def testDualTarget(): Unit = {
+    setTargetEnvironment(TargetEnvironment.create(GhostAsterism.DualTarget(emptyTarget, emptyTarget, None)))
+    verifyInstrumentConfig(getSouthResults, "GHOST_DUAL_TARGET")
   }
 
   @Test
-  def testTargetPlusSky() {
-    setTargetEnvironment(TargetEnvironment.create(GhostAsterism.TargetPlusSky(emptyTarget, emptySky, None)));
-    verifyInstrumentConfig(getSouthResults, "GHOST_TARGET_PLUS_SKY");
+  def testTargetPlusSky(): Unit = {
+    setTargetEnvironment(TargetEnvironment.create(GhostAsterism.TargetPlusSky(emptyTarget, emptySky, None)))
+    verifyInstrumentConfig(getSouthResults, "GHOST_TARGET_PLUS_SKY")
   }
 
   @Test
-  def testSkyPlusTarget() {
-    setTargetEnvironment(TargetEnvironment.create(GhostAsterism.SkyPlusTarget(emptySky, emptyTarget, None)));
-    verifyInstrumentConfig(getSouthResults, "GHOST_SKY_PLUS_TARGET");
+  def testSkyPlusTarget(): Unit = {
+    setTargetEnvironment(TargetEnvironment.create(GhostAsterism.SkyPlusTarget(emptySky, emptyTarget, None)))
+    verifyInstrumentConfig(getSouthResults, "GHOST_SKY_PLUS_TARGET")
   }
 
   @Test
-  def testHighResolution() {
-    setTargetEnvironment(TargetEnvironment.create(GhostAsterism.HighResolutionTargetPlusSky(emptyTarget, emptySky, GhostAsterism.PrvMode.PrvOff, None)));
-    verifyInstrumentConfig(getSouthResults, "GHOST_HIGH_RESOLUTION");
+  def testHighResolution(): Unit = {
+    setTargetEnvironment(TargetEnvironment.create(GhostAsterism.HighResolutionTargetPlusSky(emptyTarget, emptySky, GhostAsterism.PrvMode.PrvOff, None)))
+    verifyInstrumentConfig(getSouthResults, "GHOST_HIGH_RESOLUTION")
   }
 
   @Test
-  def testHighResolutionPrv() {
-    setTargetEnvironment(TargetEnvironment.create(GhostAsterism.HighResolutionTargetPlusSky(emptyTarget, emptySky, GhostAsterism.PrvMode.PrvOn, None)));
-    verifyInstrumentConfig(getSouthResults, "GHOST_HIGH_RESOLUTION");
+  def testHighResolutionPrv(): Unit = {
+    setTargetEnvironment(TargetEnvironment.create(GhostAsterism.HighResolutionTargetPlusSky(emptyTarget, emptySky, GhostAsterism.PrvMode.PrvOn, None)))
+    verifyInstrumentConfig(getSouthResults, "GHOST_HIGH_RESOLUTION")
+  }
+
+  @Test
+  def testSingleTargetP2(): Unit = {
+    setTargetEnvironment(TargetEnvironment.create(GhostAsterism.SingleTarget(emptyTarget, None)))
+    addGuideStar(PwfsGuideProbe.pwfs2)
+    verifyInstrumentConfig(getSouthResults, "GHOST_SINGLE_TARGET_P2")
+  }
+
+  @Test
+  def testDualTargetP2(): Unit = {
+    setTargetEnvironment(TargetEnvironment.create(GhostAsterism.DualTarget(emptyTarget, emptyTarget, None)))
+    addGuideStar(PwfsGuideProbe.pwfs2)
+    verifyInstrumentConfig(getSouthResults, "GHOST_DUAL_TARGET_P2")
+  }
+
+  @Test
+  def testTargetPlusSkyP2(): Unit = {
+    setTargetEnvironment(TargetEnvironment.create(GhostAsterism.TargetPlusSky(emptyTarget, emptySky, None)))
+    addGuideStar(PwfsGuideProbe.pwfs2)
+    verifyInstrumentConfig(getSouthResults, "GHOST_TARGET_PLUS_SKY_P2")
+  }
+
+  @Test
+  def testSkyPlusTargetP2(): Unit = {
+    setTargetEnvironment(TargetEnvironment.create(GhostAsterism.SkyPlusTarget(emptySky, emptyTarget, None)))
+    addGuideStar(PwfsGuideProbe.pwfs2)
+    verifyInstrumentConfig(getSouthResults, "GHOST_SKY_PLUS_TARGET_P2")
+  }
+
+  @Test
+  def testHighResolutionP2(): Unit = {
+    setTargetEnvironment(TargetEnvironment.create(GhostAsterism.HighResolutionTargetPlusSky(emptyTarget, emptySky, GhostAsterism.PrvMode.PrvOff, None)))
+    addGuideStar(PwfsGuideProbe.pwfs2)
+    verifyInstrumentConfig(getSouthResults, "GHOST_HIGH_RESOLUTION_P2")
+  }
+
+  @Test
+  def testHighResolutionPrvP2(): Unit = {
+    setTargetEnvironment(TargetEnvironment.create(GhostAsterism.HighResolutionTargetPlusSky(emptyTarget, emptySky, GhostAsterism.PrvMode.PrvOn, None)))
+    addGuideStar(PwfsGuideProbe.pwfs2)
+    verifyInstrumentConfig(getSouthResults, "GHOST_HIGH_RESOLUTION_P2")
   }
 }

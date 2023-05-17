@@ -1,6 +1,8 @@
 package edu.gemini.wdba.tcc;
 
 import edu.gemini.spModel.gemini.ghost.Ghost;
+import edu.gemini.spModel.guide.GuideProbe;
+import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 
 import java.util.Objects;
 
@@ -36,34 +38,44 @@ final public class GhostSupport implements ITccInstrumentSupport {
         return inst.getPosAngleDegreesStr();
     }
 
+    private boolean usesProbe(GuideProbe gp) {
+        return oe.containsTargets(gp);
+    }
+
+    private boolean usesP2() {
+        return usesProbe(PwfsGuideProbe.pwfs2);
+    }
+
     @Override
     public String getTccConfigInstrument() {
         final String result;
+
+        final String usesP2 = usesP2() ? "_P2" : "";
         switch (oe.getTargetEnvironment().getAsterism().asterismType()) {
 
             case GhostSingleTarget:
-                result = "GHOST_SINGLE_TARGET";
+                result = "GHOST_SINGLE_TARGET" + usesP2;
                 break;
 
             case GhostDualTarget:
-                result = "GHOST_DUAL_TARGET";
+                result = "GHOST_DUAL_TARGET" + usesP2;
                 break;
 
             case GhostTargetPlusSky:
-                result = "GHOST_TARGET_PLUS_SKY";
+                result = "GHOST_TARGET_PLUS_SKY" + usesP2;
                 break;
 
             case GhostSkyPlusTarget:
-                result = "GHOST_SKY_PLUS_TARGET";
+                result = "GHOST_SKY_PLUS_TARGET" + usesP2;
                 break;
 
             case GhostHighResolutionTargetPlusSky:
             case GhostHighResolutionTargetPlusSkyPrv:
-                result = "GHOST_HIGH_RESOLUTION";
+                result = "GHOST_HIGH_RESOLUTION" + usesP2;
                 break;
 
             default:
-                result = "GHOST";
+                result = "GHOST" + usesP2;
         }
         return result;
     }
