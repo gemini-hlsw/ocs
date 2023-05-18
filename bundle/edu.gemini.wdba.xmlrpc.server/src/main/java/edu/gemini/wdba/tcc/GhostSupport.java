@@ -54,30 +54,30 @@ final public class GhostSupport implements ITccInstrumentSupport {
         switch (oe.getTargetEnvironment().getAsterism().asterismType()) {
 
             case GhostSingleTarget:
-                result = "GHOST_SINGLE_TARGET" + usesP2;
+                result = "GHOST_SINGLE_TARGET";
                 break;
 
             case GhostDualTarget:
-                result = "GHOST_DUAL_TARGET" + usesP2;
+                result = "GHOST_DUAL_TARGET";
                 break;
 
             case GhostTargetPlusSky:
-                result = "GHOST_TARGET_PLUS_SKY" + usesP2;
+                result = "GHOST_TARGET_PLUS_SKY";
                 break;
 
             case GhostSkyPlusTarget:
-                result = "GHOST_SKY_PLUS_TARGET" + usesP2;
+                result = "GHOST_SKY_PLUS_TARGET";
                 break;
 
             case GhostHighResolutionTargetPlusSky:
             case GhostHighResolutionTargetPlusSkyPrv:
-                result = "GHOST_HIGH_RESOLUTION" + usesP2;
+                result = "GHOST_HIGH_RESOLUTION";
                 break;
 
             default:
-                result = "GHOST" + usesP2;
+                result = "GHOST";
         }
-        return result;
+        return result + usesP2;
     }
 
     @Override
