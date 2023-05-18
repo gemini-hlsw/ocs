@@ -1,6 +1,8 @@
 package edu.gemini.wdba.tcc;
 
 import edu.gemini.spModel.gemini.ghost.Ghost;
+import edu.gemini.spModel.guide.GuideProbe;
+import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 
 import java.util.Objects;
 
@@ -36,9 +38,19 @@ final public class GhostSupport implements ITccInstrumentSupport {
         return inst.getPosAngleDegreesStr();
     }
 
+    private boolean usesProbe(GuideProbe gp) {
+        return oe.containsTargets(gp);
+    }
+
+    private boolean usesP2() {
+        return usesProbe(PwfsGuideProbe.pwfs2);
+    }
+
     @Override
     public String getTccConfigInstrument() {
         final String result;
+
+        final String usesP2 = usesP2() ? "_P2" : "";
         switch (oe.getTargetEnvironment().getAsterism().asterismType()) {
 
             case GhostSingleTarget:
@@ -65,7 +77,7 @@ final public class GhostSupport implements ITccInstrumentSupport {
             default:
                 result = "GHOST";
         }
-        return result;
+        return result + usesP2;
     }
 
     @Override
