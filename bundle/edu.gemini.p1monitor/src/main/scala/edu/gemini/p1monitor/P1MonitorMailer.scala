@@ -1,15 +1,17 @@
 package edu.gemini.p1monitor
 
 import config.P1MonitorConfig
-import javax.mail.internet.{MimeMessage, InternetAddress}
+
+import javax.mail.internet.{InternetAddress, MimeMessage}
 import java.util.logging.{Level, Logger}
 import java.util.Properties
-import javax.mail.{Transport, Message, Session}
+import javax.mail.{Message, Session, Transport}
 import edu.gemini.model.p1.immutable._
 import edu.gemini.p1monitor.P1Monitor._
-
 import scalaz._
 import Scalaz._
+
+import javax.mail.Address
 
 class P1MonitorMailer(cfg: P1MonitorConfig) {
   val LOG = Logger.getLogger(this.getClass.getName)
@@ -99,11 +101,8 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
     new MimeMessage(session)
   }
 
-  private def addAddresses(msg: MimeMessage, recType: Message.RecipientType, addrs: Traversable[InternetAddress]): Unit = {
-    for (addr <- addrs) {
-      msg.addRecipient(recType, addr)
-    }
-  }
+  private def addAddresses(msg: MimeMessage, recType: Message.RecipientType, addrs: Traversable[InternetAddress]): Unit =
+    msg.setRecipients(recType, addrs.toList.widen[Address].toArray)
 
   private def getSiteString(observations: List[Observation]): String = observations.flatMap { obs =>
     obs.blueprint.map(_.site)
