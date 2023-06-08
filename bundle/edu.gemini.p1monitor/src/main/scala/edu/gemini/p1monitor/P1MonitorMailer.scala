@@ -84,9 +84,9 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
 
     msg.setText(body)
 
-    addAddresses(msg, Message.RecipientType.TO, cfg.getDirectory(dirName).to)
-    addAddresses(msg, Message.RecipientType.CC, cfg.getDirectory(dirName).cc)
-    addAddresses(msg, Message.RecipientType.BCC, cfg.getDirectory(dirName).bcc)
+    setAddresses(msg, Message.RecipientType.TO, cfg.getDirectory(dirName).to)
+    setAddresses(msg, Message.RecipientType.CC, cfg.getDirectory(dirName).cc)
+    setAddresses(msg, Message.RecipientType.BCC, cfg.getDirectory(dirName).bcc)
 
     // Send it.
     Transport.send(msg)
@@ -101,7 +101,7 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
     new MimeMessage(session)
   }
 
-  private def addAddresses(msg: MimeMessage, recType: Message.RecipientType, addrs: Traversable[InternetAddress]): Unit =
+  private def setAddresses(msg: MimeMessage, recType: Message.RecipientType, addrs: Traversable[InternetAddress]): Unit =
     msg.setRecipients(recType, addrs.toList.widen[Address].toArray)
 
   private def getSiteString(observations: List[Observation]): String = observations.flatMap { obs =>
