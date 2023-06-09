@@ -25,9 +25,9 @@ case class SafeMimeMessage(
       (_.put("mail.smtp.host", smtpHost))
 
     new MimeMessage(Session.getInstance(props, null)) <|
-      (_.setFrom(from))                               <|
-      (m => to.foreach(m.addRecipient(TO, _)))        <|
-      (_.setSubject(subject))                         <|
+      (_.setFrom(from))                                <|
+      (_.setRecipients(TO, to.widen[Address].toArray)) <|
+      (_.setSubject(subject))                          <|
       (_.setContent(content, "text/plain"))
   }
 
