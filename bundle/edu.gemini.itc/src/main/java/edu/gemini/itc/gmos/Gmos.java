@@ -193,7 +193,7 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
 
     /**
      * Returns the effective observing wavelength.
-     * This is properly calculated as a flux-weighted averate of
+     * This is properly calculated as a flux-weighted average of
      * observed spectrum.  So this may be temporary.
      *
      * @return Effective wavelength in nm
@@ -223,6 +223,71 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
             case E2V:       return ORIG_PLATE_SCALE * gp.spatialBinning();
             case HAMAMATSU: return HAM_PLATE_SCALE * gp.spatialBinning();
             default:        throw new Error("invalid ccd type");
+        }
+    }
+
+    // Derive the read noise from the Instrument, Amp Gain, and Amp Read Mode, overriding the default method in Instrument.java
+    @Override
+    public double getReadNoise() {
+        Log.fine("site = " + gp.site());
+        Log.fine("ccdType = " + gp.ccdType());
+        Log.fine("ampReadMode = " + gp.ampReadMode());
+        Log.fine("ampGain = " + gp.ampGain());
+        switch (gp.ccdType()) {
+            case E2V:
+                switch (gp.site()) {
+                    case GN:  // e2v DD, used before 2017-Mar
+                        if (gp.ampReadMode() == GmosCommonType.AmpReadMode.SLOW & gp.ampGain() == GmosCommonType.AmpGain.LOW) {
+                            return 3.4; // electrons
+                        } else if (gp.ampReadMode() == GmosCommonType.AmpReadMode.FAST & gp.ampGain() == GmosCommonType.AmpGain.LOW) {
+                            return 4.9; // electrons
+                        } else if (gp.ampReadMode() == GmosCommonType.AmpReadMode.FAST & gp.ampGain() == GmosCommonType.AmpGain.HIGH) {
+                            return 7.4; // electrons
+                        } else {
+                            throw new RuntimeException("Invalid combination of ampReadMode and ampGain");
+                        }
+
+                    case GS:  // EEV, used through 2015-Aug
+                        if (gp.ampReadMode() == GmosCommonType.AmpReadMode.SLOW & gp.ampGain() == GmosCommonType.AmpGain.LOW) {
+                            return 3.66; // electrons
+                        } else if (gp.ampReadMode() == GmosCommonType.AmpReadMode.FAST & gp.ampGain() == GmosCommonType.AmpGain.LOW) {
+                            return 4.33; // electrons
+                        } else if (gp.ampReadMode() == GmosCommonType.AmpReadMode.FAST & gp.ampGain() == GmosCommonType.AmpGain.HIGH) {
+                            return 7.36; // electrons
+                        } else {  // SLOW & HIGH
+                            throw new RuntimeException("Invalid combination of ampReadMode and ampGain");
+                        }
+
+                    default:
+                        throw new Error("Invalid site");
+                }
+            case HAMAMATSU:
+                switch (gp.site()) {
+                    case GN:
+                        if (gp.ampReadMode() == GmosCommonType.AmpReadMode.SLOW & gp.ampGain() == GmosCommonType.AmpGain.LOW) {
+                            return 4.14; // electrons
+                        } else if (gp.ampReadMode() == GmosCommonType.AmpReadMode.FAST & gp.ampGain() == GmosCommonType.AmpGain.LOW) {
+                            return 6.27; // electrons
+                        } else if (gp.ampReadMode() == GmosCommonType.AmpReadMode.FAST & gp.ampGain() == GmosCommonType.AmpGain.HIGH) {
+                            return 8.69; // electrons
+                        } else {  // SLOW & HIGH
+                            throw new RuntimeException("Invalid combination of ampReadMode and ampGain");
+                        }
+                    case GS:
+                       if (gp.ampReadMode() == GmosCommonType.AmpReadMode.SLOW & gp.ampGain() == GmosCommonType.AmpGain.LOW) {
+                            return 3.98; // electrons
+                        } else if (gp.ampReadMode() == GmosCommonType.AmpReadMode.FAST & gp.ampGain() == GmosCommonType.AmpGain.LOW) {
+                            return 6.57; // electrons
+                        } else if (gp.ampReadMode() == GmosCommonType.AmpReadMode.FAST & gp.ampGain() == GmosCommonType.AmpGain.HIGH) {
+                            return 7.86; // electrons
+                        } else {  // SLOW & HIGH
+                            throw new RuntimeException("Invalid combination of ampReadMode and ampGain");
+                        }
+                    default:
+                        throw new Error("Invalid site");
+                }
+            default:
+                throw new Error("Invalid ccdType");
         }
     }
 
