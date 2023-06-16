@@ -1,18 +1,20 @@
-#parameters for GMOS-N (REL-477: Note that the value for Plate Scale is currently overridden in code)
+# Parameters for GMOS-N
+# REL-477: Note that the value for Plate Scale is currently overridden in code.
+# REL-????: Set read noise in gmos.java according to read mode.
 
-#name
+# Instrument name
 GMOS-N
-#Starting wavelength (nm)
+# Starting wavelength (nm)
 360
-#Ending wavelength (nm)
+# Ending wavelength (nm)
 1000
-#Sampling (nm)
+# Sampling (nm)
 0.2
-#Background filename
+# Background filename
 gmos_n_background.dat
-#Plate Scale
+# Plate Scale
 0.0809
-#Read Noise
-3.6
-#Dark Current per pixel per second
-0.00019
+# Read Noise (set in gmos.java)
+0.0
+# Dark Current (electrons per pixel per second)
+0.00083
