@@ -1,6 +1,6 @@
 # Parameters for GMOS-S
 # REL-477: Note that the value for Plate Scale is currently overridden in code.
-# REL-????: Set read noise in gmos.java according to read mode.
+# REL-4338: Set read noise in gmos.java according to read mode.
 
 # Instrument name
 GMOS-S
