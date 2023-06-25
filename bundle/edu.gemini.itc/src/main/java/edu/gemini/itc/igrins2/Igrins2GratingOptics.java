@@ -12,11 +12,7 @@ public class Igrins2GratingOptics extends GratingOptics {
         super(directory, gratingName, gratingList, centralWavelength, detectorPixels, spectralBinning);
         data.keySet();
     }
-    public double getStart() {
-        return get_trans().getStart();
-    }
-    public double getEnd() {
-        return get_trans().getEnd();
-    }
+    public double getStart() { return get_trans().getStart(); }
+    public double getEnd() { return get_trans().getEnd(); }
     public double getSpectralPixelWidth() { return dispersion(-1); }
 }
