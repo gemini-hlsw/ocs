@@ -269,10 +269,10 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
         // -- calculate and assign s2n results
 
-        // S2N for one exposure
+        Log.fine("Calculating S2N for a single exposure...");
         resultS2NSingle = singleS2N(signal, background, darkNoise, readNoise);
 
-        // final S2N for all exposures
+        Log.fine("Calculating S2N for all exposures...");
         resultS2NFinal = finalS2N(signal, background, darkNoise, readNoise);
     }
 
@@ -303,8 +303,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
         final VisitableSampledSpectrum signal = (VisitableSampledSpectrum) sourceFlux.clone();
         final int lastPixel = lastCcdPixel(signal.getLength());
-        Log.fine(String.format("Calculating signal/pixel: throughput = %.3f on detector pixels %d - %d",
-                throughput, firstCcdPixel, lastCcdPixel));
+        Log.fine(String.format("Calculating signal/pixel: throughput = %.3f on detector pixels %d - %d", throughput, firstCcdPixel, lastPixel));
 
         for (int i = 0; i < signal.getLength(); ++i) { signal.setY(i, 0); } // zero data array before use per REL-2992
 
@@ -320,7 +319,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
         final VisitableSampledSpectrum signal = (VisitableSampledSpectrum) sourceFlux.clone();
         final int lastPixel = lastCcdPixel(signal.getLength());
-        Log.fine("Calculating signal with halo with " + throughput + " throughput on detector pixels " + firstCcdPixel + " - " + lastPixel);
+        Log.fine(String.format("Calculating signal with halo: throughput = %.3f on detector pixels %d - %d", throughput, firstCcdPixel, lastPixel));
 
         for (int i = 0; i < signal.getLength(); ++i) { signal.setY(i, 0); }
 
