@@ -272,6 +272,7 @@ public final class SEDFactory {
             sed.accept(norm);
         }
 
+        Log.fine("Accepting telescope...");
         final SampledSpectrumVisitor tel = new TelescopeApertureVisitor();
         sed.accept(tel);
 
@@ -338,10 +339,11 @@ public final class SEDFactory {
         // output: total flux of source and background.
         if (!(instrument instanceof Gsaoi) && !(instrument instanceof Niri) && !(instrument instanceof Gnirs)) {
             // TODO: for any instrument other than GSAOI and NIRI convolve here, why?
-            Log.fine("Applying instrument throughput...");
+            Log.fine("Applying instrument throughput to the SED...");
             instrument.convolveComponents(sed);
         }
-        //creatingFile(instrument.getSampling(),  sky, "skyBconv");
+        Log.fine("Applying instrument throughput to the SKY...");
+         //creatingFile(instrument.getSampling(),  sky, "skyBconv");
         instrument.convolveComponents(sky);
 
         // TODO: AO (FOR NIFS DONE AT THE VERY END, WHY DIFFERENT FROM GSAOI/NIRI?)
