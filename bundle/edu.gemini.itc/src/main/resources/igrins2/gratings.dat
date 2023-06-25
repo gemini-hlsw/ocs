@@ -1,0 +1,3 @@
+# Grating            blaze  R_at_blaze  d_lambda  dispersion
+immersion_grating_H  1600     50000       0.01    /igrins2/dispersion_H.dat
+immersion_grating_K  2200     50000       0.01    /igrins2/dispersion_K.dat
