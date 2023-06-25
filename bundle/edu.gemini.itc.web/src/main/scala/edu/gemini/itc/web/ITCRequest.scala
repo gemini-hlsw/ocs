@@ -174,6 +174,7 @@ object ITCRequest {
     else if (i == INSTRUMENT_GMOSSOUTH.readableStr)  gmosParameters(r)
     else if (i == INSTRUMENT_GNIRS.readableStr)      gnirsParameters(r)
     else if (i == INSTRUMENT_GSAOI.readableStr)      gsaoiParameters(r)
+    else if (i == INSTRUMENT_IGRINS2.readableStr)    igrins2Parameters(r)
     else if (i == INSTRUMENT_MICHELLE.readableStr)   michelleParameters(r)
     else if (i == INSTRUMENT_NIFS.readableStr)       nifsParameters(r)
     else if (i == INSTRUMENT_NIRI.readableStr)       niriParameters(r)
@@ -254,6 +255,11 @@ object ITCRequest {
       case \/-(p) => p
       case -\/(t) => throw new IllegalArgumentException(t)
     }
+  }
+
+  def igrins2Parameters(r: ITCRequest): Igrins2Parameters = {
+    val altair      = altairParameters(r)
+    Igrins2Parameters(altair)
   }
 
   def michelleParameters(r: ITCRequest): MichelleParameters = {
