@@ -73,6 +73,9 @@ final case class GsaoiParameters(
                      largeSkyOffset:    Int,
                      gems:              GemsParameters) extends InstrumentDetails
 
+final case class Igrins2Parameters(
+                     altair:            Option[AltairParameters]) extends InstrumentDetails
+
 final case class MichelleParameters(
                      filter:            MichelleParams.Filter,
                      grating:           MichelleParams.Disperser,
@@ -129,6 +132,7 @@ object InstrumentDetails {
     case i: Flamingos2Parameters      => i.grism.equals(Flamingos2.Disperser.NONE)
     case i: GnirsParameters           => i.grating.isEmpty
     case i: GsaoiParameters           => true                                       // Gsaoi is imaging only
+    case i: Igrins2Parameters         => false                                      // IGRINS2 is spectroscopy only
     case i: MichelleParameters        => i.grating.equals(MichelleParams.Disperser.MIRROR)
     case i: NifsParameters            => false                                      // NIFS is spectroscopy only
     case i: NiriParameters            => i.grism.equals(Niri.Disperser.NONE)
