@@ -77,7 +77,7 @@ public enum Igrins2Arm {
 
     public String getName() { return _name; }
     public double getWavelengthStart() { return _wavelengthStart; }
-    public double get_wavelengthCentral() { return _wavelengthCentral; }
+    public double getWavelengthCentral() { return _wavelengthCentral; }
     public double getWavelengthEnd() { return _wavelengthEnd; }
     public double getPixelSize() { return _pixelSize; }
     public int getDetXSize() { return _detXSize; }

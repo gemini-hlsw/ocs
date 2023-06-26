@@ -44,7 +44,7 @@ public class Igrins2 extends Instrument implements SpectroscopyInstrument {
                 getDirectory() + "/" + getPrefix(),
                 "immersion_grating_" + arm.getName(),
                 "gratings",
-                arm.get_wavelengthCentral(),
+                arm.getWavelengthCentral(),
                 arm.getDetXSize(),
                 1);
         _gratingOptics.setDescription("Grating Resolution");
@@ -63,7 +63,7 @@ public class Igrins2 extends Instrument implements SpectroscopyInstrument {
 
     }
 
-    public int getEffectiveWavelength() { return (int) _arm.get_wavelengthCentral(); }  // (nanometers)
+    public int getEffectiveWavelength() { return (int) _arm.getWavelengthCentral(); }  // (nanometers)
 
     public double getReadNoise() { return _readNoise; }  // (electrons)
 
