@@ -120,4 +120,6 @@ public final class GsaoiPrinter extends PrinterBase
     public double getRecenterInterval() {
         return this.getRecentInterval();
     }
+
+    public int getNumberExposures() { throw new Error("Not implemented"); }
 }

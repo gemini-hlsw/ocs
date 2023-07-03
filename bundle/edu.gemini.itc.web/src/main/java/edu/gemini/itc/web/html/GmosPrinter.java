@@ -24,6 +24,7 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
     private final boolean isImaging;
     private final ItcParameters p;
     private final GmosParameters instr;
+    private int numberExposures;
 
     public GmosPrinter(final ItcParameters p, final GmosParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
@@ -72,7 +73,7 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
 
         if (calcMethod instanceof SpectroscopyInt) {
             int exposureTime = recipe.getExposureTime();
-            int numberExposures = recipe.getNumberExposures();
+            numberExposures = recipe.getNumberExposures();
             _println(String.format(
                 "Total integration time = %d seconds (%d x %d s), of which %d seconds is on source.",
                 numberExposures * exposureTime, numberExposures, exposureTime,
@@ -286,4 +287,8 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
     public double getRecenterInterval() {
         return this.getRecentInterval();
     }
+
+    @Override
+    public int getNumberExposures() { return numberExposures; }
+
 }
