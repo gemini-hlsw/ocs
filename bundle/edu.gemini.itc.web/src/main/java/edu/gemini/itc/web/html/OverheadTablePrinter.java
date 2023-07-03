@@ -14,11 +14,13 @@ import edu.gemini.spModel.time.TimeAmountFormatter;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.logging.Logger;
 import java.util.Map;
 import java.util.StringJoiner;
 
 
 public class OverheadTablePrinter {
+    private static final Logger Log = Logger.getLogger(OverheadTablePrinter.class.getName());
     private final ItcParameters p;
     private final ConfigCreator.ConfigCreatorResult ccResult;
     private final double readoutTimePerCoadd;
@@ -49,6 +51,8 @@ public class OverheadTablePrinter {
         double getVisitTime();
 
         double getRecenterInterval();
+
+        int getNumberExposures();
     }
 
     public static String print (PrinterWithOverhead printer, final ItcParameters params,
@@ -78,8 +82,10 @@ public class OverheadTablePrinter {
         return print(printer, p, 0, r, null);
     }
 
-    private OverheadTablePrinter(PrinterWithOverhead printer, final ItcParameters params,
-                                 final double readoutTimePerCoadd, Result result,
+    private OverheadTablePrinter(PrinterWithOverhead printer,
+                                 final ItcParameters params,
+                                 final double readoutTimePerCoadd,
+                                 Result result,
                                  ItcSpectroscopyResult sResult)
             throws OverheadTablePrinterException
     {
@@ -87,26 +93,26 @@ public class OverheadTablePrinter {
         final CalculationMethod calcMethod = obs.calculationMethod();
 
         if (calcMethod instanceof ImagingInt) {
-            this.numOfExposures = (int)(((ImagingResult) result).is2nCalc().numberSourceExposures() / obs.sourceFraction());
+            numOfExposures = (int)(((ImagingResult) result).is2nCalc().numberSourceExposures() / obs.sourceFraction());
         } else if (calcMethod instanceof ImagingS2N) {
-            this.numOfExposures = ((ImagingS2N) calcMethod).exposures();
+            numOfExposures = ((ImagingS2N) calcMethod).exposures();
         } else if (calcMethod instanceof SpectroscopyS2N) {
-            this.numOfExposures = ((SpectroscopyS2N) calcMethod).exposures();
+            numOfExposures = ((SpectroscopyS2N) calcMethod).exposures();
         } else if (calcMethod instanceof ImagingExp) {
-            this.numOfExposures = ((GmosPrinter) printer).recipe.getNumberExposures();
+            numOfExposures = ((GmosPrinter) printer).recipe.getNumberExposures();
         } else if (calcMethod instanceof SpectroscopyInt) {
-            this.numOfExposures = ((GmosPrinter) printer).recipe.getNumberExposures();
-
+            numOfExposures = printer.getNumberExposures();
         } else {
-            this.numOfExposures = 1;
+            numOfExposures = 1;
         }
+        Log.fine("Number of exposures = " + numOfExposures);
         this.visit_time = printer.getVisitTime();
         this.recenterInterval = printer.getRecenterInterval();
 
-        if (this.numOfExposures > 0) {
+        if (numOfExposures > 0) {
             this.r = sResult;
             this.p = params;
-            this.ccResult = printer.createInstConfig(this.numOfExposures);
+            this.ccResult = printer.createInstConfig(numOfExposures);
             this.readoutTimePerCoadd = readoutTimePerCoadd;
             this.pta = PlannedTimeMath.calc(this.ccResult.getConfig(), printer.getInst());
             this.instrumentName = (SPComponentType) ccResult.getConfig()[0].getItemValue(ConfigCreator.InstInstrumentKey);
