@@ -7,8 +7,7 @@ import edu.gemini.spModel.gemini.igrins2.Igrins2$;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-import squants.time.Time;
-import squants.time.Seconds;
+
 
 // IGRINS2 specification class
 public class Igrins2 extends Instrument implements SpectroscopyInstrument {
@@ -24,15 +23,12 @@ public class Igrins2 extends Instrument implements SpectroscopyInstrument {
     public Igrins2(final Igrins2Parameters igp, final ObservationDetails odp, Igrins2Arm arm) {
         super(Site.GN, Bands.NEAR_IR, INSTR_DIR, FILENAME);
         this._arm = arm;
-        Log.fine("Band: " + arm.getName());
 
-        // Igrins2$.MODULE$.readNoise(exptime);
+        Log.fine("Calc method = " + odp.calculationMethod());
+        Log.fine("Arm = " + arm.getName());
 
-        if (arm == Igrins2Arm.H) {
-            _readNoise = 5.0;      // FIXME
-        } else {
-            _readNoise = 6.0;
-        }
+        _readNoise = Igrins2$.MODULE$.readNoise(odp.exposureTime(), arm.getMagnitudeBand());
+        Log.fine("Read Noise = " + _readNoise + " e-");
 
         FixedOptics _fixedOptics = new FixedOptics(
                 getDirectory() + "/",
@@ -72,6 +68,8 @@ public class Igrins2 extends Instrument implements SpectroscopyInstrument {
     public double getWavelengthStart() { return _arm.getWavelengthStart(); }  // (nanometers)
 
     public double getWavelengthEnd() { return _arm.getWavelengthEnd(); }  // (nanometers)
+
+    public Igrins2Arm getArm() { return _arm; }
 
     public String getWaveBand() { return _arm.getName(); }
 
