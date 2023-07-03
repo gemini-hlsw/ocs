@@ -1,7 +1,10 @@
 package edu.gemini.itc.igrins2;
 
+import edu.gemini.spModel.core.MagnitudeBand;
+
 public enum Igrins2Arm {
     H("H",
+            MagnitudeBand.unsafeFromString("H"),
             1490.0,
             1650.0,
             1800.0,
@@ -16,6 +19,7 @@ public enum Igrins2Arm {
             80000,
             40000),
     K("K",
+            MagnitudeBand.unsafeFromString("K"),
             1960.0,
             2200.0,
             2460.0,
@@ -31,6 +35,7 @@ public enum Igrins2Arm {
             45000);
 
     private final String _name;
+    private final MagnitudeBand _magnitudeBand;
     private final double _wavelengthStart;  // nanometers
     private final double _wavelengthCentral;  // nanometers
     private final double _wavelengthEnd;  // nanometers
@@ -46,6 +51,7 @@ public enum Igrins2Arm {
     private final int _linearityLimit;  // electrons
 
     Igrins2Arm(final String name,
+               final MagnitudeBand magnitudeBand,
                final double wavelengthStart,
                final double wavelengthCentral,
                final double wavelengthEnd,
@@ -60,6 +66,7 @@ public enum Igrins2Arm {
                final int linearityLimit,
                final int maxRecommendedFlux) {
         this._name = name;
+        this._magnitudeBand = magnitudeBand;
         this._wavelengthStart = wavelengthStart;
         this._wavelengthCentral = wavelengthCentral;
         this._wavelengthEnd = wavelengthEnd;
@@ -76,6 +83,7 @@ public enum Igrins2Arm {
     }
 
     public String getName() { return _name; }
+    public MagnitudeBand getMagnitudeBand() { return _magnitudeBand; }
     public double getWavelengthStart() { return _wavelengthStart; }
     public double getWavelengthCentral() { return _wavelengthCentral; }
     public double getWavelengthEnd() { return _wavelengthEnd; }
