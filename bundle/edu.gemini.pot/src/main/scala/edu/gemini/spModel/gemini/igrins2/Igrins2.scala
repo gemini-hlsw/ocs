@@ -239,6 +239,12 @@ object Igrins2 {
     List((MagnitudeBand.H, rn(3.8)), (MagnitudeBand.K, rn(5.0)))
   }
 
+  def readNoise(expTime: Double, band: MagnitudeBand) : Double =
+    band match {
+      case MagnitudeBand.H => 3.8 * sqrt(16) / sqrt(fowlerSamples(expTime.seconds))
+      case MagnitudeBand.K => 5.0 * sqrt(16) / sqrt(fowlerSamples(expTime.seconds))
+  }
+
   private val query_no  = false
   private val iter_yes  = true
   private val iter_no   = false
