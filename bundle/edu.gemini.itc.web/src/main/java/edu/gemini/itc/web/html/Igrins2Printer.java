@@ -5,13 +5,12 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.igrins2.Igrins2;
 import edu.gemini.itc.igrins2.Igrins2Recipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.obs.plannedtime.PlannedTime;
-import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
 import edu.gemini.spModel.obscomp.ItcOverheadProvider;
+
 import scala.Option;
 import java.io.PrintWriter;
-import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.UUID;
 
 /**
  * Helper class for printing IGRINS-2 calculation results to an output stream.
@@ -23,13 +22,17 @@ public final class Igrins2Printer extends PrinterBase implements OverheadTablePr
     private final PlottingDetails pdp;
     private final Igrins2Recipe recipe;
     private final ItcParameters p;
+    private int numberExposures;
 
-    public Igrins2Printer(final ItcParameters p, final Igrins2Parameters instr, final PlottingDetails pdp, final PrintWriter out) {
+    public Igrins2Printer(final ItcParameters p,
+                          final Igrins2Parameters instr,
+                          final PlottingDetails pdp,
+                          final PrintWriter out) {
         super(out);
-        this.instr     = instr;
-        this.recipe    = new Igrins2Recipe(p, instr);
-        this.pdp       = pdp;
-        this.p          = p;
+        this.instr = instr;
+        recipe = new Igrins2Recipe(p, instr);
+        this.pdp = pdp;
+        this.p = p;
     }
 
     public void writeOutput() {
@@ -42,22 +45,36 @@ public final class Igrins2Printer extends PrinterBase implements OverheadTablePr
     private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult[] results, final ItcSpectroscopyResult s) {
 
         final Igrins2 mainInstrument = (Igrins2) results[0].instrument();
+        final CalculationMethod calcMethod = p.observation().calculationMethod();
+        final SpectroscopyResult result = results[0];
+        final double iqAtSource = result.iqCalc().getImageQuality();
+        String str;
 
-         final SpectroscopyResult result = results[0];
-
-         final double iqAtSource = result.iqCalc().getImageQuality();
         _println("");
-
-        for (int i = 0; i < results.length; i++) {
-            _println("Read noise (" + ((Igrins2) results[i].instrument()).getWaveBand() + "): " + results[i].instrument().getReadNoise() + " electrons");
-        }
+        _println("Read noise: " +
+                results[0].instrument().getReadNoise() + " e- (" + ((Igrins2) results[0].instrument()).getWaveBand() + ") and " +
+                results[1].instrument().getReadNoise() + " e- (" + ((Igrins2) results[1].instrument()).getWaveBand() + ")");
 
         if (result.aoSystem().isDefined()) { _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get())); }
 
         _printSoftwareAperture(result, 1 / mainInstrument.getSlitWidth());
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", iqAtSource));
         _println("");
-        _printRequestedIntegrationTime(result);
+
+        if (calcMethod instanceof SpectroscopyInt) {
+            double exposureTime = recipe.getExposureTime();
+            numberExposures = recipe.getNumberExposures();
+            if (exposureTime < 5.0) {
+                str = "Total integration time = %.1f seconds (%d x %.1f s), of which %.1f seconds is on source.";
+            } else {
+                str = "Total integration time = %.0f seconds (%d x %.0f s), of which %.0f seconds is on source.";
+            }
+            _println(String.format(str, numberExposures * exposureTime, numberExposures, exposureTime,
+                    (exposureTime * numberExposures * result.observation().sourceFraction())));
+        } else {
+            _printRequestedIntegrationTime(result);
+        }
+
         _println("");
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
@@ -127,24 +144,21 @@ public final class Igrins2Printer extends PrinterBase implements OverheadTablePr
 
     public ConfigCreator.ConfigCreatorResult createInstConfig(int numberExposures) {
         ConfigCreator cc = new ConfigCreator(p);
-        return cc.createIgrins2Config(instr, numberExposures);
+        return cc.createIgrins2Config(instr, numberExposures, recipe.getExposureTime());
     }
 
     public ItcOverheadProvider getInst() { return new edu.gemini.spModel.gemini.igrins2.Igrins2(); }
 
-    public double getReadoutTimePerCoadd() {
-        // Igrins2ReadoutTime rt = Igrins2ReadoutTime.lookup(instr.builtinROI(), instr.readMode()).getValue();
-        //return rt.getReadout(1);
-        return 1;
-    }
+    @Override
+    public double getReadoutTimePerCoadd() { return 0; }
 
     @Override
-    public double getVisitTime() {
-        return this.getVisit_time();
-    }
+    public double getVisitTime() { return this.getVisit_time(); }
 
     @Override
-    public double getRecenterInterval() {
-        return this.getRecentInterval();
-    }
+    public double getRecenterInterval() { return this.getRecentInterval(); }
+
+    @Override
+    public int getNumberExposures() { return numberExposures; }
+
 }
