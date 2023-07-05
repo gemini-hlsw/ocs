@@ -149,7 +149,7 @@ public final class Igrins2Recipe {
 
         while ((numberExposures != oldNumberExposures || exposureTime != oldExposureTime) && iterations <= 5) {
             iterations += 1;
-            Log.fine(String.format("--- ITERATION %d (%d != %d) or (%.2f != %.2f) ---",
+            Log.fine(String.format("--- ITERATION %d (%d != %d) or (%.3f != %.3f) ---",
                     iterations, oldNumberExposures, numberExposures, oldExposureTime, exposureTime));
             oldNumberExposures = numberExposures;
             oldExposureTime = exposureTime;
@@ -164,7 +164,7 @@ public final class Igrins2Recipe {
                 exposureTime = (Math.ceil(totalTime / numberExposures * 10.0)) / 10.0; // round short times up to 0.1 sec
             }
             if (exposureTime < MIN_EXPTIME) { exposureTime = MIN_EXPTIME; }
-            Log.fine(String.format("exposureTime = %.2f", exposureTime));
+            Log.fine(String.format("exposureTime = %.3f", exposureTime));
 
             if ((numberExposures != oldNumberExposures || exposureTime != oldExposureTime) && iterations <= 5) {
                 // Try one more iteration to see if we can get closer to the requested S/N
@@ -178,9 +178,9 @@ public final class Igrins2Recipe {
 
             } else {
                 if (iterations > 5) {
-                    Log.fine("Stopping and calculating the results for all detectors");
+                    Log.fine("--- STOPPING and calculating the results for all detectors");
                 } else {
-                    Log.fine("No change since the last iteration, so calculating final results");
+                    Log.fine("--- NO CHANGE since the last iteration, so calculating final results");
                 }
                 for (int i = 0; i < _mainInstrument.length; i++) {
                     finalResults[i] = calculateSpectroscopy(_mainInstrument[i], exposureTime, numberExposures, snr);
