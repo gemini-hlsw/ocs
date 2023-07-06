@@ -10,11 +10,12 @@ import edu.gemini.util.security.principal.StaffPrincipal
 import java.security.Principal
 import java.time.Duration
 import java.util.UUID
-import java.util.concurrent.{TimeUnit, ThreadFactory, Executors}
+import java.util.concurrent.{Executors, ThreadFactory, TimeUnit}
 import java.util.logging.Logger
-
 import scalaz._
 import Scalaz._
+
+import java.time.Instant
 
 
 /** Dataman ties together the various pieces of the application.  Once created
@@ -121,7 +122,8 @@ object Dataman {
       schedule(progArchiveSync, progSyncDelay, config.archivePoll.allPrograms.time)
       schedule(progSummitSync, progSyncDelay, config.summitPoll.allPrograms.time)
 
-      val orr = new ObsRefreshRunnable(odb, User, oids =>
+      // Note "now" is passed by value to be re-evaluated every time it is needed.
+      val orr = new ObsRefreshRunnable(odb, User, Instant.now(), oids =>
         pollServices.foreach(_.addAll(oids))
       )
       schedule(orr, obsRefreshDelay, config.obsRefreshPeriod.time)
