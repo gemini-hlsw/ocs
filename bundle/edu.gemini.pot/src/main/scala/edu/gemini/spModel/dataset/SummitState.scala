@@ -287,7 +287,7 @@ object SummitState {
         .withParam("retry", retryCount)
   }
 
-  /** Constructs a `MIssing` instance with static type `SummitState`, which is
+  /** Constructs a `Missing` instance with static type `SummitState`, which is
     * convenient for folds, etc.
     *
     * @group Constructors

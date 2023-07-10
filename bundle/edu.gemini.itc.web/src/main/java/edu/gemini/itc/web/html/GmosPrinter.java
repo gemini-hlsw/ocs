@@ -62,7 +62,8 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
         final SpectroscopyResult result = results[0];
         final double iqAtSource = result.iqCalc().getImageQuality();
 
-        _println("Read noise: " + mainInstrument.getReadNoise());
+        _println("Read noise: " + mainInstrument.getReadNoise() + " e-/pix");
+        _println("Dark current: " + mainInstrument.getDarkCurrent() + " e-/s/pix");
 
         if (!mainInstrument.isIfuUsed()) {
             _printSoftwareAperture(results[0], 1 / mainInstrument.getSlitWidth());
@@ -166,7 +167,8 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
         _print(CalculatablePrinter.getTextResult(results[0].sfCalc()));
         _println(CalculatablePrinter.getTextResult(results[0].iqCalc()));
         _printSkyAperture(results[0]);
-        _println("Read noise: " + instrument.getReadNoise());
+        _println("Read noise: " + instrument.getReadNoise() + " e-/pix");
+        _println("Dark current: " + instrument.getDarkCurrent() + " e-/s/pix\n");
 
         final Gmos[] ccdArray = instrument.getDetectorCcdInstruments();
 
