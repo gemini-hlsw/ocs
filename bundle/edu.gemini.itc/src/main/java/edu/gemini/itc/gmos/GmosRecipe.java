@@ -272,7 +272,9 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
         final double dark_current = instrument.getDarkCurrent();
+        Log.fine(String.format("Dark Current = %.5f e-", dark_current));
         final double read_noise = instrument.getReadNoise();
+        Log.fine(String.format("Read Noise = %.2f e-", read_noise));
 
         // TODO: why, oh why?
         final double im_qual = _sdParameters.isUniform() ? 10000 : IQcalc.getImageQuality();
@@ -608,11 +610,11 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final double  ifuOffset = ifuUsed ? mainInstrument.getIFU().getApertureOffsetList().get(i) : 0.0;
         final List<ChartAxis> axes = new ArrayList<>();
 
-        String title = "Intermediate Single Exp and Final S/N in aperture" + (ifuUsed ? "\nIFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec" : "");
+        String title = "Intermediate Single-Exposure S/N and Final S/N with Sky Subtraction" + (ifuUsed ? "\nIFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec" : "");
         if (mainInstrument.isIfuUsed() &&  mainInstrument.getIfuMethod().get() instanceof IfuSum) {
             final IfuSum ifu = (IfuSum) mainInstrument.getIfuMethod().get();
             final int ifuElements = mainInstrument.getIFU().getApertureOffsetList().size();
-            title = "Intermediate Single Exp and Final S/N in aperture\n" + String.format("%d", ifuElements) + " IFU elements summed in a radius of " + String.format("%.2f", ifu.num()) + " arcsec";
+            title = "Intermediate Single-Exposure S/N and Final S/N with Sky Subtraction\n" + String.format("%d", ifuElements) + " IFU elements summed in a radius of " + String.format("%.2f", ifu.num()) + " arcsec";
         }
         final ChartAxis xAxis = ChartAxis.apply("Wavelength (nm)");
         final ChartAxis yAxis = ChartAxis.apply("Signal / Noise per spectral pixel");
