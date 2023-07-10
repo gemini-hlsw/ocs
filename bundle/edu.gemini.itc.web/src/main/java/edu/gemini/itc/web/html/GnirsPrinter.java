@@ -309,4 +309,6 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
     public double getRecenterInterval() {
         return this.getRecentInterval();
     }
+
+    public int getNumberExposures() { throw new Error("Not implemented"); }
 }

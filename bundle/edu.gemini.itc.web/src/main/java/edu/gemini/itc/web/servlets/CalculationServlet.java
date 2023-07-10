@@ -112,6 +112,7 @@ public final class CalculationServlet extends HttpServlet {
         else if (ip instanceof GhostParameters)          printer = new GhostPrinter(p, (GhostParameters) ip, ITCRequest.plotParameters(r), out);
         else if (ip instanceof GnirsParameters)          printer = new GnirsPrinter(p, (GnirsParameters) ip, ITCRequest.plotParameters(r), out);
         else if (ip instanceof GsaoiParameters)          printer = new GsaoiPrinter(p, (GsaoiParameters) ip, out);
+        else if (ip instanceof Igrins2Parameters)        printer = new Igrins2Printer(p, (Igrins2Parameters) ip, ITCRequest.plotParameters(r), out);
         else if (ip instanceof MichelleParameters)       printer = new MichellePrinter(p, (MichelleParameters) ip, ITCRequest.plotParameters(r), out);
         else if (ip instanceof NifsParameters)           printer = new NifsPrinter(p, (NifsParameters) ip, ITCRequest.plotParameters(r), out);
         else if (ip instanceof NiriParameters)           printer = new NiriPrinter(p, (NiriParameters) ip, ITCRequest.plotParameters(r), out);

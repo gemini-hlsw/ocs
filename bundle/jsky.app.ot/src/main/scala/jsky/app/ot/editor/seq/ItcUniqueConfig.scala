@@ -8,6 +8,7 @@ import edu.gemini.spModel.gemini.ghost.Ghost
 import edu.gemini.spModel.gemini.gmos.{GmosNorthType, GmosSouthType, InstGmosNorth, InstGmosSouth, FullExposureTime => GmosExposureTime}
 import edu.gemini.spModel.gemini.gnirs.{GNIRSConstants, GNIRSParams}
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
+import edu.gemini.spModel.gemini.igrins2.Igrins2
 import edu.gemini.spModel.gemini.michelle.{InstMichelle, MichelleParams}
 import edu.gemini.spModel.gemini.nifs.InstNIFS
 import edu.gemini.spModel.gemini.niri.{InstNIRI, Niri}
@@ -89,6 +90,7 @@ object ItcUniqueConfig {
       case Ghost.INSTRUMENT_NAME_PROP => false // GHOST is spectroscopy only
       case GNIRSConstants.INSTRUMENT_NAME_PROP => c.getItemValue(INST_ACQ_MIRROR).equals(GNIRSParams.AcquisitionMirror.IN)
       case Gsaoi.INSTRUMENT_NAME_PROP => true // Gsaoi is imaging only
+      case Igrins2.INSTRUMENT_NAME_PROP => false  // IGRINS2 is spectroscopy only
       case InstMichelle.INSTRUMENT_NAME_PROP => c.getItemValue(INST_DISPERSER_KEY).equals(MichelleParams.Disperser.MIRROR)
       case InstNIFS.INSTRUMENT_NAME_PROP => false // NIFS is spectroscopy only
       case InstNIRI.INSTRUMENT_NAME_PROP => c.getItemValue(INST_DISPERSER_KEY).equals(Niri.Disperser.NONE)

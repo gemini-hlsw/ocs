@@ -1,0 +1,8 @@
+# IGRINS K-band detector
+# Wavelength (nm) Efficiency
+800   0.89
+1000  0.95
+1230  0.94
+2000  0.98
+2400  0.94
+2520  0.77

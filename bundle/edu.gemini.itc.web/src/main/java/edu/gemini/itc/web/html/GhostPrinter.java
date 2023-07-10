@@ -164,4 +164,5 @@ public final class GhostPrinter extends PrinterBase implements OverheadTablePrin
         return this.getRecentInterval();
     }
 
+    public int getNumberExposures() { throw new Error("Not implemented"); }
 }

@@ -1,0 +1,16 @@
+# Instrument Name
+IGRINS2
+# Starting wavelength (nm)
+1450
+# Ending wavelength (nm)
+2500
+# Sampling (nm)
+0.01
+# Background filename
+background.dat
+# Plate Scale
+0.10
+# Read Noise (set in igrins2.java)
+0
+# Dark Current (e-/sec/pixel)
+0.01

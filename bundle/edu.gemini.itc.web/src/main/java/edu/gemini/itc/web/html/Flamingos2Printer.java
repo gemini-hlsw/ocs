@@ -172,4 +172,6 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
     public double getRecenterInterval() {
         return this.getRecentInterval();
     }
+
+    public int getNumberExposures() { throw new Error("Not implemented"); }
 }

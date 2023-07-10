@@ -9,7 +9,10 @@ public class FixedOptics extends TransmissionElement {
 
     public FixedOptics(String directory, String prefix) {
         super(directory + prefix + FILENAME);
+    }
 
+    public FixedOptics(String directory, String prefix, String suffix) {
+        super(directory + prefix + "fixed_optics" + suffix + Instrument.getSuffix());
     }
 
     public String toString() {

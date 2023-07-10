@@ -245,6 +245,19 @@ public final class ConfigCreator {
         return result;
     }
 
+    public final ConfigCreatorResult createIgrins2Config(final Igrins2Parameters igrins2Params, final int numExp, final double exposureTime) {
+        final ConfigCreatorResult result = createCommonConfig(numExp, exposureTime);
+        for (final Config step : result.getConfig()) {
+            step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_IGRINS2);
+            if (igrins2Params.altair().isDefined()) {
+                final AltairParameters altairParameters = igrins2Params.altair().get();
+                step.putItem(AOGuideStarTypeKey, altairParameters.wfsMode());
+                step.putItem(AOSystemKey, SPComponentType.AO_ALTAIR);
+            }
+        }
+        return result;
+    }
+
     public final ConfigCreatorResult createNifsConfig(final NifsParameters nifsParams, final int numExp) {
         final ConfigCreatorResult result = createCommonConfig(numExp);
 

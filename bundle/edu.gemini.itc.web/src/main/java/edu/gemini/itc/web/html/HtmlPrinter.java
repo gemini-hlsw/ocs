@@ -138,29 +138,43 @@ public final class HtmlPrinter {
     }
 
     public static String printParameterSummary(final ObservationDetails odp) {
+        CalculationMethod calcMethod = odp.calculationMethod();
+        Log.fine("CalculationMethod = " + calcMethod);
+
         final StringBuilder sb = new StringBuilder();
         sb.append("Calculation and analysis methods:\n");
+
         sb.append("<LI>Mode: ");
-        sb.append((odp.calculationMethod() instanceof Imaging ? "imaging" : "spectroscopy"));
+        sb.append((calcMethod instanceof Imaging ? "imaging" : "spectroscopy"));
         sb.append("\n");
+
         sb.append("<LI>Calculation of ");
-        if (odp.calculationMethod() instanceof S2NMethod) {
-            sb.append(String.format("S/N ratio with %d", ((S2NMethod) odp.calculationMethod()).exposures()));
-        } else if (odp.calculationMethod() instanceof IntMethod) {
-            sb.append(String.format("integration time from a S/N ratio of %.2f for", ((ImagingInt) odp.calculationMethod()).sigma()));
-        } else if (odp.calculationMethod() instanceof ExpMethod) {
-            sb.append(String.format("exposure time for a S/N ratio of %.2f.", ((ImagingExp) odp.calculationMethod()).sigma()));
-        } else if (odp.calculationMethod() instanceof SpectroscopyInt) {
+        if (    (calcMethod instanceof ImagingS2N) ||
+                (calcMethod instanceof SpectroscopyS2N)) {
+            sb.append(String.format("S/N ratio with %d", ((S2NMethod) calcMethod).exposures()));
+
+        } else if (calcMethod instanceof ImagingInt) {
+            sb.append(String.format("integration time from a S/N ratio of %.2f for", ((ImagingInt) calcMethod).sigma()));
+
+        } else if (calcMethod instanceof ImagingExp) {
+            sb.append(String.format("exposure time for a S/N ratio of %.2f.", ((ImagingExp) calcMethod).sigma()));
+
+        } else if (calcMethod instanceof SpectroscopyInt) {
             sb.append(String.format("exposure time and number of exposures for a S/N ratio of %.1f at wavelength %.2f nm.",
-                    ((SpectroscopyInt) odp.calculationMethod()).sigma(), ((SpectroscopyInt) odp.calculationMethod()).wavelength()));
+                    ((SpectroscopyInt) calcMethod).sigma(), ((SpectroscopyInt) calcMethod).wavelength()));
+
         } else {
             throw new Error("Unsupported calculation method");
         }
-        if ( (odp.calculationMethod() instanceof S2NMethod) || (odp.calculationMethod() instanceof IntMethod)) {
+
+        if (    (calcMethod instanceof ImagingS2N) ||
+                (calcMethod instanceof ImagingInt) ||
+                (calcMethod instanceof SpectroscopyS2N) ) {
             sb.append(String.format(" exposures of %.2f secs", odp.exposureTime()));
-            if (odp.calculationMethod().coaddsOrElse(1) > 1) {
-                sb.append(String.format(" and %d coadds", odp.calculationMethod().coaddsOrElse(1)));
-            }
+
+            int coadds = calcMethod.coaddsOrElse(1);
+            if (coadds > 1) sb.append(String.format(" and %d coadds", coadds));
+
             sb.append(String.format(", and %.2f%% of them on source.\n", odp.sourceFraction() * 100));
         }
 

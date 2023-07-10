@@ -1,0 +1,8 @@
+# IGRINS H-band detector
+# Wavelength (nm) Efficiency
+800   0.85
+1000  0.91
+1230  0.87
+2000  0.92
+2400  0.87
+2520  0.70

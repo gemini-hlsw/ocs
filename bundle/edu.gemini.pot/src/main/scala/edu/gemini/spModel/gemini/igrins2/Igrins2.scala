@@ -18,7 +18,7 @@ import edu.gemini.spModel.inst.{ScienceAreaGeometry, VignettableScienceAreaInstr
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obs.plannedtime.{CommonStepCalculator, ExposureCalculator, PlannedTime}
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.{CategorizedTime, Category}
-import edu.gemini.spModel.obscomp.{InstConfigInfo, InstConstants}
+import edu.gemini.spModel.obscomp.{InstConfigInfo, InstConstants, ItcOverheadProvider}
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
 import edu.gemini.spModel.seqcomp.SeqConfigNames
 import edu.gemini.spModel.telescope.{IssPort, IssPortProvider, PosAngleConstraint, PosAngleConstraintAware}
@@ -42,6 +42,7 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
   with IssPortProvider
   with PlannedTime.StepCalculator
   with ConfigPostProcessor
+  with ItcOverheadProvider
   with VignettableScienceAreaInstrument {
   _exposureTime = Igrins2.DefaultExposureTime.toSeconds
   private var _port = IssPort.UP_LOOKING
@@ -169,6 +170,12 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
   override def getSetupTime(obs: ISPObservation): Duration =
     Duration.ofMinutes(8)
 
+  override def getSetupTime(config: Config): Duration =
+    Duration.ofMinutes(8)
+
+  override def getReacquisitionTime(config: Config): Duration =
+    Duration.ofMinutes(5)
+
   override def calc(cur: Config, prev: immutable.Option[Config]): PlannedTime.CategorizedTimeGroup = {
     val times = new java.util.ArrayList[CategorizedTime]()
 
@@ -230,6 +237,12 @@ object Igrins2 {
     val fowlerSamples0 = fowlerSamples(expTime)
     def rn(rnAt16: Double) = rnAt16 * sqrt(16) / sqrt(fowlerSamples0)
     List((MagnitudeBand.H, rn(3.8)), (MagnitudeBand.K, rn(5.0)))
+  }
+
+  def readNoise(expTime: Double, band: MagnitudeBand) : Double =
+    band match {
+      case MagnitudeBand.H => 3.8 * sqrt(16) / sqrt(fowlerSamples(expTime.seconds))
+      case MagnitudeBand.K => 5.0 * sqrt(16) / sqrt(fowlerSamples(expTime.seconds))
   }
 
   private val query_no  = false

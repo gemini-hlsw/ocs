@@ -186,4 +186,6 @@ public final class NiriPrinter extends PrinterBase implements OverheadTablePrint
     public double getRecenterInterval() {
         return this.getRecentInterval();
     }
+
+    public int getNumberExposures() { throw new Error("Not implemented"); }
 }
