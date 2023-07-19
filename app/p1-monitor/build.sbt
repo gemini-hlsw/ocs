@@ -109,7 +109,7 @@ def v2024A(ov: Version, pv: Version) = AppConfig(
   props = Map(
     "org.osgi.framework.storage" -> "${user.home}/.edu.gemini.p1monitor.2024A/felix-cache",
     "p1monitor.config" -> "conf.production-2024A.xml",
-    "org.osgi.service.http.port" -> "9008",
+    "org.osgi.service.http.port" -> "9009",
     "p1monitor.host" -> "phase1.gemini.edu"
   ),
   distribution = List(Linux64)
