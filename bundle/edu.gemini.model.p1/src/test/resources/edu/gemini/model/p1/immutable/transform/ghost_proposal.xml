@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2023.2.2" tacCategory="Stellar Astrophysics, Evolution, Supernovae, Abundances">
+    <meta band3optionChosen="false" overrideAffiliate="false">
+        <firstAttachment>/Users/bmiller/gemini/sciops/softdevel/PIT/proposal_example/GeminiDemo_1_22B.pdf</firstAttachment>
+        <secondAttachment>/Users/bmiller/gemini/sciops/softdevel/PIT/proposal_example/GeminiDemo_2_22B.pdf</secondAttachment>
+    </meta>
+    <semester year="2023" half="B"/>
+    <title>GHOST Test SV Proposal</title>
+    <abstract>An abstract for the best GHOST proposal ever... </abstract>
+    <scheduling></scheduling>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Bryan</firstName>
+            <lastName>Miller</lastName>
+            <status>PhD</status>
+            <gender>Man</gender>
+            <email>bryan.miller@noirlab.edu</email>
+            <phone>+56 2 2205618</phone>
+            <address>
+                <institution>Gemini Observatory/NSF’s NOIRLab (South)</institution>
+                <address>Casilla 603
+La Serena</address>
+                <country>Chile</country>
+            </address>
+        </pi>
+    </investigators>
+    <targets>
+        <sidereal epoch="J2000" id="target-0">
+            <name>HD   2540</name>
+            <degDeg>
+                <ra>7.27855189447001293956418521702289581298828125</ra>
+                <dec>-0.0421352927700127111165784299373626708984375</dec>
+            </degDeg>
+            <properMotion deltaRA="-24.967" deltaDec="-18.311"/>
+            <magnitudes>
+                <magnitude band="B" system="Vega">10.529999732971191</magnitude>
+                <magnitude band="V" system="Vega">10.199999809265137</magnitude>
+                <magnitude band="J" system="Vega">9.274999618530273</magnitude>
+                <magnitude band="H" system="Vega">9.071999549865723</magnitude>
+                <magnitude band="K" system="Vega">9.027999877929688</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-1">
+            <name>* sig Pav</name>
+            <degDeg>
+                <ra>312.3257146436000084577244706451892852783203125</ra>
+                <dec>-68.77652112814001839069533161818981170654296875</dec>
+            </degDeg>
+            <properMotion deltaRA="-64.12" deltaDec="-49.688"/>
+            <magnitudes>
+                <magnitude band="B" system="Vega">6.545000076293945</magnitude>
+                <magnitude band="V" system="Vega">5.4070000648498535</magnitude>
+                <magnitude band="J" system="Vega">3.5490000247955322</magnitude>
+                <magnitude band="H" system="Vega">2.950000047683716</magnitude>
+                <magnitude band="K" system="Vega">2.874000072479248</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-2">
+            <name>HD 1462</name>
+            <degDeg>
+                <ra>4.6664014723500031323055736720561981201171875</ra>
+                <dec>-22.0437402003100260117207653820514678955078125</dec>
+            </degDeg>
+            <properMotion deltaRA="26.536" deltaDec="-10.286"/>
+            <magnitudes>
+                <magnitude band="B" system="Vega">10.430000305175781</magnitude>
+                <magnitude band="V" system="Vega">9.449999809265137</magnitude>
+                <magnitude band="J" system="Vega">7.789999961853027</magnitude>
+                <magnitude band="H" system="Vega">7.295000076293945</magnitude>
+                <magnitude band="K" system="Vega">7.177000045776367</magnitude>
+            </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-3">
+            <name>HD 3535</name>
+            <degDeg>
+                <ra>9.58082250529997736521181650459766387939453125</ra>
+                <dec>-3.18320676051001782980165444314479827880859375</dec>
+            </degDeg>
+            <properMotion deltaRA="40.683" deltaDec="-69.842"/>
+            <magnitudes>
+                <magnitude band="g" system="AB">10.493000030517578</magnitude>
+                <magnitude band="r" system="AB">9.864999771118164</magnitude>
+                <magnitude band="i" system="AB">9.762999534606934</magnitude>
+                <magnitude band="B" system="Vega">10.67199993133545</magnitude>
+                <magnitude band="V" system="Vega">9.982000350952148</magnitude>
+                <magnitude band="J" system="Vega">8.833000183105469</magnitude>
+                <magnitude band="H" system="Vega">8.579999923706055</magnitude>
+                <magnitude band="K" system="Vega">8.503000259399414</magnitude>
+            </magnitudes>
+        </sidereal>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC 70%/Cirrus, IQ 85%/Poor, SB Any/Bright, WV Any</name>
+            <cc>70%/Cirrus</cc>
+            <iq>85%/Poor</iq>
+            <sb>Any/Bright</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <ghost>
+            <Ghost id="blueprint-0">
+                <name>GHOST Standard Single</name>
+                <visitor>false</visitor>
+                <resolutionMode>Standard</resolutionMode>
+                <targetMode>Single</targetMode>
+            </Ghost>
+        </ghost>
+        <ghost>
+            <Ghost id="blueprint-1">
+                <name>GHOST Standard Dual</name>
+                <visitor>false</visitor>
+                <resolutionMode>Standard</resolutionMode>
+                <targetMode>Dual</targetMode>
+            </Ghost>
+        </ghost>
+        <ghost>
+            <Ghost id="blueprint-2">
+                <name>GHOST High Single</name>
+                <visitor>false</visitor>
+                <resolutionMode>High</resolutionMode>
+                <targetMode>Single</targetMode>
+            </Ghost>
+        </ghost>
+        <ghost>
+            <Ghost id="blueprint-3">
+                <name>GHOST Standard SRIFU + Sky</name>
+                <visitor>false</visitor>
+                <resolutionMode>Standard</resolutionMode>
+                <targetMode>SRIFU + Sky</targetMode>
+            </Ghost>
+        </ghost>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" target="target-0" condition="condition-0" blueprint="blueprint-0">
+            <progTime units="hr">1.0</progTime>
+            <partTime units="hr">0.0</partTime>
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation band="Band 1/2" enabled="true" target="target-3" condition="condition-0" blueprint="blueprint-1">
+            <progTime units="hr">1.0</progTime>
+            <partTime units="hr">0.0</partTime>
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation band="Band 1/2" enabled="true" target="target-1" condition="condition-0" blueprint="blueprint-2">
+            <progTime units="hr">1.0</progTime>
+            <partTime units="hr">0.0</partTime>
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+        <observation band="Band 1/2" enabled="true" target="target-2" condition="condition-0" blueprint="blueprint-3">
+            <progTime units="hr">1.0</progTime>
+            <partTime units="hr">0.0</partTime>
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+    </observations>
+    <proposalClass>
+        <special tooOption="None" jwstSynergy="false">
+            <submission>
+                <request>
+                    <time units="hr">4.0</time>
+                    <minTime units="hr">0.0</minTime>
+                </request>
+                <type>System Verification</type>
+            </submission>
+        </special>
+    </proposalClass>
+</proposal>
