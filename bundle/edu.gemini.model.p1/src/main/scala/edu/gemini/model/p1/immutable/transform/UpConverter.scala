@@ -174,19 +174,24 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter supports migrating to 2023B
  */
 case object SemesterConverter2023BTo2024A extends SemesterConverter {
+  val modeRegex = "SRIFU1 (Sky|Target) \\+ SRI[FU][UF]2 (Sky|Target)"
+
   val renameSRPlusSky: TransformFunction = {
     case p @ <ghost>{ns @ _*}</ghost> =>
       object srTransformer extends BasicTransformer {
         override def transform(n: xml.Node): xml.NodeSeq = n match {
           case <name>{name}</name>                                   =>
             // There is an interim model with some typos we need to consider
-            <name>{name.text.replaceAll("Ghost", "GHOST").replaceAll("SRIFU1 Target \\+ SRIFU2 Sky", "SRIFU + Sky").replaceAll("SRIFU1 Sky \\+ SRIUF2 Target", "SRIFU + Sky").replaceAll("SRIFU1 Sky \\+ SRIFU2 Target", "SRIFU + Sky")}</name>
-          case <targetMode>SRIFU1 Target + SRIFU2 Sky</targetMode>   => <targetMode>SRIFU + Sky</targetMode>
-          case <targetMode>SRIFU1 Target + SRIUF2 Sky</targetMode>   => <targetMode>SRIFU + Sky</targetMode>
-          case <targetMode>SRIFU1 Sky + SRIFU2 Target</targetMode>   => <targetMode>SRIFU + Sky</targetMode>
-          case <targetMode>SRIFU1 Sky + SRIUF2 Target</targetMode>   => <targetMode>SRIFU + Sky</targetMode>
-          case elem: xml.Elem                                        => elem.copy(child = elem.child.flatMap(transform))
-          case _                                                     => n
+            val fixedName = name.text
+              .replace("Ghost", "GHOST")
+              .replaceAll(modeRegex, "SRIFU + Sky")
+            <name>{fixedName}</name>
+          case <targetMode>{targetMode}</targetMode> if targetMode.text.matches(modeRegex)   =>
+            <targetMode>SRIFU + Sky</targetMode>
+          case elem: xml.Elem                                                                =>
+            elem.copy(child = elem.child.flatMap(transform))
+          case _                                                                             =>
+            n
         }
       }
       StepResult(s"The SRIFU[1|2] + SRIFU[1|2] Sky modes are now just SRIFU + Sky.", <ghost>{srTransformer.transform(ns)}</ghost>).successNel
