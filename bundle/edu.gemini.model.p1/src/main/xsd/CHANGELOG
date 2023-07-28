@@ -4,7 +4,6 @@ Gemini Phase I Schema Changes
 ##########################
 * Replace GHOST target modes 'SRIFU1 Target + SRIFU2 Sky' and 'SRIFU1 Sky + SRIFU2 Target' for 'SRIFU + Sky'
 
-
 # Version 2023.2.1 - 2023B
 ##########################
 * Add a usLongTerm flag to Queue/Classical proposal
