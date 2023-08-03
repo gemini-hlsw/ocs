@@ -46,8 +46,12 @@ public final class Igrins2Recipe {
     }
 
     private void validateInputParameters() {
-        if (_calcMethod instanceof SpectroscopyS2N && _obsDetailParameters.exposureTime() > 600) {
-            throw new IllegalArgumentException("The maximum exposure time is 600s.");
+        if (_calcMethod instanceof SpectroscopyS2N) {
+            if (_obsDetailParameters.exposureTime() < 1.63) {
+                throw new IllegalArgumentException("The minimum exposure time is 1.63 seconds.");
+            } else if (_obsDetailParameters.exposureTime() > 1800) {
+                throw new IllegalArgumentException("The maximum exposure time is 1800 seconds.");
+            }
         }
         Validation.validate(_mainInstrument[0], _obsDetailParameters, _sdParameters);  // other general validations
     }
@@ -126,7 +130,6 @@ public final class Igrins2Recipe {
             timeToHalfMax = Math.min(timeToHalfMax, maxFlux / 2. / peakFlux * exposureTime);
 
             if (((Igrins2) r.instrument()).getArm() == arm) {  // the requested wavelength is here
-                // det =
                 final VisitableSampledSpectrum fins2n = s.getFinalS2NSpectrum();
                 snr = fins2n.getY(wavelength);
                 Log.fine(String.format("S/N @ %.2f nm = %.2f", wavelength, snr));
