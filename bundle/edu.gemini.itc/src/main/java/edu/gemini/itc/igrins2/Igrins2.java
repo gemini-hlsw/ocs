@@ -19,6 +19,7 @@ public class Igrins2 extends Instrument implements SpectroscopyInstrument {
     private final Igrins2GratingOptics _gratingOptics;
     private final Igrins2Arm _arm;
     private final double _readNoise;
+    private final int _fowlerSamples;
 
     public Igrins2(final Igrins2Parameters igp, final ObservationDetails odp, Igrins2Arm arm) {
         super(Site.GN, Bands.NEAR_IR, INSTR_DIR, FILENAME);
@@ -26,6 +27,9 @@ public class Igrins2 extends Instrument implements SpectroscopyInstrument {
 
         Log.fine("Calc method = " + odp.calculationMethod());
         Log.fine("Arm = " + arm.getName());
+
+        _fowlerSamples = Igrins2$.MODULE$.fowlerSamples(odp.exposureTime());
+        Log.fine("Fowler Samples = " + _fowlerSamples);
 
         _readNoise = Igrins2$.MODULE$.readNoise(odp.exposureTime(), arm.getMagnitudeBand());
         Log.fine("Read Noise = " + _readNoise + " e-");
@@ -61,7 +65,10 @@ public class Igrins2 extends Instrument implements SpectroscopyInstrument {
 
     public int getEffectiveWavelength() { return (int) _arm.getWavelengthCentral(); }  // (nanometers)
 
+    @Override
     public double getReadNoise() { return _readNoise; }  // (electrons)
+
+    public int getFowlerSamples() { return _fowlerSamples; }
 
     public String getDirectory() { return ITCConstants.LIB + "/" + INSTR_DIR; }  // the directory with the data files
 
@@ -84,6 +91,8 @@ public class Igrins2 extends Instrument implements SpectroscopyInstrument {
     @Override public double wellDepth() { return _arm.getWellDepth(); }  // Detector well-depth (electrons)
 
     @Override public double gain() { return _arm.getGain(); }  // Detector gain (electrons / ADU)
+
+    @Override public double getDarkCurrent() { return _arm.getDarkCurrent(); }  // Detector dark current (electrons / sec / pixel)
 
     @Override public double maxFlux() { return _arm.get_maxRecommendedFlux(); }  // Maximum recommended flux (electrons)
 

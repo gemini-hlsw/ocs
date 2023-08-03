@@ -228,6 +228,10 @@ object Igrins2 {
     AllowedFowlerSamples.reverse.find(cur => nFowler >= cur).getOrElse(AllowedFowlerSamples.head)
   }
 
+  def fowlerSamples(expTime: Double) : Int = {
+    fowlerSamples(expTime.seconds)
+  }
+
   def readoutTime(expTime: Time): Time = {
     val nFowler = fowlerSamples(expTime)
     1.45479.seconds * nFowler
@@ -235,14 +239,15 @@ object Igrins2 {
 
   def readNoise(expTime: Time): List[(MagnitudeBand, Double)] = {
     val fowlerSamples0 = fowlerSamples(expTime)
-    def rn(rnAt16: Double) = rnAt16 * sqrt(16) / sqrt(fowlerSamples0)
-    List((MagnitudeBand.H, rn(3.8)), (MagnitudeBand.K, rn(5.0)))
+    List(
+      (MagnitudeBand.H, 14.4 * math.pow(fowlerSamples0, -0.34977)),
+      (MagnitudeBand.K, 13.3 * math.pow(fowlerSamples0, -0.36533)))
   }
 
   def readNoise(expTime: Double, band: MagnitudeBand) : Double =
     band match {
-      case MagnitudeBand.H => 3.8 * sqrt(16) / sqrt(fowlerSamples(expTime.seconds))
-      case MagnitudeBand.K => 5.0 * sqrt(16) / sqrt(fowlerSamples(expTime.seconds))
+      case MagnitudeBand.H => 14.4 * math.pow(fowlerSamples(expTime.seconds), -0.34977)
+      case MagnitudeBand.K => 13.3 * math.pow(fowlerSamples(expTime.seconds), -0.36533)
   }
 
   private val query_no  = false
