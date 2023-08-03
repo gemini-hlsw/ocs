@@ -12,5 +12,5 @@ background.dat
 0.10
 # Read Noise (set in igrins2.java)
 0
-# Dark Current (e-/sec/pixel)
-0.01
+# Dark Current (set in igrins2.java)
+0
