@@ -867,6 +867,27 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           result \\ "gnirs" must \\("pixelScale") \> "0.05\"/pix"
       }
     }
+    "REL-4345 Rename sr + sky ghost modes" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("ghost_proposal.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 0
+      }
+    }
+    "REL-4345 Rename sr + sky ghost modes take 2" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("ghost_proposal_2.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 4
+          changes must contain("The SRIFU[1|2] + SRIFU[1|2] Sky modes are now just SRIFU + Sky.")
+          result \\ "ghost" must \\("name") \> "GHOST Standard SRIFU + Sky"
+          result \\ "ghost" must \\("targetMode") \> "SRIFU + Sky"
+      }
+    }
   }
 
   def testF2R3KYConversion(xml: Elem): MatchResult[Result] = {

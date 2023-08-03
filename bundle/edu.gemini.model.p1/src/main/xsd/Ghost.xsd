@@ -49,8 +49,7 @@
         <xsd:restriction base="xsd:token">
             <xsd:enumeration value="Single"/>
             <xsd:enumeration value="Dual"/>
-            <xsd:enumeration value="SRIFU1 Target + SRIFU2 Sky"/>
-            <xsd:enumeration value="SRIFU1 Sky + SRIFU2 Target"/>
+            <xsd:enumeration value="SRIFU + Sky"/>
         </xsd:restriction>
     </xsd:simpleType>
 </xsd:schema>
