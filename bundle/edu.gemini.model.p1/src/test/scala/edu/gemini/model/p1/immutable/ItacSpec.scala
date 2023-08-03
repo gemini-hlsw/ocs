@@ -12,8 +12,6 @@ class ItacSpec extends Specification with SemesterProperties with XmlMatchers {
   "The ITAC XML deserialization" should {
     "support NGO Authority element missing" in {
       val proposal = ProposalIo.read(new InputStreamReader(getClass.getResourceAsStream("proposal_itac_no_ngoauthority.xml")))
-      println(proposal)
-
       ProposalIo.validate(proposal) must beRight
     }
     "support NGO Authority element present" in {
