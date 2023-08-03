@@ -51,9 +51,15 @@ public final class Igrins2Printer extends PrinterBase implements OverheadTablePr
         String str;
 
         _println("");
-        _println("Read noise: " +
-                results[0].instrument().getReadNoise() + " e- (" + ((Igrins2) results[0].instrument()).getWaveBand() + ") and " +
-                results[1].instrument().getReadNoise() + " e- (" + ((Igrins2) results[1].instrument()).getWaveBand() + ")");
+
+        _println(String.format("Read noise: %.2f e- in %s and %.2f e- in %s using %d Fowler samples.",
+                results[0].instrument().getReadNoise(), ((Igrins2) results[0].instrument()).getWaveBand(),
+                results[1].instrument().getReadNoise(), ((Igrins2) results[1].instrument()).getWaveBand(),
+                ((Igrins2) results[0].instrument()).getFowlerSamples()));
+
+        _println(String.format("Dark current: %.4f e-/s/pix in %s and %.4f e-/s/pix in %s.",
+                results[0].instrument().getDarkCurrent(), ((Igrins2) results[0].instrument()).getWaveBand(),
+                results[1].instrument().getDarkCurrent(), ((Igrins2) results[1].instrument()).getWaveBand()));
 
         if (result.aoSystem().isDefined()) { _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get())); }
 
