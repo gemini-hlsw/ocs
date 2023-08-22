@@ -891,6 +891,16 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           result \\ "ghost" must \\("targetMode") \> "SRIFU + Sky"
       }
     }
+    "23-001 Upconvert NIFS to GNIRS" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_nifs.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 4
+          changes must contain("NIFS Gemini North proposal has been migrated to GNIRS instead.")
+      }
+    }
   }
 
   def testF2R3KYConversion(xml: Elem): MatchResult[Result] = {
@@ -907,3 +917,4 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
     }
   }
 }
+

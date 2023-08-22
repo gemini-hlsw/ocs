@@ -197,7 +197,50 @@ case object SemesterConverter2023BTo2024A extends SemesterConverter {
       StepResult(s"The SRIFU[1|2] + SRIFU[1|2] Sky modes are now just SRIFU + Sky.", <ghost>{srTransformer.transform(ns)}</ghost>).successNel
   }
 
-  override val transformers: List[TransformFunction] = List(renameSRPlusSky)
+  lazy val nifsToGNIRSMessage: String = "NIFS Gemini North proposal has been migrated to GNIRS instead."
+
+  val nifsNameRegexAo = """NIFS (LGS|NGS)(/?\S*)? (.*)""".r
+  val nifsNameRegexNonAo = """NIFS (.*)""".r
+
+  def transformNifsName(name: String) = name match {
+    case nifsNameRegexAo(a, b, _) => s"""GNIRS Spectroscopy $a$b 0.15"/pix 111 l/mm grating None LR-IFU &lt; 2.5um"""
+    case nifsNameRegexNonAo(_)    => s"""GNIRS Spectroscopy  0.15"/pix 111 l/mm grating None LR-IFU &lt; 2.5um"""
+    case _                        => name
+  }
+
+  val nifsToGNIRS: TransformFunction = {
+    case p @ <nifs>{ns @ _*}</nifs> =>
+      object NifsToGnirsTransformer extends BasicTransformer {
+        override def transform(n: xml.Node): xml.NodeSeq = n match {
+          case p @ <nonAo>{q @ _*}</nonAo> =>
+            <spectroscopy id={p.attribute("id")}>
+              {q.map(transform)}
+              <pixelScale>0.15"/pix</pixelScale>
+              <crossDisperser>None</crossDisperser>
+              <fpu>LR-IFU</fpu>
+              <centralWavelength>&lt; 2.5um</centralWavelength>
+              <altair><none/></altair>
+            </spectroscopy>
+          case p @ <ao>{q @ _*}</ao> =>
+            <spectroscopy id={p.attribute("id")}>
+              {q.map(transform)}
+              <pixelScale>0.15"/pix</pixelScale>
+              <crossDisperser>None</crossDisperser>
+              <fpu>LR-IFU</fpu>
+              <centralWavelength>&lt; 2.5um</centralWavelength>
+            </spectroscopy>
+          case <name>{n}</name>          => <name>{transformNifsName(n.text)}</name>
+          case <disperser>{_}</disperser> => <disperser>111 l/mm grating</disperser>
+          case <occultingDisk>{_}</occultingDisk> => xml.NodeSeq.Empty
+          case elem: xml.Elem            =>
+            elem.copy(child = elem.child.flatMap(transform))
+          case _                         => n
+        }
+      }
+      StepResult(nifsToGNIRSMessage, <gnirs>{NifsToGnirsTransformer.transform(ns)}</gnirs>).successNel
+  }
+
+  override val transformers: List[TransformFunction] = List(renameSRPlusSky, nifsToGNIRS)
 }
 
 /**
@@ -207,8 +250,8 @@ case object SemesterConverter2023ATo2023B extends SemesterConverter {
   private val niriFilterMapping: M.NiriFilter => M.GnirsFilter = _ match {
     case M.NiriFilter.BBF_Y    => M.GnirsFilter.Y
     case M.NiriFilter.BBF_J    => M.GnirsFilter.ORDER_5 // J
-    case M.NiriFilter.BBF_H    => M.GnirsFilter.ORDER_4 // H\
-    case M.NiriFilter.BBF_K | M.NiriFilter.BBF_KPRIME | M.NiriFilter.BBF_KSHORT 
+    case M.NiriFilter.BBF_H    => M.GnirsFilter.ORDER_4 // H
+    case M.NiriFilter.BBF_K | M.NiriFilter.BBF_KPRIME | M.NiriFilter.BBF_KSHORT
                                => M.GnirsFilter.ORDER_3 // K
     case M.NiriFilter.NBF_H210 => M.GnirsFilter.H2
     case M.NiriFilter.NBF_HC   => M.GnirsFilter.PAH
