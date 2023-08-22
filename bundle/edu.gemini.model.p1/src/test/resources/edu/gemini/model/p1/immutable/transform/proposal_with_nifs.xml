@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2022.2.1">
+    <meta band3optionChosen="false" overrideAffiliate="false"/>
+    <semester year="2022" half="B"/>
+    <title></title>
+    <abstract></abstract>
+    <scheduling></scheduling>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <gender>None selected</gender>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets/>
+    <conditions/>
+    <blueprints>
+        <nifs>
+            <nonAo id="blueprint-0">
+                <name>NIFS H (1.49 - 1.80um)</name>
+                <visitor>false</visitor>
+                <disperser>H (1.49 - 1.80um)</disperser>
+            </nonAo>
+        </nifs>
+        <nifs>
+            <ao id="blueprint-1">
+                <name>NIFS NGS/FL 0.5" H (1.49 - 1.80um)</name>
+                <visitor>false</visitor>
+                <disperser>H (1.49 - 1.80um)</disperser>
+                <altair>
+                    <ngs fieldLens="true"/>
+                </altair>
+                <occultingDisk>0.5"</occultingDisk>
+            </ao>
+        </nifs>
+        <nifs>
+            <ao id="blueprint-2">
+                <name>NIFS NGS 0.5" H (1.49 - 1.80um)</name>
+                <visitor>false</visitor>
+                <disperser>H (1.49 - 1.80um)</disperser>
+                <altair>
+                    <ngs fieldLens="false"/>
+                </altair>
+                <occultingDisk>0.5"</occultingDisk>
+            </ao>
+        </nifs>
+        <nifs>
+            <ao id="blueprint-3">
+                <name>NIFS LGS 0.2" J (1.15 - 1.33um)</name>
+                <visitor>false</visitor>
+                <disperser>J (1.15 - 1.33um)</disperser>
+                <altair>
+                    <lgs pwfs1="false" aowfs="false" oiwfs="false"/>
+                </altair>
+                <occultingDisk>0.2"</occultingDisk>
+            </ao>
+        </nifs>
+        <nifs>
+            <ao id="blueprint-4">
+                <name>NIFS LGS/PWFS1 0.2" J (1.15 - 1.33um)</name>
+                <visitor>false</visitor>
+                <disperser>J (1.15 - 1.33um)</disperser>
+                <altair>
+                    <lgs pwfs1="true" aowfs="false" oiwfs="false"/>
+                </altair>
+                <occultingDisk>0.2"</occultingDisk>
+            </ao>
+        </nifs>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" blueprint="blueprint-0"/>
+        <observation band="Band 1/2" enabled="true" blueprint="blueprint-1"/>
+        <observation band="Band 1/2" enabled="true" blueprint="blueprint-2"/>
+        <observation band="Band 1/2" enabled="true" blueprint="blueprint-3"/>
+        <observation band="Band 1/2" enabled="true" blueprint="blueprint-4"/>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None" jwstSynergy="false"/>
+    </proposalClass>
+</proposal>
