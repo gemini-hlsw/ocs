@@ -33,7 +33,7 @@ object VisibilityRobot extends ObservationMetaRobot[(ProposalClass, BlueprintBas
       case o if key(o).isDefined => (key(o).get, o)
     }
 
-  override def doRefresh(m: Model) {
+  override def doRefresh(m: Model): Unit = {
     // Mark all checks as pending so the visibility is updated after every change
     // As Visibility calculation is very fast this doesn't affect performance
     model.foreach {

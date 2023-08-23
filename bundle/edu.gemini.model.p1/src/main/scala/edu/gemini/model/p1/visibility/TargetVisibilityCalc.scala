@@ -81,7 +81,7 @@ object TargetVisibilityCalc {
   )
 
   private val decGnNgs = deg( -90.0 -> Bad,                       -(37.0 - EQUALITY_LIMIT) -> Limited, -(30.0 - EQUALITY_LIMIT) -> Good, 73.0 -> Limited)
-  private val decGnLgs = deg(-(30.0 - EQUALITY_LIMIT) -> Limited, -(25.0 - EQUALITY_LIMIT) -> Good,      65.0 -> Limited,                70.0 -> Bad)
+  private val decGnLgs = deg(-(27.0 - EQUALITY_LIMIT) -> Limited, -(22.0 - EQUALITY_LIMIT) -> Good,      65.0 -> Limited,                68.0 -> Bad)
   private val decGsNgs = deg(-(87.0 - EQUALITY_LIMIT) -> Good,      22.0 -> Limited,                     28.0 -> Bad,                    90.0 -> Limited)
   private val decGsLgs = deg(-(75.0 - EQUALITY_LIMIT) -> Limited,  -70.0 -> Good,                        10.0 -> Limited,                15.0 -> Bad)
 
