@@ -416,7 +416,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
             specS2Narr[0] = s2n;
 
-            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.apply(new ExposureCalculation(exposureTime, numberExposures, 0)));
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.apply(new ExposureCalculation(exposureTime, numberExposures, snr)));
         }
 
     }
