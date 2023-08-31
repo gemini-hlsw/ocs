@@ -204,7 +204,7 @@ case object SemesterConverter2023BTo2024A extends SemesterConverter {
 
   def transformNifsName(name: String) = name match {
     case nifsNameRegexAo(a, b, _) => s"""GNIRS Spectroscopy $a$b 0.15"/pix 111 l/mm grating None LR-IFU &lt; 2.5um"""
-    case nifsNameRegexNonAo(_)    => s"""GNIRS Spectroscopy  0.15"/pix 111 l/mm grating None LR-IFU &lt; 2.5um"""
+    case nifsNameRegexNonAo(_)    => s"""GNIRS Spectroscopy LGS/PWFS1 0.15"/pix 111 l/mm grating None LR-IFU &lt; 2.5um"""
     case _                        => name
   }
 
@@ -219,7 +219,9 @@ case object SemesterConverter2023BTo2024A extends SemesterConverter {
               <crossDisperser>None</crossDisperser>
               <fpu>LR-IFU</fpu>
               <centralWavelength>&lt; 2.5um</centralWavelength>
-              <altair><none/></altair>
+              <altair>
+                <lgs pwfs1="true" aowfs="false" oiwfs="false"/>
+              </altair>
             </spectroscopy>
           case p @ <ao>{q @ _*}</ao> =>
             <spectroscopy id={p.attribute("id")}>
