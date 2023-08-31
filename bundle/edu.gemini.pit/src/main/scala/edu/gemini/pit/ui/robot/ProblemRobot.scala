@@ -83,7 +83,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           Semester2020BProblems(p, s).all ++
           List(incompleteInvestigator, missingObsElementCheck, emptyTargetCheck,
             emptyEphemerisCheck, singlePointEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
-            badGuiding, cwfsCorrectionsIssue, badVisibility, iffyVisibility, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsIQ70Check, lgsGemsIQ85Check,
+            badGuiding, cwfsCorrectionsIssue, badVisibility, iffyVisibility, minTimeCheck, wrongSite, band3Orphan2, gpiCheck, lgsIQ70Check, lgsGemsIQ85Check, gnirsLRIFUCheck,
             lgsCC50Check, texesCCCheck, texesWVCheck, gmosWVCheck, gmosR600Check, dssiObsolete, ghostTargetCheck, band3IQ, band3LGS, band3RapidToO, sbIrObservation, usLongTermCheck).flatten
       ps.sorted
     }
@@ -237,6 +237,14 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         case _                 => false
       }
 
+    def bpIsGnirsLRIFU(b: BlueprintBase): Boolean =
+      b match {
+        case GnirsBlueprintSpectroscopy(AltairNone, _,  _, _, GnirsFpu.LR_IFU, _)           => false
+        case GnirsBlueprintSpectroscopy(AltairLGS(true, _, _), _, _, _, GnirsFpu.LR_IFU, _) => false
+        case GnirsBlueprintSpectroscopy(_, _, _, _, GnirsFpu.LR_IFU, _)                     => true
+        case _                                                                              => false
+      }
+
     private val lgsIQ70Check = for {
       o  <- p.nonEmptyObservations
       c  <- o.condition
@@ -273,6 +281,12 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if b.isInstanceOf[TexesBlueprint]
       if c.wv == WaterVapor.ANY
     } yield new Problem(Severity.Warning, s"TEXES is not recommended for worse than WV80.", "Observations", s.inObsListView(o.band, _.Fixes.fixConditions(c)))
+
+    private val gnirsLRIFUCheck = for {
+      o  <- p.nonEmptyObservations
+      b  <- o.blueprint
+      if bpIsGnirsLRIFU(b)
+    } yield new Problem(Severity.Error, "The GNIRS LR-IFU can only be used with the AO options None or Altair LGS w/ PWFS1.", "Observations", s.inObsListView(o.band, _.Fixes.fixBlueprint(b)))
 
     private val gmosWVCheck = for {
       o  <- p.nonEmptyObservations
