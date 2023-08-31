@@ -19,12 +19,12 @@ object PITLauncher extends App {
   Locale.setDefault(Locale.ENGLISH)
 
   // Need to set this manually, as we are not inside OSGi
-  val version = s"${Semester.current.year}.2.2"
+  val version = s"${Semester.current.year}.1.1"
   System.setProperty("edu.gemini.model.p1.schemaVersion", version)
   System.setProperty(classOf[Workspace].getName + ".fonts.shrunk", "true")
 
   // Set manually AGS
-  AgsRobot.ags = Some(AgsHttpClient("gnauxodb.gemini.edu", 8443))
+  AgsRobot.ags = Some(AgsHttpClient("gnauxodb.gemini.edu", 443))
 
   // Create workspace with a null bundle context, it internally checks if it is null
   val workspace = new Workspace(null)

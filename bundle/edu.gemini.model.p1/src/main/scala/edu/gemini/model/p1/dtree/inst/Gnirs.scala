@@ -90,8 +90,14 @@ object Gnirs {
     // REL-4149 Allow LR_IFU only for pixel scale 0.15 and No crossdisperser
     // REL-4149 was reverted but let's keep the code until LR-IFU is available
     // REL-4352 Allow LF-IFU only for pixel scale 0.15 and No crossdisperser
+    // 23-003   Allow LF-IFU for Altair none or LGS/PWFS1
+    val altairCompatibleWithLR_IFU = s._1 match {
+      case AltairNone            => true
+      case AltairLGS(true, _, _) => true
+      case _                     => false
+    }
     val choices = GnirsFpu.values.filter {
-      case GnirsFpu.LR_IFU => (s._2 == GnirsPixelScale.PS_015 && s._4 == GnirsCrossDisperser.No)
+      case GnirsFpu.LR_IFU => (s._2 == GnirsPixelScale.PS_015 && s._4 == GnirsCrossDisperser.No && altairCompatibleWithLR_IFU)
       case GnirsFpu.HR_IFU => false
       case _               => true
     }.toList
