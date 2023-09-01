@@ -248,7 +248,7 @@ class ShellAdvisor(
 
 
     context.actionManager.add(helpMenu,
-      Some(new BrowseAction("https://www.gemini.edu/observing/phase-i/pit/pit", "Phase I Tool Help")),
+      Some(new BrowseAction("https://www.gemini.edu/observing/phase-i/pit/pit-help", "Phase I Tool Help")),
       Some(new BrowseAction(URLConstants.GET_TEMPLATES._1, URLConstants.GET_TEMPLATES._2)),
       Some(new BrowseAction(URLConstants.OPEN_ITC._1, URLConstants.OPEN_ITC._2))
     )
