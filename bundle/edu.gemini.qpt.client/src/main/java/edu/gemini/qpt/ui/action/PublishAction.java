@@ -94,7 +94,7 @@ public class PublishAction extends AbstractAsyncAction implements PropertyChange
                 // Get the destination(s)
                 destinations =
                         sched.getSite() == Site.GS ?
-                                new Destination[]{INTERNAL, PACHON} :
+                                new Destination[]{PACHON, INTERNAL} :
                                 new Destination[]{INTERNAL};
 
                 // Show progress dialog
