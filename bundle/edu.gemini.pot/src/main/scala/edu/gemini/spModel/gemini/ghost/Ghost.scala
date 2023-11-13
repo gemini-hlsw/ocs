@@ -5,6 +5,7 @@ import java.util.logging.Logger
 import java.util.{ArrayList, Collection, Collections, List => JList, Map => JMap, Set => JSet}
 import edu.gemini.pot.sp._
 import edu.gemini.shared.util.immutable.{Option => JOption}
+import edu.gemini.shared.util.immutable.ImOption
 import edu.gemini.skycalc.Angle
 import edu.gemini.spModel.config.ConfigPostProcessor
 import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
@@ -87,6 +88,15 @@ final class Ghost
     Pio.addIntParam(factory, paramSet, Ghost.BLUE_EXPOSURE_COUNT_PROP.getName, blueExposureCount)
     Pio.addParam(factory, paramSet, Ghost.BLUE_BINNING_PROP, blueBinning.name)
     Pio.addParam(factory, paramSet, Ghost.BLUE_READ_NOISE_GAIN_PROP, blueReadNoiseGain.name)
+
+    // Optional engineering properties
+    getGuideCameraExposureTime.asScala.foreach { d =>
+      Pio.addDoubleParam(factory, paramSet, Ghost.GUIDE_CAMERA_EXPOSURE_TIME_PROP.getName, d)
+    }
+    getSlitViewingCameraExposureTime.asScala.foreach { d =>
+      Pio.addDoubleParam(factory, paramSet, Ghost.SLIT_VIEWING_CAMERA_EXPOSURE_TIME_PROP.getName, d)
+    }
+
     paramSet
   }
 
@@ -132,6 +142,15 @@ final class Ghost
     setBlueExposureCount(Pio.getIntValue(paramSet, Ghost.BLUE_EXPOSURE_COUNT_PROP.getName, InstConstants.DEF_REPEAT_COUNT))
     Option(Pio.getValue(paramSet, Ghost.BLUE_BINNING_PROP)).map(GhostBinning.valueOf).foreach(setBlueBinning)
     Option(Pio.getValue(paramSet, Ghost.BLUE_READ_NOISE_GAIN_PROP)).map(GhostReadNoiseGain.valueOf).foreach(setBlueReadNoiseGain)
+
+    // Optional engineering properties
+    def optionalDouble(prop: PropertyDescriptor)(set: JOption[Double] => Unit): Unit =
+      set(ImOption.fromScalaOpt(Option(Pio.getValue(paramSet, prop)).flatMap { s =>
+        try { Some(s.toDouble) } catch { case _: NumberFormatException => None }
+      }))
+
+    optionalDouble(Ghost.GUIDE_CAMERA_EXPOSURE_TIME_PROP)(setGuideCameraExposureTime)
+    optionalDouble(Ghost.SLIT_VIEWING_CAMERA_EXPOSURE_TIME_PROP)(setSlitViewingCameraExposureTime)
   }
 
   override def getSysConfig: ISysConfig = {
@@ -148,6 +167,13 @@ final class Ghost
     sc.putParameter(DefaultParameter.getInstance(Ghost.RED_READ_NOISE_GAIN_PROP, getRedReadNoiseGain))
     sc.putParameter(DefaultParameter.getInstance(Ghost.BLUE_BINNING_PROP.getName, getBlueBinning))
     sc.putParameter(DefaultParameter.getInstance(Ghost.BLUE_READ_NOISE_GAIN_PROP, getBlueReadNoiseGain))
+    getGuideCameraExposureTime.asScala.foreach { d =>
+      sc.putParameter(DefaultParameter.getInstance(Ghost.GUIDE_CAMERA_EXPOSURE_TIME_PROP, d))
+    }
+    getSlitViewingCameraExposureTime.asScala.foreach { d =>
+      sc.putParameter(DefaultParameter.getInstance(Ghost.SLIT_VIEWING_CAMERA_EXPOSURE_TIME_PROP, d))
+    }
+
     sc
   }
 
@@ -364,6 +390,34 @@ final class Ghost
     }
   }
 
+  private var guideCameraExposureTime: JOption[Double] =
+    ImOption.empty()
+
+  def getGuideCameraExposureTime: JOption[Double] =
+    guideCameraExposureTime
+
+  def setGuideCameraExposureTime(newValue: JOption[Double]): Unit = {
+    val oldValue = getGuideCameraExposureTime
+    if (oldValue != newValue) {
+      guideCameraExposureTime = newValue
+      firePropertyChange(Ghost.GUIDE_CAMERA_EXPOSURE_TIME_PROP, oldValue, newValue)
+    }
+  }
+
+  private var slitViewingCameraExposureTime: JOption[Double] =
+    ImOption.empty()
+
+  def getSlitViewingCameraExposureTime: JOption[Double] =
+    slitViewingCameraExposureTime
+
+  def setSlitViewingCameraExposureTime(newValue: JOption[Double]): Unit = {
+    val oldValue = getSlitViewingCameraExposureTime
+    if (oldValue != newValue) {
+      slitViewingCameraExposureTime = newValue
+      firePropertyChange(Ghost.SLIT_VIEWING_CAMERA_EXPOSURE_TIME_PROP, oldValue, newValue)
+    }
+  }
+
   private var blueBinning: GhostBinning = GhostBinning.DEFAULT
 
   def getBlueBinning: GhostBinning = blueBinning
@@ -393,20 +447,6 @@ final class Ghost
 
   override def getReacquisitionTime(obs: ISPObservation): Duration =
     Duration.ofMinutes(5)
-
-  // Formula used on the ITC
-//  override def calc(cur: Config, prev: Option[Config]): PlannedTime.CategorizedTimeGroup = {
-//    val times: util.Collection[PlannedTime.CategorizedTime] = new util.ArrayList[PlannedTime.CategorizedTime]
-//    val exposureTime: Double = ExposureCalculator.instance.exposureTimeSec(cur)
-//    times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, exposureTime))
-//    val readoutTime: Double = GhostReadoutTime.getReadoutOverhead(cur)
-//    System.out.println("*** readoutTime: " + readoutTime)
-//    times.add(CategorizedTime.fromSeconds(Category.READOUT, readoutTime))
-//    System.out.println("DHS suppouse value: " + getDhsWriteTime.time)
-//    //times.add(getDhsWriteTime());
-//    CommonStepCalculator.instance.calc(cur, prev).addAll(times)
-//  }
-
 
   override def calc(cur: Config, prev: JOption[Config]): CategorizedTimeGroup = {
     val times = new java.util.ArrayList[CategorizedTime]()
@@ -554,6 +594,12 @@ object Ghost {
   val DEF_EXPOSURE_TIME_BLUE = 10.0
   val EXPOSURE_TIME_BLUE_KEY = new ItemKey(INSTRUMENT_KEY, EXPOSURE_TIME_BLUE_PROP)
 
+  val EXPOSURE_TIME_GUIDE_CAMERA_PROP: String        = "guideCameraExposureTime"
+  val EXPOSURE_TIME_GUIDE_CAMERA_KEY: ItemKey        = new ItemKey(INSTRUMENT_KEY, EXPOSURE_TIME_GUIDE_CAMERA_PROP)
+
+  val EXPOSURE_TIME_SLIT_VIEWING_CAMERA_PROP: String = "slitViewingCameraExposureTime"
+  val EXPOSURE_TIME_SLIT_VIEWING_CAMERA_KEY: ItemKey = new ItemKey(INSTRUMENT_KEY, EXPOSURE_TIME_SLIT_VIEWING_CAMERA_PROP)
+
   // The names of the base position / IFUs.
   val BASE_RA_DEGREES: String  = "baseRADeg"
   val BASE_RA_HMS: String      = "baseRAHMS"
@@ -621,6 +667,12 @@ object Ghost {
   val BLUE_EXPOSURE_COUNT_PROP: PropertyDescriptor = initProp(COUNT_BLUE, query_no, iter_yes)
   val BLUE_BINNING_PROP: PropertyDescriptor = initProp(BINNING_BLUE, query = query_yes, iter = iter_no)
   val BLUE_READ_NOISE_GAIN_PROP: PropertyDescriptor = initProp(NOISE_GAIN_BLUE, query = query_no, iter = iter_no)
+
+  val GUIDE_CAMERA_EXPOSURE_TIME_PROP: PropertyDescriptor        = initProp(EXPOSURE_TIME_GUIDE_CAMERA_PROP, query = query_no, iter = iter_no)
+  GUIDE_CAMERA_EXPOSURE_TIME_PROP.setExpert(true)
+
+  val SLIT_VIEWING_CAMERA_EXPOSURE_TIME_PROP: PropertyDescriptor = initProp(EXPOSURE_TIME_SLIT_VIEWING_CAMERA_PROP, query = query_no, iter = iter_no)
+  SLIT_VIEWING_CAMERA_EXPOSURE_TIME_PROP.setExpert(true)
 
   val RED_EXPOSURE_TIME_KEY: ItemKey =
     new ItemKey(INSTRUMENT_KEY, RED_EXPOSURE_TIME_PROP.getName)
