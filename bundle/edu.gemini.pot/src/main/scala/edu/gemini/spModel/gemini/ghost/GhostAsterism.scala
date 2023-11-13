@@ -59,8 +59,18 @@ object GhostAsterism {
   final case class GhostTarget(spTarget: SPTarget,
                                guideFiberState: GuideFiberState) {
 
+    /** Target coordinates, not PM corrected. */
     def coordinates(when: Option[Instant]): Option[Coordinates] =
       spTarget.getCoordinates(when.map(_.toEpochMilli))
+
+    /** Target coordinates, PM corrected. */
+    def pmCorrectedCoordinates(when: Option[Instant]): Option[Coordinates] = {
+      val corrected = for {
+        pm <- spTarget.getProperMotion
+        w  <- when
+      } yield pm.calculateAt(spTarget.getTarget, w)
+      corrected orElse coordinates(when)
+    }
 
     def copyWithClonedTarget: GhostTarget =
       copy(spTarget = spTarget.clone)
@@ -101,6 +111,9 @@ object GhostAsterism {
     override def basePosition(when: Option[Instant]): Option[Coordinates] =
       overriddenBase.map(_.getCoordinates) orElse defaultBasePosition(when)
 
+    override def pmCorrectedBasePosition(when: Option[Instant]): Option[Coordinates] =
+      overriddenBase.map(_.getCoordinates) orElse pmCorrectedDefaultBasePosition(when)
+
     override def basePositionProperMotion: Option[ProperMotion] =
       allTargets.map(Target.pm.get).fold
 
@@ -110,6 +123,7 @@ object GhostAsterism {
       case TargetPlusSky(t,_,_) => Right(t)
       case SkyPlusTarget(s,_,_) => Left(s)
     }
+
     def srifu2: Option[Either[SPCoordinates, GhostTarget]] = this match {
       case SingleTarget(_,_)    => None
       case DualTarget(_,t,_)    => Some(Right(t))
@@ -133,6 +147,14 @@ object GhostAsterism {
       case TargetPlusSky(t,_,_) => t.coordinates(when)
       case SkyPlusTarget(_,t,_) => t.coordinates(when)
     }
+
+    private def pmCorrectedDefaultBasePosition(when: Option[Instant]): Option[Coordinates] =
+      this match {
+        case SingleTarget(t,_)    => t.pmCorrectedCoordinates(when)
+        case DualTarget(t1,t2,_)  => interpolateCoords(t1.pmCorrectedCoordinates(when), t2.pmCorrectedCoordinates(when))
+        case TargetPlusSky(t,_,_) => t.pmCorrectedCoordinates(when)
+        case SkyPlusTarget(_,t,_) => t.pmCorrectedCoordinates(when)
+      }
 
     override def resolutionMode: ResolutionMode = ResolutionMode.GhostStandard
 
@@ -231,6 +253,9 @@ object GhostAsterism {
     /** Defines the default base position to be the same as the target position. */
     override def basePosition(when: Option[Instant]): Option[Coordinates] =
       overriddenBase.map(_.getCoordinates) orElse target.coordinates(when)
+
+    def pmCorrectedBasePosition(when: Option[Instant]): Option[Coordinates] =
+      overriddenBase.map(_.getCoordinates) orElse target.pmCorrectedCoordinates(when)
 
     override def basePositionProperMotion: Option[ProperMotion] =
       Target.pm.get(target.spTarget.getTarget)

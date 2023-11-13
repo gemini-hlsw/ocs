@@ -107,4 +107,12 @@ object SPCoordinates {
   val CoordinatesName   = "coordinates"
   val Name = "Sky"
   val Tag = Name
+
+  /**
+   * Makes a new `SPCoordinates` object at (0, 0).  Coordinates are mutable in
+   * SPCoordinates so this must be a `def`.
+   */
+  def zero: SPCoordinates =
+    new SPCoordinates(Coordinates.zero)
+
 }
