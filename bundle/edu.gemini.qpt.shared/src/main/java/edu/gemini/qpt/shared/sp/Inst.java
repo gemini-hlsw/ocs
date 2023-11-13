@@ -25,6 +25,7 @@ import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
 import edu.gemini.spModel.gemini.gpi.Gpi;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw;
+import edu.gemini.spModel.gemini.igrins2.Igrins2;
 import edu.gemini.spModel.gemini.michelle.InstMichelle;
 import edu.gemini.spModel.gemini.nici.InstNICI;
 import edu.gemini.spModel.gemini.nici.NICIParams;
@@ -110,6 +111,8 @@ public enum Inst {
 
     GSAOI(Gsaoi.SP_TYPE, false, true, true,
             GsaoiOdgw.values(), GsaoiOdgw.values(), Gsaoi.Filter.values()),
+
+    IGRINS2(Igrins2.SP_TYPE, true, false, true),
 
     MICHELLE(InstMichelle.SP_TYPE, true, false, false),
 
