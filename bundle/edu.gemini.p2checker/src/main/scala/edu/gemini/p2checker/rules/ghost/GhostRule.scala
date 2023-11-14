@@ -9,6 +9,7 @@ import edu.gemini.spModel.core.Coordinates
 import edu.gemini.spModel.gemini.ghost.GhostIfuPatrolField.{HRIFUSeparationOffset, HRSkySeparationOffset, SRIFU1SeparationOffset, SRIFU2SeparationOffset}
 import edu.gemini.spModel.gemini.ghost.{Ghost, GhostAsterism, GhostIfuPatrolField}
 import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.target.SPCoordinates
 import edu.gemini.spModel.target.env.{Asterism, AsterismType}
 import edu.gemini.spModel.target.offset.OffsetUtil
 
@@ -35,13 +36,12 @@ object GhostRule extends IRule {
        node:  ISPObsComponent,
        ifu1: Option[Coordinates],
        ifu2: Option[Coordinates]
-     ): Option[Problem] = {
+     ): Option[Problem] =
       for {
         t1 <- ifu1
         t2 <- ifu2
         if (t1.angularDistance(t2).toSignedArcsecs.abs < 102)
       } yield new Problem(Problem.Type.ERROR, id, ProbesTooClose, node)
-    }
 
     def checkBoth(
       ctx:  ObsContext,
@@ -66,19 +66,19 @@ object GhostRule extends IRule {
           checkOne("IFU1",
             node,
             base,
-            t.coordinates(when).map(_.offset(SRIFU1SeparationOffset.p.toAngle, SRIFU1SeparationOffset.q.toAngle)),
+            t.pmCorrectedCoordinates(when).map(_.offset(SRIFU1SeparationOffset.p.toAngle, SRIFU1SeparationOffset.q.toAngle)),
             GhostIfuPatrolField.ifu1(ctx))
         case GhostAsterism.DualTarget(t1, t2, _)                =>
           checkBoth(ctx,
             node,
             base,
-            t1.coordinates(when).map(_.offset(SRIFU1SeparationOffset.p.toAngle, SRIFU1SeparationOffset.q.toAngle)),
-            t2.coordinates(when).map(_.offset(SRIFU2SeparationOffset.p.toAngle, SRIFU2SeparationOffset.q.toAngle)))
+            t1.pmCorrectedCoordinates(when).map(_.offset(SRIFU1SeparationOffset.p.toAngle, SRIFU1SeparationOffset.q.toAngle)),
+            t2.pmCorrectedCoordinates(when).map(_.offset(SRIFU2SeparationOffset.p.toAngle, SRIFU2SeparationOffset.q.toAngle)))
         case GhostAsterism.TargetPlusSky(t, s, _)               =>
           checkBoth(ctx,
             node,
             base,
-            t.coordinates(when).map(_.offset(SRIFU1SeparationOffset.p.toAngle, SRIFU1SeparationOffset.q.toAngle)),
+            t.pmCorrectedCoordinates(when).map(_.offset(SRIFU1SeparationOffset.p.toAngle, SRIFU1SeparationOffset.q.toAngle)),
             Some(s.coordinates.offset(SRIFU2SeparationOffset.p.toAngle, SRIFU2SeparationOffset.q.toAngle)))
         case GhostAsterism.SkyPlusTarget(s, t, _)               =>
           checkBoth(ctx,
@@ -93,7 +93,7 @@ object GhostRule extends IRule {
           checkBoth(ctx,
             node,
             base,
-            t.coordinates(when).map(_.offset(HRIFUSeparationOffset.p.toAngle, HRIFUSeparationOffset.q.toAngle)),
+            t.pmCorrectedCoordinates(when).map(_.offset(HRIFUSeparationOffset.p.toAngle, HRIFUSeparationOffset.q.toAngle)),
             Some(sky.coordinates.offset(HRSkySeparationOffset.p.toAngle, HRSkySeparationOffset.q.toAngle)))
         case _                                                  =>
           Nil
@@ -107,7 +107,7 @@ object GhostRule extends IRule {
         ctx  <- elems.getObsContext.asScalaOpt
         env  <- Option(ctx.getTargets)
         when = ctx.getSchedulingBlockStart.asScalaOpt.map(t => Instant.ofEpochMilli(t))
-        base <- env.getAsterism.basePosition(when)
+        base <- env.getAsterism.pmCorrectedBasePosition(when)
       } checkAsterism(env.getAsterism, ctx, toc, base, when).foreach(problems.append)
 
       problems

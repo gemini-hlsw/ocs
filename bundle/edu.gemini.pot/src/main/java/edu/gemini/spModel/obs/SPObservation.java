@@ -344,6 +344,10 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
         }
     }
 
+    public void setSchedulingBlockSome(SchedulingBlock newValue) {
+        setSchedulingBlock(new Some(newValue));
+    }
+
     /**
      * Get the exec status override.
      */

@@ -46,8 +46,17 @@ trait Asterism {
   def allSpCoordinatesJava: ImList[SPCoordinates] =
     allSpCoordinates.asImList
 
-  /** Slew coordinates and AGS calculation base position. */
+  /**
+   * Slew coordinates and AGS calculation base position. Sidreal targets are
+   * not PM corrected.
+   */
   def basePosition(time: Option[Instant]): Option[Coordinates]
+
+  /**
+   * Slew coordinates and AGS calculation base position, with proper motion
+   * correction for sidereal targets.
+   */
+  def pmCorrectedBasePosition(time: Option[Instant]): Option[Coordinates]
 
   /** Proper motion of the base position. */
   def basePositionProperMotion: Option[ProperMotion]
@@ -126,6 +135,15 @@ object Asterism {
 
     override def basePosition(time: Option[Instant]): Option[Coordinates] =
       t.getCoordinates(time.map(_.toEpochMilli))
+
+    /** Target coordinates, PM corrected. */
+    def pmCorrectedBasePosition(when: Option[Instant]): Option[Coordinates] = {
+      val corrected = for {
+        pm <- basePositionProperMotion
+        w  <- when
+      } yield pm.calculateAt(t.getTarget, w)
+      corrected orElse basePosition(when)
+    }
 
     override def copyWithClonedTargets: Asterism =
       Single(t.clone)
