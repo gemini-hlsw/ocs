@@ -78,7 +78,7 @@ public class IterBiasObsForm extends JPanel {
 		add(label3, cc.xy(7, 5));
 
 		//---- label6 ----
-		label6.setText("Coadds");
+		label6.setText("Coadds/Sub-exposures");
 		add(label6, cc.xy(3, 7));
 		add(coadds, cc.xy(5, 7));
 
