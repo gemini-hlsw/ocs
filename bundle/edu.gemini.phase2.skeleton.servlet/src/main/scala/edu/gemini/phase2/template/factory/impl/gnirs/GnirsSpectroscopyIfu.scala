@@ -45,12 +45,12 @@ case class GnirsSpectroscopyIfu(blueprint:SpGnirsBlueprintSpectroscopy, exampleT
   // IF FPU == LR-IFU:
   //     INCLUDE {24}, {25}, {32}, {33}, {35}, {36} in a target-specific Scheduling Group
   // ELIF FPU == HR-IFU:
-  //     INCLUDE {24}, {26}, {34}, {35}, {37} in a target-specific Scheduling Group
+  //     INCLUDE {24}, {26}, {34}, {35}, {37}, {38} in a target-specific Scheduling Group
 
   if (fpu == LR_IFU)
     include(24, 25, 32, 33, 35, 36) in TargetGroup
   else if (fpu == HR_IFU)
-    include(24, 26, 34, 35, 37) in TargetGroup
+    include(24, 26, 34, 35, 37, 38) in TargetGroup
 
   // IF TARGET H-MAGNITUDE < 7 INCLUDE {27}              # ultra bright
   // IF 7 <= TARGET H-MAGNITUDE < 11.5 INCLUDE {28}      # very bright
