@@ -10,7 +10,6 @@ import edu.gemini.spModel.core.{Target, HorizonsDesignation, NonSiderealTarget}
 import edu.gemini.spModel.target.SPTarget
 import jsky.app.ot.gemini.editor.EphemerisUpdater
 
-import javax.swing.JOptionPane
 import javax.swing.text.JTextComponent
 
 import jsky.util.gui.DialogUtil
@@ -41,16 +40,11 @@ final class NonSiderealNameResolver(
       case class Wrapper(unwrap: Search[_ <: HorizonsDesignation]) {
         override def toString = unwrap.productPrefix
       }
-      Option {
-        JOptionPane.showInputDialog(
-          name,
-          "Select the HORIZONS target type:",
-          "Horizons Search",
-          JOptionPane.QUESTION_MESSAGE,
-          null, // TODO: icon
-          List(Comet, Asteroid, MajorBody).map(f => Wrapper(f(name.getText))).toArray[Object],
-          null)
-      } .map(_.asInstanceOf[Wrapper].unwrap)
+      ui.ask(
+        name,
+        "Select the HORIZONS target type:",
+        List(Comet, Asteroid, MajorBody).map(f => Wrapper(f(name.getText))).toArray[Object]
+      ).map(_.asInstanceOf[Wrapper].unwrap)
     }
 
   val search: HS2[Unit] =
@@ -73,16 +67,11 @@ final class NonSiderealNameResolver(
       case class Wrapper(unwrap: Row[_ <: HorizonsDesignation]) {
         override def toString = unwrap.name + " - " + unwrap.a.des
       }
-      Option {
-        JOptionPane.showInputDialog(
-          name,
-          "Multiple results were found. Please disambiguate:",
-          "Horizons Search",
-          JOptionPane.QUESTION_MESSAGE,
-          null, // TODO: icon
-          rs.map(Wrapper).sortBy(_.toString).toArray[Object],
-          null)
-      } .map(_.asInstanceOf[Wrapper].unwrap)
+      ui.ask(
+        name,
+        "Multiple results were found. Please disambiguate:",
+        rs.map(Wrapper).sortBy(_.toString).toArray[Object]
+      ).map(_.asInstanceOf[Wrapper].unwrap)
     } >>= {
       case Some(r) => action(r.a, r.name)
       case None    => ().point[HS2]

@@ -7,7 +7,8 @@ import edu.gemini.pot.sp.{ISPObsComponent, ISPObservation}
 import edu.gemini.skycalc.ObservingNight
 
 import java.util.Date
-import javax.swing.{JRootPane, SwingUtilities}
+import java.util.concurrent.atomic.AtomicReference
+import javax.swing.{JOptionPane, JRootPane, SwingUtilities}
 
 import edu.gemini.horizons.server.backend.HorizonsService2._
 import edu.gemini.shared.gui.GlassLabel
@@ -47,6 +48,24 @@ object EphemerisUpdater {
 
     val hide: HS2[Unit] = onEDT {
       glass.foreach(_.hide())
+    }
+
+    def ask(parent: Component, message: String, selectionValues: Array[Object]): Option[Object] = {
+      val ref = new AtomicReference[Object]
+      Swing.onEDTWait {
+        ref.set(
+          JOptionPane.showInputDialog(
+            parent,
+            message,
+            "Horizons Search",
+            JOptionPane.QUESTION_MESSAGE,
+            null, // TODO: icon
+            selectionValues,
+            null
+          )
+        )
+      }
+      Option(ref.get())
     }
 
   }
