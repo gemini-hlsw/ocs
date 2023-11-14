@@ -366,7 +366,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       val nonSiderealNameResolver: NonSiderealNameResolver =
         new NonSiderealNameResolver(
           nonSiderealNameField.peer,
-          (h, n) => HS2.delay(setHorizonsDesignation(h, n))
+          (h, n) => nonSiderealNameResolver.ui.onEDT(setHorizonsDesignation(h, n))
         )
 
       val nonSiderealQueryField = new BoundTextField[String](10)(
