@@ -60,7 +60,9 @@ final class NonSiderealNameResolver(
     }
 
   val noResults: HS2[Unit] =
-    HS2.delay(DialogUtil.message(name, "No results found."))
+    ui.onEDT {
+      DialogUtil.message(name, "No results found.")
+    }
 
   def manyResults(rs: List[Row[_ <: HorizonsDesignation]]): HS2[Unit] =
     HS2.delay {
