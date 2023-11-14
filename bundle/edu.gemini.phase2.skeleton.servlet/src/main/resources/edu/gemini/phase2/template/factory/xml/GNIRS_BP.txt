@@ -163,7 +163,7 @@ IF CROSS-DISPERSED == SXD OR CROSS-DISPERSED == LXD:
 IF FPU == LR-IFU:
     INCLUDE {24}, {25}, {32}, {33}, {35}, {36} in a target-specific Scheduling Group
 ELIF FPU == HR-IFU:
-    INCLUDE {24}, {26}, {34}, {35}, {37} in a target-specific Scheduling Group
+    INCLUDE {24}, {26}, {34}, {35}, {37}, {38} in a target-specific Scheduling Group
 
 IF TARGET H-MAGNITUDE < 7 INCLUDE {27}              # ultra bright
 IF 7 <= TARGET H-MAGNITUDE < 11.5 INCLUDE {28}      # very bright

@@ -37,7 +37,7 @@ class GnirsBlueprintSpec extends TemplateSpec("GNIRS_BP.xml") with Specification
           val shouldBeIncluded =
             bp.fpu match {
               case GnirsFpu.LR_IFU => Set(24, 25, 32, 33, 35, 36)
-              case GnirsFpu.HR_IFU => Set(24, 26, 34, 35, 37)
+              case GnirsFpu.HR_IFU => Set(24, 26, 34, 35, 37, 38)
               case _               => sys.error("unpossible")
             }
           shouldBeIncluded.forall(isIncluded) must beTrue
