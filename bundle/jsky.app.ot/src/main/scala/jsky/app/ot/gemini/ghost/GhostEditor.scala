@@ -4,7 +4,7 @@ import com.jgoodies.forms.factories.DefaultComponentFactory
 
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.pot.sp.SPComponentType
-import edu.gemini.shared.gui.bean.{CheckboxPropertyCtrl, ComboPropertyCtrl, RadioPropertyCtrl, TextFieldPropertyCtrl}
+import edu.gemini.shared.gui.bean.{CheckboxPropertyCtrl, ComboPropertyCtrl, EditEvent, EditListener, RadioPropertyCtrl, TextFieldPropertyCtrl}
 import edu.gemini.shared.util.immutable.{Option => JOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.gemini.ghost.{AsterismTypeConverters, Ghost, GhostAsterism, GhostBinning, GhostReadNoiseGain}
@@ -25,7 +25,10 @@ import jsky.app.ot.editor.SpinnerEditor
 import jsky.app.ot.editor.eng.EngEditor
 import jsky.app.ot.gemini.editor.ComponentEditor
 
+import java.awt.Color
 import java.awt.Font
+import java.beans.PropertyChangeEvent
+import java.beans.PropertyChangeListener
 import java.util.logging.Logger
 import javax.swing.{DefaultComboBoxModel, JComponent, JPanel, JSpinner}
 import scala.collection.JavaConverters._
@@ -78,18 +81,69 @@ final class GhostEditor extends ComponentEditor[ISPObsComponent, Ghost] with Eng
         }
       }
 
+      val MinExposureTime: java.lang.Double =    0.1
+      val MaxExposureTime: java.lang.Double = 3600.0
+
+      class ExposureTimeMessageUpdater(
+        name: String,
+        label: Label,
+        getDouble: Ghost => JOption[Double]
+      ) extends EditListener[Ghost, JOption[java.lang.Double]] with PropertyChangeListener {
+
+        override def valueChanged(event: EditEvent[Ghost, JOption[java.lang.Double]]): Unit =
+          update(event.getNewValue.asScalaOpt)
+
+        override def propertyChange(event: PropertyChangeEvent): Unit =
+          update()
+
+        def update(): Unit =
+          update(Option(getDataObject).flatMap(g => getDouble(g).asScalaOpt.map(Double.box)))
+
+        def update(value: Option[java.lang.Double]): Unit = {
+          val (fg, txt) = value match {
+            case Some(d) if d < MinExposureTime => (ComponentEditor.FATAL_FG_COLOR, f"$name exposure must be >= $MinExposureTime%.1f sec")
+            case Some(d) if d > MaxExposureTime => (ComponentEditor.FATAL_FG_COLOR, f"$name exposure limited to $MaxExposureTime%.1f sec")
+            case _                              => (Color.black, "")
+          }
+          label.foreground = fg
+          label.text       = txt
+          label.visible    = txt.nonEmpty // by setting it invisible we remove the extra Insets
+                                          // which are otherwise visible leaving an unseemly gap
+        }
+      }
+
+      def addWarningRow(warning: Label, row: Int): Unit = {
+        warning.horizontalAlignment = Alignment.Right
+        layout(warning) = new Constraints() {
+          anchor    = Anchor.East
+          gridx     = 0
+          gridwidth = 3
+          gridy     = row
+          fill      = Fill.Horizontal
+          insets    = new Insets(3, 0, 5, 0)
+        }
+      }
+
       val guideCameraExpTimeCtrl: TextFieldPropertyCtrl[Ghost, JOption[java.lang.Double]] = TextFieldPropertyCtrl.createOptionDoubleInstance(Ghost.GUIDE_CAMERA_EXPOSURE_TIME_PROP, 1)
       guideCameraExpTimeCtrl.setColumns(10)
       row(0, "Guide Camera Exp Time", guideCameraExpTimeCtrl.getComponent, "sec")
 
+      val guideWarning = new Label("")
+      guideCameraExpTimeCtrl.addEditListener(new ExposureTimeMessageUpdater("Guide camera", guideWarning, _.getGuideCameraExposureTime))
+      addWarningRow(guideWarning, 1)
+
       val slitViewingCameraExpTimeCtrl: TextFieldPropertyCtrl[Ghost, JOption[java.lang.Double]] = TextFieldPropertyCtrl.createOptionDoubleInstance(Ghost.SLIT_VIEWING_CAMERA_EXPOSURE_TIME_PROP, 1)
       slitViewingCameraExpTimeCtrl.setColumns(10)
-      row(1, "Slit Viewing Camera Exp Time", slitViewingCameraExpTimeCtrl.getComponent, "sec")
+      row(2, "Slit Viewing Camera Exp Time", slitViewingCameraExpTimeCtrl.getComponent, "sec")
+
+      val slitWarning = new Label("")
+      slitViewingCameraExpTimeCtrl.addEditListener(new ExposureTimeMessageUpdater("Slit viewing camera", slitWarning, _.getSlitViewingCameraExposureTime))
+      addWarningRow(slitWarning, 3)
 
       layout(new GridBagPanel) = new Constraints() {
         gridx     = 0
         gridwidth = 3
-        gridy     = 3
+        gridy     = 4
         weighty   = 1.0
         fill      = Fill.Vertical
       }
