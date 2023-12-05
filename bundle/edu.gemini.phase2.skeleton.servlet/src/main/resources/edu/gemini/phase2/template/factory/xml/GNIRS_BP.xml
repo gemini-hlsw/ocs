@@ -2946,7 +2946,7 @@ GNIRS configuration:
               <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="c4964997-029c-4c18-a877-336534750247" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
-                  <param name="class" value="PARTNER_CAL"/>
+                  <param name="class" value="ACQ_CAL"/>
                 </paramset>
               </container>
             </container>
@@ -3096,6 +3096,19 @@ GNIRS configuration:
           <param name="overrideQaState" value="false"/>
           <param name="setupTimeType" value="FULL"/>
         </paramset>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="303a652f-761d-4123-b6ef-02a4e47612a0" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="Sequences with Multiple Bands"/>
+            <param name="NoteText">
+              <value>If observations in multiple bands are contained within the sequence, for best results:
+
+Re-acquire after the observation of the source in a given band + associated GCAL calibrations 
+
+There is a possibility that the source can move ~0.1" on the detector when moving back to sky from the GCAL environment due to a number of factors. Since the HR-IFU FoV is small, this can lead to loss of flux with an extended source or a point source that was not originally centered well and/or is observed under poor seeing (without AO).
+</value>
+            </param>
+          </paramset>
+        </container>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="c8d98f70-3df1-4625-9ecd-427b324f6365" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="exposureTime" value="15.0"/>
@@ -3294,7 +3307,7 @@ GNIRS configuration:
               <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="8c6e0617-f79b-4da7-aa5b-19b86cd568fe" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
-                  <param name="class" value="PARTNER_CAL"/>
+                  <param name="class" value="ACQ"/>
                 </paramset>
               </container>
             </container>
@@ -3437,7 +3450,7 @@ GNIRS configuration:
               <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="f6a10a5e-dd02-4014-9165-5bba1780b0ca" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
-                  <param name="class" value="PARTNER_CAL"/>
+                  <param name="class" value="ACQ"/>
                 </paramset>
               </container>
             </container>
@@ -3580,7 +3593,7 @@ GNIRS configuration:
               <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="38fe7c92-6a5f-4af2-9409-70e850febecf" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
-                  <param name="class" value="PARTNER_CAL"/>
+                  <param name="class" value="ACQ"/>
                 </paramset>
               </container>
             </container>
@@ -3888,7 +3901,7 @@ Note that the target component in the associated spectroscopy observation must b
               <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="2c8475db-befb-4b69-970b-e4389e3604a4" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
-                  <param name="class" value="PARTNER_CAL"/>
+                  <param name="class" value="ACQ"/>
                 </paramset>
               </container>
             </container>
@@ -4173,7 +4186,12 @@ Note that the target component in the associated spectroscopy observation must b
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Sequences with Multiple Bands"/>
             <param name="NoteText">
-              <value>If observations in multiple bands are contained within the sequence, for best results, a re-acquisition should occur after the calibrations on a given band. There is a non-repeatability of ~0.1" moving back to sky from the GCAL environment, which can lead to loss of flux with an extended source or a point source that was not originally centered well and/or is observed under poor seeing.</value>
+              <value>If observations in multiple bands are contained within the sequence, for best results:
+
+Re-acquire after the observation of the source in a given band + associated GCAL calibrations 
+
+There is a possibility that the source can move ~0.1" on the detector when moving back to sky from the GCAL environment due to a number of factors. Since the HR-IFU FoV is small, this can lead to loss of flux with an extended source or a point source that was not originally centered well and/or is observed under poor seeing (without AO).
+</value>
             </param>
           </paramset>
         </container>
@@ -4382,7 +4400,7 @@ Note that the target component in the associated spectroscopy observation must b
               <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="bb273743-5dbe-4e5d-9db6-690702e91d27" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
-                  <param name="class" value="PARTNER_CAL"/>
+                  <param name="class" value="ACQ_CAL"/>
                 </paramset>
               </container>
             </container>
@@ -4532,6 +4550,19 @@ Note that the target component in the associated spectroscopy observation must b
           <param name="overrideQaState" value="false"/>
           <param name="setupTimeType" value="FULL"/>
         </paramset>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="76945f37-4f81-42c5-b9c6-54b99bdc0b28" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="Sequences with Multiple Bands"/>
+            <param name="NoteText">
+              <value>If observations in multiple bands are contained within the sequence, for best results:
+
+Re-acquire after the observation of the source in a given band + associated GCAL calibrations 
+
+There is a possibility that the source can move ~0.1" on the detector when moving back to sky from the GCAL environment due to a number of factors. Since the HR-IFU FoV is small, this can lead to loss of flux with an extended source or a point source that was not originally centered well and/or is observed under poor seeing (without AO).
+</value>
+            </param>
+          </paramset>
+        </container>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="5dd0093b-23bc-4e26-b720-50a6a26ff353" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="exposureTime" value="15.0"/>
@@ -4787,7 +4818,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     </paramset>
     <paramset name="node">
       <param name="key" value="8c6e0617-f79b-4da7-aa5b-19b86cd568fe"/>
-      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="3bfd3fc1-bb42-4d4a-ba9d-c0f2e659c470"/>
@@ -4883,7 +4914,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     </paramset>
     <paramset name="node">
       <param name="key" value="2c8475db-befb-4b69-970b-e4389e3604a4"/>
-      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="04245b0a-de99-484c-bd32-5a7f08e21545"/>
@@ -4895,7 +4926,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     </paramset>
     <paramset name="node">
       <param name="key" value="0b40b3ca-345b-4398-aa6d-72a74a9cc976"/>
-      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="40d6afd4-1f41-498e-bf38-05b1847649ee"/>
@@ -5087,7 +5118,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     </paramset>
     <paramset name="node">
       <param name="key" value="f6a10a5e-dd02-4014-9165-5bba1780b0ca"/>
-      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="9b5d65dc-1372-49e0-83b5-7d0c1f335f5f"/>
@@ -5190,6 +5221,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="76945f37-4f81-42c5-b9c6-54b99bdc0b28"/>
+      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="9216f20b-1d48-4056-8a8a-33c01db8f9df"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="3"/>
     </paramset>
@@ -5271,7 +5306,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     </paramset>
     <paramset name="node">
       <param name="key" value="434eb669-5448-46d1-a066-7d2f9b628ab8"/>
-      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="0cf9a7dd-301f-448f-a4e5-d1db9301dadc"/>
@@ -5279,6 +5314,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     </paramset>
     <paramset name="node">
       <param name="key" value="5074401f-c86e-4fb3-ac6e-a7175314ae04"/>
+      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="303a652f-761d-4123-b6ef-02a4e47612a0"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
@@ -5387,7 +5426,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     </paramset>
     <paramset name="node">
       <param name="key" value="bb273743-5dbe-4e5d-9db6-690702e91d27"/>
-      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a9f5ac1e-5676-471e-bbc1-0ca973c8d627"/>
@@ -5491,7 +5530,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     </paramset>
     <paramset name="node">
       <param name="key" value="38fe7c92-6a5f-4af2-9409-70e850febecf"/>
-      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="b82ee6d9-7729-4f57-8225-d73a3255b8fa"/>
@@ -5843,7 +5882,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     </paramset>
     <paramset name="node">
       <param name="key" value="be28d837-2928-40b6-8169-f6fcead9a651"/>
-      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="1b72132d-f8c9-4519-8ef8-a5b26af9eaf8"/>
@@ -5919,7 +5958,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     </paramset>
     <paramset name="node">
       <param name="key" value="c4964997-029c-4c18-a877-336534750247"/>
-      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="8c21ae3e-3022-4294-99f7-a32d0f3673d4"/>
