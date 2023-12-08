@@ -4260,7 +4260,7 @@ There is a possibility that the source can move ~0.1" on the detector when movin
                   <paramset name="Offset2" sequence="3">
                     <param name="p" value="-10.0"/>
                     <param name="q" value="-10.0"/>
-                    <param name="defaultGuideOption" value="on"/>
+                    <param name="defaultGuideOption" value="off"/>
                   </paramset>
                 </paramset>
               </paramset>
@@ -6382,7 +6382,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     </paramset>
     <paramset name="node">
       <param name="key" value="ce6d5f62-a846-4d5e-a2dd-5afb809cfc2f"/>
-      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="4af549df-6210-45af-8d2a-96ebbc6e988b"/>
