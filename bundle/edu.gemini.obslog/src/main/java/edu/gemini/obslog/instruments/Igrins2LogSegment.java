@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 public class Igrins2LogSegment extends InstrumentLogSegment {
     public static final Logger LOG = Logger.getLogger(Igrins2LogSegment.class.getName());
 
-    private static final String NARROW_TYPE = "Igrins2";
+    private static final String NARROW_TYPE = "IGRINS-2";
     public static final OlSegmentType SEG_TYPE = new OlSegmentType(NARROW_TYPE);
 
     private static final String SEGMENT_CAPTION = "Igrins2 Observing Log";
