@@ -1,6 +1,7 @@
 package edu.gemini.wdba.tcc;
 
 import edu.gemini.spModel.gemini.igrins2.Igrins2;
+import edu.gemini.spModel.telescope.IssPort;
 
 import java.util.Objects;
 
@@ -39,7 +40,8 @@ final public class Igrins2Support implements ITccInstrumentSupport {
 
     @Override
     public String getTccConfigInstrument() {
-        return "IGRINS2";
+        Igrins2 inst = (Igrins2) oe.getInstrument();
+        return (inst.getIssPort() == IssPort.UP_LOOKING) ? "IGRINS2" : "IGRINS2_3";
     }
 
     @Override
