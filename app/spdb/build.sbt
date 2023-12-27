@@ -61,7 +61,6 @@ def common(version: Version) = AppConfig(
     "edu.gemini.auxfile.chunkSize"                     -> "32768",
     "edu.gemini.auxfile.fits.dest"                     -> "/please/specify/in/host/specific/property/file",
     "edu.gemini.auxfile.other.dest"                    -> "/please/specify/in/host/specific/property/file",
-    "edu.gemini.auxfile.other.host"                    -> "gnconfig.gemini.edu",
     "edu.gemini.auxfile.server"                        -> "true",
     "edu.gemini.dataman.gsa.archive.host"              -> "archive.gemini.edu",
     "edu.gemini.dataman.poll.obsRefresh"               -> "PT2M",
@@ -440,7 +439,8 @@ def gnodbtest(version: Version) = AppConfig(
     "edu.gemini.dataman.gsa.summit.host" -> "mkofits-lv1new.hi.gemini.edu",
     "edu.gemini.oodb.mail.smtpHost"      -> "smtp.hi.gemini.edu",
     "edu.gemini.util.trpc.name"          -> "Gemini North ODB (Test)",
-    "osgi.shell.telnet.ip"               -> "10.1.5.36"
+    "edu.gemini.auxfile.other.host"      -> "gnconfig.gemini.edu",
+    "osgi.shell.telnet.ip"               -> "10.1.71.37"
   )
 ) extending List(odbtest(version), gnodbtest_credentials(version))
 
@@ -465,6 +465,7 @@ def gnodb(version: Version) = AppConfig(
     "edu.gemini.oodb.mail.smtpHost"        -> "smtp.hi.gemini.edu",
     "edu.gemini.spdb.dir"                  -> "/mount/wikiwiki/odbhome/ugemini/spdb/spdb.active",
     "edu.gemini.util.trpc.name"            -> "Gemini North ODB",
+    "edu.gemini.auxfile.other.host"        -> "gnconfig.gemini.edu",
     "osgi.shell.telnet.ip"                 -> "10.2.4.77",
     "edu.gemini.fire.url"                  -> "http://hbffireops.hi.gemini.edu:5000/ocsmsg"
   )
@@ -486,6 +487,7 @@ def gnagsodb(version: Version) = AppConfig(
   props = Map(
     "edu.gemini.auxfile.fits.dest"         -> "/gemsoft/var/data/ictd/GN@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.fits.host"         -> "gnconfig.gemini.edu",
+    "edu.gemini.auxfile.other.host"        -> "gnconfig.gemini.edu",
     "edu.gemini.auxfile.other.dest"        -> "/gemsoft/var/data/finder/GNqueue/Finders/@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.root"              -> "/home/software/.auxfile",
     "edu.gemini.dataman.gsa.summit.host"   -> "fits.hi.gemini.edu",
@@ -513,6 +515,7 @@ def gnodbscheduler(version: Version) = AppConfig(
     "edu.gemini.dataman.gsa.summit.host" -> "mkofits-lv1new.hi.gemini.edu",
     "edu.gemini.oodb.mail.smtpHost"      -> "smtp.hi.gemini.edu",
     "edu.gemini.util.trpc.name"          -> "Gemini North Scheduler ODB (Test)",
+    "edu.gemini.auxfile.other.host"      -> "gnconfig.gemini.edu",
     "osgi.shell.telnet.ip"               -> "10.1.198.192"
   )
 ) extending List(odbtest(version), gnodbtest_credentials(version))
@@ -535,6 +538,7 @@ def gsodbtest(version: Version) = AppConfig(
     "edu.gemini.dataman.gsa.summit.host" -> "cpofits-lv1.cl.gemini.edu",
     "edu.gemini.oodb.mail.smtpHost"      -> "smtp.cl.gemini.edu",
     "edu.gemini.util.trpc.name"          -> "Gemini South ODB (Test)",
+    "edu.gemini.auxfile.other.host"      -> "gsconfig.gemini.edu",
     "osgi.shell.telnet.ip"               -> "172.16.76.31"
   )
 ) extending List(odbtest(version), gsodbtest_credentials(version))
@@ -560,6 +564,7 @@ def gsodb(version: Version) = AppConfig(
     "edu.gemini.oodb.mail.smtpHost"        -> "smtp.cl.gemini.edu",
     "edu.gemini.spdb.dir"                  -> "/mount/petrohue/odbhome/ugemini/spdb/spdb.active",
     "edu.gemini.util.trpc.name"            -> "Gemini South ODB",
+    "edu.gemini.auxfile.other.host"        -> "gsconfig.gemini.edu",
     "osgi.shell.telnet.ip"                 -> "172.16.76.71",
     "edu.gemini.fire.url"                  -> "http://sbffireops.cl.gemini.edu:5000/ocsmsg"
   ),
