@@ -5,7 +5,6 @@ import edu.gemini.obslog.core.OlSegmentType;
 import edu.gemini.obslog.obslog.ConfigMap;
 import edu.gemini.obslog.obslog.InstrumentLogSegment;
 import edu.gemini.obslog.obslog.OlLogOptions;
-import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.type.LoggableSpType;
 
 import java.util.List;
@@ -18,7 +17,7 @@ import java.util.logging.Logger;
 public class Igrins2LogSegment extends InstrumentLogSegment {
     public static final Logger LOG = Logger.getLogger(Igrins2LogSegment.class.getName());
 
-    private static final String NARROW_TYPE = SPComponentType.INSTRUMENT_IGRINS2.narrowType;
+    private static final String NARROW_TYPE = "IGRINS-2";
     public static final OlSegmentType SEG_TYPE = new OlSegmentType(NARROW_TYPE);
 
     private static final String SEGMENT_CAPTION = "Igrins2 Observing Log";
