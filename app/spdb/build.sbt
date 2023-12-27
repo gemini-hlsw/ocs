@@ -29,6 +29,7 @@ ocsAppManifest := {
           sraaphorst(v),
           anunez(v),
           astephens(v),
+          osmirnova(v),
           with_remote_gogo(v),
             odbtest(v),
               gsodbtest(v),
@@ -273,14 +274,12 @@ def cquiroz(version: Version) = AppConfig(
   distribution = List(TestDistro),
   vmargs = List(
     "-Xss1536K",
-    "-Xms6G",
-    "-Xmx14G",
-    "-XX:+UseConcMarkSweepGC",
+    "-Xmx1024M",
     "-Dedu.gemini.site=south"
   ),
   props = Map(
-    "edu.gemini.spdb.dir"                  -> "/Users/cquiroz/.spdb/",
-    "edu.gemini.auxfile.root"              -> "/Users/cquiroz/.spdb/.auxfile",
+    "edu.gemini.spdb.dir"                  -> "/Users/carlos.quiroz/.spdb/",
+    "edu.gemini.auxfile.root"              -> "/Users/carlos.quiroz/.auxfile",
     "edu.gemini.dataman.gsa.summit.host"   -> "cpofits-lv1new.cl.gemini.edu",
     "edu.gemini.services.server.start"     -> "false",
     "edu.gemini.util.trpc.name"            -> "Carlos's ODB (Test)",
@@ -362,6 +361,33 @@ def astephens(version: Version) = AppConfig(
     "edu.gemini.auxfile.fits.host"               -> "gsconfig.gemini.edu"
   )
 ) extending List(with_gogo(version), fnussber_credentials(version))
+
+// OSMIRNOVA
+def osmirnova(version: Version) = AppConfig(
+  id = "osmirnova",
+  distribution = List(TestDistro),
+  vmargs = List(
+    "-Xss1536K",
+    "-Xmx2000M",
+    "-Dedu.gemini.site=north",
+    "-Dcron.*.edu.gemini.dbTools.html.ftpHost=localhost",
+    "-Dcron.*.edu.gemini.dbTools.html.ftpDestDir=/Users/osmirnov/.spdb/sftp",
+    "-Dcron.reports.edu.gemini.spdb.reports.public.host=localhost",
+    "-Dcron.reports.edu.gemini.spdb.reports.public.remotedir=/Users/osmirnov/.spdb/cron",
+    "-Dcron.archive.edu.gemini.dbTools.html.ftpHost=localhost",
+    "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/osmirnov/.spdb/cron"
+  ),
+  props = Map(
+    "edu.gemini.smartgcal.host"          -> "localhost",
+    "edu.gemini.spdb.dir"                -> "/Users/osmirnov/.spdb/",
+    "edu.gemini.auxfile.root"            -> "/Users/osmirnov/.auxfile",
+    "edu.gemini.dataman.gsa.summit.host" -> "mkofits-lv1new.hi.gemini.edu",
+    "edu.gemini.util.trpc.name"          -> "Florian's ODB (Test)",
+    "edu.gemini.auxfile.fits.dest"       -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.other.dest"      -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.fits.host"       -> "gsconfig.gemini.edu"
+  )
+) extending List(with_gogo(version), olesja_credentials(version))
 
 // ODBTEST
 def odbtest(version: Version) = AppConfig(
