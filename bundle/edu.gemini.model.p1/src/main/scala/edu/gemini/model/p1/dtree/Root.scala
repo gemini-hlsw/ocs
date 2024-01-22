@@ -22,6 +22,7 @@ class Root(sem:Semester) extends SingleSelectNode[Semester, Instrument, Any](sem
     case Graces     => Left(inst.Graces())
     case Gsaoi      => Left(inst.Gsaoi())
     case Igrins     => Right(IgrinsBlueprint())
+    case Igrins2    => Left(inst.Igrins2())
     case Michelle   => Left(inst.Michelle())
     case Nici       => Left(inst.Nici())
     case Nifs       => Left(inst.Nifs())
@@ -44,6 +45,6 @@ object Root {
 
   // REL-3769: GPI not available in 2020B.
   // GHOST not yet available
-  val choices: List[Instrument] = List(Alopeke, Flamingos2, Ghost, GmosNorth, GmosSouth, Gnirs, /*Graces,*/ Gsaoi, /*Igrins,*/ MaroonX, /*Nifs, Niri,*/ Visitor, Zorro)
+  val choices: List[Instrument] = List(Alopeke, Flamingos2, Ghost, GmosNorth, GmosSouth, Gnirs, /*Graces,*/ Gsaoi, Igrins2, /*Igrins,*/ MaroonX, /*Nifs, Niri,*/ Visitor, Zorro)
 
 }

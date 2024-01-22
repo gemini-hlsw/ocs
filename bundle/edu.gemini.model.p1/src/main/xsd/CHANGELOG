@@ -1,5 +1,13 @@
 Gemini Phase I Schema Changes
 
+# Version 2024.2.1 - 2024B
+##########################
+* Add IGRINS-2
+
+# Version 2024.1.1 - 2024A
+##########################
+* No changes
+
 # Version 2023.2.2 - 2023Bv2
 ##########################
 * Replace GHOST target modes 'SRIFU1 Target + SRIFU2 Sky' and 'SRIFU1 Sky + SRIFU2 Target' for 'SRIFU + Sky'

@@ -1,0 +1,42 @@
+<!--
+  Schema definition for IGRINS2 blueprints.
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="Instrument.xsd"/>
+
+    <!-- Options for IGRINS2 Blueprint. -->
+    <xsd:complexType name="Igrins2BlueprintChoice">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="null"  type="Igrins2BlueprintNull"/>
+                <xsd:element name="Igrins2" type="Igrins2Blueprint"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- IGRINS2 null. Empty blueprint, not available in PIT. -->
+    <xsd:complexType name="Igrins2BlueprintNull"/>
+
+    <!--
+      IGRINS2 Blueprint base type.
+    -->
+    <xsd:complexType name="Igrins2Blueprint">
+        <xsd:complexContent>
+            <xsd:extension base="BlueprintBase">
+                <xsd:sequence>
+                    <xsd:element name="nodding" type="Igrins2NoddingOption" maxOccurs="1" minOccurs="0"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <!--
+      IG2 Nodding options
+    -->
+    <xsd:simpleType name="Igrins2NoddingOption">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Keep target in slit"/>
+            <xsd:enumeration value="Nod to sky"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+</xsd:schema>

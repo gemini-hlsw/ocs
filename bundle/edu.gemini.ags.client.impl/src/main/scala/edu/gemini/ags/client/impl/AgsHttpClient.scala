@@ -84,7 +84,7 @@ case class AgsHttpClient(host: String, port: Int) extends AgsClient {
 private object Charset {
   val default = "UTF-8"
 
-  def set(conn: URLConnection) {
+  def set(conn: URLConnection): Unit = {
     conn.setRequestProperty("Accept-Charset", default)
   }
 
