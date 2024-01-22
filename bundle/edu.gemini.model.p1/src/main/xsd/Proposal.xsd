@@ -11,6 +11,7 @@
     <xsd:include schemaLocation="Gsaoi.xsd"/>
     <xsd:include schemaLocation="Gpi.xsd"/>
     <xsd:include schemaLocation="Igrins.xsd"/>
+    <xsd:include schemaLocation="Igrins2.xsd"/>
     <xsd:include schemaLocation="Keck.xsd"/>
     <xsd:include schemaLocation="Michelle.xsd"/>
     <xsd:include schemaLocation="Nici.xsd"/>
@@ -148,6 +149,7 @@
             <xsd:element name="gpi"        type="GpiBlueprintChoice"/>
             <xsd:element name="keck"       type="KeckBlueprint"/>
             <xsd:element name="igrins"     type="IgrinsBlueprintChoice"/>
+            <xsd:element name="igrins2"    type="Igrins2BlueprintChoice"/>
             <xsd:element name="michelle"   type="MichelleBlueprintChoice"/>
             <xsd:element name="nici"       type="NiciBlueprintChoice"/>
             <xsd:element name="nifs"       type="NifsBlueprintChoice"/>

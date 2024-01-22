@@ -640,6 +640,12 @@ package object immutable {
     val SPECKLE    = M.ZorroMode.SPECKLE_0_0096_PIX_6_7_FO_V
     val WIDE_FIELD = M.ZorroMode.WIDE_FIELD_0_0725_PIX_60_FO_V
   }
+
+  type Igrins2NoddingOption = M.Igrins2NoddingOption
+  object Igrins2NoddingOption extends EnumObject[M.Igrins2NoddingOption] {
+    val KeepTargetInSlit = M.Igrins2NoddingOption.KEEP_TARGET_IN_SLIT
+    val NodToSky         = M.Igrins2NoddingOption.NOD_TO_SKY
+  }
 }
 
 

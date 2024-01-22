@@ -47,7 +47,7 @@ object QueryArgs {
   def instSpecificArgs(blue: BlueprintBase): Seq[Arg] = (blue match {
     case visitor: VisitorBlueprint => Some("niriCamera" -> NiriCamera.F6.name()) // REL-1090
     case niri: NiriBlueprint       => Some("niriCamera" -> niri.camera.name())
-    case _ => None
+    case _                         => None
   }).toList
 
   def instId(b: BlueprintBase): Either[String, String] = b match {
@@ -60,7 +60,7 @@ object QueryArgs {
     case g: ZorroBlueprint      => Right(Instrument.Nifs.id)      // REL-3454: treat Zorro like NIFS.
     case g: MaroonXBlueprint    => Right(Instrument.Nifs.id)      // REL-3959: MaroonX uses PWFS1
     case g: GeminiBlueprintBase => Right(g.instrument.id)
-    case _ => Left("Not a Gemini Instrument")
+    case _                      => Left("Not a Gemini Instrument")
   }
 
   def instArgs(obs:Observation):Either[String, Seq[Arg]] =
@@ -78,7 +78,7 @@ object QueryArgs {
   def all(obs:Observation, time:Long):Either[String, Seq[Arg]] =
     for {
       target <- targetArgs(obs, time).right
-      conds <- conditionArgs(obs).right
-      inst <- instArgs(obs).right
+      conds  <- conditionArgs(obs).right
+      inst   <- instArgs(obs).right
     } yield target ++ conds ++ inst ++ fixedArgs
 }

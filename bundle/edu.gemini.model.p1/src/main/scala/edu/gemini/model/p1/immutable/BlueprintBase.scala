@@ -46,6 +46,9 @@ object BlueprintBase {
     // IGRINS
     case b: M.IgrinsBlueprint               => IgrinsBlueprint(b)
 
+    // IGRINS-2
+    case b: M.Igrins2Blueprint              => Igrins2Blueprint(b)
+
     // Michelle
     case b: M.MichelleBlueprintImaging      => MichelleBlueprintImaging(b)
     case b: M.MichelleBlueprintSpectroscopy => MichelleBlueprintSpectroscopy(b)

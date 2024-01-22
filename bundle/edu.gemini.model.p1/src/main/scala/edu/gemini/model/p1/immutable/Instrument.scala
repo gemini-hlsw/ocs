@@ -16,6 +16,7 @@ object Instrument {
   case object Dssi       extends Instrument(GN, "DSSI")
   case object Texes      extends Instrument(GN, "Texes", "Texes", "TEXES")
   case object Alopeke    extends Instrument(GN, "Alopeke", "'Alopeke", "Alopeke")
+  case object Igrins2    extends Instrument(GN, "IGRINS-2", "IGRINS-2", "IGRINS-2")
 
   case object Flamingos2 extends Instrument(GS, "Flamingos2", "Flamingos2", "FLAMINGOS")
   case object Ghost      extends Instrument(GS, "GHOST")
@@ -40,6 +41,7 @@ object Instrument {
     case "DSSI"       => Dssi
     case "Texes"      => Texes
     case "Alopeke"    => Alopeke
+    case "Igrins2"    => Igrins2
 
     case "Flamingos2" => Flamingos2
     case "GHOST"      => Ghost
