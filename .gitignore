@@ -66,3 +66,4 @@ metals.sbt
 
 #FR IDE
 .Trash-3906/
+bundle/*/project
