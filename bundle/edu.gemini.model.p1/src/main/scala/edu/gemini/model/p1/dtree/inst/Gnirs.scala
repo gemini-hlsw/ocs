@@ -98,7 +98,7 @@ object Gnirs {
     }
     val choices = GnirsFpu.values.filter {
       case GnirsFpu.LR_IFU => (s._2 == GnirsPixelScale.PS_015 && s._4 == GnirsCrossDisperser.No && altairCompatibleWithLR_IFU)
-      case GnirsFpu.HR_IFU => false
+      case GnirsFpu.HR_IFU => (s._2 == GnirsPixelScale.PS_005 && s._4 == GnirsCrossDisperser.No)
       case _               => true
     }.toList
 
