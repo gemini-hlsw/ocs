@@ -291,25 +291,32 @@ case object SemesterConverter2023ATo2023B extends SemesterConverter {
     case M.NiriCamera.F14 | M.NiriCamera.F32 => M.GnirsPixelScale.PS_005
   }
 
-  lazy val niriToGNIRSMessage: String = "NIRI Gemini North proposal has been migrated to GNIRS instead."
-  val niriNameRegex = """NIRI (.*) (f/\d* \(.* FoV\)) (.*)""".r //(None|Altair .*)(f/\\d*).*".r
+  lazy val niriToGNIRSMessageMulti: String = "NIRI Gemini North proposal has been migrated to GNIRS instead. Only the first filter was considered."
+  val niriNameRegex = """NIRI (.*) (f/\d* \(.* FoV\)) (.*)""".r
   def transformNiriName(name: String) = name match {
-    case niriNameRegex(a, b, c) => s"GNIRS $a ${niriCameraMapping(M.NiriCamera.fromValue(b)).value()} ${niriFilterMapping(M.NiriFilter.fromValue(c)).value()}"
+    case niriNameRegex(a, b, c) =>
+      val filters = c.split("\\+").toList.map(M.NiriFilter.fromValue).map(niriFilterMapping).toList.headOption
+      s"GNIRS $a ${niriCameraMapping(M.NiriCamera.fromValue(b)).value()} ${filters.foldMap(_.value)}"
     case _                      => name
   }
   val niriToGNIRS: TransformFunction = {
     case p @ <niri>{ns @ _*}</niri> =>
       object NiriToGnirsTransformer extends BasicTransformer {
         override def transform(n: xml.Node): xml.NodeSeq = n match {
-          case p @ <niri>{q @ _*}</niri> => <imaging id={p.attribute("id")}>{q.map(transform)}<visitor>false</visitor></imaging>
+          case p @ <niri>{q @ _*}</niri> =>
+            // Only consider the first filter
+            val filters = (p \\ "filter").map(_.text).map(M.NiriFilter.fromValue).map(niriFilterMapping).toList.headOption
+            <imaging id={p.attribute("id")}>{q.map(transform)}<filter>{filters.foldMap(_.value)}</filter></imaging>
           case <name>{n}</name>          => <name>{transformNiriName(n.text)}</name>
           case <camera>{f}</camera>      => <pixelScale>{niriCameraMapping(M.NiriCamera.fromValue(f.text)).value()}</pixelScale>
-          case <filter>{f}</filter>      => <filter>{niriFilterMapping(M.NiriFilter.fromValue(f.text)).value()}</filter>
+          case <filter>{_*}</filter>      =>
+            // remove old filters
+            xml.NodeSeq.Empty
           case elem: xml.Elem            => elem.copy(child = elem.child.flatMap(transform))
           case _                         => n
         }
       }
-      StepResult(niriToGNIRSMessage, <gnirs>{NiriToGnirsTransformer.transform(ns)}</gnirs>).successNel
+      StepResult(niriToGNIRSMessageMulti, <gnirs>{NiriToGnirsTransformer.transform(ns)}</gnirs>).successNel
   }
 
   lazy val gracesToMaroonXMessage: String = "Graces Gemini North proposal has been migrated to Maroon-X instead."

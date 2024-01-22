@@ -912,6 +912,18 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           result must \\("name") \> "GMOS-N MOS N+S 1.0 arcsec slit B480 g + OG515 (536 nm) "
       }
     }
+    "REL-4306 Fix NIRI to GNIRS conversion in PIT" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("kilonova_2023A.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 4
+          changes must contain("NIRI Gemini North proposal has been migrated to GNIRS instead. Only the first filter was considered.")
+          result \\ "gnirs" \\ "imaging" must \\("filter") \> "J (1.25um)"
+      }
+    }
+
   }
 
   def testF2R3KYConversion(xml: Elem): MatchResult[Result] = {
