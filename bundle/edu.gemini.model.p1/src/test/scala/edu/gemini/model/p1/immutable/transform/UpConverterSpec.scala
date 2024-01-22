@@ -662,9 +662,9 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 7
+          changes must have length 8
           // Check that fpu and name are replaced
-          result must \\("name") \> "GMOS-N MOS N+S None 1.0 arcsec slit B600 g + GG455 (506 nm) "
+          result must \\("name") \> "GMOS-N MOS N+S None 1.0 arcsec slit B480 g + GG455 (506 nm) "
       }
     }
     "proposal with GmosN MOS IFU blueprint and no altair should transform the name to Altair None option, REL-1257" in {
@@ -673,9 +673,9 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 7
+          changes must have length 8
           // Check that fpu and name are replaced
-          result must \\("name") \> "GMOS-N IFU None B600 i + CaT (815 nm) IFU 1 slit"
+          result must \\("name") \> "GMOS-N IFU None B480 i + CaT (815 nm) IFU 1 slit"
       }
     }
     "proposal with GPI and HStar and HLiwa modes should become H direct, REL-2671" in {
@@ -899,6 +899,17 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
         case StepResult(changes, result) =>
           changes must have length 4
           changes must contain("NIFS Gemini North proposal has been migrated to GNIRS instead.")
+      }
+    }
+    "REL-4385 Hide grism B600 from GMOS-N" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_gmosn_b600.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 4
+          changes must contain("B600 is not offered, observations are using B480 instead.")
+          result must \\("name") \> "GMOS-N MOS N+S 1.0 arcsec slit B480 g + OG515 (536 nm) "
       }
     }
   }
