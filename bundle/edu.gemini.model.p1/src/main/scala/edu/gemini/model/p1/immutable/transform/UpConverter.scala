@@ -189,7 +189,7 @@ case object SemesterConverter2024ATo2024B extends SemesterConverter {
           case _                           => n
         }
       }
-      StepResult("B600 is not offered, observations are using B480 instead.", <gmosN>{GmosNB600Remover.transform(ns)}</gmosN>).successNel
+      StepResult("B600 is no longer offered. Converting B600 observations to B480.", <gmosN>{GmosNB600Remover.transform(ns)}</gmosN>).successNel
   }
 
   override val transformers: List[TransformFunction] = List(gmosnB600Remover)
