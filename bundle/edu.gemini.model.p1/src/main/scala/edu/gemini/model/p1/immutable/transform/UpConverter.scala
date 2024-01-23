@@ -177,7 +177,22 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter supports migrating to 2024B
  */
 case object SemesterConverter2024ATo2024B extends SemesterConverter {
-  override val transformers: List[TransformFunction] = Nil
+  def transformGmosName(n: String): String = n.replaceAll("B600", "B480")
+
+  val gmosnB600Remover: TransformFunction = {
+    case p @ <gmosN>{ns @ _*}</gmosN> if (ns \\ "disperser").text == "B600" =>
+      object GmosNB600Remover extends BasicTransformer {
+        override def transform(n: xml.Node): xml.NodeSeq = n match {
+          case <name>{n}</name>            => <name>{transformGmosName(n.text)}</name>
+          case <disperser>B600</disperser> => <disperser>B480</disperser>
+          case elem: xml.Elem              => elem.copy(child = elem.child.flatMap(transform))
+          case _                           => n
+        }
+      }
+      StepResult("B600 is no longer offered. Converting B600 observations to B480.", <gmosN>{GmosNB600Remover.transform(ns)}</gmosN>).successNel
+  }
+
+  override val transformers: List[TransformFunction] = List(gmosnB600Remover)
 }
 
 /**

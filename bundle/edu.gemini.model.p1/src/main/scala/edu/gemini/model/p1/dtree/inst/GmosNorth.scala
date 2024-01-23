@@ -161,7 +161,7 @@ object GmosNorth {
     extends SingleSelectNode[BlueprintGen, GmosNDisperser, (Altair, BlueprintGen, GmosNDisperser)](gen) {
     val title       = "Select Disperser"
     val description = "Please select a disperser for your spectroscopic configuration."
-    def choices     = GmosNDisperser.values.toList
+    def choices     = GmosNDisperser.values.toList.filterNot(_ == GmosNDisperser.B600)
     def apply(d: GmosNDisperser) = Left(new SelectFilter((altair, gen, d)))
 
     def unapply = {
