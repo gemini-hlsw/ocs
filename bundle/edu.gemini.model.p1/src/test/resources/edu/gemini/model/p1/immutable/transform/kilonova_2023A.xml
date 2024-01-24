@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2023.1.1" tacCategory="Extragalactic Other">
+    <meta band3optionChosen="true" overrideAffiliate="false">
+        <firstAttachment>/Users/brendan/Documents/research/projects/proposals/Gemini/2023A/Kilonova/Gemini_2023A_Kilonova_sGRB.pdf</firstAttachment>
+        <secondAttachment>/Users/brendan/Documents/research/projects/proposals/Gemini/2023A/Kilonova/Gemini_2023A_Kilonova_sGRB_teamjust.pdf</secondAttachment>
+    </meta>
+    <semester year="2023" half="A"/>
+    <title>Identifying the fingerprints of r-process heavy metals in a short GRB</title>
+    <abstract>Short duration gamma-ray bursts (GRBs) are brief (&lt;2 s) and sudden flashes of gamma-ray radiation originated by the collision (or merger) of two compact objects, either two neutron stars (NSs) or a NS and a black hole (BH). Whereas future LIGO/Virgo detections will probe these systems in the local universe, short GRBs offer a unique route to study their evolution over cosmic time, and their contribution to the heavy element enrichment. Rapid Gemini ToO observations are critical in order to precisely localize the burst, characterize its temporal evolution, determine its host galaxy morphology and distance scale. Only a synergistic multi-wavelength effort can effectively pin down the fingerprints of heavy element production, the so-called kilonova, in the optical/nIR light of nearby short GRBs. </abstract>
+    <scheduling>No constraints.</scheduling>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Brendan</firstName>
+            <lastName>O'Connor</lastName>
+            <status>Grad Thesis</status>
+            <gender>Man</gender>
+            <email>oconnorb@umd.edu</email>
+            <phone>4133364343</phone>
+            <address>
+                <institution>University of Maryland - College Park</institution>
+                <address></address>
+                <country>USA</country>
+            </address>
+        </pi>
+        <coi id="investigator-1">
+            <firstName>Eleonora</firstName>
+            <lastName>Troja</lastName>
+            <status>PhD</status>
+            <gender>Woman</gender>
+            <email>etroja@asu.edu</email>
+            <phone></phone>
+            <institution>Arizona State University</institution>
+        </coi>
+        <coi id="investigator-2">
+            <firstName>Brad</firstName>
+            <lastName>Cenko</lastName>
+            <status>PhD</status>
+            <gender>Man</gender>
+            <email>cenko@umd.edu</email>
+            <phone></phone>
+            <institution>University of Maryland - College Park</institution>
+        </coi>
+        <coi id="investigator-3">
+            <firstName>Simone</firstName>
+            <lastName>Dichiara</lastName>
+            <status>PhD</status>
+            <gender>Man</gender>
+            <email>sbd5667@psu.edu</email>
+            <phone></phone>
+            <institution>Pennsylvania State University</institution>
+        </coi>
+        <coi id="investigator-4">
+            <firstName>Alexander</firstName>
+            <lastName>Kutyrev</lastName>
+            <status>PhD</status>
+            <gender>Man</gender>
+            <email>akutyrev@umd.edu</email>
+            <phone></phone>
+            <institution>University of Maryland - College Park</institution>
+        </coi>
+        <coi id="investigator-5">
+            <firstName>Sylvain</firstName>
+            <lastName>Veilleux</lastName>
+            <status>PhD</status>
+            <gender>Man</gender>
+            <email>veilleux@umd.edu</email>
+            <phone></phone>
+            <institution>University of Maryland - College Park</institution>
+        </coi>
+        <coi id="investigator-6">
+            <firstName>Pepa</firstName>
+            <lastName>Becerra</lastName>
+            <status>PhD</status>
+            <gender>Woman</gender>
+            <email>jbecerragonzalez@gmail.com</email>
+            <phone></phone>
+            <institution>instituto de astrofísica de canarias</institution>
+        </coi>
+        <coi id="investigator-7">
+            <firstName>Taka</firstName>
+            <lastName>Sakamoto</lastName>
+            <status>PhD</status>
+            <gender>Man</gender>
+            <email>tsakamoto@phys.aoyama.ac.jp</email>
+            <phone></phone>
+            <institution>Aoyama Gakuin University</institution>
+        </coi>
+        <coi id="investigator-8">
+            <firstName>Nat</firstName>
+            <lastName>Butler</lastName>
+            <status>PhD</status>
+            <gender>Man</gender>
+            <email>Nathaniel.Butler@asu.edu</email>
+            <phone></phone>
+            <institution>Arizona State University</institution>
+        </coi>
+        <coi id="investigator-9">
+            <firstName>William Lee</firstName>
+            <lastName>Alardin</lastName>
+            <status>PhD</status>
+            <gender>Man</gender>
+            <email>wlee@astro.unam.mx</email>
+            <phone></phone>
+            <institution>Universidad Nacional Autonoma de Mexico</institution>
+        </coi>
+        <coi id="investigator-10">
+            <firstName>Alan</firstName>
+            <lastName>Watson</lastName>
+            <status>PhD</status>
+            <gender>None selected</gender>
+            <email>alan@astro.unam.mx</email>
+            <phone></phone>
+            <institution>Universidad Nacional Autonoma de Mexico</institution>
+        </coi>
+        <coi id="investigator-11">
+            <firstName>Chryssa</firstName>
+            <lastName>Kouveliotou</lastName>
+            <status>PhD</status>
+            <gender>Woman</gender>
+            <email>kouveliotou@gwu.edu</email>
+            <phone></phone>
+            <institution>George Washington University</institution>
+        </coi>
+        <coi id="investigator-12">
+            <firstName>Ori</firstName>
+            <lastName>Fox</lastName>
+            <status>PhD</status>
+            <gender>Man</gender>
+            <email>ofox@stsci.edu</email>
+            <phone></phone>
+            <institution>STSCI</institution>
+        </coi>
+        <coi id="investigator-13">
+            <firstName>James</firstName>
+            <lastName>Gillanders</lastName>
+            <status>PhD</status>
+            <gender>Man</gender>
+            <email>jgillanders01@qub.ac.uk</email>
+            <phone></phone>
+            <institution>University of Rome Tor Vergata</institution>
+        </coi>
+        <coi id="investigator-14">
+            <firstName>Yashaswi</firstName>
+            <lastName>Julakanti</lastName>
+            <status>PhD</status>
+            <gender>Woman</gender>
+            <email>yashaswij97@gmail.com</email>
+            <phone></phone>
+            <institution>University of Rome Tor Vergata</institution>
+        </coi>
+    </investigators>
+    <targets>
+        <too id="target-0">
+            <name>target</name>
+        </too>
+        <too id="target-1">
+            <name>target</name>
+        </too>
+        <too id="target-2">
+            <name>target</name>
+        </too>
+        <too id="target-3">
+            <name>target</name>
+        </too>
+        <too id="target-4">
+            <name>target</name>
+        </too>
+        <too id="target-5">
+            <name>target</name>
+        </too>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC Any, IQ Any, SB Any/Bright, WV Any</name>
+            <cc>Any</cc>
+            <iq>Any</iq>
+            <sb>Any/Bright</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <niri>
+            <niri id="blueprint-0">
+                <name>NIRI None f/6 (0.12"/pix, 120" FoV) J (1.25 um)+H (1.65 um)+K(short) (2.15 um)</name>
+                <visitor>false</visitor>
+                <altair>
+                    <none/>
+                </altair>
+                <camera>f/6 (0.12"/pix, 120" FoV)</camera>
+                <filter>J (1.25 um)</filter>
+                <filter>H (1.65 um)</filter>
+                <filter>K(short) (2.15 um)</filter>
+            </niri>
+        </niri>
+        <flamingos2>
+            <imaging id="blueprint-1">
+                <name>Flamingos2 Imaging J (1.255 um)+H (1.631 um)+Ks (2.157 um)</name>
+                <visitor>false</visitor>
+                <filter>J (1.255 um)</filter>
+                <filter>H (1.631 um)</filter>
+                <filter>Ks (2.157 um)</filter>
+            </imaging>
+        </flamingos2>
+        <gmosS>
+            <regime>optical</regime>
+            <longslit id="blueprint-2">
+                <name>GMOS-S Longslit R400 None 1.0 arcsec slit</name>
+                <visitor>false</visitor>
+                <filter>None</filter>
+                <disperser>R400</disperser>
+                <fpu>1.0 arcsec slit</fpu>
+            </longslit>
+        </gmosS>
+        <gmosN>
+            <regime>optical</regime>
+            <longslit id="blueprint-3">
+                <name>GMOS-N LongSlit R400 None 1.0 arcsec slit</name>
+                <visitor>false</visitor>
+                <altair>
+                    <none/>
+                </altair>
+                <filter>None</filter>
+                <disperser>R400</disperser>
+                <fpu>1.0 arcsec slit</fpu>
+            </longslit>
+        </gmosN>
+        <gmosS>
+            <regime>optical</regime>
+            <imaging id="blueprint-4">
+                <name>GMOS-S Imaging r (630 nm)+i (780 nm)+z (925 nm)</name>
+                <visitor>false</visitor>
+                <filter>r (630 nm)</filter>
+                <filter>i (780 nm)</filter>
+                <filter>z (925 nm)</filter>
+            </imaging>
+        </gmosS>
+        <gmosN>
+            <regime>optical</regime>
+            <imaging id="blueprint-5">
+                <name>GMOS-N Imaging r (630 nm)+i (780 nm)+z (925 nm)</name>
+                <visitor>false</visitor>
+                <altair>
+                    <none/>
+                </altair>
+                <filter>r (630 nm)</filter>
+                <filter>i (780 nm)</filter>
+                <filter>z (925 nm)</filter>
+            </imaging>
+        </gmosN>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" target="target-0" condition="condition-0" blueprint="blueprint-0">
+            <progTime units="hr">2.8</progTime>
+            <partTime units="hr">0.27999999999999997</partTime>
+            <time units="hr">3.0799999999999996</time>
+        </observation>
+        <observation band="Band 1/2" enabled="true" target="target-1" condition="condition-0" blueprint="blueprint-1">
+            <progTime units="hr">2.8</progTime>
+            <partTime units="hr">0.27999999999999997</partTime>
+            <time units="hr">3.0799999999999996</time>
+        </observation>
+        <observation band="Band 1/2" enabled="true" target="target-2" condition="condition-0" blueprint="blueprint-2">
+            <progTime units="hr">2.0</progTime>
+            <partTime units="hr">0.2</partTime>
+            <time units="hr">2.2</time>
+        </observation>
+        <observation band="Band 1/2" enabled="true" target="target-3" condition="condition-0" blueprint="blueprint-3">
+            <progTime units="hr">2.0</progTime>
+            <partTime units="hr">0.2</partTime>
+            <time units="hr">2.2</time>
+        </observation>
+        <observation band="Band 1/2" enabled="true" target="target-4" condition="condition-0" blueprint="blueprint-4">
+            <progTime units="hr">4.2</progTime>
+            <partTime units="hr">0.0</partTime>
+            <time units="hr">4.2</time>
+        </observation>
+        <observation band="Band 1/2" enabled="true" target="target-5" condition="condition-0" blueprint="blueprint-5">
+            <progTime units="hr">4.24</progTime>
+            <partTime units="hr">0.0</partTime>
+            <time units="hr">4.24</time>
+        </observation>
+    </observations>
+    <proposalClass>
+        <queue tooOption="Rapid" jwstSynergy="false" key="7092af63-371e-4585-a94b-7ad513628ea7">
+            <ngo partnerLead="investigator-0">
+                <request>
+                    <time units="hr">19.0</time>
+                    <minTime units="hr">19.0</minTime>
+                </request>
+                <response>
+                    <receipt>
+                        <timestamp>2022-09-27T21:34:54.000Z</timestamp>
+                        <id>US-2023A-015</id>
+                        <contact>phase1help-us@gemini.edu</contact>
+                    </receipt>
+                </response>
+                <partner>us</partner>
+            </ngo>
+        </queue>
+    </proposalClass>
+</proposal>
