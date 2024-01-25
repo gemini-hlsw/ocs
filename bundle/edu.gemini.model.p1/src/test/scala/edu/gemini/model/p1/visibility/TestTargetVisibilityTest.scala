@@ -201,21 +201,18 @@ class TestTargetVisibilityTest {
   }
 
   @Test def testRaGSLgsASemester(): Unit = {
-    // More or equal to 0 and less than 1 is warning
-    gsLgsA(Limited, ("0:00:00", "0:00:00"))
-    gsLgsA(Limited, ("0:59:59.999", "0:00:00"))
-    // More than 6 and less or equal to 8 is warning
+    // More than 6 and less or equal to 7 is warning
     gsLgsA(Limited, ("6:00:00.001", "0:00:00"))
-    gsLgsA(Limited, ("8:00:00", "0:00:00"))
-    // More than 22 and less or equal to 24 is warning
-    gsLgsA(Limited, ("22:00:00.001", "0:00:00"))
-    gsLgsA(Limited, ("0:00:00", "0:00:00"))
-    // More or equal to 1 and less and equal to 6 is bad
-    gsLgsA(Bad, ("1:00:00", "0:00:00"))
+    gsLgsA(Limited, ("7:00:00", "0:00:00"))
+    // More than 18 and less or equal to 20 is warning
+    gsLgsA(Limited, ("18:00:00.001", "0:00:00"))
+    gsLgsA(Limited, ("19:59:59.999", "0:00:00"))
+    // More or equal to 20 and less and equal to 6 is bad
+    gsLgsA(Bad, ("20:00:00", "0:00:00"))
     gsLgsA(Bad, ("6:00:00", "0:00:00"))
     // Other points are good
-    gsLgsA(Good, ("8:00:00.001", "0:00:00"))
-    gsLgsA(Good, ("22:00:00", "0:00:00"))
+    gsLgsA(Good, ("7:00:00.001", "0:00:00"))
+    gsLgsA(Good, ("18:00:00", "0:00:00"))
   }
 
   @Test def testDecForGNNgs(): Unit = {
