@@ -67,4 +67,3 @@ private[visibility] object VisibilityRangeList {
   def hr(vis: (Double, TargetVisibility)*): VisibilityRangeList =
     deg(vis.map { case (h, v) => (h*15.0, v) }: _*)
 }
-

@@ -73,7 +73,7 @@ object TargetVisibilityCalc {
     Key(A, GN, Ngs) -> hr( 1.0 -> Bad,     (4.0  + EQUALITY_LIMIT) -> Limited, ( 7.0 + EQUALITY_LIMIT) -> Good,    (22.0 + EQUALITY_LIMIT) -> Limited),
     Key(A, GN, Lgs) -> hr( 0.0 -> Bad,     (5.0  + EQUALITY_LIMIT) -> Limited, ( 8.0 + EQUALITY_LIMIT) -> Good,     21.0 -> Limited),
     Key(A, GS, Ngs) -> hr( 2.0 -> Bad,     (5.0  + EQUALITY_LIMIT) -> Limited, ( 7.0 + EQUALITY_LIMIT) -> Good,    (23.0 + EQUALITY_LIMIT) -> Limited),
-    Key(A, GS, Lgs) -> hr( 1.0 -> Bad,     (6.0  + EQUALITY_LIMIT) -> Limited, ( 8.0 + EQUALITY_LIMIT) -> Good,    (22.0 + EQUALITY_LIMIT) -> Limited),
+    Key(A, GS, Lgs) -> hr(20.0 -> Bad,     (6.0  + EQUALITY_LIMIT) -> Limited, ( 7.0 + EQUALITY_LIMIT) -> Good,    (18.0 + EQUALITY_LIMIT) -> Limited),
     Key(B, GN, Ngs) -> hr(11.0 -> Limited,  13.5 -> Bad,                       (17.0 + EQUALITY_LIMIT) -> Limited, (19.0 + EQUALITY_LIMIT) -> Good),
     Key(B, GN, Lgs) -> hr(10.0 -> Limited,  12.5 -> Bad,                       (18.0 + EQUALITY_LIMIT) -> Limited, (20.0 + EQUALITY_LIMIT) -> Good),
     Key(B, GS, Ngs) -> hr( 9.0 -> Limited,  12.0 -> Bad,                       (16.0 + EQUALITY_LIMIT) -> Limited, (19.0 + EQUALITY_LIMIT) -> Good),
