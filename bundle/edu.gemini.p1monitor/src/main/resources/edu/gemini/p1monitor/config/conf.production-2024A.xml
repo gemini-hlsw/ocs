@@ -1,5 +1,5 @@
 <conf>
-    <smtp>smtp.hi.gemini.edu</smtp>
+    <smtp>lscmrelay-lv1.noirlab.edu</smtp>
 
     <bcc>swalker@gemini.edu</bcc>
     <bcc>cquiroz@gemini.edu</bcc>
