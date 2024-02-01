@@ -46,23 +46,23 @@ object OverheadsSpec {
   val instMap = HashMap(
     (("gmos", "ifu"), (
       () => GmosSBlueprintIfu(GmosSDisperser.B600, GmosSFilter.None, GmosSFpuIfu.values.apply(0)),
-      obsTimes(1.7, 0.17))
+      obsTimes(1.7, 0.23))
       ),
     (("gmos", "longns"), (
       () => GmosSBlueprintLongslitNs(GmosSDisperser.B600, GmosSFilter.None, GmosSFpuNs.values.apply(0)),
-      obsTimes(1.7, 0.17))
+      obsTimes(1.7, 0.23))
       ),
     (("gmos", "mos"), (
       () => GmosSBlueprintMos(GmosSDisperser.B600, GmosSFilter.None, GmosSMOSFpu.values.apply(0), false, false),
-      obsTimes(1.7, 0.17))
+      obsTimes(1.7, 0.23))
       ),
     (("gmos", "long"), (
       () => GmosSBlueprintLongslit(GmosSDisperser.B600, GmosSFilter.None, GmosSFpu.values.apply(0)),
-      obsTimes(1.7, 0.17))
+      obsTimes(1.7, 0.23))
       ),
     (("gmos", "ifuns"), (
       () => GmosSBlueprintIfuNs(GmosSDisperser.B600, GmosSFilter.None, GmosSFpuIfuNs.values.apply(0)),
-      obsTimes(1.7, 0.17))
+      obsTimes(1.7, 0.23))
       ),
     (("gmos", "imaging"), (
       () => GmosSBlueprintImaging(Nil),
@@ -70,7 +70,7 @@ object OverheadsSpec {
       ),
     (("gmos", "mosns"), (
       () => GmosSBlueprintMos(GmosSDisperser.B600, GmosSFilter.None, GmosSMOSFpu.values.apply(0), true, false),
-      obsTimes(1.7, 0.17))
+      obsTimes(1.7, 0.23))
       ),
     (("phoenix", "long"), (
       () => PhoenixBlueprint(Site.GS, PhoenixFocalPlaneUnit.values.apply(0), PhoenixFilter.values.apply(0)),
