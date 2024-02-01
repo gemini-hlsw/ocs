@@ -46,12 +46,12 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
 
   // GMOS overheads are the same between sites.
   private lazy val GmosImagingOverheads    = SimpleOverheads(0.00).some
-  private lazy val GmosLongslitOverheads   = SimpleOverheads(0.10).some
-  private lazy val GmosLongslitNsOverheads = SimpleOverheads(0.10).some
-  private lazy val GmosMosOverheads        = SimpleOverheads(0.10).some
-  private lazy val GmosMosNsOverheads      = SimpleOverheads(0.10).some
-  private lazy val GmosIfuOverheads        = SimpleOverheads(0.10).some
-  private lazy val GmosIfuNsOverheads      = SimpleOverheads(0.10).some
+  private lazy val GmosLongslitOverheads   = SimpleOverheads(0.14).some
+  private lazy val GmosLongslitNsOverheads = SimpleOverheads(0.14).some
+  private lazy val GmosMosOverheads        = SimpleOverheads(0.14).some
+  private lazy val GmosMosNsOverheads      = SimpleOverheads(0.14).some
+  private lazy val GmosIfuOverheads        = SimpleOverheads(0.14).some
+  private lazy val GmosIfuNsOverheads      = SimpleOverheads(0.14).some
 
   def apply(b: BlueprintBase): Option[Overheads] = b match {
     case _: Flamingos2BlueprintImaging                             => SimpleOverheads(0.10).some
@@ -63,7 +63,7 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
 
     case _: NifsBlueprintBase                                      => NIRSpectroscopyOverheads(TimeAmount(0.25, TimeUnit.HR)).some
     case _: GsaoiBlueprint                                         => SimpleOverheads(0.00).some
-    case _: GracesBlueprint                                         => SimpleOverheads(0.00).some
+    case _: GracesBlueprint                                        => SimpleOverheads(0.00).some
     case _: GhostBlueprint                                         => SimpleOverheads(0.00).some
     case _: GpiBlueprint                                           => SimpleOverheads(0.05).some
     case _: PhoenixBlueprint                                       => NIRSpectroscopyOverheads(TimeAmount(0.1667, TimeUnit.HR)).some
