@@ -91,7 +91,7 @@ object AgsStrategy {
    * Estimation of success of finding a guide star at phase 2 time.
    */
   case class Estimate(probability: Double) extends AnyVal {
-    def normalize: Estimate =
+    private def normalize: Estimate =
       if (probability <= 0) Estimate.CompleteFailure
       else if (probability >= 1) Estimate.GuaranteedSuccess
       else this

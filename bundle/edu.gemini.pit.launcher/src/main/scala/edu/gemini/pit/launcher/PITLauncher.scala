@@ -15,7 +15,7 @@ import edu.gemini.ui.workspace.impl.Workspace
  * Launcher for the PIT in local mode, used for development
  */
 object PITLauncher extends App {
-  val locale = Locale.getDefault
+  private val locale = Locale.getDefault
   Locale.setDefault(Locale.ENGLISH)
 
   // Need to set this manually, as we are not inside OSGi
@@ -27,10 +27,10 @@ object PITLauncher extends App {
   AgsRobot.ags = Some(AgsHttpClient("gnauxodb.gemini.edu", 443))
 
   // Create workspace with a null bundle context, it internally checks if it is null
-  val workspace = new Workspace(null)
+  private val workspace = new Workspace(null)
   workspace.open()
 
-  def newShell(model: Model, file: Option[File]): Unit = {
+  private def newShell(model: Model, file: Option[File]): Unit = {
     val adv = new ShellAdvisor(version, model, file, newShell, locale)
     val shell = workspace.createShell(adv)
     shell.open()

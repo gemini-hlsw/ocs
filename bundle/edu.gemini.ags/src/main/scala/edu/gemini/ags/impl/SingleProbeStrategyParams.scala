@@ -2,9 +2,8 @@ package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.AgsMagnitude
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
-import edu.gemini.ags.conf.{FaintnessKey, ProbeLimitsCalc}
 import edu.gemini.catalog.api._
-import edu.gemini.catalog.api.CatalogName.GaiaGemini
+import edu.gemini.catalog.api.CatalogName.{GaiaGemini, UCAC4}
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider
@@ -13,11 +12,10 @@ import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe
 import edu.gemini.spModel.gemini.gnirs.GnirsOiwfsGuideProbe
 import edu.gemini.spModel.gemini.nifs.NifsOiwfsGuideProbe
 import edu.gemini.spModel.gemini.niri.NiriOiwfsGuideProbe
-import edu.gemini.spModel.guide.{GuideSpeed, GuideStarValidator, PatrolField, ValidatableGuideProbe}
+import edu.gemini.spModel.guide.{GuideStarValidator, PatrolField, ValidatableGuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 
 import scalaz._
 import Scalaz._
@@ -27,9 +25,9 @@ sealed trait SingleProbeStrategyParams {
   def guideProbe: ValidatableGuideProbe
   def stepSize: Angle                        = Angle.fromDegrees(10)
   def minDistance: Option[Angle]             = Some(Angle.fromArcsecs(20))
-  def catalogName: CatalogName               = GaiaGemini
+  final def catalogs: NonEmptyList[CatalogName]    = NonEmptyList(GaiaGemini)
 
-  final def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): Option[CatalogQuery] =
+  final def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): Option[NonEmptyList[CatalogQuery]] =
     for {
       base <- ctx.getBaseCoordinates.asScalaOpt
       mc   <- magnitudeCalc(ctx, mt)
@@ -40,7 +38,9 @@ sealed trait SingleProbeStrategyParams {
         case SingleProbeStrategyParams.AltairAowfsParams => true
         case _                                           => false
       }
-      CatalogQuery.coneSearch(base.toNewModel, rc, ml, catalogName, isLgs)
+      // for Altair two catalogs can be searched
+      val cats = if (isLgs) NonEmptyList(GaiaGemini, UCAC4) else catalogs
+      cats.map(c => CatalogQuery.coneSearch(base.toNewModel, rc, ml, c, isLgs))
     }
 
   def radiusConstraint(ctx: ObsContext): Option[RadiusConstraint] =

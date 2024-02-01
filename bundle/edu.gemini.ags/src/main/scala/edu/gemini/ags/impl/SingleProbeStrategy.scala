@@ -3,18 +3,18 @@ package edu.gemini.ags.impl
 import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.catalog.api.CatalogQuery
-import edu.gemini.catalog.votable.{CatalogException, ConeSearchBackend, VoTableBackend, VoTableClient}
+import edu.gemini.catalog.votable.{CatalogException, VoTableBackend, VoTableClient}
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.{Angle, Coordinates}
 import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.guide.{GuideProbe, ValidatableGuideProbe, VignettingGuideProbe}
+import edu.gemini.spModel.gemini.altair.InstAltair
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.telescope.PosAngleConstraint._
 import edu.gemini.shared.util.immutable.ScalaConverters._
 
 import java.util.logging.Logger
-
 import scala.collection.JavaConverters._
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -43,8 +43,9 @@ final case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStr
   override def analyzeMagnitude(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
     AgsAnalysis.magnitudeAnalysis(ctx, mt, guideProbe, guideStar)
 
-  override def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] =
-    params.catalogQueries(withCorrectedSite(ctx), mt).toList
+  override def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] = {
+    params.catalogQueries(withCorrectedSite(ctx), mt).foldMap(_.toList)
+  }
 
   override def candidates(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[ProbeCandidates]] = {
     val empty = Future.successful(List(ProbeCandidates(params.guideProbe: GuideProbe, List.empty[SiderealTarget])))
@@ -56,15 +57,29 @@ final case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStr
     }).getOrElse(empty)
   }
 
+  private def allCandidates(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[ProbeCandidates]] = {
+    // query all catalogues and merge the resulting targets
+    catalogQueries(withCorrectedSite(ctx), mt).strengthR(backend).map { case (a, b) => VoTableClient.catalog(a, b)(ec) }.map(_.flatMap {
+      case r if r.result.containsError => Future.failed(CatalogException(r.result.problems))
+      case r                           => Future.successful(List(ProbeCandidates(params.guideProbe, r.result.targets.rows)))
+    }).sequence.map(_.flatten)
+  }
+
   private def catalogResult(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[List[SiderealTarget]] =
     // call candidates and extract the one and only tuple for this strategy,
     // throw away the guide probe (which we know anyway), and obtain just the
     // list of guide stars
-    candidates(ctx, mt)(ec).map(_.headOption.foldMap(_.targets))
+    candidates(ctx, mt)(ec).map(_.foldMap(_.targets))
 
   override def estimate(ctx: ObsContext, mt: MagnitudeTable)(ec: ExecutionContext): Future[AgsStrategy.Estimate] = {
     val ct = withCorrectedSite(ctx)
-    catalogResult(ct, mt)(ec).map(estimate(ct, mt, _))
+    ctx.getAOComponent.toScalaOpt match {
+      case Some(_: InstAltair) =>
+        // For altair we want to run this in all possible catalogues
+        allCandidates(ctx, mt)(ec).map(_.foldMap(_.targets)).map(estimate(ct, mt, _))
+      case _ =>
+        catalogResult(ct, mt)(ec).map(estimate(ct, mt, _))
+    }
   }
 
   private def estimate(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): AgsStrategy.Estimate = {
