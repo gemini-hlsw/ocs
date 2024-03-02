@@ -1,11 +1,18 @@
 # GNIRS HR-IFU transmission
+# Ray Sharples, 2023 July
+# Derived via comparison with long-slit flats
+# Measured values:  X 0.81, J 0.90, H 0.88, K 0.91, L 0.94, M 0.91
 # Columns are (1) wavelength in nm, (2) transmission.
 #
- 900 1.0
-1000 1.0
-2000 1.0
-3000 1.0
-4000 1.0
-5000 1.0
-6000 1.0
-
+ 780 0.81
+1169 0.81
+1170 0.90
+1429 0.90
+1430 0.88
+1859 0.88
+1860 0.91
+2699 0.91
+2700 0.94
+4399 0.94
+4400 0.91
+6000 0.91

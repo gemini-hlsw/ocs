@@ -349,45 +349,61 @@
 
     <table background="https://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0"  width="100%">
         <tbody>
-			<!--end gnirs stuff-->
 			<tr>
-				<td colspan="4" height="38" valign="bottom"><b>Detector properties:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10277#detector','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
+				<td colspan="4" height="38" valign="bottom"><b>Detector properties:</b>
+					<i>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10277#detector','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</i>
+				</td>
 			</tr>
 			<tr>
 				<td colspan="4">Read mode:</td>
 			</tr>
 			<tr>
 				<td colspan="4" align="left"> <input value="VERY_FAINT" name="ReadMode" type="radio" />
-				very low background, typically for 1-2.5 µm observations of very faint targets</td>
+					<span title="Typically for 1-2.5 &mu;m observations of very faint targets">
+					Very Faint Objects &nbsp; (t<sub>exp</sub> &gt; 60s, read noise = 7e<sup>-</sup>, t<sub>min</sub>= 18s)
+					</span>
+				</td>
 			</tr>
 			<tr>
 				<td colspan="4" align="left"><input value="FAINT" name="ReadMode" checked="checked" type="radio" />
-					low background, typically for 1-2.5 µm observations of faint targets</td>
+					<span title="Typically for 1-2.5 &mu;m observations of faint targets.">
+					Faint Objects &nbsp; (20s &lt; t<sub>exp</sub> &le; 60s, read noise = 10e<sup>-</sup>, t<sub>min</sub>= 9s)
+					</span>
+				</td>
 			</tr>
 			<tr>
 				<td colspan="4" align="left"><input value="BRIGHT" name="ReadMode" type="radio" />
-				medium background / bright objects, typically for 1-2.5 µm observations of bright targets/standards</td>
+					<span title="Typically for 1-2.5 &mu;m observations of bright targets and standards">
+						Bright Objects &nbsp; (0.6s &le; t<sub>exp</sub> &le; 20s, read noise = 30e<sup>-</sup>, t<sub>min</sub>= 0.6s)
+					</span>
+				</td>
 			</tr>
 			<tr>
 				<td colspan="4" align="left"><input value="VERY_BRIGHT" name="ReadMode" type="radio" />
-				high background (i.e. thermal IR), typically for 3-5 µm observations</td>
+					<span title="Typically for 3-5 &mu;m observations">
+						Very Bright Objects &nbsp; (t<sub>exp</sub> &lt; 0.6s, read noise = 155e<sup>-</sup>, t<sub>min</sub>= 0.2s)
+					</span>
+				</td>
 			</tr>
 			<tr>
 				<td colspan="4">Well depth:</td>
 			</tr>
 			<tr>
 				<td colspan="4" align="left"><input value="SHALLOW" name="WellDepth" checked="checked" type="radio" />
-				shallow well; typically for 1-2.5 µm observations, standard stars, faint and very faint science targets</td>
+					Shallow well; typically for 1-2.5 µm observations, standard stars, faint and very faint science targets
+				</td>
 			</tr>
 			<tr>
 				<td colspan="4" align="left"><input value="DEEP" name="WellDepth" type="radio" />
-				deep well; typically for 3-5µm observations</td>
+					Deep well; typically for 3-5µm observations
+				</td>
 			</tr>
 			<tr>
 				<td colspan="4" height="21">Dark current: &nbsp; 0.1 e-/s</td>
 			</tr>
 		</tbody>
 	</table>
+
 	<table background="https://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0"  width="100%">
 		<tbody>
 			<!-- Telescope definition-->
