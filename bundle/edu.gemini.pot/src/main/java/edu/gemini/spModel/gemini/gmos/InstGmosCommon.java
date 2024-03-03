@@ -449,7 +449,7 @@ public abstract class InstGmosCommon<
         return Optional.ofNullable(conf.getItemValue(FPU_KEY))
                 .map(c -> (GmosCommonType.FPUnit) c)
                 .filter(f -> !f.isImaging())
-                .map(f -> f.isIFU() ? SETUP_TIME_IFU_MOS : SETUP_TIME_LS_SPECTROSCOPY)
+                .map(f -> f.isIFU() | f.isCustom() ? SETUP_TIME_IFU_MOS : SETUP_TIME_LS_SPECTROSCOPY)
                 .orElse(SETUP_TIME_IMAGING);
     }
 
