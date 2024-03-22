@@ -144,6 +144,7 @@ public class WDBAServerActivator implements BundleActivator {
                 });
         _glueTracker.open();
 
+        // Extract the HTTP (internal) port number if set in the bundle property.
         int port = 8442;
         try {
             port = Integer.parseInt(
@@ -161,6 +162,8 @@ public class WDBAServerActivator implements BundleActivator {
 
                         _http = _bundleContext.getService(ref);
                         try {
+                            // Install a custom HttpContext which verifies that
+                            // the request is coming in over the internal port.
                             final HttpContext defaultContext = _http.createDefaultHttpContext();
                             _http.registerServlet(APP_CONTEXT, _servlet, new Hashtable<>(),
                                     new HttpContext() {
