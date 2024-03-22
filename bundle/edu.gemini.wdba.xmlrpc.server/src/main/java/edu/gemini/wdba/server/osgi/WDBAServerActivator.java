@@ -25,12 +25,16 @@ import org.apache.xmlrpc.server.XmlRpcHandlerMapping;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.net.URL;
 import java.security.Principal;
 import java.util.Collections;
@@ -140,6 +144,17 @@ public class WDBAServerActivator implements BundleActivator {
                 });
         _glueTracker.open();
 
+        // Extract the HTTP (internal) port number if set in the bundle property.
+        int port = 8442;
+        try {
+            port = Integer.parseInt(
+              ImOption.apply(_bundleContext.getProperty("org.osgi.service.http.port")).getOrElse("8442")
+            );
+        } catch (NumberFormatException ex) {
+            LOG.warning("Could not parse org.osgi.service.http.port property value as an int.  Using port 8442.");
+        }
+
+        final int internalPort = port;
         _httpTracker = new ServiceTracker<>(_bundleContext, HttpService.class.getName(),
                 new ServiceTrackerCustomizer<HttpService, HttpService>() {
                     public HttpService addingService(ServiceReference<HttpService> ref) {
@@ -147,7 +162,32 @@ public class WDBAServerActivator implements BundleActivator {
 
                         _http = _bundleContext.getService(ref);
                         try {
-                            _http.registerServlet(APP_CONTEXT, _servlet, new Hashtable<>(), null);
+                            // Install a custom HttpContext which verifies that
+                            // the request is coming in over the internal port.
+                            final HttpContext defaultContext = _http.createDefaultHttpContext();
+                            _http.registerServlet(APP_CONTEXT, _servlet, new Hashtable<>(),
+                                    new HttpContext() {
+                                        @Override
+                                        public boolean handleSecurity(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
+                                            boolean result = defaultContext.handleSecurity(httpServletRequest, httpServletResponse);
+                                            if (result && httpServletRequest.getServerPort() != internalPort) {
+                                              httpServletResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                                              result = false;
+                                            }
+                                            return result;
+                                        }
+
+                                        @Override
+                                        public URL getResource(String s) {
+                                            return defaultContext.getResource(s);
+                                        }
+
+                                        @Override
+                                        public String getMimeType(String s) {
+                                            return defaultContext.getMimeType(s);
+                                        }
+                                    }
+                            );
                         } catch (ServletException ex) {
                             LOG.log(Level.SEVERE, "Trouble setting up wdba web application.", ex);
                         } catch (NamespaceException ex) {
