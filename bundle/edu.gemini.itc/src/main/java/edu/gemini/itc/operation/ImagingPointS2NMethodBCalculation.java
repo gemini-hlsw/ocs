@@ -41,7 +41,7 @@ public final class ImagingPointS2NMethodBCalculation extends ImagingS2NCalculati
     }
 
     @Override public int numberSourceExposures() {
-        return int_req_source_exposures;
+        return int_req_source_exposures * coadds;
     }
 
     public double reqNumberExposures() {
