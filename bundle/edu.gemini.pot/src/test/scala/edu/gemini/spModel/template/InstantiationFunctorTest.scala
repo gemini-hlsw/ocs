@@ -7,6 +7,7 @@ import edu.gemini.spModel.gemini.gmos.InstGmosSouth
 import edu.gemini.spModel.gemini.gmos.blueprint.SpGmosSBlueprintImaging
 import edu.gemini.spModel.gemini.security.UserRolePrivileges
 import edu.gemini.spModel.obsclass.ObsClass._
+import edu.gemini.spModel.rich.pot.sp._
 
 import org.junit.Assert._
 import org.junit.Test
@@ -18,7 +19,12 @@ import Scalaz._
 
 class InstantiationFunctorTest extends TestBase {
 
-  def instantiate(os: ISPObservation*): List[ISPObservation] = {
+  def instantiate(os: ISPObservation*): List[ISPObservation] =
+    instantiate2(List(("blueprint-0", os.toList, List(newParameters(ScienceTargetName, ScienceTargetCC)))))
+
+  def instantiate2(
+    groups: List[(String, List[ISPObservation], List[TemplateParameters])]
+  ): List[ISPObservation] = {
     val fact = getFactory
     val prog = getProgram
 
@@ -30,35 +36,46 @@ class InstantiationFunctorTest extends TestBase {
     // at (RA, Dec) (1, 2) and CC50 observing conditions.
     val tfNode = fact.createTemplateFolder(prog, WithSomeNewKey)
 
-    val bp: SpBlueprint = new SpGmosSBlueprintImaging(List(FilterSouth.g_G0325).asJava)
-    val bpMap = Map("blueprint-0" -> bp)
-    val tf    = new TemplateFolder(bpMap.asJava)
+    val bpMap = groups.map { case (blueprintId, _, _) =>
+      val bp: SpBlueprint = new SpGmosSBlueprintImaging(List(FilterSouth.g_G0325).asJava)
+      (blueprintId, bp)
+    }.toMap
+
+    val tf = new TemplateFolder(bpMap.asJava)
     tfNode.setDataObject(tf)
 
-    val tgNode = fact.createTemplateGroup(prog, WithSomeNewKey)
-    val tg     = new TemplateGroup()
-    tg.setBlueprintId("blueprint-0")
-    tgNode.setDataObject(tg)
+    val func = new InstantiationFunctor
 
-    val tpNode = fact.createTemplateParameters(prog, WithSomeNewKey)
-    val tp     = newParameters(ScienceTargetName, ScienceTargetCC)
-    tpNode.setDataObject(tp)
+    groups.foreach { case (blueprintId, os, params) =>
 
-    tgNode.addTemplateParameters(tpNode)
-    tfNode.addTemplateGroup(tgNode)
+      val tgNode = fact.createTemplateGroup(prog, WithSomeNewKey)
+      val tg     = new TemplateGroup()
+      tg.setBlueprintId(blueprintId)
+      tgNode.setDataObject(tg)
+
+      val tpNodes = params.map { tp =>
+        val tpNode = fact.createTemplateParameters(prog, WithSomeNewKey)
+        tpNode.setDataObject(tp)
+        tpNode
+      }
+      tpNodes.foreach(tgNode.addTemplateParameters)
+
+      // Add an observation for each of the specified obs classes
+      os.foreach(tgNode.addObservation)
+
+      tfNode.addTemplateGroup(tgNode)
+
+      tpNodes.foreach(func.add(tgNode, _))
+    }
+
     prog.setTemplateFolder(tfNode)
 
-    // Add an observation for each of the specified obs classes
-    os.foreach(tgNode.addObservation)
-
-    // Instantiate observations
-    val func = new InstantiationFunctor
-    func.add(tgNode, tpNode)
     func.execute(getOdb, getProgram, null)
 
     // Return the instantiated observations
-    val grp = getProgram.getGroups.get(0)
-    grp.getObservations.asScala.toList
+    getProgram.getGroups.asScala.toList.flatMap { grp =>
+      grp.getObservations.asScala.toList
+    }
   }
 
   def reapply(os: ISPObservation*): List[ISPObservation] = {
@@ -164,4 +181,93 @@ class InstantiationFunctorTest extends TestBase {
       }
     }
   }
+
+  @Test def testInstantiationOrderOneGroup(): Unit = {
+    val obsList = instantiate2(
+      List((
+        "blueprint-0",
+        List(newObs(SCIENCE, Instrument.GmosSouth)),
+        List(
+          newParameters(s"$ScienceTargetName-01", ScienceTargetCC),
+          newParameters(s"$ScienceTargetName-02", ScienceTargetCC),
+          newParameters(s"$ScienceTargetName-03", ScienceTargetCC),
+          newParameters(s"$ScienceTargetName-04", ScienceTargetCC),
+          newParameters(s"$ScienceTargetName-05", ScienceTargetCC),
+          newParameters(s"$ScienceTargetName-06", ScienceTargetCC),
+          newParameters(s"$ScienceTargetName-07", ScienceTargetCC),
+          newParameters(s"$ScienceTargetName-08", ScienceTargetCC),
+          newParameters(s"$ScienceTargetName-09", ScienceTargetCC),
+          newParameters(s"$ScienceTargetName-10", ScienceTargetCC)
+        )
+      ))
+    )
+
+    val names = obsList.map { obs =>
+      obs.findTargetObsComp.get.getTargetEnvironment.getTargets.get(0).getName
+    }
+    assertEquals(10, obsList.length);
+    assertEquals(names.sorted, names)
+  }
+
+  @Test def testInstantiationOrderMultiGroups(): Unit = {
+    val obsList = instantiate2(
+      List(
+        (
+          "blueprint-0",
+          List(newObs(SCIENCE, Instrument.GmosSouth)),
+          List(
+            newParameters(s"$ScienceTargetName-00", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-01", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-02", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-03", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-04", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-05", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-06", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-07", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-08", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-09", ScienceTargetCC)
+          )
+        ),
+        (
+          "blueprint-1",
+          List(newObs(SCIENCE, Instrument.GmosSouth)),
+          List(
+            newParameters(s"$ScienceTargetName-10", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-11", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-12", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-13", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-14", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-15", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-16", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-17", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-18", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-19", ScienceTargetCC)
+          )
+        ),
+        (
+          "blueprint-2",
+          List(newObs(SCIENCE, Instrument.GmosSouth)),
+          List(
+            newParameters(s"$ScienceTargetName-20", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-21", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-22", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-23", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-24", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-25", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-26", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-27", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-28", ScienceTargetCC),
+            newParameters(s"$ScienceTargetName-29", ScienceTargetCC)
+          )
+        )
+      )
+    )
+
+    val names = obsList.map { obs =>
+      obs.findTargetObsComp.get.getTargetEnvironment.getTargets.get(0).getName
+    }
+    assertEquals(30, obsList.length);
+    assertEquals(names.sorted, names)
+  }
+
 }

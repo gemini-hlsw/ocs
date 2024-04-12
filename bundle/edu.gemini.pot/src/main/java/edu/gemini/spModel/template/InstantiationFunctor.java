@@ -17,11 +17,19 @@ import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.util.AsterismEditUtil;
 import edu.gemini.spModel.util.DefaultSchedulingBlock;
 
-
 import java.security.Principal;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import scala.Option;
+import scala.collection.convert.WrapAsJava;
+import scala.collection.convert.WrapAsJava$;
+import scala.collection.immutable.ListMap;
+import scala.collection.immutable.ListMap$;
+import scala.collection.immutable.ListSet;
+import scala.collection.immutable.ListSet$;
+import scala.Tuple2;
 
 import static edu.gemini.spModel.template.FunctorHelpers.addIfNotPresent;
 
@@ -34,7 +42,7 @@ public class InstantiationFunctor extends DBAbstractFunctor {
 
     private static final Logger LOGGER = Logger.getLogger(InstantiationFunctor.class.getName());
 
-    private final Map<ISPTemplateGroup, Set<ISPTemplateParameters>> selection = new HashMap<>();
+    private ListMap<ISPTemplateGroup, ListSet<ISPTemplateParameters>> selection = ListMap$.MODULE$.empty();
 
     /**
      * Add a group/params pair to the set of instantiations to be performed.
@@ -42,21 +50,21 @@ public class InstantiationFunctor extends DBAbstractFunctor {
      * @param params a set of params
      */
     public void add(ISPTemplateGroup group, ISPTemplateParameters params) {
-        Set<ISPTemplateParameters> list = selection.get(group);
-        if (list == null) {
-            list = new HashSet<>();
-            selection.put(group, list);
-        }
-        list.add(params);
+        final Option<ListSet<ISPTemplateParameters>> optSetOfParams = selection.get(group);
+
+        final ListSet<ISPTemplateParameters> setOfParams =
+          optSetOfParams.isEmpty() ? ListSet$.MODULE$.empty() : optSetOfParams.get();
+
+        selection = selection.updated(group, setOfParams.$plus(params));
     }
 
     public void execute(IDBDatabaseService db, ISPNode node, Set<Principal> principals) {
         try {
             List<ISPGroup> newGroups = new ArrayList<>();
             final ISPProgram prog = db.lookupProgram(node.getProgramKey());
-            for (Map.Entry<ISPTemplateGroup, Set<ISPTemplateParameters>> e : selection.entrySet()) {
-                for (ISPTemplateParameters ps : e.getValue()) {
-                    final ISPTemplateGroup templateGroup = e.getKey();
+            for (Tuple2<ISPTemplateGroup, ListSet<ISPTemplateParameters>> e : WrapAsJava$.MODULE$.asJavaIterable(selection.toList())) {
+                for (ISPTemplateParameters ps : WrapAsJava$.MODULE$.asJavaIterable(e._2.reversed())) {
+                    final ISPTemplateGroup templateGroup = e._1;
                     final TemplateParameters templateParametersData = (TemplateParameters) ps.getDataObject();
                     final SPSiteQuality siteQualityData = templateParametersData.getSiteQuality();
                     final SPTarget targetData = templateParametersData.getTarget();
