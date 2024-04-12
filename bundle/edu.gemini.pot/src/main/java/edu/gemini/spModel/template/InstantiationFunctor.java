@@ -21,10 +21,10 @@ import java.security.Principal;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 
 import scala.Option;
-import scala.collection.convert.WrapAsJava;
-import scala.collection.convert.WrapAsJava$;
+import scala.collection.immutable.Iterable;
 import scala.collection.immutable.ListMap;
 import scala.collection.immutable.ListMap$;
 import scala.collection.immutable.ListSet;
@@ -44,6 +44,13 @@ public class InstantiationFunctor extends DBAbstractFunctor {
 
     private ListMap<ISPTemplateGroup, ListSet<ISPTemplateParameters>> selection = ListMap$.MODULE$.empty();
 
+    private static <A> List<A> toJava(Iterable<A> iter) {
+        final scala.collection.immutable.List<A> scalaList = iter.toList();
+        final List<A> javaList = new ArrayList<A>(scalaList.size());
+        IntStream.range(0, scalaList.size()).forEach(i -> javaList.add(scalaList.apply(i)));
+        return javaList;
+    }
+
     /**
      * Add a group/params pair to the set of instantiations to be performed.
      * @param group a template group
@@ -62,8 +69,8 @@ public class InstantiationFunctor extends DBAbstractFunctor {
         try {
             List<ISPGroup> newGroups = new ArrayList<>();
             final ISPProgram prog = db.lookupProgram(node.getProgramKey());
-            for (Tuple2<ISPTemplateGroup, ListSet<ISPTemplateParameters>> e : WrapAsJava$.MODULE$.asJavaIterable(selection.toList())) {
-                for (ISPTemplateParameters ps : WrapAsJava$.MODULE$.asJavaIterable(e._2.reversed())) {
+            for (Tuple2<ISPTemplateGroup, ListSet<ISPTemplateParameters>> e : toJava(selection)) {
+                for (ISPTemplateParameters ps : toJava(e._2.reversed())) {
                     final ISPTemplateGroup templateGroup = e._1;
                     final TemplateParameters templateParametersData = (TemplateParameters) ps.getDataObject();
                     final SPSiteQuality siteQualityData = templateParametersData.getSiteQuality();
