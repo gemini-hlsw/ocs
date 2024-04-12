@@ -3,12 +3,14 @@ package edu.gemini.spModel.gemini.seqcomp
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances.IDENTITY_MAP
 import edu.gemini.spModel.config2.ItemKey
+import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.gemini.calunit.CalUnitParams._
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import org.junit.Assert._
 import org.junit.{Before, Test}
 
 final class BaselineReorderTest extends GcalExecTest {
+  override val progId = SPProgramID.toProgramID("GS-3000A-Q-1")
 
   val observeTypeItem  = new ItemKey("observe:observeType")
 
@@ -23,8 +25,8 @@ final class BaselineReorderTest extends GcalExecTest {
     }
   }
 
-  val flat = CalImpl(Set(Lamp.IR_GREY_BODY_HIGH), Shutter.OPEN,   Filter.ND_20, Diffuser.IR, 1,  4.0, 1, arc = false)
-  val arc  = CalImpl(Set(Lamp.AR_ARC),            Shutter.CLOSED, Filter.NIR,   Diffuser.IR, 1, 15.0, 1, arc = true )
+  val flat = CalImpl(Set(Lamp.IR_GREY_BODY_HIGH), Shutter.OPEN,   Filter.ND_20, Diffuser.IR, 1,  4.0, 1, arc = false, basecalNight = true, basecalDay = true)
+  val arc  = CalImpl(Set(Lamp.AR_ARC),            Shutter.CLOSED, Filter.NIR,   Diffuser.IR, 1, 15.0, 1, arc = true,  basecalNight = true, basecalDay = true)
 
   @Test def testOrderChange(): Unit = {
     locking {

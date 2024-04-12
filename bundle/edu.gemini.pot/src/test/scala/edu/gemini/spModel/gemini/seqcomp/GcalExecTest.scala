@@ -13,8 +13,9 @@ import java.util.concurrent.locks.ReentrantLock
 
 
 abstract class GcalExecTest extends SpModelTestBase {
-  val progId = SPProgramID.toProgramID("GS-3000A-Q-1")
-  val obsId  = new SPObservationID(progId, 1)
+  def progId: SPProgramID
+
+  def obsId  = new SPObservationID(progId, 1)
 
   def label(num: Int): DatasetLabel    = new DatasetLabel(obsId, num)
   def dataset(num: Int): Dataset       = new Dataset(label(num), "file%d".format(num), System.currentTimeMillis())

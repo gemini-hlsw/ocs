@@ -225,7 +225,10 @@ public class SeqRepeatFlatObs extends SeqRepeatCoaddExp
     }
 
     public ObsClass getDefaultObsClass() {
-        if (isArc()) return ObsClass.PROG_CAL;
+        // REL-4411: flats and arcs are now both PARTNER CAL.  Any already
+        // created manual flats will have recorded the PROG_CAL obs class,
+        // which is good since we don't want to change executed or existing
+        // observations.
         return ObsClass.PARTNER_CAL;
     }
 
