@@ -9,7 +9,7 @@ import edu.gemini.spModel.gemini.igrins2.SeqConfigIgrins2
 import edu.gemini.spModel.gemini.igrins2.blueprint.SpIgrins2Blueprint
 
 case class Igrins2(blueprint: SpIgrins2Blueprint) extends GroupInitializer[SpIgrins2Blueprint] with TemplateDsl2[InstIgrins2] {
-  val program = "IGRINS-2 INSTRUMENT PHASE I/II MAPPING BPS"
+  override val program = "IGRINS-2 INSTRUMENT PHASE I/II MAPPING BPS"
 
   override def instCompType: SPComponentType =
     InstIgrins2.SP_TYPE
