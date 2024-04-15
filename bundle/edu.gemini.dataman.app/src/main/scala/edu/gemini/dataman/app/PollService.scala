@@ -157,7 +157,7 @@ object PollService {
 
   private val Log = Logger.getLogger(getClass.getName)
 
-  def apply(name: String, workerCount: Int)(poll: DmanId => Unit): PollService =
+  def apply(name: String, workerCount: Int, priority: Int)(poll: DmanId => Unit): PollService =
     new PollService {
       val queue = RequestQueue.empty()
 
@@ -190,7 +190,7 @@ object PollService {
       val workers = (0 until (workerCount max 1)).toList.map { n =>
         val threadName = s"$name PollService Worker $n"
         new Thread(new PollRunnable(threadName), threadName) {
-          setPriority(Thread.NORM_PRIORITY - 1)
+          setPriority(priority)
           setDaemon(true)
         }
       }
