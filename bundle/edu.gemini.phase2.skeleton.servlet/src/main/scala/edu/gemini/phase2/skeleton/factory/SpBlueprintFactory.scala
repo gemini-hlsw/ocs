@@ -18,6 +18,8 @@ import edu.gemini.spModel.gemini.altair.blueprint.{SpAltair, SpAltairLgs, SpAlta
 import edu.gemini.spModel.gemini.ghost.blueprint.SpGhostBlueprint
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gnirs.blueprint.{SpGnirsBlueprintImaging, SpGnirsBlueprintSpectroscopy}
+import edu.gemini.spModel.gemini.igrins2.NoddingOption
+import edu.gemini.spModel.gemini.igrins2.blueprint.SpIgrins2Blueprint
 import edu.gemini.spModel.gemini.nici.NICIParams
 import edu.gemini.spModel.gemini.nici.blueprint.{SpNiciBlueprintCoronagraphic, SpNiciBlueprintStandard}
 import edu.gemini.spModel.gemini.nifs.NIFSParams
@@ -60,6 +62,7 @@ object SpBlueprintFactory {
       case b: GnirsBlueprintSpectroscopy    => Gnirs.spectroscopy(b)
       case b: GpiBlueprint                  => GpiHandler(b)
       case b: GsaoiBlueprint                => GsaoiHandler(b)
+      case b: Igrins2Blueprint              => Igrins2(b)
       case b: MichelleBlueprintImaging      => Michelle.imaging(b)
       case b: MichelleBlueprintSpectroscopy => Michelle.spectroscopy(b)
       case b: NiciBlueprintCoronagraphic    => Nici.coronographic(b)
@@ -97,6 +100,13 @@ object SpBlueprintFactory {
         }
     }
     scalaSpEnumList.right map { _.asJava }
+  }
+
+  object Igrins2 {
+    private def noddingOption(no: Igrins2NoddingOption) = spEnum(no, classOf[NoddingOption])
+
+    def apply(b: Igrins2Blueprint): Either[String, SpIgrins2Blueprint] =
+      noddingOption(b.nodding).right.map(n => new SpIgrins2Blueprint(n))
   }
 
   object ToSpAltair {

@@ -36,6 +36,7 @@ object TemplateDb {
     "GPI_BP.xml",
     "GRACES_BP.xml",
     "GSAOI_BP.xml",
+    "IGRINS-2_BP.xml",
     "MICHELLE_BP.xml",
     "NICI_BP.xml",
     "NIFS_BP.xml",
