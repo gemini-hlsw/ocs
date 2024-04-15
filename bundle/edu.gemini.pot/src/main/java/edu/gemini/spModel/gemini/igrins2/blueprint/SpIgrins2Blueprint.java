@@ -33,7 +33,7 @@ public final class SpIgrins2Blueprint extends SpBlueprint {
     @Override public SPComponentType instrumentType() { return Igrins2.SP_TYPE(); }
 
     @Override public String toString() {
-        return String.format("Igrins2(%s)", noddingOption);
+        return String.format("Igrins2(%s)", noddingOption.displayValue());
     }
 
     @Override public ParamSet toParamSet(PioFactory factory) {
