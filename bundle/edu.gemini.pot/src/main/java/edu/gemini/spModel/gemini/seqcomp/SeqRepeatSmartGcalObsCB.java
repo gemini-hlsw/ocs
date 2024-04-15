@@ -243,7 +243,7 @@ public abstract class SeqRepeatSmartGcalObsCB implements IConfigBuilder, Cloneab
         } else if (this instanceof Flat) {
             autoObsClass = isBaselineNight ? ObsClass.PARTNER_CAL : ObsClass.PROG_CAL;
         } else if (this instanceof Arc) {
-            autoObsClass = isBaselineNight ? ObsClass.PARTNER_CAL : ObsClass.PROG_CAL;
+            autoObsClass = isBaselineNight ? ObsClass.PARTNER_CAL : DefaultArcObsClass.forNode(seqComponent);
         } else {
             throw new InternalError("unknown node type");
         }

@@ -3,6 +3,7 @@ package edu.gemini.spModel.gemini.seqcomp
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances.IDENTITY_MAP
 import edu.gemini.spModel.config2.ItemKey
+import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.gemini.calunit.CalUnitParams._
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS
 import org.junit.Assert._
@@ -12,6 +13,8 @@ import org.junit.{Before, Test}
  * Tests that executed steps don't change even if the mapping changes.
  */
 class SmartGcalExecutedStepTest extends GcalExecTest {
+  override val progId = SPProgramID.toProgramID("GS-3000A-Q-1")
+
   val shutterItem  = new ItemKey("calibration:shutter")
   val diffuserItem = new ItemKey("calibration:diffuser")
 

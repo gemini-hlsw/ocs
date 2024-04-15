@@ -1,7 +1,7 @@
 package edu.gemini.spModel.rich.pot.sp
 
 import edu.gemini.pot.sp.{SPNodeKey, ISPContainerNode, ISPNode}
-import edu.gemini.spModel.core.SPProgramID
+import edu.gemini.spModel.core.{ProgramId, SPProgramID, Semester}
 import edu.gemini.spModel.data.ISPDataObject
 
 import scala.annotation.tailrec
@@ -16,6 +16,15 @@ final class RichNode(val node: ISPNode) extends AnyVal {
 
   def pidOption: Option[SPProgramID] =
     Option(node.getProgramID)
+
+  /**
+   * Extracts the semester from the program, if it can be determined from
+   * the program id.
+   */
+  def semesterOption: Option[Semester] =
+    pidOption
+      .map(pid => ProgramId.parse(pid.stringValue))
+      .flatMap(_.semester)
 
   def dataObject: Option[ISPDataObject] = Option(node.getDataObject)
 

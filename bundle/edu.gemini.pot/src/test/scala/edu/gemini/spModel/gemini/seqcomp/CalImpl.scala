@@ -16,14 +16,17 @@ final case class CalImpl(lamps: Set[Lamp],
                          observe: Int,
                          exposureTime: Double,
                          coadds: Int,
-                         arc: Boolean) extends Calibration {
+                         arc: Boolean,
+                         basecalNight: Boolean = false,
+                         basecalDay:   Boolean = false
+) extends Calibration {
 
   // Satisfy the Calibration interface
 
   def isFlat: JBoolean               = !isArc
   def isArc: JBoolean                = arc
-  def isBasecalNight: JBoolean       = true
-  def isBasecalDay: JBoolean         = true
+  def isBasecalNight: JBoolean       = basecalNight
+  def isBasecalDay: JBoolean         = basecalDay
 
   def getLamps: java.util.Set[Lamp] = lamps.asJava
   def getObserve: JInteger          = observe
