@@ -139,7 +139,7 @@ object PollServiceSpec extends Specification with ScalaCheck with Arbitraries {
       val oids        = (1 to 20).map(i => Obs(new SPObservationID(Q1.pid, i))).toList
       val log         = List.newBuilder[(DmanId, String)]
 
-      val ps = PollService("Test", threadCount) { id =>
+      val ps = PollService("Test", threadCount, Thread.NORM_PRIORITY - 1) { id =>
         // We want to simulate work and give the other poll service thread an
         // opportunity to run.  This is probably a bit sketchy since there is
         // no guarantee that the other thread will actually run.
