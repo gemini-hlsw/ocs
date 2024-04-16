@@ -1025,6 +1025,7 @@
         <entry key="comment"/>
         <entry key="observe_status"/>
         <entry key="datasetcomments"/>
+        <entry key="observe_class"/>
     </logEntry>
 
 </configuration>
