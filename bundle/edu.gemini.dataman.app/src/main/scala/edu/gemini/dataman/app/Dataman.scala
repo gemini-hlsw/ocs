@@ -75,8 +75,8 @@ object Dataman {
     val pollArchive  = GsaPollActions(config.archiveHost, config.site, odb)
     val pollSummit   = GsaPollActions(config.summitHost, config.site, odb)
 
-    def pollService(name: String, act: GsaPollActions): PollService =
-      PollService(name, workerCount = 10) { id =>
+    def pollService(name: String, act:  GsaPollActions, workerCount: Int, priority: Int): PollService =
+      PollService(name, workerCount, priority) { id =>
         exec.now(id match {
           case Prog(pid) => act.program(pid)
           case Obs(oid)  => act.observation(oid)
@@ -84,9 +84,13 @@ object Dataman {
         })
       }
 
-    val archivePollService = pollService("Archive", pollArchive)
-    val summitPollService  = pollService("Summit",  pollSummit)
-    val pollServices       = List(archivePollService, summitPollService)
+    val archivePollService = pollService("Archive",      pollArchive, workerCount = 10, priority = Thread.NORM_PRIORITY - 1)
+    val archiveDaily       = pollService("ArchiveDaily", pollArchive, workerCount =  2, priority = Thread.NORM_PRIORITY - 2)
+    val summitPollService  = pollService("Summit",       pollSummit,  workerCount = 10, priority = Thread.NORM_PRIORITY - 1)
+    val summitDaily        = pollService("SummitDaily",  pollSummit,  workerCount =  2, priority = Thread.NORM_PRIORITY - 2)
+
+    val allPollServices    = List(archivePollService, archiveDaily, summitPollService, summitDaily)
+    val mainPollServices   = List(archivePollService, summitPollService)
 
     val trigger  = new QaRequestTrigger(odb, (qaRequest: List[QaRequest]) => {
       exec.fork(obsLogAction.setQa(qaRequest))
@@ -101,7 +105,7 @@ object Dataman {
 
     def shutdownNow(): Unit = {
       trigger.stop()
-      pollServices.foreach(_.shutdown())
+      allPollServices.foreach(_.shutdown())
       pool.shutdownNow()
     }
 
@@ -117,14 +121,14 @@ object Dataman {
       schedulePoll(pollArchive.thisWeek, config.archivePoll.thisWeek)
       schedulePoll(pollSummit.thisWeek,  config.summitPoll.thisWeek)
 
-      val progArchiveSync = new ProgramSyncRunnable(odb, User, pids => archivePollService.addAll(pids))
-      val progSummitSync  = new ProgramSyncRunnable(odb, User, pids => summitPollService.addAll(pids))
+      val progArchiveSync = new ProgramSyncRunnable(odb, User, pids => archiveDaily.addAll(pids))
+      val progSummitSync  = new ProgramSyncRunnable(odb, User, pids => summitDaily.addAll(pids))
       schedule(progArchiveSync, progSyncDelay, config.archivePoll.allPrograms.time)
       schedule(progSummitSync, progSyncDelay, config.summitPoll.allPrograms.time)
 
       // Note "now" is passed by value to be re-evaluated every time it is needed.
       val orr = new ObsRefreshRunnable(odb, User, Instant.now(), oids =>
-        pollServices.foreach(_.addAll(oids))
+        mainPollServices.foreach(_.addAll(oids))
       )
       schedule(orr, obsRefreshDelay, config.obsRefreshPeriod.time)
       schedule(new RetryFailedRunnable(odb, User, retryMinDelay, exec), retryMinDelay.plusMillis(1), retryPeriod)
