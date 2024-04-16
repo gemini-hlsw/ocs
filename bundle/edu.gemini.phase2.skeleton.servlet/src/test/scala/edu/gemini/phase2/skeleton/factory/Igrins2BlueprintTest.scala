@@ -30,7 +30,7 @@ class Igrins2BlueprintTest extends TemplateSpec("IGRINS-2_BP.xml") with Specific
 
     "include correct observations for nodding option" in {
       forAll { (b: Igrins2Blueprint) =>
-        val incl = Set(1, 4, 5, if (b.nodding == Igrins2NoddingOption.KeepTargetInSlit) 2 else 3)
+        val incl = Set(1, 2, 5, if (b.nodding == Igrins2NoddingOption.KeepTargetInSlit) 3 else 4)
         expand(proposal(b, Nil, AnyBand)) { (_, sp) =>
           groups(sp).forall { tg =>
             libs(tg) == incl
