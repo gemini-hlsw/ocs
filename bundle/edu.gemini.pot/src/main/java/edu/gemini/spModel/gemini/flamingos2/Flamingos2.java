@@ -1416,6 +1416,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         configInfo.add(new InstConfigInfo(READMODE_PROP));
         configInfo.add(new InstConfigInfo(LYOT_WHEEL_PROP));
         configInfo.add(new InstConfigInfo(FPU_PROP));
+        configInfo.add(new InstConfigInfo(MOS_PREIMAGING_PROP));
 
         return configInfo;
     }
