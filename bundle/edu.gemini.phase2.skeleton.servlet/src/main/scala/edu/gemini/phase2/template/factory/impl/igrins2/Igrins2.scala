@@ -26,39 +26,39 @@ case class Igrins2(blueprint: SpIgrins2Blueprint) extends GroupInitializer[SpIgr
       this.db = None
     }
 
-  // Blueprint library:
-  // {1} Before telluric observation
-  // {2} Point source (ABBA) science observation
-  // {3} Extended source (On-off) science observation
-  // {4} After telluric observation
-  // {5} SVC image
+  //  Blueprint library:
+  //  {1} Before telluric observation
+  //  {3} Point source (ABBA) science observation
+  //  {4} Extended source (On-off) science observation
+  //  {5} After telluric observation
+  //  {2} SVC image
   //
-  // The instantiated scheduling group should look like
-  // Observer Instructions note
-  // Before Telluric
-  // SVC Image
-  // Science
-  // After Telluric
+  //  The instantiated scheduling group should look like
+  //  Observer Instructions note
+  //  Before Telluric
+  //  SVC Image
+  //  Science
+  //  After Telluric
   //
-  // INCLUDE note "Phase II Checklist" at the program level.
+  //  INCLUDE note "Phase II Checklist" at the program level.
   //
-  // INCLUDE {1}, {5} IN target-specific Scheduling Group
+  //  INCLUDE {1}, {2} IN target-specific Scheduling Group
   //
-  // If NODDING OPTION == Keep target in slit:
-  //   INCLUDE {2}
+  //  If NODDING OPTION == Keep target in slit:
+  //    INCLUDE {3}
   //
-  // If NODDING OPTION == Nod to sky:
-  //   INCLUDE {3}
+  //  If NODDING OPTION == Nod to sky:
+  //    INCLUDE {4}
   //
-  // INCLUDE {4} IN target-specific Scheduling Group
+  //  INCLUDE {5} IN target-specific Scheduling Group
   //
-  // INCLUDE the note "Observer Instructions" IN the target-specific Scheduling Group
+  //  INCLUDE the note "Observer Instructions" IN the target-specific Scheduling Group
 
   val n = blueprint.getNoddingOption match {
-    case NoddingOption.KEEP_TARGET_IN_SLIT => 2
-    case NoddingOption.NOD_TO_SKY          => 3
+    case NoddingOption.KEEP_TARGET_IN_SLIT => 3
+    case NoddingOption.NOD_TO_SKY          => 4
   }
-  include(1, 5, n, 4) in TargetGroup
+  include(1, 2, n, 5) in TargetGroup
 
   addNote("Observer Instructions") in TargetGroup
 }

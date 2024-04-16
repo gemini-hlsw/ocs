@@ -46,7 +46,9 @@
 
 2024-Feb-23 (bmiller)
 - updated notes for clarity and consistency with new observation names
-</value>
+
+2024-Apr-15 (bmiller)
+- renumber library ids to put them in the desired output order</value>
         </param>
       </paramset>
     </container>
@@ -156,7 +158,7 @@ A predefined number of SVC images will be saved during the science exposure, tog
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="59047603-b095-4ce7-bacb-59813767e0de" name="">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Obs: Sci (Point source)"/>
-          <param name="libraryId" value="2"/>
+          <param name="libraryId" value="3"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
@@ -231,7 +233,7 @@ A predefined number of SVC images will be saved during the science exposure, tog
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="44b24742-85f4-42d8-bbf2-b60495f8272d" name="">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Obs: Sci (Extended source)"/>
-          <param name="libraryId" value="3"/>
+          <param name="libraryId" value="4"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
@@ -306,7 +308,7 @@ A predefined number of SVC images will be saved during the science exposure, tog
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="befd3e34-d720-46ba-9e16-c9cb5293692f" name="">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Obs: &quot;After&quot; Standard"/>
-          <param name="libraryId" value="4"/>
+          <param name="libraryId" value="5"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
@@ -376,7 +378,7 @@ A predefined number of SVC images will be saved during the science exposure, tog
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="88da1ab6-b9f2-4dc0-b619-983f72686427" name="">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="SVC Image (Optional)"/>
-          <param name="libraryId" value="5"/>
+          <param name="libraryId" value="2"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
@@ -453,6 +455,7 @@ A predefined number of SVC images will be saved during the science exposure, tog
     <paramset name="node">
       <param name="key" value="befd3e34-d720-46ba-9e16-c9cb5293692f"/>
       <param name="04867c3c-f7fd-41ff-b100-6aad593b8e3c" value="1"/>
+      <param name="24ce0a75-78f6-4549-aff7-aa6a86cad528" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="002e0afc-e3a4-4be2-92b3-1f0089e0121d"/>
@@ -469,6 +472,7 @@ A predefined number of SVC images will be saved during the science exposure, tog
     <paramset name="node">
       <param name="key" value="44b24742-85f4-42d8-bbf2-b60495f8272d"/>
       <param name="04867c3c-f7fd-41ff-b100-6aad593b8e3c" value="1"/>
+      <param name="24ce0a75-78f6-4549-aff7-aa6a86cad528" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="c0dd2fa3-ff15-4962-adde-18f75e9ed775"/>
@@ -481,6 +485,7 @@ A predefined number of SVC images will be saved during the science exposure, tog
     <paramset name="node">
       <param name="key" value="88da1ab6-b9f2-4dc0-b619-983f72686427"/>
       <param name="04867c3c-f7fd-41ff-b100-6aad593b8e3c" value="1"/>
+      <param name="24ce0a75-78f6-4549-aff7-aa6a86cad528" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="6942d2b5-3f6d-4c77-bccd-d29d675a57e2"/>
@@ -493,6 +498,7 @@ A predefined number of SVC images will be saved during the science exposure, tog
     <paramset name="node">
       <param name="key" value="6b7e3b78-b8d5-46c7-9e2a-7df4adcb2cc3"/>
       <param name="04867c3c-f7fd-41ff-b100-6aad593b8e3c" value="95"/>
+      <param name="24ce0a75-78f6-4549-aff7-aa6a86cad528" value="91"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="7c3ce5a6-0406-423b-b321-6e2bf2d74046"/>
@@ -525,6 +531,7 @@ A predefined number of SVC images will be saved during the science exposure, tog
     <paramset name="node">
       <param name="key" value="59047603-b095-4ce7-bacb-59813767e0de"/>
       <param name="04867c3c-f7fd-41ff-b100-6aad593b8e3c" value="1"/>
+      <param name="24ce0a75-78f6-4549-aff7-aa6a86cad528" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="ea1b2513-a21c-4b63-9e63-343bfad56471"/>
