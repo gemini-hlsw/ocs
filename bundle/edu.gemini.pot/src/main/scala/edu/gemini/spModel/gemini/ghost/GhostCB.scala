@@ -6,6 +6,7 @@ import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.spModel.config.AbstractObsComponentCB
 import edu.gemini.spModel.core.MagnitudeBand
+import edu.gemini.spModel.core.Target
 import edu.gemini.spModel.data.config._
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostTarget
 import edu.gemini.spModel.obscomp.InstConstants
@@ -63,19 +64,38 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
        */
       // Put a coordinate parameter. Coordinates are not available here so we
       // must operate on an SPSkyObject.
-      def coordParam(so: SPSkyObject, name: Option[String],
-                     raDeg: String, decDeg: String,
-                     raHMS: String, decDMS: String) : Unit = {
+      def coordParam(
+        so:          SPSkyObject,
+        name:        Option[String],
+        typeParam:   String,
+        raDegParam:  String,
+        decDegParam: String,
+        raHMSParam:  String,
+        decDMSParam: String
+      ) : Unit = {
+
+        name.foreach(n => config.putParameter(systemName, StringParameter.getInstance(n, so.getName)))
+
+        val ttype = so match {
+          case c: SPCoordinates => Target.TargetType.Sidereal
+          case t: SPTarget      => t.getTarget.targetType
+        }
+        config.putParameter(systemName, DefaultParameter.getInstance(typeParam, ttype))
+
         val coords = so match {
-          case c: SPCoordinates => c.getCoordinates.some
-          case t: SPTarget => t.getProperMotion.map(_.calculateAt(t.getTarget, Instant.now())).orElse(t.getCoordinates(None))
+          case c: SPCoordinates =>
+            c.getCoordinates.some
+          case t: SPTarget      =>
+            val when = Instant.now()
+            t.getProperMotion
+             .map(_.calculateAt(t.getTarget, when))
+             .orElse(t.getCoordinates(Some(when.toEpochMilli)))
         }
         coords.foreach { c =>
-          name.foreach(n => config.putParameter(systemName, StringParameter.getInstance(n, so.getName)))
-          config.putParameter(systemName, DefaultParameter.getInstance(raDeg, c.ra.toDegrees))
-          config.putParameter(systemName, DefaultParameter.getInstance(decDeg, c.dec.toDegrees))
-          config.putParameter(systemName, DefaultParameter.getInstance(raHMS, c.ra.formatHMS))
-          config.putParameter(systemName, DefaultParameter.getInstance(decDMS, c.dec.formatDMS))
+          config.putParameter(systemName, DefaultParameter.getInstance(raDegParam,  c.ra.toDegrees ))
+          config.putParameter(systemName, DefaultParameter.getInstance(decDegParam, c.dec.toDegrees))
+          config.putParameter(systemName, DefaultParameter.getInstance(raHMSParam,  c.ra.formatHMS ))
+          config.putParameter(systemName, DefaultParameter.getInstance(decDMSParam, c.dec.formatDMS))
         }
       }
 
@@ -94,14 +114,17 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
         * for the observation than this, but I'm not sure what it is. This is the
         * way it's done to produce an ObsContext.
         */
-      getObsComponent.getContextObservation.getObsComponents.asScala.
-        find(_.getType.broadType === TargetObsComp.SP_TYPE.broadType).
-        map(_.getDataObject.asInstanceOf[TargetObsComp]).
-        foreach{t =>
+      getObsComponent
+        .getContextObservation
+        .getObsComponents
+        .asScala
+        .find(_.getType.broadType === TargetObsComp.SP_TYPE.broadType)
+        .map(_.getDataObject.asInstanceOf[TargetObsComp])
+        .foreach{t =>
           t.getTargetEnvironment.getUserTargets.asScala.zipWithIndex.foreach { case (ut, i) =>
-            val (a, b, c, d, e)= Ghost.userTargetParams(i + 1)
-            coordParam(ut.target, Some(a), b, c, d, e)
-            config.putParameter(systemName, DefaultParameter.getInstance(s"userTarget${i+1}Type", ut.`type`))
+            val (a, b, c, d, e, f)= Ghost.userTargetParams(i + 1)
+            coordParam(ut.target, Some(a), b, c, d, e, f)
+            config.putParameter(systemName, DefaultParameter.getInstance(s"userTarget${i+1}Purpose", ut.`type`))
           }
           config.putParameter(systemName, DefaultParameter.getInstance(Ghost.RESOLUTION_MODE, t.getAsterism.resolutionMode))
           t.getAsterism match {
@@ -113,25 +136,30 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
              * 3. If SRIFU2 is set, it can be a sky position or target: repeat the previous step. for SRIFU2 data.
              */
             case gsr: GhostAsterism.StandardResolution =>
-              gsr.overriddenBase.foreach(b => coordParam(b, None,
+              gsr.overriddenBase.foreach(b => coordParam(b,
+                None, Ghost.BASE_TYPE,
                 Ghost.BASE_RA_DEGREES, Ghost.BASE_DEC_DEGREES,
                 Ghost.BASE_RA_HMS, Ghost.BASE_DEC_DMS))
 
-              gsr.srifu1.fold(c => coordParam(c, Some(Ghost.SRIFU1_NAME),
+              gsr.srifu1.fold(c => coordParam(c,
+                Some(Ghost.SRIFU1_NAME), Ghost.SRIFU1_TYPE,
                 Ghost.SRIFU1_RA_DEG, Ghost.SRIFU1_DEC_DEG,
                 Ghost.SRIFU1_RA_HMS, Ghost.SRIFU1_DEC_DMS),
                 t => {
-                  coordParam(t.spTarget, Some(Ghost.SRIFU1_NAME),
+                  coordParam(t.spTarget,
+                    Some(Ghost.SRIFU1_NAME), Ghost.SRIFU1_TYPE,
                     Ghost.SRIFU1_RA_DEG, Ghost.SRIFU1_DEC_DEG,
                     Ghost.SRIFU1_RA_HMS, Ghost.SRIFU1_DEC_DMS)
                   guiding(Ghost.SRIFU1_GUIDING, t)
                 })
 
-              gsr.srifu2.foreach(_.fold(c => coordParam(c, Some(Ghost.SRIFU2_NAME),
+              gsr.srifu2.foreach(_.fold(c => coordParam(c,
+                Some(Ghost.SRIFU2_NAME), Ghost.SRIFU2_TYPE,
                 Ghost.SRIFU2_RA_DEG, Ghost.SRIFU2_DEC_DEG,
                 Ghost.SRIFU2_RA_HMS, Ghost.SRIFU2_DEC_DMS),
                 t => {
-                  coordParam(t.spTarget, Some(Ghost.SRIFU2_NAME),
+                  coordParam(t.spTarget,
+                    Some(Ghost.SRIFU2_NAME), Ghost.SRIFU2_TYPE,
                     Ghost.SRIFU2_RA_DEG, Ghost.SRIFU2_DEC_DEG,
                     Ghost.SRIFU2_RA_HMS, Ghost.SRIFU2_DEC_DMS)
 
@@ -145,12 +173,14 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
                * 4. If we have a sky position for HRIFU2, add it to the parameters.
                */
             case ghr: GhostAsterism.HighResolution =>
-              ghr.overriddenBase.foreach(b => coordParam(b, None,
+              ghr.overriddenBase.foreach(b => coordParam(b,
+                None, Ghost.BASE_TYPE,
                 Ghost.BASE_RA_DEGREES, Ghost.BASE_DEC_DEGREES,
                 Ghost.BASE_RA_HMS, Ghost.BASE_DEC_DMS))
 
               // Always target.
-              coordParam(ghr.hrifu.spTarget, Some(Ghost.HRIFU1_NAME),
+              coordParam(ghr.hrifu.spTarget,
+                Some(Ghost.HRIFU1_NAME), Ghost.HRIFU1_TYPE,
                 Ghost.HRIFU1_RA_DEG, Ghost.HRIFU1_DEC_DEG,
                 Ghost.HRIFU1_RA_HMS, Ghost.HRIFU1_DEC_DMS)
               guiding(Ghost.HRIFU1_GUIDING, ghr.hrifu)
@@ -159,6 +189,7 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
               coordParam(
                 ghr.hrsky,  // switch to ghr.srifu2 if we're supposed to send IFU2 coords
                 Some(Ghost.HRIFU2_NAME),
+                Ghost.HRIFU2_TYPE,
                 Ghost.HRIFU2_RA_DEG,
                 Ghost.HRIFU2_DEC_DEG,
                 Ghost.HRIFU2_RA_HMS,
