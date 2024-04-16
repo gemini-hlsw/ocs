@@ -12,6 +12,10 @@ import edu.gemini.spModel.data.config.{DefaultParameter, DefaultSysConfig, ISysC
 
 import java.util.{Collections, List => JList, Map => JMap, Set => JSet}
 import edu.gemini.spModel.data.property.{PropertyProvider, PropertySupport}
+import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKey
+import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKeyProvider
+import edu.gemini.spModel.gemini.calunit.smartgcal.keys.CalibrationKeyImpl
+import edu.gemini.spModel.gemini.calunit.smartgcal.keys.ConfigKeyIgrins2
 import edu.gemini.spModel.gemini.init.ComponentNodeInitializer
 import edu.gemini.spModel.gemini.parallacticangle.ParallacticAngleSupportInst
 import edu.gemini.spModel.inst.{ScienceAreaGeometry, VignettableScienceAreaInstrument}
@@ -43,6 +47,7 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
   with PlannedTime.StepCalculator
   with ConfigPostProcessor
   with ItcOverheadProvider
+  with CalibrationKeyProvider
   with VignettableScienceAreaInstrument {
   _exposureTime = Igrins2.DefaultExposureTime.toSeconds
   private var _port = IssPort.UP_LOOKING
@@ -209,6 +214,9 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
     }
     new ConfigSequence(configs)
   }
+
+  override def extractKey(instrumentConfig: ISysConfig): CalibrationKey =
+    new CalibrationKeyImpl(ConfigKeyIgrins2.INSTANCE)
 }
 
 object Igrins2 {

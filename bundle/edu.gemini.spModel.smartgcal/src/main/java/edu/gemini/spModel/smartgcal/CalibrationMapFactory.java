@@ -15,6 +15,7 @@ import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
 import edu.gemini.spModel.gemini.gpi.Gpi;
+import edu.gemini.spModel.gemini.igrins2.Igrins2;
 import edu.gemini.spModel.gemini.nifs.InstNIFS;
 import edu.gemini.spModel.gemini.niri.InstNIRI;
 
@@ -61,6 +62,9 @@ public class CalibrationMapFactory {
         // ------ GPI
         } else if (instrument.equals(Gpi.SP_TYPE.readableStr)) {
             return new GpiCalibrationMap(version);
+        // ------ Igrins2
+        } else if (instrument.equals(Igrins2.SP_TYPE().readableStr)) {
+            return new Igrins2CalibrationMap(version);
 
         // ------ add special maps for other instruments here....
 
