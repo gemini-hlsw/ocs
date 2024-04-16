@@ -27,9 +27,26 @@ sealed trait Target extends Product with Serializable {
   def isSidereal:    Boolean = fold(_ => false, _ => true,  _ => false)
   def isNonSidereal: Boolean = fold(_ => false, _ => false, _ => true)
 
+  def targetType: Target.TargetType =
+    fold(
+      _ => Target.TargetType.Too,
+      _ => Target.TargetType.Sidereal,
+      _ => Target.TargetType.NonSidereal
+    )
+
 }
 
-object Target extends TargetLenses
+object Target extends TargetLenses {
+
+  sealed trait TargetType extends Product with Serializable
+
+  object TargetType {
+    case object Sidereal    extends TargetType
+    case object NonSidereal extends TargetType
+    case object Too         extends TargetType
+  }
+
+}
 
 trait TargetLenses {
 

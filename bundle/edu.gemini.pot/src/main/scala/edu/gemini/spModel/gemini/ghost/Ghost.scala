@@ -601,6 +601,7 @@ object Ghost {
   val EXPOSURE_TIME_SLIT_VIEWING_CAMERA_KEY: ItemKey = new ItemKey(INSTRUMENT_KEY, EXPOSURE_TIME_SLIT_VIEWING_CAMERA_PROP)
 
   // The names of the base position / IFUs.
+  val BASE_TYPE: String        = "baseType"
   val BASE_RA_DEGREES: String  = "baseRADeg"
   val BASE_RA_HMS: String      = "baseRAHMS"
   val BASE_DEC_DEGREES: String = "baseDecDeg"
@@ -610,6 +611,7 @@ object Ghost {
   val FIBER_AGITATOR_2: String = "enableFiberAgitator2"
 
   val SRIFU1_NAME: String      = "srifu1Name"
+  val SRIFU1_TYPE: String      = "srifu1Type"
   val SRIFU1_RA_DEG: String    = "srifu1CoordsRADeg"
   val SRIFU1_DEC_DEG: String   = "srifu1CoordsDecDeg"
   val SRIFU1_RA_HMS: String    = "srifu1CoordsRAHMS"
@@ -617,6 +619,7 @@ object Ghost {
   val SRIFU1_GUIDING: String   = "srifu1Guiding"
 
   val SRIFU2_NAME: String      = "srifu2Name"
+  val SRIFU2_TYPE: String      = "srifu2Type"
   val SRIFU2_RA_DEG: String    = "srifu2CoordsRADeg"
   val SRIFU2_DEC_DEG: String   = "srifu2CoordsDecDeg"
   val SRIFU2_RA_HMS: String    = "srifu2CoordsRAHMS"
@@ -624,6 +627,7 @@ object Ghost {
   val SRIFU2_GUIDING: String   = "srifu2Guiding"
 
   val HRIFU1_NAME: String      = "hrifu1Name"
+  val HRIFU1_TYPE: String      = "hrifu1Type"
   val HRIFU1_RA_DEG: String    = "hrifu1CoordsRADeg"
   val HRIFU1_DEC_DEG: String   = "hrifu1CoordsDecDeg"
   val HRIFU1_RA_HMS: String    = "hrifu1CoordsRAHMS"
@@ -631,6 +635,7 @@ object Ghost {
   val HRIFU1_GUIDING: String   = "hrifu1Guiding"
 
   val HRIFU2_NAME: String      = "hrifu2Name"
+  val HRIFU2_TYPE: String      = "hrifu2Type"
   val HRIFU2_RA_DEG: String    = "hrifu2CoordsRADeg"
   val HRIFU2_DEC_DEG: String   = "hrifu2CoordsDecDeg"
   val HRIFU2_RA_HMS: String    = "hrifu2CoordsRAHMS"
@@ -641,8 +646,14 @@ object Ghost {
   val MAG_V_PROP               = "magV"
 
   // Property names for user targets
-  def userTargetParams(index: Int): (String, String, String, String, String) =
-    (s"userTarget${index}Name", s"userTarget${index}CoordsRADeg", s"userTarget${index}CoordsDecDeg", s"userTarget${index}CoordsRAHMS", s"userTarget${index}CoordsDecDMS")
+  def userTargetParams(index: Int): (String, String, String, String, String, String) = (
+    s"userTarget${index}Name",
+    s"userTarget${index}Type",
+    s"userTarget${index}CoordsRADeg",
+    s"userTarget${index}CoordsDecDeg",
+    s"userTarget${index}CoordsRAHMS",
+    s"userTarget${index}CoordsDecDMS"
+  )
 
   /** The properties supported by this class. */
   private def initProp(propName: String, query: Boolean, iter: Boolean): PropertyDescriptor = {

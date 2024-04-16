@@ -4,29 +4,10 @@
 package edu.gemini.spModel.gemini.ghost
 
 import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.spModel.test.InstrumentSequenceTestBase.createSysConfig
 import org.junit.Test
 
-import java.beans.PropertyDescriptor
-import edu.gemini.spModel.data.config.{DefaultParameter, IParameter}
-import edu.gemini.spModel.test.InstrumentSequenceTestBase
-import edu.gemini.spModel.test.InstrumentSequenceTestBase._
-
-import scala.collection.JavaConverters._
-
-class PlannedTimeTest extends InstrumentSequenceTestBase[Ghost, SeqConfigGhost] {
-
-  override protected def getObsCompSpType: SPComponentType =
-    SPComponentType.INSTRUMENT_GHOST
-
-  override protected def getSeqCompSpType: SPComponentType =
-    SeqConfigGhost.SP_TYPE
-
-  private def getParameter[T](pd: PropertyDescriptor, values: T*): IParameter =
-    DefaultParameter.getInstance(pd.getName, values.toList.asJava)
-
-  override def setUp(): Unit = {
-    super.setUp()
-  }
+class PlannedTimeTest extends SequenceTestBase {
 
   private def setExposure(
     redCount:    Int,
