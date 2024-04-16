@@ -11,6 +11,7 @@ import flamingos2.{Flamingos2Imaging, Flamingos2Longslit, Flamingos2Mos}
 import gmos._
 import gnirs.{GnirsImaging, GnirsSpectroscopy}
 import gsaoi.Gsaoi
+import igrins2.Igrins2
 import michelle.{MichelleImaging, MichelleSpectroscopy}
 import nici.{NiciCoronographic, NiciStandard}
 import nifs.{Nifs, NifsAo}
@@ -41,6 +42,7 @@ import edu.gemini.phase2.template.factory.impl.graces.Graces
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.phase2.template.factory.impl.gnirs.GnirsSpectroscopyIfu
 import edu.gemini.spModel.gemini.ghost.blueprint.SpGhostBlueprint
+import edu.gemini.spModel.gemini.igrins2.blueprint.SpIgrins2Blueprint
 
 case class TemplateFactoryImpl(db: TemplateDb) extends TemplateFactory {
 
@@ -98,6 +100,9 @@ case class TemplateFactoryImpl(db: TemplateDb) extends TemplateFactory {
 
       // GSAOI
       case b: SpGsaoiBlueprint => Right(Gsaoi(b))
+
+      // Igrins2
+      case b: SpIgrins2Blueprint => Right(Igrins2(b))
 
       // MICHELLE
       case b: SpMichelleBlueprintImaging => Right(MichelleImaging(b))

@@ -1,0 +1,36 @@
+Instrument : IGRINS-2
+Blueprints : IGRINS-2_BP.xml
+Version August 14, 2023 - created by Bryan M
+Version November 22, 2023 - Bryan M, remove telluric acquisition, other fixes
+Version February 23, 2024 - Bryan M, update rules for notes based on latest libraries
+Version April 15, 2024 - Bryan M, renumber libraries to be in final order
+
+Observations identified by LibraryIDs indicated with {}.
+
+Blueprint library:
+{1} Before telluric observation
+{3} Point source (ABBA) science observation
+{4} Extended source (On-off) science observation
+{5} After telluric observation
+{2} SVC image
+
+The instantiated scheduling group should look like
+Observer Instructions note
+Before Telluric
+SVC Image
+Science
+After Telluric
+
+INCLUDE note "Phase II Checklist" at the program level.
+
+INCLUDE {1}, {2} IN target-specific Scheduling Group
+
+If NODDING OPTION == Keep target in slit:
+	INCLUDE {3}
+
+If NODDING OPTION == Nod to sky:
+	INCLUDE {4}
+
+INCLUDE {5} IN target-specific Scheduling Group
+
+INCLUDE the note "Observer Instructions" IN the target-specific Scheduling Group
