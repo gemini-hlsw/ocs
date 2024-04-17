@@ -11,6 +11,7 @@ import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
 import edu.gemini.spModel.gemini.gpi.Gpi;
+import edu.gemini.spModel.gemini.igrins2.Igrins2;
 import edu.gemini.spModel.gemini.nifs.InstNIFS;
 import edu.gemini.spModel.gemini.niri.InstNIRI;
 
@@ -33,6 +34,7 @@ public class SmartGcalService {
         add(InstNIRI.SP_TYPE.readableStr);
         add(Flamingos2.SP_TYPE.readableStr);
         add(Gpi.SP_TYPE.readableStr);
+        add(Igrins2.SP_TYPE().readableStr);
     }};
 
     public static final List<String> getInstrumentNames() {
@@ -52,6 +54,7 @@ public class SmartGcalService {
         AVAILABLE_TYPES.put(InstNIRI.SP_TYPE.readableStr, new ArrayList<Calibration.Type>() {{ add(Calibration.Type.ARC); add(Calibration.Type.FLAT); }} );
         AVAILABLE_TYPES.put(Flamingos2.SP_TYPE.readableStr, new ArrayList<Calibration.Type>() {{ add(Calibration.Type.ARC); add(Calibration.Type.FLAT); }} );
         AVAILABLE_TYPES.put(Gpi.SP_TYPE.readableStr, new ArrayList<Calibration.Type>() {{ add(Calibration.Type.ARC); add(Calibration.Type.FLAT); }} );
+        AVAILABLE_TYPES.put(Igrins2.SP_TYPE().readableStr, new ArrayList<Calibration.Type>() {{ add(Calibration.Type.FLAT); }});
     }
 
     public static final List<Calibration.Type> getAvailableTypes(String instrument) {
