@@ -1,12 +1,14 @@
 package edu.gemini.spModel.io.ocs3
 
 import edu.gemini.pot.sp._
-import edu.gemini.pot.sp.SPComponentType.{ITERATOR_BASE, OBSERVATION_BASIC}
+import edu.gemini.pot.sp.SPComponentType.{ITERATOR_BASE, OBSERVATION_BASIC, TELESCOPE_TARGETENV}
 import edu.gemini.pot.spdb.{DBAbstractFunctor, IDBDatabaseService}
+import edu.gemini.spModel.core.{Deflated, Ephemeris}
 import edu.gemini.spModel.gemini.obscomp.SPProgram
 import edu.gemini.spModel.io.{PioDocumentBuilder, SequenceOutputService}
 import edu.gemini.spModel.io.PioSyntax._
-import edu.gemini.spModel.pio.{Document, Container, Pio}
+import edu.gemini.spModel.pio.codec.ParamCodec
+import edu.gemini.spModel.pio.{Document, Container, ParamSet, Pio, PioPath}
 import edu.gemini.spModel.pio.xml.{PioXmlFactory, PioXmlUtil}
 import edu.gemini.spModel.rich.pot.sp._
 
@@ -149,11 +151,41 @@ final class Ocs3ExportFunctor(format: ExportFormat) extends DBAbstractFunctor {
         doc.addContainer(c)
     }
 
+    stripEphemerisData(doc)
     Some(PioXmlUtil.toElement(doc).xmlString)
   }
 }
 
 object Ocs3ExportFunctor {
+
+  // Go through all the containers finding the target env and removing
+  // nonsidereal ephemeris data.
+  private def stripEphemerisData(doc: Document): Unit =
+    doc.allContainers.foreach { c =>
+      c.findContainers(TELESCOPE_TARGETENV).foreach { e =>
+        e.dataObject.foreach { ps =>
+          Option(ps.lookupParamSet(new PioPath("targetEnv/asterism")))
+            .foreach(stripEphemerisData)
+        }
+      }
+    }
+
+  private def stripEphemerisData(ps: ParamSet): Unit = {
+    def go(rem: List[ParamSet]): Unit =
+      rem match {
+        case Nil =>
+          ()
+        case h :: t =>
+          if (Option(h.getName).contains("ephemeris")) {
+            h.removeChild("data")
+            val pc = implicitly[ParamCodec[Deflated[List[(Long, Float, Float)]]]]
+            h.addParam(pc.encode("data", Ephemeris.empty.compressedData))
+          }
+          go(h.getParamSets.asScala.toList ::: t)
+      }
+    go(List(ps))
+  }
+
   implicit class Dom4jElementOps(xml: Element) {
 
     def rmAttr(n: String): Unit =
