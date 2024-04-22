@@ -78,7 +78,7 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     }
 
     row += 1
-    layout(new Label(s"Exposure Time (${Igrins2.MinExposureTime.toSeconds}s - ${Igrins2.MaxExposureTime.toSeconds}s):")) = new Constraints() {
+    layout(new Label("Exposure Time:")) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 0
       gridy = row
@@ -241,7 +241,7 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     }
   }
 
-  def updateFowlerSamples(): Unit = {
+  private def updateFowlerSamples(): Unit = {
     val expTime = ui.expTimeCtrl.getBean.getExposureTime.seconds
     val fowlerSamples = Igrins2.fowlerSamples(expTime)
 
@@ -275,6 +275,10 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     ui.posAnglePanel.init(this, Site.GN)
     val editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram, getContextObservation)
     ui.posAnglePanel.updateEnabledState(editable)
+    // REL-4400 Only staff can change port
+    val isStaff = OTOptions.isStaff(getProgram)
+    ui.sideLookingButton.enabled = isStaff
+    ui.upLookingButton.enabled = isStaff
 
     inst.addPropertyChangeListener(Igrins2.POS_ANGLE_CONSTRAINT_PROP.getName, ui.updateParallacticAnglePCL)
     ui.expTimeCtrl.setBean(inst)
