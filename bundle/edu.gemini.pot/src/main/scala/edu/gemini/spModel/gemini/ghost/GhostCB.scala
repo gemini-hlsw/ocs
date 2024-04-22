@@ -89,7 +89,15 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
             val when = Instant.now()
             t.getProperMotion
              .map(_.calculateAt(t.getTarget, when))
-             .orElse(t.getCoordinates(Some(when.toEpochMilli)))
+              // NOTE: We'd wish to unfold the ephemeris to get actual coordinates at the time
+              // of execution but this opens a can of worms. Ephemeris are stored in the xml as
+              // a compreesseed blob of serialized scala objects. i
+              // These objects are serialized by the db with scala 2.11 nda embedded in the xml.
+              // However the seqexec will try to deserialized them in scala 2.13 producing a failure
+              // as the scala versions don't match...
+              // Since we dont't need the actual coordiinatees but just the type, we can simply
+              // return None
+             // .orElse(t.getCoordinates(Some(when.toEpochMilli)))
         }
         coords.foreach { c =>
           config.putParameter(systemName, DefaultParameter.getInstance(raDegParam,  c.ra.toDegrees ))
