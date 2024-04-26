@@ -4,7 +4,7 @@ import edu.gemini.pot.sp._
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances
-import edu.gemini.spModel.core.{AuxFileSpectrum, BlackBody, EmissionLine, GaussianSource, LibraryNonStar, LibraryStar, Magnitude, NonSiderealTarget, PointSource, PowerLaw, SPProgramID, SiderealTarget, SpatialProfile, SpectralDistribution, TooTarget, UniformSource, UserDefinedSpectrum}
+import edu.gemini.spModel.core.{AuxFileSpectrum, BlackBody, EmissionLine, GaussianSource, HorizonsDesignation, LibraryNonStar, LibraryStar, Magnitude, NonSiderealTarget, PointSource, PowerLaw, SPProgramID, SiderealTarget, SpatialProfile, SpectralDistribution, TooTarget, UniformSource, UserDefinedSpectrum}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.TimingWindow
 import edu.gemini.spModel.gemini.obscomp.{SPProgram, SPSiteQuality}
 import edu.gemini.spModel.gemini.phase1.GsaPhase1Data
@@ -250,12 +250,22 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
         jEmptyObject
     }
 
+  private def nonsiderealObjectType(t: NonSiderealTarget): Option[String] =
+    t.horizonsDesignation.map {
+      case HorizonsDesignation.Comet(_)            => "COMET"
+      case HorizonsDesignation.AsteroidNewStyle(_) => "ASTEROID"
+      case HorizonsDesignation.AsteroidOldStyle(_) => "ASTEROID"
+      case HorizonsDesignation.MajorBody(_)        => "MAJORBODY"
+    }
+
   val nonSiderealTargetEncodeJson: EncodeJson[(TargetEnvironment, SPTarget, NonSiderealTarget, Option[Int])] =
     EncodeJson { case (te, sp, t, idx) =>
       ("spatialProfile" :=? t.spatialProfile) ->?:
         ("spectralDistribution" :=? t.spectralDistribution) ->?:
         ("magnitudes" := t.magnitudes) ->:
         ("des" :=? t.horizonsDesignation.map(_.des)) ->?:
+        ("nonsiderealObjectType" :=? nonsiderealObjectType(t)) ->?:
+        ("horizonsQuery" :=? t.horizonsDesignation.map(_.queryString)) ->?:
         ("type" := targetType(te, sp)) ->:
         ("tag" := "nonsidereal") ->:
         ("index" :=? idx) ->?:
