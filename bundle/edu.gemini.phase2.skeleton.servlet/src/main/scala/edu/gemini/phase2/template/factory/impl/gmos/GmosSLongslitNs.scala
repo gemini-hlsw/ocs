@@ -10,16 +10,16 @@ case class GmosSLongslitNs(blueprint:SpGmosSBlueprintLongslitNs) extends GmosSBa
 
   // IF SPECTROSCOPY MODE == LONGSLIT N&S
   //         INCLUDE FROM 'LONGSLIT N&S BP' IN
-  //             Target folder: {9} - {11}
+  //             Target folder: {9} - {10} 
   //             Baseline folder: {12} - {16}
-  //         For spec observations: {10}, {11}, {13}-{15}
+  //         For spec observations: {10}, {13}-{15}    
   //             SET DISPERSER FROM PI
   //             SET FILTER FROM PI
   //             SET FPU FROM PI
   //         For acquisitions: {9}, {12}
   //             if FPU!=None in the OT inst. iterators, then SET FPU FROM PI
 
-  val targetFolder = 9 to 11
+  val targetFolder = 9 to 10
   val baselineFolder = 12 to 16
   val notes = Seq.empty
 
@@ -40,7 +40,7 @@ case class GmosSLongslitNs(blueprint:SpGmosSBlueprintLongslitNs) extends GmosSBa
     } yield ()
 
     for {
-      _ <- forObservations(grp, List(10, 11, 13, 14, 15), forSpecObservations).right
+      _ <- forObservations(grp, List(10, 13, 14, 15), forSpecObservations).right
       _ <- forObservations(grp, List(9, 12), forAcquisitions).right
     } yield ()
 

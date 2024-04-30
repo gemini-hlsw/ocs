@@ -14,7 +14,7 @@ case class GmosSIfu(blueprint:SpGmosSBlueprintIfu) extends GmosSBase.WithTargetF
 
   // IF SPECTROSCOPY MODE == IFU
   //         INCLUDE FROM 'IFU BP' IN,
-  //             Target folder: {36}-{38}
+  //             Target folder: {36}-{37}
   //             Baseline folder: {39}-{42}
   //         Where FPU!=None in BP (static and iterator), SET FPU from PI
   //             IFU acq obs have an iterator titled "Field image" with
@@ -34,7 +34,7 @@ case class GmosSIfu(blueprint:SpGmosSBlueprintIfu) extends GmosSBase.WithTargetF
   //                  AND EFF WAVELENGTH + 5nm (if iteration over wavelength)
   //                 See http://www.gemini.edu/node/10637
 
-  val targetFolder = 36 to 38
+  val targetFolder = 36 to 37
   val baselineFolder = 39 to 42
   val notes = Seq.empty
 
