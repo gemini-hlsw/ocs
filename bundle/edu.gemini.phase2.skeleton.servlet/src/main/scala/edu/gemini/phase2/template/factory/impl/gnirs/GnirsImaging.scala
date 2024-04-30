@@ -12,18 +12,18 @@ case class GnirsImaging(blueprint:SpGnirsBlueprintImaging) extends GnirsBase[SpG
   import WellDepth.DEEP
 
   // **** IF INSTRUMENT MODE == IMAGING ****
-  // INCLUDE  {16}, {17}, {18} - {21} (in this order) in a Target Group
+  // INCLUDE  {16}, {17}, {18} - {21}, {39} (in this order) in a Target Group
   //         Add the note "Centering and dithering" to the top of the
   //         imaging group.
   //         SET PIXEL SCALE FROM PI
   //         FOR {16}, {20} (acqs for standards) IF PIXEL SCALE = 0.05 \
   //             SET EXPOSURE TIME=15.0 in the first GNIRS iterator: Image of keyhole
 
-  //
   //         FOR ALL OBS in Group :
   //             SET FILTER FROM PI IN ALL GNIRS ITERATORS
   //                 The GNIRS filters are changing in the 12B OT (see
   //                 REL-444 in JIRA). Here is the new mapping:
+  //                 Y (1.03um) => Y-MK: 1.03um
   //                 X (1.10um) => order 6 (X)
   //                 J (1.25um) => J-MK: 1.25um
   //                 H (1.65um) => order 4 (H-MK)
@@ -40,7 +40,7 @@ case class GnirsImaging(blueprint:SpGnirsBlueprintImaging) extends GnirsBase[SpG
     case _              => oldFilter
   }
 
-  include(16, 17, 18, 19, 20, 21) in TargetGroup
+  include(16, 17, 18, 19, 20, 21, 31) in TargetGroup
   addNote("Centering and dithering") in TargetGroup
 
   forGroup(TargetGroup)(

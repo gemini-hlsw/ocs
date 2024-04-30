@@ -29,7 +29,7 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
   // Some aliases, just to match the P-Code
   val xd = crossDisperser
 
-  // **** IF INSTRUMENT MODE == SPECTROSCOPY ****
+  // **** IF INSTRUMENT MODE == SPECTROSCOPY (SLIT) ****
   // #For science, tellurics and daytime calibration.
   // # The ordering of observations in the scheduling group should be:
   //   Notes
@@ -68,20 +68,21 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
       })
     ))
 
-  // # Expand offsets for non-cross-dispersed spectroscopic observations
-  // # Short Camera bad-pixel patch at +5.25 < Q < +11.25 -> Use -2,+4 and -4,+2
-  // # Long Camera bad-pixel patch at  +1.75 < Q <  +3.75 -> Use -1,+5 for both sci and std
+  // # Cross-dispersed offsets are -1/+2 for the science and +1/-2 for the standard (short and long cameras).
+
+  // # Expand offsets for non-cross-dispersed spectroscopic observations to avoid the bad-pixel patch
+  // # For wavelengths > 2.5um use the same offsets for both science and Telluric
   // IF CROSS-DISPERSED == No:
-  //   IF pixel scale = 0.15" AND wavelength < 2.5um:
-  //     SET Q-OFFSET to +2, -4, -4, +2 IN ITERATOR CALLED 'ABBA offset pattern' FOR {12} # Science
-  //     SET Q-OFFSET to -2, +4, +4, -2 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{14} # Telluric
-  //   ELIF pixel scale = 0.15" AND wavelength >= 2.5um:
-  //     SET Q-OFFSET to +2, -4, -4, +2 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{12},{14} # Sci & Tell
-  //   ELIF pixel scale = 0.05" AND wavelength < 2.5um:
-  //     SET Q-OFFSET to -1, +5, +5, -1 IN ITERATOR CALLED 'ABBA offset pattern' FOR {12} # Science
-  //     SET Q-OFFSET to +1, -5, -5, +1 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{14} # Telluric
-  //   ELIF pixel scale = 0.05" AND wavelength > 2.5um:
-  //     SET Q-OFFSET to -1, +5, +5, -1 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{12},{14} # Sci & Tell
+  //   IF   PIXSCALE==0.15"/pix AND wavelength < 2.5um:
+  //     SET Q-OFFSET to +2, -4, -4, +2 IN ITERATOR CALLED 'ABBA offset pattern' FOR {12}          # Science
+  //     SET Q-OFFSET to -2, +4, +4, -2 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{14}      # Telluric
+  //   ELIF PIXSCALE==0.15"/pix AND wavelength > 2.5um:
+  //      SET Q-OFFSET to +2, -4, -4, +2 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{12},{14} # Sci & Tel
+  //   ELIF PIXSCALE==0.05"/pix AND wavelength < 2.5um:
+  //      SET Q-OFFSET to -1, +5, +5, -1 IN ITERATOR CALLED 'ABBA offset pattern' FOR {12}          # Science
+  //      SET Q-OFFSET to +1, -5, -5, +1 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{14}      # Telluric
+  //   ELIF PIXSCALE==0.05"/pix AND wavelength > 2.5um:
+  //      SET Q-OFFSET to -3, +3, +3, -3 IN ITERATOR CALLED 'ABBA offset pattern' FOR {6},{12},{14} # Sci & Tel
   if (crossDisperser == CrossDispersed.NO) {
     if (pixelScale == PixelScale.PS_015 && !wavelengthGe2_5) {
       forObs(12)(mutateOffsets.withTitle("ABBA offset sequence")(setQ(2, -4, -4, 2)))
@@ -138,8 +139,6 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
   //           SET FPU FROM PI IN STATIC COMPONENT AND ITERATORS \
   //                 EXCEPT WHERE FPU == acquisition #in 2nd iterator in ACQ.
   //           IF PIXEL SCALE == 0.05"/pix :
-  //                 IF Central Wavelength < 2.5um:  SET IN FIRST ITERATOR CALLED 'GNIRS: Slit Image' Exposure Time = 15
-  //                 ELSE :                          SET IN FIRST ITERATOR CALLED 'GNIRS: Slit Image' Exposure Time = 40
   //                 SET IN FIRST ITERATOR CALLED 'GNIRS: Slit Image' Exposure Time = 15
   //                 IF CROSS-DISPERSED == LXD OR SXD IN ITERATORS SET DECKER = long camera x-disp \
   //                         EXCEPT WHERE FPU == acquisition
@@ -170,13 +169,8 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
 
     ifTrue(pixelScale == PS_005)(
 
-      ifTrue(!wavelengthGe2_5)(
-        mutateSeq.withTitleIfExists("GNIRS: Slit image")(
-          mapSteps(_ + (EXPOSURE_TIME_PROP -> 15.0)))),
-
-      ifTrue(wavelengthGe2_5)(
-        mutateSeq.withTitleIfExists("GNIRS: Slit image")(
-          mapSteps(_ + (EXPOSURE_TIME_PROP -> 40.0)))),
+      mutateSeq.withTitleIfExists("GNIRS: Slit image")(
+        mapSteps(_ + (EXPOSURE_TIME_PROP -> 15.0))),
 
       ifTrue(xd == SXD || xd == LXD)(
         mutateSeq(

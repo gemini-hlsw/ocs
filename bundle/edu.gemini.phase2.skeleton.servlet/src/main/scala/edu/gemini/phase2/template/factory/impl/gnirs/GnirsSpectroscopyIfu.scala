@@ -55,9 +55,9 @@ case class GnirsSpectroscopyIfu(blueprint:SpGnirsBlueprintSpectroscopy, exampleT
   // IF TARGET H-MAGNITUDE < 7 INCLUDE {27}              # ultra bright
   // IF 7 <= TARGET H-MAGNITUDE < 11.5 INCLUDE {28}      # very bright
   // IF 11.5 <= TARGET H-MAGNITUDE < 16 INCLUDE {29}     # bright
-  // IF 16 <= TARGET H-MAGNITUDE < 20 INCLUDE {30}       # faint
-  // IF TARGET H-MAGNITUDE >= 20 INCLUDE {31}            # blind offset
-  // ELSE INCLUDE {27-31}                                # no H-magnitude so give them all
+  // IF 16 <= TARGET H-MAGNITUDE < 20 INCLUDE {30}, {40} # faint & re-acquisition
+  // IF TARGET H-MAGNITUDE >= 20 INCLUDE {31}, {40}      # blind offset & re-acquisition
+  // ELSE INCLUDE {27-31, 40}                            # no H-magnitude so give them all
 
   val more =
     exampleTarget.flatMap(t => t.getMagnitude(H)).map(_.value) match {
@@ -65,9 +65,9 @@ case class GnirsSpectroscopyIfu(blueprint:SpGnirsBlueprintSpectroscopy, exampleT
         if (h < 7) Seq(27)
         else if (h < 11.5) Seq(28)
         else if (h < 16.0) Seq(29)
-        else if (h < 20.0) Seq(30)
-        else Seq(31)
-      case None => 27 to 31
+        else if (h < 20.0) Seq(30, 40)
+        else Seq(31, 40)
+      case None => (27 to 31) :+ 40
     }
   include(more:_*) in TargetGroup
 
@@ -80,7 +80,7 @@ case class GnirsSpectroscopyIfu(blueprint:SpGnirsBlueprintSpectroscopy, exampleT
   )
 
   // # Set the FPU and Decker in the acquisitions:
-  // FOR {24, 27-31, 35} SET FPU FROM PI IN ITERATORS EXCEPT WHERE FPU == acquisition
+  // FOR {24,27-31,35,40} SET FPU FROM PI IN ITERATORS EXCEPT WHERE FPU == acquisition
   forObs((24 +: 35 +: more): _*)(
     mutateSeq(mapStepsByKey(PARAM_FPU) {
       case FPU.ACQUISITION => FPU.ACQUISITION
@@ -88,7 +88,7 @@ case class GnirsSpectroscopyIfu(blueprint:SpGnirsBlueprintSpectroscopy, exampleT
     })
   )
 
-  // FOR {24, 27-31, 35} SET DECKER FROM PI IN ITERATORS EXCEPT WHERE DECKER == acquisition
+  // FOR {24,27-31,35,40} SET DECKER FROM PI IN ITERATORS EXCEPT WHERE DECKER == acquisition
   forObs((24 +: 35 +: more): _*)(
     ifTrue(fpu == LR_IFU)(mutateSeq(updateDecker(Decker.LR_IFU))),
     ifTrue(fpu == HR_IFU)(mutateSeq(updateDecker(Decker.HR_IFU)))

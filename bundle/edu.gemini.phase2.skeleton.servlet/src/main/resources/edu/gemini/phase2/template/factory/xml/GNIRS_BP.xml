@@ -28,7 +28,7 @@
     </paramset>
     <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="47328b23-10f6-46bd-a5e2-e9709a385f34" name="Note">
       <paramset name="Note" kind="dataObj">
-        <param name="title" value="Next libID = 39"/>
+        <param name="title" value="Next libID = 41"/>
         <param name="NoteText" value=""/>
       </paramset>
     </container>
@@ -799,6 +799,82 @@ The semicircular portion of the field is below the rectangle. The template scien
                 </container>
               </container>
             </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="0510d9f7-1a4f-4e20-99d1-df6a74e77aaa" name="GNIRS-BP-NEW-44">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="DayCal: Dark ** SET EXP TIME AND COADDS **"/>
+          <param name="libraryId" value="39"/>
+          <param name="priority" value="MEDIUM"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="FULL"/>
+        </paramset>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="2d3a068a-bfba-4027-b133-10b1926ba0f3" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="DAYTIME DARKS"/>
+            <param name="NoteText">
+              <value>Set exposure time and number of co-adds in "Manual Dark" to match the science.
+ </value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="1e6740b4-5a41-47d4-aa9a-db7a1549cd00" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="exposureTime" value="30.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="2"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_32"/>
+            <param name="slitWidth" value="ACQUISITION"/>
+            <param name="crossDispersed" value="NO"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="FAINT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="1.25"/>
+            <param name="acquisitionMirror" value="IN"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="ACQUISITION"/>
+            <param name="filter" value="J"/>
+            <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="b7edf635-be96-4bb5-88c4-872e32bb5e02" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="db7518fe-dd0f-40e4-8b0d-755f6c2aa90e" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="55610083-158f-47c2-9b48-866362f9ca9b" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="dark" key="0f515178-d412-4429-8ef3-21f53ed228d6" name="Manual Dark">
+            <paramset name="Manual Dark" kind="dataObj">
+              <param name="repeatCount" value="5"/>
+              <param name="class" value="DAY_CAL"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="10.0"/>
+            </paramset>
           </container>
         </container>
       </container>
@@ -2189,7 +2265,7 @@ This template might be used for placing a long slit along the long axis of a gal
           </paramset>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
-          <param name="setupTimeType" value="FULL"/>
+          <param name="setupTimeType" value="REACQUISITION"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="f178e770-017f-4c33-aaba-14aae2b58cdc" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
@@ -2793,7 +2869,7 @@ Pinhole flats are used for tracing the XD spectral orders. As with the flats and
     </container>
     <container kind="group" type="Group" version="2009A-1" subtype="group" key="8b4303ea-6a60-4bf9-8756-634d7e1da6a6" name="Group">
       <paramset name="Group" kind="dataObj">
-        <param name="title" value="IFU"/>
+        <param name="title" value="IFU BP"/>
         <param name="GroupType" value="TYPE_FOLDER"/>
         <param name="libraryId" value=""/>
       </paramset>
@@ -2834,6 +2910,51 @@ GNIRS configuration:
 2) In the Sequence:
   - the read mode should be appropriate for the exposure time (see http://www.gemini.edu/sciops/instruments/gnirs/spectroscopy/acquisition)
   - if the acquisition is for a Telluric standard the observe class should be "Acquisition Calibration"
+</value>
+          </param>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="80b097a7-3712-4535-a54c-5c49e1291075" name="Note">
+        <paramset name="Note" kind="dataObj">
+          <param name="title" value="@OBSERVER: Acquisition procedure"/>
+          <param name="NoteText">
+            <value>General instructions for acquiring with the IFUs
+------------------------------------------------------------------------------------------------
+
+1) Run the first two steps (1=field, 2=through IFU sky)
+
+2) gacq 1  and select the appropriate IFU option (no need to wait for the second step to be done to begin gacq'ing). Wait to send offsets until *after* the second step is complete. 
+
+3) Run step 3  (through IFU target image)  after offsets are in 
+
+4) gacq 3, identify the first pseudo-slit and first interslice location on the detector in ds9 following the gacq instructions, make any offsets that are needed
+
+5) Run step 4 if you made any offsets in step 3
+
+6) gacq 5 to check offset and make any fine adjustments
+
+7) Go to science 
+	
+
+
+General instructions for acquiring faint targets with the IFUs
+------------------------------------------------------------------------------------------------
+
+Procedure to be followed if the target is faint and requires a sky offset for both the keyhole and through-IFU steps of the acquisition.
+
+1) Run the first three steps (1=sky, 2=field, 3=through IFU sky)
+
+2) gacq 2 sky=1  and select the appropriate IFU option  (no need to wait for the third step to be done to begin gacq'ing). Wait to send offsets until *after* the third step is complete. 
+
+3) Run step 4 (through IFU target image) after offsets are in 
+
+4) gacq 4 sky=3, identify the first pseudo-slit and first interslice location on the detector in ds9 following the gacq instructions, make any offsets that are needed
+
+5) Run step 5 if you made any offsets in the previous step
+
+6) gacq 5 sky=3 to check offset and make any fine adjustments
+
+7) Go to science 
 </value>
           </param>
         </paramset>
@@ -3726,7 +3847,7 @@ There is a possibility that the source can move ~0.1" on the detector when movin
               </paramset>
               <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="65d5ba85-ad74-498d-9c8b-51fed116b6bf" name="Observe">
                 <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="2"/>
+                  <param name="repeatCount" value="1"/>
                   <param name="class" value="ACQ"/>
                 </paramset>
               </container>
@@ -3927,6 +4048,123 @@ Note that the target component in the associated spectroscopy observation must b
                 </paramset>
               </paramset>
               <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="5469965f-9ea4-4f86-9fe8-da57776f447c" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="2"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="9dfba06d-90f5-4a6a-b0eb-d3f690f86205" name="GNIRS-BP-NEW-45">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Re-Acquisition (observations &gt; 1 hr)"/>
+          <param name="libraryId" value="40"/>
+          <param name="priority" value="MEDIUM"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <paramset name="schedulingBlock">
+            <param name="start" value="1588354200000"/>
+            <paramset name="duration">
+              <param name="tag" value="unstated"/>
+            </paramset>
+          </paramset>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+          <param name="setupTimeType" value="REACQUISITION"/>
+        </paramset>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="ca051ddf-f9a6-4bd3-b415-35ba38c5c207" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="Description"/>
+            <param name="NoteText">
+              <value>Include this re-acquisition for observations longer than 1 hour.
+Update the exposure time to match the acquisition observation.
+
+Re-acquisition for the IFU observations is suggested if compensating for the flexure between the guider and the instrument is necessary for the science (e.g., if the source is extended and fill the FOV; or if that target is too faint to be detected in a single exposure and combination of the different cubes will be performed "blindly").</value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="8bb342de-aef4-4ace-a1ec-9da0afa58521" name="GNIRS">
+          <paramset name="GNIRS" kind="dataObj">
+            <param name="title" value="GNIRS"/>
+            <param name="exposureTime" value="6.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="6"/>
+            <param name="pixelScale" value="PS_015"/>
+            <param name="disperser" value="D_32"/>
+            <param name="slitWidth" value="LR_IFU"/>
+            <param name="crossDispersed" value="NO"/>
+            <param name="wollastonPrism" value="NO"/>
+            <param name="readMode" value="BRIGHT"/>
+            <param name="wellDepth" value="SHALLOW"/>
+            <param name="centralWavelength" value="2.22"/>
+            <param name="acquisitionMirror" value="IN"/>
+            <param name="camera" value="SHORT_BLUE"/>
+            <param name="decker" value="LR_IFU"/>
+            <param name="filter" value="ORDER_4"/>
+            <param name="posAngleConstraint" value="FIXED"/>
+            <param name="hartmannMask" value="OUT"/>
+            <param name="focus" value="best focus"/>
+            <param name="overrideAcqObsWavelength" value="true"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="6cf3a3aa-d34f-4d04-8291-26cd14c69a70" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="6980cce6-eabf-438e-9436-f5211bad1580" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="97c72b3d-d00d-45d3-80d5-66069e88d960" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2010B-2" subtype="GNIRS" key="32831266-4885-4b67-8e42-f62e398f5ee7" name="GNIRS Sequence">
+            <paramset name="GNIRS Sequence" kind="dataObj">
+              <param name="title" value="GNIRS: Image through IFU with sky offset"/>
+              <param name="acquisitionMirror" value="IN"/>
+              <param name="decker" value="LR_IFU"/>
+              <param name="exposureTime" value="6.0"/>
+              <param name="filter" value="ORDER_4"/>
+              <param name="slitWidth" value="LR_IFU"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="4928dd20-14f1-4f9c-a023-821018415a66" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="sky"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="-10.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="a465e532-22fa-4197-af55-7b8d0ad297ef" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="e5aaa2f5-c075-4a20-b640-45f01f6d3a11" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="source"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="d9c70332-bd85-4d39-bda9-bad5d573d712" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="2"/>
                   <param name="class" value="ACQ"/>
@@ -4770,6 +5008,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="a899117f-3723-4fb4-95f1-5863a55b1868" name="Flat">
               <paramset name="Flat" kind="dataObj">
                 <param name="repeatCount" value="1"/>
+                <param name="class" value="ACQ_CAL"/>
                 <param name="coadds" value="1"/>
                 <param name="exposureTime" value="10.0"/>
               </paramset>
@@ -4837,8 +5076,16 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="b510266d-d3ff-4a79-94ce-3f508f32c5e2"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="84f71b2a-aad4-4edc-aa3a-1ed90610b204"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="14849bdc-f51b-4a0f-90d8-5a0f3c6128ff"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="40e575a7-f2cb-4aab-a224-82c18525aee4"/>
@@ -4851,6 +5098,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="659f157d-7983-4ca5-9987-1c6e90b1284c"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="32831266-4885-4b67-8e42-f62e398f5ee7"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5c50126f-ad8f-4d32-a76e-2605b41bb12d"/>
@@ -4885,8 +5136,24 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="008b5135-4bc9-4733-a97a-79b0c3d4ae91"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="47d85d0d-3280-4e53-9d8a-96493d232211"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="142d21b1-4142-44cf-96ea-331d29bca003"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c181ef75-476e-4cf0-933f-551e70f417ec"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d3635d94-777e-4d2d-9cda-f3c186d789c7"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="3dfd1028-35e7-414a-8511-98557e64730f"/>
@@ -4953,12 +5220,25 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="87976cf5-994b-4e35-8af8-85cc6984d920"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4928dd20-14f1-4f9c-a023-821018415a66"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="d57734b1-c789-4aa0-a28f-e487d8400db3"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="a465e532-22fa-4197-af55-7b8d0ad297ef"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="65d5ba85-ad74-498d-9c8b-51fed116b6bf"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="91391b8d-7467-4fc0-af65-9163541bcce4"/>
@@ -4989,6 +5269,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="aa4fbf9c-4486-44b1-893e-950dcc8a7470"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="13"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="5ce2cf01-963a-4dfb-ba94-ec0eeb90bd90"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
@@ -5003,6 +5287,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="5c222782-678d-4766-853e-4749e420c50a"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="365cf06b-e58e-4698-a1c0-36b24a70d12a"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a3f91863-94ce-4bfa-bc65-d7b43fd1cc64"/>
@@ -5039,10 +5327,15 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="a899117f-3723-4fb4-95f1-5863a55b1868"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="5604d009-9be6-45e2-aed0-dee01505becc" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="2e060ad1-0016-4c37-a6e4-181e9511fb16"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ca051ddf-f9a6-4bd3-b415-35ba38c5c207"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="821"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5e300c8c-70db-4c49-afbf-a3d914447670"/>
@@ -5051,6 +5344,11 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="47328b23-10f6-46bd-a5e2-e9709a385f34"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="3"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="5"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8deffe85-240c-4b8d-bccf-0bc3eaa080a8"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="41eb4e8e-1c81-4e2e-878a-9c46edffe874"/>
@@ -5059,6 +5357,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="0e3ee920-6578-431f-83cb-3586c88e09b8"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="94d1e701-855b-4241-b648-57ca616e204e"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="53a3263a-58f1-45b7-8da6-e66fbadc73a8"/>
@@ -5133,6 +5435,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="97c72b3d-d00d-45d3-80d5-66069e88d960"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="2"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="1ffeb41e-8d33-4f1f-ad64-c59029528e20"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
@@ -5147,6 +5453,18 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="a97154a3-c134-4551-b497-86255103ea18"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="210f2149-5d8b-4af5-a663-5c7bfe91a728"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d3e9062a-28ca-4457-b8a7-ac9d7aca3e22"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="20d1f86b-face-4c10-a18e-7951587d0898"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a62b465e-8287-43ff-be43-e4918a57e903"/>
@@ -5185,6 +5503,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="a9a10f33-4aaa-4f50-b05d-00b1aca19407"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="5b2a5835-3796-4bbf-98dd-6d4b27134137"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
@@ -5213,6 +5535,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="07fc5499-f269-41b1-aaf5-2b5cfb5df9f6"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="5a3a52cc-5b21-4b49-b5eb-80397d642eeb"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
@@ -5235,6 +5561,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="fe5b5a4a-e301-4de5-b7c4-5a6c0c55fb09"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9a5f5b69-a534-43c1-bc52-3c255bc1b3d4"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="352c6cba-55fa-483c-8567-72019b512d28"/>
@@ -5297,6 +5627,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="6ab7060b-9b31-4442-b9a6-ea3cc9a61ddb"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="670d68d1-1468-4df5-b588-dd25b71f2e3e"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
@@ -5323,6 +5657,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="9d861c72-1ede-4fe5-8d9c-03fad6b16778"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="55610083-158f-47c2-9b48-866362f9ca9b"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="9db22afa-fff2-4496-83d6-ef637a96db1c"/>
@@ -5361,12 +5699,20 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="c8f7cbf3-69a4-4b54-9eb6-b3e69128dcff"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="4"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="1894d9d1-2d76-474b-8d29-1385067c5efd"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f3611f5a-ecf0-4104-8ad9-38e6bf89cbed"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9d59f42c-211b-4e97-8a24-71514397ca75"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="86ae7764-f3e5-4aff-a79c-d85d173c0a34"/>
@@ -5397,6 +5743,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="5b57c764-df90-4a6f-bdbc-b80ccd12675f"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="a23ae5ed-1bf7-46b9-a6de-e7982ccf818d"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
@@ -5405,12 +5755,24 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="98c5cefb-2c34-4235-a144-9aae2fa5445a"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="fd1caaa7-4ad1-413e-87fa-0942237a360b"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="2efe20df-6595-4459-88af-0f1459a468f6"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6980cce6-eabf-438e-9436-f5211bad1580"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="2"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="59fb8d1b-11d1-4694-a95f-e3708937cf5d"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="8ae40f2a-7c6e-4072-963e-c2cf6472679f"/>
@@ -5437,12 +5799,20 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="bb2a76ee-cbe5-466b-9696-aa010252a4ff"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="18"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="30bf969b-6af2-42c1-9bd4-2b3cd746403f"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d6d55460-81d4-4801-92ff-861620e1f247"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="fa237b5c-bc9b-4335-8170-249cdefe17c3"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="486f6cf9-1f94-4590-a29d-d16ef9e200a6"/>
@@ -5455,6 +5825,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="8f9dd0a8-1179-4d9f-9d10-a3e2053f613b"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ace20e02-6d62-4e7e-99de-d262197373b7"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="7a1574ba-34d9-4e8e-8b57-75d38d669b5e"/>
@@ -5475,6 +5849,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="a1d3aa25-0397-4e16-9ebc-0c4ad7ac3027"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="220ef165-1dec-4140-a816-7f0c3ac43fd5"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="ff0c4236-d106-435a-b2ba-86183e48f903"/>
@@ -5499,6 +5877,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="654c4ad9-3d1e-4edd-b03a-38db8328e6cc"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b7edf635-be96-4bb5-88c4-872e32bb5e02"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e57e06e1-1da7-445e-9cba-55a69f302e14"/>
@@ -5541,12 +5923,24 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="a2baee47-4ebf-4391-8535-3d5a49fd1f68"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ee091415-025b-4ee9-b59a-f10e9df3cfae"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="7"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="fed89d35-2d50-496c-a279-fa0cabf6b274"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f4fc9e0c-9b4b-40a7-bc44-1ccdb35d4862"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0e91a919-31f4-4bf7-8e9c-f1e64297e593"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="9f7abeb8-593a-4056-abf2-3826d3661a2c"/>
@@ -5609,6 +6003,14 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="e20ad1fc-63fb-4933-96c3-16b8cbc78428"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f6f2e1ce-c252-4797-a29c-45d17413de02"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="2"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="f056b87d-ad3b-4cfb-a6c4-9811b9533fff"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
@@ -5637,6 +6039,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="785ed6a1-140c-4ec1-89fa-fd6254cd23c5"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="158c800a-d2f3-4adf-9939-c436253fd8ee"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
@@ -5655,6 +6061,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="c3a6e476-4527-430d-b276-b872b003e446"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="19ec5358-9a36-4626-b87a-8db43dcdc92f"/>
@@ -5663,6 +6070,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="b4387f2c-11b4-4d16-8e7a-774d780e424e"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ecb2d690-49ea-4ea7-975e-d1668f3a2c61"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="dd208ab7-4901-4a47-8ed0-fd43df2710f7"/>
@@ -5701,6 +6112,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="9c186730-3414-4dcf-a2f2-fca2663b7d61"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="feff6a06-4ea3-4109-828d-b53c3564f2f6"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
@@ -5711,6 +6126,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="4552d86b-0b09-47d6-82f0-3eca5ac33499"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ba00b843-922b-4e8d-9884-de1faa84cae1"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="3e15a6c3-c03c-4b77-a985-f6ae5b5e6566"/>
@@ -5747,6 +6166,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="3c9d069f-e01c-4345-ac32-74c900273eee"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="44570083-e775-4a56-ab31-a8b8dcfd8f6b"/>
@@ -5785,6 +6205,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="f54f3e85-80cc-4d90-823b-5f9b1896aba1"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="0cfb8468-989d-4eea-9420-6a03c11adc27"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
@@ -5799,6 +6223,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="20e8cf24-cab7-44db-a391-5dbbcc8fb018"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d9c70332-bd85-4d39-bda9-bad5d573d712"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="b45a78b5-2bea-4c48-b509-4e6871a71793"/>
@@ -5817,8 +6245,20 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="19a205ab-0041-47a6-944e-cbf0ce1cb046"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="77c831a5-aef6-480d-8d8d-3943daa6257b"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="1504521e-9759-4ae1-8edb-67d5451c58cc"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="92206361-5641-430a-98f5-02e2389ee2ad"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="4cac3925-a0dd-4c22-bf72-bf750ae6c58e"/>
@@ -5829,6 +6269,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="6da70da3-8b4b-49d6-abd1-0043e4c2cf84"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="3"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="bc7fe406-17aa-4080-baa0-b62b3fc87935"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
@@ -5837,12 +6281,28 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="80b097a7-3712-4535-a54c-5c49e1291075"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="139"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6cf3a3aa-d34f-4d04-8291-26cd14c69a70"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="bfdecb0e-312e-43e6-9a17-c165c99f9dd1"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="9cc54ae0-bab3-487f-9dc2-89d83a809d04"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="7683d16b-1c6d-4165-b3d3-4b127d20e262"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3529512c-03e8-410d-98e4-56f9f2e0a6b3"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="0ae2f597-c553-4587-81f7-c0b9a37ae71b"/>
@@ -5861,8 +6321,16 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="db7518fe-dd0f-40e4-8b0d-755f6c2aa90e"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="cece92d3-da09-445c-9d35-8df506b07354"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ed3325a0-8f43-4c2d-a388-6fdca80c8fa5"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="2e9c2198-3056-4fa6-bb77-09cdec1953a4"/>
@@ -5875,6 +6343,14 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="26f11105-5ee8-4f84-9d9f-cd464ee68cda"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e98d8d3e-44f3-4f76-88bf-730725a6bf06"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="4"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0510d9f7-1a4f-4e20-99d1-df6a74e77aaa"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="72"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5dd0093b-23bc-4e26-b720-50a6a26ff353"/>
@@ -5917,6 +6393,14 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="a5e69357-07cf-4d31-8936-0605626411ee"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="da980912-ecc2-447f-bb42-40acae816ddb"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="2"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="9bfecf17-e6cb-4bf1-81c5-5aa32c8218a0"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
@@ -5933,6 +6417,18 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="c04794c3-fd85-4cc2-a00b-626d85b93315"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2d3a068a-bfba-4027-b133-10b1926ba0f3"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="3"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4da2ecf5-e2f1-47b5-bb3a-4b54674cdf8f"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="759195ab-1a6d-4812-a06e-cb8aa4413ccb"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
@@ -5947,6 +6443,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="0e9b3628-831e-4a04-b025-4c67b312a03a"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ddcece76-7dc1-433c-acc3-6b627bce9cc8"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="ad9dfedf-749c-445d-ade8-4e3bc73cbcc4"/>
@@ -5981,12 +6481,22 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="31edc887-30f8-4c6c-b389-b92b946a71de"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="7586f182-0dfd-42df-85c1-4488330e6a94"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="8b4303ea-6a60-4bf9-8756-634d7e1da6a6"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="9"/>
+      <param name="5604d009-9be6-45e2-aed0-dee01505becc" value="2"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7fd187c1-31d1-4d5b-8896-83b1ee4a3995"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="9ffa1f0f-ae1b-4d89-9654-ac0c1a67b6ed"/>
@@ -6037,12 +6547,24 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="e275c8ed-5cca-4ceb-be13-6e18f3a7aa4f"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="43"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d7aa21a4-4d91-4315-9288-8b59c512c838"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="7175333a-b656-45d3-8101-d86e14b7cc92"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="7c50fd47-c40d-4ec9-81f0-bafb46a3a185"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="374451e1-0d73-47c3-a5c0-649756641020"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="7948b747-dfbb-45cb-aae9-2bcb0a988d3f"/>
@@ -6125,6 +6647,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="a00d5839-f342-4f8e-9489-cfc7a980606e"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="178"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="25a5c8df-0971-4472-b463-343d20c61408"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
@@ -6165,6 +6691,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="4302772c-d721-4ff4-8bc2-d2a2078a44de"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="c6930fe3-fb75-4574-a6a4-31c2792c0cbd"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
@@ -6175,6 +6705,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="39224ff3-9821-4c65-ac63-b62f51b524a2"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9ea24b6a-7476-4266-bb39-478b9052c908"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="73eea54c-0b42-42f9-8512-81260b40c8f2"/>
@@ -6193,6 +6727,14 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="99fa765f-14d3-4175-9149-891556e3397a"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="5"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0f515178-d412-4429-8ef3-21f53ed228d6"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="ae835e17-ac78-4c24-9f49-8ccbb1b843ca"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
@@ -6201,12 +6743,21 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="04316b5d-b922-4aad-9463-f24bf0952238"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="f8952283-5df3-410a-a13c-f419bf2499a0"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="7fa7b252-7711-4ecb-b63a-d8227e7bb8bd"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="6"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="2"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8bb342de-aef4-4ace-a1ec-9da0afa58521"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="fc4c4856-f70d-4083-ad09-b40f689236a9"/>
@@ -6243,6 +6794,14 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="a3e4f4c5-0cdd-4de6-9fce-ebdcfd475181"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="932e0710-218d-41d5-88bf-9fdc3246ffe3"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9f921cde-1f0f-4a0e-96e5-7db0f98bfa6c"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="7"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="bb29edb4-9625-4512-b2ba-e5cb65c012c6"/>
@@ -6287,6 +6846,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="41361a58-35e6-4247-adbf-80f8a56d99ec"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="38eef604-21e2-428a-8c13-35c0507ffdfc"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="12096fac-4629-4159-b2e0-5f124902b31d"/>
@@ -6361,6 +6924,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="1e6740b4-5a41-47d4-aa9a-db7a1549cd00"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="12"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="c3a71da9-4760-4830-aee0-6b271aa2a6cb"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
@@ -6377,12 +6944,24 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="3f7ab873-579c-4b77-8c91-2b4b70460c53"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="c63c4cc3-1134-49a4-bde2-4b264d3214c2"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="d7e4af56-df55-4d04-b30c-d9c8e53848ce"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="ce6d5f62-a846-4d5e-a2dd-5afb809cfc2f"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="2"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="abe0c687-ea2e-4eca-96e3-ad8285e16307"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="4af549df-6210-45af-8d2a-96ebbc6e988b"/>
@@ -6393,8 +6972,24 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="b6602fca-9668-4dd0-adf7-1958e5e09b95"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2a6ca8bf-f660-40e6-a2ee-921f24c9f721"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="3b624a8a-3e87-413e-bf76-67365a85e00f"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a7582d85-099d-44fe-816b-e561465569f6"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="5"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9dfba06d-90f5-4a6a-b0eb-d3f690f86205"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="10"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="17ae2bd7-c1a4-4dc5-a069-85aed2f0cada"/>
@@ -6429,6 +7024,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="2abad928-0f86-4aa0-a032-775a338039f1"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="163efa1d-ab84-4dbd-9fea-0327e0c94cf8"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
@@ -6437,12 +7036,28 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="f990ef9d-3c8d-4823-9bf1-5f34dc25be81"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="762f9d93-aada-487d-a296-199c0fdcf6ce"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="2"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2beca067-7129-4c6c-8256-cf59fb402333"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="3eef5b8a-06a4-4584-949f-96e50ff82574"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="baf64dea-eb4e-41fe-ba81-e1c43d59addb"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6f36c431-bb38-446c-a42b-6a49c2c914f9"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="9c5c9d94-6e2a-44df-a475-893985d65fa8"/>
@@ -6455,6 +7070,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="984783b9-5d4f-402c-9993-9eda632192b9"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="30e66a86-c713-4fdf-aa0e-2c7270de744f"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d22daab6-2a7c-452e-91fc-d86351b808e2"/>
@@ -6475,6 +7094,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="a0eba339-6088-4146-a60d-95a1f713761a"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e5aaa2f5-c075-4a20-b640-45f01f6d3a11"/>
+      <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5b1b7aaf-bb60-4ed4-a245-fc71feefab56"/>
