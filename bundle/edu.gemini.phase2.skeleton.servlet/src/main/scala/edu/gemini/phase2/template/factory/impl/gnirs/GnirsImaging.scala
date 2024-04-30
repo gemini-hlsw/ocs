@@ -40,7 +40,7 @@ case class GnirsImaging(blueprint:SpGnirsBlueprintImaging) extends GnirsBase[SpG
     case _              => oldFilter
   }
 
-  include(16, 17, 18, 19, 20, 21, 31) in TargetGroup
+  include(16, 17, 18, 19, 20, 21, 39) in TargetGroup
   addNote("Centering and dithering") in TargetGroup
 
   forGroup(TargetGroup)(
