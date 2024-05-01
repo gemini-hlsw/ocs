@@ -61,7 +61,7 @@ case class GmosSMosNs(blueprint:SpGmosSBlueprintMos) extends GmosSBase.WithTarge
       _ <- forObservations(grp, spec, forSpecObservation).right
       _ <- forObservations(grp, Seq(29), _.setCustomSlitWidth(blueprint.fpu)).right
       _ <- forObservations(grp, Seq(34, 35), _.setFpu(blueprint.fpu)).right
-      _ <- forObservations(grp, Seq(27, 28, 29, 32).filter(targetFolder.contains), _.setDefaultCustomMaskName(pid)).right
+      _ <- forObservations(grp, Seq(22, 27, 28, 29, 32).filter(targetFolder.contains), _.setDefaultCustomMaskName(pid)).right
       _ <- forObservations(grp, Seq(33), forStandardAcq).right
     } yield ()
 
