@@ -8,6 +8,7 @@ import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
+import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.telescope.IssPort;
 import org.junit.Test;
 
@@ -35,6 +36,30 @@ public final class GnirsSupportTest extends InstrumentSupportTestBase<InstGNIRS>
     @Test public void testGNIRS_UpLooking() throws Exception {
         setPort(IssPort.UP_LOOKING);
         verifyInstrumentConfig(getNorthResults(), "GNIRS");
+    }
+
+    @Test public void testGNIRS_up_P2() throws Exception {
+        setPort(IssPort.UP_LOOKING);
+        addGuideStar(PwfsGuideProbe.pwfs2);
+        verifyInstrumentConfig(getNorthResults(), "GNIRS_P2");
+    }
+
+    @Test public void testGNIRS_side_P2() throws Exception {
+        setPort(IssPort.SIDE_LOOKING);
+        addGuideStar(PwfsGuideProbe.pwfs2);
+        verifyInstrumentConfig(getNorthResults(), "GNIRS" + GNIRSSupport.GNIRS_SIDE_PORT + "_P2");
+    }
+
+    @Test public void testGNIRS_up_P1() throws Exception {
+        setPort(IssPort.UP_LOOKING);
+        addGuideStar(PwfsGuideProbe.pwfs1);
+        verifyInstrumentConfig(getNorthResults(), "GNIRS_P1");
+    }
+
+    @Test public void testGNIRS_side_P1() throws Exception {
+        setPort(IssPort.SIDE_LOOKING);
+        addGuideStar(PwfsGuideProbe.pwfs1);
+        verifyInstrumentConfig(getNorthResults(), "GNIRS" + GNIRSSupport.GNIRS_SIDE_PORT + "_P1");
     }
 
     private void setup(AltairParams.GuideStarType type) throws Exception {
@@ -80,6 +105,16 @@ public final class GnirsSupportTest extends InstrumentSupportTestBase<InstGNIRS>
 
     @Test public void testNoAoPointOrig() throws Exception {
         verifyPointOrig(getSouthResults(), "gnirs");
+    }
+
+    @Test public void testNoAoPointOrigP1() throws Exception {
+        addGuideStar(PwfsGuideProbe.pwfs1);
+        verifyPointOrig(getSouthResults(), "gnirs_p1");
+    }
+
+    @Test public void testNoAoPointOrigP2() throws Exception {
+        addGuideStar(PwfsGuideProbe.pwfs2);
+        verifyPointOrig(getSouthResults(), "gnirs_p2");
     }
 
     @Test public void testLgsPointOrig() throws Exception {
