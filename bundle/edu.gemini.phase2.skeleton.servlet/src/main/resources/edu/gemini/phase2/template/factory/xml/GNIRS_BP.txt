@@ -8,6 +8,9 @@ Version : 2018-Feb-15, astephens, tweak long-slit offsets to avoid bad-pixel pat
 Version : 2018-Nov-26, astephens, revise the long-camera long-wavelength long-slit offsets
 Version : 2022-Feb-15, astephens, change long-red slit image to 40s
 Version : 2022-Mar-22, astephens, add IFU templates
+Version : 2024-Apr-12, epfarina, add darks for imaging, change the very faint acq for the IFU to have only one image on source
+Version : 2024-Apr-12, epfarina, add note on acquistion with IFUs, re-acquisition template have Setup Type: 'Reacquisition Only (6mins)'
+Version : 2024-Apr-15, epfarina, HR-IFU sacrificial flat set to: 'Acquisition Calibration', change exptime for long red camera slit acquisition to 15
 
 Observations identified by LibraryIDs indicated with {}.
 
@@ -16,7 +19,7 @@ PI = Phase I
 \ = line continuation
 
 **** IF INSTRUMENT MODE == IMAGING ****
-INCLUDE  {16}, {17}, {18} - {21} (in this order) in a Target Group
+INCLUDE  {16}, {17}, {18} - {21}, {39} (in this order) in a Target Group
         Add the note "Centering and dithering" to the top of the
         imaging group.
         SET PIXEL SCALE FROM PI
@@ -27,7 +30,7 @@ INCLUDE  {16}, {17}, {18} - {21} (in this order) in a Target Group
             SET FILTER FROM PI IN ALL GNIRS ITERATORS
                 The GNIRS filters are changing in the 12B OT (see
                 REL-444 in JIRA). Here is the new mapping:
- 		Y (1.03um) => Y-MK: 1.03um
+                Y (1.03um) => Y-MK: 1.03um
                 X (1.10um) => order 6 (X)
                 J (1.25um) => J-MK: 1.25um
                 H (1.65um) => order 4 (H-MK)
@@ -96,8 +99,7 @@ ELSE INCLUDE {7} - {11}, {22}, {23}                      # no H-magnitude provid
                 EXCEPT WHERE FPU == acquisition #in 2nd iterator in ACQ.
 
           IF PIXEL SCALE == 0.05"/pix :
-                IF Central Wavelength < 2.5um:  SET IN FIRST ITERATOR CALLED 'GNIRS: Slit Image' Exposure Time = 15
-                ELSE :                          SET IN FIRST ITERATOR CALLED 'GNIRS: Slit Image' Exposure Time = 40
+                SET IN FIRST ITERATOR CALLED 'GNIRS: Slit Image' Exposure Time = 15
                 IF CROSS-DISPERSED == LXD OR SXD IN ITERATORS SET DECKER = long camera x-disp \
                         EXCEPT WHERE FPU == acquisition
                 IF CROSS-DISPERSED == None SET DECKER IN ITERATORS = long camera long slit \
@@ -168,17 +170,17 @@ ELIF FPU == HR-IFU:
 IF TARGET H-MAGNITUDE < 7 INCLUDE {27}              # ultra bright
 IF 7 <= TARGET H-MAGNITUDE < 11.5 INCLUDE {28}      # very bright
 IF 11.5 <= TARGET H-MAGNITUDE < 16 INCLUDE {29}     # bright
-IF 16 <= TARGET H-MAGNITUDE < 20 INCLUDE {30}       # faint
-IF TARGET H-MAGNITUDE >= 20 INCLUDE {31}            # blind offset
-ELSE INCLUDE {27-31}                                # no H-magnitude so give them all
+IF 16 <= TARGET H-MAGNITUDE < 20 INCLUDE {30}, {40} # faint & re-acquisition
+IF TARGET H-MAGNITUDE >= 20 INCLUDE {31}, {40}      # blind offset & re-acquisition
+ELSE INCLUDE {27-31, 40}                            # no H-magnitude so give them all
 
 SET CONDITIONS FROM PI
 SET PIXEL SCALE FROM PI
 SET DISPERSER FROM PI
 
 # Set the FPU and Decker in the acquisitions:
-FOR {24,27-31,35} SET FPU FROM PI IN ITERATORS EXCEPT WHERE FPU == acquisition
-FOR {24,27-31,35} SET DECKER FROM PI IN ITERATORS EXCEPT WHERE DECKER == acquisition
+FOR {24,27-31,35,40} SET FPU FROM PI IN ITERATORS EXCEPT WHERE FPU == acquisition
+FOR {24,27-31,35,40} SET DECKER FROM PI IN ITERATORS EXCEPT WHERE DECKER == acquisition
 
 IF PI Central Wavelength > 2.5um
     SET Well Depth == Deep

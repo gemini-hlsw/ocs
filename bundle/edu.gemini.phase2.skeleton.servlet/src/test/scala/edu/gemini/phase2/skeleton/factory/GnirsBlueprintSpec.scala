@@ -15,7 +15,6 @@ class GnirsBlueprintSpec extends TemplateSpec("GNIRS_BP.xml") with Specification
 
   // This is just a sanity check to ensure that expansion works and that referenced library
   // observations exist. It doesn't test the specifics of the blueprint logic.
-
   "GNIRS Sanity Check" >> {
 
     "Imaging Blueprint Expansion" ! forAll { (bp: GnirsBlueprintImaging) =>
@@ -57,9 +56,9 @@ class GnirsBlueprintSpec extends TemplateSpec("GNIRS_BP.xml") with Specification
                 if (h < 7) Set(27)
                 else if (h < 11.5) Set(28)
                 else if (h < 16.0) Set(29)
-                else if (h < 20.0) Set(30)
-                else Set(31)
-              case None => (27 to 31).toSet
+                else if (h < 20.0) Set(30, 40)
+                else Set(31, 40)
+              case None => (27 to 31).toSet + 40
             }
             acqs.forall(libs(g).toSet) // all acqs should be there
           }
