@@ -1,5 +1,6 @@
 package edu.gemini.wdba.tcc;
 
+import edu.gemini.spModel.gemini.visitor.VisitorConfig;
 import edu.gemini.spModel.gemini.visitor.VisitorInstrument;
 import edu.gemini.spModel.gemini.visitor.VisitorPosAngleMode;
 
@@ -36,13 +37,17 @@ public class VisitorInstrumentSupport implements ITccInstrumentSupport {
     @Override
     public String getTccConfigInstrument() {
         final VisitorInstrument inst = (VisitorInstrument) _oe.getInstrument();
-        return inst.getVisitorConfig().tccInstrumentName();
+        final VisitorConfig vc = inst.getVisitorConfig();
+        final String name = vc.tccInstrumentName();
+        return vc.hasPwfsSpecificConfigs() ? _oe.pwfsConfigInstrument(name) : name;
     }
 
     @Override
     public String getTccConfigInstrumentOrigin() {
         final VisitorInstrument inst = (VisitorInstrument) _oe.getInstrument();
-        return inst.getVisitorConfig().tccInstrumentOrigin();
+        final VisitorConfig vc = inst.getVisitorConfig();
+        final String origin = vc.tccInstrumentOrigin();
+        return vc.hasPwfsSpecificConfigs() ? _oe.pwfsConfigInstrumentOrigin(origin) : origin;
     }
 
     @Override
