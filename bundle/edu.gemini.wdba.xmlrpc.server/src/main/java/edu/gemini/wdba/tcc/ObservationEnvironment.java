@@ -18,6 +18,7 @@ import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPCoordinates;
 import edu.gemini.spModel.target.env.Asterism;
 import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.wdba.glue.api.WdbaGlueException;
 
@@ -163,8 +164,24 @@ public final class ObservationEnvironment {
         return usedGuiders().contains(probe);
     }
 
+    public boolean usesP1() {
+        return containsTargets(PwfsGuideProbe.pwfs1);
+    }
+
+    public boolean usesP2() {
+        return containsTargets(PwfsGuideProbe.pwfs2);
+    }
+
     public boolean containsTargets(GuideProbe.Type type) {
         return usedGuiders().stream().anyMatch(gp -> gp.getType() == type);
+    }
+
+    public String pwfsConfigInstrument(String config) {
+        return config + (usesP2() ? "_P2" : (usesP1() ? "_P1" : ""));
+    }
+
+    public String pwfsConfigInstrumentOrigin(String config) {
+        return config + (usesP2() ? "_p2": (usesP1() ? "_p1" : ""));
     }
 
     public enum AoAspect {

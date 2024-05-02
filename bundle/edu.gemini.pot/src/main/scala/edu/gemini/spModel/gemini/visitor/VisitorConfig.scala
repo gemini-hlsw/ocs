@@ -50,6 +50,9 @@ sealed trait VisitorConfig extends Product with Serializable {
   def readoutTime: Duration =
     VisitorConfig.DefaultReadoutTime
 
+  def hasPwfsSpecificConfigs: Boolean =
+    false
+
 }
 
 object VisitorConfig {
@@ -88,6 +91,9 @@ object VisitorConfig {
 
     override val readoutTime: Duration =
       Duration.ofSeconds(6L)
+
+    override val hasPwfsSpecificConfigs: Boolean =
+      true
 
   }
 
@@ -154,6 +160,9 @@ object VisitorConfig {
 
     override val positionAngleMode: VisitorPosAngleMode =
       VisitorPosAngleMode.Fixed0
+
+    override val hasPwfsSpecificConfigs: Boolean =
+      true
 
   }
 

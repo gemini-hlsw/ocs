@@ -48,20 +48,6 @@ public class GNIRSSupport implements ITccInstrumentSupport {
         return inst.getPosAngleDegreesStr();
     }
 
-    private String getPortFreeTccConfigInstrument() {
-        // Return the name of the GNIRS config
-        // SCI-0163: WDBA entries for GNIRS+Altair
-        // Updated for 2011A testing:
-        // "However, the instrument loaded for gnirs is ngs or lgs2gnirs, rather
-        // than ao2gnirs. This is the correct syntax for the instrument origin,
-        // but not for the instrument parameter.  Tested 11/8 by Jesse Ball"
-        switch (_oe.getAoAspect()) {
-            case ngs:
-            case lgs: return "AO2GNIRS";
-            default : return "GNIRS";
-        }
-    }
-
     private String getPortSuffix() {
         String val = "";
         if (((InstGNIRS) _oe.getInstrument()).getIssPort() == IssPort.SIDE_LOOKING) {
@@ -71,7 +57,17 @@ public class GNIRSSupport implements ITccInstrumentSupport {
     }
 
     public String getTccConfigInstrument() {
-        return getPortFreeTccConfigInstrument() + getPortSuffix();
+        // Return the name of the GNIRS config
+        // SCI-0163: WDBA entries for GNIRS+Altair
+        // Updated for 2011A testing:
+        // "However, the instrument loaded for gnirs is ngs or lgs2gnirs, rather
+        // than ao2gnirs. This is the correct syntax for the instrument origin,
+        // but not for the instrument parameter.  Tested 11/8 by Jesse Ball"
+        switch (_oe.getAoAspect()) {
+            case ngs:
+            case lgs: return "AO2GNIRS" + getPortSuffix();
+            default : return _oe.pwfsConfigInstrument("GNIRS" + getPortSuffix());
+        }
     }
 
     /**
@@ -84,7 +80,7 @@ public class GNIRSSupport implements ITccInstrumentSupport {
         switch (_oe.getAoAspect()) {
             case ngs : return "ngs2gnirs";
             case lgs : return _oe.adjustInstrumentOriginForLGS_P1("lgs2gnirs");
-            default  : return "gnirs";
+            default  : return _oe.pwfsConfigInstrumentOrigin("gnirs");
         }
     }
 

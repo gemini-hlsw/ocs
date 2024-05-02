@@ -41,12 +41,12 @@ final public class Igrins2Support implements ITccInstrumentSupport {
     @Override
     public String getTccConfigInstrument() {
         Igrins2 inst = (Igrins2) oe.getInstrument();
-        return (inst.getIssPort() == IssPort.UP_LOOKING) ? "IGRINS2" : "IGRINS2_3";
+        return oe.pwfsConfigInstrument((inst.getIssPort() == IssPort.UP_LOOKING) ? "IGRINS2" : "IGRINS2_3");
     }
 
     @Override
     public String getTccConfigInstrumentOrigin() {
-        return "igrins2";
+        return oe.pwfsConfigInstrumentOrigin("igrins2");
     }
 
     @Override

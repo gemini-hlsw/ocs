@@ -60,13 +60,9 @@ public final class GMOSSupport implements ITccInstrumentSupport {
         return inst.getPosAngleDegreesStr();
     }
 
-    private boolean usesProbe(GuideProbe gp) {
-        return _oe.containsTargets(gp);
-    }
-
-    private boolean usesP1() { return usesProbe(PwfsGuideProbe.pwfs1);         }
-    private boolean usesP2() { return usesProbe(PwfsGuideProbe.pwfs2);         }
-    private boolean usesOI() { return usesProbe(GmosOiwfsGuideProbe.instance); }
+    private boolean usesP1() { return _oe.usesP1(); }
+    private boolean usesP2() { return _oe.usesP2(); }
+    private boolean usesOI() { return _oe.containsTargets(GmosOiwfsGuideProbe.instance); }
 
     private boolean isIfu() {
         final SPInstObsComp inst = _oe.getInstrument();
