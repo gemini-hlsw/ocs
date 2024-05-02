@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2020A-1" subtype="basic" key="d4ad9f8d-e5d1-4e36-a7c0-189f1d62531d" name="GMOS-S-BP">
+  <container kind="program" type="Program" version="2023A-1" subtype="basic" key="d4ad9f8d-e5d1-4e36-a7c0-189f1d62531d" name="GMOS-S-BP">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="GMOS-S PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -384,13 +384,17 @@ Details:
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Description"/>
             <param name="NoteText">
-              <value>This template shows a longslit science observation with GCAL flats mixed in.
+              <value>This template shows a longslit science observation with GCAL flats and arcs mixed in.
 
 It is assumed that GMOS is mounted on the side-looking ISS port.
 
-An offset sequence nods the target along the slit by +/- 15 arcsec.  A GMOS-S iterator 
-dithers the grating spectrally in 2 wavelength settings in order to cover the gap 
-between the CCDs and get full wavelength coverage.
+The instrument is configured based on the Phase I resource selections.
+An offset sequence nods the target along the slit by 15 arcsec (Q offsets).  
+A GMOS-N iterator dithers the grating spectrally in 2 wavelength settings in 
+order to cover the gap between the CCDs and get full wavelength coverage.
+
+The smartGCAL flats and arcs will automatically choose the best exposure 
+time for the given instrument configuration.
 
 The required observations for a Longslit program include:
 
@@ -399,28 +403,13 @@ Longslit: Science
 
 and the Baseline Calibrations include:
 
-Longslit: CuAr
-Longslit: Standard Acquisition
-Longslit: Standard with GCALflats
-Longslit: Standard CuAr 
-Longslit: Twilight flat
+Longslit: Baseline Standard Acquisition
+Longslit: Baseline Standard with GCALflats
+Longslit: Baseline Standard CuAr 
+Longslit: Baseline Twilight flat
 
 
 </value>
-            </param>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="d0250479-652f-4d04-9489-420e5a6c70cf" name="Note">
-          <paramset name="Note" kind="dataObj">
-            <param name="title" value="On-sky arcs for blue setups"/>
-            <param name="NoteText">
-              <value>On-sky CuAr arc exposures for spectroscopy blue-ward of the 557.7 nm sky line are provided as baseline (nighttime partner) calibrations since semester 2019A. For long-slit spectroscopy, this applies to the following configurations:
--- B1200 grating used at central wavelenghts &lt;= 480 nm
--- B600 grating used at central wavelengths &lt;= 405 nm 
-
-On-sky arc calibrations for setups covering the 557.7 nm or other sky lines can be requested as nighttime program calibrations (charged to the program time), if required. 
-
-Daytime baseline arc lamp exposures will be provided for all spectroscopic observations that do not include on-sky arcs.</value>
             </param>
           </paramset>
         </container>
@@ -493,8 +482,15 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
                 </paramset>
               </container>
             </container>
-            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="cfa02cb6-ea07-4979-bc7d-daf5421dff7f" name="Flat">
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="56d71840-dbe3-43ad-8926-ae421d87963c" name="Flat">
               <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="030ff245-79ac-4f5a-b530-a79221b2a82b" name="Arc">
+              <paramset name="Arc" kind="dataObj">
                 <param name="repeatCount" value="1"/>
                 <param name="coadds" value="1"/>
                 <param name="exposureTime" value="10.0"/>
@@ -505,7 +501,14 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
             <paramset name="GMOS-S Sequence" kind="dataObj">
               <param name="disperserLambda" value="530.0"/>
             </paramset>
-            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="db93ad6f-c5a1-4573-9f90-d7793ae2df55" name="Flat">
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="cdf14421-2fa4-49ff-8c9e-e3dd2710d958" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="4dc5c03c-62e5-4c81-8f27-413f3457d7d8" name="Flat">
               <paramset name="Flat" kind="dataObj">
                 <param name="repeatCount" value="1"/>
                 <param name="coadds" value="1"/>
@@ -1574,55 +1577,21 @@ Details:
             <param name="title" value="Description"/>
             <param name="NoteText">
               <value>This is a N&amp;S longslit science observation of a faint target with GCAL flats
-mixed in. 
+and arcs mixed in. 
+
+It is assumed that GMOS is mounted on the side-looking ISS port.
 
 Nod offset is +-5arcsec, use the standard shuffling (1392 rows and a binning
-of X=2, Y=1. It is assumed that GMOS is mounted on the side-looking ISS port.
+of X=2, Y=1. The nod offset is defined by the user. Nods are performed in the 
+q direction, i.e. along the slit. The shuffle offset is set by the total number of detector rows and 
+should not be changed for the N&amp;S longslit mode. 1392 corresponds to  1/3 of the detector rows. 
+See the GMOS N&amp;S webpages for further details on the N&amp;S configuration. 
 
-The observation contain 1 science exposure and 1 GCALflat at each
+The observation contain 1 science exposure, 1 GCALflat, and 1 GCALarc at each
 of 3 wavelength settings, 770nm, 780nm and 790nm. Three wavelength settings
 are used to cover the gap between the CCDs and get full wavelength
-coverage. An DtaX offset (0,-2,2) is used in each wavelength setting.
-
-The exposures are the follow:
-   science  at 780nm, DtaX=0
-   GCALflat at 780nm, DtaX=0
-   GCALflat at 780nm. DtaX=-2
-   science  at 780nm DtaX=-2
-   science  at 780nm, DtaX=2
-   GCALflat at 780nm, DtaX=2
-   GCALflat at 790nm. DtaX=0
-   science  at 790nm DtaX=0
-   science  at 790nm, DtaX=-2
-   GCALflat at 790nm, DtaX=-2
-   science  at 790nm, DtaX=2
-   GCALflat at 790nm, DtaX=2
-   science  at 770nm, DtaX=0
-   GCALflat at 770nm, DtaX=0
-   GCALflat at 770nm. DtaX=-2
-   science  at 770nm DtaX=-2
-   science  at 770nm, DtaX=2
-   GCALflat at 770nm, DtaX=2
-
-DTA-X offsetting was implemented to aid in the suppression of linear charge traps affecting Nod &amp; Shuffle data in the original EEV detectors. With the upgraded GMOS-N and GMOS-S Hamamatsu detectors DTA-X offsetting is no longer as advantageous; see the N&amp;S web pages.  
-Here by using four GMOS-N Sequences to change central wavelength and dither the
-DTAX we save on overhead with an efficient science-flat-flat-science-science-flat-flat-science 
-arrangement, minimizing the number of calibration congfiguration movements required.
+coverage. 
 </value>
-            </param>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="449b4e2d-b636-4a2d-ad41-fd7f8241a117" name="Note">
-          <paramset name="Note" kind="dataObj">
-            <param name="title" value="On-sky arcs for blue setups"/>
-            <param name="NoteText">
-              <value>On-sky CuAr arc exposures for spectroscopy blue-ward of the 557.7 nm sky line are provided as baseline (nighttime partner) calibrations since semester 2019A. For long-slit spectroscopy, this applies to the following configurations:
--- B1200 grating used at central wavelenghts &lt;= 480 nm
--- B600 grating used at central wavelengths &lt;= 405 nm 
-
-On-sky arc calibrations for setups covering the 557.7 nm or other sky lines can be requested as nighttime program calibrations (charged to the program time), if required. 
-
-Daytime baseline arc lamp exposures will be provided for all spectroscopic observations that do not include on-sky arcs.</value>
             </param>
           </paramset>
         </container>
@@ -1646,177 +1615,75 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
             <paramset name="GMOS-S Sequence" kind="dataObj">
               <param name="disperserLambda" value="780.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="327a6810-a1b9-4f60-bab9-83ee17e45f34" name="GMOS-S Sequence">
-              <paramset name="GMOS-S Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="ZERO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="f8b9af6b-ff2e-43d2-b6d8-93fcfae4268d" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="SCIENCE"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="7b731034-0504-491c-ba81-339d7769912d" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="a52ba380-d637-4e01-a4c3-28e620353a16" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="af7acccc-428c-4922-9389-ad0dbc21156d" name="GMOS-S Sequence">
-              <paramset name="GMOS-S Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="MTWO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="2c125c45-a1b0-4453-af6d-909aa4b96a1c" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="a8892f51-a048-4ae4-9469-20d9f7d87a4b" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="06e3306e-833e-49ca-b3df-140c927e3424" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="c1cdb37d-7fc1-414e-8f79-ec3c14fb31de" name="GMOS-S Sequence">
-              <paramset name="GMOS-S Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="TWO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="229b368e-d1ee-40a5-bd6e-37eed7c00705" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="bdd68574-32e4-4568-8e70-dec775abbacc" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="61d8153a-5a18-4e98-a65e-2d88295409a0" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
             </container>
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="1ecff6b3-9141-4d10-9b06-b30866a9213a" name="GMOS-S Sequence">
             <paramset name="GMOS-S Sequence" kind="dataObj">
               <param name="disperserLambda" value="795.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="7297027a-089b-46dd-aa33-d92f38f86972" name="GMOS-S Sequence">
-              <paramset name="GMOS-S Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="ZERO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="7c3dbad3-be63-463c-a342-730a2cf56971" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="632ce2f8-b1db-4047-91a2-a4c63d9a0b10" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="a0a257b7-7a93-4081-9e4e-25fedc20e615" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="433b853f-127f-4182-8f80-ef34c8cf2d65" name="GMOS-S Sequence">
-              <paramset name="GMOS-S Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="MTWO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="285370c8-2a59-470f-b6fa-e7b5b48d6ffa" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="e49558b5-1827-4852-8ef3-87af28837846" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="9b31b769-9787-4df8-a83f-2c7317b61c7c" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="a6cb0209-7eb7-4bd5-a837-4b845726850c" name="GMOS-S Sequence">
-              <paramset name="GMOS-S Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="TWO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="deaeda49-5874-46cf-9e4e-53ca64bcf5ff" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="SCIENCE"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="ec3997e8-c5fc-40cc-8918-2d92ae7411b7" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="067fd28e-3372-400d-80de-52985de73962" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
             </container>
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="4e3ad2d3-33b9-46ec-9a6a-494902b9e2f1" name="GMOS-S Sequence">
             <paramset name="GMOS-S Sequence" kind="dataObj">
               <param name="disperserLambda" value="765.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="14ae4961-0158-45d2-9b09-09cc6b913133" name="GMOS-S Sequence">
-              <paramset name="GMOS-S Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="ZERO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="c9b31f53-506f-44d9-9df0-7070e4309ecd" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="SCIENCE"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="06d6f79e-258f-48ce-a6b6-63e997a8e40d" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="6efa9057-acc9-4341-93e1-0d48146ab12b" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="311d0a74-5afb-46c4-84c7-ee1316452e4e" name="GMOS-S Sequence">
-              <paramset name="GMOS-S Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="MTWO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="ff4baff3-a15e-4f2b-96b3-005665c8f58d" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="47b4bc96-6f24-4c55-8a5a-0994b3109d34" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="1ab8ef4b-b18d-4f20-9e79-8312411f1c54" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="676e5189-ed3d-4d0f-998b-02caf1131a96" name="GMOS-S Sequence">
-              <paramset name="GMOS-S Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="TWO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="cc29819a-1c3d-4fca-8fa6-10f6f0f39f1a" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="c1246e92-5055-49cb-bae7-bc9de53c087e" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="6739b3ba-3f31-4933-85de-f5f54a6ca44d" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
             </container>
           </container>
         </container>
@@ -3230,7 +3097,7 @@ gacq *filenumber*
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Description"/>
             <param name="NoteText">
-              <value>This is a MOS science observation with GCAL flats
+              <value>This is a MOS science observation with GCAL flats and arcs
 mixed in.
 The mask is for the program GSYYYYSQXXX-NN 
 It is assumed that GMOS is mounted on the side-looking ISS port.
@@ -3243,18 +3110,22 @@ Instead of using one GMOS sequence, 3 sequences are used. This makes
 it possible to order the exposures as follows:
    science  at 520nm
    GCALflat at 520nm
+   GCALarc at 520nm
+   GCALarc at 540 nm
    GCALflat at 540nm
    science  at 540nm
 
 If only one GMOS sequence had been used the order would have been
    science  520nm
    GCALflat 520nm
+   GCALarc 520nm
    science  540nm
    GCALflat 540nm
+   GCALarc 540 nm
 This would take longer because the science fold mirror used for taking the flats
 has to move more often.
 
-The user should specify the slit width used in the mask (1.00 arcsec is set by default). 
+The user should specify the slit width used in the mask. 
 This is used to compute the exposure time for GCAL flats.
 
 The maskname used in this template will have to be edited in order to match the 
@@ -3268,20 +3139,6 @@ for either Queue, Classical, Director's Discretionary or Science Verification pr
 PPP is the program number, and MM is the mask number (a MOS PI may design several
 masks for use, with a technical limit of 99 masks).
 </value>
-            </param>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="9c75238f-0922-42d1-997f-caf36fb08cbd" name="Note">
-          <paramset name="Note" kind="dataObj">
-            <param name="title" value="On-sky arcs for blue setups"/>
-            <param name="NoteText">
-              <value>On-sky CuAr arc exposures for spectroscopy blue-ward of the 557.7 nm sky line are provided as baseline (nighttime partner) calibrations since semester 2019A. For long-slit spectroscopy, this applies to the following configurations:
--- B1200 grating used at central wavelenghts &lt;= 480 nm
--- B600 grating used at central wavelengths &lt;= 405 nm 
-
-On-sky arc calibrations for setups covering the 557.7 nm or other sky lines can be requested as nighttime program calibrations (charged to the program time), if required. 
-
-Daytime baseline arc lamp exposures will be provided for all spectroscopic observations that do not include on-sky arcs.</value>
             </param>
           </paramset>
         </container>
@@ -3301,7 +3158,7 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
             <param name="fpuMode" value="CUSTOM_MASK"/>
             <param name="fpu" value="CUSTOM_MASK"/>
             <param name="fpuCustomMask" value="GSYYYYSQXXX-NN"/>
-            <param name="customSlitWidth" value="CUSTOM_WIDTH_1_00"/>
+            <param name="customSlitWidth" value="OTHER"/>
             <param name="filter" value="NONE"/>
             <param name="ccdXBinning" value="TWO"/>
             <param name="ccdYBinning" value="TWO"/>
@@ -3347,11 +3204,25 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
                 <param name="exposureTime" value="10.0"/>
               </paramset>
             </container>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="e13e97c6-8e77-4eea-9a9b-c23f30abc3dc" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="39a471e3-8e81-4c15-8ee2-09576d52881c" name="GMOS-S Sequence">
             <paramset name="GMOS-S Sequence" kind="dataObj">
               <param name="disperserLambda" value="530.0"/>
             </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="a1abb050-ca3e-49c8-ae1c-0f73106aff97" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="fba25e96-354e-4814-9059-c4c2d92f6225" name="Flat">
               <paramset name="Flat" kind="dataObj">
                 <param name="repeatCount" value="1"/>
@@ -3378,6 +3249,13 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
             </container>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="04256082-0932-4bbe-8fad-a0c1d6fd4cb4" name="Flat">
               <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="7b6366b3-ae76-434b-9d03-49e34f1c6b1e" name="Arc">
+              <paramset name="Arc" kind="dataObj">
                 <param name="repeatCount" value="1"/>
                 <param name="coadds" value="1"/>
                 <param name="exposureTime" value="10.0"/>
@@ -3478,7 +3356,7 @@ wavelength coverage.
             <param name="fpuMode" value="CUSTOM_MASK"/>
             <param name="fpu" value="CUSTOM_MASK"/>
             <param name="fpuCustomMask" value="GSYYYYSQXXX-NN"/>
-            <param name="customSlitWidth" value="CUSTOM_WIDTH_1_00"/>
+            <param name="customSlitWidth" value="OTHER"/>
             <param name="filter" value="NONE"/>
             <param name="ccdXBinning" value="TWO"/>
             <param name="ccdYBinning" value="TWO"/>
@@ -4720,15 +4598,12 @@ gacq *filenumber*
               <value>This is a MOS Nod&amp;Shuffle science observation with GCAL flats
 mixed in. 
 
-The instrument is configured to use a central wavelength
-of 780nm.  A Custom MOS mask with the name  GSYYYYSQXXX-NN is used. 
-The mask slit width is to be set by the user
+The instrument is configured based on the Phase I resource selections.   
+A Custom MOS mask with the name  GSYYYYSQXXX-NN is used. 
 The mask used in this example does not 
 exist, but the N&amp;S static component is set to use an offset (shuffle distance) of 
 32 detector rows, corresponding to a distance of 2.34".  This would be appropriate 
 for a MOS mask designed to use micro-shuffling with a slit length of 2.34".
-This sequence uses also electronic offsets (e-offsets)
-
 
 Note that this shuffle offset of 2.34 arc-seconds is NOT the same as the nod (sky offset) 
 used for dithering (1.5 arc-seconds in this example).  The shuffle offset is set by the 
@@ -4738,20 +4613,11 @@ defined with respect to the slit center and should be smaller than the half the
 defined slit length.  The NODs are only in the q direction, along the slit, and not in 
 the p direction which is across the slit.
 
-DTA-X offsetting was implemented to aid in the suppression of linear charge traps affecting Nod &amp; Shuffle data in the original EEV detectors. With the upgraded GMOS-N and GMOS-S Hamamatsu detectors DTA-X offsetting is no longer as advantageous. The sequence also dithers the
-grating spectrally by by 10 nm above and below the central wavelength in order to
-fill in the information missing due to the gaps between the detectors.
-
 It is assumed that GMOS is mounted on the side-looking ISS port.
 
 Because the total extent of the N&amp;S nod is small (&lt;2arcsec) the user can
 select electronic offsetting (e-offsets).  This is recommended since it will significantly
 reduce the N&amp;S overhead. This sequence uses e-offsets.
-
-The observation contains nested GMOS-S iterators in order to sequence both  the DTAX
-and the central wavelength.  By using nested GMOS-S Sequences to dither the DTAX and 
-central wavelength we save on overhead with an efficient flat-science-science-flat-flat-science 
-arrangement, minimizing the numberof calibration congfiguration movements required.
 
 Each science exposure consists of 10 N&amp;S cycles. The nods are along the 
 slits, keeping the science targets in the slits at all times. The total on-target
@@ -4771,17 +4637,15 @@ and the Baseline Calibrations include:
 
 MOS: N&amp;S Dark
 MOS: Mask Image (one for each MOS mask)
-MOS: CuAr (one for each MOS mask)
 MOS: Acq (Standard)
 MOS: Standard w/ flats
 MOS: CuAr (Standard)
 MOS: Twilight flat (optional, one for each MOS mask)
 
-Normally for MOS observations the MOS: Acq, MOS: N&amp;S Science, MOS: Mask Image, MOS: CuAr and MOS: Twilight are organized into a separate folder for each MOS mask, while the MOS: N&amp;S Dark, MOS: Acq (Standard), MOS: Standard w/ flats, and MOS: CuAr (Standard) are organized together in a separate Baseline Calibrations folder.
 
 SLITWIDTH:
-The user should specify the slit width used in the mask (1.00 arcsec is set by default). 
-This is used to compute the exposure time for GCAL flats.
+The slit width will need to be set to the value that matches (or is closest) to the slit width
+used for the mask. GCAL arcs and flats will remain undefined until the slit width is added. 
 
 
 MASKNAME:
@@ -4796,20 +4660,6 @@ for either Queue, Classical, Director's Discretionary or Science Verification pr
 PPP is the program number, and MM is the mask number (a MOS PI may design several
 masks for use, with a technical limit of 99 masks).
 </value>
-            </param>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="11c9fc1f-10aa-496c-89df-6ce32935cdba" name="Note">
-          <paramset name="Note" kind="dataObj">
-            <param name="title" value="On-sky arcs for blue setups"/>
-            <param name="NoteText">
-              <value>On-sky CuAr arc exposures for spectroscopy blue-ward of the 557.7 nm sky line are provided as baseline (nighttime partner) calibrations since semester 2019A. For long-slit spectroscopy, this applies to the following configurations:
--- B1200 grating used at central wavelenghts &lt;= 480 nm
--- B600 grating used at central wavelengths &lt;= 405 nm 
-
-On-sky arc calibrations for setups covering the 557.7 nm or other sky lines can be requested as nighttime program calibrations (charged to the program time), if required. 
-
-Daytime baseline arc lamp exposures will be provided for all spectroscopic observations that do not include on-sky arcs.</value>
             </param>
           </paramset>
         </container>
@@ -4829,7 +4679,7 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
             <param name="fpuMode" value="CUSTOM_MASK"/>
             <param name="fpu" value="CUSTOM_MASK"/>
             <param name="fpuCustomMask" value="GSYYYYSQXXX-NN"/>
-            <param name="customSlitWidth" value="CUSTOM_WIDTH_1_00"/>
+            <param name="customSlitWidth" value="OTHER"/>
             <param name="filter" value="OG515_G0330"/>
             <param name="ccdXBinning" value="TWO"/>
             <param name="ccdYBinning" value="ONE"/>
@@ -4880,177 +4730,75 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
             <paramset name="GMOS-S Sequence" kind="dataObj">
               <param name="disperserLambda" value="780.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="c78dc315-0400-475f-8d21-094f231522e8" name="GMOS-S Sequence">
-              <paramset name="GMOS-S Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="ZERO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="f7076996-9863-4af9-b405-1bf7ef5a5f1f" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="SCIENCE"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="d0643b87-2b19-4267-9306-763dbe6de393" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="468a41d1-bc1f-4309-b6fa-5b73aeb18fb9" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="f4d592f5-8a65-4454-80d2-4de1531cc93f" name="GMOS-S Sequence">
-              <paramset name="GMOS-S Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="MTWO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="41e60935-bc64-4291-bdd7-408a5c7296e6" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="bf7e5f9a-d303-4c8e-b6fa-1c328c3097ec" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="270ee79f-fd2a-4050-86da-509307a73b46" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="5c67350d-0f0e-4daa-bcf4-ad192bf07ade" name="GMOS-S Sequence">
-              <paramset name="GMOS-S Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="TWO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="13dabd3f-af57-43b1-809e-9a65d9a5f5c6" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="30c34e24-34a2-41ef-8aed-e3d1575ae3c2" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="f6444717-3cf0-49e6-87ac-054485e74fe2" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
             </container>
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="dffab4e6-9b01-4d59-af50-97368b3e1763" name="GMOS-S Sequence">
             <paramset name="GMOS-S Sequence" kind="dataObj">
               <param name="disperserLambda" value="795.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="9ff82138-d4b6-4854-b564-1ba247e48487" name="GMOS-S Sequence">
-              <paramset name="GMOS-S Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="ZERO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="018f7c08-1528-4788-a0b1-6e53fcc894ea" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="964ecef9-6dd4-49c3-8cbf-f55ed5bfdf24" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="a3b80f41-304b-462f-8519-8b6c1f0699df" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="9f65b2e9-59e5-483f-8c0e-d4606f1f6551" name="GMOS-S Sequence">
-              <paramset name="GMOS-S Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="MTWO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="806b2bc5-ca64-444a-bd29-7c05d1029adb" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="5f2eef87-e134-4b5a-b9de-363f1b31a065" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="b54550d0-58e2-46c8-b8d8-d26eb2d69d5c" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="a98f3144-3c27-4ae2-89d6-b84f7c526a69" name="GMOS-S Sequence">
-              <paramset name="GMOS-S Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="TWO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="b29081cb-6260-45ca-aebd-53e7b0ea2128" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="SCIENCE"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="7f5ddf64-5410-4baf-8ccd-ad1acb05a94f" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="c36e6938-7781-4ea1-9edc-f27c2d5e8f6e" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
             </container>
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="e201159f-195e-4b64-a437-f3034f4759a0" name="GMOS-S Sequence">
             <paramset name="GMOS-S Sequence" kind="dataObj">
               <param name="disperserLambda" value="765.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="ef3d0114-935f-4a48-a9b3-7f7d7867fff6" name="GMOS-S Sequence">
-              <paramset name="GMOS-S Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="ZERO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="b46862ed-e169-4dbd-820b-23748101803e" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="SCIENCE"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="4147c617-50ba-48b9-a502-79882a4b3766" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="efad1417-e01d-4799-9199-eb851b6bb305" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="318d0a73-91a2-4be6-a534-cab137f05f6a" name="GMOS-S Sequence">
-              <paramset name="GMOS-S Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="MTWO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="4855d9b6-5030-4bf0-b0a6-a5eef7279d0a" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="9fc8975e-33e6-4afc-b866-541ce2a251f2" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="3e66d8b0-e10c-43a1-9b12-9c5ce052e183" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="08a9b7f9-55ef-486c-913e-ec6ce4a244ff" name="GMOS-S Sequence">
-              <paramset name="GMOS-S Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="TWO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="1073bc64-06bf-4448-8c96-75398225fcfe" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="eb9ca5b4-73e6-4ec4-8f13-73a9e6ca5dc6" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="41555b8a-71bc-4d07-a60c-f1fde0156a40" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
             </container>
           </container>
         </container>
@@ -6252,29 +6000,18 @@ For help setting up the acquistion, see the Description note for the "Longslit A
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Description"/>
             <param name="NoteText">
-              <value>This is an IFU observation followed by a GCAL flat
-field.
+              <value>This is an IFU observation followed by a GCAL flat and arc.
 
 It is assumed that GMOS is mounted on the side-looking ISS port.
 
 Two offset positions are used to fill in dead fibers.
 
-For targets fainter than R~18mag, imaging through the IFU will take too long.  Instead a blind offset acquisition should be used.  For more information on blind offsetting, please see https://www.gemini.edu/observing/telescopes-and-sites/telescopes#Acquisition.
-For help setting up the acquistion, see the Description note for the "Longslit Acquisition (Blind Offset)" within the Templates: Spectroscopy Acquisition Observations folder.  If it is not possible to find a nearby reference star with well known coordinates for blind offsetting, make the 2nd step be another imaging exposure, such that the position of the target on the CCD in imaging mode can be checked after the initial telescope offset has been determined and applied.   The blind offset method is preferred because the user can  directly measure from the acquisition image where the science target will approximately fall in the IFU field of view. </value>
-            </param>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="573c68ee-fc6f-4e65-9109-f88799866512" name="Note">
-          <paramset name="Note" kind="dataObj">
-            <param name="title" value="On-sky arcs for blue setups"/>
-            <param name="NoteText">
-              <value>On-sky CuAr arc exposures for spectroscopy blue-ward of the 557.7 nm sky line are provided as baseline (nighttime partner) calibrations since semester 2019A. For long-slit spectroscopy, this applies to the following configurations:
--- B1200 grating used at central wavelenghts &lt;= 480 nm
--- B600 grating used at central wavelengths &lt;= 405 nm 
-
-On-sky arc calibrations for setups covering the 557.7 nm or other sky lines can be requested as nighttime program calibrations (charged to the program time), if required. 
-
-Daytime baseline arc lamp exposures will be provided for all spectroscopic observations that do not include on-sky arcs.</value>
+If your science target cannot be detected in imaging mode in one of the GMOS filters in about 1 min of exposure time 
+(corresponding to about 3 min of through-IFU exposures), you will need to define a blind offset acquisition.  
+For more information on blind offsetting, please see https://www.gemini.edu/observing/telescopes-and-sites/telescopes#Acquisition.
+For help setting up the acquistion, see the Description note for the "Longslit Acquisition (Blind Offset)" within the 
+Templates: Spectroscopy Acquisition Observations folder. If it is not possible to find a nearby reference star with well known coordinates for blind offsetting, make the 2nd step be another imaging exposure, such that the position of the target on the CCD in imaging mode can be checked after the initial telescope offset has been determined and applied. The blind offset method is preferred because the user can  directly measure 
+from the acquisition image where the science target will approximately fall in the IFU field of view. </value>
             </param>
           </paramset>
         </container>
@@ -6321,11 +6058,25 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
                   <param name="exposureTime" value="10.0"/>
                 </paramset>
               </container>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="8d625726-2d8f-40dc-926c-d58585542e2d" name="Arc">
+                <paramset name="Arc" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="coadds" value="1"/>
+                  <param name="exposureTime" value="10.0"/>
+                </paramset>
+              </container>
             </container>
             <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="6ed91d12-d7c7-43d8-b9ae-d283f08fdde8" name="GMOS-S Sequence">
               <paramset name="GMOS-S Sequence" kind="dataObj">
                 <param name="disperserLambda" value="640.0"/>
               </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="5b8b32df-2670-413f-964d-3aea148a4e09" name="Arc">
+                <paramset name="Arc" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="coadds" value="1"/>
+                  <param name="exposureTime" value="10.0"/>
+                </paramset>
+              </container>
               <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="ad189a6e-7c8c-4917-8f58-3785d11076c8" name="Flat">
                 <paramset name="Flat" kind="dataObj">
                   <param name="repeatCount" value="1"/>
@@ -6368,11 +6119,25 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
                   <param name="exposureTime" value="10.0"/>
                 </paramset>
               </container>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="f047883c-f202-45a7-adf5-64cfa57035a5" name="Arc">
+                <paramset name="Arc" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="coadds" value="1"/>
+                  <param name="exposureTime" value="10.0"/>
+                </paramset>
+              </container>
             </container>
             <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="080a8064-51b9-429d-89d1-dcf2d82c8a78" name="GMOS-S Sequence">
               <paramset name="GMOS-S Sequence" kind="dataObj">
                 <param name="disperserLambda" value="630.0"/>
               </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="55305aa6-d5ee-4248-8204-620fe3823f03" name="Arc">
+                <paramset name="Arc" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="coadds" value="1"/>
+                  <param name="exposureTime" value="10.0"/>
+                </paramset>
+              </container>
               <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="988b98c3-a5e2-43b7-9d79-b6b894f6234a" name="Flat">
                 <paramset name="Flat" kind="dataObj">
                   <param name="repeatCount" value="1"/>
@@ -7263,7 +7028,7 @@ For help setting up the acquistion, see the Description note for the "Longslit A
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Description"/>
             <param name="NoteText">
-              <value>This example of an IFU N&amp;S science observation with GCAL flats
+              <value>This example of an IFU N&amp;S science observation with GCAL flats and arcs
 mixed in. 
 
 Two spectral dither settings are used. It is assumed that GMOS is mounted on the 
@@ -7271,9 +7036,9 @@ side-looking ISS port.
 
 The number of shuffle rows for the IFU is 285.
 
-The observation contain 1 science exposure and 1 GCALflat at each
+The observation contain 1 science exposure, 1 GCALflat, and 1 GCALarc at each
 of 2 wavelength settings, 780nm and 785nm. Two wavelength settings
-is used to cover the gap between the CCDs.
+are used to cover the gap between the CCDs.
 
 The telescope nods to a sky position 15 arcseconds from the target.
 Since no objects are at the sky position the guiding is turned off 
@@ -7281,21 +7046,7 @@ there (OIWFS = freeze).  This saves the overhead of waiting for the OI
 probe arm to move.
 
 
-Assumed Conditions: IQ=70%, CC=50%, SB=50%, WV=Any (good IQ, photometric, dark)</value>
-            </param>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="cd3106c3-7c69-49ae-8ad0-09b63a42ac19" name="Note">
-          <paramset name="Note" kind="dataObj">
-            <param name="title" value="On-sky arcs for blue setups"/>
-            <param name="NoteText">
-              <value>On-sky CuAr arc exposures for spectroscopy blue-ward of the 557.7 nm sky line are provided as baseline (nighttime partner) calibrations since semester 2019A. For long-slit spectroscopy, this applies to the following configurations:
--- B1200 grating used at central wavelenghts &lt;= 480 nm
--- B600 grating used at central wavelengths &lt;= 405 nm 
-
-On-sky arc calibrations for setups covering the 557.7 nm or other sky lines can be requested as nighttime program calibrations (charged to the program time), if required. 
-
-Daytime baseline arc lamp exposures will be provided for all spectroscopic observations that do not include on-sky arcs.</value>
+</value>
             </param>
           </paramset>
         </container>
@@ -7338,7 +7089,7 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
                 <param name="p" value="0.0"/>
                 <param name="q" value="15.0"/>
                 <param name="defaultGuideOption" value="on"/>
-                <param name="GMOS OIWFS" value="guide"/>
+                <param name="GMOS OIWFS" value="freeze"/>
               </paramset>
             </paramset>
             <param name="mosPreimaging" value="NO"/>
@@ -7377,11 +7128,25 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
                 <param name="exposureTime" value="10.0"/>
               </paramset>
             </container>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="63b05b28-f877-4057-9eb1-7b4199474e05" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="a3581a66-c73d-4daf-9b06-149569d3a928" name="GMOS-S Sequence">
             <paramset name="GMOS-S Sequence" kind="dataObj">
               <param name="disperserLambda" value="790.0"/>
             </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="b56e15e6-2efd-4cd4-9993-d79394155432" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="fabd96cf-3f05-4f51-9787-5d7d7abbc00e" name="Flat">
               <paramset name="Flat" kind="dataObj">
                 <param name="repeatCount" value="1"/>
@@ -8270,6 +8035,10 @@ it possible to order the exposures as follows:
   </container>
   <container kind="versions" type="versions" version="1.0">
     <paramset name="node">
+      <param name="key" value="7c3dbad3-be63-463c-a342-730a2cf56971"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="90ad0d15-93db-4f62-b0f7-a0bf660752d1"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
@@ -8284,6 +8053,10 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="2b5402d0-b0a2-4246-9b96-baae27eb2e27"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cc29819a-1c3d-4fca-8fa6-10f6f0f39f1a"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="4e8b7182-f599-444a-b4ca-2c832413645e"/>
@@ -8301,6 +8074,10 @@ it possible to order the exposures as follows:
       <param name="key" value="b626a8f5-366a-4e8b-ab83-cce006223175"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c9b31f53-506f-44d9-9df0-7070e4309ecd"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f2e19bfc-0f4b-4332-b204-28e6d71fa73b"/>
@@ -8343,6 +8120,10 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="deaeda49-5874-46cf-9e4e-53ca64bcf5ff"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="3fcf2c78-1731-435b-b103-51f0427f3b7e"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="4"/>
@@ -8362,6 +8143,10 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="573416fe-f71c-4ad3-bd38-a8703be05c8d"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="0d5125e4-220c-4139-8c2c-228eaca208a6"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="6f9ce732-4d8f-45fb-8efc-326ac52ad5e3"/>
@@ -8392,6 +8177,10 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="2c125c45-a1b0-4453-af6d-909aa4b96a1c"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="2fecb104-4a8b-4c7b-9248-1b21ac9502dd"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
@@ -8407,6 +8196,7 @@ it possible to order the exposures as follows:
       <param name="key" value="4deb15c2-2204-4b1f-af2c-5021dea48b5e"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="cc09d464-f464-46e7-b92a-9c32d00ad528" value="2"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="0db81411-cfc5-4af5-8fce-08f74178753d"/>
@@ -8599,6 +8389,10 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="5b8b32df-2670-413f-964d-3aea148a4e09"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="fe60b601-0cd9-447b-be67-bc2f0ca74d3c"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
@@ -8697,6 +8491,7 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="cc09d464-f464-46e7-b92a-9c32d00ad528" value="10"/>
       <param name="c6f062cb-7969-4906-9f6d-7a21fc214ec3" value="7"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="49"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d0929d2b-59c9-4471-97c2-2d26b594bec6"/>
@@ -8748,6 +8543,10 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="bd59c46b-8b73-45d8-8803-dfac27dcbcfe"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="83205a9e-7949-46ac-98f1-ab4ff4bde246"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="698c6fb2-2012-4cb3-9ef4-5be80a9091a9"/>
@@ -8855,6 +8654,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="9923db95-d9ec-41b0-9a36-cbae9bd0eae5"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="6"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="835043f7-9911-428d-a87f-361398dfc38b"/>
@@ -8880,6 +8680,10 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="bfcb6bc1-f6e5-4d5a-ad3c-e1ea9bf83cdd"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b29081cb-6260-45ca-aebd-53e7b0ea2128"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f2b26bc2-e5d0-48c1-9911-1570913e6ef5"/>
@@ -8924,6 +8728,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="080a8064-51b9-429d-89d1-dcf2d82c8a78"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="266fb131-eeb2-4632-a260-6208a74257ae"/>
@@ -8932,6 +8737,10 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="b0f6b442-48b6-4921-a36e-c0fc20803a46"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ff4baff3-a15e-4f2b-96b3-005665c8f58d"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="ca0686e1-ef36-41b5-ad20-b87869589d92"/>
@@ -8982,6 +8791,7 @@ it possible to order the exposures as follows:
       <param name="key" value="6ed91d12-d7c7-43d8-b9ae-d283f08fdde8"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="4"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e8a43a41-1c55-4800-a004-332896a45f90"/>
@@ -8992,8 +8802,13 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="229b368e-d1ee-40a5-bd6e-37eed7c00705"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="39a471e3-8e81-4c15-8ee2-09576d52881c"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e9abead7-eedf-4306-aa1d-3f9112c53b3d"/>
@@ -9061,6 +8876,7 @@ it possible to order the exposures as follows:
       <param name="key" value="0af67cb2-503c-4eab-92ad-4e3511a0f90f"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="26fe7595-bea1-48c9-a7a7-687b32655ed8" value="2"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="6e642f10-749c-4e80-9303-22de94e7b999"/>
@@ -9111,6 +8927,7 @@ it possible to order the exposures as follows:
       <param name="key" value="ab5358a7-ecf1-4ac3-a63a-be36ce7d9347"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="cc09d464-f464-46e7-b92a-9c32d00ad528" value="15"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="52"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e277c004-fefc-4824-8487-869a55d617fd"/>
@@ -9161,6 +8978,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="cddf73b8-4c82-450e-8a67-b0da5b0e0915"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="1b47e549-1265-4d4c-9101-6d4c92028333"/>
@@ -9191,6 +9009,10 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="b56e15e6-2efd-4cd4-9993-d79394155432"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="ecb41656-1ef0-487d-89b1-97437e66b145"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
@@ -9202,6 +9024,7 @@ it possible to order the exposures as follows:
       <param name="key" value="a3581a66-c73d-4daf-9b06-149569d3a928"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="4"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="efad1417-e01d-4799-9199-eb851b6bb305"/>
@@ -9218,6 +9041,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="054e6bde-9c7c-44a3-a5fa-07dac51e2bba"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="15"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="ee278ea9-c4e3-42e1-b09a-bf410bab2fa5"/>
@@ -9284,12 +9108,20 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="b46862ed-e169-4dbd-820b-23748101803e"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="3b9415fc-1540-4a9a-9ff5-b54bb3d113fb"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="94e15589-a711-4a11-bde2-3662de5f2101"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="285370c8-2a59-470f-b6fa-e7b5b48d6ffa"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="c36e6938-7781-4ea1-9edc-f27c2d5e8f6e"/>
@@ -9299,6 +9131,7 @@ it possible to order the exposures as follows:
       <param name="key" value="9a5fd14d-486e-4d9a-96a2-a48f238b71ad"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="4"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="10"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5c0f712b-6d4b-49de-a058-df2258183fb0"/>
@@ -9391,8 +9224,17 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="41e60935-bc64-4291-bdd7-408a5c7296e6"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="e4269884-e01b-4e74-9a1a-234b98613e55"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="6"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="cdf14421-2fa4-49ff-8c9e-e3dd2710d958"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="468a41d1-bc1f-4309-b6fa-5b73aeb18fb9"/>
@@ -9450,6 +9292,7 @@ it possible to order the exposures as follows:
       <param name="key" value="f2c043fe-df6b-4802-9b00-04abef079e67"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="26fe7595-bea1-48c9-a7a7-687b32655ed8" value="1"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="84d5bdbe-97b6-4922-baac-14d283ab4fc0"/>
@@ -9483,12 +9326,17 @@ it possible to order the exposures as follows:
       <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="a1abb050-ca3e-49c8-ae1c-0f73106aff97"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="db93ad6f-c5a1-4573-9f90-d7793ae2df55"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="46b7a6c2-e926-4669-933c-472014c7796f"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="45"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f7a7f897-7106-49ab-b3cc-467d6b6cbd0f"/>
@@ -9527,6 +9375,10 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="1065f731-59d3-428d-8f33-6ead827bb45f" value="1"/>
       <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="2"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f047883c-f202-45a7-adf5-64cfa57035a5"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="bf7e5f9a-d303-4c8e-b6fa-1c328c3097ec"/>
@@ -9593,6 +9445,7 @@ it possible to order the exposures as follows:
       <param name="key" value="7459b7ba-47b3-47f2-830f-30b182f10675"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="4"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f8a30bd7-96eb-4a8c-834a-a98434763ce2"/>
@@ -9621,6 +9474,10 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="58cbf366-b3f7-480e-be73-007d5d174366"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="030ff245-79ac-4f5a-b530-a79221b2a82b"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e03fda15-154f-4e88-b1d7-ed7f0b93a93b"/>
@@ -9671,6 +9528,7 @@ it possible to order the exposures as follows:
       <param name="key" value="60e72d50-c5ae-4a79-8985-1345932d1d9b"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="cc09d464-f464-46e7-b92a-9c32d00ad528" value="2"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="106d3dc4-8cf2-4cb2-8078-58267629a5c9"/>
@@ -9680,6 +9538,7 @@ it possible to order the exposures as follows:
       <param name="key" value="4e3ad2d3-33b9-46ec-9a6a-494902b9e2f1"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="4"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="6"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="73d3ccd2-71d5-4dba-86b0-5c1527c95aac"/>
@@ -9692,6 +9551,10 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="5b3974e9-1da2-4f6c-9d4a-13a1ab0744fe"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1073bc64-06bf-4448-8c96-75398225fcfe"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="1ab8ef4b-b18d-4f20-9e79-8312411f1c54"/>
@@ -9728,6 +9591,11 @@ it possible to order the exposures as follows:
       <param name="key" value="9142172a-543e-454e-9ee5-74cf8b64e732"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="c6f062cb-7969-4906-9f6d-7a21fc214ec3" value="2"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="23"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4dc5c03c-62e5-4c81-8f27-413f3457d7d8"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="2332f019-1670-4074-8a92-dca565752685"/>
@@ -9752,6 +9620,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="24844d0c-9305-41af-9eb2-54efc8abf087"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="6"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="7fc0fdc3-b9f6-439c-bf63-e44f342884da"/>
@@ -9772,6 +9641,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="51d2bb5b-dd8a-4b8e-8762-b41b5619d169"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="0cd33817-836c-43e8-adad-3750baefbb9e"/>
@@ -9784,6 +9654,10 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="e121c1e0-ab78-44a6-a76e-260ba7a19556"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7b6366b3-ae76-434b-9d03-49e34f1c6b1e"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a8892f51-a048-4ae4-9469-20d9f7d87a4b"/>
@@ -9810,6 +9684,7 @@ it possible to order the exposures as follows:
       <param name="key" value="8d6577f6-f3d1-42cd-994d-c4322ba52c85"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="26fe7595-bea1-48c9-a7a7-687b32655ed8" value="2"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="1b5e79e1-c1cb-470e-95cb-68732fccf4c0"/>
@@ -9932,6 +9807,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="7a5dc3dd-0ea1-4579-bc5d-ec82701f3652"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e8e3df75-801b-464e-8640-4bfdd038ba04"/>
@@ -10002,6 +9878,7 @@ it possible to order the exposures as follows:
       <param name="key" value="dffab4e6-9b01-4d59-af50-97368b3e1763"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="2"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="6"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e977d172-a97e-4847-a7ce-8016f80ed6b4"/>
@@ -10042,6 +9919,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="3b8e02fe-49a9-4514-a978-cef80ac7f925"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="7b05e1ba-0531-45ac-8698-dd4e0f4af370"/>
@@ -10062,10 +9940,15 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="d210307b-aabb-47e8-abeb-51429cb7bf72"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a4e8c620-7c70-4ae0-b302-a3d7a9e45ae4"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="56d71840-dbe3-43ad-8926-ae421d87963c"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5aa44412-a68f-45c6-82ca-a05180829e97"/>
@@ -10109,12 +9992,20 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="806b2bc5-ca64-444a-bd29-7c05d1029adb"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="7d21c4b5-a220-4a32-88b0-211a02f61796"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d77729f7-7690-4610-846d-6ef373663a9f"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f8b9af6b-ff2e-43d2-b6d8-93fcfae4268d"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5c50bbab-0061-4500-8a48-afb17810b806"/>
@@ -10201,6 +10092,10 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="13dabd3f-af57-43b1-809e-9a65d9a5f5c6"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="7172b917-64e5-421c-8c5f-22a032e208db"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
@@ -10236,6 +10131,7 @@ it possible to order the exposures as follows:
       <param name="key" value="fc2495c4-1b5a-4e84-9f6f-a02c1772dcd1"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="26fe7595-bea1-48c9-a7a7-687b32655ed8" value="2"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f933a46d-e7bb-4e93-a875-b0ea5eb457c8"/>
@@ -10312,6 +10208,7 @@ it possible to order the exposures as follows:
       <param name="key" value="1ecff6b3-9141-4d10-9b06-b30866a9213a"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="2"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="6"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="19c7ebaf-8c89-4c72-887c-3b2d134c6d26"/>
@@ -10358,6 +10255,10 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="018f7c08-1528-4788-a0b1-6e53fcc894ea"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="0df01626-a118-4e59-b8c0-b4958866ebd7"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="c6f062cb-7969-4906-9f6d-7a21fc214ec3" value="2"/>
@@ -10367,8 +10268,16 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="e13e97c6-8e77-4eea-9a9b-c23f30abc3dc"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="29b5b9f5-c03f-4f9e-8e6c-81f79ef67070"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d97117c7-cc91-4769-80fd-57acc4e83ad2"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a74872f0-758d-455b-98f1-9331852b21a2"/>
@@ -10448,6 +10357,7 @@ it possible to order the exposures as follows:
       <param name="key" value="eaf05aa4-94f4-4928-aab8-d5c81fbabc3b"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="26fe7595-bea1-48c9-a7a7-687b32655ed8" value="2"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="1126b566-c4fc-4d50-b229-7b3fbb7e3583"/>
@@ -10468,6 +10378,10 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="c1cdb37d-7fc1-414e-8f79-ec3c14fb31de"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f129ad48-804d-4a33-a529-4066a7259f6f"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="c78dc315-0400-475f-8d21-094f231522e8"/>
@@ -10513,6 +10427,10 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="e0cd823a-6b6c-4c2d-bae7-ed912580504d"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="ceda96f8-a79b-4375-a66f-e5191b305523"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
@@ -10527,6 +10445,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="14ab7a86-8d60-4a5c-9db8-f42ebd76ae41"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="484bd8f7-c018-4e15-b0e0-eb8524ac9446"/>
@@ -10597,6 +10516,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="820c70da-0cdd-4965-bad0-bd19aca28753"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="125"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="2cda639d-af24-43be-a3fb-39449e95c37c"/>
@@ -10635,6 +10555,10 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="8d625726-2d8f-40dc-926c-d58585542e2d"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="481ee762-1625-438f-8e0a-ad0ceb9ee77d"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
@@ -10655,6 +10579,10 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="f7076996-9863-4af9-b405-1bf7ef5a5f1f"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="c3ac14e4-ed16-47a0-bc34-83f8884f892d"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
@@ -10666,6 +10594,7 @@ it possible to order the exposures as follows:
       <param name="key" value="e201159f-195e-4b64-a437-f3034f4759a0"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="b2d887d1-77f6-4d0b-9179-7219b5971d2c" value="4"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="6"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d6081ce2-23f3-4c32-906c-1ff83dde4d1c"/>
@@ -10678,6 +10607,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="fac444e9-10b4-4552-9767-8950809c8941"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="73255c9f-9b9f-4dcc-a3f8-785139759df7"/>
@@ -10712,6 +10642,10 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="6e14c999-729d-495d-98ac-a9e082b7dc7f"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="dee0384a-e6dd-4cd5-92d3-ddda8731f352"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
@@ -10727,6 +10661,7 @@ it possible to order the exposures as follows:
       <param name="key" value="545826ab-2d10-469e-bfae-bdfcd47936d1"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
       <param name="26fe7595-bea1-48c9-a7a7-687b32655ed8" value="1"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="13610c2c-badc-4cf2-9a96-2332be406740"/>
@@ -10761,8 +10696,13 @@ it possible to order the exposures as follows:
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="4855d9b6-5030-4bf0-b0a6-a5eef7279d0a"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="38ef7334-05ba-43a2-9993-76c7d81147d4"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="5"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="17665147-240a-4e00-8d52-78466a47f91f"/>
@@ -10787,6 +10727,10 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="41b06990-8ce8-4062-a9a9-18969ef018b5"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="63b05b28-f877-4057-9eb1-7b4199474e05"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d7c71731-615c-4f2e-812e-af48f40e461c"/>
@@ -10861,6 +10805,10 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="03656e83-ad60-4641-85d8-9e494e5c7062"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="55305aa6-d5ee-4248-8204-620fe3823f03"/>
+      <param name="95c3a7cf-75cb-49a7-bf95-0a43fca3d4df" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="c4581e64-091c-4b0f-a764-228d65164884"/>

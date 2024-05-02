@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2020A-1" subtype="basic" key="c313a6e9-cf0e-4a98-a2bf-192f3091d541" name="GMOS-N-BP-copy3">
+  <container kind="program" type="Program" version="2023A-1" subtype="basic" key="c313a6e9-cf0e-4a98-a2bf-192f3091d541" name="GMOS-N-BP-copy3">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="GMOS-N PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -397,7 +397,7 @@ Details:
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Description"/>
             <param name="NoteText">
-              <value>This template shows a longslit science observation with GCAL flats mixed in.
+              <value>This template shows a longslit science observation with GCAL flats and arcs mixed in.
 
 It is assumed that GMOS is mounted on the side-looking ISS port.
 
@@ -406,7 +406,7 @@ An offset sequence nods the target along the slit by 15 arcsec (Q offsets).
 A GMOS-N iterator dithers the grating spectrally in 2 wavelength settings in 
 order to cover the gap between the CCDs and get full wavelength coverage.
 
-The smartGCAL flats will automatically choose the best exposure 
+The smartGCAL flats and arcs will automatically choose the best exposure 
 time for the given instrument configuration.
 
 The other required observations for a Longslit program include:
@@ -416,7 +416,6 @@ Longslit: Science
 
 and the Baseline Calibrations include:
 
-Longslit: Baseline CuAr
 Longslit: Baseline Standard Acquisition
 Longslit: Baseline Standard with GCALflats
 Longslit: Baseline Standard CuAr 
@@ -424,20 +423,6 @@ Longslit: Baseline Twilight flat
 
 
 </value>
-            </param>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="a98aeebc-5efc-4d6d-a778-55175907aa25" name="Note">
-          <paramset name="Note" kind="dataObj">
-            <param name="title" value="On-sky arcs for blue setups"/>
-            <param name="NoteText">
-              <value>On-sky CuAr arc exposures for spectroscopy blue-ward of the 557.7 nm sky line are provided as baseline (nighttime partner) calibrations since semester 2019A. For long-slit spectroscopy, this applies to the following configurations:
--- B1200 grating used at central wavelenghts &lt;= 480 nm
--- B600 grating used at central wavelengths &lt;= 405 nm 
-
-On-sky arc calibrations for setups covering the 557.7 nm or other sky lines can be requested as nighttime program calibrations (charged to the program time), if required. 
-
-Daytime baseline arc lamp exposures will be provided for all spectroscopic observations that do not include on-sky arcs.</value>
             </param>
           </paramset>
         </container>
@@ -451,7 +436,7 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="SLOW"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="B600_G5307"/>
+            <param name="disperser" value="B480_G5309"/>
             <param name="disperserLambda" value="520.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
@@ -488,13 +473,6 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
             <paramset name="GMOS-N Sequence" kind="dataObj">
               <param name="disperserLambda" value="520.0"/>
             </paramset>
-            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="681c6aaa-2c1c-44e9-97eb-ebe128358d30" name="Flat">
-              <paramset name="Flat" kind="dataObj">
-                <param name="repeatCount" value="1"/>
-                <param name="coadds" value="1"/>
-                <param name="exposureTime" value="10.0"/>
-              </paramset>
-            </container>
             <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="e05cfa3a-b611-4c84-a7f0-dda4e08608c5" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <paramset name="offsets">
@@ -524,11 +502,25 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
                 <param name="exposureTime" value="10.0"/>
               </paramset>
             </container>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="d360fe9d-ba85-4355-a6c2-2a38c2b5e9ff" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="c91750d0-d979-4147-b6d5-e897774b8dd2" name="GMOS-N Sequence">
             <paramset name="GMOS-N Sequence" kind="dataObj">
               <param name="disperserLambda" value="525.0"/>
             </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="c3aa889f-2afa-451c-bb22-b02cab0622d5" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="1de8a6b9-41fc-4ed3-a39f-ba4772150b1d" name="Flat">
               <paramset name="Flat" kind="dataObj">
                 <param name="repeatCount" value="1"/>
@@ -557,13 +549,6 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
                   <param name="class" value="SCIENCE"/>
                 </paramset>
               </container>
-            </container>
-            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="056173a3-55f9-47c9-8e31-4a2b09b91c43" name="Flat">
-              <paramset name="Flat" kind="dataObj">
-                <param name="repeatCount" value="1"/>
-                <param name="coadds" value="1"/>
-                <param name="exposureTime" value="10.0"/>
-              </paramset>
             </container>
           </container>
         </container>
@@ -655,7 +640,7 @@ time for the given instrument configuration.
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="B600_G5307"/>
+            <param name="disperser" value="B480_G5309"/>
             <param name="disperserLambda" value="520.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
@@ -987,7 +972,7 @@ when conditions are convenient for observing baseline standards.
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="SLOW"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="B600_G5307"/>
+            <param name="disperser" value="B480_G5309"/>
             <param name="disperserLambda" value="520.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
@@ -1128,7 +1113,7 @@ time for the given instrument configuration.
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="B600_G5307"/>
+            <param name="disperser" value="B480_G5309"/>
             <param name="disperserLambda" value="520.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
@@ -1260,7 +1245,7 @@ The exposure is taken on the sky so the Translation stage should be
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="SLOW"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="B600_G5307"/>
+            <param name="disperser" value="B480_G5309"/>
             <param name="disperserLambda" value="520.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
@@ -1565,43 +1550,21 @@ Details:
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Description"/>
             <param name="NoteText">
-              <value>This example shows a N&amp;S longslit science observation of a faint target with GCAL flats
-mixed in. The instrument is configured based on the Phase I resource selections.
-Nod offset is +-15arcsec, use the standard shuffling (1392 rows and a binning
-of X=2, Y=1. It is assumed that GMOS is mounted on the side-looking ISS port.
+              <value>This example shows a longslit N&amp;S science observation of a faint target with GCAL flats
+and GCAL arcs mixed in. The instrument is configured based on the Phase I resource selections.
 
-The observations contain 1 science exposure and 1 GCALflat at each
+It is assumed that GMOS is mounted on the side-looking ISS port.
+
+The example uses binning X=2 and Y=1, a nod offset of +/-15arcsec, and a shuffle offset of 
+1392 unbinned detector rows. The nod offset is defined by the user. Nods are performed in the 
+q direction, i.e. along the slit. The shuffle offset is set by the total number of detector rows and 
+should not be changed for the N&amp;S longslit mode. 1392 corresponds to  1/3 of the detector rows. 
+See the GMOS N&amp;S webpages for further details on the N&amp;S configuration.
+
+The observations contain 1 science exposure, 1 GCALflat, and 1 GCALarc at each
 of 3 wavelength settings, 770nm, 780nm and 790nm. Three wavelength settings
 are used to cover the gap between the CCDs and get full wavelength
-coverage. An DtaX offset (0,4,-4) is used in each wavelength setting.
-
-The exposures are the follow:
-   science  at 780nm, DtaX=0
-   GCALflat at 780nm, DtaX=0
-   GCALflat at 780nm. DtaX=4
-   science  at 780nm DtaX=4
-   science  at 780nm, DtaX=-4
-   GCALflat at 780nm, DtaX=-4
-   GCALflat at 790nm. DtaX=0
-   science  at 790nm DtaX=0
-   science  at 790nm, DtaX=4
-   GCALflat at 790nm, DtaX=4
-   science  at 790nm, DtaX=-4
-   GCALflat at 790nm, DtaX=-4
-   science  at 770nm, DtaX=0
-   GCALflat at 770nm, DtaX=0
-   GCALflat at 770nm. DtaX=4
-   science  at 770nm DtaX=4
-   science  at 770nm, DtaX=-4
-   GCALflat at 770nm, DtaX=-4
-
-DTA-X offsetting was implemented to aid in the suppression of linear charge traps affecting 
-Nod &amp; Shuffle data in the original EEV detectors. With the upgraded GMOS-N and GMOS-S 
-Hamamatsu detectors DTA-X offsetting is no longer as advantageous; see the N&amp;S web pages.  
-Here by using four GMOS-N Sequences to change central wavelength and dither the DTAX we save 
-on overhead with an efficient science-flat-flat-science-science-flat-flat-science 
-arrangement, minimizing the number of calibration congfiguration movements 
-required.
+coverage. 
 
 </value>
             </param>
@@ -1672,177 +1635,75 @@ required.
             <paramset name="GMOS-N Sequence" kind="dataObj">
               <param name="disperserLambda" value="780.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="ee03ce5c-8949-42d2-b205-723df9114faf" name="GMOS-N Sequence">
-              <paramset name="GMOS-N Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="ZERO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="f2e9cd47-454f-4c7e-b1e8-1d8447e21502" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="SCIENCE"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="5b333aab-d144-4238-aaf8-5719bc20dadd" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="9203b1b4-4b50-4a8b-9818-561c478a1b2a" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="b1404f77-a197-411a-96ba-a39cb5a2dc5f" name="GMOS-N Sequence">
-              <paramset name="GMOS-N Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="FOUR"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="f6899c91-e621-42b8-a23d-d990feea0842" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="c07ee2ea-a4cb-4cb2-b7e4-4941be2b2d4a" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="46373244-6789-424b-baac-2122136f7764" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="7f13f4de-4e9e-4005-93f4-90507fa95bb7" name="GMOS-N Sequence">
-              <paramset name="GMOS-N Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="MFOUR"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="a0290534-df52-4e8a-82a4-dbba6887c79a" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="a5613f95-03c2-4673-84bc-27dea85340b9" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="f9683117-33fe-4a61-9adc-28483df96b5b" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
             </container>
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="aee44f92-1060-4510-a0c5-e40970adc8cc" name="GMOS-N Sequence">
             <paramset name="GMOS-N Sequence" kind="dataObj">
               <param name="disperserLambda" value="790.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="107c2916-72d0-48d2-b4be-67aad2258642" name="GMOS-N Sequence">
-              <paramset name="GMOS-N Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="ZERO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="71f35e24-f6f4-4444-9d59-3fa1896af882" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="5bdfbcd5-ebf5-475a-8e0a-78df199028bb" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="fc0392c0-38f1-483b-ab2f-100daf1be376" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="0e9322c4-0734-4a81-a11a-2a57c82ab4f9" name="GMOS-N Sequence">
-              <paramset name="GMOS-N Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="FOUR"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="25aa815a-2d23-49ee-8914-5dcb4b231c75" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="4d7a8c7c-7d4e-4d8c-a518-a301625723f1" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="00851daf-23b8-4242-9e6b-8f0c8566d453" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="9fefb7d9-86d1-4685-a530-d19211165d3c" name="GMOS-N Sequence">
-              <paramset name="GMOS-N Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="MFOUR"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="77103f53-1736-471c-8c92-51318ccaf909" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="SCIENCE"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="dcdf9c5b-13ac-4630-8800-252e881092f6" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="4612632e-e4ec-4c73-ad3e-530d5f017423" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
             </container>
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="0d8e537f-a768-40f3-9cae-75e14c6e80f0" name="GMOS-N Sequence">
             <paramset name="GMOS-N Sequence" kind="dataObj">
               <param name="disperserLambda" value="770.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="d9482198-0f7c-4fb0-a398-0c8a59fadaa7" name="GMOS-N Sequence">
-              <paramset name="GMOS-N Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="ZERO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="8e07bdb1-c64a-432c-bfed-7f5aa881d048" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="SCIENCE"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="6325e47d-284f-4cd4-a386-85546e86982b" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="65fa6890-c484-4059-887e-d5abb8db4d18" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="293416c7-5bc5-4ddf-bd2a-13ff47646b63" name="GMOS-N Sequence">
-              <paramset name="GMOS-N Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="FOUR"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="0fe04736-c347-4a2e-9cf8-8b22bd5ca9df" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="50c878b3-6180-4be1-b0a5-23d0c8d781b9" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="e048fb5b-075e-4610-ab50-b4916caf7e92" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="35fdde31-6a26-4b79-b4b9-fce31abb94b1" name="GMOS-N Sequence">
-              <paramset name="GMOS-N Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="MFOUR"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="43541edd-41d9-4d69-a020-2170c27d308b" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="f3211da2-908c-41ce-b090-e4f06e48f201" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="fb5e8fa3-66d0-49c2-9023-fc76a03fa85a" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
             </container>
           </container>
         </container>
@@ -3270,7 +3131,7 @@ gacq *filenumber*
             <param name="title" value="Description"/>
             <param name="NoteText">
               <value>This example shows a MOS science observation with GCAL flats
-mixed in.
+and arcs mixed in.
 The mask is for the program GNYYYYSQXXX-NN 
 It is assumed that GMOS is mounted on the side-looking ISS port.
 
@@ -3288,19 +3149,10 @@ Where YYYY is the year, (A/B) stands for either semester A or B, (Q/C/DD/SV) sta
 for either Queue, Classical, Director's Discretionary or Science Verification programs, 
 PPP is the program number, and MM is the mask number (a MOS PI may design several
 masks for use, with a technical limit of 99 masks).
+
+The slit width will need to be set to the value that matches (or is closest) to the slit width
+used for the mask. GCAL arcs and flats will remain undefined until the slit width is added. 
 </value>
-            </param>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="3f0756e8-f7ea-4bc3-a58b-7ddc473aae04" name="Note">
-          <paramset name="Note" kind="dataObj">
-            <param name="title" value="On-sky arcs for blue setups"/>
-            <param name="NoteText">
-              <value>On-sky CuAr arc exposures for spectroscopy blue-ward of the 557.7 nm sky line are provided as baseline (nighttime partner) calibrations since semester 2019A. 
-
-On-sky arc calibrations for setups covering the 557.7 nm or other sky lines can be requested as nighttime program calibrations (charged to the program time), if required. 
-
-Daytime baseline arc lamp exposures will be provided for all spectroscopic observations that do not include on-sky arcs.</value>
             </param>
           </paramset>
         </container>
@@ -3314,13 +3166,13 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="SLOW"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="B600_G5307"/>
+            <param name="disperser" value="B480_G5309"/>
             <param name="disperserLambda" value="520.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="CUSTOM_MASK"/>
             <param name="fpu" value="CUSTOM_MASK"/>
             <param name="fpuCustomMask" value="GNYYYYSQXXX-NN"/>
-            <param name="customSlitWidth" value="CUSTOM_WIDTH_1_00"/>
+            <param name="customSlitWidth" value="OTHER"/>
             <param name="filter" value="NONE"/>
             <param name="ccdXBinning" value="TWO"/>
             <param name="ccdYBinning" value="TWO"/>
@@ -3353,13 +3205,6 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
             <paramset name="GMOS-N Sequence" kind="dataObj">
               <param name="disperserLambda" value="520.0"/>
             </paramset>
-            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="704f168e-8c8e-43ec-b377-a1874699323d" name="Flat">
-              <paramset name="Flat" kind="dataObj">
-                <param name="repeatCount" value="1"/>
-                <param name="coadds" value="1"/>
-                <param name="exposureTime" value="10.0"/>
-              </paramset>
-            </container>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="29f283b5-8dff-4798-aa91-522317e16061" name="Observe">
               <paramset name="Observe" kind="dataObj">
                 <param name="repeatCount" value="1"/>
@@ -3373,11 +3218,25 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
                 <param name="exposureTime" value="10.0"/>
               </paramset>
             </container>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="d29c0b1a-4cad-4078-aa86-6b57283b73c0" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="45c8a300-c8c5-4cd3-a55e-bca2b8c58e37" name="GMOS-N Sequence">
             <paramset name="GMOS-N Sequence" kind="dataObj">
               <param name="disperserLambda" value="530.0"/>
             </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="e858de84-e5e2-4ddf-81c0-502e55e091bb" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="26032384-b381-42c0-9b2b-12321a037d9c" name="Flat">
               <paramset name="Flat" kind="dataObj">
                 <param name="repeatCount" value="1"/>
@@ -3391,25 +3250,11 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
                 <param name="class" value="SCIENCE"/>
               </paramset>
             </container>
-            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="eb9b0ff7-49eb-4c0e-83f4-1e70011e0f3d" name="Flat">
-              <paramset name="Flat" kind="dataObj">
-                <param name="repeatCount" value="1"/>
-                <param name="coadds" value="1"/>
-                <param name="exposureTime" value="10.0"/>
-              </paramset>
-            </container>
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="150ef984-546d-47c3-8a36-91a0cfc7f10c" name="GMOS-N Sequence">
             <paramset name="GMOS-N Sequence" kind="dataObj">
               <param name="disperserLambda" value="540.0"/>
             </paramset>
-            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="8272947f-0b70-4b4e-9d28-eaad67abf48e" name="Flat">
-              <paramset name="Flat" kind="dataObj">
-                <param name="repeatCount" value="1"/>
-                <param name="coadds" value="1"/>
-                <param name="exposureTime" value="10.0"/>
-              </paramset>
-            </container>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="faef3496-a3a4-4e9a-8693-b60b3f3fda33" name="Observe">
               <paramset name="Observe" kind="dataObj">
                 <param name="repeatCount" value="1"/>
@@ -3418,6 +3263,13 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
             </container>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="148f4a59-ea20-465e-befa-edf011e1028f" name="Flat">
               <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="2c9f0984-1cd9-48ff-882a-02e95a5406c3" name="Arc">
+              <paramset name="Arc" kind="dataObj">
                 <param name="repeatCount" value="1"/>
                 <param name="coadds" value="1"/>
                 <param name="exposureTime" value="10.0"/>
@@ -3515,13 +3367,13 @@ time for the given slit width.
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="B600_G5307"/>
+            <param name="disperser" value="B480_G5309"/>
             <param name="disperserLambda" value="520.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="CUSTOM_MASK"/>
             <param name="fpu" value="CUSTOM_MASK"/>
             <param name="fpuCustomMask" value="GNYYYYSQXXX-NN"/>
-            <param name="customSlitWidth" value="CUSTOM_WIDTH_1_00"/>
+            <param name="customSlitWidth" value="OTHER"/>
             <param name="filter" value="NONE"/>
             <param name="ccdXBinning" value="TWO"/>
             <param name="ccdYBinning" value="TWO"/>
@@ -3838,7 +3690,7 @@ masks for use, with a technical limit of 99 masks).</value>
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="SLOW"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="B600_G5307"/>
+            <param name="disperser" value="B480_G5309"/>
             <param name="disperserLambda" value="520.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="CUSTOM_MASK"/>
@@ -4151,6 +4003,7 @@ standard star observations either spatially or spectrally.
 We recommend the following grating specific wavelength settings:
 
 R400: science central wavelength +/- 150 nm
+B480: science central wavelength +/- 125 nm
 B600: science central wavelength +/- 100 nm
 R600: science central wavelength +/- 100 nm
 R831: science central wavelength +/- 80 nm
@@ -4174,8 +4027,8 @@ spectrophotometric baseline standards.
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="SLOW"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="B600_G5307"/>
-            <param name="disperserLambda" value="420.0"/>
+            <param name="disperser" value="B480_G5309"/>
+            <param name="disperserLambda" value="395.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
             <param name="fpu" value="LONGSLIT_4"/>
@@ -4221,7 +4074,7 @@ spectrophotometric baseline standards.
           <paramset name="Sequence" kind="dataObj"/>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="1be5f6c7-f41e-40e0-b7ee-91a818f73ce3" name="GMOS-N Sequence">
             <paramset name="GMOS-N Sequence" kind="dataObj">
-              <param name="disperserLambda" value="420.0"/>
+              <param name="disperserLambda" value="395.0"/>
             </paramset>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="1ea9b347-afed-47d6-8d7c-ed825e816b60" name="Observe">
               <paramset name="Observe" kind="dataObj">
@@ -4257,7 +4110,7 @@ spectrophotometric baseline standards.
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="b359576e-9191-4e46-b38b-4f401a486f7a" name="GMOS-N Sequence">
             <paramset name="GMOS-N Sequence" kind="dataObj">
-              <param name="disperserLambda" value="620.0"/>
+              <param name="disperserLambda" value="645.0"/>
             </paramset>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="f23bb88c-2e18-41e2-b16f-0a48c01ed975" name="Observe">
               <paramset name="Observe" kind="dataObj">
@@ -4357,7 +4210,7 @@ as used for the Baseline Standard observation.
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="B600_G5307"/>
+            <param name="disperser" value="B480_G5309"/>
             <param name="disperserLambda" value="420.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
@@ -4812,11 +4665,10 @@ gacq *filenumber*
             <param name="title" value="Description"/>
             <param name="NoteText">
               <value>This example shows a MOS Nod&amp;Shuffle science observation with GCAL flats
-mixed in. 
+and arcs mixed in. 
 
 The instrument is configured based on the Phase I resource selections. 
-A mask with the name  GNYYYYSQXXX-NN is used. 
-The mask slit width is to be set by the user. The mask used in this example does not 
+A mask with the name  GNYYYYSQXXX-NN is used. The mask used in this example does not 
 exist, but the N&amp;S static component is set to use an offset (shuffle distance) of 
 63 detector rows, corresponding to a distance of 5.09".  This would be appropriate 
 for a MOS mask designed to use micro-shuffling with a slit length of 5.09".
@@ -4829,22 +4681,11 @@ defined with respect to the slit center and should be smaller than the half the
 defined slit length.  The NODs are only in the q direction, along the slit, and not in 
 the p direction which is across the slit.
 
-DTA-X offsetting was implemented to aid in the suppression of linear charge traps affecting 
-Nod &amp; Shuffle data in the original EEV detectors. With the upgraded GMOS-N and GMOS-S 
-Hamamatsu detectors DTA-X offsetting is no longer as advantageous; see the N&amp;S web pages.
-The sequence also dithers the grating spectrally by by 10 nm above and below the 
-central wavelength in order to fill in the information missing due to the gaps between the detectors.
-
 It is assumed that GMOS is mounted on the side-looking ISS port.
 
 Because the total extent of the N&amp;S nod is small (&lt;2arcsec) the user can
 select electronic offsetting.  This is recommended since it will significantly
 reduce the N&amp;S overhead.
-
-The observation contains nested GMOS-N iterators in order to sequence both  the DTAX
-and the central wavelength.  By using nested GMOS-N Sequences to dither the DTAX and 
-central wavelength we save on overhead with an efficient flat-science-science-flat-flat-science 
-arrangement, minimizing the numberof calibration congfiguration movements required.
 
 Each science exposure consists of 10 N&amp;S cycles. The nods are along the 
 slits, keeping the science targets in the slits at all times. The total on-target
@@ -4864,13 +4705,11 @@ and the Baseline Calibrations include:
 
 MOS: N&amp;S Dark
 MOS: Mask Image (one for each MOS mask)
-MOS: CuAr (one for each MOS mask)
 MOS: Acq (Standard)
 MOS: Standard w/ flats
 MOS: CuAr (Standard)
 MOS: Twilight flat (optional, one for each MOS mask)
 
-Normally for MOS observations the MOS: Acq, MOS: N&amp;S Science, MOS: Mask Image, MOS: CuAr and MOS: Twilight are organized into a separate folder for each MOS mask, while the MOS: N&amp;S Dark, MOS: Acq (Standard), MOS: Standard w/ flats, and MOS: CuAr (Standard) are organized together in a separate Baseline Calibrations folder.
 
 The maskname used in this template will have to be edited in order to match the 
 MOS mask name used by the science program.  The mask name has the following
@@ -4882,6 +4721,9 @@ Where YYYY is the year, (A/B) stands for either semester A or B, (Q/C/DD/SV) sta
 for either Queue, Classical, Director's Discretionary or Science Verification programs, 
 PPP is the program number, and MM is the mask number (a MOS PI may design several
 masks for use, with a technical limit of 99 masks).
+
+The slit width will need to be set to the value that matches (or is closest) to the slit width
+used for the mask. GCAL arcs and flats will remain undefined until the slit width is added. 
 </value>
             </param>
           </paramset>
@@ -4953,177 +4795,75 @@ masks for use, with a technical limit of 99 masks).
             <paramset name="GMOS-N Sequence" kind="dataObj">
               <param name="disperserLambda" value="780.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="99cf0f5b-a003-4971-a979-5a7e2727da2c" name="GMOS-N Sequence">
-              <paramset name="GMOS-N Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="ZERO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="a70d255c-d457-46cf-b019-2284a406c76d" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="SCIENCE"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="20cea1d9-59ef-48e4-b585-f66d61ac0a44" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="e3757578-74f4-4c67-921b-6ec0fb07b78c" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="8a46a498-26cd-48b5-981a-5ce5f9f4af40" name="GMOS-N Sequence">
-              <paramset name="GMOS-N Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="FOUR"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="367c09ad-8db9-4770-9feb-0a60ebb05b3a" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="055af8ac-befe-4a59-867b-50ed10887bbe" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="a353c925-6a86-4847-acc5-ed0a29f2f311" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="5d579987-a79e-4751-87f5-13491d9b1b14" name="GMOS-N Sequence">
-              <paramset name="GMOS-N Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="MFOUR"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="c5ada0f6-550f-4e08-96ee-cf278dc88b99" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="81b04bbb-5fe6-49ca-8b67-2c0a33895a43" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="a0aafa34-5bb4-420d-a375-5bb3666d3eaf" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
             </container>
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="3cad9022-e1bf-44e2-a453-0f630d3b2c40" name="GMOS-N Sequence">
             <paramset name="GMOS-N Sequence" kind="dataObj">
               <param name="disperserLambda" value="790.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="cc48ac97-e27e-4b52-8f26-353259e20b79" name="GMOS-N Sequence">
-              <paramset name="GMOS-N Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="ZERO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="3c2f8162-1754-4c28-8b9f-700ae271cebd" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="d964416a-3fe6-44af-aac8-773a4f476015" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="ab75b9ec-c076-4900-bf9f-0469cc539008" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="625b9ff4-7249-4274-9433-ec263ac0cb01" name="GMOS-N Sequence">
-              <paramset name="GMOS-N Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="FOUR"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="dfc98654-da4d-4e70-a14e-4c8007dc57e2" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="fe42a1ea-5fb2-4a53-88ce-efc8f6b2df50" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="4aca5aa1-a2e0-4f0b-bdbb-9f118259c5c5" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="dab7c4fb-519f-459e-a7bf-0d3e3860fa3d" name="GMOS-N Sequence">
-              <paramset name="GMOS-N Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="MFOUR"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="f8c5f033-0c0a-4088-a497-e680ea013eaa" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="SCIENCE"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="26c389ff-5a17-45f3-b057-781db2a96197" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="48973547-179f-4e4c-b22e-5bd3e19b976f" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
             </container>
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="6ff822df-efbf-4496-93b3-9b97cda73c7a" name="GMOS-N Sequence">
             <paramset name="GMOS-N Sequence" kind="dataObj">
               <param name="disperserLambda" value="770.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="6dd020dd-7892-4c9c-84ec-b062da1a8ce9" name="GMOS-N Sequence">
-              <paramset name="GMOS-N Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="ZERO"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="7f5ee991-1dc1-44d7-8cea-71c07a9806ab" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="SCIENCE"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="8c975cab-94dc-4dad-9429-d8feb0f8a3b7" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="930cc5f5-5fa2-4041-9bca-41d344f786ed" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="c5a48dd8-3afe-49c7-9884-761896bf0250" name="GMOS-N Sequence">
-              <paramset name="GMOS-N Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="FOUR"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="dcb4d0f7-bbbc-4fa7-94e9-da3e72a56730" name="Flat">
+              <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="d15976f0-5d44-4020-8fa8-cd0b6730cdc8" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="c77ef2aa-c306-46e3-aa3e-546af473e79d" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="32b5e98e-8976-4dcd-9f16-e26e4b313312" name="GMOS-N Sequence">
-              <paramset name="GMOS-N Sequence" kind="dataObj">
-                <param name="dtaXOffset" value="MFOUR"/>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="512720a5-e00d-4675-a0f3-0089dfbccb0a" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="50aee326-e02b-462b-b5a1-b81cbea4206f" name="Flat">
-                <paramset name="Flat" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
-                </paramset>
-              </container>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="9b811c05-b6fb-46c7-9054-42ed88ea65ca" name="Observe">
-                <paramset name="Observe" kind="dataObj">
-                  <param name="repeatCount" value="1"/>
-                  <param name="class" value="SCIENCE"/>
-                </paramset>
-              </container>
             </container>
           </container>
         </container>
@@ -5837,6 +5577,7 @@ standard star observations either spatially or spectrally.
 We recommend the following grating specific wavelength settings:
 
 R400: science central wavelength +/- 150 nm
+B480: science central wavelength +/- 125 nm
 B600: science central wavelength +/- 100 nm
 R600: science central wavelength +/- 100 nm
 R831: science central wavelength +/- 80 nm
@@ -6298,19 +6039,21 @@ will approximately fall in the IFU field of view.
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Description"/>
             <param name="NoteText">
-              <value>This example shows an IFU observation followed by a GCAL flat field.
+              <value>This example shows an IFU observation followed by a GCAL flat and arc.
 
 The instrument is configured based on the Phase I resource selections.
 It is assumed that GMOS is mounted on the side-looking ISS port.
 
-For targets fainter than R~18mag, imaging through the IFU will take too long.  Instead a blind offset acquisition should be used.  
+If your science target cannot be detected in imaging mode in one of the GMOS filters in about 1 min of exposure time 
+(corresponding to about 3 min of through-IFU exposures), you will need to define a blind offset acquisition.  
 For more information on blind offsetting, please see https://www.gemini.edu/observing/telescopes-and-sites/telescopes#Acquisition.
-For help setting up the acquistion, see the Description note for the "Longslit Acquisition (Blind Offset)" within the Templates: Spectroscopy Acquisition Observations folder.  
-If it is not possible to find a nearby reference star with well known coordinates for blind offsetting, make the 2nd step be another imaging exposure, such that the position 
-of the target on the CCD in imaging mode can be checked after the initial telescope offset has been determined and applied. The blind offset method is preferred because 
-the user can  directly measure from the acquisition image where the science target will approximately fall in the IFU field of view. 
+For help setting up the acquistion, see the Description note for the "Longslit Acquisition (Blind Offset)" within the 
+Templates: Spectroscopy Acquisition Observations folder. If it is not possible to find a nearby reference star with well known coordinates 
+for blind offsetting, make the 2nd step be another imaging exposure, such that the position of the target on the CCD in imaging mode 
+can be checked after the initial telescope offset has been determined and applied. The blind offset method is preferred because the user 
+can  directly measure from the acquisition image where the science target will approximately fall in the IFU field of view. 
 
-The smartGCAL flat will automatically choose the best exposure 
+The smartGCAL flats and arcs will automatically choose the best exposure 
 time for the given instrument configuration.
 
 
@@ -6321,26 +6064,10 @@ IFU: Science
 
 and the Baseline Calibrations include:
 
-IFU: Baseline CuAr arc
 IFU: Baseline Standard: acquisition observation 
 IFU: Baseline Standard: observation with GCALflat
 IFU: Baseline Standard CuAr arc 
 IFU: Baseline Twilight </value>
-            </param>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="8da48740-4b68-4f80-89b4-8d78022fe45a" name="Note">
-          <paramset name="Note" kind="dataObj">
-            <param name="title" value="On-sky arcs for blue setups"/>
-            <param name="NoteText">
-              <value>On-sky CuAr arc exposures for spectroscopy blue-ward of the 557.7 nm sky line are provided as baseline (nighttime partner) calibrations since semester 2019A. For IFU spectroscopy, this applies to the following configurations:
--- B1200 configurations using central wavelenghts &lt;= 480 nm
--- B600 configurations using central wavelengths &lt;= 405 nm
--- or IFU-2 configurations using B600+g', B1200+g'+OG515, R831+g'+GG455, or R600+g' 
-
-On-sky arc calibrations for setups covering the 557.7 nm or other sky lines can be requested as nighttime program calibrations (charged to the program time), if required. 
-
-Daytime baseline arc lamp exposures will be provided for all spectroscopic observations that do not include on-sky arcs.</value>
             </param>
           </paramset>
         </container>
@@ -6391,13 +6118,6 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
             <paramset name="GMOS-N Sequence" kind="dataObj">
               <param name="disperserLambda" value="780.0"/>
             </paramset>
-            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="0629e21b-65e0-4a9d-8b91-88de04fc993c" name="Flat">
-              <paramset name="Flat" kind="dataObj">
-                <param name="repeatCount" value="1"/>
-                <param name="coadds" value="1"/>
-                <param name="exposureTime" value="10.0"/>
-              </paramset>
-            </container>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="fa3e427c-db34-4ead-894e-7caa1f1520cf" name="Observe">
               <paramset name="Observe" kind="dataObj">
                 <param name="repeatCount" value="2"/>
@@ -6411,11 +6131,25 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
                 <param name="exposureTime" value="10.0"/>
               </paramset>
             </container>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="50deea50-c300-4cda-903b-5aad8d5044b4" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="3ce7b519-c9e5-4128-9f82-e52bc42140ce" name="GMOS-N Sequence">
             <paramset name="GMOS-N Sequence" kind="dataObj">
               <param name="disperserLambda" value="790.0"/>
             </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="2eb32897-593d-442a-8d94-aba232c8c61d" name="Arc">
+              <paramset name="Arc" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="9bcb3f17-143f-49ce-98b9-40c4abb0720e" name="Flat">
               <paramset name="Flat" kind="dataObj">
                 <param name="repeatCount" value="1"/>
@@ -6429,25 +6163,11 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
                 <param name="class" value="SCIENCE"/>
               </paramset>
             </container>
-            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="50ff8269-031e-4e57-9e4d-82b1dcf60be4" name="Flat">
-              <paramset name="Flat" kind="dataObj">
-                <param name="repeatCount" value="1"/>
-                <param name="coadds" value="1"/>
-                <param name="exposureTime" value="10.0"/>
-              </paramset>
-            </container>
           </container>
           <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOS" key="3e197f4a-4d28-4aa4-b3c0-47a7c87f023d" name="GMOS-N Sequence">
             <paramset name="GMOS-N Sequence" kind="dataObj">
               <param name="disperserLambda" value="770.0"/>
             </paramset>
-            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="28175b67-62b3-434c-b734-883d531d4609" name="Flat">
-              <paramset name="Flat" kind="dataObj">
-                <param name="repeatCount" value="1"/>
-                <param name="coadds" value="1"/>
-                <param name="exposureTime" value="10.0"/>
-              </paramset>
-            </container>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="1b1df709-a20f-4261-a914-d15dea4a1730" name="Observe">
               <paramset name="Observe" kind="dataObj">
                 <param name="repeatCount" value="2"/>
@@ -6456,6 +6176,13 @@ Daytime baseline arc lamp exposures will be provided for all spectroscopic obser
             </container>
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="de0e850f-ff14-4301-996d-e1de7b527b85" name="Flat">
               <paramset name="Flat" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="f26f4010-4f68-4595-aced-ebc91aae1f0e" name="Arc">
+              <paramset name="Arc" kind="dataObj">
                 <param name="repeatCount" value="1"/>
                 <param name="coadds" value="1"/>
                 <param name="exposureTime" value="10.0"/>
@@ -7179,6 +6906,7 @@ time for the given instrument configuration.
       <param name="key" value="93570bc8-3ed1-4357-b4ce-e8fb19566bf2"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
       <param name="bc304bbe-c57c-4867-aefe-ba650a1f02b8" value="2"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="66143c16-0211-4d8b-8ec8-06da9f91b98d"/>
@@ -7208,6 +6936,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="073fc42b-738a-46e6-b35f-4e5081c796bc"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="ee5e9eba-249b-4cad-be82-98a5383ab04c"/>
@@ -7273,6 +7002,7 @@ time for the given instrument configuration.
       <param name="key" value="69ea82c3-9e20-49cc-8603-0ab3a02fea85"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
       <param name="2c5f9d9b-dd36-43a1-985e-40b62f97c03c" value="18"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="39"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="31420daa-15eb-4c59-9e2f-d8efb5459989"/>
@@ -7333,6 +7063,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="aee44f92-1060-4510-a0c5-e40970adc8cc"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="6"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="87a93971-29c3-40d4-8ce6-d9bacf46335b"/>
@@ -7389,6 +7120,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="226f6169-e0fe-42d8-b86f-deba98fff2e3"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="75d04b48-09b9-4397-9510-8ff5cfe615d0"/>
@@ -7503,6 +7235,10 @@ time for the given instrument configuration.
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="0fe04736-c347-4a2e-9cf8-8b22bd5ca9df"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="cebb0681-a34b-4449-b64b-81eaaea5cfec"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
     </paramset>
@@ -7595,6 +7331,10 @@ time for the given instrument configuration.
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="50deea50-c300-4cda-903b-5aad8d5044b4"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="c394beb0-c9b5-44dd-8f17-acc9a1332136"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
     </paramset>
@@ -7625,6 +7365,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="0d8e537f-a768-40f3-9cae-75e14c6e80f0"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="6"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e2c42f9e-b217-454b-b2a2-8503ec04e43d"/>
@@ -7653,10 +7394,15 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="6f1c5707-d34b-4e6e-955a-22fbda47fab8"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f938650e-ff58-4a40-af4e-06ada805a4da"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7f5ee991-1dc1-44d7-8cea-71c07a9806ab"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="9b50ab68-292c-40f7-a144-da41f9da316e"/>
@@ -7683,9 +7429,15 @@ time for the given instrument configuration.
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="d29c0b1a-4cad-4078-aa86-6b57283b73c0"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="ac78fa02-c2a6-4aee-bb25-263825886137"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
       <param name="190718b9-50ad-45c9-8274-d2a9c89502c8" value="2"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="48"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="8"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="0d94736c-76b6-421f-9fcc-8744da7f9762"/>
@@ -7731,6 +7483,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="acd2d7be-94c0-4964-9042-3349f792efa3"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="fe42a1ea-5fb2-4a53-88ce-efc8f6b2df50"/>
@@ -7751,10 +7504,15 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="d9e7c1e5-5fc8-4723-af98-a6b1d6400b9f"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="0121d465-bad9-4e93-ac5c-4532e25fdeab"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="25aa815a-2d23-49ee-8914-5dcb4b231c75"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5fdd546f-6bfd-41d4-aff7-02210eda5175"/>
@@ -7793,6 +7551,10 @@ time for the given instrument configuration.
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="a70d255c-d457-46cf-b019-2284a406c76d"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="c07adbe4-c09b-4f7f-b4d8-54a2f0e8f7eb"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
     </paramset>
@@ -7803,6 +7565,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="5a22caec-63bf-4f60-9755-e894e826a3cc"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="4d181922-0ff6-40ff-90e4-71e837e979d2" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="6f2e8bda-8709-4329-a556-a17f394d2616"/>
@@ -7889,6 +7652,10 @@ time for the given instrument configuration.
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="dfc98654-da4d-4e70-a14e-4c8007dc57e2"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="a353c925-6a86-4847-acc5-ed0a29f2f311"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
     </paramset>
@@ -7953,8 +7720,13 @@ time for the given instrument configuration.
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="2eb32897-593d-442a-8d94-aba232c8c61d"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="b359576e-9191-4e46-b38b-4f401a486f7a"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="4d181922-0ff6-40ff-90e4-71e837e979d2" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5c629495-3200-497d-a74d-48499c3bcc08"/>
@@ -7988,6 +7760,7 @@ time for the given instrument configuration.
       <param name="key" value="ebe88633-51f4-4069-ad2a-dd0287f63a67"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
       <param name="bc304bbe-c57c-4867-aefe-ba650a1f02b8" value="2"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="6165bf89-c5ad-42f9-84d4-1443300a93ee"/>
@@ -8020,6 +7793,11 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="2d972de0-c190-4069-98bc-8898ff53eb97"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="2"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f2e9cd47-454f-4c7e-b1e8-1d8447e21502"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="2c488e55-10d1-4cba-b0dc-03a3cdec5033"/>
@@ -8049,6 +7827,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="d93cef29-7308-42f8-9dfc-989f8ccba8a4"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="6"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="1221f99d-40e4-440e-ad6d-b33713b21da0"/>
@@ -8061,10 +7840,12 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="3189b0da-a0e1-450a-900d-ba8e235ddad2"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="6"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="45c8a300-c8c5-4cd3-a55e-bca2b8c58e37"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="4f60aba7-ae2b-485a-902e-c3739d0d0401"/>
@@ -8079,8 +7860,17 @@ time for the given instrument configuration.
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="f6899c91-e621-42b8-a23d-d990feea0842"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="3cad9022-e1bf-44e2-a453-0f630d3b2c40"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="6"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8e07bdb1-c64a-432c-bfed-7f5aa881d048"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="3095486d-0f67-4620-920b-f2810cdff20c"/>
@@ -8139,6 +7929,10 @@ time for the given instrument configuration.
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="9889a384-d0f3-4fd8-afa3-b985a3d4a4a5"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="071705d6-a8eb-42cd-b9ee-64a8c33a940a"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
     </paramset>
@@ -8174,6 +7968,7 @@ time for the given instrument configuration.
       <param name="key" value="e3cbe75a-8b3c-460f-9959-077abe9cde88"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
       <param name="2c5f9d9b-dd36-43a1-985e-40b62f97c03c" value="2"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f45645a1-8c52-4703-8967-a62b8b23f45a"/>
@@ -8186,6 +7981,11 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="7cf7b449-9f3e-4e5b-aede-53291c2d106e"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="4"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a0290534-df52-4e8a-82a4-dbba6887c79a"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="b4a31bbb-9a35-4faf-acbd-c3b0459a5ee7"/>
@@ -8206,6 +8006,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="0be90a88-b9be-4922-a5e4-e29b0483630f"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a670374f-4778-4832-bdde-e86977f1e8df"/>
@@ -8214,10 +8015,15 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="50d3f796-882a-4f3f-b4f5-258d2e81c891"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="148f4a59-ea20-465e-befa-edf011e1028f"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="512720a5-e00d-4675-a0f3-0089dfbccb0a"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="17489a78-f512-445e-a237-b70428325482"/>
@@ -8288,6 +8094,10 @@ time for the given instrument configuration.
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="77103f53-1736-471c-8c92-51318ccaf909"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="a98aeebc-5efc-4d6d-a778-55175907aa25"/>
       <param name="bc304bbe-c57c-4867-aefe-ba650a1f02b8" value="327"/>
     </paramset>
@@ -8314,6 +8124,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="3ce7b519-c9e5-4128-9f82-e52bc42140ce"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="28647a3b-fd08-4c36-9412-ed8dd77976e4"/>
@@ -8354,6 +8165,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="039966ef-7558-44ef-9c3e-35b1d847e3cc"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="21f265b1-8f24-4251-bab2-3571722c6d5c"/>
@@ -8390,6 +8202,11 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="3cacdb9a-0c38-4e4b-b8f8-32b8782f98de"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="2"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="367c09ad-8db9-4770-9feb-0a60ebb05b3a"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="584a6768-6c9a-40c2-9725-7da8d73d185e"/>
@@ -8399,6 +8216,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="300a9db0-5fb5-42fd-ae58-a8bb3167a2b3"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="acd95727-e850-475d-9153-71aa09a146b0"/>
@@ -8415,6 +8233,8 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="13c0cfd1-bb01-4b0a-b79b-8a088c2e8183"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="9"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="303"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a1579c87-ab76-4c73-9b7f-d0b1e3d86eca"/>
@@ -8423,6 +8243,8 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="c8f2c7f6-503c-42c2-b465-8895a087a1ea"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
+      <param name="4d181922-0ff6-40ff-90e4-71e837e979d2" value="5"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="ff748dc8-9dea-45d0-a31f-b103fff0a23c"/>
@@ -8435,6 +8257,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="3e197f4a-4d28-4aa4-b3c0-47a7c87f023d"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="294bf61b-fd3a-4e3f-a565-bc0ac3289582"/>
@@ -8464,10 +8287,15 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="c91750d0-d979-4147-b6d5-e897774b8dd2"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="7f381d16-1c9a-4f0e-bbbc-fb3a45248060"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e858de84-e5e2-4ddf-81c0-502e55e091bb"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a20cf44f-2119-40de-979f-9d5474f709cb"/>
@@ -8488,6 +8316,10 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="c819b5e3-3ff5-456e-9785-b8d7df111106"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b1ea99fe-c35f-4028-84e3-26b208276e71"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="db68a6b0-7afc-460f-8b67-09b3dfca0a7b"/>
@@ -8630,6 +8462,11 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="150ef984-546d-47c3-8a36-91a0cfc7f10c"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="2"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f26f4010-4f68-4595-aced-ebc91aae1f0e"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="bc81d392-0b9d-4808-afa4-17e76ad43bf4"/>
@@ -8659,6 +8496,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="1be5f6c7-f41e-40e0-b7ee-91a818f73ce3"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="4d181922-0ff6-40ff-90e4-71e837e979d2" value="5"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="c79a93fa-a1ea-4e74-ad53-74b8e4b3e077"/>
@@ -8723,6 +8561,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="885d67fe-7847-44b8-a5bc-caba170d32dc"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="4d181922-0ff6-40ff-90e4-71e837e979d2" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="1697d1c1-f3fe-4b8b-b19f-aa749df16899"/>
@@ -8731,6 +8570,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="6ff822df-efbf-4496-93b3-9b97cda73c7a"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="6"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e3757578-74f4-4c67-921b-6ec0fb07b78c"/>
@@ -8781,6 +8621,10 @@ time for the given instrument configuration.
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="2c9f0984-1cd9-48ff-882a-02e95a5406c3"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="5631eb82-05fe-49fb-9197-f7c3c2dc900d"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
     </paramset>
@@ -8803,6 +8647,10 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="46373244-6789-424b-baac-2122136f7764"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="dcb4d0f7-bbbc-4fa7-94e9-da3e72a56730"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="bde06820-aed5-439d-bf5a-bbd27ac41d98"/>
@@ -8896,6 +8744,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="388fded0-2336-4dec-9acd-d941eec56286"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="eed7fedc-f3ce-48a8-88f8-f1f1216744d0"/>
@@ -8908,6 +8757,10 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="1fa439d4-06a1-4c41-b4b5-0e51ea9679f8"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f8c5f033-0c0a-4088-a497-e680ea013eaa"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="bc79b542-d964-42f1-bcbe-86b654a61a6d"/>
@@ -9127,9 +8980,14 @@ time for the given instrument configuration.
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="c5ada0f6-550f-4e08-96ee-cf278dc88b99"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="a4b43a3e-98e1-4313-88f1-f1567c898d85"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
       <param name="2c5f9d9b-dd36-43a1-985e-40b62f97c03c" value="8"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1707"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d5b33b21-7443-4fba-946f-6e28fa3791d8"/>
@@ -9166,6 +9024,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="24d865b6-d02f-4d31-be78-bf88f67b4dab"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="20"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5bdfbcd5-ebf5-475a-8e0a-78df199028bb"/>
@@ -9182,6 +9041,10 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="b0675ff8-e770-4fc5-a556-0aaef76bc862"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="71f35e24-f6f4-4444-9d59-3fa1896af882"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f4529dd3-3cf7-4c30-bdc1-a3d103a238fd"/>
@@ -9227,6 +9090,10 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="e8413e96-0040-45d7-aedd-d2e7ca2d628f"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c3aa889f-2afa-451c-bb22-b02cab0622d5"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="6dd020dd-7892-4c9c-84ec-b062da1a8ce9"/>
@@ -9312,6 +9179,7 @@ time for the given instrument configuration.
       <param name="key" value="a72db9fc-d754-43d8-8a87-657d03f4e11a"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
       <param name="bc304bbe-c57c-4867-aefe-ba650a1f02b8" value="2"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="3d053fa0-e634-4137-ab44-776d7e8ade7c"/>
@@ -9328,6 +9196,18 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="44e34ce8-ed3c-4349-9d4e-22bf81411c61"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d360fe9d-ba85-4355-a6c2-2a38c2b5e9ff"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="43541edd-41d9-4d69-a020-2170c27d308b"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3c2f8162-1754-4c28-8b9f-700ae271cebd"/>
+      <param name="3d1e52ea-c1f4-454d-adda-54e2b46cf0c4" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="2045b3d5-ace4-437f-887e-ac3fe1fe6d52"/>
@@ -9408,6 +9288,7 @@ time for the given instrument configuration.
     <paramset name="node">
       <param name="key" value="87c974d1-c29f-4826-9d30-830f60f19b5f"/>
       <param name="b8758db1-4326-49cf-a680-cd8b53d2ecf4" value="1"/>
+      <param name="dc009434-291a-4941-8a9c-870055e59c76" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="06546bbe-0862-4722-b7c3-e699bd14e2ff"/>

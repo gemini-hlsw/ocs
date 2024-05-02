@@ -10,16 +10,16 @@ case class GmosSLongslit(blueprint:SpGmosSBlueprintLongslit) extends GmosSBase.W
 
   // IF SPECTROSCOPY MODE == LONGSLIT
   //         INCLUDE FROM 'LONGSLIT BP' IN
-  //             Target Folder: {2} - {4}
+  //             Target Folder: {2} - {3}
   //             Baseline Folder: {5} - {8}
-  //         For spec observations: {3}, {4}, {6}-{8}
+  //         For spec observations: {3}, {6}-{8}
   //             SET DISPERSER FROM PI
   //             SET FILTER FROM PI
   //             SET FPU FROM PI
   //         For acquisitions: {2}, {5}
   //             if FPU!=None in the OT inst. iterators, then SET FPU FROM PI
 
-  val targetFolder = 2 to 4
+  val targetFolder = 2 to 3
   val baselineFolder = 5 to 8
   val notes = Seq.empty
 
@@ -40,7 +40,7 @@ case class GmosSLongslit(blueprint:SpGmosSBlueprintLongslit) extends GmosSBase.W
     } yield ()
 
     for {
-      _ <- forObservations(grp, List(3, 4, 6, 7, 8), forSpecObservation).right
+      _ <- forObservations(grp, List(3, 6, 7, 8), forSpecObservation).right
       _ <- forObservations(grp, List(2, 5), forAcquisition).right
     } yield ()
 

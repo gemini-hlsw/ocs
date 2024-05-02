@@ -2,6 +2,8 @@ Instrument : GMOS-S
 Blueprint templates: GMOS_S_BP.xml
 
 Last update: 2021 September 22, Julia Scharwaechter
+Last update: 2024 March 11, jscharwaechter: Removed daytime arcs (now
+taken with science)
 
 Target and conditions information from the Phase I observations only
 needs to be entered into the template science observations. Daytime
@@ -27,9 +29,9 @@ INCLUDE BP{1}
 
 IF SPECTROSCOPY MODE == LONGSLIT
         INCLUDE FROM 'LONGSLIT BP' IN
-            Target Folder: {2} - {4}
+            Target Folder: {2} - {3}
             Baseline Folder: {5} - {8}
-        For spec observations: {3}, {4}, {6}-{8}
+        For spec observations: {3}, {6}-{8}
             SET DISPERSER FROM PI
             SET FILTER FROM PI
             SET FPU FROM PI
@@ -38,9 +40,9 @@ IF SPECTROSCOPY MODE == LONGSLIT
 
 IF SPECTROSCOPY MODE == LONGSLIT N&S
         INCLUDE FROM 'LONGSLIT N&S BP' IN
-            Target folder: {9} - {11} 
+            Target folder: {9} - {10} 
             Baseline folder: {12} - {16}
-        For spec observations: {10}, {11}, {13}-{15}    
+        For spec observations: {10}, {13}-{15}    
             SET DISPERSER FROM PI
             SET FILTER FROM PI
             SET FPU FROM PI
@@ -49,20 +51,21 @@ IF SPECTROSCOPY MODE == LONGSLIT N&S
         
 IF SPECTROSCOPY MODE == MOS
         INCLUDE FROM 'MOS BP' IN
-            Target folder: {20}, {21} - {23}
+            Target folder: {20}, {22}, {23}
               IF PRE-IMAGING REQ == YES
                 INCLUDE {18}, {17}
               IF PRE-IMAGING REQ == NO
                 INCLUDE {19}
             Baseline folder: {24}-{26}
-        For spec observations: {20}, {21}, {23}, {25}, {26}
+        For spec observations: {20}, {23}, {25}, {26}
             SET DISPERSER FROM PI
             SET FILTER FROM PI
-            For {20}, {21}
+            For {20}
                  SET MOS "Slit Width" from PI
             For {25}, {26} 
                     SET FPU (built-in longslit) using the width specified in PI
-        For MOS observations in the target folder (not pre-image): any of {18} - {23}
+        For MOS observations in the target folder (not pre-image): any
+        of {18} - {20}, {22}, {23}
             SET "Custom Mask MDF" = G(N/S)YYYYS(Q/C/DD/SV/LP/FT)XXX-NN 
                 where: 
                 (N/S) is the site 
@@ -77,20 +80,20 @@ IF SPECTROSCOPY MODE == MOS
 
 IF SPECTROSCOPY MODE == MOS N&S
         INCLUDE IN
-            Target folder: {29}, {22}, {31}, {32}
+            Target folder: {29}, {22}, {32}
               IF PRE-IMAGING REQ == YES
                 INCLUDE {17}, {27}
               IF PRE-IMAGING REQ == NO
                 INCLUDE {28}
             Baseline folder: {30}, {33}-{35}
-       For spec observations: {29}, {31}, {32}, {34}, {35}
+       For spec observations: {29}, {32}, {34}, {35}
             SET DISPERSER FROM PI
             SET FILTER FROM PI
-            For {29}, {31}
+            For {29}
                 SET MOS "Slit Width" from PI
             For {34}, {35} 
                 SET FPU (built-in longslit) using the width specified in PI
-       For MOS observations in the target folder (not pre-image): any of {27} - {32}
+       For MOS observations in the target folder (not pre-image): any of {27} - {29}, {32}
             SET "Custom Mask MDF" = G(N/S)YYYYS(Q/C/DD/SV/LP/FT)XXX-NN 
                 where: 
                 (N/S) is the site 
@@ -105,7 +108,7 @@ IF SPECTROSCOPY MODE == MOS N&S
 
 IF SPECTROSCOPY MODE == IFU
         INCLUDE FROM 'IFU BP' IN,
-            Target folder: {36}-{38}
+            Target folder: {36}-{37}
             Baseline folder: {39}-{42}
         Where FPU!=None in BP (static and iterator), SET FPU from PI
             IFU acq obs have an iterator titled "Field image" with
@@ -127,7 +130,7 @@ IF SPECTROSCOPY MODE == IFU
 
 IF SPECTROSCOPY MODE == IFU N&S
         INCLUDE FROM 'IFU N&S BP' IN, 
-            Target folder: {43}-{45}
+            Target folder: {43}-{44}
             Baseline folder: {46}-{50}
         Where FPU!=None in BP (static and iterator), SET FPU from PI
             IFU acq obs have an iterator titled "Field image" with
