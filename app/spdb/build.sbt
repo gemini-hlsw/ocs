@@ -516,7 +516,7 @@ def gnodbscheduler(version: Version) = AppConfig(
     "edu.gemini.oodb.mail.smtpHost"      -> "smtp.hi.gemini.edu",
     "edu.gemini.util.trpc.name"          -> "Gemini North Scheduler ODB (Test)",
     "edu.gemini.auxfile.other.host"      -> "gnconfig.gemini.edu",
-    "osgi.shell.telnet.ip"               -> "10.1.198.192"
+    "osgi.shell.telnet.ip"               -> "10.1.71.38"
   )
 ) extending List(odbtest(version), gnodbtest_credentials(version))
 
