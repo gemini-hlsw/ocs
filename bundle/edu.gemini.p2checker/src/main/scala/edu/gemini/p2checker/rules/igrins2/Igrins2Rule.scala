@@ -29,11 +29,8 @@ object Igrins2Rule extends IRule {
   val ConfigRules: java.util.Collection[IConfigRule] =
     List[IConfigRule](ExposureTimeRule).asJava
 
-  val Rules: List[IRule] = List(
-  )
-
   override def check(elems: ObservationElements): IP2Problems =
-    (new SequenceRule(ConfigRules, null) :: Rules).foldLeft(IP2Problems.EMPTY) { (ps, rule) =>
+    (List(new SequenceRule(ConfigRules, null))).foldLeft(IP2Problems.EMPTY) { (ps, rule) =>
       ps.appended(rule.check(elems))
     }
 
