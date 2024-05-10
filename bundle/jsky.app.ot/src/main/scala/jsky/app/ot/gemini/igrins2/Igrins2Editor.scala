@@ -78,7 +78,7 @@ class Igrins2Editor extends ComponentEditor[ISPObsComponent, Igrins2]{
     }
 
     row += 1
-    layout(new Label("Exposure Time:")) = new Constraints() {
+    layout(new Label(s"Exposure Time (min: ${Igrins2.MinExposureTime.toSeconds}s):")) = new Constraints() {
       anchor = Anchor.NorthWest
       gridx = 0
       gridy = row
