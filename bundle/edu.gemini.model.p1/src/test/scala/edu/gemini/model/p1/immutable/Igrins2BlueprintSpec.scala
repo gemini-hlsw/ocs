@@ -11,7 +11,7 @@ import scala.xml.XML
 class Igrins2BlueprintSpec extends Specification with SemesterProperties with XmlMatchers {
   private val blueprints = Igrins2NoddingOption.values.map(m => Igrins2Blueprint(m))
 
-  // A proposal for Igrins2 with speckle mode and visitor set to false.
+  // A proposal for Igrins2
   private val proposal = ProposalIo.read(new InputStreamReader(getClass.getResourceAsStream("proposal_igrins2.xml")))
 
   "The Igrins2 Blueprint" should {
@@ -36,8 +36,8 @@ class Igrins2BlueprintSpec extends Specification with SemesterProperties with Xm
       }.forall(blueprints)
     }
     "be possible to deserialize" in {
-      // This proposal is configured with nod to sky option.
-      proposal.blueprints.head must beEqualTo(Igrins2Blueprint(Igrins2NoddingOption.NodToSky))
+      // This proposal is configured with nod off to sky option.
+      proposal.blueprints.head must beEqualTo(Igrins2Blueprint(Igrins2NoddingOption.NodOffToSky))
     }
   }
 }
