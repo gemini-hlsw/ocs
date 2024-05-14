@@ -25,7 +25,7 @@ public final class SpIgrins2Blueprint extends SpBlueprint {
     }
 
     public SpIgrins2Blueprint(ParamSet paramSet) {
-        noddingOption = Pio.getEnumValue(paramSet, PARAM_NODDING, NoddingOption.KEEP_TARGET_IN_SLIT);
+        noddingOption = Pio.getEnumValue(paramSet, PARAM_NODDING, NoddingOption.NOD_ALONG_SLIT);
     }
 
     @Override public String paramSetName() { return PARAM_SET_NAME; }
@@ -33,7 +33,7 @@ public final class SpIgrins2Blueprint extends SpBlueprint {
     @Override public SPComponentType instrumentType() { return Igrins2.SP_TYPE(); }
 
     @Override public String toString() {
-        return String.format("Igrins2(%s)", noddingOption.displayValue());
+        return String.format("IGRINS-2 (%s)", noddingOption.displayValue());
     }
 
     @Override public ParamSet toParamSet(PioFactory factory) {

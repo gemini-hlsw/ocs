@@ -4,6 +4,7 @@ Version August 14, 2023 - created by Bryan M
 Version November 22, 2023 - Bryan M, remove telluric acquisition, other fixes
 Version February 23, 2024 - Bryan M, update rules for notes based on latest libraries
 Version April 15, 2024 - Bryan M, renumber libraries to be in final order
+Version May 14, 2024 - Bryan M, update for reworded nod options
 
 Observations identified by LibraryIDs indicated with {}.
 
@@ -25,7 +26,7 @@ INCLUDE note "Phase II Checklist" at the program level.
 
 INCLUDE {1}, {2} IN target-specific Scheduling Group
 
-If NODDING OPTION == Keep target in slit:
+If NODDING OPTION == Nod along slit:
 	INCLUDE {3}
 
 If NODDING OPTION == Nod to sky:
