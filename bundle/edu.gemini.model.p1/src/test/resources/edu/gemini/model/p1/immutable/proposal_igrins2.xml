@@ -26,7 +26,7 @@
             <Igrins2 id="blueprint-0">
                 <name>IGRINS-2 Nod off to sky</name>
                 <visitor>false</visitor>
-                <nodding>Nod off to sky</nodding>
+                <nodding>Nod to sky</nodding>
             </Igrins2>
         </igrins2>
     </blueprints>

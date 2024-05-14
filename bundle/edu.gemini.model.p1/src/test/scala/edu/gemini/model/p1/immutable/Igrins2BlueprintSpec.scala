@@ -37,7 +37,7 @@ class Igrins2BlueprintSpec extends Specification with SemesterProperties with Xm
     }
     "be possible to deserialize" in {
       // This proposal is configured with nod off to sky option.
-      proposal.blueprints.head must beEqualTo(Igrins2Blueprint(Igrins2NoddingOption.NodOffToSky))
+      proposal.blueprints.head must beEqualTo(Igrins2Blueprint(Igrins2NoddingOption.NodToSky))
     }
   }
 }

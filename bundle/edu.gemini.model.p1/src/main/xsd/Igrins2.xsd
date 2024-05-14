@@ -35,8 +35,8 @@
     -->
     <xsd:simpleType name="Igrins2NoddingOption">
         <xsd:restriction base="xsd:token">
-            <xsd:enumeration value="Nod along the slit"/>
-            <xsd:enumeration value="Nod off to sky"/>
+            <xsd:enumeration value="Nod along slit"/>
+            <xsd:enumeration value="Nod to sky"/>
         </xsd:restriction>
     </xsd:simpleType>
 </xsd:schema>
