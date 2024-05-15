@@ -44,7 +44,7 @@ case class Igrins2(blueprint: SpIgrins2Blueprint) extends GroupInitializer[SpIgr
   //
   //  INCLUDE {1}, {2} IN target-specific Scheduling Group
   //
-  //  If NODDING OPTION == Keep target in slit:
+  //  If NODDING OPTION == Nod along slit:
   //    INCLUDE {3}
   //
   //  If NODDING OPTION == Nod to sky:
@@ -55,8 +55,8 @@ case class Igrins2(blueprint: SpIgrins2Blueprint) extends GroupInitializer[SpIgr
   //  INCLUDE the note "Observer Instructions" IN the target-specific Scheduling Group
 
   val n = blueprint.getNoddingOption match {
-    case NoddingOption.KEEP_TARGET_IN_SLIT => 3
-    case NoddingOption.NOD_TO_SKY          => 4
+    case NoddingOption.NOD_ALONG_SLIT => 3
+    case NoddingOption.NOD_TO_SKY     => 4
   }
   include(1, 2, n, 5) in TargetGroup
 

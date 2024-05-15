@@ -66,7 +66,7 @@ object UpConverter {
    * @return The result of the operation containing either an error or a success that contains a list of change description and a converted XML
    */
   def convert(node: XMLNode):Result = node match {
-    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == Proposal.currentSchemaVersion =>
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text.matches("2024.2.[12]") =>
       StepResult(Nil, node).successNel[String]
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text.matches("2024.1.1") =>
       from2024A.concatenate.convert(node)

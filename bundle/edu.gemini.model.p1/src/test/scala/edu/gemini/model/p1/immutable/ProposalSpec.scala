@@ -14,7 +14,7 @@ class ProposalSpec extends Specification with SemesterProperties with XmlMatcher
     }
     "use a schema version read from System properties" in {
       val proposal = Proposal.empty
-      proposal.schemaVersion must beEqualTo("2024.2.1")
+      proposal.schemaVersion must beEqualTo("2024.2.2")
     }
     "set the band3optionChosen by default to false" in {
       val proposal = Proposal.empty
@@ -57,7 +57,7 @@ class ProposalSpec extends Specification with SemesterProperties with XmlMatcher
       val xml = XML.loadString(ProposalIo.writeToString(proposal))
 
       // verify the exported value is set to the current semester
-      xml must \\("proposal", "schemaVersion" -> "2024.2.1")
+      xml must \\("proposal", "schemaVersion" -> "2024.2.2")
     }
     "be able to open latin1 encoded files" in {
       val proposal = ProposalIo.read(new InputStreamReader(getClass.getResourceAsStream("proposal_with_latin1_encoding.xml")))

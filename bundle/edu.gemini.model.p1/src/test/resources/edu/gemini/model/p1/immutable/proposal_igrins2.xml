@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<proposal schemaVersion="2024.1.1">
+<proposal schemaVersion="2024.1.2">
     <meta band3optionChosen="false" overrideAffiliate="false"/>
     <semester year="2024" half="B"/>
     <title></title>
@@ -24,7 +24,7 @@
     <blueprints>
         <igrins2>
             <Igrins2 id="blueprint-0">
-                <name>IGRINS-2 Nod to sky</name>
+                <name>IGRINS-2 Nod off to sky</name>
                 <visitor>false</visitor>
                 <nodding>Nod to sky</nodding>
             </Igrins2>

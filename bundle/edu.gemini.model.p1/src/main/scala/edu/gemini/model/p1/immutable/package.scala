@@ -643,8 +643,8 @@ package object immutable {
 
   type Igrins2NoddingOption = M.Igrins2NoddingOption
   object Igrins2NoddingOption extends EnumObject[M.Igrins2NoddingOption] {
-    val KeepTargetInSlit = M.Igrins2NoddingOption.KEEP_TARGET_IN_SLIT
-    val NodToSky         = M.Igrins2NoddingOption.NOD_TO_SKY
+    val NodAlongSlit = M.Igrins2NoddingOption.NOD_ALONG_SLIT
+    val NodToSky     = M.Igrins2NoddingOption.NOD_TO_SKY
   }
 }
 

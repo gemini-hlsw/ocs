@@ -7,7 +7,7 @@ import edu.gemini.shared.util.immutable.Some;
 
 public enum NoddingOption implements DisplayableSpType {
 
-    KEEP_TARGET_IN_SLIT("Keep target in slit"),
+    NOD_ALONG_SLIT("Nod along slit"),
     NOD_TO_SKY("Nod to sky");
 
     private final String displayValue;
