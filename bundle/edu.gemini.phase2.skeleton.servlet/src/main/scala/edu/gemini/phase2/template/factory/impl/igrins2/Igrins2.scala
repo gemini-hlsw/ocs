@@ -54,6 +54,8 @@ case class Igrins2(blueprint: SpIgrins2Blueprint) extends GroupInitializer[SpIgr
   //
   //  INCLUDE the note "Observer Instructions" IN the target-specific Scheduling Group
 
+  addNote("Phase II Checklist") in TopLevel
+
   val n = blueprint.getNoddingOption match {
     case NoddingOption.NOD_ALONG_SLIT => 3
     case NoddingOption.NOD_TO_SKY     => 4
