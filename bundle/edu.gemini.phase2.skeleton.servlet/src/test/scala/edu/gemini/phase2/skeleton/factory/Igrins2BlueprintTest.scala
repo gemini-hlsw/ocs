@@ -23,7 +23,11 @@ class Igrins2BlueprintTest extends TemplateSpec("IGRINS-2_BP.xml") with Specific
     "include all notes" in {
       forAll { (b: Igrins2Blueprint) =>
         expand(proposal(b, Nil, AnyBand)) { (_, sp) =>
-          groups(sp).forall(tg => existsNote(tg, "Observer Instructions"))
+          val notes = List(
+            "Phase II Checklist",
+            "Observer Instructions"
+          )
+          groups(sp).forall(tg => notes.forall(n => existsNote(tg, n)))
         }
       }
     }
