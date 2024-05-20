@@ -7,6 +7,7 @@ import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.spModel.config.AbstractObsComponentCB
 import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.core.Target
+import edu.gemini.spModel.core.Target.TargetType
 import edu.gemini.spModel.data.config._
 import edu.gemini.spModel.gemini.ghost.GhostAsterism.GhostTarget
 import edu.gemini.spModel.obscomp.InstConstants
@@ -89,15 +90,15 @@ final class GhostCB(obsComp: ISPObsComponent) extends AbstractObsComponentCB(obs
             val when = Instant.now()
             t.getProperMotion
              .map(_.calculateAt(t.getTarget, when))
-              // NOTE: We'd wish to unfold the ephemeris to get actual coordinates at the time
-              // of execution but this opens a can of worms. Ephemeris are stored in the xml as
-              // a compreesseed blob of serialized scala objects. i
-              // These objects are serialized by the db with scala 2.11 nda embedded in the xml.
+              // NOTE: For Non-sidereal targets We'd wish to unfold the ephemeris to get actual coordinates at the time
+              // of execution but this opens a can of worms. Ephemeris are stored in the xml as a compressed blob of
+              // serialized scala objects.
+              // These objects are serialized by the db with scala 2.11 and embedded in the xml.
               // However the seqexec will try to deserialized them in scala 2.13 producing a failure
               // as the scala versions don't match...
-              // Since we dont't need the actual coordiinatees but just the type, we can simply
+              // Since we don't need the actual coordinates but just the type, we can simply
               // return None
-             // .orElse(t.getCoordinates(Some(when.toEpochMilli)))
+              .orElse(if (ttype == TargetType.NonSidereal) None else t.getCoordinates(Some(when.toEpochMilli)))
         }
         coords.foreach { c =>
           config.putParameter(systemName, DefaultParameter.getInstance(raDegParam,  c.ra.toDegrees ))
