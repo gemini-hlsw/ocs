@@ -31,66 +31,158 @@ class SeqexecConfigTest extends SequenceTestBase {
     GhostTarget(t, GuideFiberState.Enabled)
   }
 
-  @Test def testSingleTargetSidereal(): Unit = {
+  def testSingleTargetSidereal(): Unit = {
     setAsterism(SingleTarget(sidrealTarget, None))
     assertNull(step0.getItemValue(key(Ghost.BASE_TYPE)))
     assertEquals(TargetType.Sidereal, step0.getItemValue(key(Ghost.SRIFU1_TYPE)))
     assertNull(step0.getItemValue(key(Ghost.SRIFU2_TYPE)))
+    // Coordinates
+    assertNull(step0.getItemValue(key(Ghost.SRIFU2_RA_DEG)))
+    assertNull(step0.getItemValue(key(Ghost.SRIFU2_DEC_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.SRIFU1_RA_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.SRIFU1_DEC_DEG)))
   }
 
-  @Test def testSingleTargetNonsidereal(): Unit = {
+  def testSingleTargetNonsidereal(): Unit = {
     setAsterism(SingleTarget(nonSidrealTarget, None))
     assertNull(step0.getItemValue(key(Ghost.BASE_TYPE)))
     assertEquals(TargetType.NonSidereal, step0.getItemValue(key(Ghost.SRIFU1_TYPE)))
     assertNull(step0.getItemValue(key(Ghost.SRIFU2_TYPE)))
+    // Coordinates
+    assertNull(step0.getItemValue(key(Ghost.SRIFU2_RA_DEG)))
+    assertNull(step0.getItemValue(key(Ghost.SRIFU2_DEC_DEG)))
+    assertNull(step0.getItemValue(key(Ghost.SRIFU1_RA_DEG)))
+    assertNull(step0.getItemValue(key(Ghost.SRIFU1_DEC_DEG)))
   }
 
-  @Test def testSingleTargetOverridenBase(): Unit = {
+  def testSingleTargetOverridenBase(): Unit = {
     setAsterism(SingleTarget(nonSidrealTarget, Some(SPCoordinates.zero)))
     assertEquals(TargetType.Sidereal,    step0.getItemValue(key(Ghost.BASE_TYPE)))
     assertEquals(TargetType.NonSidereal, step0.getItemValue(key(Ghost.SRIFU1_TYPE)))
     assertNull(step0.getItemValue(key(Ghost.SRIFU2_TYPE)))
+    // Coordinates
+    assertNull(step0.getItemValue(key(Ghost.SRIFU2_RA_DEG)))
+    assertNull(step0.getItemValue(key(Ghost.SRIFU2_DEC_DEG)))
+    assertNull(step0.getItemValue(key(Ghost.SRIFU1_RA_DEG)))
+    assertNull(step0.getItemValue(key(Ghost.SRIFU1_DEC_DEG)))
   }
 
-  @Test def testSkyPlusTargetSidereal(): Unit = {
+  def testSkyPlusTargetSidereal(): Unit = {
     setAsterism(SkyPlusTarget(SPCoordinates.zero, sidrealTarget, None))
     assertNull(step0.getItemValue(key(Ghost.BASE_TYPE)))
     assertEquals(TargetType.Sidereal, step0.getItemValue(key(Ghost.SRIFU1_TYPE)))
     assertEquals(TargetType.Sidereal, step0.getItemValue(key(Ghost.SRIFU2_TYPE)))
+    // Coordinates
+    assertEquals(0.0, step0.getItemValue(key(Ghost.SRIFU2_RA_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.SRIFU2_DEC_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.SRIFU1_RA_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.SRIFU1_DEC_DEG)))
   }
 
-  @Test def testSkyPlusTargetNonSidereal(): Unit = {
+  def testSkyPlusTargetNonSidereal(): Unit = {
     setAsterism(SkyPlusTarget(SPCoordinates.zero, nonSidrealTarget, None))
     assertNull(step0.getItemValue(key(Ghost.BASE_TYPE)))
     assertEquals(TargetType.Sidereal,    step0.getItemValue(key(Ghost.SRIFU1_TYPE)))
     assertEquals(TargetType.NonSidereal, step0.getItemValue(key(Ghost.SRIFU2_TYPE)))
+    // Coordinates
+    assertNull(step0.getItemValue(key(Ghost.SRIFU2_RA_DEG)))
+    assertNull(step0.getItemValue(key(Ghost.SRIFU2_DEC_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.SRIFU1_RA_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.SRIFU1_DEC_DEG)))
   }
 
-  @Test def testSkyPlusTargetNonSiderealOverridenBase(): Unit = {
+  def testSkyPlusTargetNonSiderealOverridenBase(): Unit = {
     setAsterism(SkyPlusTarget(SPCoordinates.zero, nonSidrealTarget, Some(SPCoordinates.zero)))
     assertEquals(TargetType.Sidereal,    step0.getItemValue(key(Ghost.BASE_TYPE)))
     assertEquals(TargetType.Sidereal,    step0.getItemValue(key(Ghost.SRIFU1_TYPE)))
     assertEquals(TargetType.NonSidereal, step0.getItemValue(key(Ghost.SRIFU2_TYPE)))
+    // Coordinates
+    assertNull(step0.getItemValue(key(Ghost.SRIFU2_RA_DEG)))
+    assertNull(step0.getItemValue(key(Ghost.SRIFU2_DEC_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.SRIFU1_RA_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.SRIFU1_DEC_DEG)))
   }
 
-  @Test def testTargetPlusSkySidereal(): Unit = {
+  def testTargetPlusSkySidereal(): Unit = {
     setAsterism(TargetPlusSky(sidrealTarget, SPCoordinates.zero, None))
     assertNull(step0.getItemValue(key(Ghost.BASE_TYPE)))
     assertEquals(TargetType.Sidereal, step0.getItemValue(key(Ghost.SRIFU1_TYPE)))
     assertEquals(TargetType.Sidereal, step0.getItemValue(key(Ghost.SRIFU2_TYPE)))
+    // Coordinates
+    assertEquals(0.0, step0.getItemValue(key(Ghost.SRIFU2_RA_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.SRIFU2_DEC_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.SRIFU1_RA_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.SRIFU1_DEC_DEG)))
   }
 
-  @Test def testTargetPlusSkyNonSidereal(): Unit = {
+  def testTargetPlusSkyNonSidereal(): Unit = {
     setAsterism(TargetPlusSky(nonSidrealTarget, SPCoordinates.zero, None))
     assertNull(step0.getItemValue(key(Ghost.BASE_TYPE)))
     assertEquals(TargetType.NonSidereal, step0.getItemValue(key(Ghost.SRIFU1_TYPE)))
     assertEquals(TargetType.Sidereal,    step0.getItemValue(key(Ghost.SRIFU2_TYPE)))
+    // Coordinates
+    assertEquals(0.0, step0.getItemValue(key(Ghost.SRIFU2_RA_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.SRIFU2_DEC_DEG)))
+    assertNull(step0.getItemValue(key(Ghost.SRIFU1_RA_DEG)))
+    assertNull(step0.getItemValue(key(Ghost.SRIFU1_DEC_DEG)))
   }
 
-  @Test def testTargetPlusSkyNonSiderealOverridenBase(): Unit = {
+  def testTargetPlusSkyNonSiderealOverridenBase(): Unit = {
     setAsterism(TargetPlusSky(nonSidrealTarget, SPCoordinates.zero, Some(SPCoordinates.zero)))
     assertEquals(TargetType.Sidereal,    step0.getItemValue(key(Ghost.BASE_TYPE)))
     assertEquals(TargetType.NonSidereal, step0.getItemValue(key(Ghost.SRIFU1_TYPE)))
     assertEquals(TargetType.Sidereal,    step0.getItemValue(key(Ghost.SRIFU2_TYPE)))
+    // Coordinates
+    assertEquals(0.0, step0.getItemValue(key(Ghost.SRIFU2_RA_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.SRIFU2_DEC_DEG)))
+    assertNull(step0.getItemValue(key(Ghost.SRIFU1_RA_DEG)))
+    assertNull(step0.getItemValue(key(Ghost.SRIFU1_DEC_DEG)))
+  }
+
+  def testHRTargetPlusSidereal(): Unit = {
+    setAsterism(HighResolutionTargetPlusSky(sidrealTarget, SPCoordinates.zero, PrvMode.PrvOff, None))
+    assertNull(step0.getItemValue(key(Ghost.BASE_TYPE)))
+    assertEquals(TargetType.Sidereal, step0.getItemValue(key(Ghost.HRIFU1_TYPE)))
+    assertEquals(TargetType.Sidereal, step0.getItemValue(key(Ghost.HRIFU2_TYPE)))
+    // Coordinates
+    assertEquals(0.0, step0.getItemValue(key(Ghost.HRIFU2_RA_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.HRIFU2_DEC_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.HRIFU1_RA_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.HRIFU1_DEC_DEG)))
+  }
+
+  def testHRTargetPlusSiderealOverridenBase(): Unit = {
+    setAsterism(HighResolutionTargetPlusSky(sidrealTarget, SPCoordinates.zero, PrvMode.PrvOff, Some(SPCoordinates.zero)))
+    assertEquals(TargetType.Sidereal, step0.getItemValue(key(Ghost.BASE_TYPE)))
+    assertEquals(TargetType.Sidereal, step0.getItemValue(key(Ghost.HRIFU1_TYPE)))
+    assertEquals(TargetType.Sidereal, step0.getItemValue(key(Ghost.HRIFU2_TYPE)))
+    // Coordinates
+    assertEquals(0.0, step0.getItemValue(key(Ghost.HRIFU2_RA_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.HRIFU2_DEC_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.HRIFU1_RA_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.HRIFU1_DEC_DEG)))
+  }
+
+  def testHRTargetPlusNonSidereal(): Unit = {
+    setAsterism(HighResolutionTargetPlusSky(nonSidrealTarget, SPCoordinates.zero, PrvMode.PrvOff, None))
+    assertNull(step0.getItemValue(key(Ghost.BASE_TYPE)))
+    assertEquals(TargetType.NonSidereal, step0.getItemValue(key(Ghost.HRIFU1_TYPE)))
+    assertEquals(TargetType.Sidereal, step0.getItemValue(key(Ghost.HRIFU2_TYPE)))
+    // Coordinates
+    assertEquals(0.0, step0.getItemValue(key(Ghost.HRIFU2_RA_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.HRIFU2_DEC_DEG)))
+    assertNull(step0.getItemValue(key(Ghost.HRIFU1_RA_DEG)))
+    assertNull(step0.getItemValue(key(Ghost.HRIFU1_DEC_DEG)))
+  }
+  def testHRTargetPlusNonSiderealOverridenBase(): Unit = {
+    setAsterism(HighResolutionTargetPlusSky(nonSidrealTarget, SPCoordinates.zero, PrvMode.PrvOff, Some(SPCoordinates.zero)))
+    assertEquals(TargetType.Sidereal, step0.getItemValue(key(Ghost.BASE_TYPE)))
+    assertEquals(TargetType.NonSidereal, step0.getItemValue(key(Ghost.HRIFU1_TYPE)))
+    assertEquals(TargetType.Sidereal, step0.getItemValue(key(Ghost.HRIFU2_TYPE)))
+    // Coordinates
+    assertEquals(0.0, step0.getItemValue(key(Ghost.HRIFU2_RA_DEG)))
+    assertEquals(0.0, step0.getItemValue(key(Ghost.HRIFU2_DEC_DEG)))
+    assertNull(step0.getItemValue(key(Ghost.HRIFU1_RA_DEG)))
+    assertNull(step0.getItemValue(key(Ghost.HRIFU1_DEC_DEG)))
   }
 }

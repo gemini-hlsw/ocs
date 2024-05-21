@@ -5,7 +5,7 @@ name := "ocs"
 organization in Global := "edu.gemini.ocs"
 
 // true indicates a test release, and false indicates a production release
-ocsVersion in ThisBuild := OcsVersion("2024A", true, 1, 1, 2)
+ocsVersion in ThisBuild := OcsVersion("2024B", true, 1, 1, 3)
 
 pitVersion in ThisBuild := OcsVersion("2024B", false, 2, 2, 1)
 
