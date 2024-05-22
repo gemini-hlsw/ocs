@@ -538,7 +538,7 @@ def gsodbtest(version: Version) = AppConfig(
     "edu.gemini.auxfile.fits.dest"       -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.fits.host"       -> "gsconfig.gemini.edu",
     "edu.gemini.auxfile.other.dest"      -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
-    "edu.gemini.dataman.gsa.summit.host" -> "cpofits-lv1.cl.gemini.edu",
+    "edu.gemini.dataman.gsa.summit.host" -> "fits.cl.gemini.edu",
     "edu.gemini.oodb.mail.smtpHost"      -> "smtp.cl.gemini.edu",
     "edu.gemini.util.trpc.name"          -> "Gemini South ODB (Test)",
     "edu.gemini.auxfile.other.host"      -> "gsconfig.gemini.edu",
