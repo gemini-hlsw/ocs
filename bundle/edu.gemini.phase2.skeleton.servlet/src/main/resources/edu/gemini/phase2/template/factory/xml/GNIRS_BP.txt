@@ -10,7 +10,9 @@ Version : 2022-Feb-15, astephens, change long-red slit image to 40s
 Version : 2022-Mar-22, astephens, add IFU templates
 Version : 2024-Apr-12, epfarina, add darks for imaging, change the very faint acq for the IFU to have only one image on source
 Version : 2024-Apr-12, epfarina, add note on acquistion with IFUs, re-acquisition template have Setup Type: 'Reacquisition Only (6mins)'
-Version : 2024-Apr-15, epfarina, HR-IFU sacrificial flat set to: 'Acquisition Calibration', change exptime for long red camera slit acquisition to 15
+Version : 2024-Apr-15, epfarina, HR-IFU sacrificial flat set to: 'Acquisition Calibration', change exptime for acquisitions associated with science at >=2.5 to 15s
+Version : 2024-May-15, bclemaux & epfarina, changed order of HR-IFU sacrificial flat, updated acquistions for >=2.5um HR-IFU science to use the long blue camera
+Version : 2024-May-20, bclemaux, included explicit mention of when notes should be added, changed note numbers, updated central wavelength for >=2.5um HR-IFU science 
 
 Observations identified by LibraryIDs indicated with {}.
 
@@ -20,8 +22,7 @@ PI = Phase I
 
 **** IF INSTRUMENT MODE == IMAGING ****
 INCLUDE  {16}, {17}, {18} - {21}, {39} (in this order) in a Target Group
-        Add the note "Centering and dithering" to the top of the
-        imaging group.
+Add the note "Centering and dithering" to the top of the Scheduling Group.
         SET PIXEL SCALE FROM PI
         FOR {16}, {20} (acqs for standards) IF PIXEL SCALE = 0.05 \
           SET EXPOSURE TIME=15.0 in the first GNIRS iterator: Image of keyhole
@@ -137,12 +138,13 @@ IF CROSS-DISPERSED == SXD OR CROSS-DISPERSED == LXD :
            SET CROSS-DISPERSED FROM PI
            DO NOT ADD an Altair component if AO mode != None
 
-# Notes to add to target Scheduling Group
-In ALL Scheduling group add NOTE "ACQ README"
-IF DISPERSER == 111 l/mm ADD NOTE "NOTE1: Calibrations for high spectral resolution observations" in target Scheduling Group
+# Notes to add to target Scheduling Group for slit spectroscopy
+In ALL Scheduling group add NOTE "ACQ Strategies and Exposure Times"
+In ALL Scheduling group add NOTE "Note 1: Exp times for Telluric standards" 
+IF DISPERSER == 111 l/mm ADD NOTE "NOTE2: Calibrations for high spectral resolution observations" in target Scheduling Group
 IF CROSS-DISPERSED == SXD OR CROSS-DISPERSED == LXD:
-          ADD NOTE "NOTE2: Bad pixels in XD mode" in target Scheduling Group
-          ADD NOTE "NOTE3: Differential refraction and XD mode" in target Scheduling Group
+          ADD NOTE "NOTE3: Bad pixels in XD mode" in target Scheduling Group
+          ADD NOTE "NOTE4: Differential refraction and XD mode" in target Scheduling Group
 
 ###### requests 2020.04.08 Siyi #####
 # change mean parallactic angle as the default set up for XD mode
@@ -155,6 +157,7 @@ IF CROSS-DISPERSED == SXD OR CROSS-DISPERSED == LXD:
 
 # The ordering of observations in the scheduling group should be:
   Notes
+  IF FPU == HR-IFU: Sacrificial flat {38}
   Before standard acq
   Before standard spec
   SCI acq(s)
@@ -183,7 +186,19 @@ FOR {24,27-31,35,40} SET FPU FROM PI IN ITERATORS EXCEPT WHERE FPU == acquisitio
 FOR {24,27-31,35,40} SET DECKER FROM PI IN ITERATORS EXCEPT WHERE DECKER == acquisition
 
 IF PI Central Wavelength > 2.5um
-    SET Well Depth == Deep
+
+     IF ACQ: 
+	SET Well Depth == Shallow 
+	SET Central Wavelength == 1.65um
+
+     IF SCI:
+	SET Well Depth == Deep 
+	SET Central Wavelength == >2.5um
+
+# Notes to add to target Scheduling Group for IFU Observations
+In ALL Scheduling group add NOTE "IFU Acquisitions"
+In ALL Scheduling group add NOTE "@OBSERVER: Acquisition procedure"
+In ALL Scheduling group add NOTE "@OBSERVER: Sacrificial flat"
 
 # In LGS mode the science uses the mode from PI but the standards use NGS + FieldLens:
 IF AO mode != None:

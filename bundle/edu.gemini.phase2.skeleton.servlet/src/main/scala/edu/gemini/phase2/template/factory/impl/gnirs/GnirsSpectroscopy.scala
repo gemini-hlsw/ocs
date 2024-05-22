@@ -249,19 +249,23 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
       setCrossDispersed(crossDisperser))
   }
 
-  // #Notes to add to target Scheduling Group
-  // In ALL Scheduling group add "ACQ README" note
-  // IF DISPERSER == 111 l/mm ADD NOTE1 in target Scheduling Group
+  // # Notes to add to target Scheduling Group for slit spectroscopy
+  // In ALL Scheduling group add NOTE "ACQ Strategies and Exposure Times"
+  // In ALL Scheduling group add NOTE "Note 1: Exp times for Telluric standards"
+  // IF DISPERSER == 111 l/mm ADD NOTE "NOTE2: Calibrations for high spectral resolution observations" in target Scheduling Group
   // IF CROSS-DISPERSED == SXD OR CROSS-DISPERSED == LXD:
-  //           ADD NOTE2 in target Scheduling Group
-  //           ADD NOTE3 in target Scheduling Group
+  //          ADD NOTE "NOTE3: Bad pixels in XD mode" in target Scheduling Group
+  //          ADD NOTE "NOTE4: Differential refraction and XD mode" in target Scheduling Group
 
-  addNote("ACQ README") in TargetGroup
+  addNote(
+    "ACQ Strategies and Exposure Times",
+    "NOTE1: Exp times for Telluric standards"
+  ) in TargetGroup
   if (disperser == D_111)
-    addNote("NOTE1: Calibrations for high spectral resolution observations") in TargetGroup
+    addNote("NOTE2: Calibrations for high spectral resolution observations") in TargetGroup
   if (xd == SXD || xd == LXD) {
-    addNote("NOTE2: Bad pixels in XD mode") in TargetGroup
-    addNote("NOTE3: Differential refraction and XD mode") in TargetGroup
+    addNote("NOTE3: Bad pixels in XD mode") in TargetGroup
+    addNote("NOTE4: Differential refraction and XD mode") in TargetGroup
   }
 
   // requests 2020.04.08 Siyi
