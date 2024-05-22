@@ -13,8 +13,7 @@ case class GnirsImaging(blueprint:SpGnirsBlueprintImaging) extends GnirsBase[SpG
 
   // **** IF INSTRUMENT MODE == IMAGING ****
   // INCLUDE  {16}, {17}, {18} - {21}, {39} (in this order) in a Target Group
-  //         Add the note "Centering and dithering" to the top of the
-  //         imaging group.
+  // Add the note "Centering and dithering" to the top of the Scheduling Group.
   //         SET PIXEL SCALE FROM PI
   //         FOR {16}, {20} (acqs for standards) IF PIXEL SCALE = 0.05 \
   //             SET EXPOSURE TIME=15.0 in the first GNIRS iterator: Image of keyhole

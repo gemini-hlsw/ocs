@@ -30,6 +30,7 @@ trait GnirsBase[B <: SpGnirsBlueprintBase] extends GroupInitializer[B] with Temp
   def setSlitWidth = mutateStatic[SlitWidth](_.setSlitWidth(_))
   def setPixelScale = mutateStatic[PixelScale](_.setPixelScale(_))
   def setWellDepth = mutateStatic[WellDepth](_.setWellDepth(_))
+  def setCentralWavelength = mutateStatic[Double](_.setCentralWavelength(_))
   def setFPU = mutateStatic[FPU](_.setSlitWidth(_))
   def setExposureTime = mutateStatic[Double](_.setExposureTime(_))
   def setPositionAngleConstraint = mutateStatic[PosAngleConstraint](_.setPosAngleConstraint(_))

@@ -44,7 +44,7 @@
           <param name="NoteText">
             <value>The acquisition script will center the target in the middle of the rectangular portion of the GNIRS field. 
 
-The semicircular portion of the field is below the rectangle. The template science dither patterns are centered at (p,q)=(-3,0) and are small enough to fit in the field of view of the new Y-MK, J-MK and H-MK photometric filters (see www.gemini.edu/sciops/instruments/gnirs/imaging).</value>
+The semicircular portion of the field is below the rectangle. The template science dither patterns are centered at [p,q]=[0,0] and are small enough to fit in the field of view of the new Y-MK, J-MK and H-MK photometric filters (see www.gemini.edu/sciops/instruments/gnirs/imaging).</value>
           </param>
         </paramset>
       </container>
@@ -887,7 +887,7 @@ The semicircular portion of the field is below the rectangle. The template scien
       </paramset>
       <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="94f9d9cc-cdc6-4e60-a828-dae81e2b22ec" name="Note">
         <paramset name="Note" kind="dataObj">
-          <param name="title" value="ACQ Strategies and Exposure Times "/>
+          <param name="title" value="ACQ Strategies and Exposure Times"/>
           <param name="NoteText">
             <value>
 EVERY GNIRS OBSERVATION MUST HAVE AN ASSOCIATED ACQUISITION OBSERVATION defined by the PI during the phase II process.
@@ -937,7 +937,7 @@ GNIRS configuration:
           <param name="title" value="NOTE1: Exp times for Telluric standards"/>
           <param name="NoteText">
             <value>
-Please check the exposure time for the Telluric standards using the ITC (or http://www.gemini.edu/std-star-exposure-times) to AVOID SATURATION.  Persistance is very severe with the GNIRS detector and may last ~20 minutes and impact subsequent observations.
+Please check the exposure time for the Telluric standards using the ITC (or http://www.gemini.edu/std-star-exposure-times) to AVOID SATURATION.  If saturation occurs, the resultant persistance may last ~5-10 minutes at a level above the read noise for the very faint mode and may impact subsequent observations.
 </value>
           </param>
         </paramset>
@@ -2072,15 +2072,6 @@ Note that the target component in the associated spectroscopy observation must b
           <param name="overrideQaState" value="false"/>
           <param name="setupTimeType" value="FULL"/>
         </paramset>
-        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="a80d28a5-b4b8-434b-805a-7d33d3ab8c07" name="Note">
-          <paramset name="Note" kind="dataObj">
-            <param name="title" value="Possible uses"/>
-            <param name="NoteText">
-              <value>
-This template might be used for placing a long slit along the long axis of a galaxy or across a large planet.</value>
-            </param>
-          </paramset>
-        </container>
         <container kind="obsComp" type="Instrument" version="2017A-1" subtype="GNIRS" key="bced9cb8-ace1-4f08-9a24-a526f6ad6bb4" name="GNIRS">
           <paramset name="GNIRS" kind="dataObj">
             <param name="title" value="GNIRS"/>
@@ -2923,7 +2914,7 @@ GNIRS configuration:
 
 1) Run the first two steps (1=field, 2=through IFU sky)
 
-2) gacq 1  and select the appropriate IFU option (no need to wait for the second step to be done to begin gacq'ing). Wait to send offsets until *after* the second step is complete. 
+2) gacq 1 and select the appropriate IFU option (no need to wait for the second step to be done to begin gacq'ing). Wait to send offsets until *after* the second step is complete. 
 
 3) Run step 3  (through IFU target image)  after offsets are in 
 
@@ -2944,7 +2935,7 @@ Procedure to be followed if the target is faint and requires a sky offset for bo
 
 1) Run the first three steps (1=sky, 2=field, 3=through IFU sky)
 
-2) gacq 2 sky=1  and select the appropriate IFU option  (no need to wait for the third step to be done to begin gacq'ing). Wait to send offsets until *after* the third step is complete. 
+2) gacq 2 sky=1 and select the appropriate IFU option  (no need to wait for the third step to be done to begin gacq'ing). Wait to send offsets until *after* the third step is complete. 
 
 3) Run step 4 (through IFU target image) after offsets are in 
 
@@ -2955,6 +2946,16 @@ Procedure to be followed if the target is faint and requires a sky offset for bo
 6) gacq 5 sky=3 to check offset and make any fine adjustments
 
 7) Go to science 
+</value>
+          </param>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="9fdbf587-933b-4422-a0dc-1a722643e4c1" name="Note">
+        <paramset name="Note" kind="dataObj">
+          <param name="title" value="@OBSERVER: Sacrificial flat"/>
+          <param name="NoteText">
+            <value>Please remember to take a sacrificial flat prior to each HR-IFU observation if this is the first HR-IFU observation of the night or if the prism location has moved since the last HR-IFU observation (see more details in the Sacrificial flat note)
+
 </value>
           </param>
         </paramset>
@@ -3221,12 +3222,17 @@ Procedure to be followed if the target is faint and requires a sky offset for bo
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Sequences with Multiple Bands"/>
             <param name="NoteText">
-              <value>If observations in multiple bands are contained within the sequence, for best results:
+              <value>If observations in multiple bands are contained within the sequence, for best results re-acquire after the observation of the source in a given band + associated GCAL calibrations 
 
-Re-acquire after the observation of the source in a given band + associated GCAL calibrations 
+------------------------------------------------
+To the PI/program team: 
+------------------------------------------------
 
 There is a possibility that the source can move ~0.1" on the detector when moving back to sky from the GCAL environment due to a number of factors. Since the HR-IFU FoV is small, this can lead to loss of flux with an extended source or a point source that was not originally centered well and/or is observed under poor seeing (without AO).
-</value>
+
+Testing on sky, albeit at a single elevation and a single set of Cassegrain Rotator angles, shows that this problem is likely to be at a level of ~&lt;0.02". However, a few isolated incidences of larger jumps have been observed.  Re-acquistions come out of program time, but are generally short in practice (~6 minutes). If in doubt about whether re-acquisitions are needed, we suggest you include them. 
+
+------------------------------------------------</value>
             </param>
           </paramset>
         </container>
@@ -4078,10 +4084,17 @@ Note that the target component in the associated spectroscopy observation must b
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Description"/>
             <param name="NoteText">
-              <value>Include this re-acquisition for observations longer than 1 hour.
-Update the exposure time to match the acquisition observation.
+              <value>Include this re-acquisition for observations longer than ~ 1 hour (though see below).
 
-Re-acquisition for the IFU observations is suggested if compensating for the flexure between the guider and the instrument is necessary for the science (e.g., if the source is extended and fill the FOV; or if that target is too faint to be detected in a single exposure and combination of the different cubes will be performed "blindly").</value>
+Update the exposure times in the re-acqusition sequence to match those in the acquisition observation.
+
+------------------------------------------------
+To the PI/program team: 
+------------------------------------------------
+Utilizing a re-acquisition every ~1h for IFU observations is suggested if compensating for the flexure between the guider and the instrument is necessary for the science (e.g., if the source is extended and fill the FOV; or if that target is too faint to be detected in a single exposure and combination of the different cubes will be performed "blindly").
+
+Note that PWFS2 flexure is of the order 0.1-0.2" per hour (https://www.gemini.edu/instrumentation/nifs/capability%23PWFS#Guiding) and LGS + PWFS1 flexure is ~0.8"/hr (https://www.gemini.edu/instrumentation/altair/modes#LGS+P1). Re-acquistions come out of program time, but are generally short in practice (~6 minutes). If in doubt about whether re-acquisitions are needed, we suggest you include them. 
+------------------------------------------------</value>
             </param>
           </paramset>
         </container>
@@ -4420,16 +4433,21 @@ Re-acquisition for the IFU observations is suggested if compensating for the fle
           <param name="overrideQaState" value="false"/>
           <param name="setupTimeType" value="FULL"/>
         </paramset>
-        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="434eb669-5448-46d1-a066-7d2f9b628ab8" name="Note">
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="007159fe-4d9c-4f1d-8893-e79a33da3502" name="Note">
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Sequences with Multiple Bands"/>
             <param name="NoteText">
-              <value>If observations in multiple bands are contained within the sequence, for best results:
+              <value>If observations in multiple bands are contained within the sequence, for best results re-acquire after the observation of the source in a given band + associated GCAL calibrations 
 
-Re-acquire after the observation of the source in a given band + associated GCAL calibrations 
+------------------------------------------------
+To the PI/program team: 
+------------------------------------------------
 
 There is a possibility that the source can move ~0.1" on the detector when moving back to sky from the GCAL environment due to a number of factors. Since the HR-IFU FoV is small, this can lead to loss of flux with an extended source or a point source that was not originally centered well and/or is observed under poor seeing (without AO).
-</value>
+
+Testing on sky, albeit at a single elevation and a single set of Cassegrain Rotator angles, shows that this problem is likely to be at a level of ~&lt;0.02". However, a few isolated incidences of larger jumps have been observed.  Re-acquistions come out of program time, but are generally short in practice (~6 minutes). If in doubt about whether re-acquisitions are needed, we suggest you include them. 
+
+------------------------------------------------</value>
             </param>
           </paramset>
         </container>
@@ -4788,16 +4806,21 @@ There is a possibility that the source can move ~0.1" on the detector when movin
           <param name="overrideQaState" value="false"/>
           <param name="setupTimeType" value="FULL"/>
         </paramset>
-        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="76945f37-4f81-42c5-b9c6-54b99bdc0b28" name="Note">
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="c9ef668a-b8c9-4819-a19f-04e595dce02c" name="Note">
           <paramset name="Note" kind="dataObj">
             <param name="title" value="Sequences with Multiple Bands"/>
             <param name="NoteText">
-              <value>If observations in multiple bands are contained within the sequence, for best results:
+              <value>If observations in multiple bands are contained within the sequence, for best results re-acquire after the observation of the source in a given band + associated GCAL calibrations 
 
-Re-acquire after the observation of the source in a given band + associated GCAL calibrations 
+------------------------------------------------
+To the PI/program team: 
+------------------------------------------------
 
 There is a possibility that the source can move ~0.1" on the detector when moving back to sky from the GCAL environment due to a number of factors. Since the HR-IFU FoV is small, this can lead to loss of flux with an extended source or a point source that was not originally centered well and/or is observed under poor seeing (without AO).
-</value>
+
+Testing on sky, albeit at a single elevation and a single set of Cassegrain Rotator angles, shows that this problem is likely to be at a level of ~&lt;0.02". However, a few isolated incidences of larger jumps have been observed.  Re-acquistions come out of program time, but are generally short in practice (~6 minutes). If in doubt about whether re-acquisitions are needed, we suggest you include them. 
+
+------------------------------------------------</value>
             </param>
           </paramset>
         </container>
@@ -5257,6 +5280,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="007159fe-4d9c-4f1d-8893-e79a33da3502"/>
+      <param name="4bfd3f1b-3994-4fb7-9738-fba88603b650" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="f3318ab9-0a68-46dc-a463-d8f59d2e74a4"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
@@ -5336,6 +5363,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="ca051ddf-f9a6-4bd3-b415-35ba38c5c207"/>
       <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="821"/>
+      <param name="4bfd3f1b-3994-4fb7-9738-fba88603b650" value="688"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5e300c8c-70db-4c49-afbf-a3d914447670"/>
@@ -5525,6 +5553,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="462581b4-33b7-4712-8ede-2dedcf1ee6c5"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="4bfd3f1b-3994-4fb7-9738-fba88603b650" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="4ad6c41a-1ce0-4e7d-a046-33439b5eb115"/>
@@ -5653,6 +5682,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="303a652f-761d-4123-b6ef-02a4e47612a0"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="4bfd3f1b-3994-4fb7-9738-fba88603b650" value="545"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="9d861c72-1ede-4fe5-8d9c-03fad6b16778"/>
@@ -5949,6 +5979,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="566f82e1-c283-47df-a281-4f378ac48e9a"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c9ef668a-b8c9-4819-a19f-04e595dce02c"/>
+      <param name="4bfd3f1b-3994-4fb7-9738-fba88603b650" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="c494d28c-483d-46dc-8bbf-8bfe9be77041"/>
@@ -6283,6 +6317,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="80b097a7-3712-4535-a54c-5c49e1291075"/>
       <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="139"/>
+      <param name="4bfd3f1b-3994-4fb7-9738-fba88603b650" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="6cf3a3aa-d34f-4d04-8291-26cd14c69a70"/>
@@ -6335,6 +6370,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="2e9c2198-3056-4fa6-bb77-09cdec1953a4"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="699b1cfa-ed4f-41e8-93b7-6bb398537241" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="0f003401-c23f-4833-9344-2250e9165cd2"/>
@@ -6359,6 +6395,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="be28d837-2928-40b6-8169-f6fcead9a651"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="3"/>
+      <param name="4bfd3f1b-3994-4fb7-9738-fba88603b650" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="1b72132d-f8c9-4519-8ef8-a5b26af9eaf8"/>
@@ -6401,12 +6438,17 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="2"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="9fdbf587-933b-4422-a0dc-1a722643e4c1"/>
+      <param name="4a2bb797-c6e2-4b85-a0dc-b45691c472f5" value="328"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="9bfecf17-e6cb-4bf1-81c5-5aa32c8218a0"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="21eb5a62-d443-4cab-9e7e-224594ef2c51"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="31e1326e-5ed3-4c52-8f79-c9bb4e25ab33" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="42e51b6f-cbed-4bd5-81d9-24022978ea36"/>
@@ -6493,6 +6535,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
       <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="9"/>
       <param name="5604d009-9be6-45e2-aed0-dee01505becc" value="2"/>
+      <param name="4a2bb797-c6e2-4b85-a0dc-b45691c472f5" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="7fd187c1-31d1-4d5b-8896-83b1ee4a3995"/>
@@ -6557,6 +6600,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="7175333a-b656-45d3-8101-d86e14b7cc92"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="93a453d2-178d-4c81-ac62-7a300df7cb15" value="11"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="7c50fd47-c40d-4ec9-81f0-bafb46a3a185"/>
@@ -6629,6 +6673,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="1a02c0d7-07f9-40b7-bac3-b505df24b031"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="31e1326e-5ed3-4c52-8f79-c9bb4e25ab33" value="216"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d7cfdfdb-f420-40de-a82f-4e448d5a773e"/>

@@ -9,10 +9,13 @@ import edu.gemini.spModel.gemini.altair.AltairParams.Mode._
 import edu.gemini.spModel.gemini.altair.AltairParams.Mode
 import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.phase2.template.factory.impl._
+import edu.gemini.spModel.obs.ObsClassService
+import edu.gemini.spModel.obsclass.ObsClass
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.telescope.PosAngleConstraint
 import edu.gemini.spModel.gemini.altair.blueprint.SpAltairNgs
 import edu.gemini.spModel.gemini.altair.AltairParams.Mode
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams.WellDepth.SHALLOW
 
 case class GnirsSpectroscopyIfu(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarget: Option[SPTarget])
   extends GnirsBase[SpGnirsBlueprintSpectroscopy] {
@@ -34,6 +37,7 @@ case class GnirsSpectroscopyIfu(blueprint:SpGnirsBlueprintSpectroscopy, exampleT
   // **** IF INSTRUMENT MODE == SPECTROSCOPY (IFU) ****
   //
   // # The ordering of observations in the scheduling group should be:
+  //   IF FPU == HR-IFU: Sacrificial flat {38}
   //   Notes
   //   Before standard acq
   //   Before standard spec
@@ -94,11 +98,44 @@ case class GnirsSpectroscopyIfu(blueprint:SpGnirsBlueprintSpectroscopy, exampleT
     ifTrue(fpu == HR_IFU)(mutateSeq(updateDecker(Decker.HR_IFU)))
   )
 
+  private def mutateForClasses(includes: Set[ObsClass])(m: Mutator): Mutator =
+    obs =>
+      if (includes(ObsClassService.lookupObsClass(obs))) m(obs)
+      else Right(())
+
+  def ifObsClassIn(c: ObsClass*)(m: Mutator): Mutator =
+    mutateForClasses(c.toSet)(m)
+
+  def ifObsClassNotIn(c: ObsClass*)(m: Mutator): Mutator =
+    mutateForClasses(ObsClass.values.toSet -- c)(m)
+
   // IF PI Central Wavelength > 2.5um
-  //     SET Well Depth == Deep
+  //
+  //     IF ACQ:
+  //	SET Well Depth == Shallow
+  //	SET Central Wavelength == 1.65um
+  //
+  //     IF SCI:
+  //	SET Well Depth == Deep
+  //	SET Central Wavelength == >2.5um
   forObs(targetGroup: _*)(
-    ifTrue(wavelengthGe2_5)(setWellDepth(DEEP))
+    ifObsClassIn(ObsClass.ACQ, ObsClass.ACQ_CAL)(ifTrue(wavelengthGe2_5)(setWellDepth(SHALLOW))),
+    ifObsClassIn(ObsClass.ACQ, ObsClass.ACQ_CAL)(ifTrue(wavelengthGe2_5)(setCentralWavelength(1.65))),
+
+    ifObsClassNotIn(ObsClass.ACQ, ObsClass.ACQ_CAL)(ifTrue(wavelengthGe2_5)(setWellDepth(DEEP))),
+    ifObsClassNotIn(ObsClass.ACQ, ObsClass.ACQ_CAL)(ifTrue(wavelengthGe2_5)(setCentralWavelength(2.5)))
   )
+
+  // # Notes to add to target Scheduling Group for IFU Observations
+  // In ALL Scheduling group add NOTE "IFU Acquisitions"
+  // In ALL Scheduling group add NOTE "@OBSERVER: Acquisition procedure"
+  // In ALL Scheduling group add NOTE "@OBSERVER: Sacrificial flat"
+  addNote(
+    "IFU Acquisitions",
+    "@OBSERVER: Acquisition procedure",
+    "@OBSERVER: Sacrificial flat"
+  ) in TargetGroup
+
 
   // # In LGS mode the science uses the mode from PI but the standards use NGS + FieldLens:
   // IF AO mode != None:
