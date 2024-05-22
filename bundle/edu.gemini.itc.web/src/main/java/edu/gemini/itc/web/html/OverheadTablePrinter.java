@@ -93,7 +93,9 @@ public class OverheadTablePrinter {
         final CalculationMethod calcMethod = obs.calculationMethod();
 
         if (calcMethod instanceof ImagingInt) {
-            numOfExposures = (int)(((ImagingResult) result).is2nCalc().numberSourceExposures() / obs.sourceFraction());
+            int coadds = params.observation().calculationMethod().coaddsOrElse(1);
+            Log.fine("Number of coadds = " + coadds);
+            numOfExposures = (int)(((ImagingResult) result).is2nCalc().numberSourceExposures() / coadds / obs.sourceFraction());
         } else if (calcMethod instanceof ImagingS2N) {
             numOfExposures = ((ImagingS2N) calcMethod).exposures();
         } else if (calcMethod instanceof SpectroscopyS2N) {
