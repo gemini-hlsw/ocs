@@ -120,11 +120,13 @@ case class GnirsSpectroscopyIfu(blueprint:SpGnirsBlueprintSpectroscopy, exampleT
   //	SET Central Wavelength == >2.5um
   forObs(targetGroup: _*)(
     ifObsClassIn(ObsClass.ACQ, ObsClass.ACQ_CAL)(ifTrue(wavelengthGe2_5)(setWellDepth(SHALLOW))),
-    ifObsClassIn(ObsClass.ACQ, ObsClass.ACQ_CAL)(ifTrue(wavelengthGe2_5)(setCentralWavelength(1.65))),
+    ifObsClassIn(ObsClass.ACQ, ObsClass.ACQ_CAL)(ifTrue(wavelengthGe2_5)(setCentralWavelength(2.22))),
 
     ifObsClassNotIn(ObsClass.ACQ, ObsClass.ACQ_CAL)(ifTrue(wavelengthGe2_5)(setWellDepth(DEEP))),
-    ifObsClassNotIn(ObsClass.ACQ, ObsClass.ACQ_CAL)(ifTrue(wavelengthGe2_5)(setCentralWavelength(2.5)))
+    ifObsClassNotIn(ObsClass.ACQ, ObsClass.ACQ_CAL)(ifTrue(wavelengthGe2_5)(setCentralWavelength(3.4)))
   )
+
+  if (wavelengthGe2_5) addNote("Long blue camera used for acquisitions") in TargetGroup
 
   // # Notes to add to target Scheduling Group for IFU Observations
   // In ALL Scheduling group add NOTE "IFU Acquisitions"

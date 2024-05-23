@@ -2960,6 +2960,14 @@ Procedure to be followed if the target is faint and requires a sky offset for bo
           </param>
         </paramset>
       </container>
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="74ef57fb-fff5-4412-a745-8162e8b314ed" name="Note">
+        <paramset name="Note" kind="dataObj">
+          <param name="title" value="Long blue camera used for acquisitions"/>
+          <param name="NoteText">
+            <value>Unless targets are extremely red, the preference is to use the long blue camera for acquisitions even for science taken with the long red camera. Do not modify the central wavelength for acquisition sequences unless you know your target cannot be acquired easily in the K band (or unless you need to use the H2 filter due to a very bright target). </value>
+          </param>
+        </paramset>
+      </container>
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="e4e53510-e555-4bc4-8666-7503d0095d73" name="GNIRS-BP-NEW-20">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Acq: &quot;Before&quot; standard"/>
@@ -6035,6 +6043,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="94f9d9cc-cdc6-4e60-a828-dae81e2b22ec"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="4196f81f-b865-44f6-b630-8631169886f8" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e20ad1fc-63fb-4933-96c3-16b8cbc78428"/>
@@ -6295,6 +6304,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="74ef57fb-fff5-4412-a745-8162e8b314ed"/>
+      <param name="4196f81f-b865-44f6-b630-8631169886f8" value="554"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="4cac3925-a0dd-4c22-bf72-bf750ae6c58e"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
     </paramset>
@@ -6536,6 +6549,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="3e78562d-de8b-4339-8efe-cd00f2abbce6" value="9"/>
       <param name="5604d009-9be6-45e2-aed0-dee01505becc" value="2"/>
       <param name="4a2bb797-c6e2-4b85-a0dc-b45691c472f5" value="1"/>
+      <param name="4196f81f-b865-44f6-b630-8631169886f8" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="7fd187c1-31d1-4d5b-8896-83b1ee4a3995"/>
