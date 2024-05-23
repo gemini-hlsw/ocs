@@ -187,13 +187,15 @@ FOR {24,27-31,35,40} SET DECKER FROM PI IN ITERATORS EXCEPT WHERE DECKER == acqu
 
 IF PI Central Wavelength > 2.5um
 
+     In ALL Scheduling group add NOTE "Long blue camera used for acquisitions"
+
      IF ACQ: 
 	SET Well Depth == Shallow 
-	SET Central Wavelength == 1.65um
+	SET Central Wavelength == 2.22um
 
      IF SCI:
 	SET Well Depth == Deep 
-	SET Central Wavelength == >2.5um
+	SET Central Wavelength == 3.4um
 
 # Notes to add to target Scheduling Group for IFU Observations
 In ALL Scheduling group add NOTE "IFU Acquisitions"
@@ -211,3 +213,4 @@ IF AO mode != None:
             IF PI AO == "Altair Laser Guidestar w/ PWFS1": SET Guide Star Type = Laser Guide Star + PWFS1
          FOR {24-26} {35-37}:   # Standards
             SET Guide Star Type = Natural Guide Star with Field Lens
+
