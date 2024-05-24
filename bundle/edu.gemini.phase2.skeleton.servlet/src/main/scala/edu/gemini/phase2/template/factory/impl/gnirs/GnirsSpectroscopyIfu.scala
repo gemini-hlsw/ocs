@@ -131,13 +131,15 @@ case class GnirsSpectroscopyIfu(blueprint:SpGnirsBlueprintSpectroscopy, exampleT
   // # Notes to add to target Scheduling Group for IFU Observations
   // In ALL Scheduling group add NOTE "IFU Acquisitions"
   // In ALL Scheduling group add NOTE "@OBSERVER: Acquisition procedure"
-  // In ALL Scheduling group add NOTE "@OBSERVER: Sacrificial flat"
+  //
+  // IF FPU == HR-IFU:
+  // 	In ALL Scheduling group add NOTE "@OBSERVER: Sacrificial flat"
   addNote(
     "IFU Acquisitions",
-    "@OBSERVER: Acquisition procedure",
-    "@OBSERVER: Sacrificial flat"
+    "@OBSERVER: Acquisition procedure"
   ) in TargetGroup
 
+  if (fpu == HR_IFU) addNote("@OBSERVER: Sacrificial flat") in TargetGroup
 
   // # In LGS mode the science uses the mode from PI but the standards use NGS + FieldLens:
   // IF AO mode != None:
