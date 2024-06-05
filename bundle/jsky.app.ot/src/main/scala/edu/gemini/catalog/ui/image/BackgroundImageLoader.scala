@@ -12,6 +12,7 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 
 import edu.gemini.pot.sp._
 import edu.gemini.spModel.core.{Angle, Coordinates, Site, Wavelength}
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.rich.pot.sp._
 import jsky.app.ot.tpe.{ImageCatalogPanel, TpeContext, TpeImageWidget, TpeManager}
@@ -179,7 +180,12 @@ object BackgroundImageLoader {
     */
   private def requestedImage(tpe: TpeContext): Option[TargetImageRequest] =
     for {
-      ctx    <- tpe.obsContext
+      // The ObsContext is needed to get the scheduling block.  The specific
+      // observing conditions (or lack thereof) is irrelevant for loading the
+      // image, so use the 'obsContextWithConditions' method instead of the
+      // 'obsContext' method to avoid returning 'None' if the observation is
+      // missing an Observing Conditions node.
+      ctx    <- tpe.obsContextWithConditions(Conditions.NOMINAL)
       ast    <- tpe.targets.asterism
       when   = ctx.getSchedulingBlockStart.asScalaOpt.map(ms => Instant.ofEpochMilli(ms.toLong))
       coords <- ast.basePosition(when orElse Some(Instant.now))
