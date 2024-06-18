@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2024.2.2">
+    <meta band3optionChosen="false" overrideAffiliate="false"/>
+    <semester year="2024" half="B"/>
+    <title></title>
+    <abstract></abstract>
+    <scheduling></scheduling>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <gender>None selected</gender>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets>
+        <sidereal epoch="J2000" id="target-0">
+            <name>vega</name>
+            <degDeg>
+                <ra>279.23473478999994767946191132068634033203125</ra>
+                <dec>38.78368896000000631829607300460338592529296875</dec>
+            </degDeg>
+            <properMotion deltaRA="200.94" deltaDec="286.23"/>
+            <magnitudes>
+                <magnitude band="B" system="Vega">0.029999999329447746</magnitude>
+                <magnitude band="V" system="Vega">0.029999999329447746</magnitude>
+                <magnitude band="R" system="Vega">0.10000000149011612</magnitude>
+                <magnitude band="J" system="Vega">-0.18000000715255737</magnitude>
+                <magnitude band="H" system="Vega">-0.029999999329447746</magnitude>
+                <magnitude band="K" system="Vega">0.12999999523162842</magnitude>
+            </magnitudes>
+        </sidereal>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC Any, IQ Any, SB Any/Bright, WV Any</name>
+            <cc>Any</cc>
+            <iq>Any</iq>
+            <sb>Any/Bright</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <igrins2>
+            <Igrins2 id="blueprint-0">
+                <name>IGRINS-2 Nod along slit</name>
+                <visitor>false</visitor>
+                <nodding>Nod along slit</nodding>
+            </Igrins2>
+        </igrins2>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" target="target-0" condition="condition-0" blueprint="blueprint-0">
+            <progTime units="hr">1.0</progTime>
+            <partTime units="hr">0.0</partTime>
+            <time units="hr">1.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Limited</visibility>
+                <gsa>0</gsa>
+            </meta>
+        </observation>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None" jwstSynergy="false" usLongTerm="false"/>
+    </proposalClass>
+</proposal>
