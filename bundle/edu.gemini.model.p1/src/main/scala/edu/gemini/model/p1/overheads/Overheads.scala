@@ -72,7 +72,6 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
     case _: DssiBlueprint                                          => SimpleOverheads(0.00).some
     case _: VisitorBlueprint                                       => SimpleOverheads(0.00).some
     case _: AlopekeBlueprint                                       => SimpleOverheads(0.00).some
-    case _: Igrins2Blueprint                                       => SimpleOverheads(0.00).some
     case _: ZorroBlueprint                                         => SimpleOverheads(0.00).some
     case _: IgrinsBlueprint                                        => NIRSpectroscopyOverheads(TimeAmount(0.25, TimeUnit.HR)).some
     case _: Igrins2Blueprint                                       => NIRSpectroscopyOverheads(TimeAmount(0.25, TimeUnit.HR)).some

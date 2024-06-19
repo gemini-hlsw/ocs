@@ -112,6 +112,10 @@ object OverheadsSpec {
       () => DssiBlueprint(Site.GS),
       obsTimes(1.7, 0.00))
       ),
+    (("igrins2", "spec"), (
+      () => Igrins2Blueprint(Igrins2NoddingOption.NodToSky),
+      obsTimes(1.7, 0.5))
+      ),
     (("gnirs", "imaging"), (
       () => GnirsBlueprintImaging(AltairNone, GnirsPixelScale.PS_005, GnirsFilter.values.apply(0)),
       obsTimes(1.7, 0.17))
