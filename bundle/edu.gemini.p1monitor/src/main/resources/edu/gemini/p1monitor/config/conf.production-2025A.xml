@@ -8,7 +8,7 @@
 
     <type name="FastTurnaround">
         <dir>/home/software/test_proposals/fast_turnaround/proposals/2025A</dir>
-        <to>pitft@gemini.edu</to>
+        <to>fast.turnaround@gemini.edu</to>
     </type>
 
     <type name="DirectorTime">
