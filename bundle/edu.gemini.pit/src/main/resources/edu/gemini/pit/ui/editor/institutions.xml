@@ -1921,6 +1921,15 @@
         </contact>
     </site>
     <site>
+        <institution>UC Davis (Physics and Astronomy)</institution>
+        <address>Department of Physics and Astronomy</address>
+        <address>One Shields Avenue</address>
+        <address>Davis</address>
+        <address>CA</address>
+        <address>95616</address>
+        <country>USA</country>
+    </site>
+    <site>
         <institution>UC Irvine</institution>
         <address>Department of Physics and Astronomy</address>
         <address>Irvine</address>
@@ -1946,6 +1955,15 @@
             <fax>310-206-2096</fax>
             <email>user@astro.ucla.edu</email>
         </contact>
+    </site>
+    <site>
+        <institution>UC Merced (Physics)</institution>
+        <address>Department of Physics</address>
+        <address>5200 North Lake Rd.</address>
+        <address>Merced</address>
+        <address>CA</address>
+        <address>95343</address>
+        <country>USA</country>
     </site>
     <site>
         <institution>UC Riverside</institution>
@@ -2107,18 +2125,6 @@
             <phone>626-395-4973</phone>
             <fax>626-568-9352</fax>
             <email>user@caltech.edu</email>
-        </contact>
-    </site>
-    <site>
-        <institution>California State University at Davis</institution>
-        <address>Department of Physics</address>
-        <address>Davis</address>
-        <address>CA</address>
-        <address>95616-8677</address>
-        <country>USA</country>
-        <contact>
-            <phone>916-752-1501</phone>
-            <email>user@physics.ucdavis.edu</email>
         </contact>
     </site>
     <site>
@@ -2844,7 +2850,7 @@
         </contact>
     </site>
     <site>
-        <institution>NSF's NOIRLab</institution>
+        <institution>NSF NOIRLab</institution>
         <address>950 North Cherry Avenue</address>
         <address>Tucson</address>
         <address>AZ</address>
@@ -3641,7 +3647,7 @@
         </contact>
     </site>
     <site>
-        <institution>Gemini Observatory/NSF’s NOIRLab (North)</institution>
+        <institution>Gemini Observatory/NSF NOIRLab (North)</institution>
         <address>670 N. Aohoku Place</address>
         <address>Hilo</address>
         <address>HI</address>
@@ -3654,7 +3660,7 @@
         </contact>
     </site>
     <site>
-        <institution>Gemini Observatory/NSF’s NOIRLab (South)</institution>
+        <institution>Gemini Observatory/NSF NOIRLab (South)</institution>
         <address>Casilla 603</address>
         <address>La Serena</address>
         <country>Chile</country>
