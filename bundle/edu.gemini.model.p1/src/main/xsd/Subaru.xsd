@@ -24,6 +24,7 @@
             <xsd:enumeration value="HDS"/>
             <xsd:enumeration value="IRCS"/>
             <xsd:enumeration value="MOIRCS"/>
+            <xsd:enumeration value="PFS"/>
             <xsd:enumeration value="Suprime Cam"/>
             <xsd:enumeration value="Hyper Suprime Cam"/>
             <xsd:enumeration value="Visitor"/>
