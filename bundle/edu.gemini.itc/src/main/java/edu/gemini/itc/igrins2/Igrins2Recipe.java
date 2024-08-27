@@ -160,7 +160,11 @@ public final class Igrins2Recipe {
             double totalTime = exposureTime * numberExposures * (desiredSNR / snr) * (desiredSNR / snr);
             Log.fine(String.format("totalTime = %.2f", totalTime));
             numberExposures = (int) Math.ceil(totalTime / maxExptime);
-            Log.fine(String.format("numberExposures = %d", numberExposures));
+            Log.fine(String.format("numberExposures = %d (raw)", numberExposures));
+
+            if (numberExposures % 4 != 0) { numberExposures += 4 - numberExposures % 4; }  // force multiple of 4 exposures
+            Log.fine(String.format("numberExposures = %d (as multiple of 4)", numberExposures));
+
             if ((totalTime / numberExposures) > 5.0) {
                 exposureTime = Math.ceil(totalTime / numberExposures);  // round long exposure times up to an integer
             } else {
