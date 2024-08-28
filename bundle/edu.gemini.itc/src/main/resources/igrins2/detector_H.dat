@@ -1,8 +1,9 @@
 # IGRINS H-band detector
+# 2024-Aug-27 reduced by 20% to match on-sky data
 # Wavelength (nm) Efficiency
-800   0.85
-1000  0.91
-1230  0.87
-2000  0.92
-2400  0.87
-2520  0.70
+800  0.68
+1000 0.73
+1230 0.70
+2000 0.74
+2400 0.70
+2520 0.56

@@ -64,7 +64,7 @@ public final class Igrins2Printer extends PrinterBase implements OverheadTablePr
         if (result.aoSystem().isDefined()) { _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get())); }
 
         _printSoftwareAperture(result, 1 / mainInstrument.getSlitWidth());
-        _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", iqAtSource));
+        _println(String.format("Derived image size(FWHM) for a point source = %.2f arcsec", iqAtSource));
         _println("");
 
         if (calcMethod instanceof SpectroscopyInt) {
@@ -82,7 +82,17 @@ public final class Igrins2Printer extends PrinterBase implements OverheadTablePr
         }
 
         _println("");
-        _printPeakPixelInfo(s.ccd(0));
+        _println("The peak pixel signal + background on each detector is:");
+        for (int i = 0; i <= 1; i++) {
+            _println(String.format("%s: %.0f e- (%d ADU) which is %.0f%% of full well (%.0f e-) and %.0f%% of the linearity limit (%d e-).",
+                    ((Igrins2) results[i].instrument()).getArm().getName(),
+                    s.ccd(i).get().peakPixelFlux(), s.ccd(i).get().adu(),
+                    s.ccd(i).get().percentFullWell(), s.ccd(i).get().wellDepth(),
+                    (100. * s.ccd(i).get().peakPixelFlux() / ((Igrins2) results[i].instrument()).getArm().getLinearityLimit()),
+                    ((Igrins2) results[i].instrument()).getArm().getLinearityLimit()));
+        }
+
+        _println("");
         _printWarnings(s.warnings());
 
         _print(OverheadTablePrinter.print(this, p, results[0], s));
@@ -93,32 +103,31 @@ public final class Igrins2Printer extends PrinterBase implements OverheadTablePr
 
         // H signal
         _printImageLink(id, SignalChart.instance(), 0, pdp);
-        _printFileLink(id, SignalData.instance(), 0);
-        _printFileLink(id, BackgroundData.instance(), 0);
+        _printFileLink(id, SignalData.instance(), 0, 0, " in H");
+        _printFileLink(id, BackgroundData.instance(), 0, 0, " in H");
         _println("");
 
         // K signal
         _printImageLink(id, SignalChart.instance(), 1, pdp);
-        _printFileLink(id, SignalData.instance(), 1);
-        _printFileLink(id, BackgroundData.instance(), 1);
+        _printFileLink(id, SignalData.instance(), 1, 0, " in K");
+        _printFileLink(id, BackgroundData.instance(), 1, 0, " in K");
         _println("");
 
         // H S/N
         _printImageLink(id, S2NChart.instance(), 0, pdp);
-        _printFileLink(id, SingleS2NData.instance(), 0);
-        _printFileLink(id, FinalS2NData.instance(), 0);
+        _printFileLink(id, SingleS2NData.instance(), 0, 0, " in H");
+        _printFileLink(id, FinalS2NData.instance(), 0, 0, " in H");
         _println("");
 
         // K S/N
         _printImageLink(id, S2NChart.instance(), 1, pdp);
-        _printFileLink(id, SingleS2NData.instance(), 1);
-        _printFileLink(id, FinalS2NData.instance(), 1);
+        _printFileLink(id, SingleS2NData.instance(), 1, 0, " in K");
+        _printFileLink(id, FinalS2NData.instance(), 1, 0, " in K");
         _println("");
 
         printConfiguration(result.parameters(), mainInstrument, result.aoSystem(), iqAtSource);
         _println(HtmlPrinter.printParameterSummary(pdp));
     }
-
 
     private void printConfiguration(final ItcParameters p, final Igrins2 instrument, final Option<AOSystem> ao, final double iqAtSource) {
         _print("<HR align=left SIZE=3>");

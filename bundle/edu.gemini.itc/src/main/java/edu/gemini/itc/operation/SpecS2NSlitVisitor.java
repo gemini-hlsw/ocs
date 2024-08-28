@@ -255,7 +255,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
         // shot noise on dark current flux in aperture
         final double darkNoise = darkCurrent * output_slit.lengthPixels() * exposureTime;  // per spectral pixel
-        Log.fine("Dark noise = " + darkCurrent + " * "  + output_slit.lengthPixels() + " pix long slit * " + exposureTime + " sec = " + darkNoise);
+        Log.fine("Dark = " + darkCurrent + " * "  + output_slit.lengthPixels() + " pix long slit * " + exposureTime + " sec = " + darkNoise);
 
         // readout noise in aperture
         final double readNoise = this.readNoise * this.readNoise * output_slit.lengthPixels();  // per spectral pixel
@@ -284,7 +284,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         final VisitableSampledSpectrum signal = haloIsUsed ? signalWithHalo(throughput.onePixelThroughput(), haloThroughput.onePixelThroughput()) : signal(throughput.onePixelThroughput());
         final VisitableSampledSpectrum sqrtBackground = background(new OnePixelSlit(input_slit.width(), input_slit.pixelSize())); // background(slit); REL-508
 
-        // For testing purposes, uncomment this bit to plot the TOTAL signal in the aperture:
+        // For testing purposes, uncomment this bit to plot the TOTAL signal in the aperture [DEBUG]:
         //Log.warning("Calculating the TOTAL signal and background in the aperture.");
         //final VisitableSampledSpectrum signal = haloIsUsed ? signalWithHalo(throughput.throughput(), haloThroughput.throughput()) : signal(throughput.throughput());
         //final VisitableSampledSpectrum sqrtBackground = background(input_slit);
