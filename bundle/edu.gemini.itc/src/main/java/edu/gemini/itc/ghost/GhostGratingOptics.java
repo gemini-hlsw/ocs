@@ -22,4 +22,9 @@ public class GhostGratingOptics extends GratingOptics {
     public double getPixelWidth() {
         return dispersion(-1);
     }
+
+    @Override
+    public String toString() {
+        return "Grating Optics: " + getDescription() + ". Blaze function defined at "+ _file + " file.";
+    }
 }

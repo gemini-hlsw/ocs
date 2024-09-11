@@ -2,7 +2,6 @@ package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.ghost.GHostRecipe;
 import edu.gemini.itc.base.SpectroscopyResult;
-import edu.gemini.itc.ghost.GhostSaturLimitRule;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 import edu.gemini.itc.ghost.Ghost;
@@ -41,36 +40,23 @@ public final class GhostPrinter extends PrinterBase implements OverheadTablePrin
     }
 
     private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult[] results, final ItcSpectroscopyResult s) {
-
         final Ghost mainInstrument = (Ghost) results[0].instrument(); // main instrument
-
         _println("");
-
         final SpectroscopyResult result = results[0];
         final double iqAtSource = result.iqCalc().getImageQuality();
-
         Log.info("calculateSpectroscopy getImageQuality[0]: " + results[0].iqCalc().getImageQuality() + " [1]: "+ results[1].iqCalc().getImageQuality() + "  " + iqAtSource);
-
+        _print("<br>", false);
         _println("Read noise: " + mainInstrument.getReadNoise());
-
-
-        _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", iqAtSource));
-        _printSkyAperture(result);
-        _println("");
-
+        _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", iqAtSource));
         _printRequestedIntegrationTime(result);
-        _println("");
-
-        _printPeakPixelInfo(s.ccd(0));
+        _print("<br>", false);
+        _printPeakPixelInfo(s, results);
         _printWarnings(s.warnings());
-
         _print(OverheadTablePrinter.print(this, p, results[0], s));
-
         Log.info("CCD lengh: " + s.ccds().length() );
-
         _print("<HR align=left SIZE=3>");
-
-        for (int i = 0; i < 1; i++) {
+        Log.info("results size: "+results.length + "  groupsSize: " + s.chartGroups().length());
+        for (int i = 2; i < s.chartGroups().length(); i++) {
             _println("<p style=\"page-break-inside: never\">");
             Log.info("Plotting results, index: "+i);
             _printImageLink(id, SignalChart.instance(), i, pdp);
@@ -85,8 +71,6 @@ public final class GhostPrinter extends PrinterBase implements OverheadTablePrin
             _printImageLink(id, S2NChartPerRes.instance(), i, pdp);
             _printFileLink(id, SingleS2NPerResEle.instance(), i);
             _printFileLink(id, FinalS2NPerResEle.instance(), i);
-
-
         }
 
         printConfiguration(results[0].parameters(), mainInstrument, iqAtSource);
@@ -103,38 +87,41 @@ public final class GhostPrinter extends PrinterBase implements OverheadTablePrin
 
     private void printConfiguration(final ItcParameters p, final Ghost mainInstrument, final double iqAtSource) {
         _println("");
-
         _print("<HR align=left SIZE=3>");
-
-        _println(HtmlPrinter.printParameterSummary(pdp));
-
-        _println("<b>Input Parameters:</b>");
+        _println("<h2 style=\"margin:0;margin-left:5%;\">Input Parameters introduced by the user in this result</h2>");
         _println("Instrument: " + mainInstrument.getName() + "\n");
         _println(HtmlPrinter.printParameterSummary(p.source()));
         _println(ghostToString(mainInstrument, p, (GhostParameters) p.instrument()));
         _println(HtmlPrinter.printParameterSummary(p.telescope()));
         _println(HtmlPrinter.printParameterSummary(p.conditions(), mainInstrument.getEffectiveWavelength(), iqAtSource));
         _println(HtmlPrinter.printParameterSummary(p.observation()));
+
     }
 
     private String ghostToString(final Ghost instrument, final ItcParameters p, final GhostParameters config) {
-
-        String s = "Instrument configuration: \n";
-        s += HtmlPrinter.opticalComponentsToString(instrument);
-        s += "\n";
-        s += "Spatial Binning (y-binning): " + instrument.getSpatialBinning() + "\n";
-        s += "Spectral Binning (x-binning): " + instrument.getSpectralBinning() + "\n";
-        s += String.format("Pixel Size in Spatial Direction: %.5f arcsec \n", instrument.getPixelSize());
-        s += String.format("Pixel Size in Spectral Direction: %.5f nm \n", instrument.getGratingDispersion());
-
+        String s = HtmlPrinter.opticalComponentsToString(instrument);
+        s += "Binning Configuration: ";
+        s += "<li>Spatial Binning (y-binning): " + instrument.getSpatialBinning() + "</li>";
+        s += "<li>Spectral Binning (x-binning): " + instrument.getSpectralBinning() + "</li>";
+        s += String.format("<li>Pixel Size in Spatial Direction: %.5f arcsec </li>", instrument.getPixelSize());
+        s += String.format("<li>Pixel Size in Spectral Direction: %.5f nm </li>", instrument.getGratingDispersion());
         return s;
     }
 
-    protected void _printPeakPixelInfo(final scala.Option<ItcCcd> ccd, final GhostSaturLimitRule ghostLimit) {
-        if (ccd.isDefined()) {
-            _println(
-                    String.format("The peak pixel signal + background is %.0f e- (%d ADU). This is %.0f%% of the saturation limit of %.0f e-.",
-                            ccd.get().peakPixelFlux(), ccd.get().adu(), ghostLimit.percentOfLimit(ccd.get().peakPixelFlux()), ghostLimit.limit()));
+    protected void _printPeakPixelInfo(final ItcSpectroscopyResult s, final SpectroscopyResult[] results) {
+        _println("The peak pixel signal + background on each detector is:");
+        for (int i = 0; i < s.ccds().length(); i++) {
+            int saturationLimit = ((Ghost) results[i].instrument()).getSaturationLimit();
+            double peakPixelFlux = s.ccd(i).get().peakPixelFlux();
+            int peakPixelToADU = s.ccd(i).get().adu();
+            _print(String.format("%s%s %s: The peak pixel signal + background is %.0f e- (%d ADU) where the limit is %d %s",
+                                    "<p style=\"margin:0;margin-left:2%;",
+                                    (peakPixelToADU >= saturationLimit) ? "color:red;\"> Warning" : "\">",
+                                    ((Ghost) results[i].instrument()).getDetectorName(),
+                                    peakPixelFlux,
+                                    peakPixelToADU,
+                                    saturationLimit,
+                                    "</p>"), false);
         }
     }
 

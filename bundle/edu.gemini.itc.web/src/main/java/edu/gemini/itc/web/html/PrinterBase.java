@@ -52,16 +52,20 @@ public abstract class PrinterBase {
         }
     }
 
-    protected void _print(String s) {
+    protected void _print(String s, boolean addBr) {
         if (_out == null) {
             s = s.replaceAll("<br>", "\n");
             s = s.replaceAll("<BR>", "\n");
             s = s.replaceAll("<LI>", "-");
             System.out.print(s);
-        } else {
+        } else if (addBr){
             s = s.replaceAll("\n", "<br>");
             _out.print(s.replaceAll("\n", "<br>") + "<br>");
-        }
+        } else
+            _out.print(s);
+    }
+    protected void _print(String s) {
+        _print(s, true);
     }
 
     protected void _println(final String s) {
@@ -202,8 +206,10 @@ public abstract class PrinterBase {
     protected void _printSkyAperture(final Result result) {
         final AnalysisMethod method = result.observation().analysisMethod();
         final double aperture;
-        if      (method instanceof ApertureMethod) aperture = ((ApertureMethod) method).skyAperture();
-        else if (method instanceof IfuMethod)      aperture = ((IfuMethod) method).skyFibres();
+        if      (method instanceof ApertureMethod)
+            aperture = ((ApertureMethod) method).skyAperture();
+        else if (method instanceof IfuMethod)
+            aperture = ((IfuMethod) method).skyFibres();
         else throw new Error();
         _println("Sky subtraction aperture = " + aperture + " times the software aperture.");
     }

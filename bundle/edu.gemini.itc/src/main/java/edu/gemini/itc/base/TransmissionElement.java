@@ -46,6 +46,9 @@ public class TransmissionElement implements SampledSpectrumVisitor {
         return _trans;
     }
 
+    public String getDescription(){
+        return _description;
+    }
     public void setDescription(String desc) {
         this._description = desc;
     }
