@@ -5,7 +5,12 @@ name := "ocs"
 organization in Global := "edu.gemini.ocs"
 
 // true indicates a test release, and false indicates a production release
+<<<<<<< HEAD
 ocsVersion in ThisBuild := OcsVersion("2025A", true, 1, 1, 1)
+=======
+// FR changed this one to try the deployment ocsVersion in ThisBuild := OcsVersion("2024B", true, 1, 1, 3)
+ocsVersion in ThisBuild := OcsVersion("2024B", true, 1, 1, 5)
+>>>>>>> 75be30fb9 (REL-TASK 4388)
 
 pitVersion in ThisBuild := OcsVersion("2025A", true, 1, 1, 1)
 
