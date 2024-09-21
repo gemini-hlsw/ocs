@@ -57,8 +57,8 @@ object LibraryStar {
   case object B5I     extends LibraryStar("B5I", "b5i")
   case object B9III   extends LibraryStar("B9III", "B9III")
   // A
-  //case object A0V     extends LibraryStar("A0V", "a0v")  // Form works but tests fail with the lower-case filename
-  case object A0V     extends LibraryStar("A0V", "A0V")    // Form fails but tests pass with the upper-case filename
+  case object A0V     extends LibraryStar("A0V", "a0v")
+  case object A0V_new extends LibraryStar("A0V", "A0V")
   case object A0III   extends LibraryStar("A0III", "a0iii")
   case object A0I     extends LibraryStar("A0I", "a0i")
   case object A1V     extends LibraryStar("A1V", "A1V")
@@ -193,7 +193,7 @@ object LibraryStar {
   val Values: List[LibraryStar] = List(
     O5V, O8III, O9V, O95V,
     B0V, B05V, B3V, B5_7V, B5III, B5I, B9III,
-    A0I, A0III, A0V, A1V, A2V, A3V, A4V, A5V, A5III, A6V, A8III,
+    A0I, A0III, A0V, A0V_new, A1V, A2V, A3V, A4V, A5V, A5III, A6V, A8III,
     F0I, F0II, F0III, F0IV, F0V, F2II, F2III, F2V, F4V, F5I, F5III, F5V, F5V_w, F6V_r, F7V, F8I, F8IV, F8V,
     G0I, G0V, G0V_w, G0V_r, G0III, G1V, G2I, G2IV, G2V, G3V, G5I, G5V, G5V_w, G5V_r, G5III, G5III_w, G5III_r, G7III, G8I, G8III, G8V,
     K0III, K0III_w, K0III_r, K0IV, K0V, K0V_r, K0_1II, K05III, K15III, K2I, K2III, K2V, K3II, K3III, K3V, K4I, K4III,K4III_w, K4III_r, K4V, K5III, K5V,
