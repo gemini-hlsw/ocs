@@ -71,39 +71,51 @@ object LibraryStar {
   case object A8III   extends LibraryStar("A8III", "A8III")
   // F
   case object F0V     extends LibraryStar("F0V", "f0v")
+  case object F0V_new extends LibraryStar("F0V", "F0V")
   case object F0I     extends LibraryStar("F0I", "f0i")
+  case object F0I_new extends LibraryStar("F0I", "F0I")
   case object F0II    extends LibraryStar("F0II", "F0II")
   case object F0III   extends LibraryStar("F0III", "f0iii")
+  case object F0III_new extends LibraryStar("F0III", "F0III")
   case object F0IV    extends LibraryStar("F0IV", "F0IV")
   case object F2II    extends LibraryStar("F2II", "F2II")
   case object F2III   extends LibraryStar("F2III", "F2III")
   case object F2V     extends LibraryStar("F2V", "F2V")
   case object F4V     extends LibraryStar("F4V", "F4V")
   case object F5V     extends LibraryStar("F5V", "f5v")
+  case object F5V_new extends LibraryStar("F5V", "F5V")
   case object F5V_w   extends LibraryStar("F5V-w", "f5v-w")
   case object F6V_r   extends LibraryStar("F6V-r", "f6v-r")
   case object F5III   extends LibraryStar("F5III", "f5iii")
+  case object F5III_new extends LibraryStar("F5III", "F5III")
   case object F5I     extends LibraryStar("F5I", "f5i")
+  case object F5I_new extends LibraryStar("F5I", "F5I")
   case object F7V     extends LibraryStar("F7V", "F7V")
   case object F8I     extends LibraryStar("F8I", "F8I")
   case object F8IV    extends LibraryStar("F8IV", "F8IV")
   case object F8V     extends LibraryStar("F8V", "F8V")
   // G
   case object G0V     extends LibraryStar("G0V", "g0v")
+  case object G0V_new extends LibraryStar("G0V", "G0V")
   case object G0V_w   extends LibraryStar("G0V-w", "g0v-w")
   case object G0V_r   extends LibraryStar("G0V-r", "g0v-r")
   case object G0III   extends LibraryStar("G0III", "g0iii")
   case object G0I     extends LibraryStar("G0I", "g0i")
+  case object G0I_new extends LibraryStar("G0I", "G0I")
   case object G1V     extends LibraryStar("G1V", "G1V")
   case object G2I     extends LibraryStar("G2I", "G2I")
   case object G2IV    extends LibraryStar("G2IV", "G2IV")
   case object G2V     extends LibraryStar("G2V", "g2v")
+  case object G2V_new extends LibraryStar("G2V", "G2V")
   case object G3V     extends LibraryStar("G3V", "G3V")
   case object G5I     extends LibraryStar("G5I", "g5i")
+  case object G5I_new extends LibraryStar("G5I", "G5I")
   case object G5III   extends LibraryStar("G5III", "g5iii")
+  case object G5III_new extends LibraryStar("G5III", "G5III")
   case object G5III_w extends LibraryStar("G5III-w", "g5iii-w")
   case object G5III_r extends LibraryStar("G5III-r", "g5iii-r")
   case object G5V     extends LibraryStar("G5V", "g5v")
+  case object G5V_new extends LibraryStar("G5V", "G5V")
   case object G5V_w   extends LibraryStar("G5V-w", "g5v-w")
   case object G5V_r   extends LibraryStar("G5V-r", "g5v-r")
   case object G7III   extends LibraryStar("G7III", "G7III")
@@ -113,9 +125,11 @@ object LibraryStar {
   // K
   case object K0_1II  extends LibraryStar("K0-1II", "k0-1ii")
   case object K0III   extends LibraryStar("K0III", "k0iii")
+  case object K0III_new extends LibraryStar("K0III", "K0III")
   case object K0III_w extends LibraryStar("K0III-w", "k0iii-w")
   case object K0III_r extends LibraryStar("K0III-r", "k0iii-r")
   case object K0V     extends LibraryStar("K0V", "k0v")
+  case object K0V_new extends LibraryStar("K0V", "K0V")
   case object K0IV    extends LibraryStar("K0IV", "K0IV")
   case object K0V_r   extends LibraryStar("K0V-r", "k0v-r")
   case object K05III  extends LibraryStar("K0.5III", "K0.5III")
@@ -127,7 +141,9 @@ object LibraryStar {
   case object K3III   extends LibraryStar("K3III", "K3III")
   case object K3V     extends LibraryStar("K3V", "K3V")
   case object K4I     extends LibraryStar("K4I", "k4i")
+  case object K4I_new extends LibraryStar("K4I", "K4I")
   case object K4III   extends LibraryStar("K4III", "k4iii")
+  case object K4III_new extends LibraryStar("K4III", "K4III")
   case object K4III_w extends LibraryStar("K4III-w", "k4iii-w")
   case object K4III_r extends LibraryStar("K4III-r", "k4iii-r")
   case object K4V     extends LibraryStar("K4V", "k4v")
@@ -135,18 +151,23 @@ object LibraryStar {
   case object K5V     extends LibraryStar("K5V", "K5V")
   // M
   case object M0III   extends LibraryStar("M0III", "m0iii")
+  case object M0III_new extends LibraryStar("M0III", "M0III")
   case object M0V     extends LibraryStar("M0V", "m0v")
+  case object M0V_new extends LibraryStar("M0V", "M0V")
   case object M1III   extends LibraryStar("M1III", "M1III")
   case object M1V     extends LibraryStar("M1V", "M1V")
   case object M2I     extends LibraryStar("M2I", "M2I")
   case object M2III   extends LibraryStar("M2III", "M2III")
   case object M2V     extends LibraryStar("M2V", "M2V")
   case object M3III   extends LibraryStar("M3III", "m3iii")
+  case object M3III_new extends LibraryStar("M3III", "M3III")
   case object M3V     extends LibraryStar("M3V", "m3v")
+  case object M3V_new extends LibraryStar("M3V", "M3V")
   case object M4III   extends LibraryStar("M4III", "M4III")
   case object M4V     extends LibraryStar("M4V", "M4V")
   case object M5V     extends LibraryStar("M5V", "M5V")
   case object M6III   extends LibraryStar("M6III", "m6iii")
+  case object M6III_new extends LibraryStar("M6III", "M6III")
   case object M6V     extends LibraryStar("M6V", "m6v")
   case object M7III   extends LibraryStar("M7III", "M7III")
   case object M9III   extends LibraryStar("M9III", "m9iii")
@@ -194,10 +215,10 @@ object LibraryStar {
     O5V, O8III, O9V, O95V,
     B0V, B05V, B3V, B5_7V, B5III, B5I, B9III,
     A0I, A0III, A0V, A0V_new, A1V, A2V, A3V, A4V, A5V, A5III, A6V, A8III,
-    F0I, F0II, F0III, F0IV, F0V, F2II, F2III, F2V, F4V, F5I, F5III, F5V, F5V_w, F6V_r, F7V, F8I, F8IV, F8V,
-    G0I, G0V, G0V_w, G0V_r, G0III, G1V, G2I, G2IV, G2V, G3V, G5I, G5V, G5V_w, G5V_r, G5III, G5III_w, G5III_r, G7III, G8I, G8III, G8V,
-    K0III, K0III_w, K0III_r, K0IV, K0V, K0V_r, K0_1II, K05III, K15III, K2I, K2III, K2V, K3II, K3III, K3V, K4I, K4III,K4III_w, K4III_r, K4V, K5III, K5V,
-    M0III, M0V, M1III, M1V, M2I, M2III, M2V, M3III, M3V, M4III, M4V, M5V, M6V, M6III, M7III, M9III,
+    F0I, F0I_new, F0II, F0III, F0III_new, F0IV, F0V, F0V_new, F2II, F2III, F2V, F4V, F5I, F5I_new, F5III, F5III_new, F5V, F5V_new, F5V_w, F6V_r, F7V, F8I, F8IV, F8V,
+    G0I, G0I_new, G0V, G0V_new, G0V_w, G0V_r, G0III, G1V, G2I, G2IV, G2V, G2V_new, G3V, G5I, G5I_new, G5V, G5V_new, G5V_w, G5V_r, G5III, G5III_new, G5III_w, G5III_r, G7III, G8I, G8III, G8V,
+    K0III, K0III_new, K0III_w, K0III_r, K0IV, K0V, K0V_new, K0V_r, K0_1II, K05III, K15III, K2I, K2III, K2V, K3II, K3III, K3V, K4I, K4I_new, K4III, K4III_new, K4III_w, K4III_r, K4V, K5III, K5V,
+    M0III, M0III_new, M0V, M0V_new, M1III, M1V, M2I, M2III, M2V, M3III, M3III_new, M3V, M3V_new, M4III, M4V, M5V, M6V, M6III, M6III_new, M7III, M9III,
     sdB, sdF8, sdO,
     DA08, DA09, DA12, DA15, DA18, DA24, DA28, DA30, DA31, DA33, DA36, DA38, DA48, DA57, DBQ40, DBQA50, DO20,
     T2800K,   T2600K,     T2400K,   T2200K,     T2000K,
