@@ -1580,7 +1580,7 @@ coverage.
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="SLOW"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="R400_G5305"/>
+            <param name="disperser" value="R400_G5310"/>
             <param name="disperserLambda" value="780.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
@@ -1790,7 +1790,7 @@ time for the given instrument configuration.
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="R400_G5305"/>
+            <param name="disperser" value="R400_G5310"/>
             <param name="disperserLambda" value="780.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
@@ -2123,7 +2123,7 @@ when conditions are convenient for observing baseline standards.
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="SLOW"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="R400_G5305"/>
+            <param name="disperser" value="R400_G5310"/>
             <param name="disperserLambda" value="780.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
@@ -2266,7 +2266,7 @@ time for the given instrument configuration.
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="R400_G5305"/>
+            <param name="disperser" value="R400_G5310"/>
             <param name="disperserLambda" value="780.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
@@ -2401,7 +2401,7 @@ The exposure is taken on the sky so the Translation stage should be
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="SLOW"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="R400_G5305"/>
+            <param name="disperser" value="R400_G5310"/>
             <param name="disperserLambda" value="780.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
@@ -4738,7 +4738,7 @@ used for the mask. GCAL arcs and flats will remain undefined until the slit widt
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="SLOW"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="R400_G5305"/>
+            <param name="disperser" value="R400_G5310"/>
             <param name="disperserLambda" value="780.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="CUSTOM_MASK"/>
@@ -5115,7 +5115,7 @@ time for the given instrument configuration.
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="R400_G5305"/>
+            <param name="disperser" value="R400_G5310"/>
             <param name="disperserLambda" value="780.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="CUSTOM_MASK"/>
@@ -5269,7 +5269,7 @@ masks for use, with a technical limit of 99 masks).</value>
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="SLOW"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="R400_G5305"/>
+            <param name="disperser" value="R400_G5310"/>
             <param name="disperserLambda" value="780.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="CUSTOM_MASK"/>
@@ -5605,7 +5605,7 @@ time for the given instrument configuration.
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="SLOW"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="R400_G5305"/>
+            <param name="disperser" value="R400_G5310"/>
             <param name="disperserLambda" value="780.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
@@ -5787,7 +5787,7 @@ time for the given instrument configuration.
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="R400_G5305"/>
+            <param name="disperser" value="R400_G5310"/>
             <param name="disperserLambda" value="680.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
@@ -6081,7 +6081,7 @@ IFU: Baseline Twilight </value>
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="SLOW"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="R400_G5305"/>
+            <param name="disperser" value="R400_G5310"/>
             <param name="disperserLambda" value="780.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
@@ -6269,7 +6269,7 @@ time for the given instrument configuration.
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="R400_G5305"/>
+            <param name="disperser" value="R400_G5310"/>
             <param name="disperserLambda" value="780.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
@@ -6385,7 +6385,7 @@ time for the given instrument configuration.
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="SLOW"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="R400_G5305"/>
+            <param name="disperser" value="R400_G5310"/>
             <param name="disperserLambda" value="780.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
@@ -6543,7 +6543,7 @@ time for the given instrument configuration.
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="FAST"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="R400_G5305"/>
+            <param name="disperser" value="R400_G5310"/>
             <param name="disperserLambda" value="780.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
@@ -6819,7 +6819,7 @@ time for the given instrument configuration.
             <param name="gainChoice" value="LOW"/>
             <param name="ampReadMode" value="SLOW"/>
             <param name="detectorManufacturer" value="HAMAMATSU"/>
-            <param name="disperser" value="R400_G5305"/>
+            <param name="disperser" value="R400_G5310"/>
             <param name="disperserLambda" value="780.0"/>
             <param name="disperserOrder" value="ONE"/>
             <param name="fpuMode" value="BUILTIN"/>
