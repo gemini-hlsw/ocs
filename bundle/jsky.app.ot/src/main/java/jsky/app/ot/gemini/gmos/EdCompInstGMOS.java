@@ -138,6 +138,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
             new GMOSInfo(DisperserNorth.B600_G5303, 320, 1100),
             new GMOSInfo(DisperserNorth.R600_G5304, 530, 1100),
             new GMOSInfo(DisperserNorth.R400_G5305, 520, 1100),
+            new GMOSInfo(DisperserNorth.R400_G5310, 520, 1100),
             new GMOSInfo(DisperserNorth.R150_G5306, 430, 1100)
     };
 
@@ -1356,7 +1357,8 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         if (filter == FilterNorth.g_G0301
                 && (disperser == DisperserNorth.R831_G5302
                 || disperser == DisperserNorth.R600_G5304
-                || disperser == DisperserNorth.R400_G5305)) {
+                || disperser == DisperserNorth.R400_G5305
+                || disperser == DisperserNorth.R400_G5310)) {
             _setWarning(_w.warning1, "Grating-filter combination gives very small wavelength coverage");
             return;
         }

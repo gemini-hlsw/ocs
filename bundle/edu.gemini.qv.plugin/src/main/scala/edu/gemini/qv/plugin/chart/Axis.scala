@@ -69,6 +69,7 @@ object Axis {
     FilterAnd(Filter.GmosN.FocalPlanes(GmosNorthType.FPUnitNorth.IFU_1), Filter.GmosN.Dispersers(GmosNorthType.DisperserNorth.MIRROR)),
     FilterAnd(Filter.GmosN.FocalPlanes(GmosNorthType.FPUnitNorth.IFU_1), Filter.GmosN.Dispersers(GmosNorthType.DisperserNorth.R150_G5306)),
     FilterAnd(Filter.GmosN.FocalPlanes(GmosNorthType.FPUnitNorth.IFU_1), Filter.GmosN.Dispersers(GmosNorthType.DisperserNorth.R400_G5305)),
+    FilterAnd(Filter.GmosN.FocalPlanes(GmosNorthType.FPUnitNorth.IFU_1), Filter.GmosN.Dispersers(GmosNorthType.DisperserNorth.R400_G5310)),
     FilterAnd(Filter.GmosN.FocalPlanes(GmosNorthType.FPUnitNorth.IFU_1), Filter.GmosN.Dispersers(GmosNorthType.DisperserNorth.R600_G5304)),
     FilterAnd(Filter.GmosN.FocalPlanes(GmosNorthType.FPUnitNorth.IFU_1), Filter.GmosN.Dispersers(GmosNorthType.DisperserNorth.R831_G5302)),
     FilterAnd(Filter.GmosN.FocalPlanes(GmosNorthType.FPUnitNorth.IFU_3), Filter.GmosN.Dispersers(GmosNorthType.DisperserNorth.B1200_G5301)),
@@ -78,6 +79,7 @@ object Axis {
     FilterAnd(Filter.GmosN.FocalPlanes(GmosNorthType.FPUnitNorth.IFU_3), Filter.GmosN.Dispersers(GmosNorthType.DisperserNorth.MIRROR)),
     FilterAnd(Filter.GmosN.FocalPlanes(GmosNorthType.FPUnitNorth.IFU_3), Filter.GmosN.Dispersers(GmosNorthType.DisperserNorth.R150_G5306)),
     FilterAnd(Filter.GmosN.FocalPlanes(GmosNorthType.FPUnitNorth.IFU_3), Filter.GmosN.Dispersers(GmosNorthType.DisperserNorth.R400_G5305)),
+    FilterAnd(Filter.GmosN.FocalPlanes(GmosNorthType.FPUnitNorth.IFU_3), Filter.GmosN.Dispersers(GmosNorthType.DisperserNorth.R400_G5310)),
     FilterAnd(Filter.GmosN.FocalPlanes(GmosNorthType.FPUnitNorth.IFU_3), Filter.GmosN.Dispersers(GmosNorthType.DisperserNorth.R600_G5304)),
     FilterAnd(Filter.GmosN.FocalPlanes(GmosNorthType.FPUnitNorth.IFU_3), Filter.GmosN.Dispersers(GmosNorthType.DisperserNorth.R831_G5302))
   ))
@@ -89,6 +91,7 @@ object Axis {
     FilterAnd(Filter.GmosN.FocalPlanes(GmosNorthType.FPUnitNorth.CUSTOM_MASK), Filter.GmosN.Dispersers(GmosNorthType.DisperserNorth.MIRROR)),
     FilterAnd(Filter.GmosN.FocalPlanes(GmosNorthType.FPUnitNorth.CUSTOM_MASK), Filter.GmosN.Dispersers(GmosNorthType.DisperserNorth.R150_G5306)),
     FilterAnd(Filter.GmosN.FocalPlanes(GmosNorthType.FPUnitNorth.CUSTOM_MASK), Filter.GmosN.Dispersers(GmosNorthType.DisperserNorth.R400_G5305)),
+    FilterAnd(Filter.GmosN.FocalPlanes(GmosNorthType.FPUnitNorth.CUSTOM_MASK), Filter.GmosN.Dispersers(GmosNorthType.DisperserNorth.R400_G5310)),
     FilterAnd(Filter.GmosN.FocalPlanes(GmosNorthType.FPUnitNorth.CUSTOM_MASK), Filter.GmosN.Dispersers(GmosNorthType.DisperserNorth.R600_G5304)),
     FilterAnd(Filter.GmosN.FocalPlanes(GmosNorthType.FPUnitNorth.CUSTOM_MASK), Filter.GmosN.Dispersers(GmosNorthType.DisperserNorth.R831_G5302))
   ))

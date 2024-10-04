@@ -865,6 +865,7 @@ public final class GmosRule implements IRule {
 
         static {
             //north dispersers
+            DISPERSER_LIMITS_MAP.put(DisperserNorth.R400_G5310, 710.0);
             DISPERSER_LIMITS_MAP.put(DisperserNorth.R400_G5305, 710.0);
             DISPERSER_LIMITS_MAP.put(DisperserNorth.R831_G5302, 815.0);
             DISPERSER_LIMITS_MAP.put(DisperserNorth.R600_G5304, 775.0);
