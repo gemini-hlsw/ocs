@@ -82,7 +82,7 @@ public class GmosNorthType {
         R400_G5305(  "R400_G5305",  "R400",  400, Ictd.unavailable()) {
             @Override public boolean isObsolete() { return true; }
         },
-        R400_G5310(  "R150_G5310",  "R400",  400, Ictd.track("R400")),
+        R400_G5310(  "R400_G5310",  "R400",  400, Ictd.track("R400")),
         R150_G5306(  "R150_G5306",  "R150",  150, Ictd.unavailable()) {
             @Override public boolean isObsolete() { return true; }
         },
