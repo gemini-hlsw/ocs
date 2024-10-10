@@ -20,10 +20,10 @@ object HtmlUtil {
       s" ${temp}K blackbody with ${sd.norm} ${sd.units.displayValue} in the ${sd.normBand.name} band."
 
     case l: LibraryStar =>
-      s" ${sd.norm} ${sd.units.displayValue} ${l.sedSpectrum} star in the ${sd.normBand.name} band."
+      s" ${sd.norm} ${sd.units.displayValue} ${l.label} star in the ${sd.normBand.name} band."
 
     case l: LibraryNonStar =>
-      s" ${sd.norm} ${sd.units.displayValue} ${l.sedSpectrum} in the ${sd.normBand.name} band."
+      s" ${sd.norm} ${sd.units.displayValue} ${l.label} in the ${sd.normBand.name} band."
 
     case u: UserDefined =>
       s" ${sd.norm} ${sd.units.displayValue} user defined SED in the ${sd.normBand.name} band with the name: ${u.name}"
