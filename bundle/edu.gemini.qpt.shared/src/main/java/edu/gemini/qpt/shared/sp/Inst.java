@@ -214,7 +214,7 @@ public enum Inst {
         this.north = north;
         this.south = south;
         this.normallyAvailable = normallyAvailable;
-        this.options = filterNotObsolete(options);
+        this.options = options; // RNC: retain obsolete items to allow mid-semester changes
         this.normallyAvailableOptions = filterNotObsolete(normallyAvailableOptions);
         this.hiddenOptions = hiddenOptions;
         this.guideProbe = null;

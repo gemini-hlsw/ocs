@@ -191,9 +191,9 @@ def rnorris(version: Version) = AppConfig(
   ),
   props = Map(
     "edu.gemini.auxfile.fits.host"               -> "gsconfig.gemini.edu",
-    "edu.gemini.auxfile.root"                    -> "/Users/rnorris/.auxfile",
+    "edu.gemini.auxfile.root"                    -> "/Users/rob.norris/.auxfile",
     "edu.gemini.dataman.gsa.summit.host"         -> "mkofits-lv1new.hi.gemini.edu",
-    "edu.gemini.spdb.dir"                        -> "/Users/rnorris/.spdb/",
+    "edu.gemini.spdb.dir"                        -> "/Users/rob.norris/.spdb/",
     "edu.gemini.util.trpc.name"                  -> "Rob's ODB (Test)",
     "edu.gemini.services.telescope.schedule.id.north"  -> "00h6i49qldh5qrteote4nfhldo@group.calendar.google.com",
     "edu.gemini.services.telescope.schedule.id.south"  -> "c4br8ehtv4i8741jfe4ef5saq8@group.calendar.google.com",
