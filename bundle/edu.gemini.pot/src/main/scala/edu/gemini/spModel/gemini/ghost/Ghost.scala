@@ -443,10 +443,10 @@ final class Ghost
   }
 
   override def getSetupTime(obs: ISPObservation): Duration =
-    Duration.ofMinutes(15)
+    Ghost.SetupTime
 
   override def getReacquisitionTime(obs: ISPObservation): Duration =
-    Duration.ofMinutes(5)
+    Ghost.ReaquisitionTime
 
   override def calc(cur: Config, prev: JOption[Config]): CategorizedTimeGroup = {
     val times = new java.util.ArrayList[CategorizedTime]()
@@ -503,7 +503,7 @@ final class Ghost
 
 object Ghost {
   val LOG: Logger = Logger.getLogger(classOf[Ghost].getName)
-  val SetupTime: Duration = Duration.ofSeconds(900) // This value was provided by Venus
+  val SetupTime: Duration = Duration.ofMinutes(8) // This value is updated on REL-4506
 
   // should be added 900 seconds of the SETUP_TIME
   val ReaquisitionTime: Duration = Duration.ofSeconds(300)

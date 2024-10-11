@@ -28,7 +28,7 @@ class PlannedTimeTest extends SequenceTestBase {
 
     // Red dominates here because of its slow readout
     verifyMs(
-      15 * 60 * 1000 + // setup
+      8 * 60 * 1000 + // setup
       11000          + // exposure
       58994          + // 1 1x1 medium (red) readout
        5000            // DHS write
@@ -44,7 +44,7 @@ class PlannedTimeTest extends SequenceTestBase {
     setExposure(1, 11, 1, 12)
 
     verifyMs(
-      15 * 60 * 1000 + // setup
+      8 * 60 * 1000 + // setup
       12000          + // exposure
       45957          + // 1 1x1 slow (blue) readout
        5000            // DHS write
@@ -60,7 +60,7 @@ class PlannedTimeTest extends SequenceTestBase {
     setExposure(1, 11, 1, 12)
 
     verifyMs(
-      15 * 60 * 1000 + // setup
+      8 * 60 * 1000 + // setup
       12000          + // exposure
       45957          + // 1 1x1 slow (blue) readout
        5000            // DHS write
@@ -77,7 +77,7 @@ class PlannedTimeTest extends SequenceTestBase {
     setExposure(1, 11, 1, 100)
 
     verifyMs(
-      15 * 60 * 1000 + // setup
+      8 * 60 * 1000 + // setup
 
       // science step
       100000         + // exposure
