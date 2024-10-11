@@ -173,13 +173,13 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
     edu.gemini.skycalc.Angle.arcmins(4.75)
 
   override def getSetupTime(obs: ISPObservation): Duration =
-    Duration.ofMinutes(8)
+    Duration.ofMinutes(7) // 420 s as indicated in REL-4531
 
   override def getSetupTime(config: Config): Duration =
-    Duration.ofMinutes(8)
+    Duration.ofSeconds(Igrins2.SetupTime.toSeconds.toLong)
 
   override def getReacquisitionTime(config: Config): Duration =
-    Duration.ofMinutes(5)
+    Duration.ofSeconds(Igrins2.SetupTime.toSeconds.toLong)
 
   override def calc(cur: Config, prev: immutable.Option[Config]): PlannedTime.CategorizedTimeGroup = {
     val times = new java.util.ArrayList[CategorizedTime]()
@@ -221,6 +221,7 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
 
 object Igrins2 {
   val SP_TYPE: SPComponentType = SPComponentType.INSTRUMENT_IGRINS2
+  val SetupTime: Time = 7.minutes // REL-4531
   val DefaultExposureTime: Time = 30.seconds // sec (by default settings)
 
   val MinExposureTime: Time = 1.63.seconds
@@ -230,6 +231,11 @@ object Igrins2 {
   val WavelengthCoverageUpperBound: Wavelength = Wavelength.fromMicrons(2.46)
 
   val AllowedFowlerSamples: List[Int] = List(1, 2, 4, 8, 16)
+
+  // REL-4531
+  val FowlerSamplesReadoutTime: Map[Int, Time] = Map(1 -> 7.0.seconds, 2 -> 9.8.seconds, 4 -> 14.4.seconds, 8 -> 22.3.seconds, 16 -> 38.seconds)
+
+  assert(AllowedFowlerSamples.forall(FowlerSamplesReadoutTime.contains))
 
   def fowlerSamples(expTime: Time): Int = {
     val nFowler = ((expTime.toSeconds - 0.168)/1.45479).toInt
@@ -242,7 +248,7 @@ object Igrins2 {
 
   def readoutTime(expTime: Time): Time = {
     val nFowler = fowlerSamples(expTime)
-    1.45479.seconds * nFowler
+    FowlerSamplesReadoutTime.getOrElse(nFowler, sys.error(s"Unsupported fowler samples value $nFowler"))
   }
 
   def readNoise(expTime: Time): List[(MagnitudeBand, Double)] = {
