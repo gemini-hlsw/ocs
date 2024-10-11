@@ -423,7 +423,7 @@ public abstract class SPInstObsComp extends AbstractDataObject {
         m.put(Instrument.GmosNorth,  Duration.ofSeconds( 10));
         m.put(Instrument.GmosSouth,  Duration.ofSeconds( 10));
         m.put(Instrument.Gnirs,      Duration.ofMillis(   8500));
-        m.put(Instrument.Igrins2,    Duration.ofSeconds( 10));
+        m.put(Instrument.Igrins2,    Duration.ofSeconds(  8));
         m.put(Instrument.Nifs,       Duration.ofMillis(   9800));
         m.put(Instrument.Niri,       Duration.ofMillis(   5070));
 
