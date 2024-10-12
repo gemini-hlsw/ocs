@@ -11,6 +11,7 @@ import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
 import edu.gemini.spModel.gemini.gpi.Gpi;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
+import edu.gemini.spModel.gemini.igrins2.Igrins2;
 import edu.gemini.spModel.gemini.michelle.InstMichelle;
 import edu.gemini.spModel.gemini.nici.InstNICI;
 import edu.gemini.spModel.gemini.nifs.InstNIFS;
@@ -45,6 +46,7 @@ final class ScienceLibraryInfo {
         _libInfo.put(InstNIFS.SP_TYPE, new ScienceLibraryInfo(Site.GN, "GN-NIFS-library"));
         _libInfo.put(InstNIRI.SP_TYPE, new ScienceLibraryInfo(Site.GN, "GN-NIRI-library"));
         _libInfo.put(InstTexes.SP_TYPE, new ScienceLibraryInfo(Site.GN, "GN-TEXES-library"));
+        _libInfo.put(Igrins2.SP_TYPE, new ScienceLibraryInfo(Site.GN, "GN-IGRINS2-library"));
 
         //SOUTH
         _libInfo.put(Flamingos2.SP_TYPE, new ScienceLibraryInfo(Site.GS, "GS-Flamingos2-library"));
