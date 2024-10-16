@@ -233,7 +233,8 @@ object Igrins2 {
   val AllowedFowlerSamples: List[Int] = List(1, 2, 4, 8, 16)
 
   // REL-4531
-  val FowlerSamplesReadoutTime: Map[Int, Time] = Map(1 -> 7.0.seconds, 2 -> 9.8.seconds, 4 -> 14.4.seconds, 8 -> 22.3.seconds, 16 -> 38.seconds)
+  val FowlerSamplesReadoutTime: Map[Int, Time] =
+    Map(1 -> 10.0.seconds, 2 -> 12.8.seconds, 4 -> 17.4.seconds, 8 -> 25.3.seconds, 16 -> 41.seconds)
 
   assert(AllowedFowlerSamples.forall(FowlerSamplesReadoutTime.contains))
 
