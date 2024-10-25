@@ -13,6 +13,8 @@ Version : 2024-Apr-12, epfarina, add note on acquistion with IFUs, re-acquisitio
 Version : 2024-Apr-15, epfarina, HR-IFU sacrificial flat set to: 'Acquisition Calibration', change exptime for acquisitions associated with science at >=2.5 to 15s
 Version : 2024-May-15, bclemaux & epfarina, changed order of HR-IFU sacrificial flat, updated acquistions for >=2.5um HR-IFU science to use the long blue camera
 Version : 2024-May-20, bclemaux, included explicit mention of when notes should be added, changed note numbers, updated central wavelength for >=2.5um HR-IFU science 
+Version : 2024-Oct-21, bclemaux, updated advice for science at >=2.5um regarding well depth and advice related to acqusitions with the ND100x filter 
+
 
 Observations identified by LibraryIDs indicated with {}.
 
@@ -81,6 +83,7 @@ IF CROSS-DISPERSED == No:
 
 IF PI Central Wavelength > 2.5um
     SET Well depth == Deep for {5}-{14},{22}
+    Well Depth for >=2.5um observations
 
 # ACQ for science to target Scheduling Group
 IF TARGET H-MAGNITUDE < 7 INCLUDE {22}                   # ND filter
@@ -188,7 +191,8 @@ FOR {24,27-31,35,40} SET DECKER FROM PI IN ITERATORS EXCEPT WHERE DECKER == acqu
 IF PI Central Wavelength > 2.5um
 
      In ALL Scheduling group add NOTE "Long blue camera used for acquisitions"
-
+     In ALL Scheduling group add NOTE "Well Depth for >=2.5um observations" 
+     
      IF ACQ: 
 	SET Well Depth == Shallow 
 	SET Central Wavelength == 2.22um
