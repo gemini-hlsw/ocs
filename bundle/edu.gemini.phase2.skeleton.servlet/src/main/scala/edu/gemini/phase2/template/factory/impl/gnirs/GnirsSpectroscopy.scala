@@ -121,13 +121,14 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
 
   // IF PI Central Wavelength > 2.5um:
   //    SET Well depth == Deep for {5}-{14},{22}
+  //    Well Depth for >=2.5um observations
   if (wavelengthGe2_5) {
 
     // Update well depth, but only for specific obs if they are already included.
     val included = curIncludes(TargetGroup).toSet
     val all      = Set(5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 22)
     forObs((all & included).toSeq: _*)(setWellDepth(DEEP))
-
+    addNote("For observations with a central wavelength > 2.5 µm, PIs should consult their contact scientist for advice on detector well depth.")
   }
 
   // #In ALL ACQ

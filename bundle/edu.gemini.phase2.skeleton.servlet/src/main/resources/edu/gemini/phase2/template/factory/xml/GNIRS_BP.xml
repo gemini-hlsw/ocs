@@ -896,7 +896,7 @@ This page also provides tables of suggested exposure times to AVOID SATURATION w
 
 Briefly, we distinguish four main types of acquisition method, depending on the brightness of the target (in Vega mags):
 
-1) Very bright objects (H &lt; 11.5):  Narrow-band filter, no sky subtraction (for H &lt; 7, the ND100X filter can be used to avoid saturation, but see the warning about filter shifts here: www.gemini.edu/sciops/instruments/gnirs/spectroscopy/acquisition
+1) Very bright objects (H &lt; 11.5):  Narrow-band filter, no sky subtraction (for H &lt; 7, the ND100X filter can be used to avoid saturation, but see the warning about filter shifts here: https://www.gemini.edu/instrumentation/gnirs/observation-preparation#nd100+h2  and on the Acq with ND filter note). 
 
 2) Bright objects (11.5 &lt; H &lt; 16): Broad-band filter, no sky subtraction
 
@@ -972,6 +972,14 @@ The GNIRS detector contains a few small regions of bad pixels (see www.gemini.ed
             <value>
 Because of the large wavelength coverage of the XD modes, differential refraction can cause light to be lost from the slit in certain circumstances. If you are interested in the whole 0.9 - 2.5 um wavelength range and are using a very narrow slit and/or expect your target to be observed at high airmass, you may wish to consider observing at the mean parallactic angle: https://www.gemini.edu/sciops/instruments/gnirs/observation-preparation/ot-details
 </value>
+          </param>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="ad83b10e-fe65-4fad-9dac-b3feecb9da52" name="Note">
+        <paramset name="Note" kind="dataObj">
+          <param name="title" value="Well Depth for &gt;=2.5um observations"/>
+          <param name="NoteText">
+            <value>For observations with a central wavelength &gt; 2.5 um, PIs should consult their contact scientist for advice on optimal detector well depth.</value>
           </param>
         </paramset>
       </container>
@@ -1284,7 +1292,9 @@ The initial slit image is taken in the H band filter as exposure times in the na
             <param name="title" value="Filter selection"/>
             <param name="NoteText">
               <value>
-The initial slit image is taken in the H band filter as exposure times in the narrowband H2 filter used to image bright targets are prohibitively long for slit imaging. The images of the target field and of the target through the slit are taken in the H2 filter combined wth the ND100X filter. </value>
+The initial slit image is taken in the H band filter as exposure times in the narrowband H2 filter (or ND100X+H2) used to image bright targets are prohibitively long for slit imaging. The images of the target field and of the target through the slit are taken in the H2 filter combined wth the ND100X filter. 
+
+Note that there is a ~3% ghosting effect seen with the ND100X+H2 filter combination (see https://www.gemini.edu/instrumentation/gnirs/observation-preparation#nd100+h2 )   that can be confusing for acquisitions. Leave a note to the observer to warn them about this effect. Also note that using the ND100X+H2 filter induces a ~0.1" shift in the p dimension relative to using just the H2 filter and is not recommended for slit widths &lt;=0.45". </value>
             </param>
           </paramset>
         </container>
@@ -2964,7 +2974,17 @@ Procedure to be followed if the target is faint and requires a sky offset for bo
         <paramset name="Note" kind="dataObj">
           <param name="title" value="Long blue camera used for acquisitions"/>
           <param name="NoteText">
-            <value>Unless targets are extremely red, the preference is to use the long blue camera for acquisitions even for science taken with the long red camera. Do not modify the central wavelength for acquisition sequences unless you know your target cannot be acquired easily in the K band (or unless you need to use the H2 filter due to a very bright target). </value>
+            <value>Unless targets are extremely red, the preference is to use the long blue camera for acquisitions even for science taken with the long red camera. Do not modify the central wavelength for acquisition sequences unless you know your target cannot be acquired easily in the K band (or unless you need to use the H2 filter due to a very bright target). 
+
+During 25A, only one camera position will be available at a time. Please work with your contact scientist to make sure that the acquisition sequences are modified correctly to use the same camera poisition as is used for your science. </value>
+          </param>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="9bbb58a1-5afd-49a9-9594-1910844e3e2e" name="Note">
+        <paramset name="Note" kind="dataObj">
+          <param name="title" value="Well Depth for &gt;=2.5um observations"/>
+          <param name="NoteText">
+            <value>For observations with a central wavelength &gt; 2.5 um, PIs should consult their contact scientist for advice on optimal detector well depth.</value>
           </param>
         </paramset>
       </container>
@@ -3374,6 +3394,17 @@ Testing on sky, albeit at a single elevation and a single set of Cassegrain Rota
             <param name="focus" value="best focus"/>
             <param name="overrideAcqObsWavelength" value="true"/>
             <param name="issPort" value="SIDE_LOOKING"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="236030df-17d5-4d48-8fc2-1a5ec940f178" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="Filter selection"/>
+            <param name="NoteText">
+              <value>
+The initial slit image is taken in the H band filter as exposure times in the narrowband H2 filter (or ND100X+H2) used to image bright targets are prohibitively long for pseudoslit imaging. The images of the target field and of the target through the IFU are taken in the H2 filter combined wth the ND100X filter. 
+
+Note that there is a ~3% ghosting effect seen with the ND100X+H2 filter combination (see https://www.gemini.edu/instrumentation/gnirs/observation-preparation#nd100+h2 )   that can be confusing for acquisitions. Leave a note to the observer to warn them about this effect. Also note that using the ND100X+H2 filter induces a ~0.1" shift in the p dimension relative to using just the H2 filter and is not recommended for slit widths &lt;=0.45". </value>
+            </param>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="659f157d-7983-4ca5-9987-1c6e90b1284c" name="Observing Log">
@@ -5294,6 +5325,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="f3318ab9-0a68-46dc-a463-d8f59d2e74a4"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="4c140f64-9a7f-499c-bdd6-72c1d935e253" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="af63dd1f-a51c-48b7-af27-24179920c6cd"/>
@@ -5622,6 +5654,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="5063d9f0-6ecb-4f50-ac95-1ef4b0298f1e"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="236030df-17d5-4d48-8fc2-1a5ec940f178"/>
+      <param name="4c140f64-9a7f-499c-bdd6-72c1d935e253" value="19"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f2154ccc-0e49-4d77-935a-e94e43d11879"/>
@@ -6044,6 +6080,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="key" value="94f9d9cc-cdc6-4e60-a828-dae81e2b22ec"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
       <param name="4196f81f-b865-44f6-b630-8631169886f8" value="1"/>
+      <param name="4c140f64-9a7f-499c-bdd6-72c1d935e253" value="9"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e20ad1fc-63fb-4933-96c3-16b8cbc78428"/>
@@ -6306,6 +6343,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="74ef57fb-fff5-4412-a745-8162e8b314ed"/>
       <param name="4196f81f-b865-44f6-b630-8631169886f8" value="554"/>
+      <param name="4c140f64-9a7f-499c-bdd6-72c1d935e253" value="335"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="4cac3925-a0dd-4c22-bf72-bf750ae6c58e"/>
@@ -6550,6 +6588,11 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
       <param name="5604d009-9be6-45e2-aed0-dee01505becc" value="2"/>
       <param name="4a2bb797-c6e2-4b85-a0dc-b45691c472f5" value="1"/>
       <param name="4196f81f-b865-44f6-b630-8631169886f8" value="1"/>
+      <param name="4c140f64-9a7f-499c-bdd6-72c1d935e253" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ad83b10e-fe65-4fad-9dac-b3feecb9da52"/>
+      <param name="4c140f64-9a7f-499c-bdd6-72c1d935e253" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="7fd187c1-31d1-4d5b-8896-83b1ee4a3995"/>
@@ -6736,6 +6779,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="f1778803-c131-48c0-b65e-0b2b40c2bec4"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="4c140f64-9a7f-499c-bdd6-72c1d935e253" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f6d7b116-6880-4565-b817-88a508c42204"/>
@@ -6977,6 +7021,7 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="920c0231-d267-4eb8-8998-d0b06101ca04"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+      <param name="4c140f64-9a7f-499c-bdd6-72c1d935e253" value="47"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="58ebab42-7449-4077-b986-3ed3e1cccce5"/>
@@ -7061,6 +7106,10 @@ Once you shift the prism, re-read the GNIRS mechanisms file in the cc, and toggl
     <paramset name="node">
       <param name="key" value="17c7bfbf-6330-4594-92ea-342413109487"/>
       <param name="903f0ea9-d6de-42d8-b976-24a7c7b79c20" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9bbb58a1-5afd-49a9-9594-1910844e3e2e"/>
+      <param name="4c140f64-9a7f-499c-bdd6-72c1d935e253" value="18"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5a8c9144-4be6-4614-953b-c21f35733069"/>
