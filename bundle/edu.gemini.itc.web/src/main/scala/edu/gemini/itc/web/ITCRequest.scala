@@ -337,8 +337,8 @@ object ITCRequest {
     fpMask match {
       case fpMask if fpMask.startsWith("CUSTOM_WIDTH") =>
         site match {
-          case Site.GN => FPUnitNorth.CUSTOM_MASK
-          case Site.GS => FPUnitSouth.CUSTOM_MASK
+          case Site.GN => FPUnitNorth.CUSTOM_MASK.asInstanceOf[GmosCommonType.FPUnit]
+          case Site.GS => FPUnitSouth.CUSTOM_MASK.asInstanceOf[GmosCommonType.FPUnit]
         }
       case _ =>
         site match {
