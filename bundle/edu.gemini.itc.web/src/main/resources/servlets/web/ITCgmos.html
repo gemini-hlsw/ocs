@@ -250,20 +250,31 @@
 				</td>
 
 				<td>Focal plane unit:
-				<select name="instrumentFPMask" size="1">
-				<option selected="selected" value="FPU_NONE">none</option>
-				<option value="IFU_1">IFU-2</option>
-				<option value="IFU_2">IFU Left Slit (blue)</option>
-				<option value="IFU_3">IFU Right Slit (red)</option>
-                <option value="LONGSLIT_1">0.25 arcsec slit(let)</option>
-                <option value="LONGSLIT_2">0.5 arcsec slit(let)</option>
-				<option value="LONGSLIT_3">0.75 arcsec slit(let)</option>
-				<option value="LONGSLIT_4">1.0 arcsec slit(let)</option>
-				<option value="LONGSLIT_5">1.5 arcsec slit(let)</option>
-				<option value="LONGSLIT_6">2.0 arcsec slit(let)</option>
-				<option value="LONGSLIT_7">5.0 arcsec slit(let)</option>
-				</select></td>
+					<select name="instrumentFPMask" size="1">
+						<option selected="selected" value="FPU_NONE">None (imaging)</option>
+						<option value="IFU_1">IFU-2</option>
+						<option value="IFU_2">IFU Left Slit (blue)</option>
+						<option value="IFU_3">IFU Right Slit (red)</option>
+						<option value="none" disabled></option>
+						<option value="LONGSLIT_1">Long Slit 0.25&Prime;</option>
+						<option value="LONGSLIT_2">Long Slit 0.50&Prime;</option>
+						<option value="LONGSLIT_3">Long Slit 0.75&Prime;</option>
+						<option value="LONGSLIT_4">Long Slit 1.0&Prime;</option>
+						<option value="LONGSLIT_5">Long Slit 1.5&Prime;</option>
+						<option value="LONGSLIT_6">Long Slit 2.0&Prime;</option>
+						<option value="LONGSLIT_7">Long Slit 5.0&Prime;</option>
+						<option value="none" disabled></option>
+						<option value="CUSTOM_WIDTH_0_25">MOS 0.25&Prime; slits</option>
+						<option value="CUSTOM_WIDTH_0_50">MOS 0.50&Prime; slits</option>
+						<option value="CUSTOM_WIDTH_0_75">MOS 0.75&Prime; slits</option>
+						<option value="CUSTOM_WIDTH_1_00">MOS 1.0&Prime; slits</option>
+						<option value="CUSTOM_WIDTH_1_50">MOS 1.5&Prime; slits</option>
+						<option value="CUSTOM_WIDTH_2_00">MOS 2.0&Prime; slits</option>
+						<option value="CUSTOM_WIDTH_5_00">MOS 5.0&Prime; slits</option>
+					</select>
+				</td>
 			</tr>
+
 			<tr>
 				<td colspan="2" height="50" valign="bottom"><b>Detector properties:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10273#detector','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false"><span>more info</span></a><span>)</span></i></td>
 			</tr>

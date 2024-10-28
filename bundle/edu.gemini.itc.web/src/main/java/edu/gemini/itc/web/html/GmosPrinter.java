@@ -222,8 +222,13 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
 
         s += String.format("Amp gain: %s, Amp read mode: %s\n",config.ampGain().displayValue() ,config.ampReadMode().displayValue());
 
-        if (!instrument.getFpMask().equals(GmosNorthType.FPUnitNorth.FPU_NONE) && !instrument.getFpMask().equals(GmosSouthType.FPUnitSouth.FPU_NONE))
-            s += "<LI> Focal Plane Mask: " + instrument.getFpMask().displayValue() + "\n";
+        if (!instrument.getFpMask().equals(GmosNorthType.FPUnitNorth.FPU_NONE) && !instrument.getFpMask().equals(GmosSouthType.FPUnitSouth.FPU_NONE)) {
+            s += "<LI> Focal Plane Mask: " + instrument.getFpMask().displayValue();
+            if (instrument.getFpMask().equals(GmosNorthType.FPUnitNorth.CUSTOM_MASK) ||
+                    instrument.getFpMask().equals(GmosSouthType.FPUnitSouth.CUSTOM_MASK))
+                s += " with " + config.customSlitWidth().get().displayValue() + " slits";
+            s += "\n";
+        }
         s += "\n";
         s += "Region of Interest: " + config.builtinROI().displayValue() + "\n";
         if (p.observation().calculationMethod() instanceof Spectroscopy)

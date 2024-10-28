@@ -216,11 +216,12 @@ object ITCRequest {
     val specBinning                       = r.intParameter("specBinning")
     val ccdType                           = r.enumParameter(classOf[DetectorManufacturer])
     val centralWl                         = r.centralWavelengthInNanometers()
-    val fpMask: GmosCommonType.FPUnit     = if (site.equals(Site.GN)) r.enumParameter(classOf[FPUnitNorth],    "instrumentFPMask")   else r.enumParameter(classOf[FPUnitSouth],      "instrumentFPMask")
+    val fpMask                            = fpMaskParameters(r)
+    val customSlitWidth                   = customSlitWidthParameters(r)
     val ampGain                           = r.enumParameter(classOf[AmpGain])
     val ampReadMode                       = r.enumParameter(classOf[AmpReadMode])
     val builtinROI                        = r.enumParameter(classOf[GmosCommonType.BuiltinROI])
-    GmosParameters(filter, grating, centralWl, fpMask, ampGain, ampReadMode, None, spatBinning, specBinning, ccdType, builtinROI, site)
+    GmosParameters(filter, grating, centralWl, fpMask, ampGain, ampReadMode, customSlitWidth, spatBinning, specBinning, ccdType, builtinROI, site)
   }
 
   /**
@@ -328,6 +329,34 @@ object ITCRequest {
     val avgStrehl  = r.doubleParameter("avgStrehl") / 100.0
     val strehlBand = r.parameter("strehlBand")
     GemsParameters(avgStrehl, strehlBand)
+  }
+
+  def fpMaskParameters(r: ITCRequest): GmosCommonType.FPUnit = {
+    val site = r.enumParameter(classOf[Site])
+    val fpMask = r.parameter("instrumentFPMask")
+    fpMask match {
+      case fpMask if fpMask.startsWith("CUSTOM_WIDTH") =>
+        site match {
+          case Site.GN => FPUnitNorth.CUSTOM_MASK.asInstanceOf[GmosCommonType.FPUnit]
+          case Site.GS => FPUnitSouth.CUSTOM_MASK.asInstanceOf[GmosCommonType.FPUnit]
+        }
+      case _ =>
+        site match {
+          case Site.GN => r.enumParameter(classOf[FPUnitNorth], "instrumentFPMask")
+          case Site.GS => r.enumParameter(classOf[FPUnitSouth], "instrumentFPMask")
+        }
+    }
+  }
+
+  def customSlitWidthParameters(r: ITCRequest): Option[GmosCommonType.CustomSlitWidth] = {
+    val fpMask = r.parameter("instrumentFPMask")
+    fpMask match {
+      case fpMask if fpMask.startsWith("CUSTOM_WIDTH") =>
+        val slitwidth = r.enumParameter(classOf[GmosCommonType.CustomSlitWidth], "instrumentFPMask")
+        some(slitwidth)
+      case _ =>
+        None
+    }
   }
 
   sealed trait CoaddsType
