@@ -128,7 +128,7 @@ case class GnirsSpectroscopy(blueprint:SpGnirsBlueprintSpectroscopy, exampleTarg
     val included = curIncludes(TargetGroup).toSet
     val all      = Set(5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 22)
     forObs((all & included).toSeq: _*)(setWellDepth(DEEP))
-    addNote("For observations with a central wavelength > 2.5 µm, PIs should consult their contact scientist for advice on detector well depth.")
+    addNote("Well Depth for >=2.5um observations") in TopLevel
   }
 
   // #In ALL ACQ
