@@ -213,7 +213,7 @@ object ITCRequest {
     val filter: GmosCommonType.Filter     = if (site.equals(Site.GN)) r.enumParameter(classOf[FilterNorth],    "instrumentFilter")    else r.enumParameter(classOf[FilterSouth],    "instrumentFilter")
     val grating: GmosCommonType.Disperser = if (site.equals(Site.GN)) r.enumParameter(classOf[DisperserNorth], "instrumentDisperser") else r.enumParameter(classOf[DisperserSouth], "instrumentDisperser")
     val spatBinning                       = r.intParameter("spatBinning")
-    val specBinning                       = r.intParameter("specBinning")
+    val specBinning                       = if (r.parameter("instrumentDisperser") == "MIRROR") r.intParameter("spatBinning") else r.intParameter("specBinning")
     val ccdType                           = r.enumParameter(classOf[DetectorManufacturer])
     val centralWl                         = r.centralWavelengthInNanometers()
     val fpMask                            = fpMaskParameters(r)
