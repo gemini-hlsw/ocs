@@ -228,10 +228,14 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
                 switch (gp.readMode()) {
                     case SLOW_LOW:
 <<<<<<< HEAD
+<<<<<<< HEAD
                         return 4.5;
 =======
                         return 4.5;  // e-
 >>>>>>> 75be30fb9 (REL-TASK 4388)
+=======
+                        return 4.5;
+>>>>>>> fd58ebe46 (Cleaning code)
                     case MEDIUM_LOW:
                         return 4.5;
                     case FAST_LOW:
@@ -245,10 +249,14 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
                 switch (gp.readMode()) {
                     case SLOW_LOW:
 <<<<<<< HEAD
+<<<<<<< HEAD
                         return 4.5;
 =======
                         return 4.5;  // e-
 >>>>>>> 75be30fb9 (REL-TASK 4388)
+=======
+                        return 4.5;
+>>>>>>> fd58ebe46 (Cleaning code)
                     case MEDIUM_LOW:
                         return 4.5;
                     case FAST_LOW:
