@@ -156,6 +156,7 @@ public class OverheadTablePrinter {
                     numReacq = 0;
                 }
             }
+            if (instrumentName.equals(SPComponentType.INSTRUMENT_IGRINS2)) numReacq = 0;  // REL-4602
         }
         return numReacq;
     }
