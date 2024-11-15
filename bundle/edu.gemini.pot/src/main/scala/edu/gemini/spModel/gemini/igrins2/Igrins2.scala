@@ -179,7 +179,7 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
     Duration.ofSeconds(Igrins2.SetupTime.toSeconds.toLong)
 
   override def getReacquisitionTime(config: Config): Duration =
-    Duration.ofSeconds(Igrins2.SetupTime.toSeconds.toLong)
+    Duration.ofMinutes(5)
 
   override def calc(cur: Config, prev: immutable.Option[Config]): PlannedTime.CategorizedTimeGroup = {
     val times = new java.util.ArrayList[CategorizedTime]()
