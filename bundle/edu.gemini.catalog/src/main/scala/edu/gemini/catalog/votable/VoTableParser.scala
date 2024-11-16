@@ -482,6 +482,7 @@ object CatalogAdapter {
     private val errorFluxIDExtra = "FLUX_ERROR_(.)_.+"
     private val fluxIDExtra      = "FLUX_(.)_.+"
     private val errorFluxID      = "FLUX_ERROR_(.)".r
+    private val GaiaMagID        = "FLUX(_ERROR)?_G" // Matches gaia G
     private val fluxID           = "FLUX_(.)".r
     private val magSystemID      = "FLUX_SYSTEM_(.)".r
     val idField                  = FieldId("MAIN_ID", VoTableParser.UCD_OBJID)
@@ -493,7 +494,8 @@ object CatalogAdapter {
     override def ignoreMagnitudeField(v: FieldId): Boolean =
       !v.id.toLowerCase.startsWith("flux") ||
         v.id.matches(errorFluxIDExtra)     ||
-        v.id.matches(fluxIDExtra)
+        v.id.matches(fluxIDExtra)          ||
+        v.id.matches(GaiaMagID)
 
     override def isMagnitudeSystemField(v: (FieldId, String)): Boolean =
       v._1.id.toLowerCase.startsWith("flux_system")
