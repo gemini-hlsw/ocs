@@ -851,6 +851,22 @@ class VoTableParserSpec extends Specification with VoTableParser {
       result.map(_.magnitudeIn(MagnitudeBand._i)) should beEqualTo(\/.right(Some(new Magnitude(16.902, MagnitudeBand._i, 0.005))))
       result.map(_.magnitudeIn(MagnitudeBand._z)) should beEqualTo(\/.right(Some(new Magnitude(17.015, MagnitudeBand._z, 0.011))))
     }
+    "parse simbad queries with gaia magnitudes" in {
+      // From http://simbad.u-strasbg.fr/simbad/sim-id?Ident=2MFGC6625&output.format=VOTable
+      val xmlFile = "simbad-new-hip-59783.xml"
+      // The sample has only one row
+      val result = VoTableParser.parse(CatalogName.SIMBAD, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
+
+      // id and coordinates
+      result.map(_.name) should beEqualTo(\/.right("HD 106593"))
+      // magnitudes
+      println(result.map(_.magnitudes))
+      result.map(_.magnitudeIn(MagnitudeBand.B)) should beEqualTo(\/.right(Some(new Magnitude(7.95, MagnitudeBand.B))))
+      result.map(_.magnitudeIn(MagnitudeBand.V)) should beEqualTo(\/.right(Some(new Magnitude(7.69, MagnitudeBand.V))))
+      result.map(_.magnitudeIn(MagnitudeBand.J)) should beEqualTo(\/.right(Some(new Magnitude(7.063, MagnitudeBand.J, 0.018))))
+      result.map(_.magnitudeIn(MagnitudeBand.H)) should beEqualTo(\/.right(Some(new Magnitude(6.932, MagnitudeBand.H, 0.027))))
+      result.map(_.magnitudeIn(MagnitudeBand.K)) should beEqualTo(\/.right(Some(new Magnitude(6.884, MagnitudeBand.K, 0.023))))
+    }
     "parse simbad named queries with mixed magnitudes" in {
       // From http://simbad.u-strasbg.fr/simbad/sim-id?Ident=2SLAQ%20J000008.13%2B001634.6&output.format=VOTable
       val xmlFile = "simbad-J000008.13.xml"
