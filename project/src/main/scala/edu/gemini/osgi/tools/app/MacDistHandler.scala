@@ -19,7 +19,7 @@ object MacDistHandler {
   val certificateHash = "80386EDC22D4A690A10B38D6A0B4479149D87477"
   val signatureID = "T87F4ZD75E"
 
-  val jarMatcher = FileSystems.getDefault().getPathMatcher("glob:.jar")
+  val jarMatcher   = FileSystems.getDefault().getPathMatcher("glob:**.jar")
   val dylibMatcher = FileSystems.getDefault().getPathMatcher("glob:.dylib")
 }
 
