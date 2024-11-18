@@ -12,10 +12,6 @@ unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/argonaut_2.11-6.2.jar")
 )
 
-libraryDependencies ++= Seq(
-  "org.scala-lang" % "scala-compiler" % scalaVersion.value
-)
-
 osgiSettings
 
 ocsBundleSettings

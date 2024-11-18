@@ -12,8 +12,7 @@ unmanagedJars in Compile ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scalaz"     %% "scalaz-concurrent" % ScalaZVersion,
-  "org.scala-lang" %  "scala-compiler"    % scalaVersion.value
+  "org.scalaz"     %% "scalaz-concurrent" % ScalaZVersion
 )
 
 osgiSettings

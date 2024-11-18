@@ -15,8 +15,7 @@ libraryDependencies ++= Seq(
   "org.scalaz"     %% "scalaz-core"       % ScalaZVersion,
   "org.scalaz"     %% "scalaz-concurrent" % ScalaZVersion,
   "org.scalaz"     %% "scalaz-effect"     % ScalaZVersion,
-  "org.scala-lang" %  "scala-actors"      % scalaVersion.value,
-  "org.scala-lang" %  "scala-compiler"    % scalaVersion.value // required to pull the dependencies via edu.gemini.util.security
+  "org.scala-lang" %  "scala-actors"      % scalaVersion.value
 )
 
 osgiSettings
