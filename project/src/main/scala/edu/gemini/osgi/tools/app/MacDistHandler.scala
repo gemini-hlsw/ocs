@@ -1,13 +1,7 @@
 package edu.gemini.osgi.tools.app
 
 import java.io.{File, IOException, PrintWriter}
-import java.nio.file.{
-  FileSystems,
-  FileVisitResult,
-  Files,
-  Path,
-  SimpleFileVisitor
-}
+import java.nio.file.{FileSystems, FileVisitResult, Files, Path, SimpleFileVisitor}
 import java.nio.file.attribute.BasicFileAttributes
 import edu.gemini.osgi.tools.app.{copy => recursivecopy}
 
@@ -138,9 +132,14 @@ case class MacDistHandler(jre: Option[String], jreName: String)
         new File(appDir.getPath).toPath,
         new SimpleFileVisitor[Path]() {
           override def visitFile(
-              file: Path,
-              attrs: BasicFileAttributes
+            file:  Path,
+            attrs: BasicFileAttributes
           ): FileVisitResult = {
+            if (file.toFile.getName.startsWith("scala-compiler")) {
+              println(s"Remove native libs from scala-compiler jar")
+              val cmd = Seq("zip", "-d", file.toFile.getAbsolutePath, """META-INF/native/**""" )
+              cmd.lines.foreach(println)
+            }
             if (
               MacDistHandler.jarMatcher
                 .matches(file) || MacDistHandler.dylibMatcher.matches(file)
@@ -148,10 +147,7 @@ case class MacDistHandler(jre: Option[String], jreName: String)
               Seq(
                 "codesign",
                 "-f",
-                "-vv",
                 "--options",
-                "--entitlements",
-                entitlements.getAbsolutePath.toString,
                 "runtime",
                 "-s",
                 MacDistHandler.certificateHash,
@@ -188,8 +184,8 @@ case class MacDistHandler(jre: Option[String], jreName: String)
         new File(appDir.getPath, ".Trash").toPath,
         new SimpleFileVisitor[Path]() {
           override def postVisitDirectory(
-              dir: Path,
-              ex: IOException
+            dir: Path,
+            ex:  IOException
           ): FileVisitResult = {
             Files.delete(dir);
             FileVisitResult.CONTINUE
