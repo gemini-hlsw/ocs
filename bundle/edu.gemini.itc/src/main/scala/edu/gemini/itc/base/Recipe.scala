@@ -50,10 +50,17 @@ object Recipe {
   }
 
   def createSignalChart(result: SpectroscopyResult, title: String, index: Int): SpcChartData = {
+     createSignalChart (result.specS2N(index).getSignalSpectrum, "Signal", result.specS2N(index).getBackgroundSpectrum, "SQRT(Background)",title);
+  }
+
+
+  def createSignalChart(signal1: VisitableSampledSpectrum, dataLegend1: String,
+                  signal2: VisitableSampledSpectrum, dataLegend2: String,
+                  titleGraph : String): SpcChartData = {
     val data: JList[SpcSeriesData] = new ArrayList[SpcSeriesData]()
-    data.add(SpcSeriesData(SignalData,     "Signal",           result.specS2N(index).getSignalSpectrum.getData, Some(ITCChart.DarkBlue)))
-    data.add(SpcSeriesData(BackgroundData, "SQRT(Background)", result.specS2N(index).getBackgroundSpectrum.getData, Some(ITCChart.LightBlue)))
-    new SpcChartData(SignalChart, title, ChartAxis("Wavelength (nm)"), ChartAxis("e- per exposure per spectral pixel"), data.toList)
+    data.add(SpcSeriesData(SignalData,     dataLegend1, signal1.getData, Some(ITCChart.DarkBlue)))
+    data.add(SpcSeriesData(BackgroundData, dataLegend2, signal2.getData, Some(ITCChart.LightBlue)))
+    new SpcChartData(SignalChart, titleGraph, ChartAxis("Wavelength (nm)"), ChartAxis("e- per exposure per spectral pixel"), data.toList)
   }
 
   def createS2NChart(result: SpectroscopyResult): SpcChartData = {
@@ -65,13 +72,20 @@ object Recipe {
   }
 
   def createS2NChart(result: SpectroscopyResult, title: String, index: Int): SpcChartData = {
+     return createS2NChart(result.specS2N(index).getExpS2NSpectrum,result.specS2N(index).getFinalS2NSpectrum, "Single Exp S/N", "Final S/N  ", title)
+  }
+
+  def createS2NChart(expS2NSpectrum: VisitableSampledSpectrum, finalS2NSpectrum: VisitableSampledSpectrum,
+                     legendExpS2N: String, legendS2N : String,
+                     title: String): SpcChartData = {
     val data: JList[SpcSeriesData] = new ArrayList[SpcSeriesData]
-    data.add(SpcSeriesData(SingleS2NData, "Single Exp S/N", result.specS2N(index).getExpS2NSpectrum.getData))
-    data.add(SpcSeriesData(FinalS2NData,  "Final S/N  ",    result.specS2N(index).getFinalS2NSpectrum.getData))
+    data.add(SpcSeriesData(SingleS2NData, legendExpS2N, expS2NSpectrum.getData))
+    data.add(SpcSeriesData(FinalS2NData,  legendS2N,    finalS2NSpectrum.getData))
     new SpcChartData(S2NChart, title, ChartAxis("Wavelength (nm)"), ChartAxis("Signal / Noise per spectral pixel"), data.toList)
   }
 
-  def createS2NChart(singleS2N: VisitableSampledSpectrum, finalS2N: VisitableSampledSpectrum, title: String, color1: Color, color2: Color): SpcChartData = {
+
+  def createS2NChartPerRes(singleS2N: VisitableSampledSpectrum, finalS2N: VisitableSampledSpectrum, title: String, color1: Color, color2: Color): SpcChartData = {
     val data: JList[SpcSeriesData] = new ArrayList[SpcSeriesData]
     data.add(SpcSeriesData(SingleS2NPerResEle, "Single Exp S/N", singleS2N.getData, Option(color1)))
     data.add(SpcSeriesData(FinalS2NPerResEle,  "Final S/N  ",    finalS2N.getData, Option(color2)))

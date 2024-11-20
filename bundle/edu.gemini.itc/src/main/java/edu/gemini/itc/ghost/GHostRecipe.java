@@ -1,11 +1,14 @@
 package edu.gemini.itc.ghost;
 
 import edu.gemini.itc.base.*;
+import edu.gemini.itc.gnirs.GnirsRecipe;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.ghost.Detector;
 import scala.Option;
+import scala.Some;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -23,6 +26,8 @@ public final class GHostRecipe  {
     private final ObservingConditions _obsConditionParameters;
     private final TelescopeDetails _telescope;
 
+    private final short WAVELENGTH_BLUE_END = 542; // nm . Range 347 - 542 nm
+
     /**
      * Constructs a GhostRecipe given the parameters. Useful for testing.
      */
@@ -39,28 +44,57 @@ public final class GHostRecipe  {
         // some general validations
         Validation.validate(_mainInstrument[0], _obsDetailParameters, _sdParameters);
     }
-
-
     public ItcSpectroscopyResult serviceResult(final SpectroscopyResult[] r, final boolean headless) {
         final List<List<SpcChartData>> groups = new ArrayList<>();
-
-        //final List<SpcChartData> dataSets2 = new ArrayList<SpcChartData>();
-        for (SpectroscopyResult r1 : r){
+        final List<SpcChartData> combined = new ArrayList<SpcChartData>();
+        List<VisitableSampledSpectrum> listPerResElement = new ArrayList<VisitableSampledSpectrum>();
+        for (SpectroscopyResult r1 : r) {
             final List<SpcChartData> dataSets1 = new ArrayList<SpcChartData>();
             dataSets1.add(Recipe$.MODULE$.createSignalChart(r1, 0));
-            dataSets1.add(Recipe$.MODULE$.createS2NChart(r1, "Single Exposure and Final S/N in aperture per pixel",0));
+            dataSets1.add(Recipe$.MODULE$.createS2NChart(r1, "Single Exposure and Final S/N in aperture per pixel", 0));
             VisitableSampledSpectrum finalS2N = (VisitableSampledSpectrum) r1.specS2N()[0].getFinalS2NSpectrum().clone();
             Ghost inst = (Ghost) r1.instrument();
             inst.transPerResolutionElement(finalS2N);
-            VisitableSampledSpectrum sigleS2N = (VisitableSampledSpectrum) r1.specS2N()[0].getExpS2NSpectrum().clone();
-            inst.transPerResolutionElement(sigleS2N);
-            dataSets1.add(Recipe$.MODULE$.createS2NChart(sigleS2N, finalS2N,
-                                                         "Single Exposure and Final S/N in aperture per resolution Element",
-                                                         ITCChart.DarkGreen, ITCChart.DarkRed));
+            VisitableSampledSpectrum singleS2N = (VisitableSampledSpectrum) r1.specS2N()[0].getExpS2NSpectrum().clone();
+            inst.transPerResolutionElement(singleS2N);
+            dataSets1.add(Recipe$.MODULE$.createS2NChartPerRes(singleS2N, finalS2N,
+                    "Single Exposure and Final S/N in aperture per resolution Element",
+                    ITCChart.DarkGreen, ITCChart.DarkRed));
             groups.add(dataSets1);
-
+            listPerResElement.add(singleS2N);
+            listPerResElement.add(finalS2N);
+        }
+        // This part creates a single graph to include the blue and red band.
+        // This last graph is the one shown as the final result in the Ghost Web result.
+        VisitableSampledSpectrum singleS2NCombPerRes = (VisitableSampledSpectrum) listPerResElement.get(2).clone();
+        VisitableSampledSpectrum finalS2NSpecCombPerRes = (VisitableSampledSpectrum) listPerResElement.get(3).clone();
+        VisitableSampledSpectrum sigSpectrumComb = (VisitableSampledSpectrum) r[1].specS2N()[0].getSignalSpectrum().clone();
+        VisitableSampledSpectrum backGroundSpectComb = (VisitableSampledSpectrum) r[1].specS2N()[0].getBackgroundSpectrum().clone();
+        VisitableSampledSpectrum expS2NComb = (VisitableSampledSpectrum) r[1].specS2N()[0].getExpS2NSpectrum().clone();
+        VisitableSampledSpectrum finalS2NSpecComb = (VisitableSampledSpectrum) r[1].specS2N()[0].getFinalS2NSpectrum().clone();
+        int indexWV = r[0].specS2N()[0].getSignalSpectrum().getLowerIndex(WAVELENGTH_BLUE_END);
+        for (int i = 0; i <= indexWV; ++i) {
+            sigSpectrumComb.setY(i, r[0].specS2N()[0].getSignalSpectrum().getY(i));
+            backGroundSpectComb.setY(i, r[0].specS2N()[0].getBackgroundSpectrum().getY(i));
+            expS2NComb.setY(i, r[0].specS2N()[0].getExpS2NSpectrum().getY(i));
+            finalS2NSpecComb.setY(i, r[0].specS2N()[0].getFinalS2NSpectrum().getY(i));
+            singleS2NCombPerRes.setY(i, listPerResElement.get(0).getY(i));
+            finalS2NSpecCombPerRes.setY(i, listPerResElement.get(1).getY(i));
         }
 
+        combined.add(Recipe$.MODULE$.createSignalChart(sigSpectrumComb, "Signal",
+                backGroundSpectComb, "SQRT(Background)",
+                "Signal & SQRT(Background) in one pixel"));
+
+        combined.add(Recipe$.MODULE$.createS2NChart(expS2NComb, finalS2NSpecComb,
+                "Single Exp S/N", "Final S/N  ",
+                "Signal / Noise per spectral pixel"
+                ));
+
+        combined.add(Recipe$.MODULE$.createS2NChartPerRes(singleS2NCombPerRes, finalS2NSpecCombPerRes,
+                "Single Exposure and Final S/N in aperture per resolution Element",
+                ITCChart.DarkGreen, ITCChart.DarkRed));
+        groups.add(combined);
         return Recipe$.MODULE$.serviceGroupedResult(r, groups, headless);
     }
 
