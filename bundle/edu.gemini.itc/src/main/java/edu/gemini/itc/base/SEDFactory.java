@@ -175,7 +175,7 @@ public final class SEDFactory {
             return temp;
 
         } else if (sdp.distribution() instanceof LibraryStar) {
-            temp = getSED(getLibraryResource(STELLAR_LIB, sdp), sampling);
+            temp = getSED(getLibraryResource(STELLAR_LIB, sdp).toLowerCase(), sampling);
             temp.applyWavelengthCorrection();
             return temp;
 
