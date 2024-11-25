@@ -45,7 +45,6 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * @param xInterval Sampling interval (nm)
      */
     public DefaultSampledSpectrum(ArraySpectrum sp, double xInterval) {
-        Log.fine("Interval: " + xInterval + " nm");
         double xStart = sp.getStart();
         double xEnd = sp.getEnd();
         int numIntervals = (int) ((xEnd - xStart) / xInterval);
@@ -67,7 +66,6 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * @param z         Redshift of target
      */
     public DefaultSampledSpectrum(ArraySpectrum sp, double xStart, double xEnd, double xInterval, double z) {
-        Log.fine("Interval: " + xInterval + " nm");
 
         if ( (1+z) * sp.getStart() > xStart || (1+z) * sp.getEnd() < xEnd ) {
             throw new IllegalArgumentException(
@@ -97,7 +95,6 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     }
 
     @Override public void trim(double newStart, double newEnd) {
-        Log.fine("Trimming to " + newStart + " - " + newEnd);
         if (newStart < getStart()) {
             newStart = getStart();
         }
