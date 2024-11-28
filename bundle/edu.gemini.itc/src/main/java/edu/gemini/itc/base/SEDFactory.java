@@ -153,8 +153,8 @@ public final class SEDFactory {
         } else if (sdp.distribution() instanceof UserDefinedSpectrum) {
             final UserDefinedSpectrum userDefined = (UserDefinedSpectrum) sdp.distribution();
             final MagnitudeBand band = sdp.normBand();
-            Double inst_start_wave = instrument.getObservingStart();
-            Double inst_end_wave = instrument.getObservingEnd();
+            double inst_start_wave = instrument.getObservingStart();
+            double inst_end_wave = instrument.getObservingEnd();
 
             // GNIRS overrides getObservingStart and getObservingEnd for each order,
             // so use the full GNIRS XD wavelength range:

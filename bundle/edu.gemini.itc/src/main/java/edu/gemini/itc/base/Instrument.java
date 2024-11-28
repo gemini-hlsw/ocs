@@ -173,9 +173,14 @@ public abstract class Instrument {
     public double getObservingStart() {
         // From original code (Michelle, TReCS, Nifs and GMOS): grating trumps everything else, is this correct?
         // Note that F2, Gnirs, Niri and Nifs behave differently again and override this method.
-        if (disperser.isDefined()) return disperser.get().getStart();
+        if (disperser.isDefined()) {
+            double start = disperser.get().getStart();
+            Log.fine("start = " + start + " nm");
+            return start;
+        }
         double s = getStart();
         s = filter.isDefined() ? Math.max(filter.get().getStart(),  s) : s;
+        Log.fine("start = " + s + " nm");
         return s;
     }
 
