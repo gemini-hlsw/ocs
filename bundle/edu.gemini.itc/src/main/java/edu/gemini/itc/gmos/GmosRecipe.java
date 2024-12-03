@@ -560,7 +560,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         // Calculate the Peak Pixel Flux
         final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, exposureTime, SFcalc, im_qual, sed_integral, sky_integral);
 
-        return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, Recipe$.MODULE$.noAOSystem(), ExposureCalculation$.MODULE$.option(IS2Ncalc.getExposureTime(), numberExposures, IS2Ncalc.totalSNRatio()));
+        return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, Recipe$.MODULE$.noAOSystem(), ExposureCalculation$.MODULE$.option(IS2Ncalc.getExposureTime(), numberExposures, IS2Ncalc.totalSNRatio(), IS2Ncalc.singleSNRatio()));
 
     }
 
