@@ -166,11 +166,11 @@ final case class SpcChartData(chartType: SpcChartType, title: String, xAxis: Cha
   def allSeriesAsJava(t: SpcDataType): java.util.List[SpcSeriesData] = series.filter(_.dataType == t)
 }
 
-case class ExposureCalculation(exposureTime: Double, exposures: Int, totalSignalToNoise: Double, singleSignalToNoise: Double)
+case class ExposureCalculation(exposureTime: Double, exposures: Int, signalToNoise: Double)
 
 object ExposureCalculation {
-  def option(exposureTime: Double, exposures: Int, totalToNoise: Double, singleSignalToNoise: Double): Option[ExposureCalculation] =
-    Some(ExposureCalculation(exposureTime, exposures, totalToNoise, singleSignalToNoise))
+  def option(exposureTime: Double, exposures: Int, signalToNoise: Double): Option[ExposureCalculation] = 
+    Some(ExposureCalculation(exposureTime, exposures, signalToNoise))
 }
 
 /** The result of a spectroscopy ITC calculation contains some numbers per CCD and a set of groups of charts.
