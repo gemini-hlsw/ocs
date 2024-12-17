@@ -32,6 +32,7 @@ import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
+import edu.gemini.spModel.gemini.ghost.GhostAsterism
 import edu.gemini.spModel.time.ChargeClass
 import edu.gemini.spModel.util.SPTreeUtil
 
@@ -370,12 +371,20 @@ final case class ProgramExportServlet(odb: IDBDatabaseService, user: Set[Princip
       val ge = te.getGuideEnvironment.guideEnv
 
       // Base information: we are only dealing with asterisms with a single target for now.
-      val asterism = te.getAsterism.asInstanceOf[Asterism.Single]
+      val base: SPTarget = te.getAsterism match {
+        case GhostAsterism.SingleTarget(t, _)                      => t.spTarget
+        case GhostAsterism.DualTarget(t, _, _)                     => t.spTarget // use the first target
+        case GhostAsterism.TargetPlusSky(t, _, _)                  => t.spTarget
+        case GhostAsterism.SkyPlusTarget(_, t, _)                  => t.spTarget
+        case GhostAsterism.HighResolutionTargetPlusSky(t, _, _, _) => t.spTarget
+        case Asterism.Single(t)                                    => t
+        case _                                                     => sys.error("Cannot happen") // Famous last words
+      }
 
       ("guideGroups" := guideGrpListEncodeJson(te, ge.groups)) ->:
         ("primaryIndex" := ge.primaryIndex) ->:
         ("userTargets" := userTargetsEncodeJson(te, te.getUserTargets.asScala.toList)) ->:
-        ("base" := targetEncodeJson(te, asterism.t, None)) ->:
+        ("base" := targetEncodeJson(te, base, None)) ->:
         jEmptyObject
     }
 
