@@ -72,13 +72,13 @@ public class GmosSouthType {
     public enum DisperserSouth implements GmosCommonType.Disperser, IctdType {
         // Mirror isn't tracked but is always installed.
         MIRROR(     "Mirror",     "mirror",    0, Ictd.installed()),
-        B1200_G5321("B1200_G5321", "B1200", 1200, Ictd.track("B1200")),
-        R831_G5322(  "R831_G5322",  "R831",  831, Ictd.track( "R831")),
-        B600_G5323(  "B600_G5323",  "B600",  600, Ictd.track( "B600")),
-        R600_G5324(  "R600_G5324",  "R600",  600, Ictd.track( "R600")),
-        B480_G5327(  "B480_G5327",  "B480",  480, Ictd.track( "B480")),
-        R400_G5325(  "R400_G5325",  "R400",  400, Ictd.track( "R400")),
-        R150_G5326(  "R150_G5326",  "R150",  150, Ictd.track( "R150")),
+        B1200_G5321("B1200", "B1200", "G5321", 1200),
+        R831_G5322(  "R831",  "R831", "G5322", 831),
+        B600_G5323(  "B600",  "B600", "G5323", 600),
+        R600_G5324(  "R600",  "R600", "G5324", 600),
+        B480_G5327(  "B480",  "B480", "G5327",  480),
+        R400_G5325(  "R400",  "R400", "G5325",  400),
+        R150_G5326(  "R150",  "R150", "G5326",  150),
         ;
 
         /** The default Disperser value **/
@@ -94,6 +94,13 @@ public class GmosSouthType {
             this.logValue      = logValue;
             this.rulingDensity = rulingDensity;
             this.ictd          = ictd;
+        }
+
+        DisperserSouth(final String name, final String logValue, final String geminiID, final int rulingDensity) {
+            this.displayValue  = name + "_" + geminiID;
+            this.logValue      = logValue;
+            this.rulingDensity = rulingDensity;     // [lines/mm]
+            this.ictd          = Ictd.trackWithID(name, geminiID);
         }
 
         public String displayValue() {
