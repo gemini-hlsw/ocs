@@ -7,14 +7,14 @@
 	h1 { font-family: Helvetica; font-size: 14pt; font-weight: bold; text-align: center; margin: 24pt; }
 	h2 { font-family: Helvetica; font-size: 12pt; font-weight: bold; margin-top: 18pt;}
 	h3 { font-family: Helvetica; font-size: 10pt; font-weight: bold; margin-top: 4pt;}
-	h2.visit { font-family: Helvetica; font-size: 12pt; font-weight: bold; color: white; background-color: gray; padding: 5pt; padding-left:10pt; margin-top: 24pt; }
+	h2.visit { font-family: Helvetica; font-size: 12pt; font-weight: bold; color: white; background-color: dimgray; padding: 5pt; padding-left:10pt; margin-top: 24pt; }
 	body { font-size: 10pt; margin: 15px; }
 	div.conditions { font-weight: bold; margin-bottom: 10pt; text-align: center }
 	div.image { text-align:center; margin: 10pt; margin-top: 10pt; }
-	div.image img { border: 1px solid gray }
+	div.image img { border: 1px solid dimgray }
 	div.comment { xbackground-color: #f4f4f4; padding: 10pt; border: 1px solid #cccccc; margin-bottom: 0pt; }
 	table.visits { margin: 10pt }
-	th { font-family: Helvetica; font-size: 9pt; border-bottom: 1px solid gray; text-align: left; padding-left: 5pt; padding-right: 5pt; }
+	th { font-family: Helvetica; font-size: 9pt; border-bottom: 1px solid dimgray; text-align: left; padding-left: 5pt; padding-right: 5pt; }
 	td { font-size: 10pt; padding-left: 5pt; padding-right: 5pt; }
 	td.comment { xbackground-color: #f4f4f4; padding-top: 5px; padding-bottom:5px }
 	</style>
@@ -42,13 +42,13 @@
 
 	-->
 
-	<h2>Resource Summary</h2>
+	<h2><a id="resource_summary">Resource Summary</a></h2>
 
 	<table align="center">
 		<tr>
 		#foreach ($variant in $doc.Schedule.Variants)
 			<td valign="top">
-			<div style="font-family: Helvetica; font-weight: bold; color: white; background-color: gray; padding: 3pt;">$variant</div>
+			<div style="font-family: Helvetica; font-weight: bold; color: white; background-color: dimgray; padding: 3pt;"><a href="#$variant" style="color:turquoise">$variant</a></div>
 			<div style="padding:3pt">
 			#foreach ($config in $doc.getUniqueConfigs($variant))
 				$config<br>
@@ -67,7 +67,8 @@
 
 		#if(!$doc.isEmpty($variant.Comment) || !$variant.isEmpty())
 
-		<h2 class="visit" style="page-break-before:always;margin-bottom:0pt;"><a name="$variant.Conditions.toShortString()">$variant</a><br><span style="font-size:9pt; font-weight: normal">$variant.Conditions</span></h2>
+		<h2 class="visit" style="page-break-before:always;margin-bottom:0pt;"><a id="$variant" name="$variant.Conditions.toShortString()">$variant</a><span style="float:right">[<a href="#resource_summary" style="color:turquoise">top</a>]</span>
+		<br><span style="font-size:9pt; font-weight: normal">$variant.Conditions</span></h2>
 		#if(!$doc.isEmpty($variant.Comment))
 		<div class="comment" style="margin-top:0pt">$variant.Comment</div>
 		#end
