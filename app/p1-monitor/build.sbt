@@ -18,9 +18,9 @@ ocsAppManifest := {
       common(ov, pv),
         dev(ov, pv),
         staging(ov, pv),
-        v2024A(ov, pv),
         v2024B(ov, pv),
-        v2025A(ov, pv)
+        v2025A(ov, pv),
+        v2025B(ov, pv)
     )
   )
 }
@@ -79,18 +79,6 @@ def staging(ov: Version, pv: Version) = AppConfig(
   distribution = List(Linux32, Linux64)
 ) extending List(common(ov, pv))
 
-// 2024A
-def v2024A(ov: Version, pv: Version) = AppConfig(
-  id = "2024A",
-  props = Map(
-    "org.osgi.framework.storage" -> "${user.home}/.edu.gemini.p1monitor.2024A/felix-cache",
-    "p1monitor.config" -> "conf.production-2024A.xml",
-    "org.osgi.service.http.port" -> "9009",
-    "p1monitor.host" -> "phase1.gemini.edu"
-  ),
-  distribution = List(Linux64)
-) extending List(common(ov, pv))
-
 // 2024B
 def v2024B(ov: Version, pv: Version) = AppConfig(
   id = "2024B",
@@ -113,5 +101,17 @@ def v2025A(ov: Version, pv: Version) = AppConfig(
     "p1monitor.host" -> "phase1.gemini.edu"
   ),
   distribution = List(Linux32, Linux64)
+) extending List(common(ov, pv))
+
+// 2025B
+def v2025B(ov: Version, pv: Version) = AppConfig(
+  id = "2025B",
+  props = Map(
+    "org.osgi.framework.storage" -> "${user.home}/.edu.gemini.p1monitor.2025B/felix-cache",
+    "p1monitor.config" -> "conf.production-2025B.xml",
+    "org.osgi.service.http.port" -> "9009",
+    "p1monitor.host" -> "phase1.gemini.edu"
+  ),
+  distribution = List(Linux64)
 ) extending List(common(ov, pv))
 
