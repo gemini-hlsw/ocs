@@ -4,16 +4,19 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.Flamingos2Parameters;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2.ReadMode;
 import scala.Option;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Flamingos 2 specification class
  */
 public final class Flamingos2 extends Instrument implements SpectroscopyInstrument {
+    private static final Logger Log = Logger.getLogger(Flamingos2.class.getName());
 
     // values are taken from instrument's web documentation
     private static final double AmpGain        =   4.44; // electrons / ADU
@@ -154,7 +157,29 @@ public final class Flamingos2 extends Instrument implements SpectroscopyInstrume
             case FAINT_OBJECT_SPEC:  return "lowNoise";
             default:                 throw new Error();
         }
+    }
 
+    public ReadMode getReadMode() {
+        return params.readMode();
+    }
+
+    public double getMinExposureTime(ReadMode r) {
+        switch (r) {
+            case BRIGHT_OBJECT_SPEC: return 2.0;  // seconds
+            case MEDIUM_OBJECT_SPEC: return 8.0;
+            case FAINT_OBJECT_SPEC:  return 16.0;
+            default:                 throw new Error("Unknown readMode");
+        }
+    }
+
+    public ReadMode getOptimalReadMode(double exposureTime) {
+        if (exposureTime < 21.) {
+            return ReadMode.BRIGHT_OBJECT_SPEC;
+        } else if (exposureTime < 85.) {
+            return ReadMode.MEDIUM_OBJECT_SPEC;
+        } else {
+            return ReadMode.FAINT_OBJECT_SPEC;
+        }
     }
 
     public Disperser disperser() {

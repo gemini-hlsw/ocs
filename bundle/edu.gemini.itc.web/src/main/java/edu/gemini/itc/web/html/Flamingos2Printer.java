@@ -33,8 +33,8 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
         this.pdp       = pdp;
         this.recipe    = new Flamingos2Recipe(p, instr);
         this.isImaging = p.observation().calculationMethod() instanceof Imaging;
-        this.p          = p;
-        this.instr          = instr;
+        this.p         = p;
+        this.instr     = instr;
     }
 
     /**
@@ -58,6 +58,8 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
 
         // we know this is Flamingos
         final Flamingos2 instrument = (Flamingos2) result.instrument();
+        final CalculationMethod calcMethod = p.observation().calculationMethod();
+
         final double iqAtSource = result.iqCalc().getImageQuality();
 
         _println("");
@@ -68,7 +70,16 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
 
         _println("");
 
-        _printRequestedIntegrationTime(result);
+        if (calcMethod instanceof SpectroscopyInt) {
+            double exposureTime = recipe.getExposureTime();
+            int numberExposures = recipe.getNumberExposures();
+            _println(String.format(
+                "Total integration time = %.2f seconds (%d x %.2f s), of which %.2f seconds is on source.",
+                    numberExposures * exposureTime, numberExposures, exposureTime,
+                    exposureTime * numberExposures * result.observation().sourceFraction()));
+        } else {
+            _printRequestedIntegrationTime(result);
+        }
 
         _println("");
 
@@ -139,7 +150,10 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
         for (final TransmissionElement te : instrument.getComponents()) {
             s += "<LI>" + te.toString() + "<BR>";
         }
-        s += "<LI>Read Noise: " + instrument.getReadNoiseString() + "\n";
+
+        //s += "<LI>Read Mode (recipe): " + recipe.getReadMode().toString() + "\n";
+        s += "<LI>Read Noise: " + instrument.getReadNoiseString() + "\n";     // OLD for running tests
+        //s += "<LI>Read Noise (recipe): " + recipe.getReadMode().readNoise() + " e-\n";
 
         if (instrument.getFocalPlaneMask() != FPUnit.FPU_NONE)
             s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask().getSlitWidth() + " pix slit\n";
@@ -149,10 +163,9 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
         return s;
     }
 
-
     public ConfigCreator.ConfigCreatorResult createInstConfig(int numberExposures) {
         ConfigCreator cc = new ConfigCreator(p);
-        return cc.createF2Config(instr, numberExposures);
+        return cc.createF2Config(instr, recipe.getReadMode(), numberExposures, recipe.getExposureTime());
     }
 
     public ItcOverheadProvider getInst() {
@@ -173,5 +186,7 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
         return this.getRecentInterval();
     }
 
-    public int getNumberExposures() { throw new Error("Not implemented"); }
+    public int getNumberExposures() {
+        return recipe.getNumberExposures();
+    }
 }

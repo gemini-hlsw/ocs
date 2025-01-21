@@ -101,7 +101,7 @@ public class OverheadTablePrinter {
         } else if (calcMethod instanceof SpectroscopyS2N) {
             numOfExposures = ((SpectroscopyS2N) calcMethod).exposures();
         } else if (calcMethod instanceof ImagingExp) {
-            numOfExposures = ((GmosPrinter) printer).recipe.getNumberExposures();
+            numOfExposures = printer.getNumberExposures();
         } else if (calcMethod instanceof SpectroscopyInt) {
             numOfExposures = printer.getNumberExposures();
         } else {
