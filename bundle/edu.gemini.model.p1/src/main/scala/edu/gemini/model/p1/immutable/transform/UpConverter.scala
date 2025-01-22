@@ -192,7 +192,7 @@ case object SemesterConverter2025ATo2025B extends SemesterConverter {
             <Igrins2 id={p.attribute("id")}>
               {transform(q) ++ <telluricStars>1</telluricStars>}
             </Igrins2>
-          case <name>{n}</name>            => <name>{n.text} 1 telluric stars</name>
+          case <name>{n}</name>            => <name>{n.text}, 1 telluric star</name>
           case elem: xml.Elem              => elem.copy(child = elem.child.flatMap(transform))
           case _                           => n
         }

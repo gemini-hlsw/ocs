@@ -113,7 +113,7 @@ object OverheadsSpec {
       obsTimes(1.7, 0.00))
       ),
     (("igrins2", "spec"), (
-      () => Igrins2Blueprint(Igrins2NoddingOption.NodToSky, 1),
+      () => Igrins2Blueprint(Igrins2NoddingOption.NodToSky, 2),
       obsTimes(1.7, 0.5))
       ),
     (("gnirs", "imaging"), (

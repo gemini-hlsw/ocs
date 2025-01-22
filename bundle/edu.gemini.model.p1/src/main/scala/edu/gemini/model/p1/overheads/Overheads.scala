@@ -41,6 +41,14 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
     }
   }
 
+  private case class IGRINS2Overheads(telluricTime: TimeAmount, nTelluric: Int) extends Overheads {
+    override def calculate(progTime: TimeAmount): ObservationTimes = {
+      val progTimeHrs: Double = progTime.toHours.value
+      val partTimeHrs = nTelluric * telluricTime.toHours.value
+      ObservationTimes(TimeAmount(progTimeHrs, TimeUnit.HR), TimeAmount(partTimeHrs, TimeUnit.HR))
+    }
+  }
+
   // Empty overheads for instruments from exchange partners, e.g. Keck and Subaru.
   private lazy val EmptyOverheads          = SimpleOverheads(0.00).some
 
@@ -74,7 +82,7 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
     case _: AlopekeBlueprint                                       => SimpleOverheads(0.00).some
     case _: ZorroBlueprint                                         => SimpleOverheads(0.00).some
     case _: IgrinsBlueprint                                        => NIRSpectroscopyOverheads(TimeAmount(0.25, TimeUnit.HR)).some
-    case _: Igrins2Blueprint                                       => NIRSpectroscopyOverheads(TimeAmount(0.25, TimeUnit.HR)).some
+    case b: Igrins2Blueprint                                       => IGRINS2Overheads(TimeAmount(0.25, TimeUnit.HR), b.telluricStars).some
     case _: MaroonXBlueprint                                       => SimpleOverheads(0.00).some
 
     // NIRI relies on whether or not AO is being used.

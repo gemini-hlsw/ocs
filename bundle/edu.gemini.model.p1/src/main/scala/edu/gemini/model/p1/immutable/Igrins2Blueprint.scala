@@ -8,7 +8,8 @@ object Igrins2Blueprint {
 
 case class Igrins2Blueprint(nodding: Igrins2NoddingOption, telluricStars: Int) extends GeminiBlueprintBase {
   require(telluricStars >= 0 && telluricStars <= 2)
-  def name: String = s"IGRINS-2 ${nodding.value}, $telluricStars telluric stars"
+  private val ts = if (telluricStars == 1) "1 telluric star" else s"$telluricStars telluric stars"
+  def name: String = s"IGRINS-2 ${nodding.value}, $ts"
 
   def this(m: M.Igrins2Blueprint) = this(
     m.getNodding,
