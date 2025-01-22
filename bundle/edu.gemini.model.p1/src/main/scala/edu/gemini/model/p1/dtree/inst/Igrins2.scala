@@ -24,6 +24,8 @@ object Igrins2 {
     override val choices: List[Int] = List(0, 1 , 2)
     override def apply(m: Int) = Right(Igrins2Blueprint(n, m))
 
+    override def default: Option[Int] = Some(1)
+
     override def unapply = {
       case b: Igrins2Blueprint => b.telluricStars
     }
