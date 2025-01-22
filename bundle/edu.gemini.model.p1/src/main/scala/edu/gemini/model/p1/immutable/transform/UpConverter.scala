@@ -71,11 +71,11 @@ object UpConverter {
   def convert(node: XMLNode):Result = node match {
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == Proposal.currentSchemaVersion =>
       StepResult(Nil, node).successNel[String]
-    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text.matches("2025.1.1") =>
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text.matches("2025.1.[12]") =>
       from2025A.concatenate.convert(node)
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text.matches("2024.2.[12]") =>
       from2024B.concatenate.convert(node)
-    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text.matches("2024.1.1") =>
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text.matches("2024.1.[12]") =>
       from2024A.concatenate.convert(node)
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text.matches("2023.2.[12]") =>
       from2023B.concatenate.convert(node)
@@ -184,7 +184,22 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter supports migrating to 2025B
  */
 case object SemesterConverter2025ATo2025B extends SemesterConverter {
-  override val transformers: List[TransformFunction] = Nil
+  val addTelluricStarsIG2: TransformFunction = {
+    case p @ <igrins2>{_*}</igrins2> =>
+      object AddTelluricStars extends BasicTransformer {
+        override def transform(n: xml.Node): xml.NodeSeq = n match {
+          case p @ <Igrins2>{q @ _*}</Igrins2> =>
+            <Igrins2 id={p.attribute("id")}>
+              {transform(q) ++ <telluricStars>1</telluricStars>}
+            </Igrins2>
+          case <name>{n}</name>            => <name>{n.text} 1 telluric stars</name>
+          case elem: xml.Elem              => elem.copy(child = elem.child.flatMap(transform))
+          case _                           => n
+        }
+      }
+      StepResult("Added a default request for 1 telluric star.", AddTelluricStars.transform(p)).successNel
+  }
+  override val transformers: List[TransformFunction] = List(addTelluricStarsIG2)
 }
 
 /**
