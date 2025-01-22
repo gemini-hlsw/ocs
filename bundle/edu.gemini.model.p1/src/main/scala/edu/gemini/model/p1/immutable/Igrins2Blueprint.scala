@@ -6,11 +6,14 @@ object Igrins2Blueprint {
   def apply(m: M.Igrins2Blueprint): Igrins2Blueprint = new Igrins2Blueprint(m)
 }
 
-case class Igrins2Blueprint(nodding: Igrins2NoddingOption) extends GeminiBlueprintBase {
-  def name: String = s"IGRINS-2 ${nodding.value}"
+case class Igrins2Blueprint(nodding: Igrins2NoddingOption, telluricStars: Int) extends GeminiBlueprintBase {
+  require(telluricStars >= 0 && telluricStars <= 2)
+  private val ts = if (telluricStars == 1) "1 telluric star" else s"$telluricStars telluric stars"
+  def name: String = s"IGRINS-2 ${nodding.value}, $ts"
 
   def this(m: M.Igrins2Blueprint) = this(
-    m.getNodding
+    m.getNodding,
+    m.getTelluricStars
   )
 
   override def instrument: Instrument = Instrument.Igrins2
@@ -21,6 +24,7 @@ case class Igrins2Blueprint(nodding: Igrins2NoddingOption) extends GeminiBluepri
     m.setName(name)
     m.setVisitor(visitor)
     m.setNodding(nodding)
+    m.setTelluricStars(telluricStars)
     m
   }
 

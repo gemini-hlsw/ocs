@@ -923,6 +923,17 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           result \\ "gnirs" \\ "imaging" must \\("filter") \> "J (1.25um)"
       }
     }
+    "REL-4624 Add a default value for telluricStar to old igrins2 proposals" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_igrins2.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 4
+          changes must contain("Added a default request for 1 telluric star.")
+          result \\ "igrins2" \\ "Igrins2" must \\("telluricStars") \>"1"
+      }
+    }
 
   }
 
