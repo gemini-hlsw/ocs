@@ -15,7 +15,12 @@ class Igrins2BlueprintTest extends TemplateSpec("IGRINS-2_BP.xml") with Specific
     Arbitrary(Gen.oneOf(Igrins2NoddingOption.values))
 
   implicit val ArbitraryIgrins2Blueprint: Arbitrary[Igrins2Blueprint] =
-    Arbitrary(arbitrary[Igrins2NoddingOption].map(Igrins2Blueprint(_)))
+    Arbitrary {
+      for {
+        n <- arbitrary[Igrins2NoddingOption]
+        s <- Gen.oneOf(0, 1, 2)
+      } yield Igrins2Blueprint(n, s)
+    }
 
   private val AnyBand: MagnitudeBand = MagnitudeBand.R // required, but not used
 
