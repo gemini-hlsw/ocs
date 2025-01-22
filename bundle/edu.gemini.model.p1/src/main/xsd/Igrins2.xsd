@@ -25,6 +25,7 @@
             <xsd:extension base="BlueprintBase">
                 <xsd:sequence>
                     <xsd:element name="nodding" type="Igrins2NoddingOption" maxOccurs="1" minOccurs="0"/>
+                    <xsd:element name="telluricStars" type="Igrins2TelluricStandardStars" maxOccurs="1" minOccurs="1"/>
                 </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>
@@ -37,6 +38,16 @@
         <xsd:restriction base="xsd:token">
             <xsd:enumeration value="Nod along slit"/>
             <xsd:enumeration value="Nod to sky"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!--
+      IG2 Requested telluric standard star.
+    -->
+    <xsd:simpleType name="Igrins2TelluricStandardStars">
+        <xsd:restriction base="xsd:int">
+            <xsd:minInclusive value="0"/>
+            <xsd:maxInclusive value="2"/>
         </xsd:restriction>
     </xsd:simpleType>
 </xsd:schema>
