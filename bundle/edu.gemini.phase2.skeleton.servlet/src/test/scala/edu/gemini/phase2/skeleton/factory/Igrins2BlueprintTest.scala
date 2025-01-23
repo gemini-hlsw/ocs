@@ -1,8 +1,7 @@
 package edu.gemini.phase2.skeleton.factory
 
 import edu.gemini.spModel.core.MagnitudeBand
-import edu.gemini.model.p1.immutable.Igrins2Blueprint
-import edu.gemini.model.p1.immutable.Igrins2NoddingOption
+import edu.gemini.model.p1.immutable.{Igrins2Blueprint, Igrins2NoddingOption, Igrins2TelluricStars}
 import org.scalacheck.Prop._
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Arbitrary._
@@ -18,7 +17,7 @@ class Igrins2BlueprintTest extends TemplateSpec("IGRINS-2_BP.xml") with Specific
     Arbitrary {
       for {
         n <- arbitrary[Igrins2NoddingOption]
-        s <- Gen.oneOf(0, 1, 2)
+        s <- arbitrary[Igrins2TelluricStars]
       } yield Igrins2Blueprint(n, s)
     }
 
