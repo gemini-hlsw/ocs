@@ -9,7 +9,6 @@ class OverheadsSpec extends org.specs2.mutable.Specification {
  "Overheads" should {
    "calculate all times properly in both directions" in {
      forall(OverheadsSpec.instMap) { case ((k, v), (blueprint, expected)) =>
-       val overheads = Overheads(blueprint())
        val results = for (o <- Overheads(blueprint())) yield {
          val calculated = o.calculate(OverheadsSpec.intTime)
          calculated
@@ -30,7 +29,7 @@ object OverheadsSpec {
     almostEqual(times1.progTime, times2.progTime) && almostEqual(times1.partTime, times2.partTime)
 
   // Integration time in hours used in the tests.
-  val intTime = TimeAmount(1.70, TimeUnit.HR)
+  val intTime: TimeAmount = TimeAmount(1.70, TimeUnit.HR)
 
   // Convenience function to create ObservationTimes in hours.
   private def obsTimes(progTime: Double, partTime: Double): ObservationTimes = {
@@ -81,7 +80,7 @@ object OverheadsSpec {
       obsTimes(1.7, 0.00))
       ),
     (("f2", "mos"), (
-      () => Flamingos2BlueprintMos(Flamingos2Disperser.R1200JH, Nil, false),
+      () => Flamingos2BlueprintMos(Flamingos2Disperser.R1200JH, Nil, preImaging = false),
       obsTimes(1.7, 0.5))
       ),
     (("f2", "imaging"), (
@@ -112,10 +111,14 @@ object OverheadsSpec {
       () => DssiBlueprint(Site.GS),
       obsTimes(1.7, 0.00))
       ),
-    (("igrins2", "spec"), (
-      () => Igrins2Blueprint(Igrins2NoddingOption.NodToSky, 2),
+    (("igrins2", "default"), (
+      () => Igrins2Blueprint(Igrins2NoddingOption.NodToSky, Igrins2TelluricStars.Default),
+      obsTimes(1.7, 0.25))
+    ),
+    (("igrins2", "two star"), (
+      () => Igrins2Blueprint(Igrins2NoddingOption.NodToSky, Igrins2TelluricStars.TwoStar),
       obsTimes(1.7, 0.5))
-      ),
+    ),
     (("gnirs", "imaging"), (
       () => GnirsBlueprintImaging(AltairNone, GnirsPixelScale.PS_005, GnirsFilter.values.apply(0)),
       obsTimes(1.7, 0.17))

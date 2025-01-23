@@ -190,14 +190,14 @@ case object SemesterConverter2025ATo2025B extends SemesterConverter {
         override def transform(n: xml.Node): xml.NodeSeq = n match {
           case p @ <Igrins2>{q @ _*}</Igrins2> =>
             <Igrins2 id={p.attribute("id")}>
-              {transform(q) ++ <telluricStars>1</telluricStars>}
+              {transform(q) ++ <telluricStars>Default</telluricStars>}
             </Igrins2>
           case <name>{n}</name>            => <name>{n.text}, 1 telluric star</name>
           case elem: xml.Elem              => elem.copy(child = elem.child.flatMap(transform))
           case _                           => n
         }
       }
-      StepResult("Added a default request for 1 telluric star.", AddTelluricStars.transform(p)).successNel
+      StepResult("Added a default request of 1 telluric star per 1.5 hours.", AddTelluricStars.transform(p)).successNel
   }
   override val transformers: List[TransformFunction] = List(addTelluricStarsIG2)
 }

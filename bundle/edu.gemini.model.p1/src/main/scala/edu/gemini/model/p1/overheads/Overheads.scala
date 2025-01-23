@@ -1,12 +1,8 @@
 package edu.gemini.model.p1.overheads
 
 import edu.gemini.model.p1.immutable._
-
 import scalaz._
 import Scalaz._
-import squants.time._
-
-import scala.annotation.tailrec
 
 // This is not the ideal package for this to live in, but to avoid circular bundle references, we put it here.
 // Much of this is rendered obsolete due to the change from REL-2985 to REL-2926, but I am leaving it here in case
@@ -32,7 +28,7 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
     }
   }
   private case class NIRSpectroscopyOverheads(telluricTime: TimeAmount) extends Overheads {
-    val VisitLength = TimeAmount(1.5, TimeUnit.HR)
+    private val VisitLength = TimeAmount(1.5, TimeUnit.HR)
     override def calculate(progTime: TimeAmount): ObservationTimes = {
       val progTimeHrs: Double = progTime.toHours.value
       val nTelluric = math.ceil(progTimeHrs / VisitLength.toHours.value)
@@ -41,9 +37,15 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
     }
   }
 
-  private case class IGRINS2Overheads(telluricTime: TimeAmount, nTelluric: Int) extends Overheads {
+  private case class IGRINS2Overheads(telluricTime: TimeAmount, telluricStars: Igrins2TelluricStars) extends Overheads {
     override def calculate(progTime: TimeAmount): ObservationTimes = {
       val progTimeHrs: Double = progTime.toHours.value
+      val nTelluric = telluricStars match {
+        case Igrins2TelluricStars.Default  => (progTimeHrs / 1.5).toInt
+        case Igrins2TelluricStars.TwoStar  => 2
+        case Igrins2TelluricStars.OneStar  => 1
+        case Igrins2TelluricStars.ZeroStar => 0
+      }
       val partTimeHrs = nTelluric * telluricTime.toHours.value
       ObservationTimes(TimeAmount(progTimeHrs, TimeUnit.HR), TimeAmount(partTimeHrs, TimeUnit.HR))
     }

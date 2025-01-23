@@ -646,6 +646,30 @@ package object immutable {
     val NodAlongSlit = M.Igrins2NoddingOption.NOD_ALONG_SLIT
     val NodToSky     = M.Igrins2NoddingOption.NOD_TO_SKY
   }
+
+  type Igrins2TelluricStars = M.Igrins2TelluricStars
+  object Igrins2TelluricStars extends EnumObject[M.Igrins2TelluricStars] {
+    val Default  = M.Igrins2TelluricStars.DEFAULT
+    val TwoStar  = M.Igrins2TelluricStars.TWO
+    val OneStar  = M.Igrins2TelluricStars.ONE
+    val ZeroStar = M.Igrins2TelluricStars.ZERO
+
+    def show(ts: Igrins2TelluricStars): String =
+      ts match {
+        case Igrins2TelluricStars.Default  => "Default (1 per 1.5 hours)"
+        case Igrins2TelluricStars.TwoStar  => "2 telluric stars"
+        case Igrins2TelluricStars.OneStar  => "1 telluric star"
+        case Igrins2TelluricStars.ZeroStar => "0 telluric stars"
+      }
+
+    def unsafeFromString(s: String): Igrins2TelluricStars =
+      s match {
+        case "Default (1 per 1.5 hours)" => Igrins2TelluricStars.Default
+        case "2 telluric stars"          => Igrins2TelluricStars.TwoStar
+        case "1 telluric star"           => Igrins2TelluricStars.OneStar
+        case "0 telluric stars"          => Igrins2TelluricStars.ZeroStar
+      }
+  }
 }
 
 

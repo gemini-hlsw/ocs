@@ -25,7 +25,7 @@
             <xsd:extension base="BlueprintBase">
                 <xsd:sequence>
                     <xsd:element name="nodding" type="Igrins2NoddingOption" maxOccurs="1" minOccurs="0"/>
-                    <xsd:element name="telluricStars" type="Igrins2TelluricStandardStars" maxOccurs="1" minOccurs="1"/>
+                    <xsd:element name="telluricStars" type="Igrins2TelluricStars" maxOccurs="1" minOccurs="0"/>
                 </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>
@@ -42,12 +42,14 @@
     </xsd:simpleType>
 
     <!--
-      IG2 Requested telluric standard star.
+      IG2 Requested telluric standard stars.
     -->
-    <xsd:simpleType name="Igrins2TelluricStandardStars">
-        <xsd:restriction base="xsd:int">
-            <xsd:minInclusive value="0"/>
-            <xsd:maxInclusive value="2"/>
+    <xsd:simpleType name="Igrins2TelluricStars">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="Default"/>
+            <xsd:enumeration value="Two"/>
+            <xsd:enumeration value="One"/>
+            <xsd:enumeration value="Zero"/>
         </xsd:restriction>
     </xsd:simpleType>
 </xsd:schema>

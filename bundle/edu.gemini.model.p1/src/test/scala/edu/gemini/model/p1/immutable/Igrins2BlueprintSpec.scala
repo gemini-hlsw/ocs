@@ -9,7 +9,7 @@ import org.specs2.mutable.Specification
 import scala.xml.XML
 
 class Igrins2BlueprintSpec extends Specification with SemesterProperties with XmlMatchers {
-  private val blueprints = (Igrins2NoddingOption.values.zip(List(0, 1, 2))).map{case (m, n) => Igrins2Blueprint(m, n)}
+  private val blueprints = Igrins2NoddingOption.values.zip(Igrins2TelluricStars.values).map{case (m, n) => Igrins2Blueprint(m, n)}
 
   // A proposal for Igrins2
   private val proposal = ProposalIo.read(new InputStreamReader(getClass.getResourceAsStream("proposal_igrins2.xml")))
@@ -32,13 +32,13 @@ class Igrins2BlueprintSpec extends Specification with SemesterProperties with Xm
         xml must \\("igrins2") \\ "Igrins2"
         xml must \\("Igrins2") \\ "name" \> b.name
         xml must \\("Igrins2") \\ "nodding" \> b.nodding.value
-        xml must \\("Igrins2") \\ "telluricStars" \> b.telluricStars.toString
+        xml must \\("Igrins2") \\ "telluricStars" \> b.telluricStars.value
         xml must \\("Igrins2") \ "visitor" \> "false"
       }.forall(blueprints)
     }
     "be possible to deserialize" in {
       // This proposal is configured with nod off to sky option.
-      proposal.blueprints.head must beEqualTo(Igrins2Blueprint(Igrins2NoddingOption.NodToSky, 1))
+      proposal.blueprints.head must beEqualTo(Igrins2Blueprint(Igrins2NoddingOption.NodToSky, Igrins2TelluricStars.TwoStar))
     }
   }
 }

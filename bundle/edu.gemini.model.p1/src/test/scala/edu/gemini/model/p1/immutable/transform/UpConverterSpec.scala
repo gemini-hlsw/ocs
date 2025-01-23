@@ -930,8 +930,8 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
           changes must have length 4
-          changes must contain("Added a default request for 1 telluric star.")
-          result \\ "igrins2" \\ "Igrins2" must \\("telluricStars") \>"1"
+          changes must contain("Added a default request of 1 telluric star per 1.5 hours.")
+          result \\ "igrins2" \\ "Igrins2" must \\("telluricStars") \> "Default"
       }
     }
 
