@@ -27,7 +27,7 @@
                 <name>IGRINS-2 Nod off to sky</name>
                 <visitor>false</visitor>
                 <nodding>Nod to sky</nodding>
-                <telluricStars>1</telluricStars>
+                <telluricStars>Two</telluricStars>
             </Igrins2>
         </igrins2>
     </blueprints>
