@@ -21,11 +21,14 @@ object Igrins2 {
   // The enumeration cannot include numbers thus we use a String as interemdiate here
   class TelluricStarsOption(n: Igrins2NoddingOption) extends SingleSelectNode[Igrins2NoddingOption, String, Igrins2Blueprint](n) {
     override val title = "Telluric calibration stars"
-    override val description = "Select the the number of telluric stars per observation. Each star uses 0.25 hr of partner time. Any change from the default must be justified in the technical description section."
+    override val description = "Select the the number of telluric stars per observation. Each star uses 0.25 hr of partner time."
+    override val warning = Some("Any change from the default must be justified in the technical description section.")
     override val choices: List[String] = Igrins2TelluricStars.values.toList.map(Igrins2TelluricStars.show)
     override def apply(m: String) = {
       Right(Igrins2Blueprint(n, Igrins2TelluricStars.unsafeFromString(m)))
     }
+
+    override def default: Option[String] = Some(Igrins2TelluricStars.show(Igrins2TelluricStars.Default))
 
     override def unapply = {
       case b: Igrins2Blueprint => Igrins2TelluricStars.show(b.telluricStars)

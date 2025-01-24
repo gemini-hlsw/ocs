@@ -38,10 +38,13 @@ object Overheads extends (BlueprintBase => Option[Overheads]) {
   }
 
   private case class IGRINS2Overheads(telluricTime: TimeAmount, telluricStars: Igrins2TelluricStars) extends Overheads {
+    private val VisitLength = TimeAmount(1.5, TimeUnit.HR)
+
     override def calculate(progTime: TimeAmount): ObservationTimes = {
       val progTimeHrs: Double = progTime.toHours.value
       val nTelluric = telluricStars match {
-        case Igrins2TelluricStars.Default  => (progTimeHrs / 1.5).toInt
+        case Igrins2TelluricStars.Default  => 
+          math.ceil(progTimeHrs / VisitLength.toHours.value)
         case Igrins2TelluricStars.TwoStar  => 2
         case Igrins2TelluricStars.OneStar  => 1
         case Igrins2TelluricStars.ZeroStar => 0
