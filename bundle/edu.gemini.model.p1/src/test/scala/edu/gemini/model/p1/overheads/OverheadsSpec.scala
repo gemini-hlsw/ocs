@@ -113,7 +113,7 @@ object OverheadsSpec {
       ),
     (("igrins2", "default"), (
       () => Igrins2Blueprint(Igrins2NoddingOption.NodToSky, Igrins2TelluricStars.Default),
-      obsTimes(1.7, 0.25))
+      obsTimes(1.7, 0.5))
     ),
     (("igrins2", "two star"), (
       () => Igrins2Blueprint(Igrins2NoddingOption.NodToSky, Igrins2TelluricStars.TwoStar),

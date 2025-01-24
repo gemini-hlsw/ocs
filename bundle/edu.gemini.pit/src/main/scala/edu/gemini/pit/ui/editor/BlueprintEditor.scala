@@ -101,6 +101,10 @@ class BlueprintEditor private (initialState:UIState[_, _], editable:Boolean) ext
       // Field values
       Title.text = state.node.title
       Description.text = state.node.description
+      state.node.warning.foreach{ v =>
+        Warning.visible = true
+        Warning.text = v
+      }
       state match {
         case s: SelectUIState[_, _] => addListView(s)
         case s: TextUIState[_] => addTextView(s)
@@ -115,6 +119,7 @@ class BlueprintEditor private (initialState:UIState[_, _], editable:Boolean) ext
     add(new BorderPanel {
       add(Title, North)
       add(Description, Center)
+      add(Warning, South)
     }, North)
 
     add(Instructions, South)
@@ -135,6 +140,19 @@ class BlueprintEditor private (initialState:UIState[_, _], editable:Boolean) ext
       peer.setWrapStyleWord(true)
       border = swing.BorderFactory.createEmptyBorder(4, 4, 4, 4)
       foreground = awt.Color.DARK_GRAY
+    }
+
+    // Warning is a text area with red
+    object Warning extends TextArea {
+      opaque = false
+      visible = false
+      editable = false
+      columns = 30
+      rows = 1
+      peer.setLineWrap(true)
+      peer.setWrapStyleWord(true)
+      border = swing.BorderFactory.createEmptyBorder(0, 4, 4, 4)
+      foreground = awt.Color.RED
     }
 
     // Our text entry is a text field
