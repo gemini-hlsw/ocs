@@ -46,8 +46,9 @@ public abstract class PrinterBase {
     /* TODO: this needs to be validated for spectroscopy for all instruments, find a better place to do this */
     protected void validatePlottingDetails(final PlottingDetails pdp, final Instrument instrument) {
         if (pdp != null && pdp.getPlotLimits().equals(PlottingDetails.PlotLimits.USER)) {
-            if (pdp.getPlotWaveL() * 1000 > instrument.getObservingEnd() || pdp.getPlotWaveU() * 1000 < instrument.getObservingStart()) {
-                throw new IllegalArgumentException("User limits for plotting do not overlap with filter.");
+            if (pdp.getPlotWaveL() > instrument.getObservingEnd() ||
+                    pdp.getPlotWaveU() < instrument.getObservingStart()) {
+                throw new IllegalArgumentException("User limits for plotting do not overlap with instrument configuration.");
             }
         }
     }

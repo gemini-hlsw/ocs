@@ -54,6 +54,9 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     private VisitableSampledSpectrum resultSqrtBackground;
     private VisitableSampledSpectrum resultS2NSingle;
     private VisitableSampledSpectrum resultS2NFinal;
+    private VisitableSampledSpectrum totalSignal;
+    private VisitableSampledSpectrum totalBackground;
+    private double totalDarkNoise;
 
     /**
      * Constructs SpecS2NVisitor.
@@ -274,9 +277,14 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
         Log.fine("Calculating S2N for all exposures...");
         resultS2NFinal = finalS2N(signal, background, darkNoise, readNoise);
+
+        // Make these publicly available
+        totalDarkNoise = darkNoise;
+        totalBackground = background;
+        totalSignal = signal;
     }
 
-    /** Calculates signal and background per coadd. */
+    /** Calculates signal and background per pixel per coadd. */
     private void calculateSignal() {
         Log.fine("Calculating signal and background in a 1-pixel aperture.");
 
@@ -386,9 +394,11 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         } else {
             throw new Error();
         }
+        Log.fine("skyAper = " + skyAper);
 
         // calculate the noise factor for the given skyAper
         final double noiseFactor = 1 + (1 / skyAper);
+        Log.fine("noiseFactor = " + noiseFactor);
 
         // the number of exposures measuring the source flux is
         final double spec_number_source_exposures = numberExposures * coadds * sourceFraction;
@@ -417,8 +427,6 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     private double totalFlux(final double flux, final double throughput, final double wv) {
         return flux * throughput * exposureTime * disperser.dispersion(wv);
     }
-
-
 
     public void setSourceSpectrum(final VisitableSampledSpectrum sed) {
         sourceFlux = sed;
@@ -470,6 +478,22 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
     public VisitableSampledSpectrum getFinalS2NSpectrum() {
         return resultS2NFinal;
+    }
+
+    public VisitableSampledSpectrum getTotalSignalSpectrum() {
+        return totalSignal;
+    }
+
+    public VisitableSampledSpectrum getTotalBackgroundSpectrum() {
+        return totalBackground;
+    }
+
+    public double getTotalDarkNoise() {
+        return totalDarkNoise;
+    }
+
+    public int getSlitLengthPixels() {
+        return output_slit.lengthPixels();
     }
 
 }

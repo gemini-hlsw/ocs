@@ -6,6 +6,7 @@ import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2.ReadMode;
 import scala.Option;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -86,87 +87,142 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         }
         Log.fine("numberExposures = " + numberExposures);
 
-        SpectroscopyResult result;
+        final double skyAper = 1.0;  // hard-coded in the F2 web form
+        double readNoise;
+        double totalTime;
 
         if (calcMethod instanceof SpectroscopyInt) {
-            // Iteratively determine exposureTime & numberExposures that will give the requested S/N at wavelength.
-            exposureTime = 80.0;  // starting point; choose the longest time that still yields medium read noise mode
-            Log.fine(String.format("exposureTime = %.2f", exposureTime));
-            readMode = instrument.getOptimalReadMode(exposureTime);
-            Log.fine("readMode = " + readMode.toString());
-            result = calculateSpectroscopy(instrument, readMode, exposureTime, numberExposures);
+            // Determine exposureTime & numberExposures that will give the requested S/N at wavelength.
 
-            double wavelength = ((SpectroscopyInt) _obsDetailParameters.calculationMethod()).wavelength();
-            Log.fine(String.format("Wavelength = %.2f nm", wavelength));
-            SpecS2N specS2N = result.specS2N()[0];
-            final VisitableSampledSpectrum fins2n = specS2N.getFinalS2NSpectrum();
-            double peakFlux = specS2N.getPeakPixelCount();
-            Log.fine(String.format("peakFlux = %.0f e-", peakFlux));
-            double snr = fins2n.getY(wavelength);
-            Log.fine(String.format("snr = %.2f", snr));
-            double maxFlux = instrument.maxFlux();  // maximum useful flux
-            Log.fine(String.format("maxFlux = %.0f e-", maxFlux));
-            double timeToHalfMax = maxFlux / 2. / peakFlux * exposureTime;  // time to reach half the maximum (goal)
-            Log.fine(String.format("timeToHalfMax = %.2f seconds", timeToHalfMax));
-            if (timeToHalfMax < 1.0) throw new RuntimeException(String.format(
-                    "This target is too bright for this configuration.\n" +
-                    "The detector will reach %.0f ADU in %.2f seconds.", maxFlux/2., timeToHalfMax));
-            int maxExptime = Math.min(300, (int) timeToHalfMax);  // 300s is an arbitrary maximum
-            Log.fine(String.format("maxExptime = %d seconds", maxExptime));
             double desiredSNR = ((SpectroscopyInt) calcMethod).sigma();
             Log.fine(String.format("desiredSNR = %.2f", desiredSNR));
 
-            int oldNumberExposures = 0;
-            double oldExposureTime = 0.0;
-            int iterations = 1;
-            final int maxIterations = 10;
-            double minExposureTime;
+            double wavelength = ((SpectroscopyInt) _obsDetailParameters.calculationMethod()).wavelength();
+            Log.fine(String.format("Wavelength = %.2f nm", wavelength));
 
-            while ((numberExposures != oldNumberExposures || exposureTime != oldExposureTime) && iterations <= maxIterations) {
-                Log.fine(String.format("--- ITERATION %d (%d != %d) or (%.2f != %.2f) ---",
-                        iterations, oldNumberExposures, numberExposures, oldExposureTime, exposureTime));
-                oldNumberExposures = numberExposures;
-                oldExposureTime = exposureTime;
-                // Estimate the time required to achieve the requested S/N assuming S/N scales as sqrt(t):
-                double totalTime = exposureTime * numberExposures * (desiredSNR / snr) * (desiredSNR / snr);
-                Log.fine(String.format("totalTime = %.2f s", totalTime));
+            double maxFlux = instrument.maxFlux();  // maximum useful flux
+            Log.fine(String.format("maxFlux = %.0f e-", maxFlux));
 
+            // Perform an initial run of the ITC to get the signal and background for this target at this wavelength
+            readMode = ReadMode.MEDIUM_OBJECT_SPEC;  // arbitrary choice
+            Log.fine("readMode = " + readMode.toString());
+            double initialExposureTime = readMode.recomendedExpTimeSec();
+            int initialNumberExposures = 4;
+            Log.fine(String.format("initialExposureTime = %.2f sec", initialExposureTime));
+            Log.fine("initialNumberExposures = " + initialNumberExposures);
+
+            SpectroscopyResult result = calculateSpectroscopy(instrument, readMode, initialExposureTime, initialNumberExposures);
+            SpecS2N specS2N = result.specS2N()[0];
+
+            double peakFlux = specS2N.getPeakPixelCount();
+            Log.fine(String.format("peakFlux = %.0f e-", peakFlux));
+
+            VisitableSampledSpectrum backgroundSpectrum = specS2N.getTotalBackgroundSpectrum();
+            double background = backgroundSpectrum.getY(wavelength);
+            Log.fine(String.format("Background @ %.1f nm = %.2f e- (summed over aperture)", wavelength, background));
+
+            VisitableSampledSpectrum signalSpectrum = specS2N.getTotalSignalSpectrum();
+            double signal = signalSpectrum.getY(wavelength);
+            Log.fine(String.format("Signal @ %.1f nm = %.2f e- (summed over aperture)", wavelength, signal));
+
+            int numberPixels = specS2N.getSlitLengthPixels();
+            Log.fine("Pixels in aperture = " + numberPixels);
+
+            Log.fine(String.format("Read Noise = %.2f e- (per pixel)", readMode.readNoise()));
+            readNoise = readMode.readNoise() * readMode.readNoise() * numberPixels;
+            Log.fine(String.format("Read Noise = %.2f e- (squared and summed over aperture)", readNoise));
+            //Log.fine(String.format("Read Noise = %.3f e- (from specS2N)", specS2N.getTotalReadNoise()));
+
+            double darkNoise = specS2N.getTotalDarkNoise();
+            Log.fine(String.format("Dark Current = %.2f e- (summed over aperture)", darkNoise));
+
+            // Look up the S/N calculated by the ITC for comparison:
+            VisitableSampledSpectrum finalS2NSpectrum = specS2N.getFinalS2NSpectrum();
+            Log.fine(String.format("S/N @ %.1f nm = %.3f e-", wavelength, finalS2NSpectrum.getY(wavelength)));
+
+            // Calculate the S/N and verify that the answer is the same:
+            Log.fine(String.format("Predicted S/N = %.3f e-", calculateSNR(signal, background, darkNoise, readNoise, skyAper, initialNumberExposures)));
+
+            double timeToHalfMax = maxFlux / 2. / peakFlux * initialExposureTime;  // time to reach half the maximum flux
+            Log.fine(String.format("timeToHalfMax = %.2f seconds", timeToHalfMax));
+
+            if (timeToHalfMax < 1.0) throw new RuntimeException(String.format(
+                    "This target is too bright for this configuration.\n" +
+                            "The detector will reach %.0f ADU in %.2f seconds.", maxFlux/2., timeToHalfMax));
+
+            double maxExptime = Math.min(300, (int) timeToHalfMax);
+            Log.fine(String.format("maxExptime = %.2f seconds", maxExptime));
+
+            // Step through each of the read modes and see which works best.
+            List<ReadMode> readModes = Arrays.asList(ReadMode.FAINT_OBJECT_SPEC, ReadMode.MEDIUM_OBJECT_SPEC, ReadMode.BRIGHT_OBJECT_SPEC);
+            for (ReadMode rm : readModes) {
+                readMode = rm;
+                Log.fine("=== Checking " + readMode.toString() + " read mode ===");
+
+                readNoise = readMode.readNoise() * readMode.readNoise() * numberPixels;
+                Log.fine(String.format("Read Noise = %.2f e- (squared and summed)", readNoise));
+                Log.fine(String.format("S/N = %.3f", calculateSNR(signal, background, darkNoise, readNoise, skyAper, initialNumberExposures)));
+
+                exposureTime = calculateExposureTime(signal / initialExposureTime,
+                        background / initialExposureTime, darkNoise / initialExposureTime,
+                        readNoise, skyAper, desiredSNR / Math.sqrt(initialNumberExposures));
+                totalTime = exposureTime * initialNumberExposures;
+                Log.fine(String.format("totalTime = %.2f sec", totalTime));
+
+                // Calculate the optimal number of exposures:
                 numberExposures = (int) Math.ceil(totalTime / maxExptime);
-                Log.fine(String.format("numberExposures = %d", numberExposures));
                 if (numberExposures % 4 != 0) {
                     numberExposures += 4 - numberExposures % 4;  // make a multiple of 4
-                    Log.fine(String.format("numberExposures = %d (as a multiple of 4)", numberExposures));
                 }
+                Log.fine(String.format("numberExposures = %d", numberExposures));
 
-                if ((totalTime / numberExposures) > 10.0) {
-                    exposureTime = Math.ceil(totalTime / numberExposures);  // round long exposure times up to an integer
-                } else {
-                    exposureTime = (Math.ceil(totalTime / numberExposures * 10.0)) / 10.0; // round short times up to 0.1 sec
-                }
+                // Calculate the new exposure time with this number of exposures:
+                exposureTime = calculateExposureTime(signal / initialExposureTime,
+                        background / initialExposureTime, darkNoise / initialExposureTime,
+                        readNoise, skyAper, desiredSNR / Math.sqrt(numberExposures));
 
-                readMode = instrument.getOptimalReadMode(exposureTime);
-                Log.fine("readMode = " + readMode.toString());
-
-                minExposureTime = instrument.getMinExposureTime(readMode);
-                Log.fine(String.format("minExposureTime = %.2f s", minExposureTime));
-
-                if (exposureTime < minExposureTime) { exposureTime = minExposureTime; }
-                Log.fine(String.format("exposureTime = %.3f", exposureTime));
-
-                if ((numberExposures != oldNumberExposures || exposureTime != oldExposureTime) && iterations <= maxIterations) {
-                    result = calculateSpectroscopy(instrument, readMode, exposureTime, numberExposures);
-                    specS2N = result.specS2N()[0];
-                    final VisitableSampledSpectrum newfins2n = specS2N.getFinalS2NSpectrum();
-                    snr = newfins2n.getY(wavelength);
-                    Log.fine(String.format("--> Iteration %d: %d x %.2f sec -> S/N @ %.2f nm = %.2f",
-                            iterations, numberExposures, exposureTime, wavelength, snr));
-                    iterations += 1;
+                if (exposureTime < readMode.recomendedExpTimeSec()) {  // continue to the next read mode
+                    Log.fine(String.format("This is shorter than recommended (%.1f sec)", readMode.recomendedExpTimeSec()));
+                } else {  // Accept this read mode
+                    break;
                 }
             }
-        } else {
-            result = calculateSpectroscopy(instrument, readMode, exposureTime, numberExposures);
+
+            Log.fine("=== The read mode, exposure time, and number of exposures have been decided ===");
+            Log.fine("readMode = " + readMode.toString());
+            Log.fine(String.format("numberExposures = %d", numberExposures));
+            if (exposureTime < readMode.minimumExpTimeSec()) {
+                Log.fine("Reducing exposure time to the minimum allowed for the read mode");
+                exposureTime = readMode.minimumExpTimeSec();
+            }
+            Log.fine(String.format("exposureTime = %.3f", exposureTime));
         }
-        return result;
+
+        // Run the ITC to generate the output graphs
+        return calculateSpectroscopy(instrument, readMode, exposureTime, numberExposures);
+    }
+
+    private double calculateSNR(double signal, double background, double darkNoise, double readNoise, double skyAper, int numberExposures) {
+        final double noiseFactor = 1. + (1. / skyAper);
+        return Math.sqrt(numberExposures) * signal / Math.sqrt(signal + noiseFactor * (background + darkNoise + readNoise));
+    }
+
+    private double calculateExposureTime(double signal, double background, double darkNoise, double readNoise, double skyAper, double SNR) {
+        // Calculate the exposure time required to achieve a desired S/N on a single frame.
+        // Signal, background, and darkNoise are per second and summed over the pixels in the aperture.
+        // readNoise is squared and summed over the pixels in the aperture.
+        
+        final double f = 1. + (1. / skyAper);  // noise factor
+
+        // SNR = S / sqrt(S + f(B + D + R)) = st / sqrt(st + f(bt + dt + R)) = x
+        // This can be expressed as a quadratic equation:  (ss/xx)t^2 - (s + fb + fd)t - fR = 0
+        // and solved using the quadratic formula: t = (-b + sqrt(b^2 - 4ac)) / 2a
+        double a = signal * signal / (SNR * SNR);
+        double b = -(signal + f * background + f * darkNoise);
+        double c = -f * readNoise;
+        double exposureTime = (-b + Math.sqrt(b*b - 4.*a*c)) / (2.*a);
+        Log.fine(String.format("exposureTime = %.3f", exposureTime));
+        return exposureTime;
     }
 
     public SpectroscopyResult calculateSpectroscopy(
