@@ -163,25 +163,6 @@ public final class Flamingos2 extends Instrument implements SpectroscopyInstrume
         return params.readMode();
     }
 
-    public double getMinExposureTime(ReadMode r) {
-        switch (r) {
-            case BRIGHT_OBJECT_SPEC: return 2.0;  // seconds
-            case MEDIUM_OBJECT_SPEC: return 8.0;
-            case FAINT_OBJECT_SPEC:  return 16.0;
-            default:                 throw new Error("Unknown readMode");
-        }
-    }
-
-    public ReadMode getOptimalReadMode(double exposureTime) {
-        if (exposureTime < 21.) {
-            return ReadMode.BRIGHT_OBJECT_SPEC;
-        } else if (exposureTime < 85.) {
-            return ReadMode.MEDIUM_OBJECT_SPEC;
-        } else {
-            return ReadMode.FAINT_OBJECT_SPEC;
-        }
-    }
-
     public Disperser disperser() {
         return _grismOptics.get();
     }
