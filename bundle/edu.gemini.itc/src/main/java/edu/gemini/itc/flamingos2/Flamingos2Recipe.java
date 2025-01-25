@@ -211,7 +211,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         // Calculate the exposure time required to achieve a desired S/N on a single frame.
         // Signal, background, and darkNoise are per second and summed over the pixels in the aperture.
         // readNoise is squared and summed over the pixels in the aperture.
-        
+
         final double f = 1. + (1. / skyAper);  // noise factor
 
         // SNR = S / sqrt(S + f(B + D + R)) = st / sqrt(st + f(bt + dt + R)) = x

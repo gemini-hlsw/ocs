@@ -151,9 +151,10 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
             s += "<LI>" + te.toString() + "<BR>";
         }
 
-        //s += "<LI>Read Mode (recipe): " + recipe.getReadMode().toString() + "\n";
-        s += "<LI>Read Noise: " + instrument.getReadNoiseString() + "\n";     // OLD for running tests
-        //s += "<LI>Read Noise (recipe): " + recipe.getReadMode().readNoise() + " e-\n";
+        // Highlight the read mode if what was specified in the web form does not match what was calculated:
+        s += (instrument.getReadMode() != recipe.getReadMode()) ? "<LI style=\"color:darkorange\">" : "<LI>";
+        s += "Read Mode: " + recipe.getReadMode().toString() + "\n";
+        s += "<LI>Read Noise: " + recipe.getReadMode().readNoise() + " e-\n";
 
         if (instrument.getFocalPlaneMask() != FPUnit.FPU_NONE)
             s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask().getSlitWidth() + " pix slit\n";
