@@ -15,11 +15,13 @@ import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 
 import java.io.PrintWriter;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 /**
  * Helper class for printing F2 calculation results to an output stream.
  */
 public final class Flamingos2Printer extends PrinterBase implements OverheadTablePrinter.PrinterWithOverhead {
+    private static final Logger Log = Logger.getLogger(Flamingos2Printer.class.getName());
 
     private final PlottingDetails pdp;
     private final Flamingos2Recipe recipe;
@@ -110,7 +112,6 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
 
     }
 
-
     private void writeImagingOutput(final ImagingResult result, final ItcImagingResult s) {
 
         // we know this is Flamingos
@@ -152,6 +153,8 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
         }
 
         // Highlight the read mode if what was specified in the web form does not match what was calculated:
+        Log.fine("readMode (instrument) = " + instrument.getReadMode().toString());
+        Log.fine("readMode (recipe) = " + recipe.getReadMode().toString());
         s += (instrument.getReadMode() != recipe.getReadMode()) ? "<LI style=\"color:darkorange\">" : "<LI>";
         s += "Read Mode: " + recipe.getReadMode().toString() + "\n";
         s += "<LI>Read Noise: " + recipe.getReadMode().readNoise() + " e-\n";
