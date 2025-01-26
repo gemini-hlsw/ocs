@@ -12,6 +12,7 @@ import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.StandardGuideOptions;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.ghost.Ghost;
 
 import java.util.ArrayList;
@@ -379,11 +380,16 @@ public final class ConfigCreator {
         return result;
     }
 
-    public final ConfigCreatorResult createF2Config(final Flamingos2Parameters f2Params, final int numExp) {
-        final ConfigCreatorResult result = createCommonConfig(numExp);
+    public final ConfigCreatorResult createF2Config(
+            final Flamingos2Parameters f2Params,
+            final Flamingos2.ReadMode readMode,
+            final int numExp,
+            final double exposureTime) {
+
+        final ConfigCreatorResult result = createCommonConfig(numExp, exposureTime);
 
         for (final Config step : result.getConfig()) {
-            step.putItem(ReadModeKey, (f2Params.readMode()));
+            step.putItem(ReadModeKey, readMode);
             step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_FLAMINGOS2);
             step.putItem(DisperserKey, f2Params.grism());
             step.putItem(FPUKey, f2Params.mask());
@@ -391,11 +397,9 @@ public final class ConfigCreator {
                 step.putItem(GuideWithPWFS2Key, StandardGuideOptions.Value.guide);
             } else if (itcParams.telescope().getWFS().equals(GuideProbe.Type.OIWFS)) {
                 step.putItem(GuideWithOIWFSKey, StandardGuideOptions.Value.guide);
-
             }
         }
         return result;
 
     }
 }
-

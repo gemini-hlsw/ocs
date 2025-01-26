@@ -463,6 +463,25 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             return fins2n;
         }
 
+
+        // These methods are required to comply with the SpecS2N interface, but they don't do anything:
+
+        @Override public VisitableSampledSpectrum getTotalBackgroundSpectrum() {
+            throw new java.lang.UnsupportedOperationException();
+        }
+
+        @Override public VisitableSampledSpectrum getTotalSignalSpectrum() {
+            throw new java.lang.UnsupportedOperationException();
+        }
+
+        @Override public double getTotalDarkNoise() {
+            throw new java.lang.UnsupportedOperationException();
+        }
+
+        @Override public int getSlitLengthPixels() {
+            throw new java.lang.UnsupportedOperationException();
+        }
+
     }
 
 
