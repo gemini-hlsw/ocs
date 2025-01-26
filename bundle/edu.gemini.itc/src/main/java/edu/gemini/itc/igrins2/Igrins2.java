@@ -2,6 +2,7 @@ package edu.gemini.itc.igrins2;
 
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.igrins2.Igrins2$;
 import java.util.ArrayList;
@@ -67,6 +68,10 @@ public class Igrins2 extends Instrument implements SpectroscopyInstrument {
 
     @Override
     public double getReadNoise() { return _readNoise; }  // (electrons)
+
+    public double getReadNoise(double exposureTime) {
+        return Igrins2$.MODULE$.readNoise(exposureTime, _arm.getMagnitudeBand());  // (electrons)
+    }
 
     public int getFowlerSamples() { return _fowlerSamples; }
 
