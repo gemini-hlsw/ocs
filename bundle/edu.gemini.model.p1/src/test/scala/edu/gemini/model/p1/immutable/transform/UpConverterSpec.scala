@@ -43,7 +43,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
               i.visitor must beFalse
           }
 
-          proposal.semester must beEqualTo(Semester(2025, SemesterOption.A))
+          proposal.semester must beEqualTo(Semester(2025, SemesterOption.B))
       }
 
       UpConverter.upConvert(xml) must beSuccessful.like {
@@ -921,6 +921,17 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           changes must have length 4
           changes must contain("NIRI Gemini North proposal has been migrated to GNIRS instead. Only the first filter was considered.")
           result \\ "gnirs" \\ "imaging" must \\("filter") \> "J (1.25um)"
+      }
+    }
+    "REL-4624 Add a default value for telluricStar to old igrins2 proposals" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_igrins2.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 4
+          changes must contain("Added a default request of 1 telluric star per 1.5 hours.")
+          result \\ "igrins2" \\ "Igrins2" must \\("telluricStars") \> "Default"
       }
     }
 

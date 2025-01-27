@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2024.1.2">
+    <meta band3optionChosen="false" overrideAffiliate="false"/>
+    <semester year="2024" half="B"/>
+    <title></title>
+    <abstract></abstract>
+    <scheduling></scheduling>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName></firstName>
+            <lastName></lastName>
+            <status>PhD</status>
+            <gender>None selected</gender>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets/>
+    <conditions/>
+    <blueprints>
+        <igrins2>
+            <Igrins2 id="blueprint-0">
+                <name>IGRINS-2 Nod off to sky</name>
+                <visitor>false</visitor>
+                <nodding>Nod to sky</nodding>
+            </Igrins2>
+        </igrins2>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" blueprint="blueprint-0"/>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None" jwstSynergy="false" usLongTerm="false"/>
+    </proposalClass>
+</proposal>

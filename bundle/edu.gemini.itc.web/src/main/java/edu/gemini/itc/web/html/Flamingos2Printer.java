@@ -15,11 +15,13 @@ import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 
 import java.io.PrintWriter;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 /**
  * Helper class for printing F2 calculation results to an output stream.
  */
 public final class Flamingos2Printer extends PrinterBase implements OverheadTablePrinter.PrinterWithOverhead {
+    private static final Logger Log = Logger.getLogger(Flamingos2Printer.class.getName());
 
     private final PlottingDetails pdp;
     private final Flamingos2Recipe recipe;
@@ -33,8 +35,8 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
         this.pdp       = pdp;
         this.recipe    = new Flamingos2Recipe(p, instr);
         this.isImaging = p.observation().calculationMethod() instanceof Imaging;
-        this.p          = p;
-        this.instr          = instr;
+        this.p         = p;
+        this.instr     = instr;
     }
 
     /**
@@ -58,6 +60,8 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
 
         // we know this is Flamingos
         final Flamingos2 instrument = (Flamingos2) result.instrument();
+        final CalculationMethod calcMethod = p.observation().calculationMethod();
+
         final double iqAtSource = result.iqCalc().getImageQuality();
 
         _println("");
@@ -68,7 +72,16 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
 
         _println("");
 
-        _printRequestedIntegrationTime(result);
+        if (calcMethod instanceof SpectroscopyInt) {
+            double exposureTime = recipe.getExposureTime();
+            int numberExposures = recipe.getNumberExposures();
+            _println(String.format(
+                "Total integration time = %.2f seconds (%d x %.2f s), of which %.2f seconds is on source.",
+                    numberExposures * exposureTime, numberExposures, exposureTime,
+                    exposureTime * numberExposures * result.observation().sourceFraction()));
+        } else {
+            _printRequestedIntegrationTime(result);
+        }
 
         _println("");
 
@@ -98,7 +111,6 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
         _println(HtmlPrinter.printParameterSummary(pdp));
 
     }
-
 
     private void writeImagingOutput(final ImagingResult result, final ItcImagingResult s) {
 
@@ -139,7 +151,13 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
         for (final TransmissionElement te : instrument.getComponents()) {
             s += "<LI>" + te.toString() + "<BR>";
         }
-        s += "<LI>Read Noise: " + instrument.getReadNoiseString() + "\n";
+
+        // Highlight the read mode if what was specified in the web form does not match what was calculated:
+        Log.fine("readMode (instrument) = " + instrument.getReadMode().toString());
+        Log.fine("readMode (recipe) = " + recipe.getReadMode().toString());
+        s += (instrument.getReadMode() != recipe.getReadMode()) ? "<LI style=\"color:darkorange\">" : "<LI>";
+        s += "Read Mode: " + recipe.getReadMode().toString() + "\n";
+        s += "<LI>Read Noise: " + recipe.getReadMode().readNoise() + " e-\n";
 
         if (instrument.getFocalPlaneMask() != FPUnit.FPU_NONE)
             s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask().getSlitWidth() + " pix slit\n";
@@ -149,10 +167,9 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
         return s;
     }
 
-
     public ConfigCreator.ConfigCreatorResult createInstConfig(int numberExposures) {
         ConfigCreator cc = new ConfigCreator(p);
-        return cc.createF2Config(instr, numberExposures);
+        return cc.createF2Config(instr, recipe.getReadMode(), numberExposures, recipe.getExposureTime());
     }
 
     public ItcOverheadProvider getInst() {
@@ -173,5 +190,7 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
         return this.getRecentInterval();
     }
 
-    public int getNumberExposures() { throw new Error("Not implemented"); }
+    public int getNumberExposures() {
+        return recipe.getNumberExposures();
+    }
 }

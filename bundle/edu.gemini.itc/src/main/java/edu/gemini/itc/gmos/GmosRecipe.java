@@ -519,6 +519,21 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             throw new java.lang.UnsupportedOperationException();
         }
 
+        @Override public VisitableSampledSpectrum getTotalBackgroundSpectrum() {
+            throw new java.lang.UnsupportedOperationException();
+        }
+
+        @Override public VisitableSampledSpectrum getTotalSignalSpectrum() {
+            throw new java.lang.UnsupportedOperationException();
+        }
+
+        @Override public double getTotalDarkNoise() {
+            throw new java.lang.UnsupportedOperationException();
+        }
+
+        @Override public int getSlitLengthPixels() {
+            throw new java.lang.UnsupportedOperationException();
+        }
     }
 
 

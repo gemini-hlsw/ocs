@@ -45,9 +45,10 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * @param xInterval Sampling interval (nm)
      */
     public DefaultSampledSpectrum(ArraySpectrum sp, double xInterval) {
-        Log.fine("Interval: " + xInterval + " nm");
         double xStart = sp.getStart();
         double xEnd = sp.getEnd();
+        Log.fine("xStart = " + xStart + " nm (from SED)");
+        Log.fine("xEnd = " + xEnd + " nm");
         int numIntervals = (int) ((xEnd - xStart) / xInterval);
         double[] data = new double[numIntervals + 1];
         for (int i = 0; i <= numIntervals; ++i) {
@@ -67,12 +68,13 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * @param z         Redshift of target
      */
     public DefaultSampledSpectrum(ArraySpectrum sp, double xStart, double xEnd, double xInterval, double z) {
-        Log.fine("Interval: " + xInterval + " nm");
+        Log.fine("xStart = " + xStart + " nm (specified)");
+        Log.fine("xEnd = " + xEnd + " nm");
 
         if ( (1+z) * sp.getStart() > xStart || (1+z) * sp.getEnd() < xEnd ) {
             throw new IllegalArgumentException(
-                    String.format("Redshifted SED (%.1f - %.1f nm) does not cover the range of the instrument and normalization band (%.1f - %.1f nm).",
-                            (1+z)*sp.getStart(), (1+z)*sp.getEnd(), xStart, xEnd));
+                    String.format("Redshifted SED (%.1f - %.1f nm) does not cover the range of the instrument and normalization band " +
+                                    "(%.1f - %.1f nm).", (1+z)*sp.getStart(), (1+z)*sp.getEnd(), xStart, xEnd));
         }
 
         // The SED will be redshifted later so resample over range / (1+z):
@@ -97,7 +99,6 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     }
 
     @Override public void trim(double newStart, double newEnd) {
-        Log.fine("Trimming to " + newStart + " - " + newEnd);
         if (newStart < getStart()) {
             newStart = getStart();
         }

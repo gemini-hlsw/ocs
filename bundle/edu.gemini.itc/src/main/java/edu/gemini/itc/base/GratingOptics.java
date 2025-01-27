@@ -35,8 +35,10 @@ public abstract class GratingOptics extends TransmissionElement implements Dispe
         Log.fine("spectralBinning = " + _spectralBinning);
     }
 
-    public double getStart() {
-        return centralWavelength - (data.apply(gratingName).dispersion() * detectorPixels / 2);
+    public double getStart() {  // wavelength of first pixel
+        double start = centralWavelength - (data.apply(gratingName).dispersion() * detectorPixels / 2);
+        Log.fine("start = " + start + " nm");
+        return start;
     }
 
     public double getEnd() {
@@ -49,7 +51,6 @@ public abstract class GratingOptics extends TransmissionElement implements Dispe
 
     public double getPixelWidth() {
         return data.apply(gratingName).dispersion() * _spectralBinning;
-
     }
 
     public double getGratingResolvingPower() {

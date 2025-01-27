@@ -1,8 +1,7 @@
 package edu.gemini.phase2.skeleton.factory
 
 import edu.gemini.spModel.core.MagnitudeBand
-import edu.gemini.model.p1.immutable.Igrins2Blueprint
-import edu.gemini.model.p1.immutable.Igrins2NoddingOption
+import edu.gemini.model.p1.immutable.{Igrins2Blueprint, Igrins2NoddingOption, Igrins2TelluricStars}
 import org.scalacheck.Prop._
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Arbitrary._
@@ -15,7 +14,12 @@ class Igrins2BlueprintTest extends TemplateSpec("IGRINS-2_BP.xml") with Specific
     Arbitrary(Gen.oneOf(Igrins2NoddingOption.values))
 
   implicit val ArbitraryIgrins2Blueprint: Arbitrary[Igrins2Blueprint] =
-    Arbitrary(arbitrary[Igrins2NoddingOption].map(Igrins2Blueprint(_)))
+    Arbitrary {
+      for {
+        n <- arbitrary[Igrins2NoddingOption]
+        s <- arbitrary[Igrins2TelluricStars]
+      } yield Igrins2Blueprint(n, s)
+    }
 
   private val AnyBand: MagnitudeBand = MagnitudeBand.R // required, but not used
 

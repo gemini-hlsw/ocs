@@ -15,6 +15,12 @@ public interface SpecS2N {
     VisitableSampledSpectrum getExpS2NSpectrum();
     VisitableSampledSpectrum getFinalS2NSpectrum();
 
+    // Quantities summed over the aperture:
+    VisitableSampledSpectrum getTotalSignalSpectrum();
+    VisitableSampledSpectrum getTotalBackgroundSpectrum();
+    double getTotalDarkNoise();
+    int getSlitLengthPixels();
+
     default double getPeakPixelCount() {
         final double[] sig = getSignalSpectrum().getValues();
         final double[] bck = getBackgroundSpectrum().getValues();

@@ -79,9 +79,7 @@ public class GmosNorthType {
         B600_G5307(  "B600_G5307",  "B600",  600, Ictd.track("B600")),
         R600_G5304(  "R600_G5304",  "R600",  600, Ictd.track("R600")),
         B480_G5309(  "B480_G5309",  "B480",  480, Ictd.track("B480")),
-        R400_G5305(  "R400_G5305",  "R400",  400, Ictd.unavailable()) {
-            @Override public boolean isObsolete() { return true; }
-        },
+        R400_G5305(  "R400_G5305",  "R400",  400, Ictd.track("R400")),
         R400_G5310(  "R400_G5310",  "R400",  400, Ictd.track("R400")),
         R150_G5306(  "R150_G5306",  "R150",  150, Ictd.unavailable()) {
             @Override public boolean isObsolete() { return true; }

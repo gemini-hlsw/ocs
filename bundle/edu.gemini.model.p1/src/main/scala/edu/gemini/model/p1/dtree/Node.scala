@@ -9,6 +9,7 @@ sealed abstract class Node[+I, C, S, +O](state: I) extends (S => Either[Node[O, 
 
   def title: String
   def description: String
+  def warning: Option[String] = None
   def toUIPage: UIPage[C, S]
 
   def default: Option[S] = None

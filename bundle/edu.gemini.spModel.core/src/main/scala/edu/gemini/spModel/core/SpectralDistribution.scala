@@ -35,7 +35,7 @@ sealed trait Library extends SpectralDistribution {
   val sedSpectrum: String
 }
 
-/** Stars */
+/** A star. */
 sealed abstract class LibraryStar(val label: String, val sedSpectrum: String) extends Library
 object LibraryStar {
 
@@ -213,16 +213,13 @@ object LibraryStar {
   case object T0400K    extends LibraryStar("T=400K (600nm-10um model)",  "t0400k")
 
   /** All available library stars. */
-  val Values: List[LibraryStar] = List(
-    O5V, O8III, O9V, O95V,
-    B0V, B05V, B3V, B5_7V, B5III, B5I, B9III,
-    A0I, A0III, A0III_new, A0V, A0V_new, A1V, A2V, A3V, A4V, A5V, A5V_new, A5III, A6V, A8III,
-    F0I, F0I_new, F0II, F0III, F0III_new, F0IV, F0V, F0V_new, F2II, F2III, F2V, F4V, F5I, F5I_new, F5III, F5III_new, F5V, F5V_new, F5V_w, F6V_r, F7V, F8I, F8IV, F8V,
-    G0I, G0I_new, G0V, G0V_new, G0V_w, G0V_r, G0III, G1V, G2I, G2IV, G2V, G2V_new, G3V, G5I, G5I_new, G5V, G5V_new, G5V_w, G5V_r, G5III, G5III_new, G5III_w, G5III_r, G7III, G8I, G8III, G8V,
-    K0III, K0III_new, K0III_w, K0III_r, K0IV, K0V, K0V_new, K0V_r, K0_1II, K05III, K15III, K2I, K2III, K2V, K3II, K3III, K3V, K4I, K4I_new, K4III, K4III_new, K4III_w, K4III_r, K4V, K5III, K5V,
-    M0III, M0III_new, M0V, M0V_new, M1III, M1V, M2I, M2III, M2V, M3III, M3III_new, M3V, M3V_new, M4III, M4V, M5V, M6V, M6III, M6III_new, M7III, M8III, M9III,
-    sdB, sdF8, sdO,
-    DA08, DA09, DA12, DA15, DA18, DA24, DA28, DA30, DA31, DA33, DA36, DA38, DA48, DA57, DBQ40, DBQA50, DO20,
+  val Values = List(
+    O5V,      O8III,      B0V,      B5_7V,      B5III,      B5I,      A0V,      A0III,      A0I,
+    A5V,      A5III,      F0V,      F0III,      F0I,        F5V,      F5V_w,    F6V_r,      F5III,
+    F5I,      G0V,        G0V_w,    G0V_r,      G0III,      G0I,      G2V,      G5V,        G5V_w,
+    G5V_r,    G5III,      G5III_w,  G5III_r,    G5I,        K0V,      K0V_r,    K0III,      K0III_w,
+    K0III_r,  K0_1II,     K4V,      K4III,      K4III_w,    K4III_r,  K4I,      M0V,        M0III,
+    M3V,      M3III,      M6V,      M6III,      M9III,
     T2800K,   T2600K,     T2400K,   T2200K,     T2000K,
     T1800K,   T1600K,     T1400K,   T1200K,     T1000K,
     T0900K,   T0800K,     T0600K,   T0400K
@@ -236,14 +233,14 @@ object LibraryNonStar {
   /** Finds a non-star spectrum identified by the given spectrum name (i.e. the ITC file name). */
   def findByName(n: String): Option[LibraryNonStar] = values.find(_.sedSpectrum == n)
 
-  /** Known non-star library objects. */
+  /** Known non-star library obejcts. */
   case object EllipticalGalaxy  extends LibraryNonStar("Elliptical Galaxy",                       "elliptical-galaxy")
   case object SpiralGalaxy      extends LibraryNonStar("Spiral Galaxy (Sc)",                      "spiral-galaxy")
   case object QS0               extends LibraryNonStar("QSO (80-855nm)",                          "QSO")
   case object QS02              extends LibraryNonStar("QSO (276-3520nm)",                        "QSO2")
   case object OrionNebula       extends LibraryNonStar("HII region (Orion)",                      "Orion-nebula")
-  case object PlanetaryNebula   extends LibraryNonStar("Planetary nebula (NGC7009)",              "Planetary-nebula")
-  case object PlanetaryNebula2  extends LibraryNonStar("Planetary nebula (IC5117)",               "Planetary-nebula2")
+  case object PlanetaryNebula   extends LibraryNonStar("Planetary nebula (NGC7009: 100-1100nm)",  "Planetary-nebula")
+  case object PlanetaryNebula2  extends LibraryNonStar("Planetary nebula (IC5117: 480-2500nm)",   "Planetary-nebula2")
   case object PlanetaryNebula3  extends LibraryNonStar("Planetary nebula (NGC7027)",              "Planetary-nebula-NGC7027")
   case object StarburstGalaxy   extends LibraryNonStar("Starburst galaxy (M82)",                  "Starburst-galaxy")
   case object PmsStar           extends LibraryNonStar("Pre-main sequence star (HD100546)",       "PMS-star")
@@ -273,8 +270,8 @@ object LibraryNonStar {
   case object Neptune           extends LibraryNonStar("Neptune",                                 "Neptune")
 
 
-  /** All available non-star spectra. */
-  val values: List[LibraryNonStar] = List(
+  /** All available non-star spectras. */
+  val values = List(
     EllipticalGalaxy, SpiralGalaxy, QS0, QS02, OrionNebula, PlanetaryNebula, PlanetaryNebula2, PlanetaryNebula3,
     StarburstGalaxy, PmsStar, GalacticCenter, Afgl230, Afgl3068, AlphaBoo, AlphaCar, BetaAnd, BetaGru, GammaCas,
     GammaDra, L1511Irs, NGC1068, NGC2023, NGC2440, OCet, OrionBar, Rscl, Txpsc, Wr104, Wr34,
