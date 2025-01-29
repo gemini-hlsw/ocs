@@ -90,6 +90,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         final double skyAper = 1.0;  // hard-coded in the F2 web form
         double readNoise;
         double totalTime;
+        double wavelength = 0;
 
         if (calcMethod instanceof SpectroscopyInt) {
             // Determine exposureTime & numberExposures that will give the requested S/N at wavelength.
@@ -97,7 +98,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
             double desiredSNR = ((SpectroscopyInt) calcMethod).sigma();
             Log.fine(String.format("desiredSNR = %.2f", desiredSNR));
 
-            double wavelength = ((SpectroscopyInt) _obsDetailParameters.calculationMethod()).wavelength();
+            wavelength = ((SpectroscopyInt) _obsDetailParameters.calculationMethod()).wavelength();
             Log.fine(String.format("Wavelength = %.2f nm", wavelength));
 
             double maxFlux = instrument.maxFlux();  // maximum useful flux
@@ -111,7 +112,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
             Log.fine(String.format("initialExposureTime = %.2f sec", initialExposureTime));
             Log.fine("initialNumberExposures = " + initialNumberExposures);
 
-            SpectroscopyResult result = calculateSpectroscopy(instrument, readMode, initialExposureTime, initialNumberExposures);
+            SpectroscopyResult result = calculateSpectroscopy(instrument, readMode, initialExposureTime, initialNumberExposures, wavelength);
             SpecS2N specS2N = result.specS2N()[0];
 
             double peakFlux = specS2N.getPeakPixelCount();
@@ -199,7 +200,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         }
 
         // Run the ITC to generate the output graphs
-        return calculateSpectroscopy(instrument, readMode, exposureTime, numberExposures);
+        return calculateSpectroscopy(instrument, readMode, exposureTime, numberExposures, wavelength);
     }
 
     private double calculateSNR(double signal, double background, double darkNoise, double readNoise, double skyAper, int numberExposures) {
@@ -229,7 +230,9 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
             final Flamingos2 instrument,
             final ReadMode readMode,
             final double exposureTime,
-            final int numberExposures) {
+            final int numberExposures,
+            final double wavelength
+    ) {
 
         // Start of morphology section of ITC
 
@@ -275,8 +278,9 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
 
         final SpecS2NSlitVisitor[] specS2Narr = new SpecS2NSlitVisitor[1];
         specS2Narr[0] = specS2N;
+        final double snr = specS2N.getFinalS2NSpectrum().getY(wavelength);
 
-        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.empty());
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.apply(new ExposureCalculation(exposureTime, numberExposures, snr)));
     }
 
     public ImagingResult calculateImaging() {
