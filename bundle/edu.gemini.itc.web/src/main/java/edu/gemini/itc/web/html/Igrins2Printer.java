@@ -48,14 +48,16 @@ public final class Igrins2Printer extends PrinterBase implements OverheadTablePr
         final CalculationMethod calcMethod = p.observation().calculationMethod();
         final SpectroscopyResult result = results[0];
         final double iqAtSource = result.iqCalc().getImageQuality();
+        double exposureTime = recipe.getExposureTime();
+        numberExposures = recipe.getNumberExposures();
         String str;
 
         _println("");
 
-        _println(String.format("Read noise: %.2f e- in %s and %.2f e- in %s using %d Fowler samples.",
-                results[0].instrument().getReadNoise(), ((Igrins2) results[0].instrument()).getWaveBand(),
-                results[1].instrument().getReadNoise(), ((Igrins2) results[1].instrument()).getWaveBand(),
-                ((Igrins2) results[0].instrument()).getFowlerSamples()));
+        _println(String.format("Read noise: %.2f e- in %s, and %.2f e- in %s, using %d Fowler samples.",
+                ((Igrins2) results[0].instrument()).getReadNoise(exposureTime), ((Igrins2) results[0].instrument()).getWaveBand(),
+                ((Igrins2) results[1].instrument()).getReadNoise(exposureTime), ((Igrins2) results[1].instrument()).getWaveBand(),
+                ((Igrins2) results[0].instrument()).getFowlerSamples(exposureTime)));
 
         _println(String.format("Dark current: %.4f e-/s/pix in %s and %.4f e-/s/pix in %s.",
                 results[0].instrument().getDarkCurrent(), ((Igrins2) results[0].instrument()).getWaveBand(),
@@ -64,14 +66,12 @@ public final class Igrins2Printer extends PrinterBase implements OverheadTablePr
         if (result.aoSystem().isDefined()) { _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get())); }
 
         _printSoftwareAperture(result, 1 / mainInstrument.getSlitWidth());
-        _println(String.format("Derived image size(FWHM) for a point source = %.2f arcsec", iqAtSource));
+        _println(String.format("Derived image size (FWHM) for a point source = %.2f arcsec.", iqAtSource));
         _println("");
 
         if (calcMethod instanceof SpectroscopyInt) {
-            double exposureTime = recipe.getExposureTime();
-            numberExposures = recipe.getNumberExposures();
-            if (exposureTime < 5.0) {
-                str = "Total integration time = %.1f seconds (%d x %.1f s), of which %.1f seconds is on source.";
+            if (exposureTime < 10) {
+                str = "Total integration time = %.1f seconds (%d x %.2f s), of which %.1f seconds is on source.";
             } else {
                 str = "Total integration time = %.0f seconds (%d x %.0f s), of which %.0f seconds is on source.";
             }
