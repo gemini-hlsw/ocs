@@ -68,7 +68,21 @@ public class Igrins2 extends Instrument implements SpectroscopyInstrument {
     @Override
     public double getReadNoise() { return _readNoise; }  // (electrons)
 
+    public double getReadNoise(double exposureTime) {
+        return Igrins2$.MODULE$.readNoise(exposureTime, _arm.getMagnitudeBand());  // (electrons)
+    }
+
+    public double getMinExposureTime() { return Igrins2$.MODULE$.MinExposureTime().toSeconds(); }
+
+    public double getMaxExposureTime() { return Igrins2$.MODULE$.MaxExposureTime().toSeconds(); }
+
+    public double getDefaultExposureTime() { return Igrins2$.MODULE$.DefaultExposureTime().toSeconds(); }
+
     public int getFowlerSamples() { return _fowlerSamples; }
+
+    public int getFowlerSamples(double exposureTime) {
+        return Igrins2$.MODULE$.fowlerSamples(exposureTime);
+    }
 
     public String getDirectory() { return ITCConstants.LIB + "/" + INSTR_DIR; }  // the directory with the data files
 
