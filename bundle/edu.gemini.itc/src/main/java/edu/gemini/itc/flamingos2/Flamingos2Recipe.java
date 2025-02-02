@@ -195,8 +195,9 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
                 Log.fine("Increasing exposure time to the minimum allowed for the read mode");
                 exposureTime = readMode.minimumExpTimeSec();
             }
-            exposureTime = Math.round(exposureTime);  // finally round to an integer
-            Log.fine(String.format("exposureTime = %.3f", exposureTime));
+
+            exposureTime = Math.ceil(exposureTime);  // finally round up to an integer
+            Log.fine(String.format("exposureTime = %.0f", exposureTime));
         }
 
         // Run the ITC to generate the output graphs
