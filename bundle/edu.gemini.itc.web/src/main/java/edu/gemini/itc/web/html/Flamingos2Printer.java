@@ -73,12 +73,12 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
         _println("");
 
         if (calcMethod instanceof SpectroscopyInt) {
-            double exposureTime = recipe.getExposureTime();
+            int exposureTime = recipe.getExposureTime();
             int numberExposures = recipe.getNumberExposures();
             _println(String.format(
-                "Total integration time = %.2f seconds (%d x %.2f s), of which %.2f seconds is on source.",
+                "Total integration time = %d seconds (%d x %d s), of which %d seconds is on source.",
                     numberExposures * exposureTime, numberExposures, exposureTime,
-                    exposureTime * numberExposures * result.observation().sourceFraction()));
+                    (int) (exposureTime * numberExposures * result.observation().sourceFraction())));
         } else {
             _printRequestedIntegrationTime(result);
         }

@@ -139,20 +139,17 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
 
             // Look up the S/N calculated by the ITC for comparison:
             VisitableSampledSpectrum finalS2NSpectrum = specS2N.getFinalS2NSpectrum();
-            Log.fine(String.format("S/N @ %.1f nm = %.3f e-", wavelength, finalS2NSpectrum.getY(wavelength)));
+            Log.fine(String.format("S/N @ %.1f nm = %.3f", wavelength, finalS2NSpectrum.getY(wavelength)));
 
             // Calculate the S/N and verify that the answer is the same:
             Log.fine(String.format("Predicted S/N = %.3f e-", calculateSNR(signal, background, darkNoise, readNoise, skyAper, initialNumberExposures)));
 
-            double timeToHalfMax = maxFlux / 2. / peakFlux * initialExposureTime;  // time to reach half the maximum flux
-            Log.fine(String.format("timeToHalfMax = %.2f seconds", timeToHalfMax));
+            double maxExposureTime = Math.min(300, maxFlux / 2. / peakFlux * initialExposureTime);
+            Log.fine(String.format("maxExposureTime = %.2f seconds", maxExposureTime));
 
-            if (timeToHalfMax < 1.0) throw new RuntimeException(String.format(
+            if (maxExposureTime < 1) throw new RuntimeException(String.format(
                     "This target is too bright for this configuration.\n" +
-                            "The detector will reach %.0f ADU in %.2f seconds.", maxFlux/2., timeToHalfMax));
-
-            double maxExptime = Math.min(300, (int) timeToHalfMax);
-            Log.fine(String.format("maxExptime = %.2f seconds", maxExptime));
+                            "The detector will reach %.0f ADU in %.2f seconds.", maxFlux/2., maxExposureTime));
 
             // Step through each of the read modes and see which works best.
             List<ReadMode> readModes = Arrays.asList(ReadMode.FAINT_OBJECT_SPEC, ReadMode.MEDIUM_OBJECT_SPEC, ReadMode.BRIGHT_OBJECT_SPEC);
@@ -164,26 +161,28 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
                 Log.fine(String.format("Read Noise = %.2f e- (squared and summed)", readNoise));
                 Log.fine(String.format("S/N = %.3f", calculateSNR(signal, background, darkNoise, readNoise, skyAper, initialNumberExposures)));
 
-                exposureTime = calculateExposureTime(signal / initialExposureTime,
-                        background / initialExposureTime, darkNoise / initialExposureTime,
-                        readNoise, skyAper, desiredSNR / Math.sqrt(initialNumberExposures));
-                totalTime = exposureTime * initialNumberExposures;
-                Log.fine(String.format("totalTime = %.2f sec", totalTime));
-
-                // Calculate the optimal number of exposures:
-                numberExposures = (int) Math.ceil(totalTime / maxExptime);
-                if (numberExposures % 4 != 0) {
-                    numberExposures += 4 - numberExposures % 4;  // make a multiple of 4
+                int iterations = 0;
+                int oldNumberExposures = -1;
+                double oldExposureTime = -1;
+                while ( (exposureTime != oldExposureTime || numberExposures != oldNumberExposures) && iterations < 10) {
+                    Log.fine("Iteration " + iterations + " ----------------");
+                    oldNumberExposures = numberExposures;
+                    oldExposureTime = exposureTime;
+                    exposureTime = calculateExposureTime(signal / initialExposureTime,
+                            background / initialExposureTime, darkNoise / initialExposureTime,
+                            readNoise, skyAper, desiredSNR / Math.sqrt(numberExposures));
+                    totalTime = exposureTime * numberExposures;
+                    numberExposures = (int) Math.ceil(totalTime / maxExposureTime);
+                    if (numberExposures % 4 != 0) { numberExposures += 4 - numberExposures % 4;}  // make a multiple of 4
+                    exposureTime = totalTime / numberExposures;
+                    Log.fine(String.format("Iteration %d: -> %d x %.3f sec = %.3f sec (RN=%.2f e-)",
+                            iterations, numberExposures, exposureTime, totalTime, readMode.readNoise()));
+                    iterations += 1;
                 }
-                Log.fine(String.format("numberExposures = %d", numberExposures));
-
-                // Calculate the new exposure time with this number of exposures:
-                exposureTime = calculateExposureTime(signal / initialExposureTime,
-                        background / initialExposureTime, darkNoise / initialExposureTime,
-                        readNoise, skyAper, desiredSNR / Math.sqrt(numberExposures));
+                Log.fine("Converged");
 
                 if (exposureTime < readMode.recomendedExpTimeSec()) {  // continue to the next read mode
-                    Log.fine(String.format("This is shorter than recommended (%.1f sec)", readMode.recomendedExpTimeSec()));
+                    Log.fine(String.format("This is shorter than recommended (%.0f sec)", readMode.recomendedExpTimeSec()));
                 } else {  // Accept this read mode
                     break;
                 }
@@ -193,9 +192,10 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
             Log.fine("readMode = " + readMode.toString());
             Log.fine(String.format("numberExposures = %d", numberExposures));
             if (exposureTime < readMode.minimumExpTimeSec()) {
-                Log.fine("Reducing exposure time to the minimum allowed for the read mode");
+                Log.fine("Increasing exposure time to the minimum allowed for the read mode");
                 exposureTime = readMode.minimumExpTimeSec();
             }
+            exposureTime = Math.round(exposureTime);  // finally round to an integer
             Log.fine(String.format("exposureTime = %.3f", exposureTime));
         }
 
@@ -279,6 +279,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         final SpecS2NSlitVisitor[] specS2Narr = new SpecS2NSlitVisitor[1];
         specS2Narr[0] = specS2N;
         final double snr = specS2N.getFinalS2NSpectrum().getY(wavelength);
+        Log.fine(String.format("S/N @ %.1f nm = %.3f", wavelength, snr));
 
         return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.apply(new ExposureCalculation(exposureTime, numberExposures, snr)));
     }
@@ -327,8 +328,8 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
     }
 
-    public double getExposureTime() {
-        return exposureTime;
+    public int getExposureTime() {
+        return (int) exposureTime;
     }
 
     public int getNumberExposures() {
