@@ -484,7 +484,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
             public String description()  { return "Weak Source"; }
             public String logValue()     { return "faint";       }
 
-            public double minimumExpTimeSec()    { return 14; }
+            public double minimumExpTimeSec()    { return 14.0; }
             public double recomendedExpTimeSec() { return 85.0; }
             public double readoutTimeSec()       { return 20.0; }
             public int readCount()               { return  8;   }
