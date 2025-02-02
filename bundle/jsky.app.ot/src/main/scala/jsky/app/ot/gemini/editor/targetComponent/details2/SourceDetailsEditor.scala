@@ -84,7 +84,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor[SPT
   private def powerLawOrDefault    (t: SPTarget): PowerLaw      = getDistribution(t).fold(defaultPowerLaw)(_.asInstanceOf[PowerLaw])
 
   private val libraryStarDetails     = new ComboBox[LibraryStar](LibraryStar.Values) {
-    renderer = Renderer(_.sedSpectrum)
+    renderer = Renderer(_.label)
   }
   private val libraryNonStarDetails  = new ComboBox[LibraryNonStar](LibraryNonStar.values) {
     renderer = Renderer(_.label)
