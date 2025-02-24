@@ -122,7 +122,7 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
     string.trim
   }
 
-  private def getTypeString(propClass: ProposalClass): String = propClass match {
+  private def getTypeString(propClass: ProposalClass): String            = propClass match {
       case pc: SpecialProposalClass                                     => pc.sub.specialType.value()
       case _:  FastTurnaroundProgramClass                               => "Fast Turnaround"
       case _:  SubaruIntensiveProgramClass                              => "Intensive Observing Program at Subaru"
@@ -131,18 +131,18 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
       case _:  QueueProposalClass                                       => "Queue"
       case ClassicalProposalClass(_, _, _, Right(_), _, _, _, _)        => "Exchange"
       case _:  ClassicalProposalClass                                   => "Classical"
-      case ExchangeProposalClass(_, _, _, ExchangePartner.SUBARU, _)    => "Subaru"
+      case ExchangeProposalClass(_, _, _, ExchangePartner.SUBARU, _, _) => "Subaru"
       case _                                                            => ""
     }
 
-  private def getTypeName(dir: String, propClass: ProposalClass): String = propClass match {
-      case ft: FastTurnaroundProgramClass                            => "FT"
-      case _:  SubaruIntensiveProgramClass                           => "SIP"
-      case pc: SpecialProposalClass                                  => pc.sub.specialType
-      case lp: LargeProgramClass                                     => "LP"
-      case q:  GeminiNormalProposalClass                             => dir.toUpperCase
-      case ExchangeProposalClass(_, _, _, ExchangePartner.SUBARU, _) => "SUBARU"
-      case _                                                         => ""
+  private def getTypeName(dir: String, propClass: ProposalClass): String  = propClass match {
+      case ft: FastTurnaroundProgramClass                                => "FT"
+      case _:  SubaruIntensiveProgramClass                               => "SIP"
+      case pc: SpecialProposalClass                                      => pc.sub.specialType
+      case lp: LargeProgramClass                                         => "LP"
+      case q:  GeminiNormalProposalClass                                 => dir.toUpperCase
+      case ExchangeProposalClass(_, _, _, ExchangePartner.SUBARU, _, _)  => "SUBARU"
+      case _                                                             => ""
     }
 
   private def getInstrumentsString(prop: Proposal): String = prop.observations.map {

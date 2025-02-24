@@ -33,6 +33,11 @@ class P1TemplatesSpec extends Specification with XmlMatchers {
 
       XML.loadString(result) must \\("block") \>~ """\s*Observing Mode: Queue \+ Standard ToO.\s*"""
     }
+    "write on the ObservingMode Exchange + Standard ToO, REL-4650" in {
+      val result = transformProposal("proposal_exchange_too.xml")
+
+      XML.loadString(result) must \\("block") \>~ """\s*Observing Mode: Exchange \+ Standard ToO.\s*"""
+    }
     "include TAC information in case all are approved, REL-677" in {
       val result = transformProposal("proposal_submitted_to_tac_all_approved.xml")
 

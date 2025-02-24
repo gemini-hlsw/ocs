@@ -60,6 +60,7 @@
                     <xsl:when test="proposalClass/classical">Classical</xsl:when>
                     <xsl:when test="proposalClass/queue[@tooOption != 'None']">Queue&#160;+&#160;<xsl:value-of select="proposalClass/queue/@tooOption"/>&#160;ToO</xsl:when>
                     <xsl:when test="proposalClass/queue">Queue</xsl:when>
+                    <xsl:when test="proposalClass/exchange[@tooOption != 'None']">Exchange&#160;+&#160;<xsl:value-of select="proposalClass/exchange/@tooOption"/>&#160;ToO</xsl:when>
                     <xsl:when test="proposalClass/exchange">Exchange</xsl:when>
                     <xsl:when test="proposalClass/special">Special</xsl:when>
                     <xsl:when test="proposalClass/large">Large Program</xsl:when>

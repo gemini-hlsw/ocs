@@ -21,6 +21,7 @@ import edu.gemini.pit.ui.binding._
 import javax.swing.{BorderFactory, Icon, JComboBox, JLabel}
 import javax.swing.{ComboBoxModel, DefaultComboBoxModel, SwingConstants}
 import edu.gemini.model.p1.immutable.Partners.FtPartner
+import edu.gemini.model.p1.mutable.TooOption
 
 // An enum for multi facility selection
 object MultiFacilitySelection extends Enumeration {
@@ -218,7 +219,8 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
       selection.reactions += {
         case SelectionChanged(_) => model match {
-          case Some(e: ExchangeProposalClass) => model = Some(e.copy(partner = selection.item))
+          case Some(e: ExchangeProposalClass) =>
+            model = Some(e.copy(partner = selection.item, tooOption = if (e.partner === ExchangePartner.SUBARU) e.tooOption else TooOption.NONE))
           case _                              => // shouldn't happen
         }
       }
@@ -271,10 +273,13 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
             }
 
             // E => {Q,C} when Q/C is NGO
-            case e: ExchangeProposalClass if selection.item == Classical && localClassical.subs.isLeft => localClassical = localClassical.copy(subs = Left(e.subs))
-            case e: ExchangeProposalClass if selection.item == Queue && localQueue.subs.isLeft => localQueue = localQueue.copy(subs = Left(e.subs))
+            case e: ExchangeProposalClass if selection.item == Classical && localClassical.subs.isLeft =>
+              localClassical = localClassical.copy(subs = Left(e.subs))
+            case e: ExchangeProposalClass if selection.item == Queue && localQueue.subs.isLeft =>
+              localQueue = localQueue.copy(subs = Left(e.subs))
 
-            case _ if selection.item == Fast => model = model.map(m =>m .copy(meta = m.meta.copy(secondAttachment = none)))
+            case _ if selection.item == Fast =>
+              model = model.map(m =>m .copy(meta = m.meta.copy(secondAttachment = none)))
 
             case _ => // nop
           }
@@ -307,11 +312,12 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
     // TOO label and combo box
     lazy val tooLabel = dvLabel("ToO Activation:") {
-      case _: QueueProposalClass          => true
-      case _: LargeProgramClass           => true
-      case _: FastTurnaroundProgramClass  => true
-      case _: SubaruIntensiveProgramClass => true
-      case _: SpecialProposalClass        => true
+      case _: QueueProposalClass                                           => true
+      case _: LargeProgramClass                                            => true
+      case _: FastTurnaroundProgramClass                                   => true
+      case _: SubaruIntensiveProgramClass                                  => true
+      case _: SpecialProposalClass                                         => true
+      case s: ExchangeProposalClass if s.partner == ExchangePartner.SUBARU => true
     }
 
     // TOO option combo box
@@ -334,6 +340,9 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           case s: SubaruIntensiveProgramClass =>
             selection.item = s.tooOption
             visible = true
+          case s: ExchangeProposalClass if s.partner == ExchangePartner.SUBARU =>
+            selection.item = s.tooOption
+            visible = true
           case s: SpecialProposalClass =>
             selection.item = s.tooOption
             visible = true
@@ -349,6 +358,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           case Some(f: FastTurnaroundProgramClass)  => model = Some(FastTurnaroundProgramClass.tooOption.set(f, selection.item))
           case Some(s: SubaruIntensiveProgramClass) => model = Some(SubaruIntensiveProgramClass.tooOption.set(s, selection.item))
           case Some(s: SpecialProposalClass)        => model = Some(SpecialProposalClass.tooOption.set(s, selection.item))
+          case Some(e: ExchangeProposalClass)       => model = Some(ExchangeProposalClass.tooOption.set(e, selection.item))
           case _                                    => // shouldn't happen
         }
       }
@@ -356,7 +366,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     }
 
     // Multi label and combo box
-    lazy val multiFacilityLabel = dvLabel("AEON/Multi-facility:") {
+    private lazy val multiFacilityLabel = dvLabel("AEON/Multi-facility:") {
       case _: QueueProposalClass     => true
       case _: LargeProgramClass      => true
       case _: ClassicalProposalClass => true
@@ -512,12 +522,6 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         icon = SharedIcons.ICON_VARIANT
 
       }
-    }
-
-    lazy val geminiRequiredTimeLabel = dvLabel("Gemini Time Required:") {
-      case q: QueueProposalClass     => q.multiFacility.isDefined
-      case l: LargeProgramClass      => l.multiFacility.isDefined
-      case c: ClassicalProposalClass => c.multiFacility.isDefined
     }
 
     lazy val jwstSynergyLabel = dvLabel("JWST Synergy:") {
