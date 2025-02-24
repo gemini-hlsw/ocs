@@ -384,6 +384,7 @@ object HorizonsService2 {
       val url: URL = new URL(s"$baseURL?$queryParams")
       LOG.info(s"Horizons request $url")
       val conn = url.openConnection().asInstanceOf[HttpsURLConnection]
+      conn.setSSLSocketFactory(GemSslSocketFactory.get())
       conn.setHostnameVerifier(hostnameVerifier)
       conn.setReadTimeout(timeout)
       ConnectionCharset.set(conn)
