@@ -704,6 +704,18 @@
         </contact>
     </site>
     <site>
+        <institution>Astronomical Institute of Czech Academy of Sciences</institution>
+        <address>Fričova 298</address>
+        <address>251 65 Ondřejov</address>
+        <country>Czechia</country>
+    </site>
+    <site>
+        <institution>Nicolaus Copernicus Astronomical Center</institution>
+        <address>Bartycka 18</address>
+        <address>00-716 Warszawa</address>
+        <country>Poland</country>
+    </site>
+    <site>
         <institution>McGill University</institution>
         <address>Physics Department</address>
         <address>Ernest Rutherford Physics Building</address>
@@ -808,6 +820,13 @@
             <fax>416-971-2026</fax>
             <email>user@astro.utoronto.ca</email>
         </contact>
+    </site>
+    <site>
+        <institution>Saint Martin's University</institution>
+        <address>5000 Abbey Way SE</address>
+        <address>Lacey</address>
+        <address>WA 98503</address>
+        <country>USA</country>
     </site>
     <site>
         <institution>Trent University</institution>
