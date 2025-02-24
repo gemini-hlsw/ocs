@@ -138,7 +138,7 @@
                     <xsd:element name="partner" type="ExchangePartner"/>
                     <xsd:element name="ngo"  type="NgoSubmission" minOccurs="1" maxOccurs="unbounded"/>
                 </xsd:sequence>
-                <xsd:attribute name="tooOption"   type="TooOption" use="required"/>
+                <xsd:attribute name="tooOption"   type="TooOption" use="optional" default="None"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>

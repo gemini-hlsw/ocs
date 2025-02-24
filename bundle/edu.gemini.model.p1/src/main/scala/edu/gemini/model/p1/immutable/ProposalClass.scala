@@ -266,15 +266,19 @@ object ExchangeProposalClass {
     Option(m.getComment),
     Option(m.getKey).map(UUID.fromString),
     m.getPartner,
+    m.getTooOption,
     m.getNgo.asScala.map(NgoSubmission.apply).toList)
 
-  def empty = apply(None, None, None, ExchangePartner.SUBARU, Nil)
+
+  val tooOption: Lens[ExchangeProposalClass, ToOChoice] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
+  def empty = apply(None, None, None, ExchangePartner.SUBARU, ToOChoice.None, Nil)
 
 }
 case class ExchangeProposalClass(itac:Option[Itac],
                                  comment:Option[String],
                                  key:Option[UUID],
                                  partner:ExchangePartner,
+                                 tooOption: ToOChoice,
                                  subs:List[NgoSubmission]) extends ProposalClass {
 
   def mutable(p:Proposal, n:Namer):M.ExchangeProposalClass = {
@@ -283,6 +287,7 @@ case class ExchangeProposalClass(itac:Option[Itac],
     m.setComment(comment.orNull)
     m.setKey(key.map(_.toString).orNull)
     m.setPartner(partner)
+    m.setTooOption(tooOption)
     m.getNgo.addAll(subs.map(_.mutable(p, n)).asJava)
     m
   }
