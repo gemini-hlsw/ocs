@@ -113,7 +113,7 @@ final class Igrins2 extends ParallacticAngleSupportInst(Igrins2.SP_TYPE)
     _posAngleConstraint = newValue
 
   /**
-   * Get the GMOS Port
+   * Get the Port
    */
   override def getIssPort: IssPort = {
     if (_port == null) _port = IssPort.DEFAULT
@@ -252,17 +252,37 @@ object Igrins2 {
     FowlerSamplesReadoutTime.getOrElse(nFowler, sys.error(s"Unsupported fowler samples value $nFowler"))
   }
 
+  // REL-4644
+  // Fowler samples: {1, 2, 4, 8, 16}
+  // H detector read noise: {17.4, 12.5, 9.2, 6.8, 5.1}
+  // K detector read noise: {23.7, 16.9, 12.2, 8.9, 6.7}
+  def ReadNoise(band: MagnitudeBand, fowlerSamples: Int): Double = {
+    (band, fowlerSamples) match {
+      case (MagnitudeBand.H, 1) => 17.4
+      case (MagnitudeBand.H, 2) => 12.5
+      case (MagnitudeBand.H, 4) => 9.2
+      case (MagnitudeBand.H, 8) => 6.8
+      case (MagnitudeBand.H, 16) => 5.1
+      case (MagnitudeBand.K, 1) => 23.7
+      case (MagnitudeBand.K, 2) => 16.9
+      case (MagnitudeBand.K, 4) => 12.2
+      case (MagnitudeBand.K, 8) => 8.9
+      case (MagnitudeBand.K, 16) => 6.7
+    }
+  }
+
   def readNoise(expTime: Time): List[(MagnitudeBand, Double)] = {
     val fowlerSamples0 = fowlerSamples(expTime)
     List(
-      (MagnitudeBand.H, 14.4 * math.pow(fowlerSamples0, -0.34977)),
-      (MagnitudeBand.K, 13.3 * math.pow(fowlerSamples0, -0.36533)))
+      (MagnitudeBand.H, ReadNoise(MagnitudeBand.H, fowlerSamples0)),
+      (MagnitudeBand.K, ReadNoise(MagnitudeBand.K, fowlerSamples0)))
   }
 
-  def readNoise(expTime: Double, band: MagnitudeBand) : Double =
+  def readNoise(expTime: Double, band: MagnitudeBand) : Double = {
     band match {
-      case MagnitudeBand.H => 14.4 * math.pow(fowlerSamples(expTime.seconds), -0.34977)
-      case MagnitudeBand.K => 13.3 * math.pow(fowlerSamples(expTime.seconds), -0.36533)
+      case MagnitudeBand.H => ReadNoise(MagnitudeBand.H, fowlerSamples(expTime))
+      case MagnitudeBand.K => ReadNoise(MagnitudeBand.K, fowlerSamples(expTime))
+    }
   }
 
   private val query_no  = false
