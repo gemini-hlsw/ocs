@@ -934,6 +934,26 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           result \\ "igrins2" \\ "Igrins2" must \\("telluricStars") \> "Default"
       }
     }
+    "REL-4650 Support upconverting exchange with subaru and set TooOption to None" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_exchange_subaru.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 3
+          result \\ "proposalClass" \\ "exchange" must \\("partner") \> "subaru"
+      }
+    }
+    "REL-4650 Support upconverting exchange with keck and set TooOption to None" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_exchange_subaru.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 3
+          result \\ "proposalClass" \\ "exchange" must \\("partner") \> "subaru"
+      }
+    }
 
   }
 
