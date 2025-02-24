@@ -4,6 +4,7 @@ import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.EmissionLine;
 import edu.gemini.spModel.core.GaussianSource;
 import edu.gemini.spModel.core.SpatialProfile;
+import java.util.logging.Logger;
 
 /**
  * This is a collection of validation methods that originally were implemented repeatedly for the different
@@ -13,6 +14,8 @@ import edu.gemini.spModel.core.SpatialProfile;
  * of the ITC is Java code, this is probably the way to go.
  */
 public final class Validation {
+
+    private static final Logger Log = Logger.getLogger( Validation.class.getName() );
 
     public static void validate(final Instrument instrument, final ObservationDetails obs, final SourceDefinition source) {
         checkElineWidth(instrument, source);
@@ -80,16 +83,20 @@ public final class Validation {
                 case MID_IR:  resolution = 2.00 * 2; break; // mid ir is sampled with 2 nm resolution
                 default:      throw new Error();
             }
+            Log.fine(String.format("Data file resolution = %.2f nm", resolution));
 
             final EmissionLine eLine = (EmissionLine) source.distribution();
-            final double maxWidth = ITCConstants.C / (eLine.wavelength().toNanometers() * (1.0 + source.redshift().z() / resolution));
+            final double redshiftedWavelength = eLine.wavelength().toNanometers() * (1.0 + source.redshift().z());
+            Log.fine(String.format("Redshifted wavelength = %.2f nm", redshiftedWavelength));
+            // R = λ / Δλ
+            // Δv = c / R = c * Δλ / λ
+            final double minWidth = ITCConstants.C * resolution / redshiftedWavelength;
+            Log.fine(String.format("Minimum line width = %.2f km/s", minWidth));
 
-            if (eLine.width().toKilometersPerSecond() < maxWidth) {
+            if (eLine.width().toKilometersPerSecond() < minWidth) {
                 throw new IllegalArgumentException(
-                    String.format(
-                            "Please use a model line width > %.2f nm (or %.2f km/s) " +
-                            "to avoid undersampling of the line profile when convolved " +
-                            "with the transmission response", 1.0*resolution, maxWidth));
+                    String.format("Please use a line width > %.2f km/s (%.2f nm) to avoid undersampling of the " +
+                            "line profile when convolved with the transmission response", minWidth, resolution));
             }
         }
     }
