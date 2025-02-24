@@ -459,7 +459,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
             public String description()  { return "Strong Source";}
             public String logValue()     { return "bright";       }
 
-            public double minimumExpTimeSec()    { return  1.5; }
+            public double minimumExpTimeSec()    { return  2.0; }
             public double recomendedExpTimeSec() { return  5.0; }
             public double readoutTimeSec()       { return  8.0; }
             public int readCount()               { return  1;   }
@@ -471,7 +471,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
             public String description()  { return "Medium Source";}
             public String logValue()     { return "medium";       }
 
-            public double minimumExpTimeSec()    { return  6.0; }
+            public double minimumExpTimeSec()    { return  8.0; }
             public double recomendedExpTimeSec() { return 21.0; }
             public double readoutTimeSec()       { return 14.0; }
             public int readCount()               { return  4;   }
@@ -484,7 +484,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
             public String description()  { return "Weak Source"; }
             public String logValue()     { return "faint";       }
 
-            public double minimumExpTimeSec()    { return 12.0; }
+            public double minimumExpTimeSec()    { return 14.0; }
             public double recomendedExpTimeSec() { return 85.0; }
             public double readoutTimeSec()       { return 20.0; }
             public int readCount()               { return  8;   }

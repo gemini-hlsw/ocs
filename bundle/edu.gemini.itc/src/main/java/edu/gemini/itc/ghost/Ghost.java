@@ -270,7 +270,10 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
     public String getDetectorName() {
         return _ccdColor.displayValue();
     }
+
     public double maxFlux() {
         return _ccdColor.getSaturationLimit() * gain();
     }
+
+    @Override public double getMinExposureTime() { throw new Error("NOT IMPLEMENTED"); }
 }

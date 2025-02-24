@@ -505,6 +505,10 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
         return 13.5;
     }
 
+    @Override public double getMinExposureTime() {
+        return params.readMode().getMinExp();
+    }
+
     public double maxFlux() {
         return _linearityLimit;
     }

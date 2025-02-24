@@ -384,7 +384,7 @@ public final class ConfigCreator {
             final Flamingos2Parameters f2Params,
             final Flamingos2.ReadMode readMode,
             final int numExp,
-            final double exposureTime) {
+            final int exposureTime) {
 
         final ConfigCreatorResult result = createCommonConfig(numExp, exposureTime);
 

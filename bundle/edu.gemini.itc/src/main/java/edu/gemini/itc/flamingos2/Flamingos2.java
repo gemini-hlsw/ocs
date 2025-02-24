@@ -159,6 +159,11 @@ public final class Flamingos2 extends Instrument implements SpectroscopyInstrume
         }
     }
 
+    @Override
+    public double getMinExposureTime() {
+        return params.readMode().minimumExpTimeSec();
+    }
+
     public ReadMode getReadMode() {
         return params.readMode();
     }

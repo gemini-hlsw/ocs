@@ -115,6 +115,10 @@ public final class Gsaoi extends Instrument {
         return LinearityLimit;
     }
 
+    @Override public double getMinExposureTime() {
+        return params.readMode().minExposureTimeSecs();
+    }
+
     @Override public List<WarningRule> warnings() {
         return new ArrayList<WarningRule>() {{
             add(new LinearityLimitRule(LinearityLimit, 0.80));

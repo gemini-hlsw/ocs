@@ -251,6 +251,7 @@ public abstract class Instrument {
     public abstract double wellDepth();
     public abstract double gain();
     public abstract double maxFlux();
+    public abstract double getMinExposureTime();
 
     // === Warnings
 

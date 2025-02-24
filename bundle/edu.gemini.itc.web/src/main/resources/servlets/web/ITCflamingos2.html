@@ -473,13 +473,17 @@
             </tr>
             <tr>
                 <td><input value="s2n" name="calcMethod" checked="checked" type="radio" /></td>
-                <td>Total S/N ratio resulting from <input name="numExpA" size="5" value="30" type="text" />
-                    exposures each having an exposure time of <input name="expTimeA" size="5" value="120" type="text" /> secs and with a fraction <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
-
+                <td>Total S/N ratio resulting from
+                    <input name="numExpA" value="30" type="number" step="1" style="width: 5em" /> exposures each having an exposure time of
+                    <input name="expTimeA" value="120" type="number" step="1" style="width: 5em"/> secs and with a fraction
+                    <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
             </tr>
             <tr>
                 <td><input value="intTime" name="calcMethod" type="radio" /></td>
-                <td>Imaging integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" /> using an exposure time for each exposure of <input name="expTimeC" size="5" value="120" type="text" /> secs and with a fraction <input name="fracOnSourceC" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
+                <td>Imaging integration time to achieve a S/N ratio of
+                    <input name="sigmaC" size="3" value="5" type="text" /> using an exposure time for each exposure of
+                    <input name="expTimeC" value="120" type="number" step="1" style="width: 5em" /> secs and with a fraction
+                    <input name="fracOnSourceC" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
 
             </tr>
             <tr>

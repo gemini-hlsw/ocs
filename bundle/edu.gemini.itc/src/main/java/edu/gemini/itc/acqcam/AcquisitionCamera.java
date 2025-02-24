@@ -84,6 +84,8 @@ public class AcquisitionCamera extends Instrument {
         return 1.01;
     }
 
+    @Override public double getMinExposureTime() { throw new Error("NOT IMPLEMENTED"); }
+
     @Override public List<WarningRule> warnings() {
         return new ArrayList<WarningRule>() {{
             add(new SaturationLimitRule(WellDepth, 0.80));

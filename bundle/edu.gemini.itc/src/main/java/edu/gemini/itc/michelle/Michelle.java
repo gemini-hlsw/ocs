@@ -229,6 +229,8 @@ public final class Michelle extends Instrument implements SpectroscopyInstrument
         return WELL_DEPTH;
     }
 
+    @Override public double getMinExposureTime() { throw new Error("NOT IMPLEMENTED"); }
+
     @Override public List<WarningRule> warnings() {
         return new ArrayList<WarningRule>() {{
             add(new SaturationLimitRule(WELL_DEPTH, 0.80));

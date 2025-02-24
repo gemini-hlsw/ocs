@@ -483,4 +483,5 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
         }};
     }
 
+    @Override public double getMinExposureTime() { return 1.; }
 }

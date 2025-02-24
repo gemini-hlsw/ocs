@@ -58,9 +58,12 @@ public final class ImagingMethodExptime extends ImagingS2NCalculation {
         double timeToHalfMax = maxFlux / 2. / peakFlux * exposure_time;  // time to reach half of the maximum (our goal)
         Log.fine(String.format("timeToHalfMax = %.2f seconds", timeToHalfMax));
 
-        if (timeToHalfMax < 1.0) throw new RuntimeException(String.format(
-                "This target is too bright for this configuration.\n" +
-                "The detector well is half filled in %.2f seconds.", timeToHalfMax));
+        if (timeToHalfMax < instrument.getMinExposureTime()) {
+            Log.fine("Minimum exposure time = " + instrument.getMinExposureTime());
+            throw new RuntimeException(String.format(
+                    "This target is too bright for this configuration.\n" +
+                            "The detector well is half filled in %.2f seconds.", timeToHalfMax));
+        }
 
         int maxExptime = Math.min(1200, (int) timeToHalfMax);  // 1200s is the (GMOS) maximum due to cosmic rays
         Log.fine(String.format("maxExptime = %d seconds", maxExptime));
@@ -69,12 +72,19 @@ public final class ImagingMethodExptime extends ImagingS2NCalculation {
         Log.fine(String.format("desiredSNR = %.2f", desiredSNR));
 
         double totalTime = exposure_time * numberExposures * (desiredSNR / snr) * (desiredSNR / snr);
-        Log.fine(String.format("totalTime = %.2f", totalTime));
+        Log.fine(String.format("totalTime = %.3f sec", totalTime));
 
         numberExposures = (int) Math.ceil(totalTime / maxExptime);
         Log.fine(String.format("numberExposures = %d", numberExposures));
 
-        exposure_time = Math.ceil(totalTime / numberExposures);
+        exposure_time = totalTime / numberExposures;
+        if (exposure_time < instrument.getMinExposureTime()) {
+            Log.fine("Increasing exposure time to the minimum allowed");
+            exposure_time = instrument.getMinExposureTime();
+        }
+
+        // Supported instruments are GMOS and F2, and both require integer exposure times, so round up:
+        exposure_time = Math.ceil(exposure_time);
         Log.fine(String.format("exposureTime = %.2f", exposure_time));
 
         // TODO: for instruments that can coadd - calculate the number of coadds

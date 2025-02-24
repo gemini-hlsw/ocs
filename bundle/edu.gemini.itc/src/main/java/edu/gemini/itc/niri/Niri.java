@@ -259,6 +259,10 @@ public class Niri extends Instrument implements SpectroscopyInstrument {
         return params.wellDepth().linearityLimit();
     }
 
+    @Override public double getMinExposureTime() {
+        return params.readMode().getMinExp(params.builtinROI().getROIDescription());
+    }
+
     @Override public List<WarningRule> warnings() {
         return new ArrayList<WarningRule>() {{
             add(new LinearityLimitRule(params.wellDepth().linearityLimit(), 0.80));
