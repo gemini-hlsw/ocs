@@ -51,7 +51,7 @@ public final class Nifs extends Instrument implements SpectroscopyInstrument {
     protected IFUComponent _IFU;
 
     protected double _readNoiseValue;
-
+    protected double _minimumExpousureTime;
 
 
     public Nifs(final NifsParameters gp, final ObservationDetails odp) {
@@ -77,6 +77,7 @@ public final class Nifs extends Instrument implements SpectroscopyInstrument {
 
         //Set read noise and Well depth values by obsevation type
         _readNoiseValue = gp.readMode().getReadNoise();
+        _minimumExpousureTime = gp.readMode().getMinExp();
 
         // decide which filter we are going to use in case "Same as Disperser" is selected
         final NIFSParams.Filter filter;
@@ -124,10 +125,7 @@ public final class Nifs extends Instrument implements SpectroscopyInstrument {
         _sampling = _gratingOptics.dispersion(-1);
         addDisperser(_gratingOptics);
 
-
         addComponent(_detector);
-
-
 
     }
 
@@ -215,7 +213,6 @@ public final class Nifs extends Instrument implements SpectroscopyInstrument {
         return _IFUMethod;
     }
 
-
     public double getCentralWavelength() {
         return _centralWavelength;
     }
@@ -224,7 +221,6 @@ public final class Nifs extends Instrument implements SpectroscopyInstrument {
         return _readNoiseValue;
     }
 
-
     @Override public double wellDepth() {
         return WellDepth;
     }
@@ -232,6 +228,8 @@ public final class Nifs extends Instrument implements SpectroscopyInstrument {
     @Override public double gain() {
         return 2.8; // electrons / ADU
     }
+
+    @Override public double getMinExposureTime() { return _minimumExpousureTime; }
 
     public double maxFlux() {
         return LinearityLimit;
