@@ -101,9 +101,12 @@ class BlueprintEditor private (initialState:UIState[_, _], editable:Boolean) ext
       // Field values
       Title.text = state.node.title
       Description.text = state.node.description
-      state.node.warning.foreach{ v =>
+      state.node.warning.map { v =>
         Warning.visible = true
         Warning.text = v
+      }.getOrElse {
+        Warning.visible = false
+        Warning.text = ""
       }
       state match {
         case s: SelectUIState[_, _] => addListView(s)

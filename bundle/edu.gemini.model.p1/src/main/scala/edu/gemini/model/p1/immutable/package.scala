@@ -655,7 +655,7 @@ package object immutable {
 
     def show(ts: Igrins2TelluricStars): String =
       ts match {
-        case Igrins2TelluricStars.Default  => "Default (1 per 1.5 hours)"
+        case Igrins2TelluricStars.Default  => "Default tellurics (1 per 1.5 hours)"
         case Igrins2TelluricStars.TwoStar  => "2 telluric stars"
         case Igrins2TelluricStars.OneStar  => "1 telluric star"
         case Igrins2TelluricStars.ZeroStar => "0 telluric stars"
@@ -663,10 +663,10 @@ package object immutable {
 
     def unsafeFromString(s: String): Igrins2TelluricStars =
       s match {
-        case "Default (1 per 1.5 hours)" => Igrins2TelluricStars.Default
-        case "2 telluric stars"          => Igrins2TelluricStars.TwoStar
-        case "1 telluric star"           => Igrins2TelluricStars.OneStar
-        case "0 telluric stars"          => Igrins2TelluricStars.ZeroStar
+        case "Default tellurics (1 per 1.5 hours)" => Igrins2TelluricStars.Default
+        case "2 telluric stars"                    => Igrins2TelluricStars.TwoStar
+        case "1 telluric star"                     => Igrins2TelluricStars.OneStar
+        case "0 telluric stars"                    => Igrins2TelluricStars.ZeroStar
       }
   }
 }
