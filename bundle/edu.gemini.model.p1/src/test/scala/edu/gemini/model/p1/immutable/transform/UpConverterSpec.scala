@@ -954,6 +954,17 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           result \\ "proposalClass" \\ "exchange" must \\("partner") \> "subaru"
       }
     }
+    "REL-4642 Limit gender options" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_gender_to_none.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 4
+          changes must contain("Reset gender.")
+          result \\ "pi" must \\("gender") \> "None selected"
+      }
+    }
 
   }
 

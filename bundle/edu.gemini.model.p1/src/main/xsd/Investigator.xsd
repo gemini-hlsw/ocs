@@ -82,7 +82,6 @@
             <xsd:enumeration value="None selected"/>
             <xsd:enumeration value="Woman"/>
             <xsd:enumeration value="Man"/>
-            <xsd:enumeration value="Another gender"/>
             <xsd:enumeration value="Prefer not to say"/>
         </xsd:restriction>
     </xsd:simpleType>

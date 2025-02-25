@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2025.1.1">
+    <meta band3optionChosen="false" overrideAffiliate="false"/>
+    <semester year="2025" half="A"/>
+    <title></title>
+    <abstract></abstract>
+    <scheduling></scheduling>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>John</firstName>
+            <lastName>Doe</lastName>
+            <status>PhD</status>
+            <gender>Another gender</gender>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets/>
+    <conditions/>
+    <blueprints/>
+    <observations/>
+    <proposalClass>
+        <queue tooOption="None" jwstSynergy="false" usLongTerm="false"/>
+    </proposalClass>
+</proposal>
