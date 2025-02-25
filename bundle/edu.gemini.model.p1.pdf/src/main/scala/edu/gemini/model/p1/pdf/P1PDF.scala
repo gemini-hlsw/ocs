@@ -142,7 +142,7 @@ object P1PDF {
     "br"     -> GeminiStandard,
     "ca"     -> GeminiDefaultListAtTheEnd,
     "cl"     -> CL,
-    "kr"     -> GeminiStandard,
+    "kr"     -> GeminiDARP,
     "uh"     -> GeminiStandard,
     "da"     -> GeminiDARP,
     "gs"     -> GeminiStandard,
