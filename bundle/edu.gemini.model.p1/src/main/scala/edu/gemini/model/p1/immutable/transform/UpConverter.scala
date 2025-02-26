@@ -199,20 +199,7 @@ case object SemesterConverter2025ATo2025B extends SemesterConverter {
       }
       StepResult("Added a default request of 1 telluric star per 1.5 hours.", AddTelluricStars.transform(p)).successNel
   }
-
-  val resetGenderIfAnother: TransformFunction = {
-    case p @ <gender>Another gender</gender> =>
-      object ResetGender extends BasicTransformer {
-        override def transform(n: xml.Node): xml.NodeSeq = n match {
-          case Text("Another gender") =>
-            Text("None selected")
-          case elem: xml.Elem              => elem.copy(child = elem.child.flatMap(transform))
-          case _                           => n
-        }
-      }
-      StepResult("Reset gender.", ResetGender.transform(p)).successNel
-  }
-  override val transformers: List[TransformFunction] = List(addTelluricStarsIG2, resetGenderIfAnother)
+  override val transformers: List[TransformFunction] = List(addTelluricStarsIG2)
 }
 
 /**
@@ -229,7 +216,7 @@ case object SemesterConverter2024ATo2024B extends SemesterConverter {
   def transformGmosName(n: String): String = n.replaceAll("B600", "B480")
 
   val gmosnB600Remover: TransformFunction = {
-    case <gmosN>{ns @ _*}</gmosN> if (ns \\ "disperser").text == "B600" =>
+    case p @ <gmosN>{ns @ _*}</gmosN> if (ns \\ "disperser").text == "B600" =>
       object GmosNB600Remover extends BasicTransformer {
         override def transform(n: xml.Node): xml.NodeSeq = n match {
           case <name>{n}</name>            => <name>{transformGmosName(n.text)}</name>
