@@ -2,8 +2,6 @@ Gemini Phase I Schema Changes
 
 # Version 2025.2.1 - 2025B
 ##########################
-* Remove option 'Another' from the gender list of options
-* Add tooOption to Exchange proposals
 * Add field telluricStars to IGRINS-2, defaulting to 'Default'
 
 # Version 2025.1.1 - 2025A

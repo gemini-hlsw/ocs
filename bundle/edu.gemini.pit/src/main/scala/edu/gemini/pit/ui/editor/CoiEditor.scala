@@ -81,7 +81,7 @@ class CoiEditor(coi: CoInvestigator, editable:Boolean) extends StdModalEditor[Co
 
     override def text(a: InvestigatorGender): String = a match {
       case InvestigatorGender.NONE_SELECTED => ""
-      case x                                => x.value()
+      case x => x.value()
     }
   }
 

@@ -416,6 +416,7 @@ package object immutable {
     val NONE_SELECTED     = M.InvestigatorGender.NONE_SELECTED
     val WOMAN             = M.InvestigatorGender.WOMAN
     val MAN               = M.InvestigatorGender.MAN
+    val ANOTHER_GENDER    = M.InvestigatorGender.ANOTHER_GENDER
     val PREFER_NOT_TO_SAY = M.InvestigatorGender.PREFER_NOT_TO_SAY
   }
 
