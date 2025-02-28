@@ -37,6 +37,9 @@ public final class ImOption {
         return toScalaOpt(None.instance());
     }
 
+    public static <T> scala.Option<T> scalaOpt(final T t) {
+        return Option$.MODULE$.apply(t);
+    }
     public static <T> Option<T> when(final boolean condition, Supplier<T> value) {
         return condition ? new Some<>(value.get()) : None.instance();
     }

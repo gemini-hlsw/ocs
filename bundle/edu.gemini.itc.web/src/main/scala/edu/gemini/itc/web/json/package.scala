@@ -8,6 +8,13 @@ package object json {
   def constCodec[A](a: A): CodecJson[A] =
     CodecJson(_ => jEmptyObject, _ => DecodeResult.ok(a))
 
+  implicit val SignalToNoiseAtCodec: CodecJson[SignalToNoiseAt] =
+    casecodec3(SignalToNoiseAt.apply, SignalToNoiseAt.unapply)(
+      "wavelength",
+      "single",
+      "final"
+    )
+
   implicit val ExposureCalculationCodec: CodecJson[ExposureCalculation] =
     casecodec3(ExposureCalculation.apply, ExposureCalculation.unapply)(
       "exposureTime",

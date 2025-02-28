@@ -279,10 +279,13 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
 
         final SpecS2NSlitVisitor[] specS2Narr = new SpecS2NSlitVisitor[1];
         specS2Narr[0] = specS2N;
-        final double snr = specS2N.getFinalS2NSpectrum().getY(wavelength);
-        Log.fine(String.format("S/N @ %.1f nm = %.3f", wavelength, snr));
+        final double singleSnr = specS2N.getExpS2NSpectrum().getY(wavelength);
+        final double finalSnr = specS2N.getFinalS2NSpectrum().getY(wavelength);
+        Log.fine(String.format("single S/N @ %.1f nm = %.3f", wavelength, singleSnr));
+        Log.fine(String.format("final S/N @ %.1f nm = %.3f", wavelength, finalSnr));
 
-        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.apply(new ExposureCalculation(exposureTime, numberExposures, snr)));
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(),
+                Option.apply(new ExposureCalculation(exposureTime, numberExposures, finalSnr)), SignalToNoiseAt.fromValues(wavelength, singleSnr, finalSnr));
     }
 
     public ImagingResult calculateImaging() {

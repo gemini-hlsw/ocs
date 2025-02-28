@@ -270,12 +270,16 @@ public final class Igrins2Recipe {
 
         final SpecS2N[] specS2Narr = new SpecS2N[]{specS2N};
 
+        VisitableSampledSpectrum singleS2NSpectrum = specS2N.getExpS2NSpectrum();
         VisitableSampledSpectrum finalS2NSpectrum = specS2N.getFinalS2NSpectrum();
-        double snr = finalS2NSpectrum.getY(SnrWavelength);
-        Log.fine(String.format("S/N @ %.1f nm = %.3f", SnrWavelength, snr));
+        double singleSnr = singleS2NSpectrum.getY(SnrWavelength);
+        double finalSnr = finalS2NSpectrum.getY(SnrWavelength);
+        Log.fine(String.format("single S/N @ %.1f nm = %.3f", SnrWavelength, singleSnr));
+        Log.fine(String.format("final S/N @ %.1f nm = %.3f", SnrWavelength, finalSnr));
 
         return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), altair,
-                Option.apply(new ExposureCalculation(exposureTime, numberExposures, snr)));
+                Option.apply(new ExposureCalculation(exposureTime, numberExposures, finalSnr)),
+                SignalToNoiseAt.fromValues(SnrWavelength, singleSnr, finalSnr));
     }
 
     private double calculateSNR(double signal, double background, double darkNoise, double readNoise, double skyAper, int numberExposures) {

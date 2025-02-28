@@ -15,6 +15,7 @@ import edu.gemini.itc.operation.SourceFractionFactory;
 import edu.gemini.itc.operation.SpecS2N;
 import edu.gemini.itc.operation.SpecS2NSlitVisitor;
 import edu.gemini.itc.shared.*;
+import edu.gemini.shared.util.immutable.ImOption;
 import scala.Option;
 import scala.Some;
 import scala.collection.JavaConversions;
@@ -379,7 +380,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 specS2Narr[i] = s2n;
             }
 
-            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, sf_list.get(0), Option.empty(), Option.apply(new ExposureCalculation(exposureTime, numberExposures, snr)));
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, sf_list.get(0), Option.empty(), Option.apply(new ExposureCalculation(exposureTime, numberExposures, snr)), ImOption.scalaNone());
 
             // ==== SLIT
         } else {
@@ -409,10 +410,10 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
             src[0].sed.accept(specS2N);
 
-            VisitableSampledSpectrum signalIFUSpec      = (VisitableSampledSpectrum) specS2N.getSignalSpectrum().clone();
-            VisitableSampledSpectrum backGroundIFUSpec  = (VisitableSampledSpectrum) specS2N.getBackgroundSpectrum().clone();
-            VisitableSampledSpectrum expS2NIFUSpec      = (VisitableSampledSpectrum) specS2N.getExpS2NSpectrum().clone();
-            VisitableSampledSpectrum finalS2NIFUSpec    = (VisitableSampledSpectrum) specS2N.getFinalS2NSpectrum().clone();
+            VisitableSampledSpectrum signalIFUSpec = (VisitableSampledSpectrum) specS2N.getSignalSpectrum().clone();
+            VisitableSampledSpectrum backGroundIFUSpec = (VisitableSampledSpectrum) specS2N.getBackgroundSpectrum().clone();
+            VisitableSampledSpectrum expS2NIFUSpec = (VisitableSampledSpectrum) specS2N.getExpS2NSpectrum().clone();
+            VisitableSampledSpectrum finalS2NIFUSpec = (VisitableSampledSpectrum) specS2N.getFinalS2NSpectrum().clone();
             System.out.println("SSLIT snr " + snr);
             System.out.println("Signal = " + signalIFUSpec.getValues()[0]);
             System.out.println("exp = " + expS2NIFUSpec.getValues()[0]);
@@ -420,14 +421,18 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             System.out.println("at = " + wavelengthAt);
 
             s2n.setSlitS2N(0, signalIFUSpec, backGroundIFUSpec, expS2NIFUSpec, finalS2NIFUSpec);
-            System.out.println("at exp sn = " + expS2NIFUSpec.getY(1000 * wavelengthAt));
+            System.out.println("at exp sn = " + expS2NIFUSpec.getY(wavelengthAt));
             System.out.println("at exp sn = " + expS2NIFUSpec.getStart());
             System.out.println("at exp sn = " + expS2NIFUSpec.getEnd());
-            System.out.println("at final sn = " + finalS2NIFUSpec.getY(1000 * wavelengthAt));
+            System.out.println("at final sn = " + finalS2NIFUSpec.getY(wavelengthAt));
 
             specS2Narr[0] = s2n;
-
-            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.apply(new ExposureCalculation(exposureTime, numberExposures, snr)));
+            final double singleSnr = specS2N.getExpS2NSpectrum().getY(wavelengthAt);
+            final double finalSnr = specS2N.getFinalS2NSpectrum().getY(wavelengthAt);
+            Log.fine(String.format("Single S/N @ %.1f nm = %.3f", wavelengthAt, singleSnr));
+            Log.fine(String.format("Final S/N @ %.1f nm = %.3f", wavelengthAt, finalSnr));
+            System.out.println("AHHHH " + SignalToNoiseAt.fromValues(wavelengthAt, singleSnr, finalSnr));
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.apply(new ExposureCalculation(exposureTime, numberExposures, snr)), SignalToNoiseAt.fromValues(wavelengthAt, singleSnr, finalSnr));
         }
 
     }
@@ -586,7 +591,16 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         // Calculate the Peak Pixel Flux
         final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, exposureTime, SFcalc, im_qual, sed_integral, sky_integral);
 
-        return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, Recipe$.MODULE$.noAOSystem(), ExposureCalculation$.MODULE$.option(IS2Ncalc.getExposureTime(), numberExposures, IS2Ncalc.totalSNRatio()));
+        return new ImagingResult(
+                p,
+                instrument,
+                IQcalc,
+                SFcalc,
+                peak_pixel_count,
+                IS2Ncalc,
+                Recipe$.MODULE$.noAOSystem(),
+                ImOption.scalaOpt(new ExposureCalculation(IS2Ncalc.getExposureTime(), numberExposures, IS2Ncalc.totalSNRatio()))
+        );
 
     }
 
