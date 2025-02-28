@@ -37,6 +37,15 @@ object ItcCalculation extends ItcParametersCodec with ItcResultCodec {
       itcRes <- itc.calculate(itcReq, true).toEither.leftMap(_.msg)
     } yield itcRes.asJson.nospaces).toString
   }
+
+  def calculateSignalToNoise(json: String): String = {
+    val itc: ItcService = new ItcServiceImpl
+
+    (for {
+      itcReq <- Parse.decodeEither[ItcParameters](json)
+      itcRes <- itc.calculate(itcReq, true).toEither.leftMap(_.msg)
+    } yield itcRes.asJson.nospaces).toString
+  }
 }
 
 /**

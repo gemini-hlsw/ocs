@@ -150,7 +150,11 @@ final case class SpectroscopyS2N(
                     coadds: Option[Int],
                     exposureTime: Double,
                     sourceFraction: Double,
-                    offset: Double) extends Spectroscopy with S2NMethod
+                    offset: Double,
+                    at: Option[Double] // wavelength in nanometers
+                  ) extends Spectroscopy with S2NMethod {
+  val atWithDefault: Double = at.getOrElse(0) // Horrible but works better with Java
+}
 
 // Return the spectroscopic integration time (exposure time & number of exposures) given the desired S/N
 final case class SpectroscopyInt(

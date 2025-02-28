@@ -235,7 +235,9 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             final int detectorCount,
             final double exposureTime,
             final int numberExposures,
-            final double snr) {
+            final double snr,
+            final double wavelengthAt // Wavelength to measure s/n at in microns
+        ) {
 
         SpecS2NSlitVisitor specS2N;
         final SpecS2N[] specS2Narr;
@@ -411,8 +413,17 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             VisitableSampledSpectrum backGroundIFUSpec  = (VisitableSampledSpectrum) specS2N.getBackgroundSpectrum().clone();
             VisitableSampledSpectrum expS2NIFUSpec      = (VisitableSampledSpectrum) specS2N.getExpS2NSpectrum().clone();
             VisitableSampledSpectrum finalS2NIFUSpec    = (VisitableSampledSpectrum) specS2N.getFinalS2NSpectrum().clone();
+            System.out.println("SSLIT snr " + snr);
+            System.out.println("Signal = " + signalIFUSpec.getValues()[0]);
+            System.out.println("exp = " + expS2NIFUSpec.getValues()[0]);
+            System.out.println("final = " + finalS2NIFUSpec.getValues()[0]);
+            System.out.println("at = " + wavelengthAt);
 
             s2n.setSlitS2N(0, signalIFUSpec, backGroundIFUSpec, expS2NIFUSpec, finalS2NIFUSpec);
+            System.out.println("at exp sn = " + expS2NIFUSpec.getY(1000 * wavelengthAt));
+            System.out.println("at exp sn = " + expS2NIFUSpec.getStart());
+            System.out.println("at exp sn = " + expS2NIFUSpec.getEnd());
+            System.out.println("at final sn = " + finalS2NIFUSpec.getY(1000 * wavelengthAt));
 
             specS2Narr[0] = s2n;
 

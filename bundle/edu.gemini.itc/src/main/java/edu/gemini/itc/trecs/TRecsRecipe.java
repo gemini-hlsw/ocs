@@ -4,6 +4,7 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import scala.Option;
+import edu.gemini.shared.util.immutable.ImOption;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +70,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             );
         } else if (odp.calculationMethod() instanceof SpectroscopyS2N) {
             return new ObservationDetails(
-                    new SpectroscopyS2N(correctedNumExposures, odp.coadds(), correctedExposureTime, odp.sourceFraction(), odp.offset()),
+                    new SpectroscopyS2N(correctedNumExposures, odp.coadds(), correctedExposureTime, odp.sourceFraction(), odp.offset(), ImOption.scalaNone()),
                     odp.analysisMethod()
             );
         } else {
