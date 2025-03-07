@@ -47,13 +47,13 @@ trait ObservationDetailsCodec {
       "exposureTime",
       "sourceFraction",
       "offset",
-      "at"
+      "wavelengthAt"
     )
 
   private val SpectroscopyIntCodec: CodecJson[SpectroscopyInt] =
     casecodec5(SpectroscopyInt.apply, SpectroscopyInt.unapply)(
       "sigma",
-      "wavelength",
+      "wavelengthAt",
       "coadds",
       "sourceFraction",
       "offset"

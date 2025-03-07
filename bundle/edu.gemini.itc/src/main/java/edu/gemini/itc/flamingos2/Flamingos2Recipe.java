@@ -91,14 +91,15 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         double readNoise;
         double totalTime;
         double wavelength = 0;
+        double desiredSNR = 0;
 
         if (calcMethod instanceof SpectroscopyInt) {
             // Determine exposureTime & numberExposures that will give the requested S/N at wavelength.
 
-            double desiredSNR = ((SpectroscopyInt) calcMethod).sigma();
+            desiredSNR = ((SpectroscopyInt) calcMethod).sigma();
             Log.fine(String.format("desiredSNR = %.2f", desiredSNR));
 
-            wavelength = ((SpectroscopyInt) _obsDetailParameters.calculationMethod()).wavelength();
+            wavelength = ((SpectroscopyInt) _obsDetailParameters.calculationMethod()).wavelengthAt();
             Log.fine(String.format("Wavelength = %.2f nm", wavelength));
 
             double maxFlux = instrument.maxFlux();  // maximum useful flux
@@ -201,7 +202,8 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         }
 
         // Run the ITC to generate the output graphs
-        return calculateSpectroscopy(instrument, readMode, exposureTime, numberExposures, wavelength);
+        return calculateSpectroscopy(instrument, readMode, exposureTime, numberExposures, wavelength)
+                .withExposureCalculation(AllExposureCalculations.single(new ExposureCalculation(exposureTime, numberExposures, desiredSNR)));
     }
 
     private double calculateSNR(double signal, double background, double darkNoise, double readNoise, double skyAper, int numberExposures) {
@@ -284,8 +286,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         Log.fine(String.format("single S/N @ %.1f nm = %.3f", wavelength, singleSnr));
         Log.fine(String.format("final S/N @ %.1f nm = %.3f", wavelength, finalSnr));
 
-        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(),
-                Option.apply(new ExposureCalculation(exposureTime, numberExposures, finalSnr)), SignalToNoiseAt.fromValues(wavelength, singleSnr, finalSnr));
+        return new SpectroscopySNResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.empty());
     }
 
     public ImagingResult calculateImaging() {

@@ -22,4 +22,10 @@ package object json {
       "signalToNoise"
     )
 
+  implicit val AllExposureCalculationCodec: CodecJson[AllExposureCalculations] =
+    casecodec2(AllExposureCalculations.apply, AllExposureCalculations.unapply)(
+      "exposuresPerCCD",
+      "selected"
+    )
+
 }

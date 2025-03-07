@@ -22,7 +22,6 @@ import scala.collection.JavaConversions;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
@@ -89,18 +88,22 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final SpectroscopyResult[] results = new SpectroscopyResult[ccdArray.length];
         final CalculationMethod calcMethod = _obsDetailParameters.calculationMethod();
         Log.fine("calcMethod = " + calcMethod);
+        double wavelengthAt = 0;
 
         if (calcMethod instanceof SpectroscopyS2N) {
             numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
+            wavelengthAt = ((SpectroscopyS2N) _obsDetailParameters.calculationMethod()).atWithDefault();
         } else if (calcMethod instanceof SpectroscopyInt) {
             numberExposures = ((SpectroscopyInt) calcMethod).exposures();
+            wavelengthAt = ((SpectroscopyInt) _obsDetailParameters.calculationMethod()).wavelengthAt();
         } else {
             throw new Error("Unsupported calculation method");
         }
 
         for (int i = 0; i < ccdArray.length; i++) {
             final Gmos instrument = ccdArray[i];
-            results[i] = calculateSpectroscopy(mainInstrument, instrument, ccdArray.length, exposureTime, numberExposures, 0);
+            Log.fine("================= Calculate CCD " + i);
+            results[i] = calculateSpectroscopySingleCCD(mainInstrument, instrument, ccdArray.length, exposureTime, numberExposures, wavelengthAt);
         }
 
         if (calcMethod instanceof SpectroscopyInt) {
@@ -109,7 +112,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             // 3. Iteratively determine exposureTime & numberExposures that will give the requested S/N at wavelength.
             // 4. Process all the CCDs using the final exposureTime & numberExposures and return the result.
 
-            double wavelength = ((SpectroscopyInt) _obsDetailParameters.calculationMethod()).wavelength();
+            double wavelength = ((SpectroscopyInt) _obsDetailParameters.calculationMethod()).wavelengthAt();
             Log.fine(String.format("Wavelength = %.2f nm", wavelength));
             final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
             double peakFlux = 0.0;
@@ -190,7 +193,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 if ((numberExposures != oldNumberExposures || exposureTime != oldExposureTime) && iterations <= 5) {
                     // Try one more iteration to see if we can get closer to the requested S/N
                     final Gmos instrument = ccdArray[ccd];
-                    final SpectroscopyResult newresult = calculateSpectroscopy(mainInstrument, instrument, ccdArray.length, exposureTime, numberExposures, snr);
+                    final SpectroscopyResult newresult = calculateSpectroscopySingleCCD(mainInstrument, instrument, ccdArray.length, exposureTime, numberExposures, wavelength);
                     final GmosSpecS2N specS2N = (GmosSpecS2N) newresult.specS2N()[0];
                     final VisitableSampledSpectrum fins2n = specS2N.getFinalS2NSpectrum(slit);
                     snr = fins2n.getY(wavelength);
@@ -200,11 +203,19 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                     if (iterations > 5) {
                         Log.fine("Stopping and calculating the results for all CCDs");
                     } else {
-                        Log.fine("No change since the last iteration, so calculating final results for all CCDs");
+                        Log.fine("No change since the last iteration, so calculating final results for all CCDs, selected SNR: " + ccd);
+                    }
+                    List<ExposureCalculation> allCalculations = new ArrayList<>();
+                    for (int i = 0; i < ccdArray.length; i++) {
+                        // This is not fully correct as we are saying each CCD will need the same exposure time, while we really only care
+                        // about the selected one
+                        allCalculations.add(new ExposureCalculation(exposureTime, numberExposures, snr));
                     }
                     for (int i = 0; i < ccdArray.length; i++) {
                         final Gmos instrument = ccdArray[i];
-                        results[i] = calculateSpectroscopy(mainInstrument, instrument, ccdArray.length, exposureTime, numberExposures, snr);
+                        results[i] =
+                                calculateSpectroscopySingleCCD(mainInstrument, instrument, ccdArray.length, exposureTime, numberExposures, wavelength)
+                                        .withExposureCalculation(AllExposureCalculations.fromJavaList(allCalculations, ccd));
                     }
                 }
             }
@@ -230,13 +241,12 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     }
 
     // TODO: bring mainInstrument and instrument together
-    private SpectroscopyResult calculateSpectroscopy(
+    private SpectroscopyResult calculateSpectroscopySingleCCD(
             final Gmos mainInstrument,
             final Gmos instrument,
             final int detectorCount,
             final double exposureTime,
             final int numberExposures,
-            final double snr,
             final double wavelengthAt // Wavelength to measure s/n at in microns
         ) {
 
@@ -380,7 +390,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 specS2Narr[i] = s2n;
             }
 
-            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, sf_list.get(0), Option.empty(), Option.apply(new ExposureCalculation(exposureTime, numberExposures, snr)), ImOption.scalaNone());
+            return new SpectroscopySNResult(p, instrument, IQcalc, specS2Narr, slit, sf_list.get(0), Option.empty(), ImOption.scalaNone());
 
             // ==== SLIT
         } else {
@@ -414,25 +424,15 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             VisitableSampledSpectrum backGroundIFUSpec = (VisitableSampledSpectrum) specS2N.getBackgroundSpectrum().clone();
             VisitableSampledSpectrum expS2NIFUSpec = (VisitableSampledSpectrum) specS2N.getExpS2NSpectrum().clone();
             VisitableSampledSpectrum finalS2NIFUSpec = (VisitableSampledSpectrum) specS2N.getFinalS2NSpectrum().clone();
-            System.out.println("SSLIT snr " + snr);
-            System.out.println("Signal = " + signalIFUSpec.getValues()[0]);
-            System.out.println("exp = " + expS2NIFUSpec.getValues()[0]);
-            System.out.println("final = " + finalS2NIFUSpec.getValues()[0]);
-            System.out.println("at = " + wavelengthAt);
 
             s2n.setSlitS2N(0, signalIFUSpec, backGroundIFUSpec, expS2NIFUSpec, finalS2NIFUSpec);
-            System.out.println("at exp sn = " + expS2NIFUSpec.getY(wavelengthAt));
-            System.out.println("at exp sn = " + expS2NIFUSpec.getStart());
-            System.out.println("at exp sn = " + expS2NIFUSpec.getEnd());
-            System.out.println("at final sn = " + finalS2NIFUSpec.getY(wavelengthAt));
 
             specS2Narr[0] = s2n;
             final double singleSnr = specS2N.getExpS2NSpectrum().getY(wavelengthAt);
             final double finalSnr = specS2N.getFinalS2NSpectrum().getY(wavelengthAt);
-            Log.fine(String.format("Single S/N @ %.1f nm = %.3f", wavelengthAt, singleSnr));
-            Log.fine(String.format("Final S/N @ %.1f nm = %.3f", wavelengthAt, finalSnr));
-            System.out.println("AHHHH " + SignalToNoiseAt.fromValues(wavelengthAt, singleSnr, finalSnr));
-            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.apply(new ExposureCalculation(exposureTime, numberExposures, snr)), SignalToNoiseAt.fromValues(wavelengthAt, singleSnr, finalSnr));
+            // check if the wavelength is in range and return the sn to noise at that point, or None
+            Option<SignalToNoiseAt> at = RecipeUtil.instance().signalToNoiseAt(wavelengthAt, specS2N.getExpS2NSpectrum(), specS2N.getFinalS2NSpectrum());
+            return new SpectroscopySNResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), RecipeUtil.instance().signalToNoiseAt(wavelengthAt, signalIFUSpec, finalS2NIFUSpec));
         }
 
     }
@@ -599,7 +599,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 peak_pixel_count,
                 IS2Ncalc,
                 Recipe$.MODULE$.noAOSystem(),
-                ImOption.scalaOpt(new ExposureCalculation(IS2Ncalc.getExposureTime(), numberExposures, IS2Ncalc.totalSNRatio()))
+                Option.apply(AllExposureCalculations.single(new ExposureCalculation(IS2Ncalc.getExposureTime(), numberExposures, IS2Ncalc.totalSNRatio())))
         );
 
     }

@@ -117,7 +117,7 @@ sealed trait ExpMethod extends CalculationMethod {
 
 sealed trait SpecIntMethod extends CalculationMethod {
   def sigma: Double
-  def wavelength: Double // nanometers
+  def wavelengthAt: Double // nanometers
 }
 
 // Return the Signal-to-Noise given the number of exposures, exposure time, etc.
@@ -146,23 +146,23 @@ final case class ImagingExp(
 }
 
 final case class SpectroscopyS2N(
-                    exposures: Int,
-                    coadds: Option[Int],
-                    exposureTime: Double,
-                    sourceFraction: Double,
-                    offset: Double,
-                    at: Option[Double] // wavelength in nanometers
+                                  exposures: Int,
+                                  coadds: Option[Int],
+                                  exposureTime: Double,
+                                  sourceFraction: Double,
+                                  offset: Double,
+                                  wavelengthAt: Option[Double] // wavelength in nanometers
                   ) extends Spectroscopy with S2NMethod {
-  val atWithDefault: Double = at.getOrElse(0) // Horrible but works better with Java
+  val atWithDefault: Double = wavelengthAt.getOrElse(0) // Horrible but works better with Java
 }
 
 // Return the spectroscopic integration time (exposure time & number of exposures) given the desired S/N
 final case class SpectroscopyInt(
-                    sigma: Double,
-                    wavelength: Double,
-                    coadds: Option[Int],
-                    sourceFraction: Double,
-                    offset: Double) extends Spectroscopy with SpecIntMethod with S2NMethod {
+                                  sigma: Double,
+                                  wavelengthAt: Double,
+                                  coadds: Option[Int],
+                                  sourceFraction: Double,
+                                  offset: Double) extends Spectroscopy with SpecIntMethod with S2NMethod {
   val exposureTime: Double = 1200
   val exposures: Int = 1
 }

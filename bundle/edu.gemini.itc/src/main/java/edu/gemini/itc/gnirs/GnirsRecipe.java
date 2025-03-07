@@ -236,7 +236,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 specS2Narr[i++] = specS2N;
             }
 
-            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, null, 0, altair, Option.empty(), Option.empty());
+            return new SpectroscopySNResult(p, instrument, IQcalc, specS2Narr, null, 0, altair, Option.empty());
 
         } else {  // === SLIT ===
 
@@ -355,7 +355,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                     specS2Narr[i] = s2n;
                 }
 
-                return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), altair, Option.empty(), Option.empty());
+                return new SpectroscopySNResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), altair, Option.empty());
 
             } else {  // === NOT XD ===
 
@@ -369,8 +369,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 sed.accept(specS2N);
 
                 final SpecS2N[] specS2Narr = new SpecS2N[]{specS2N};
-                return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), altair, Option.empty(), Option.empty()
-                );
+                return new SpectroscopySNResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), altair, Option.empty());
             }
 
         }
@@ -567,7 +566,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         }
         IS2Ncalc.calculate();
 
-        return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair, Recipe$.MODULE$.noExposureTime());
+        return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair, Option.empty());
 
     }
 

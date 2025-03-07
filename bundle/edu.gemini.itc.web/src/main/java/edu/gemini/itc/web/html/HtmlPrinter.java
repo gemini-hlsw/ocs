@@ -161,7 +161,7 @@ public final class HtmlPrinter {
 
         } else if (calcMethod instanceof SpectroscopyInt) {
             sb.append(String.format("exposure time and number of exposures for a S/N ratio of %.1f at wavelength %.2f nm.",
-                    ((SpectroscopyInt) calcMethod).sigma(), ((SpectroscopyInt) calcMethod).wavelength()));
+                    ((SpectroscopyInt) calcMethod).sigma(), ((SpectroscopyInt) calcMethod).wavelengthAt()));
 
         } else {
             throw new Error("Unsupported calculation method");
