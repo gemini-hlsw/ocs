@@ -84,7 +84,6 @@ object ItcResult {
 
 // === IMAGING RESULTS
 
-// In this case we calculate exposure for each ccd
 final case class ItcImagingResult(ccds: List[ItcCcd], exposureCalculation: Option[AllExposureCalculations]) extends ItcResult
 
 // === SPECTROSCOPY RESULTS
@@ -169,19 +168,19 @@ final case class SpcChartData(chartType: SpcChartType, title: String, xAxis: Cha
 
 case class SignalToNoiseAt(wavelength: Double, singleSignalToNoise: Double, finalSignalToNoise: Double)
 
-case class ExposureCalculation(exposureTime: Double, exposures: Int, requestedSignalToNoise: Double)
+case class TotalExposure(exposureTime: Double, exposures: Int)
 
-case class AllExposureCalculations(exposuresPerCcd: List[ExposureCalculation], selectedIndex: Int) {
+case class AllExposureCalculations(exposuresPerCcd: List[TotalExposure], selectedIndex: Int) {
   // We could use a zipper but I don't want to overcomplicate it
   require(selectedIndex >= 0)
   require(selectedIndex < exposuresPerCcd.length)
 }
 
 object AllExposureCalculations {
-  def single(e: ExposureCalculation): AllExposureCalculations =
+  def single(e: TotalExposure): AllExposureCalculations =
     AllExposureCalculations(List(e), 0)
 
-  def fromJavaList(e: java.util.List[ExposureCalculation], index: Int): AllExposureCalculations =
+  def fromJavaList(e: java.util.List[TotalExposure], index: Int): AllExposureCalculations =
     AllExposureCalculations(e.toList, index)
 }
 
@@ -189,7 +188,11 @@ object AllExposureCalculations {
   * Individual charts and data series can be referenced by their types and group index. For most instruments there
   * is only one chart and data series of each type, however for NIFS and GMOS there will be several charts
   * of each type for each IFU element. */
-final case class ItcSpectroscopyResult(ccds: List[ItcCcd], chartGroups: List[SpcChartGroup], exposureCalculations: Option[AllExposureCalculations], snAt: Option[SignalToNoiseAt]) extends ItcResult {
+final case class ItcSpectroscopyResult(
+    ccds: List[ItcCcd],
+    chartGroups: List[SpcChartGroup],
+    exposureCalculations: Option[AllExposureCalculations],
+    snAt: Option[SignalToNoiseAt]) extends ItcResult {
 
   /** Gets chart data by type and its group index.
     * This method will fail if the result you're looking for does not exist.

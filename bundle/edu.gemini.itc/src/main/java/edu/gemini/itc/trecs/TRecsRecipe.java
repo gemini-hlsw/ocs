@@ -70,7 +70,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             );
         } else if (odp.calculationMethod() instanceof SpectroscopyS2N) {
             return new ObservationDetails(
-                    new SpectroscopyS2N(correctedNumExposures, odp.coadds(), correctedExposureTime, odp.sourceFraction(), odp.offset(), ImOption.scalaNone()),
+                    new SpectroscopyS2N(correctedNumExposures, odp.coadds(), correctedExposureTime, odp.sourceFraction(), odp.offset(), Option.empty()),
                     odp.analysisMethod()
             );
         } else {

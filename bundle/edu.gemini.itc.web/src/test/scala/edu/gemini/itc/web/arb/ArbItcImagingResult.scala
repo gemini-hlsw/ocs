@@ -13,14 +13,14 @@ trait ArbItcImagingResult {
   val genItcCcd: Gen[List[ItcCcd]] =
     Gen.smallNonEmptyListOf(arbitrary[ItcCcd])
 
-  val genExposureCalculation: Gen[List[ExposureCalculation]] =
-    Gen.smallNonEmptyListOf(arbitrary[ExposureCalculation])
+  val genExposureCalculation: Gen[List[TotalExposure]] =
+    Gen.smallNonEmptyListOf(arbitrary[TotalExposure])
 
   implicit val arbItcImagingResult: Arbitrary[ItcImagingResult] =
     Arbitrary {
       for {
         ccds  <- genItcCcd
-        calcs <- genExposureCalculation
+        calcs <- Gen.option(genExposureCalculation.map(e => AllExposureCalculations(e, 0)))
       } yield ItcImagingResult(ccds, calcs)
     }
 

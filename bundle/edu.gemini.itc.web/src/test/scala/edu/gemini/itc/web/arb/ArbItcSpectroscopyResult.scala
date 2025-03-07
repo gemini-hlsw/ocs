@@ -71,19 +71,26 @@ trait ArbItcSpectroscopyResult {
   val genSpcChartGroup: Gen[SpcChartGroup] =
     Gen.smallListOf(genSpcChartData).map(SpcChartGroup)
 
-  val genExposureCalculation: Gen[ExposureCalculation] =
+  val genExposureCalculation: Gen[TotalExposure] =
     for {
       time  <- arbitrary[Double]
       count <- arbitrary[Int]
-      sn    <- arbitrary[Double]
-    } yield ExposureCalculation(time, count, sn)
+    } yield TotalExposure(time, count)
+
+  val genSignalToNoiseAt: Gen[SignalToNoiseAt] =
+    for {
+      w <- arbitrary[Double]
+      s <- arbitrary[Double]
+      t <- arbitrary[Double]
+    } yield SignalToNoiseAt(w, s, t)
 
   val genItcSpectroscopyResult: Gen[ItcSpectroscopyResult] =
     for {
       ccds        <- Gen.nonEmptyListOf(arbitrary[ItcCcd])
       chartGroups <- Gen.smallListOf(genSpcChartGroup)
-      exposureCalculation <- Gen.option(genExposureCalculation)
-     } yield ItcSpectroscopyResult(ccds, chartGroups, exposureCalculation)
+      calcs       <- Gen.option(Gen.nonEmptyListOf(genExposureCalculation).map(e => AllExposureCalculations(e, 0)))
+      snAt        <- Gen.option(genSignalToNoiseAt)
+     } yield ItcSpectroscopyResult(ccds, chartGroups, calcs, snAt)
 
   implicit val arbItcSpectroscopyResult: Arbitrary[ItcSpectroscopyResult] =
     Arbitrary(genItcSpectroscopyResult)

@@ -38,7 +38,7 @@ trait SpectroscopyArrayRecipe extends Recipe {
 
 object Recipe {
 
-  def noExposureTime: Option[ExposureCalculation] = None
+  def noExposureTime: Option[TotalExposure] = None
   def noAOSystem: Option[AOSystem] = None
 
   // =============
@@ -98,13 +98,12 @@ object Recipe {
   def toCcdData(r: ImagingResult): ItcCcd =
     ItcCcd(r.is2nCalc.singleSNRatio(), r.is2nCalc.totalSNRatio(), r.peakPixelCount, r.instrument.wellDepth, r.instrument.gain, Warning.collectWarnings(r))
 
-  def serviceResult(r: ImagingResult): ItcImagingResult = {
+  def serviceResult(r: ImagingResult): ItcImagingResult =
     ItcImagingResult(List(toCcdData(r)), r.exposureCalculations)
-  }
 
   def serviceResult(r: Array[ImagingResult]): ItcImagingResult = {
     val ccds = r.map(toCcdData).toList
-    ItcImagingResult(ccds, r.map(_.exposureCalculations).toList.headOption.flatten)
+    ItcImagingResult(ccds, r.map(_.exposureCalculations).toList.headOption.flatten) // FIXME: Review how many result are we gettingg
   }
 
   // === Spectroscopy
@@ -146,16 +145,14 @@ object Recipe {
   // A set of results and a set of groups of charts, this covers GMOS (3 CCDs and potentially separate groups
   // for IFU cases, if IFU is activated).
   def serviceGroupedResult(rs: Array[SpectroscopyResult], charts: JList[JList[SpcChartData]], headless: Boolean): ItcSpectroscopyResult = {
-    val snAtArray = rs.map(_.signalToNoiseAt).collect {
-      case Some(a) => a
-    }
+    val snAtArray = rs.flatMap(_.signalToNoiseAt)
     // if all the snAt ar empty it means we are out of range, so return none
     // else filter out the ones containing 0 and return the first. If none is over 0 just return the first.
     val snAt = snAtArray.find(_.finalSignalToNoise > 0).orElse(snAtArray.headOption)
     ItcSpectroscopyResult(
       rs.map(r => toCcdData(r, charts.toList.flatten)).toList,
       if (headless) Nil else charts.toList.map(l => SpcChartGroup(l.toList)),
-      rs.flatMap(_.exposureCalculations).headOption, // FIXME: This is certainly not correct, I need to think a bit about how to model this
+      rs.flatMap(_.exposureCalculations).headOption, // At least for gmos we return the same exposure calculation for each ccd.
       snAt
     )
 

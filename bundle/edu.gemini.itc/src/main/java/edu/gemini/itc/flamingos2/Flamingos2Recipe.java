@@ -203,7 +203,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
 
         // Run the ITC to generate the output graphs
         return calculateSpectroscopy(instrument, readMode, exposureTime, numberExposures, wavelength).withExposureCalculation(
-                AllExposureCalculations.single(new ExposureCalculation(exposureTime, numberExposures, desiredSNR)));
+                AllExposureCalculations.single(new TotalExposure(exposureTime, numberExposures)));
     }
 
     private double calculateSNR(double signal, double background, double darkNoise, double readNoise, double skyAper, int numberExposures) {
@@ -229,7 +229,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         return exposureTime;
     }
 
-    public SpectroscopyResult calculateSpectroscopy(
+    private SpectroscopyResult calculateSpectroscopy(
             final Flamingos2 instrument,
             final ReadMode readMode,
             final double exposureTime,
@@ -286,7 +286,8 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         Log.fine(String.format("single S/N @ %.1f nm = %.3f", wavelength, singleSnr));
         Log.fine(String.format("final S/N @ %.1f nm = %.3f", wavelength, finalSnr));
 
-        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.empty(), Option.empty());
+        final scala.Option<SignalToNoiseAt> sn = RecipeUtil.instance().signalToNoiseAt(wavelength, specS2N.getExpS2NSpectrum(), specS2N.getFinalS2NSpectrum());
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), sn, Option.empty());
     }
 
     public ImagingResult calculateImaging() {

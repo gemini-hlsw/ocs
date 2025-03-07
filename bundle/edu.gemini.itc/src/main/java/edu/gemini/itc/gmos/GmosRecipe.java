@@ -15,7 +15,6 @@ import edu.gemini.itc.operation.SourceFractionFactory;
 import edu.gemini.itc.operation.SpecS2N;
 import edu.gemini.itc.operation.SpecS2NSlitVisitor;
 import edu.gemini.itc.shared.*;
-import edu.gemini.shared.util.immutable.ImOption;
 import scala.Option;
 import scala.Some;
 import scala.collection.JavaConversions;
@@ -205,11 +204,11 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                     } else {
                         Log.fine("No change since the last iteration, so calculating final results for all CCDs, selected SNR: " + ccd);
                     }
-                    List<ExposureCalculation> allCalculations = new ArrayList<>();
+                    List<TotalExposure> allCalculations = new ArrayList<>();
                     for (int i = 0; i < ccdArray.length; i++) {
                         // This is not fully correct as we are saying each CCD will need the same exposure time, while we really only care
                         // about the selected one
-                        allCalculations.add(new ExposureCalculation(exposureTime, numberExposures, snr));
+                        allCalculations.add(new TotalExposure(exposureTime, numberExposures));
                     }
                     for (int i = 0; i < ccdArray.length; i++) {
                         final Gmos instrument = ccdArray[i];
@@ -247,7 +246,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             final int detectorCount,
             final double exposureTime,
             final int numberExposures,
-            final double wavelengthAt // Wavelength to measure s/n at in microns
+            final double wavelengthAt // Wavelength to measure s/n at in nanometes
         ) {
 
         SpecS2NSlitVisitor specS2N;
@@ -390,7 +389,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 specS2Narr[i] = s2n;
             }
 
-            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, sf_list.get(0), Option.empty(), Option.empty(), Option.empty());
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, sf_list.get(0), Option.empty(), Option.empty(), Option.apply(AllExposureCalculations.single(new TotalExposure(exposureTime, numberExposures))));
 
             // ==== SLIT
         } else {
@@ -599,7 +598,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 peak_pixel_count,
                 IS2Ncalc,
                 Recipe$.MODULE$.noAOSystem(),
-                Option.apply(AllExposureCalculations.single(new ExposureCalculation(IS2Ncalc.getExposureTime(), numberExposures, IS2Ncalc.totalSNRatio())))
+                Option.apply(AllExposureCalculations.single(new TotalExposure(IS2Ncalc.getExposureTime(), numberExposures)))
         );
 
     }
