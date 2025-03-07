@@ -390,7 +390,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 specS2Narr[i] = s2n;
             }
 
-            return new SpectroscopySNResult(p, instrument, IQcalc, specS2Narr, slit, sf_list.get(0), Option.empty(), ImOption.scalaNone());
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, sf_list.get(0), Option.empty(), Option.empty(), Option.empty());
 
             // ==== SLIT
         } else {
@@ -432,7 +432,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             final double finalSnr = specS2N.getFinalS2NSpectrum().getY(wavelengthAt);
             // check if the wavelength is in range and return the sn to noise at that point, or None
             Option<SignalToNoiseAt> at = RecipeUtil.instance().signalToNoiseAt(wavelengthAt, specS2N.getExpS2NSpectrum(), specS2N.getFinalS2NSpectrum());
-            return new SpectroscopySNResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), RecipeUtil.instance().signalToNoiseAt(wavelengthAt, signalIFUSpec, finalS2NIFUSpec));
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), at, Option.empty());
         }
 
     }

@@ -1,7 +1,7 @@
 package edu.gemini.itc.base
 
 import edu.gemini.itc.operation._
-import edu.gemini.itc.shared.{AllExposureCalculations, ExposureCalculation, ItcParameters, SignalToNoiseAt}
+import edu.gemini.itc.shared.{AllExposureCalculations, ItcParameters, SignalToNoiseAt}
 
 /*
  * Helper objects that are used to pass around detailed results of imaging and spectroscopy calculations internally.
@@ -24,10 +24,6 @@ sealed trait Result {
   val conditions = parameters.conditions
 }
 
-sealed trait WithExposureCalculation {
-  val exposureCalculation: Option[AllExposureCalculations]
-}
-
 /* Internal object for imaging results. */
 final case class ImagingResult(
     parameters: ItcParameters,
@@ -37,8 +33,11 @@ final case class ImagingResult(
     peakPixelCount: Double,
     is2nCalc: ImagingS2NCalculatable,
     aoSystem: Option[AOSystem],
-    exposureCalculation: Option[AllExposureCalculations]
-) extends Result with WithExposureCalculation
+    exposureCalculations: Option[AllExposureCalculations]
+) extends Result {
+  def withExposureCalculation(exposureCalculations: AllExposureCalculations): ImagingResult =
+    copy(exposureCalculations = Some(exposureCalculations))
+}
 
 object ImagingResult {
 
@@ -84,20 +83,7 @@ object ImagingResult {
 }
 
 /* Internal object for generic spectroscopy results. */
-sealed trait SpectroscopyResult extends Result {
-  def parameters: ItcParameters
-  def instrument: Instrument
-  def iqCalc: ImageQualityCalculatable
-  def specS2N: Array[SpecS2N] // Array is used for IFU cases (GMOS and NIFS)
-  def slit: Slit
-  def slitThrougput: Double
-  def aoSystem: Option[AOSystem]
-  def signalToNoiseAt: Option[SignalToNoiseAt]
-  def peakPixelCount: Double = specS2N.map(_.getPeakPixelCount).max
-
-  def withExposureCalculation(exposureCalculation: AllExposureCalculations): SpectroscopyResult
-}
-final case class SpectroscopySNResult(
+final case class SpectroscopyResult(
     parameters: ItcParameters,
     instrument: Instrument,
     iqCalc: ImageQualityCalculatable,
@@ -105,23 +91,10 @@ final case class SpectroscopySNResult(
     slit: Slit,
     slitThrougput: Double,
     aoSystem: Option[AOSystem],
-    signalToNoiseAt: Option[SignalToNoiseAt]
-) extends SpectroscopyResult {
-  def withExposureCalculation(exposureCalculation: AllExposureCalculations): SpectroscopyResult =
-    SpectroscopyResultWithExposure(parameters, instrument, iqCalc, specS2N, slit, slitThrougput, aoSystem, signalToNoiseAt, Some(exposureCalculation))
-
-}
-final case class SpectroscopyResultWithExposure(
-                                     parameters: ItcParameters,
-                                     instrument: Instrument,
-                                     iqCalc: ImageQualityCalculatable,
-                                     specS2N: Array[SpecS2N], // Array is used for IFU cases (GMOS and NIFS)
-                                     slit: Slit,
-                                     slitThrougput: Double,
-                                     aoSystem: Option[AOSystem],
-                                     signalToNoiseAt: Option[SignalToNoiseAt],
-                                     exposureCalculation: Option[AllExposureCalculations]
-                                   ) extends SpectroscopyResult with WithExposureCalculation  {
-  def withExposureCalculation(exposureCalculation: AllExposureCalculations): SpectroscopyResult =
-    copy(exposureCalculation = Some(exposureCalculation))
+    signalToNoiseAt: Option[SignalToNoiseAt],
+    exposureCalculations: Option[AllExposureCalculations]
+) extends Result {
+  def withExposureCalculation(exposureCalculations: AllExposureCalculations): SpectroscopyResult =
+    copy(exposureCalculations = Some(exposureCalculations))
+  def peakPixelCount: Double = specS2N.map(_.getPeakPixelCount).max
 }

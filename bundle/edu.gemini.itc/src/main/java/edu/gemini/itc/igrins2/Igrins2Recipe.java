@@ -277,7 +277,7 @@ public final class Igrins2Recipe {
         Log.fine(String.format("single S/N @ %.1f nm = %.3f", SnrWavelength, singleSnr));
         Log.fine(String.format("final S/N @ %.1f nm = %.3f", SnrWavelength, finalSnr));
 
-        return new SpectroscopyResultWithExposure(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), altair,
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), altair,
                 RecipeUtil.instance().signalToNoiseAt(SnrWavelength, singleS2NSpectrum, finalS2NSpectrum),
                 Option.apply(AllExposureCalculations.single(new ExposureCalculation(exposureTime, numberExposures, finalSnr))));
     }
