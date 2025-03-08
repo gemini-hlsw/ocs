@@ -1,14 +1,11 @@
 package edu.gemini.itc.ghost;
 
 import edu.gemini.itc.base.*;
-import edu.gemini.itc.gnirs.GnirsRecipe;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.ghost.Detector;
 import scala.Option;
-import scala.Some;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -146,7 +143,7 @@ public final class GHostRecipe  {
         Log.fine(String.format("slitLength = %.2f, throughput = %.5f, onePix = %.5f, numfibers = %d, centerFiber = %d",
            instrument.getSlitLength(), totalspsf, sf_list.get((sf_list.size() - 1) / 2), numfibers, (sf_list.size() - 1) / 2));
 
-         final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
+        final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
                 slit,
                 slit,
                 instrument.disperser.get(),
@@ -165,7 +162,9 @@ public final class GHostRecipe  {
         sed.sed.accept(specS2N);
 
         final SpecS2N[] specS2Narr = new SpecS2N[] {specS2N};
-        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.empty(), Option.empty());
+        // FIXME Return the real GHOST exposure
+        AllExposures exposure = AllExposures.empty();
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.empty(), exposure);
     }
 
 

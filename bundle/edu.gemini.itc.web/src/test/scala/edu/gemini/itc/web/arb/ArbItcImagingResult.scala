@@ -20,7 +20,7 @@ trait ArbItcImagingResult {
     Arbitrary {
       for {
         ccds  <- genItcCcd
-        calcs <- Gen.option(genExposureCalculation.map(e => AllExposureCalculations(e, 0)))
+        calcs <- genExposureCalculation.map(e => AllExposures(e, 0))
       } yield ItcImagingResult(ccds, calcs)
     }
 

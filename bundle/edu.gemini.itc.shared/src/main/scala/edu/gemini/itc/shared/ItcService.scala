@@ -84,7 +84,7 @@ object ItcResult {
 
 // === IMAGING RESULTS
 
-final case class ItcImagingResult(ccds: List[ItcCcd], exposureCalculation: Option[AllExposureCalculations]) extends ItcResult
+final case class ItcImagingResult(ccds: List[ItcCcd], exposureCalculation: AllExposures) extends ItcResult
 
 // === SPECTROSCOPY RESULTS
 
@@ -170,29 +170,28 @@ case class SignalToNoiseAt(wavelength: Double, singleSignalToNoise: Double, fina
 
 case class TotalExposure(exposureTime: Double, exposures: Int)
 
-case class AllExposureCalculations(exposuresPerCcd: List[TotalExposure], selectedIndex: Int) {
+case class AllExposures(exposuresPerCcd: List[TotalExposure], selectedIndex: Int) {
   // We could use a zipper but I don't want to overcomplicate it
-  require(selectedIndex >= 0)
   require(selectedIndex < exposuresPerCcd.length)
 }
 
-object AllExposureCalculations {
-  def single(e: TotalExposure): AllExposureCalculations =
-    AllExposureCalculations(List(e), 0)
+object AllExposures {
+  // This doesn't make much sense as everything should return a value but it will be a placeholder
+  // While other instruments are being added to gpp
+  val empty: AllExposures = AllExposures(Nil, -1)
 
-  def fromJavaList(e: java.util.List[TotalExposure], index: Int): AllExposureCalculations =
-    AllExposureCalculations(e.toList, index)
+  def single(e: TotalExposure): AllExposures =
+    AllExposures(List(e), 0)
+
+  def fromJavaList(e: java.util.List[TotalExposure], index: Int): AllExposures =
+    AllExposures(e.toList, index)
 }
 
 /** The result of a spectroscopy ITC calculation contains some numbers per CCD and a set of groups of charts.
   * Individual charts and data series can be referenced by their types and group index. For most instruments there
   * is only one chart and data series of each type, however for NIFS and GMOS there will be several charts
   * of each type for each IFU element. */
-final case class ItcSpectroscopyResult(
-    ccds: List[ItcCcd],
-    chartGroups: List[SpcChartGroup],
-    exposureCalculations: Option[AllExposureCalculations],
-    snAt: Option[SignalToNoiseAt]) extends ItcResult {
+final case class ItcSpectroscopyResult(ccds: List[ItcCcd], chartGroups: List[SpcChartGroup], allExposures: AllExposures, snAt: Option[SignalToNoiseAt]) extends ItcResult {
 
   /** Gets chart data by type and its group index.
     * This method will fail if the result you're looking for does not exist.

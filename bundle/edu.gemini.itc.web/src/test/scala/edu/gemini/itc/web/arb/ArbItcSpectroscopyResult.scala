@@ -88,7 +88,7 @@ trait ArbItcSpectroscopyResult {
     for {
       ccds        <- Gen.nonEmptyListOf(arbitrary[ItcCcd])
       chartGroups <- Gen.smallListOf(genSpcChartGroup)
-      calcs       <- Gen.option(Gen.nonEmptyListOf(genExposureCalculation).map(e => AllExposureCalculations(e, 0)))
+      calcs       <- Gen.nonEmptyListOf(genExposureCalculation).map(e => AllExposures(e, 0))
       snAt        <- Gen.option(genSignalToNoiseAt)
      } yield ItcSpectroscopyResult(ccds, chartGroups, calcs, snAt)
 

@@ -1,7 +1,7 @@
 package edu.gemini.itc.base
 
 import edu.gemini.itc.operation._
-import edu.gemini.itc.shared.{AllExposureCalculations, ItcParameters, SignalToNoiseAt}
+import edu.gemini.itc.shared.{AllExposures, ItcParameters, SignalToNoiseAt}
 
 /*
  * Helper objects that are used to pass around detailed results of imaging and spectroscopy calculations internally.
@@ -33,9 +33,9 @@ final case class ImagingResult(
     peakPixelCount: Double,
     is2nCalc: ImagingS2NCalculatable,
     aoSystem: Option[AOSystem],
-    exposureCalculations: Option[AllExposureCalculations]
+    exposureCalculations: Option[AllExposures] // TODO make this not an Option once we do all instruments
 ) extends Result {
-  def withExposureCalculation(exposureCalculations: AllExposureCalculations): ImagingResult =
+  def withExposureCalculation(exposureCalculations: AllExposures): ImagingResult =
     copy(exposureCalculations = Some(exposureCalculations))
 }
 
@@ -92,9 +92,9 @@ final case class SpectroscopyResult(
     slitThrougput: Double,
     aoSystem: Option[AOSystem],
     signalToNoiseAt: Option[SignalToNoiseAt],
-    exposureCalculations: Option[AllExposureCalculations]
+    exposureCalculations: AllExposures
 ) extends Result {
-  def withExposureCalculation(exposureCalculations: AllExposureCalculations): SpectroscopyResult =
-    copy(exposureCalculations = Some(exposureCalculations))
+  def withExposureCalculation(exposureCalculations: AllExposures): SpectroscopyResult =
+    copy(exposureCalculations = exposureCalculations)
   def peakPixelCount: Double = specS2N.map(_.getPeakPixelCount).max
 }

@@ -214,7 +214,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                         final Gmos instrument = ccdArray[i];
                         results[i] =
                                 calculateSpectroscopySingleCCD(mainInstrument, instrument, ccdArray.length, exposureTime, numberExposures, wavelength)
-                                        .withExposureCalculation(AllExposureCalculations.fromJavaList(allCalculations, ccd));
+                                        .withExposureCalculation(AllExposures.fromJavaList(allCalculations, ccd));
                     }
                 }
             }
@@ -389,7 +389,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 specS2Narr[i] = s2n;
             }
 
-            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, sf_list.get(0), Option.empty(), Option.empty(), Option.apply(AllExposureCalculations.single(new TotalExposure(exposureTime, numberExposures))));
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, sf_list.get(0), Option.empty(), Option.empty(), AllExposures.single(new TotalExposure(exposureTime, numberExposures)));
 
             // ==== SLIT
         } else {
@@ -431,7 +431,8 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             final double finalSnr = specS2N.getFinalS2NSpectrum().getY(wavelengthAt);
             // check if the wavelength is in range and return the sn to noise at that point, or None
             Option<SignalToNoiseAt> at = RecipeUtil.instance().signalToNoiseAt(wavelengthAt, specS2N.getExpS2NSpectrum(), specS2N.getFinalS2NSpectrum());
-            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), at, Option.empty());
+            AllExposures exposure = AllExposures.single(new TotalExposure(exposureTime, numberExposures));
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), at, exposure);
         }
 
     }
@@ -598,7 +599,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 peak_pixel_count,
                 IS2Ncalc,
                 Recipe$.MODULE$.noAOSystem(),
-                Option.apply(AllExposureCalculations.single(new TotalExposure(IS2Ncalc.getExposureTime(), numberExposures)))
+                Option.apply(AllExposures.single(new TotalExposure(IS2Ncalc.getExposureTime(), numberExposures)))
         );
 
     }
