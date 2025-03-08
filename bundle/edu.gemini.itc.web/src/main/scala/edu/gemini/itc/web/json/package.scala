@@ -15,15 +15,15 @@ package object json {
       "final"
     )
 
-  implicit val ExposureCalculationCodec: CodecJson[TotalExposure] =
-    casecodec2(TotalExposure.apply, TotalExposure.unapply)(
+  implicit val IntegrationTimeCalculationCodec: CodecJson[IntegrationTime] =
+    casecodec2(IntegrationTime.apply, IntegrationTime.unapply)(
       "exposureTime",
       "exposures"
     )
 
-  implicit val AllExposureCalculationCodec: CodecJson[AllExposures] =
-    casecodec2(AllExposures.apply, AllExposures.unapply)(
-      "exposuresPerCCD",
+  implicit val AllIntegrationTimesCodec: CodecJson[AllIntegrationTimes] =
+    casecodec2(AllIntegrationTimes.apply, AllIntegrationTimes.unapply)(
+      "detectors",
       "selected"
     )
 

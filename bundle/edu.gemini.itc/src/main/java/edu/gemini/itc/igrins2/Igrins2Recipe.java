@@ -279,7 +279,7 @@ public final class Igrins2Recipe {
 
         return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), altair,
                 RecipeUtil.instance().signalToNoiseAt(SnrWavelength, singleS2NSpectrum, finalS2NSpectrum),
-                AllExposures.single(new TotalExposure(exposureTime, numberExposures)));
+                AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures)));
     }
 
     private double calculateSNR(double signal, double background, double darkNoise, double readNoise, double skyAper, int numberExposures) {

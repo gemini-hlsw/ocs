@@ -10,7 +10,7 @@ trait ItcImagingResultCodec {
   val ItcImagingResultCodec: CodecJson[ItcImagingResult] =
     casecodec2(ItcImagingResult.apply, ItcImagingResult.unapply)(
       "ccds",
-      "exposureCalculation"
+      "times"
     )
 
 }

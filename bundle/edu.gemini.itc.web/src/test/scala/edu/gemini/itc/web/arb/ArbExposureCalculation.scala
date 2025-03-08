@@ -6,13 +6,13 @@ import org.scalacheck.Arbitrary._
 import scalaz.\/
 
 trait ArbExposureCalculation {
-  val genExposureCalculation: Gen[TotalExposure] =
+  val genExposureCalculation: Gen[IntegrationTime] =
     for {
       time  <- arbitrary[Double]
       count <- arbitrary[Int]
-    } yield TotalExposure(time, count)
+    } yield IntegrationTime(time, count)
 
-  implicit val arbExposureCalculation: Arbitrary[TotalExposure] =
+  implicit val arbExposureCalculation: Arbitrary[IntegrationTime] =
     Arbitrary(genExposureCalculation)
 
 }

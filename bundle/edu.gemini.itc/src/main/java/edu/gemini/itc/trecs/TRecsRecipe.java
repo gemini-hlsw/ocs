@@ -4,7 +4,6 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import scala.Option;
-import edu.gemini.shared.util.immutable.ImOption;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -139,7 +138,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         final SpecS2NSlitVisitor[] specS2Narr = new SpecS2NSlitVisitor[1];
         specS2Narr[0] = specS2N;
-        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.empty(), AllExposures.empty());
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.empty(), AllIntegrationTimes.empty());
     }
 
     public ImagingResult calculateImaging() {

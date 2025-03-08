@@ -204,17 +204,17 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                     } else {
                         Log.fine("No change since the last iteration, so calculating final results for all CCDs, selected SNR: " + ccd);
                     }
-                    List<TotalExposure> allCalculations = new ArrayList<>();
+                    List<IntegrationTime> allCalculations = new ArrayList<>();
                     for (int i = 0; i < ccdArray.length; i++) {
                         // This is not fully correct as we are saying each CCD will need the same exposure time, while we really only care
                         // about the selected one
-                        allCalculations.add(new TotalExposure(exposureTime, numberExposures));
+                        allCalculations.add(new IntegrationTime(exposureTime, numberExposures));
                     }
                     for (int i = 0; i < ccdArray.length; i++) {
                         final Gmos instrument = ccdArray[i];
                         results[i] =
                                 calculateSpectroscopySingleCCD(mainInstrument, instrument, ccdArray.length, exposureTime, numberExposures, wavelength)
-                                        .withExposureCalculation(AllExposures.fromJavaList(allCalculations, ccd));
+                                        .withTimes(AllIntegrationTimes.fromJavaList(allCalculations, ccd));
                     }
                 }
             }
@@ -389,7 +389,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 specS2Narr[i] = s2n;
             }
 
-            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, sf_list.get(0), Option.empty(), Option.empty(), AllExposures.single(new TotalExposure(exposureTime, numberExposures)));
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, sf_list.get(0), Option.empty(), Option.empty(), AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures)));
 
             // ==== SLIT
         } else {
@@ -427,11 +427,9 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             s2n.setSlitS2N(0, signalIFUSpec, backGroundIFUSpec, expS2NIFUSpec, finalS2NIFUSpec);
 
             specS2Narr[0] = s2n;
-            final double singleSnr = specS2N.getExpS2NSpectrum().getY(wavelengthAt);
-            final double finalSnr = specS2N.getFinalS2NSpectrum().getY(wavelengthAt);
             // check if the wavelength is in range and return the sn to noise at that point, or None
             Option<SignalToNoiseAt> at = RecipeUtil.instance().signalToNoiseAt(wavelengthAt, specS2N.getExpS2NSpectrum(), specS2N.getFinalS2NSpectrum());
-            AllExposures exposure = AllExposures.single(new TotalExposure(exposureTime, numberExposures));
+            AllIntegrationTimes exposure = AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures));
             return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), at, exposure);
         }
 
@@ -599,7 +597,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 peak_pixel_count,
                 IS2Ncalc,
                 Recipe$.MODULE$.noAOSystem(),
-                Option.apply(AllExposures.single(new TotalExposure(IS2Ncalc.getExposureTime(), numberExposures)))
+                Option.apply(AllIntegrationTimes.single(new IntegrationTime(IS2Ncalc.getExposureTime(), numberExposures)))
         );
 
     }

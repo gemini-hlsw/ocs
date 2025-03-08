@@ -163,7 +163,7 @@ public final class GHostRecipe  {
 
         final SpecS2N[] specS2Narr = new SpecS2N[] {specS2N};
         // FIXME Return the real GHOST exposure
-        AllExposures exposure = AllExposures.empty();
+        AllIntegrationTimes exposure = AllIntegrationTimes.empty();
         return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.empty(), exposure);
     }
 

@@ -67,7 +67,7 @@ trait ItcSpectroscopyResultCodec {
     casecodec4(ItcSpectroscopyResult.apply, ItcSpectroscopyResult.unapply)(
       "ccds",
       "chartGroups",
-      "exposureCalculation",
+      "times",
       "signalToNoiseAt"
   )
 

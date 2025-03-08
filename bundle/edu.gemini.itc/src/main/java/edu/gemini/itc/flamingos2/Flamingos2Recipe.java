@@ -91,12 +91,11 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         double readNoise;
         double totalTime;
         double wavelength = 0;
-        double desiredSNR = 0;
 
         if (calcMethod instanceof SpectroscopyInt) {
             // Determine exposureTime & numberExposures that will give the requested S/N at wavelength.
 
-            desiredSNR = ((SpectroscopyInt) calcMethod).sigma();
+            double desiredSNR = ((SpectroscopyInt) calcMethod).sigma();
             Log.fine(String.format("desiredSNR = %.2f", desiredSNR));
 
             wavelength = ((SpectroscopyInt) _obsDetailParameters.calculationMethod()).wavelengthAt();
@@ -202,8 +201,8 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         }
 
         // Run the ITC to generate the output graphs
-        return calculateSpectroscopy(instrument, readMode, exposureTime, numberExposures, wavelength).withExposureCalculation(
-                AllExposures.single(new TotalExposure(exposureTime, numberExposures)));
+        return calculateSpectroscopy(instrument, readMode, exposureTime, numberExposures, wavelength).withTimes(
+                AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures)));
     }
 
     private double calculateSNR(double signal, double background, double darkNoise, double readNoise, double skyAper, int numberExposures) {
@@ -287,7 +286,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         Log.fine(String.format("final S/N @ %.1f nm = %.3f", wavelength, finalSnr));
 
         final scala.Option<SignalToNoiseAt> sn = RecipeUtil.instance().signalToNoiseAt(wavelength, specS2N.getExpS2NSpectrum(), specS2N.getFinalS2NSpectrum());
-        final AllExposures exp = AllExposures.single(new TotalExposure(exposureTime, numberExposures));
+        final AllIntegrationTimes exp = AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures));
         return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), sn, exp);
     }
 

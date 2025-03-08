@@ -38,7 +38,7 @@ trait SpectroscopyArrayRecipe extends Recipe {
 
 object Recipe {
 
-  def noExposureTime: Option[TotalExposure] = None
+  def noExposureTime: Option[IntegrationTime] = None
   def noAOSystem: Option[AOSystem] = None
 
   // =============
@@ -101,14 +101,14 @@ object Recipe {
   def serviceResult(r: ImagingResult): ItcImagingResult =
     ItcImagingResult(
       List(toCcdData(r)),
-      r.exposureCalculations.getOrElse(AllExposures.empty)
+      r.times.getOrElse(AllIntegrationTimes.empty)
     )
 
   def serviceResult(r: Array[ImagingResult]): ItcImagingResult = {
     val ccds = r.map(toCcdData).toList
     ItcImagingResult(
       ccds,
-      r.map(_.exposureCalculations).toList.headOption.flatten.getOrElse(AllExposures.empty)) // FIXME: Review how many result are we gettingg
+      r.map(_.times).toList.headOption.flatten.getOrElse(AllIntegrationTimes.empty)) // FIXME: Review how many result are we gettingg
   }
 
   // === Spectroscopy
@@ -132,7 +132,7 @@ object Recipe {
     ItcSpectroscopyResult(
       List(toCcdData(r, charts.toList)),
       if (headless) Nil else List(SpcChartGroup(charts.toList)),
-      r.exposureCalculations,
+      r.times,
       r.signalToNoiseAt
     )
   }
@@ -142,7 +142,7 @@ object Recipe {
     ItcSpectroscopyResult(
       List(toCcdData(r, charts.toList.flatten)),
       if (headless) Nil else charts.toList.map(l => SpcChartGroup(l.toList)),
-      r.exposureCalculations,
+      r.times,
       r.signalToNoiseAt
     )
   }
@@ -157,7 +157,7 @@ object Recipe {
     ItcSpectroscopyResult(
       rs.map(r => toCcdData(r, charts.toList.flatten)).toList,
       if (headless) Nil else charts.toList.map(l => SpcChartGroup(l.toList)),
-      rs.map(_.exposureCalculations).headOption.getOrElse(AllExposures.empty),
+      rs.map(_.times).headOption.getOrElse(AllIntegrationTimes.empty),
       snAt
     )
 
