@@ -84,7 +84,7 @@ object ItcResult {
 
 // === IMAGING RESULTS
 
-final case class ItcImagingResult(ccds: List[ItcCcd], exposureCalculation: List[ExposureCalculation]) extends ItcResult
+final case class ItcImagingResult(ccds: List[ItcCcd], times: AllIntegrationTimes) extends ItcResult
 
 // === SPECTROSCOPY RESULTS
 
@@ -166,18 +166,36 @@ final case class SpcChartData(chartType: SpcChartType, title: String, xAxis: Cha
   def allSeriesAsJava(t: SpcDataType): java.util.List[SpcSeriesData] = series.filter(_.dataType == t)
 }
 
-case class ExposureCalculation(exposureTime: Double, exposures: Int, signalToNoise: Double)
+case class SignalToNoiseAt(wavelength: Double, singleSignalToNoise: Double, finalSignalToNoise: Double)
 
-object ExposureCalculation {
-  def option(exposureTime: Double, exposures: Int, signalToNoise: Double): Option[ExposureCalculation] = 
-    Some(ExposureCalculation(exposureTime, exposures, signalToNoise))
+case class IntegrationTime(exposureTime: Double, exposures: Int)
+
+case class AllIntegrationTimes(detectors: List[IntegrationTime], selectedIndex: Int) {
+  // We could use a zipper but I don't want to overcomplicate it
+  // require(selectedIndex >= 0) // FIXME Enable once all instruments are converted
+  require(selectedIndex < detectors.length)
+}
+
+object AllIntegrationTimes {
+  // This doesn't make much sense as everything should return a value but it will be a placeholder
+  // While other instruments are being added to gpp
+  val empty: AllIntegrationTimes = AllIntegrationTimes(Nil, -1)
+
+  def single(e: IntegrationTime): AllIntegrationTimes =
+    AllIntegrationTimes(List(e), 0)
+
+  def fromJavaList(e: java.util.List[IntegrationTime], index: Int): AllIntegrationTimes = {
+    require(index >= 0)
+    require(index < e.size())
+    AllIntegrationTimes(e.toList, index)
+  }
 }
 
 /** The result of a spectroscopy ITC calculation contains some numbers per CCD and a set of groups of charts.
   * Individual charts and data series can be referenced by their types and group index. For most instruments there
   * is only one chart and data series of each type, however for NIFS and GMOS there will be several charts
   * of each type for each IFU element. */
-final case class ItcSpectroscopyResult(ccds: List[ItcCcd], chartGroups: List[SpcChartGroup], exposureCalculation: Option[ExposureCalculation]) extends ItcResult {
+final case class ItcSpectroscopyResult(ccds: List[ItcCcd], chartGroups: List[SpcChartGroup], times: AllIntegrationTimes, snAt: Option[SignalToNoiseAt]) extends ItcResult {
 
   /** Gets chart data by type and its group index.
     * This method will fail if the result you're looking for does not exist.

@@ -69,7 +69,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             );
         } else if (odp.calculationMethod() instanceof SpectroscopyS2N) {
             return new ObservationDetails(
-                    new SpectroscopyS2N(correctedNumExposures, odp.coadds(), correctedExposureTime, odp.sourceFraction(), odp.offset()),
+                    new SpectroscopyS2N(correctedNumExposures, odp.coadds(), correctedExposureTime, odp.sourceFraction(), odp.offset(), Option.empty()),
                     odp.analysisMethod()
             );
         } else {
@@ -138,7 +138,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         final SpecS2NSlitVisitor[] specS2Narr = new SpecS2NSlitVisitor[1];
         specS2Narr[0] = specS2N;
-        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.empty());
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.empty(), AllIntegrationTimes.empty());
     }
 
     public ImagingResult calculateImaging() {

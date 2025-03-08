@@ -37,7 +37,8 @@ trait SpectroscopyArrayRecipe extends Recipe {
 }
 
 object Recipe {
-  def noExposureTime: Option[ExposureCalculation] = None
+
+  def noExposureTime: Option[IntegrationTime] = None
   def noAOSystem: Option[AOSystem] = None
 
   // =============
@@ -98,11 +99,16 @@ object Recipe {
     ItcCcd(r.is2nCalc.singleSNRatio(), r.is2nCalc.totalSNRatio(), r.peakPixelCount, r.instrument.wellDepth, r.instrument.gain, Warning.collectWarnings(r))
 
   def serviceResult(r: ImagingResult): ItcImagingResult =
-    ItcImagingResult(List(toCcdData(r)), r.exposureCalculation.toList)
+    ItcImagingResult(
+      List(toCcdData(r)),
+      r.times.getOrElse(AllIntegrationTimes.empty)
+    )
 
   def serviceResult(r: Array[ImagingResult]): ItcImagingResult = {
     val ccds = r.map(toCcdData).toList
-    ItcImagingResult(ccds, r.map(_.exposureCalculation).toList.flatten)
+    ItcImagingResult(
+      ccds,
+      r.map(_.times).toList.headOption.flatten.getOrElse(AllIntegrationTimes.empty)) // FIXME: Review how many result are we gettingg
   }
 
   // === Spectroscopy
@@ -122,31 +128,55 @@ object Recipe {
   // === Java helpers
 
   // One result (CCD) and a simple set of charts, this covers most cases.
-  def serviceResult(r: SpectroscopyResult, charts: JList[SpcChartData], headless: Boolean): ItcSpectroscopyResult =
+  def serviceResult(r: SpectroscopyResult, charts: JList[SpcChartData], headless: Boolean): ItcSpectroscopyResult = {
     ItcSpectroscopyResult(
       List(toCcdData(r, charts.toList)),
       if (headless) Nil else List(SpcChartGroup(charts.toList)),
-      r.exposureCalculation
+      r.times,
+      r.signalToNoiseAt
     )
+  }
 
   // One result (CCD) and a set of groups of charts, this covers NIFS (1 CCD and separate groups for IFU cases).
-  def serviceGroupedResult(r: SpectroscopyResult, charts: JList[JList[SpcChartData]], headless: Boolean): ItcSpectroscopyResult =
+  def serviceGroupedResult(r: SpectroscopyResult, charts: JList[JList[SpcChartData]], headless: Boolean): ItcSpectroscopyResult = {
     ItcSpectroscopyResult(
       List(toCcdData(r, charts.toList.flatten)),
       if (headless) Nil else charts.toList.map(l => SpcChartGroup(l.toList)),
-      r.exposureCalculation
+      r.times,
+      r.signalToNoiseAt
     )
+  }
 
   // A set of results and a set of groups of charts, this covers GMOS (3 CCDs and potentially separate groups
   // for IFU cases, if IFU is activated).
   def serviceGroupedResult(rs: Array[SpectroscopyResult], charts: JList[JList[SpcChartData]], headless: Boolean): ItcSpectroscopyResult = {
+    val snAtArray = rs.flatMap(_.signalToNoiseAt)
+    // if all the snAt ar empty it means we are out of range, so return none
+    // else filter out the ones containing 0 and return the first. If none is over 0 just return the first.
+    val snAt = snAtArray.find(_.finalSignalToNoise > 0).orElse(snAtArray.headOption)
     ItcSpectroscopyResult(
       rs.map(r => toCcdData(r, charts.toList.flatten)).toList,
       if (headless) Nil else charts.toList.map(l => SpcChartGroup(l.toList)),
-      rs.headOption.flatMap(_.exposureCalculation) // all the array items have the same exposure calculation
+      rs.map(_.times).headOption.getOrElse(AllIntegrationTimes.empty),
+      snAt
     )
 
   }
 
 }
+object RecipeUtil {
+  val instance = this
 
+  // We want to find sn at a specific wavelength.
+  // if the wavelength is out of range return None, other wise return the value even if sn is 0
+  def signalToNoiseAt(wavelengthAt: Double, signal: Spectrum, total: Spectrum): Option[SignalToNoiseAt] = {
+    // Both spectrums need the same range
+    require(signal.getStart == total.getStart)
+    require(signal.getEnd == total.getEnd)
+    val result = if (wavelengthAt >= signal.getStart && wavelengthAt <= signal.getEnd) {
+      // 0 is a valid sn
+      Option(SignalToNoiseAt(wavelengthAt, signal.getY(wavelengthAt), total.getY(wavelengthAt)))
+    } else None
+    result
+  }
+}

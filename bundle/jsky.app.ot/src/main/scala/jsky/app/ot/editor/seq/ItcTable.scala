@@ -298,7 +298,7 @@ class ItcSpectroscopyTable(val parameters: ItcParametersProvider) extends ItcTab
 
     } yield {
       val uniqueConfigs = ItcUniqueConfig.spectroscopyConfigs(seq)
-      val inputs        = uniqueConfigs.map(uc => extractInputs(instrument, parameters.schedulingBlockStart, uc, frac => SpectroscopyS2N(uc.count, uc.coadds, uc.singleExposureTime, frac, 0.0)))
+      val inputs        = uniqueConfigs.map(uc => extractInputs(instrument, parameters.schedulingBlockStart, uc, frac => SpectroscopyS2N(uc.count, uc.coadds, uc.singleExposureTime, frac, 0.0, None)))
       val results       = uniqueConfigs.zip(inputs).map { case (uc, i) => doServiceCall(peer, i) }
 
       instrument.getType match {

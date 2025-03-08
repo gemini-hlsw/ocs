@@ -41,7 +41,8 @@ object ItcSanitySpec extends Specification with ScalaCheck {
               coadds         = None,
               exposureTime   = 1.0,
               sourceFraction = 0.5,
-              offset         = 0.0
+              offset         = 0.0,
+              wavelengthAt   = Some(10.0)
             ),
             analysisMethod = AutoAperture(
               skyAperture    = 1.0

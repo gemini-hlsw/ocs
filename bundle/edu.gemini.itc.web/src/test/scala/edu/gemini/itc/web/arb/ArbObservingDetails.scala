@@ -24,7 +24,8 @@ trait ArbObservationDetails {
       e <- arbitrary[Double]
       f <- arbitrary[Double]
       o <- arbitrary[Double]
-    } yield SpectroscopyS2N(n, c, e, f, o)
+      w <- arbitrary[Option[Double]]
+    } yield SpectroscopyS2N(n, c, e, f, o, w)
 
   val genS2NMethod: Gen[S2NMethod] =
     Gen.oneOf(genImagingS2N, genSpecroscopyS2N)

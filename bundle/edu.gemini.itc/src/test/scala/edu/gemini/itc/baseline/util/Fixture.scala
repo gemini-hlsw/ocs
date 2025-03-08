@@ -81,11 +81,11 @@ object Fixture {
   // ==== SPECTROSCOPY ANALYSIS MODES
   lazy val SpectroscopyModes = List(
     ObservationDetails(
-      SpectroscopyS2N(6, Some(4), 300.0, 0.5, 10.0),
+      SpectroscopyS2N(6, Some(4), 300.0, 0.5, 10.0, None),
       AutoAperture(4.5)
     ),
     ObservationDetails(
-      SpectroscopyS2N(6, None, 300.0, 1.0, 10.0),
+      SpectroscopyS2N(6, None, 300.0, 1.0, 10.0, None),
       UserAperture(2.5, 6.0)
     )
   )
@@ -95,31 +95,31 @@ object Fixture {
 
   lazy val IfuSingleModes = List(
     ObservationDetails(
-      SpectroscopyS2N(10, None, 150.0, 0.5, 10.0),
+      SpectroscopyS2N(10, None, 150.0, 0.5, 10.0, None),
       IfuSingle(1, 0.5)
     )
   )
   lazy val IfuSummedModes = List(
     ObservationDetails(
-      SpectroscopyS2N(6, Some(10), 300.0, 1.0, 8.0),
+      SpectroscopyS2N(6, Some(10), 300.0, 1.0, 8.0, None),
       IfuSummed(1, 2, 5, 0.0, 0.0)
     )
   )
   lazy val IfuRadialModes = List(
     ObservationDetails(
-      SpectroscopyS2N(3, None, 400.0, 1.0, 7.0),
+      SpectroscopyS2N(3, None, 400.0, 1.0, 7.0, None),
       IfuRadial(1, 0.0, 0.0)
     ),
     ObservationDetails(
-      SpectroscopyS2N(3, Some(4), 400.0, 1.0, 7.0),
+      SpectroscopyS2N(3, Some(4), 400.0, 1.0, 7.0, None),
       IfuRadial(1, 0.5, 1.0)
     ),
     ObservationDetails(
-      SpectroscopyS2N(6, None, 300.0, 1.0, 6.0),
+      SpectroscopyS2N(6, None, 300.0, 1.0, 6.0, None),
       IfuRadial(5, 0.0, 1.0)
     ),
     ObservationDetails(
-      SpectroscopyS2N(6, Some(2), 300.0, 1.0, 6.0),
+      SpectroscopyS2N(6, Some(2), 300.0, 1.0, 6.0, None),
       IfuRadial(5, 1.0, 1.0)
     )
   )

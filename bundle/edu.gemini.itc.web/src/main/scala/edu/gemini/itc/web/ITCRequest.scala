@@ -414,7 +414,8 @@ object ITCRequest {
           coadds(r, CoaddsA),
           r.doubleParameter("expTimeA"),
           r.doubleParameter("fracOnSourceA"),
-          r.doubleParameter("offset")
+          r.doubleParameter("offset"),
+          None
         )
       case "intTimeSpec" if InstrumentDetails.isSpectroscopy(i) =>
         SpectroscopyInt(
