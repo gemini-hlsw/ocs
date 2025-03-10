@@ -64,10 +64,11 @@ trait ItcSpectroscopyResultCodec {
 
 
   val ItcSpectroscopyResultCodec: CodecJson[ItcSpectroscopyResult] =
-    casecodec3(ItcSpectroscopyResult.apply, ItcSpectroscopyResult.unapply)(
+    casecodec4(ItcSpectroscopyResult.apply, ItcSpectroscopyResult.unapply)(
       "ccds",
       "chartGroups",
-      "exposureCalculation"
+      "times",
+      "signalToNoiseAt"
   )
 
 }

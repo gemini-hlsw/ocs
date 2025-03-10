@@ -98,7 +98,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
             double desiredSNR = ((SpectroscopyInt) calcMethod).sigma();
             Log.fine(String.format("desiredSNR = %.2f", desiredSNR));
 
-            wavelength = ((SpectroscopyInt) _obsDetailParameters.calculationMethod()).wavelength();
+            wavelength = ((SpectroscopyInt) _obsDetailParameters.calculationMethod()).wavelengthAt();
             Log.fine(String.format("Wavelength = %.2f nm", wavelength));
 
             double maxFlux = instrument.maxFlux();  // maximum useful flux
@@ -201,7 +201,8 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         }
 
         // Run the ITC to generate the output graphs
-        return calculateSpectroscopy(instrument, readMode, exposureTime, numberExposures, wavelength);
+        return calculateSpectroscopy(instrument, readMode, exposureTime, numberExposures, wavelength).withTimes(
+                AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures)));
     }
 
     private double calculateSNR(double signal, double background, double darkNoise, double readNoise, double skyAper, int numberExposures) {
@@ -227,7 +228,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         return exposureTime;
     }
 
-    public SpectroscopyResult calculateSpectroscopy(
+    private SpectroscopyResult calculateSpectroscopy(
             final Flamingos2 instrument,
             final ReadMode readMode,
             final double exposureTime,
@@ -279,10 +280,14 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
 
         final SpecS2NSlitVisitor[] specS2Narr = new SpecS2NSlitVisitor[1];
         specS2Narr[0] = specS2N;
-        final double snr = specS2N.getFinalS2NSpectrum().getY(wavelength);
-        Log.fine(String.format("S/N @ %.1f nm = %.3f", wavelength, snr));
+        final double singleSnr = specS2N.getExpS2NSpectrum().getY(wavelength);
+        final double finalSnr = specS2N.getFinalS2NSpectrum().getY(wavelength);
+        Log.fine(String.format("single S/N @ %.1f nm = %.3f", wavelength, singleSnr));
+        Log.fine(String.format("final S/N @ %.1f nm = %.3f", wavelength, finalSnr));
 
-        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.apply(new ExposureCalculation(exposureTime, numberExposures, snr)));
+        final scala.Option<SignalToNoiseAt> sn = RecipeUtil.instance().signalToNoiseAt(wavelength, specS2N.getExpS2NSpectrum(), specS2N.getFinalS2NSpectrum());
+        final AllIntegrationTimes exp = AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures));
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), sn, exp);
     }
 
     public ImagingResult calculateImaging() {

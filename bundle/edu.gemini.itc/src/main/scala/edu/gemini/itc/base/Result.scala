@@ -1,7 +1,7 @@
 package edu.gemini.itc.base
 
 import edu.gemini.itc.operation._
-import edu.gemini.itc.shared.{ExposureCalculation, ItcParameters, ItcWarning}
+import edu.gemini.itc.shared.{AllIntegrationTimes, ItcParameters, SignalToNoiseAt}
 
 /*
  * Helper objects that are used to pass around detailed results of imaging and spectroscopy calculations internally.
@@ -26,15 +26,18 @@ sealed trait Result {
 
 /* Internal object for imaging results. */
 final case class ImagingResult(
-    parameters: ItcParameters,
-    instrument: Instrument,
-    iqCalc: ImageQualityCalculatable,
-    sfCalc: SourceFraction,
-    peakPixelCount: Double,
-    is2nCalc: ImagingS2NCalculatable,
-    aoSystem: Option[AOSystem],
-    exposureCalculation: Option[ExposureCalculation]
-) extends Result
+                                parameters: ItcParameters,
+                                instrument: Instrument,
+                                iqCalc: ImageQualityCalculatable,
+                                sfCalc: SourceFraction,
+                                peakPixelCount: Double,
+                                is2nCalc: ImagingS2NCalculatable,
+                                aoSystem: Option[AOSystem],
+                                times: Option[AllIntegrationTimes] // TODO make this not an Option once we do all instruments
+) extends Result {
+  def withTimes(times: AllIntegrationTimes): ImagingResult =
+    copy(times = Some(times))
+}
 
 object ImagingResult {
 
@@ -81,15 +84,17 @@ object ImagingResult {
 
 /* Internal object for generic spectroscopy results. */
 final case class SpectroscopyResult(
-    parameters: ItcParameters,
-    instrument: Instrument,
-    iqCalc: ImageQualityCalculatable,
-    specS2N: Array[SpecS2N], // Array is used for IFU cases (GMOS and NIFS)
-    slit: Slit,
-    slitThrougput: Double,
-    aoSystem: Option[AOSystem],
-    exposureCalculation: Option[ExposureCalculation]
+                                     parameters: ItcParameters,
+                                     instrument: Instrument,
+                                     iqCalc: ImageQualityCalculatable,
+                                     specS2N: Array[SpecS2N], // Array is used for IFU cases (GMOS and NIFS)
+                                     slit: Slit,
+                                     slitThrougput: Double,
+                                     aoSystem: Option[AOSystem],
+                                     signalToNoiseAt: Option[SignalToNoiseAt],
+                                     times: AllIntegrationTimes
 ) extends Result {
-  lazy val peakPixelCount: Double = specS2N.map(_.getPeakPixelCount).max
+  def withTimes(times: AllIntegrationTimes): SpectroscopyResult =
+    copy(times = times)
+  def peakPixelCount: Double = specS2N.map(_.getPeakPixelCount).max
 }
-

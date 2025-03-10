@@ -5,6 +5,8 @@ import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.data.YesNoType;
 import scala.Option;
+import edu.gemini.shared.util.immutable.ImOption;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +68,7 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
             );
         } else if (odp.calculationMethod() instanceof SpectroscopyS2N) {
             return new ObservationDetails(
-                    new SpectroscopyS2N(correctedNumExposures, odp.coadds(), correctedExposureTime, odp.sourceFraction(), odp.offset()),
+                    new SpectroscopyS2N(correctedNumExposures, odp.coadds(), correctedExposureTime, odp.sourceFraction(), odp.offset(), ImOption.scalaNone()),
                     odp.analysisMethod()
             );
         } else {
@@ -136,9 +138,7 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         final SpecS2N[] specS2Narr = new SpecS2N[1];
         specS2Narr[0] = specS2N;
-        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.empty());
-
-
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.empty(), AllIntegrationTimes.empty());
     }
 
     public ImagingResult calculateImaging() {

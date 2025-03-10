@@ -165,7 +165,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
             specS2Narr[i++] = specS2N;
         }
 
-        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, null, 0, altair, Option.empty());
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, null, 0, altair, Option.empty(), AllIntegrationTimes.empty());
     }
 
     // NIFS CHARTS
