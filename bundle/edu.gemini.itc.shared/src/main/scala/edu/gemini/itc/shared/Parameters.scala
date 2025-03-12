@@ -101,6 +101,11 @@ sealed trait CalculationMethod {
   def coaddsOrElse(d: Int): Int = coadds.getOrElse(d)
   def sourceFraction: Double
   def offset: Double
+
+  def isSpectroscopy: Boolean
+  def isImaging: Boolean
+
+  require(isSpectroscopy != isImaging)
 }
 
 sealed trait S2NMethod extends CalculationMethod {
@@ -126,7 +131,10 @@ final case class ImagingS2N(
                     coadds: Option[Int],
                     exposureTime: Double,
                     sourceFraction: Double,
-                    offset: Double) extends Imaging with S2NMethod
+                    offset: Double) extends Imaging with S2NMethod {
+  def isSpectroscopy: Boolean = false
+  def isImaging: Boolean = true
+}
 
 // Return the number of exposures (Integration Time) given the exposure time, desired S/N, etc.
 final case class ImagingInt(
@@ -134,7 +142,11 @@ final case class ImagingInt(
                     exposureTime: Double,
                     coadds: Option[Int],
                     sourceFraction: Double,
-                    offset: Double) extends Imaging with IntMethod
+                    offset: Double) extends Imaging with IntMethod {
+
+  def isSpectroscopy: Boolean = false
+  def isImaging: Boolean = true
+}
 
 // Return the exposure time and number of exposures given the desired S/N
 final case class ImagingExp(
@@ -143,6 +155,8 @@ final case class ImagingExp(
                     sourceFraction: Double,
                     offset: Double) extends Imaging with IntMethod {
   val exposureTime: Double = 60
+  def isSpectroscopy: Boolean = false
+  def isImaging: Boolean = true
 }
 
 final case class SpectroscopyS2N(
@@ -154,6 +168,8 @@ final case class SpectroscopyS2N(
                                   wavelengthAt: Option[Double] // wavelength in nanometers
                   ) extends Spectroscopy with S2NMethod {
   val atWithDefault: Double = wavelengthAt.getOrElse(0) // Not a very nice default, but we'd be outside any CCD and just return 0 sn
+  def isSpectroscopy: Boolean = true
+  def isImaging: Boolean = false
 }
 
 // Return the spectroscopic integration time (exposure time & number of exposures) given the desired S/N
@@ -165,6 +181,8 @@ final case class SpectroscopyInt(
                                   offset: Double) extends Spectroscopy with SpecIntMethod with S2NMethod {
   val exposureTime: Double = 1200
   val exposures: Int = 1
+  def isSpectroscopy: Boolean = true
+  def isImaging: Boolean = false
 }
 
 
