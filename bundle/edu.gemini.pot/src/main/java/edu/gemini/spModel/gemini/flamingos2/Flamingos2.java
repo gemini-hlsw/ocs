@@ -140,8 +140,16 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
             }
         },
         Y("Y (1.02 um)", "Y", new Some<>(1.02),                   Ictd.track("Y")),
-        F1056("F1056 (1.056 um)", "F1056", new Some<>(1.056),     Ictd.track("F1056")),
-        F1063("F1063 (1.063 um)", "F1063", new Some<>(1.063),     Ictd.track("F1063")),
+        F1056("F1056 (1.056 um)", "F1056", new Some<>(1.056),     Ictd.unavailable()) {
+            @Override public boolean isObsolete() {
+                return true;
+            }
+        },
+        F1063("F1063 (1.063 um)", "F1063", new Some<>(1.063),     Ictd.unavailable()) {
+            @Override public boolean isObsolete() {
+                return true;
+            }
+        },
         J_LOW("J-low (1.15 um)", "J-low", new Some<>(1.15),       Ictd.track("J-low")),
         J("J (1.25 um)", "J", new Some<>(1.25),                   Ictd.track("J")),
         H("H (1.65 um)", "H", new Some<>(1.65),                   Ictd.track("H")),
@@ -151,7 +159,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         K_RED("K-red (2.31 um)", "K-red", new Some<>(2.31),       Ictd.track("K-red")),
         JH("JH (spectroscopic)", "JH", new Some<>(1.3385),        Ictd.track("JH")),
         HK("HK (spectroscopic)", "HK", new Some<>(1.9),           Ictd.track("HK")),
-        DARK("Dark", "Dark", None.DOUBLE,                         Ictd.track("Dark")) {
+        DARK("Dark", "Dark", None.DOUBLE,                         Ictd.unavailable()) {
             @Override public boolean isObsolete() {
                 return true;
             }
