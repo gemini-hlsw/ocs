@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static edu.gemini.spModel.gemini.flamingos2.Flamingos2.Disperser.NONE;
+import static edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit.FPU_NONE;
+
 /**
  * This class performs the calculations for Flamingos 2 used for imaging.
  */
@@ -50,13 +53,9 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
      * Check input parameters for consistency
      */
     private void validateInputParameters() {
-        if (_obsDetailParameters.calculationMethod() instanceof Spectroscopy) {
-            switch (_flamingos2Parameters.grism()) {
-                case NONE:          throw new IllegalArgumentException("In spectroscopy mode, a grism must be selected");
-            }
-            switch (_flamingos2Parameters.mask()) {
-                case FPU_NONE:      throw new IllegalArgumentException("In spectroscopy mode, a FP must be selected");
-            }
+        if (_obsDetailParameters.calculationMethod().isSpectroscopy()) {
+            if (_flamingos2Parameters.grism() == NONE) throw new IllegalArgumentException("In spectroscopy mode, a grism must be selected");
+            if (_flamingos2Parameters.mask() == FPU_NONE) throw new IllegalArgumentException("In spectroscopy mode, a FP must be selected");
         }
         // some general validations
         Validation.validate(instrument, _obsDetailParameters, _sdParameters);
@@ -119,12 +118,16 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
             Log.fine(String.format("peakFlux = %.0f e-", peakFlux));
 
             VisitableSampledSpectrum backgroundSpectrum = specS2N.getTotalBackgroundSpectrum();
+            if (wavelength < backgroundSpectrum.getStart() || wavelength > backgroundSpectrum.getEnd())
+                throw new RuntimeException(String.format("Wavelength %.1f out of range", wavelength));
             double background = backgroundSpectrum.getY(wavelength);
             Log.fine(String.format("Background @ %.1f nm = %.2f e- (summed over aperture)", wavelength, background));
 
             VisitableSampledSpectrum signalSpectrum = specS2N.getTotalSignalSpectrum();
             double signal = signalSpectrum.getY(wavelength);
             Log.fine(String.format("Signal @ %.1f nm = %.2f e- (summed over aperture)", wavelength, signal));
+            // A signal 0 leads to infinity exposure times, let's abort
+            if (signal <= 0) throw new RuntimeException("Signal = 0");
 
             int numberPixels = specS2N.getSlitLengthPixels();
             Log.fine("Pixels in aperture = " + numberPixels);
