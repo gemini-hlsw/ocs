@@ -57,9 +57,9 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final TRecs instrument = new TRecs(tp, odp); // TODO: Avoid creating an instrument instance twice.
         final double correctedExposureTime = instrument.getFrameTime();
         final int correctedNumExposures = new Double(odp.exposureTime() / instrument.getFrameTime() + 0.5).intValue();
-        if (odp.calculationMethod() instanceof ImagingInt) {
+        if (odp.calculationMethod() instanceof ImagingExpCount) {
             return new ObservationDetails(
-                    new ImagingInt(((ImagingInt) odp.calculationMethod()).sigma(), correctedExposureTime, odp.coadds(), odp.sourceFraction(), odp.offset()),
+                    new ImagingExpCount(((ImagingExpCount) odp.calculationMethod()).sigma(), correctedExposureTime, odp.coadds(), odp.sourceFraction(), odp.offset()),
                     odp.analysisMethod()
             );
         } else if (odp.calculationMethod() instanceof ImagingS2N) {

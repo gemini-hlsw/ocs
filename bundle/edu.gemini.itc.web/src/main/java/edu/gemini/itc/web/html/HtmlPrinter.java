@@ -153,11 +153,11 @@ public final class HtmlPrinter {
                 (calcMethod instanceof SpectroscopyS2N)) {
             sb.append(String.format("S/N ratio with %d", ((S2NMethod) calcMethod).exposures()));
 
-        } else if (calcMethod instanceof ImagingInt) {
-            sb.append(String.format("integration time from a S/N ratio of %.2f for", ((ImagingInt) calcMethod).sigma()));
+        } else if (calcMethod instanceof ImagingExpCount) {
+            sb.append(String.format("integration time from a S/N ratio of %.2f for", ((ImagingExpCount) calcMethod).sigma()));
 
-        } else if (calcMethod instanceof ImagingExp) {
-            sb.append(String.format("exposure time for a S/N ratio of %.2f.", ((ImagingExp) calcMethod).sigma()));
+        } else if (calcMethod instanceof ImagingInt) {
+            sb.append(String.format("exposure time for a S/N ratio of %.2f.", ((ImagingInt) calcMethod).sigma()));
 
         } else if (calcMethod instanceof SpectroscopyInt) {
             sb.append(String.format("exposure time and number of exposures for a S/N ratio of %.1f at wavelength %.2f nm.",
@@ -168,7 +168,7 @@ public final class HtmlPrinter {
         }
 
         if (    (calcMethod instanceof ImagingS2N) ||
-                (calcMethod instanceof ImagingInt) ||
+                (calcMethod instanceof ImagingExpCount) ||
                 (calcMethod instanceof SpectroscopyS2N) ) {
             sb.append(String.format(" exposures of %.2f secs", odp.exposureTime()));
 

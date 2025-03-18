@@ -144,7 +144,7 @@ sealed trait IntMethod extends CalculationMethod {
 }
 
 // Return the exposure time and number of exposures given the desired S/N
-final case class ImagingExp(
+final case class ImagingInt(
                              sigma: Double,
                              coadds: Option[Int],
                              sourceFraction: Double,
@@ -168,8 +168,8 @@ final case class SpectroscopyInt(
 }
 
 
-// Return the number of exposures (Integration Time) given the exposure time, desired S/N, etc.
-final case class ImagingInt(
+// Return the number of exposures (count) given the exposure time, desired S/N, etc.
+final case class ImagingExpCount(
                     sigma: Double,
                     exposureTime: Double,
                     coadds: Option[Int],

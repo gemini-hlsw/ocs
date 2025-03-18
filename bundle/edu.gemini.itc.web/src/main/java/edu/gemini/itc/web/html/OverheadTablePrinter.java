@@ -8,7 +8,6 @@ import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.obs.plannedtime.OffsetOverheadCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
-import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
 import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 import edu.gemini.spModel.time.TimeAmountFormatter;
 
@@ -92,7 +91,7 @@ public class OverheadTablePrinter {
         final ObservationDetails obs = result.observation();
         final CalculationMethod calcMethod = obs.calculationMethod();
 
-        if (calcMethod instanceof ImagingInt) {
+        if (calcMethod instanceof ImagingExpCount) {
             int coadds = params.observation().calculationMethod().coaddsOrElse(1);
             Log.fine("Number of coadds = " + coadds);
             numOfExposures = (int)(((ImagingResult) result).is2nCalc().numberSourceExposures() / coadds / obs.sourceFraction());
@@ -100,7 +99,7 @@ public class OverheadTablePrinter {
             numOfExposures = ((ImagingS2N) calcMethod).exposures();
         } else if (calcMethod instanceof SpectroscopyS2N) {
             numOfExposures = ((SpectroscopyS2N) calcMethod).exposures();
-        } else if (calcMethod instanceof ImagingExp) {
+        } else if (calcMethod instanceof ImagingInt) {
             numOfExposures = printer.getNumberExposures();
         } else if (calcMethod instanceof SpectroscopyInt) {
             numOfExposures = printer.getNumberExposures();

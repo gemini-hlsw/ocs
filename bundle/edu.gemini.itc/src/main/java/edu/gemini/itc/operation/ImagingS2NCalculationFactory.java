@@ -1,8 +1,8 @@
 package edu.gemini.itc.operation;
 
 import edu.gemini.itc.base.Instrument;
-import edu.gemini.itc.shared.ImagingExp;
 import edu.gemini.itc.shared.ImagingInt;
+import edu.gemini.itc.shared.ImagingExpCount;
 import edu.gemini.itc.shared.ImagingS2N;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.shared.S2NMethod;
@@ -34,9 +34,9 @@ public final class ImagingS2NCalculationFactory {
 
         if (obs.calculationMethod() instanceof ImagingS2N) {
             return new ImagingS2NMethodACalculation(obs, instrument, srcFrac, sed_integral, sky_integral);
-        } else if (obs.calculationMethod() instanceof ImagingInt) {
+        } else if (obs.calculationMethod() instanceof ImagingExpCount) {
             return new ImagingPointS2NMethodBCalculation(obs, instrument, srcFrac, sed_integral, sky_integral);
-        } else if (obs.calculationMethod() instanceof ImagingExp) {
+        } else if (obs.calculationMethod() instanceof ImagingInt) {
             return new ImagingMethodExptime(obs, instrument, srcFrac, sed_integral, sky_integral, _sdParameters, im_qual);
         } else {
             throw new Error("Invalid calculation method");

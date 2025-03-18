@@ -69,11 +69,11 @@ object Fixture {
       UserAperture(2.0, 5.0)
     ),
     ObservationDetails(
-      ImagingInt(5, 300.0, None, 1.0, 5.0),
+      ImagingExpCount(5, 300.0, None, 1.0, 5.0),
       AutoAperture(5.5)
     ),
     ObservationDetails(
-      ImagingInt(5, 300.0, Some(5), 1.0, 5.0),
+      ImagingExpCount(5, 300.0, Some(5), 1.0, 5.0),
       UserAperture(2.0, 5.0)
     )
   )
