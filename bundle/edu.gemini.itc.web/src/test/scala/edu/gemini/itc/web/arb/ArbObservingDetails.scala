@@ -17,7 +17,7 @@ trait ArbObservationDetails {
       o <- arbitrary[Double]
     } yield ImagingS2N(n, c, e, f, o)
 
-  val genSpecroscopyS2N: Gen[SpectroscopyS2N] =
+  val genSpectroscopyS2N: Gen[SpectroscopyS2N] =
     for {
       n <- arbitrary[Int]
       c <- arbitrary[Option[Int]]
@@ -27,8 +27,25 @@ trait ArbObservationDetails {
       w <- arbitrary[Option[Double]]
     } yield SpectroscopyS2N(n, c, e, f, o, w)
 
+  val genImagingExp: Gen[ImagingExp] =
+    for {
+      s <- arbitrary[Double]
+      c <- arbitrary[Option[Int]]
+      f <- arbitrary[Double]
+      o <- arbitrary[Double]
+    } yield ImagingExp(s, c, f, o)
+
+  val genSpectroscopyInt: Gen[SpectroscopyInt] =
+    for {
+      s <- arbitrary[Double]
+      c <- arbitrary[Option[Int]]
+      f <- arbitrary[Double]
+      o <- arbitrary[Double]
+      w <- arbitrary[Double]
+    } yield SpectroscopyInt(s, w, c, f, o)
+
   val genS2NMethod: Gen[S2NMethod] =
-    Gen.oneOf(genImagingS2N, genSpecroscopyS2N)
+    Gen.oneOf(genImagingS2N, genSpectroscopyS2N)
 
   val genImagingInt: Gen[ImagingInt] =
     for {
@@ -40,10 +57,10 @@ trait ArbObservationDetails {
     } yield ImagingInt(s, e, c, f, o)
 
   val genIntMethod: Gen[IntMethod] =
-    genImagingInt // only one for now but we mirror the type structure here
+    Gen.oneOf(genImagingExp, genSpectroscopyInt)
 
   val genCalculationMethod: Gen[CalculationMethod] =
-    Gen.oneOf(genS2NMethod, genIntMethod)
+    Gen.oneOf(genS2NMethod, genIntMethod, genImagingInt)
 
   val genAutoAperture: Gen[AutoAperture] =
     arbitrary[Double].map(AutoAperture)

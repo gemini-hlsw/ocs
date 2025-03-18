@@ -2,7 +2,6 @@ package edu.gemini.itc.web.json
 
 import argonaut._, Argonaut._
 import edu.gemini.itc.shared._
-import edu.gemini.spModel.gemini.obscomp.SPSiteQuality._
 
 trait ObservationDetailsCodec {
   import edu.gemini.json.coproduct._
@@ -25,9 +24,18 @@ trait ObservationDetailsCodec {
       "offset"
     )
 
+  private val SpectroscopyIntCodec: CodecJson[SpectroscopyInt] =
+    casecodec5(SpectroscopyInt.apply, SpectroscopyInt.unapply)(
+      "sigma",
+      "wavelengthAt",
+      "coadds",
+      "sourceFraction",
+      "offset"
+    )
+
   private val IntMethodCodec: CodecJson[IntMethod] =
     CoproductCodec[IntMethod]
-      .withCase("ImagingInt", ImagingIntCodec) { case a: ImagingInt => a }
+      .withCase("SpectroscopyInt", SpectroscopyIntCodec) { case a: SpectroscopyInt => a }
       .withCase("ImagingExp", ImagingExpCodec) { case a: ImagingExp => a }
       .asCodecJson
 
@@ -50,25 +58,16 @@ trait ObservationDetailsCodec {
       "wavelengthAt"
     )
 
-  private val SpectroscopyIntCodec: CodecJson[SpectroscopyInt] =
-    casecodec5(SpectroscopyInt.apply, SpectroscopyInt.unapply)(
-      "sigma",
-      "wavelengthAt",
-      "coadds",
-      "sourceFraction",
-      "offset"
-    )
-
   private val S2NMethodCodec: CodecJson[S2NMethod] =
     CoproductCodec[S2NMethod]
       .withCase("ImagingS2N",      ImagingS2NCodec)      { case a: ImagingS2N      => a }
-      .withCase("SpectroscopyInt", SpectroscopyIntCodec) { case a: SpectroscopyInt => a }
       .withCase("SpectroscopyS2N", SpectroscopyS2NCodec) { case a: SpectroscopyS2N => a }
       .asCodecJson
 
   private implicit val CalculationMethodCodec: CodecJson[CalculationMethod] =
     CoproductCodec[CalculationMethod]
       .withCase("IntMethod", IntMethodCodec) { case a: IntMethod => a }
+      .withCase("ImagingInt", ImagingIntCodec) { case a: ImagingInt => a }
       .withCase("S2NMethod", S2NMethodCodec) { case a: S2NMethod => a }
       .asCodecJson
 
