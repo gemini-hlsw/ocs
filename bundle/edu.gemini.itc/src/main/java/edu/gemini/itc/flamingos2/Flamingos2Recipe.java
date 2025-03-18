@@ -79,8 +79,8 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
 
         if (calcMethod instanceof SpectroscopyS2N) {
             numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
-        } else if (calcMethod instanceof SpectroscopyInt) {
-            numberExposures = ((SpectroscopyInt) calcMethod).exposures();
+        } else if (calcMethod instanceof SpectroscopyIntegrationTime) {
+            numberExposures = ((SpectroscopyIntegrationTime) calcMethod).exposures();
         } else {
             throw new Error("Unsupported calculation method");
         }
@@ -91,13 +91,13 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         double totalTime;
         double wavelength = 0;
 
-        if (calcMethod instanceof SpectroscopyInt) {
+        if (calcMethod instanceof SpectroscopyIntegrationTime) {
             // Determine exposureTime & numberExposures that will give the requested S/N at wavelength.
 
-            double desiredSNR = ((SpectroscopyInt) calcMethod).sigma();
+            double desiredSNR = ((SpectroscopyIntegrationTime) calcMethod).sigma();
             Log.fine(String.format("desiredSNR = %.2f", desiredSNR));
 
-            wavelength = ((SpectroscopyInt) _obsDetailParameters.calculationMethod()).wavelengthAt();
+            wavelength = ((SpectroscopyIntegrationTime) _obsDetailParameters.calculationMethod()).wavelengthAt();
             Log.fine(String.format("Wavelength = %.2f nm", wavelength));
 
             double maxFlux = instrument.maxFlux();  // maximum useful flux

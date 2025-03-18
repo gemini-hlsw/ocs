@@ -386,7 +386,7 @@ object ITCRequest {
     val calcMethod = r.parameter("calcMethod")
     val calculationMethod = calcMethod match {
       case "intTime"  if InstrumentDetails.isImaging(i)     =>
-        ImagingInt(
+        ImagingExposureCount(
           r.doubleParameter("sigmaC"),
           r.doubleParameter("expTimeC"),
           coadds(r, CoaddsC),
@@ -394,7 +394,7 @@ object ITCRequest {
           r.doubleParameter("offset")
         )
       case "expTime"  if InstrumentDetails.isImaging(i)     =>
-        ImagingExp(
+        ImagingIntegrationTime(
           r.doubleParameter("sigmaD"),
           coadds(r, CoaddsD),
           r.doubleParameter("fracOnSourceD"),
@@ -418,7 +418,7 @@ object ITCRequest {
           None
         )
       case "intTimeSpec" if InstrumentDetails.isSpectroscopy(i) =>
-        SpectroscopyInt(
+        SpectroscopyIntegrationTime(
           r.doubleParameter("sigmaE"),
           r.doubleParameter("wavelengthE"),
           coadds(r, CoaddsE),

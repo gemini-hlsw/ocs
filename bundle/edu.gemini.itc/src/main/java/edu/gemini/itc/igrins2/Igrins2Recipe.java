@@ -84,12 +84,12 @@ public final class Igrins2Recipe {
             exposureTime = _obsDetailParameters.exposureTime();
             numberExposures = ((SpectroscopyS2N) _calcMethod).exposures();
 
-        } else if (_calcMethod instanceof SpectroscopyInt) {  // determine the optimal exposure time and number of exposures
+        } else if (_calcMethod instanceof SpectroscopyIntegrationTime) {  // determine the optimal exposure time and number of exposures
 
-            double desiredSNR = ((SpectroscopyInt) _calcMethod).sigma();
+            double desiredSNR = ((SpectroscopyIntegrationTime) _calcMethod).sigma();
             Log.fine(String.format("desiredSNR = %.2f", desiredSNR));
 
-            SnrWavelength = ((SpectroscopyInt) _obsDetailParameters.calculationMethod()).wavelengthAt() * 1000.;
+            SnrWavelength = ((SpectroscopyIntegrationTime) _obsDetailParameters.calculationMethod()).wavelengthAt() * 1000.;
             Log.fine(String.format("Wavelength = %.2f nm", SnrWavelength));
 
             if (Igrins2Arm.H.getWavelengthStart() <= SnrWavelength && SnrWavelength <= Igrins2Arm.H.getWavelengthEnd()) {

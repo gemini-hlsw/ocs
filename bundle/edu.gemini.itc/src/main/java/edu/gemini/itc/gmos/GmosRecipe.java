@@ -92,9 +92,9 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         if (calcMethod instanceof SpectroscopyS2N) {
             numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
             wavelengthAt = ((SpectroscopyS2N) _obsDetailParameters.calculationMethod()).atWithDefault();
-        } else if (calcMethod instanceof SpectroscopyInt) {
-            numberExposures = ((SpectroscopyInt) calcMethod).exposures();
-            wavelengthAt = ((SpectroscopyInt) _obsDetailParameters.calculationMethod()).wavelengthAt();
+        } else if (calcMethod instanceof SpectroscopyIntegrationTime) {
+            numberExposures = ((SpectroscopyIntegrationTime) calcMethod).exposures();
+            wavelengthAt = ((SpectroscopyIntegrationTime) _obsDetailParameters.calculationMethod()).wavelengthAt();
         } else {
             throw new Error("Unsupported calculation method");
         }
@@ -105,13 +105,13 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             results[i] = calculateSpectroscopySingleCCD(mainInstrument, instrument, ccdArray.length, exposureTime, numberExposures, wavelengthAt);
         }
 
-        if (calcMethod instanceof SpectroscopyInt) {
+        if (calcMethod instanceof SpectroscopyIntegrationTime) {
             // 1. Process all CCDs to get the peak flux and derive the maximum exposure time.
             // 2. Figure out which CCD includes the wavelength of interest.
             // 3. Iteratively determine exposureTime & numberExposures that will give the requested S/N at wavelength.
             // 4. Process all the CCDs using the final exposureTime & numberExposures and return the result.
 
-            double wavelength = ((SpectroscopyInt) _obsDetailParameters.calculationMethod()).wavelengthAt();
+            double wavelength = ((SpectroscopyIntegrationTime) _obsDetailParameters.calculationMethod()).wavelengthAt();
             Log.fine(String.format("Wavelength = %.2f nm", wavelength));
             final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
             double peakFlux = 0.0;
@@ -169,7 +169,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
             int maxExptime = Math.min(1200, (int) timeToHalfMax);     // 1200s is maximum due to cosmic rays
             Log.fine(String.format("maxExptime = %d seconds", maxExptime));
-            double desiredSNR = ((SpectroscopyInt) calcMethod).sigma();
+            double desiredSNR = ((SpectroscopyIntegrationTime) calcMethod).sigma();
             Log.fine(String.format("desiredSNR = %.2f", desiredSNR));
 
             int oldNumberExposures = 0;

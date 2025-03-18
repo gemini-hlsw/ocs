@@ -1,16 +1,12 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.base.ImagingResult;
-import edu.gemini.itc.base.Result;
 import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.flamingos2.Flamingos2;
 import edu.gemini.itc.flamingos2.Flamingos2Recipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
-import edu.gemini.spModel.obs.plannedtime.PlannedTime;
-import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator;
 import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 
 import java.io.PrintWriter;
@@ -72,7 +68,7 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
 
         _println("");
 
-        if (calcMethod instanceof SpectroscopyInt) {
+        if (calcMethod instanceof SpectroscopyIntegrationTime) {
             int exposureTime = recipe.getExposureTime();
             int numberExposures = recipe.getNumberExposures();
             _println(String.format(

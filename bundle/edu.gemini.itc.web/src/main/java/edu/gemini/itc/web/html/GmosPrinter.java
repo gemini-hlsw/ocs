@@ -8,7 +8,6 @@ import edu.gemini.itc.gmos.GmosSaturLimitRule;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.gmos.*;
-import edu.gemini.spModel.obs.plannedtime.PlannedTime;
 import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 
 import java.io.PrintWriter;
@@ -72,7 +71,7 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
         _printSkyAperture(result);
         _println("");
 
-        if (calcMethod instanceof SpectroscopyInt) {
+        if (calcMethod instanceof SpectroscopyIntegrationTime) {
             int exposureTime = recipe.getExposureTime();
             numberExposures = recipe.getNumberExposures();
             _println(String.format(
