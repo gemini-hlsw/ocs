@@ -2,7 +2,7 @@ package edu.gemini.itc.operation;
 
 import edu.gemini.itc.base.Instrument;
 import edu.gemini.itc.shared.CalculationMethod;
-import edu.gemini.itc.shared.ImagingInt;
+import edu.gemini.itc.shared.ImagingIntegrationTime;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.shared.SourceDefinition;
 import java.util.logging.Logger;
@@ -68,7 +68,7 @@ public final class ImagingMethodExptime extends ImagingS2NCalculation {
         int maxExptime = Math.min(1200, (int) timeToHalfMax);  // 1200s is the (GMOS) maximum due to cosmic rays
         Log.fine(String.format("maxExptime = %d seconds", maxExptime));
 
-        double desiredSNR = ((ImagingInt) calcMethod).sigma();
+        double desiredSNR = ((ImagingIntegrationTime) calcMethod).sigma();
         Log.fine(String.format("desiredSNR = %.2f", desiredSNR));
 
         double totalTime = exposure_time * numberExposures * (desiredSNR / snr) * (desiredSNR / snr);

@@ -27,36 +27,36 @@ trait ArbObservationDetails {
       w <- arbitrary[Option[Double]]
     } yield SpectroscopyS2N(n, c, e, f, o, w)
 
-  val genImagingInt: Gen[ImagingInt] =
+  val genImagingInt: Gen[ImagingIntegrationTime] =
     for {
       s <- arbitrary[Double]
       c <- arbitrary[Option[Int]]
       f <- arbitrary[Double]
       o <- arbitrary[Double]
-    } yield ImagingInt(s, c, f, o)
+    } yield ImagingIntegrationTime(s, c, f, o)
 
-  val genSpectroscopyInt: Gen[SpectroscopyInt] =
+  val genSpectroscopyInt: Gen[SpectroscopyIntegrationTime] =
     for {
       s <- arbitrary[Double]
       c <- arbitrary[Option[Int]]
       f <- arbitrary[Double]
       o <- arbitrary[Double]
       w <- arbitrary[Double]
-    } yield SpectroscopyInt(s, w, c, f, o)
+    } yield SpectroscopyIntegrationTime(s, w, c, f, o)
 
   val genS2NMethod: Gen[S2NMethod] =
     Gen.oneOf(genImagingS2N, genSpectroscopyS2N)
 
-  val genImagingExpCount: Gen[ImagingExpCount] =
+  val genImagingExpCount: Gen[ImagingExposureCount] =
     for {
       s <- arbitrary[Double]
       e <- arbitrary[Double]
       c <- arbitrary[Option[Int]]
       f <- arbitrary[Double]
       o <- arbitrary[Double]
-    } yield ImagingExpCount(s, e, c, f, o)
+    } yield ImagingExposureCount(s, e, c, f, o)
 
-  val genIntMethod: Gen[IntMethod] =
+  val genIntMethod: Gen[IntegrationTimeMethod] =
     Gen.oneOf(genImagingInt, genSpectroscopyInt)
 
   val genCalculationMethod: Gen[CalculationMethod] =

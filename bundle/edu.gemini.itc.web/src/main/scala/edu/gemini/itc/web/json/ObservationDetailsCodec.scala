@@ -7,8 +7,8 @@ trait ObservationDetailsCodec {
   import edu.gemini.json.coproduct._
   import edu.gemini.json.keyed._
 
-  private val ImagingExpCountCodec: CodecJson[ImagingExpCount] =
-    casecodec5(ImagingExpCount.apply, ImagingExpCount.unapply)(
+  private val ImagingExpCountCodec: CodecJson[ImagingExposureCount] =
+    casecodec5(ImagingExposureCount.apply, ImagingExposureCount.unapply)(
       "sigma",
       "exposureTime",
       "coadds",
@@ -16,16 +16,16 @@ trait ObservationDetailsCodec {
       "offset"
     )
 
-  private val ImagingIntCodec: CodecJson[ImagingInt] =
-    casecodec4(ImagingInt.apply, ImagingInt.unapply)(
+  private val ImagingIntCodec: CodecJson[ImagingIntegrationTime] =
+    casecodec4(ImagingIntegrationTime.apply, ImagingIntegrationTime.unapply)(
       "sigma",
       "coadds",
       "sourceFraction",
       "offset"
     )
 
-  private val SpectroscopyIntCodec: CodecJson[SpectroscopyInt] =
-    casecodec5(SpectroscopyInt.apply, SpectroscopyInt.unapply)(
+  private val SpectroscopyIntCodec: CodecJson[SpectroscopyIntegrationTime] =
+    casecodec5(SpectroscopyIntegrationTime.apply, SpectroscopyIntegrationTime.unapply)(
       "sigma",
       "wavelengthAt",
       "coadds",
@@ -33,10 +33,10 @@ trait ObservationDetailsCodec {
       "offset"
     )
 
-  private val IntMethodCodec: CodecJson[IntMethod] =
-    CoproductCodec[IntMethod]
-      .withCase("SpectroscopyInt", SpectroscopyIntCodec) { case a: SpectroscopyInt => a }
-      .withCase("ImagingInt", ImagingIntCodec)           { case a: ImagingInt => a }
+  private val IntMethodCodec: CodecJson[IntegrationTimeMethod] =
+    CoproductCodec[IntegrationTimeMethod]
+      .withCase("SpectroscopyIntegrationTime", SpectroscopyIntCodec) { case a: SpectroscopyIntegrationTime => a }
+      .withCase("ImagingIntegrationTime", ImagingIntCodec)           { case a: ImagingIntegrationTime => a }
       .asCodecJson
 
   private val ImagingS2NCodec: CodecJson[ImagingS2N] =
@@ -66,9 +66,9 @@ trait ObservationDetailsCodec {
 
   private implicit val CalculationMethodCodec: CodecJson[CalculationMethod] =
     CoproductCodec[CalculationMethod]
-      .withCase("IntMethod", IntMethodCodec)            { case a: IntMethod => a }
-      .withCase("ExpCountMethod", ImagingExpCountCodec) { case a: ImagingExpCount => a }
-      .withCase("S2NMethod", S2NMethodCodec)            { case a: S2NMethod => a }
+      .withCase("IntegrationTimeMethod", IntMethodCodec)     { case a: IntegrationTimeMethod => a }
+      .withCase("ExposureCountMethod", ImagingExpCountCodec) { case a: ImagingExposureCount => a }
+      .withCase("S2NMethod", S2NMethodCodec)                 { case a: S2NMethod => a }
       .asCodecJson
 
   private val AutoApertureCodec: CodecJson[AutoAperture] =

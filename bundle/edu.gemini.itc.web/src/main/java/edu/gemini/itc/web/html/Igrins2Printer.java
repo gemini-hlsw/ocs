@@ -69,7 +69,7 @@ public final class Igrins2Printer extends PrinterBase implements OverheadTablePr
         _println(String.format("Derived image size (FWHM) for a point source = %.2f arcsec.", iqAtSource));
         _println("");
 
-        if (calcMethod instanceof SpectroscopyInt) {
+        if (calcMethod instanceof SpectroscopyIntegrationTime) {
             if (exposureTime < 10) {
                 str = "Total integration time = %.1f seconds (%d x %.2f s), of which %.1f seconds is on source.";
             } else {
