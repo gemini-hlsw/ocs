@@ -334,7 +334,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         // Calculate the Peak Pixel Flux
         final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, exposureTime, SFcalc, im_qual, sed_integral, sky_integral);
 
-        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
+        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, Option.empty(), Option.apply(AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures))));
     }
 
     public int getExposureTime() {
