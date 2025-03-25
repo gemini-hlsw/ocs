@@ -118,7 +118,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
             Log.fine(String.format("peakFlux = %.0f e-", peakFlux));
 
             VisitableSampledSpectrum backgroundSpectrum = specS2N.getTotalBackgroundSpectrum();
-            if (wavelength < backgroundSpectrum.getStart() || wavelength > backgroundSpectrum.getEnd())
+            if (wavelength > 0 && (wavelength < backgroundSpectrum.getStart() || wavelength > backgroundSpectrum.getEnd()))
                 throw new RuntimeException(String.format("Wavelength %.1f out of range", wavelength));
             double background = backgroundSpectrum.getY(wavelength);
             Log.fine(String.format("Background @ %.1f nm = %.2f e- (summed over aperture)", wavelength, background));
@@ -287,7 +287,8 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         final double finalSnr = specS2N.getFinalS2NSpectrum().getY(wavelength);
         Log.fine(String.format("single S/N @ %.1f nm = %.3f", wavelength, singleSnr));
         Log.fine(String.format("final S/N @ %.1f nm = %.3f", wavelength, finalSnr));
-        if (wavelength < specS2N.getExpS2NSpectrum().getStart() || wavelength > specS2N.getExpS2NSpectrum().getEnd())
+        // 0 is used by the web forms, ignore it as a degenerate case
+        if (wavelength > 0 && (wavelength < specS2N.getExpS2NSpectrum().getStart() || wavelength > specS2N.getExpS2NSpectrum().getEnd()))
             throw new RuntimeException(String.format("Wavelength %.1f out of range", wavelength));
 
         final scala.Option<SignalToNoiseAt> sn = RecipeUtil.instance().signalToNoiseAt(wavelength, specS2N.getExpS2NSpectrum(), specS2N.getFinalS2NSpectrum());
