@@ -33,7 +33,6 @@ import java.beans.PropertyDescriptor
 import java.time.Duration
 import scala.collection.immutable.TreeMap
 import scala.collection.JavaConverters._
-import scala.math.sqrt
 
 /*
  ** The Igrins2 instrument SP model.
@@ -224,7 +223,7 @@ object Igrins2 {
   val SetupTime: Time = 7.minutes // REL-4531
   val DefaultExposureTime: Time = 30.seconds // sec (by default settings)
 
-  val MinExposureTime: Time = 1.63.seconds
+  val MinExposureTime: Time = 3.08.seconds  // REL-4667
   val MaxExposureTime: Time = 600.seconds
 
   val WavelengthCoverageLowerBound: Wavelength = Wavelength.fromMicrons(1.49)
@@ -232,14 +231,14 @@ object Igrins2 {
 
   val AllowedFowlerSamples: List[Int] = List(1, 2, 4, 8, 16)
 
-  // REL-4531
+  // REL-4531 and updated in REL-4667
   val FowlerSamplesReadoutTime: Map[Int, Time] =
-    Map(1 -> 10.0.seconds, 2 -> 12.8.seconds, 4 -> 17.4.seconds, 8 -> 25.3.seconds, 16 -> 41.seconds)
+    Map(1 -> 8.5.seconds, 2 -> 11.3.seconds, 4 -> 16.0.seconds, 8 -> 24.0.seconds, 16 -> 39.5.seconds)
 
   assert(AllowedFowlerSamples.forall(FowlerSamplesReadoutTime.contains))
 
   def fowlerSamples(expTime: Time): Int = {
-    val nFowler = ((expTime.toSeconds - 0.168)/1.45479).toInt
+    val nFowler = ((expTime.toSeconds + 1.45479 - 0.168)/1.45479).toInt  // REL-4667
     AllowedFowlerSamples.reverse.find(cur => nFowler >= cur).getOrElse(AllowedFowlerSamples.head)
   }
 

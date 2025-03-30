@@ -47,10 +47,10 @@ public final class Igrins2Recipe {
 
     private void validateInputParameters() {
         if (_calcMethod instanceof SpectroscopyS2N) {
-            if (_obsDetailParameters.exposureTime() < 1.63) {
-                throw new IllegalArgumentException("The minimum exposure time is 1.63 seconds.");
-            } else if (_obsDetailParameters.exposureTime() > 1800) {
-                throw new IllegalArgumentException("The maximum exposure time is 1800 seconds.");
+            if (_obsDetailParameters.exposureTime() < _mainInstrument[0].getMinExposureTime()) {
+                throw new IllegalArgumentException("The minimum exposure time is " + _mainInstrument[0].getMinExposureTime() + " seconds.");
+            } else if (_obsDetailParameters.exposureTime() > _mainInstrument[0].getMaxExposureTime()) {
+                throw new IllegalArgumentException("The maximum exposure time is " + _mainInstrument[0].getMaxExposureTime() + " seconds.");
             }
         }
         Validation.validate(_mainInstrument[0], _obsDetailParameters, _sdParameters);  // other general validations
