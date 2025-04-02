@@ -238,7 +238,7 @@ object Igrins2 {
   assert(AllowedFowlerSamples.forall(FowlerSamplesReadoutTime.contains))
 
   def fowlerSamples(expTime: Time): Int = {
-    val nFowler = ((expTime.toSeconds + 1.45479 - 0.168)/1.45479).toInt  // REL-4667
+    val nFowler = ((expTime.toSeconds - 1.45479 - 0.168)/1.45479).toInt  // REL-4667
     AllowedFowlerSamples.reverse.find(cur => nFowler >= cur).getOrElse(AllowedFowlerSamples.head)
   }
 
