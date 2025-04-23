@@ -25,7 +25,7 @@ class ItcServiceImpl extends ItcService {
 
   import ItcService._
 
-  def calculate(p: ItcParameters, headless: Boolean): Result = try {
+  def calculate(p: ItcParameters, includeCharts: Boolean): Result = try {
 
     // update parameters sent from client with stuff that needs to be done on the server
     val updatedParams: ItcParameters = {
@@ -53,7 +53,7 @@ class ItcServiceImpl extends ItcService {
     // execute ITC service call with updated parameters
     updatedParams.observation.calculationMethod match {
       case _: Imaging       => calculateImaging(updatedParams)
-      case _: Spectroscopy  => calculateSpectroscopy(updatedParams, headless)
+      case _: Spectroscopy  => calculateSpectroscopy(updatedParams, includeCharts)
     }
 
   } catch {
@@ -102,13 +102,13 @@ class ItcServiceImpl extends ItcService {
 
   // === Spectroscopy
 
-  private def calculateSpectroscopy(p: ItcParameters, headless: Boolean): Result =
+  private def calculateSpectroscopy(p: ItcParameters, includeCharts: Boolean): Result =
     p.instrument match {
-      case i: Flamingos2Parameters        => spectroscopyResult   (new Flamingos2Recipe(p, i), headless )
-      case i: GmosParameters              => spectroscopyResult   (new GmosRecipe(p, i),       headless )
-      case i: GnirsParameters             => spectroscopyResult   (new GnirsRecipe(p, i),      headless )
-      case i: NifsParameters              => spectroscopyResult   (new NifsRecipe(p, i),       headless )
-      case i: NiriParameters              => spectroscopyResult   (new NiriRecipe(p, i),       headless )
+      case i: Flamingos2Parameters        => spectroscopyResult   (new Flamingos2Recipe(p, i), includeCharts )
+      case i: GmosParameters              => spectroscopyResult   (new GmosRecipe(p, i),       includeCharts )
+      case i: GnirsParameters             => spectroscopyResult   (new GnirsRecipe(p, i),      includeCharts )
+      case i: NifsParameters              => spectroscopyResult   (new NifsRecipe(p, i),       includeCharts )
+      case i: NiriParameters              => spectroscopyResult   (new NiriRecipe(p, i),       includeCharts )
       case _                              => ItcResult.forMessage (s"Spectroscopy with this instrument: ${p.instrument} is not supported by ITC.")
 
     }
@@ -117,24 +117,24 @@ class ItcServiceImpl extends ItcService {
 
   private def calculateSpectroscopyCharts(p: ItcParameters): Result =
     p.instrument match {
-      case i: GmosParameters              => spectroscopyResult(new GmosRecipe(p, i),       headless = false)
-      case i: Flamingos2Parameters        => spectroscopyResult(new Flamingos2Recipe(p, i), headless = false)
-      case i: GnirsParameters             => spectroscopyResult(new GnirsRecipe(p, i),      headless = false )
-      case i: NifsParameters              => spectroscopyResult(new NifsRecipe(p, i),       headless = false )
-      case i: NiriParameters              => spectroscopyResult(new NiriRecipe(p, i),       headless = false )
+      case i: GmosParameters              => spectroscopyResult(new GmosRecipe(p, i),       includeCharts = false)
+      case i: Flamingos2Parameters        => spectroscopyResult(new Flamingos2Recipe(p, i), includeCharts = false)
+      case i: GnirsParameters             => spectroscopyResult(new GnirsRecipe(p, i),      includeCharts = false )
+      case i: NifsParameters              => spectroscopyResult(new NifsRecipe(p, i),       includeCharts = false )
+      case i: NiriParameters              => spectroscopyResult(new NiriRecipe(p, i),       includeCharts = false )
       case _                              => ItcResult.forMessage (s"Spectroscopy with this instrument: ${p.instrument} is not supported by ITC.")
 
     }
 
-  private def spectroscopyResult(recipe: SpectroscopyRecipe, headless: Boolean): Result = {
+  private def spectroscopyResult(recipe: SpectroscopyRecipe, includeCharts: Boolean): Result = {
     val r = recipe.calculateSpectroscopy()
-    val s = recipe.serviceResult(r, headless)
+    val s = recipe.serviceResult(r, includeCharts)
     ItcResult.forResult(s)
   }
 
-  private def spectroscopyResult(recipe: SpectroscopyArrayRecipe, headless: Boolean): Result = {
+  private def spectroscopyResult(recipe: SpectroscopyArrayRecipe, includeCharts: Boolean): Result = {
     val r = recipe.calculateSpectroscopy()
-    val s = recipe.serviceResult(r, headless)
+    val s = recipe.serviceResult(r, includeCharts)
     ItcResult.forResult(s)
   }
 
