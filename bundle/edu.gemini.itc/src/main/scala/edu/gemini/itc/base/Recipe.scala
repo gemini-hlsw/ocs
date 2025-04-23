@@ -128,20 +128,20 @@ object Recipe {
   // === Java helpers
 
   // One result (CCD) and a simple set of charts, this covers most cases.
-  def serviceResult(r: SpectroscopyResult, charts: JList[SpcChartData], headless: Boolean): ItcSpectroscopyResult = {
+  def serviceResult(r: SpectroscopyResult, charts: JList[SpcChartData], includeCharts: Boolean): ItcSpectroscopyResult = {
     ItcSpectroscopyResult(
       List(toCcdData(r, charts.toList)),
-      if (headless) Nil else List(SpcChartGroup(charts.toList)),
+      if (includeCharts) Nil else List(SpcChartGroup(charts.toList)),
       r.times,
       r.signalToNoiseAt
     )
   }
 
   // One result (CCD) and a set of groups of charts, this covers NIFS (1 CCD and separate groups for IFU cases).
-  def serviceGroupedResult(r: SpectroscopyResult, charts: JList[JList[SpcChartData]], headless: Boolean): ItcSpectroscopyResult = {
+  def serviceGroupedResult(r: SpectroscopyResult, charts: JList[JList[SpcChartData]], includeCharts: Boolean): ItcSpectroscopyResult = {
     ItcSpectroscopyResult(
       List(toCcdData(r, charts.toList.flatten)),
-      if (headless) Nil else charts.toList.map(l => SpcChartGroup(l.toList)),
+      if (includeCharts) Nil else charts.toList.map(l => SpcChartGroup(l.toList)),
       r.times,
       r.signalToNoiseAt
     )
@@ -149,14 +149,14 @@ object Recipe {
 
   // A set of results and a set of groups of charts, this covers GMOS (3 CCDs and potentially separate groups
   // for IFU cases, if IFU is activated).
-  def serviceGroupedResult(rs: Array[SpectroscopyResult], charts: JList[JList[SpcChartData]], headless: Boolean): ItcSpectroscopyResult = {
+  def serviceGroupedResult(rs: Array[SpectroscopyResult], charts: JList[JList[SpcChartData]], includeCharts: Boolean): ItcSpectroscopyResult = {
     val snAtArray = rs.flatMap(_.signalToNoiseAt)
     // if all the snAt ar empty it means we are out of range, so return none
     // else filter out the ones containing 0 and return the first. If none is over 0 just return the first.
     val snAt = snAtArray.find(_.finalSignalToNoise > 0).orElse(snAtArray.headOption)
     ItcSpectroscopyResult(
       rs.map(r => toCcdData(r, charts.toList.flatten)).toList,
-      if (headless) Nil else charts.toList.map(l => SpcChartGroup(l.toList)),
+      if (includeCharts) Nil else charts.toList.map(l => SpcChartGroup(l.toList)),
       rs.map(_.times).headOption.getOrElse(AllIntegrationTimes.empty),
       snAt
     )

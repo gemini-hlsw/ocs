@@ -84,7 +84,7 @@ class ItcServiceImpl extends ItcService {
       case i: GsaoiParameters             => imagingResult        (new GsaoiRecipe(p, i))
       case i: NiriParameters              => imagingResult        (new NiriRecipe(p, i))
       case i: GnirsParameters             => imagingResult        (new GnirsRecipe(p, i))
-      case _                              => ItcResult.forMessage ("Imaging with this instrument is not supported by ITC.")
+      case _                              => ItcResult.forMessage (s"Imaging with this instrument: ${p.instrument} is not supported by ITC.")
     }
 
   private def imagingResult(recipe: ImagingRecipe): Result = {
@@ -109,7 +109,7 @@ class ItcServiceImpl extends ItcService {
       case i: GnirsParameters             => spectroscopyResult   (new GnirsRecipe(p, i),      headless )
       case i: NifsParameters              => spectroscopyResult   (new NifsRecipe(p, i),       headless )
       case i: NiriParameters              => spectroscopyResult   (new NiriRecipe(p, i),       headless )
-      case _                              => ItcResult.forMessage ("Spectroscopy with this instrument is not supported by ITC.")
+      case _                              => ItcResult.forMessage (s"Spectroscopy with this instrument: ${p.instrument} is not supported by ITC.")
 
     }
 
@@ -117,8 +117,12 @@ class ItcServiceImpl extends ItcService {
 
   private def calculateSpectroscopyCharts(p: ItcParameters): Result =
     p.instrument match {
-      case i: GmosParameters              => spectroscopyResult(new GmosRecipe(p, i), false)
-      case _                              => ItcResult.forMessage ("Spectroscopy with this instrument is not supported by ITC.")
+      case i: GmosParameters              => spectroscopyResult(new GmosRecipe(p, i),       headless = false)
+      case i: Flamingos2Parameters        => spectroscopyResult(new Flamingos2Recipe(p, i), headless = false)
+      case i: GnirsParameters             => spectroscopyResult(new GnirsRecipe(p, i),      headless = false )
+      case i: NifsParameters              => spectroscopyResult(new NifsRecipe(p, i),       headless = false )
+      case i: NiriParameters              => spectroscopyResult(new NiriRecipe(p, i),       headless = false )
+      case _                              => ItcResult.forMessage (s"Spectroscopy with this instrument: ${p.instrument} is not supported by ITC.")
 
     }
 
