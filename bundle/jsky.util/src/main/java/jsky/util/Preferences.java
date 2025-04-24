@@ -327,8 +327,12 @@ public class Preferences {
     private static void _centerComponent(Component component) {
         Dimension dim = component.getPreferredSize();
         if (dim.width > 1 && dim.height > 1) {
-            Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-            component.setLocation(screen.width / 2 - dim.width / 2, screen.height / 2 - dim.height / 2);
+            PointerInfo pointerInfo = MouseInfo.getPointerInfo();
+            if (pointerInfo != null) {
+                LOG.info("Placing " + component.getName() + " on " + pointerInfo.getDevice().getIDstring());
+                Rectangle screen = pointerInfo.getDevice().getDefaultConfiguration().getBounds();
+                component.setLocation(screen.x + (screen.width - dim.width) / 2, screen.y + (screen.height - dim.height) / 2);
+            }
         }
     }
 

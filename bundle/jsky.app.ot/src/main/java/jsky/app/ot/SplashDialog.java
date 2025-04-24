@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.URL;
+import java.util.logging.Logger;
 
 import edu.gemini.spModel.core.Version;
 import jsky.util.gui.Resources;
@@ -19,6 +20,7 @@ import jsky.app.ot.viewer.ViewerService;
 
 public final class SplashDialog extends JFrame {
 
+    private static final Logger Log = Logger.getLogger( SplashDialog.class.getName() );
     private static SplashDialog instance;
     private static URL welcomeTextUrl;
 
@@ -45,8 +47,13 @@ public final class SplashDialog extends JFrame {
         getContentPane().add(splashPanel, BorderLayout.CENTER);
         final Dimension dim = splashPanel.getPreferredSize();
         splashPanel.setPreferredSize(dim);
-        final Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-        setLocation(screen.width / 2 - dim.width / 2, screen.height / 2 - dim.height / 2);
+
+        PointerInfo pointerInfo = MouseInfo.getPointerInfo();
+        if (pointerInfo != null) {
+            Log.info("Starting splash screen on " + pointerInfo.getDevice().getIDstring());
+            Rectangle screen = pointerInfo.getDevice().getDefaultConfiguration().getBounds();
+            setLocation(screen.x + (screen.width - dim.width) / 2, screen.y + (screen.height - dim.height) / 2);
+        }
         int op = quitOnClose ? WindowConstants.EXIT_ON_CLOSE : WindowConstants.DISPOSE_ON_CLOSE;
         setDefaultCloseOperation(op);
 

@@ -20,7 +20,7 @@ import jsky.app.ot.OT
 import jsky.app.ot.vcs.VcsOtClient
 import jsky.app.ot.viewer.DBProgramChooserFilter
 import java.awt
-import java.awt.Color
+import java.awt.{Color, MouseInfo}
 import java.awt.event.{MouseAdapter, MouseEvent}
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing
@@ -97,7 +97,8 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
 
     try {
       modal = true
-      Option(parent).foreach(setLocationRelativeTo)
+      val screen = MouseInfo.getPointerInfo.getDevice.getDefaultConfiguration.getBounds
+      location = new Point(screen.x + (screen.width - size.width)/2, screen.y + (screen.height - size.height)/2)
       updateStorage()
       open()
       selection
