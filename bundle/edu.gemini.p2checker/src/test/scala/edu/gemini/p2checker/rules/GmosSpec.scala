@@ -13,16 +13,16 @@ final class GmosSpec extends RuleSpec {
 
   val ruleSet = new GmosRule()
 
-  // === REL-2143: Don't allow E2V CCDs for GMOS-S programs after 2014A.
-  "No E2V for GMOS-S after 2014A rule" should {
+  // === REL-4509: Don't allow E2V CCDs.
+  "No E2V for GMOS" should {
 
     import GmosCommonType.DetectorManufacturer._
     import SPComponentType._
 
-    val E2VErrId = "GmosRule_POST_2014A_GMOS_S_WITH_E2V_RULE"
+    val E2VErrId = "GmosRule_POST_2014A_GMOS_WITH_E2V_RULE"
 
-    "give no error for unknown semester with E2V" in {
-      expectNoneOf(E2VErrId) { setup[InstGmosSouth](INSTRUMENT_GMOSSOUTH) { d =>
+    "give an error for unknown semester with E2V" in {
+      expectAllOf(E2VErrId) { setup[InstGmosSouth](INSTRUMENT_GMOSSOUTH) { d =>
         d.setDetectorManufacturer(E2V)
       }}
     }
@@ -69,8 +69,8 @@ final class GmosSpec extends RuleSpec {
       }}
     }
 
-    "not affect GMOS-N for semester 2015A with E2V" in {
-      expectNoneOf(E2VErrId) { setup[InstGmosNorth](INSTRUMENT_GMOS, "GN-2015A-Q-34") { d =>
+    "give an error for GMOS-N for semester 2015A with E2V" in {
+      expectAllOf(E2VErrId) { setup[InstGmosNorth](INSTRUMENT_GMOS, "GN-2015A-Q-34") { d =>
         d.setDetectorManufacturer(E2V)
       }}
     }
