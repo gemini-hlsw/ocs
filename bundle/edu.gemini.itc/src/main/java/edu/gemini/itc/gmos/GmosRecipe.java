@@ -182,7 +182,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 oldNumberExposures = numberExposures;
                 oldExposureTime = exposureTime;
                 // Estimate the time required to achieve the requested S/N assuming S/N scales as sqrt(t):
-                double totalTime = exposureTime * numberExposures * (desiredSNR / snr) * (desiredSNR / snr);
+                double totalTime = (double) exposureTime * numberExposures * (desiredSNR / snr) * (desiredSNR / snr);
                 Log.fine(String.format("totalTime = %.2f", totalTime));
                 numberExposures = (int) Math.ceil(totalTime / maxExptime);
                 Log.fine(String.format("numberExposures = %d", numberExposures));
@@ -190,6 +190,9 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 Log.fine(String.format("exposureTime = %d", exposureTime));
 
                 if ((numberExposures != oldNumberExposures || exposureTime != oldExposureTime) && iterations <= 5) {
+                    if (numberExposures > 1000) {
+                        throw new RuntimeException("Configuration would require " + numberExposures + " exposures");
+                    }
                     // Try one more iteration to see if we can get closer to the requested S/N
                     final Gmos instrument = ccdArray[ccd];
                     final SpectroscopyResult newresult = calculateSpectroscopySingleCCD(mainInstrument, instrument, ccdArray.length, exposureTime, numberExposures, wavelength);
