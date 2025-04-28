@@ -3080,6 +3080,7 @@ During 25A, only one camera position will be available at a time. Please work wi
               <param name="acquisitionMirror" value="IN"/>
               <param name="decker" value="LR_IFU"/>
               <param name="exposureTime" value="6.0"/>
+              <param name="coadds" value="1"/>
               <param name="filter" value="ORDER_4"/>
               <param name="slitWidth" value="LR_IFU"/>
             </paramset>
@@ -3457,6 +3458,7 @@ Note that there is a ~3% ghosting effect seen with the ND100X+H2 filter combinat
               <param name="acquisitionMirror" value="IN"/>
               <param name="decker" value="LR_IFU"/>
               <param name="exposureTime" value="6.0"/>
+              <param name="coadds" value="1"/>
               <param name="filter" value="ORDER_4"/>
               <param name="slitWidth" value="LR_IFU"/>
             </paramset>
@@ -3600,6 +3602,7 @@ Note that there is a ~3% ghosting effect seen with the ND100X+H2 filter combinat
               <param name="acquisitionMirror" value="IN"/>
               <param name="decker" value="LR_IFU"/>
               <param name="exposureTime" value="6.0"/>
+              <param name="coadds" value="1"/>
               <param name="filter" value="ORDER_4"/>
               <param name="slitWidth" value="LR_IFU"/>
             </paramset>
@@ -3743,6 +3746,7 @@ Note that there is a ~3% ghosting effect seen with the ND100X+H2 filter combinat
               <param name="acquisitionMirror" value="IN"/>
               <param name="decker" value="LR_IFU"/>
               <param name="exposureTime" value="6.0"/>
+              <param name="coadds" value="1"/>
               <param name="filter" value="ORDER_4"/>
               <param name="slitWidth" value="LR_IFU"/>
             </paramset>
@@ -4051,6 +4055,7 @@ Note that the target component in the associated spectroscopy observation must b
               <param name="acquisitionMirror" value="IN"/>
               <param name="decker" value="LR_IFU"/>
               <param name="exposureTime" value="6.0"/>
+              <param name="coadds" value="1"/>
               <param name="filter" value="ORDER_4"/>
               <param name="slitWidth" value="LR_IFU"/>
             </paramset>
@@ -4679,6 +4684,7 @@ Testing on sky, albeit at a single elevation and a single set of Cassegrain Rota
               <param name="acquisitionMirror" value="IN"/>
               <param name="decker" value="LR_IFU"/>
               <param name="exposureTime" value="6.0"/>
+              <param name="coadds" value="1"/>
               <param name="filter" value="ORDER_4"/>
               <param name="slitWidth" value="LR_IFU"/>
             </paramset>
