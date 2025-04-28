@@ -139,7 +139,11 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
                 return true;
             }
         },
-        Y("Y (1.02 um)", "Y", new Some<>(1.02),                   Ictd.track("Y")),
+        Y("Y (1.02 um)", "Y", new Some<>(1.02),                   Ictd.unavailable()) {
+            @Override public boolean isObsolete() { //REL-2501 - This filter was never purchased....
+                return true;
+            }
+        },
         F1056("F1056 (1.056 um)", "F1056", new Some<>(1.056),     Ictd.unavailable()) {
             @Override public boolean isObsolete() {
                 return true;
