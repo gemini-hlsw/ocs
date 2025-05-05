@@ -10,7 +10,7 @@ import edu.gemini.spModel.pio.xml.PioXmlFactory
 
 object To2025B extends Migration {
 
-  override val version = Version.`match`("2025A-1")
+  override val version = Version.`match`("2025B-1")
 
   val fact = new PioXmlFactory
 
