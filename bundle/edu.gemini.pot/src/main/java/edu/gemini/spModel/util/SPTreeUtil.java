@@ -274,7 +274,7 @@ public class SPTreeUtil {
         if (sc == null || narrowType == null) return null;
 
         List<ISPSeqComponent> l = DBSequenceNodeService.findSeqComponentsByNarrowType(sc, narrowType, false, noObserve);
-        if (l != null && l.size() != 0) {
+        if (l != null && !l.isEmpty()) {
              return l.get(0);
         }
 
