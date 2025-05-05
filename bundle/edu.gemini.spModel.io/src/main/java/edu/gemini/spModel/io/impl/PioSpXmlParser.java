@@ -25,6 +25,7 @@ import edu.gemini.spModel.io.impl.migration.to2017B.To2017B;
 import edu.gemini.spModel.io.impl.migration.to2018A.To2018A;
 import edu.gemini.spModel.io.impl.migration.to2020A.To2020A;
 import edu.gemini.spModel.io.impl.migration.to2023A.To2023A;
+import edu.gemini.spModel.io.impl.migration.to2025B.To2025B;
 import edu.gemini.spModel.io.impl.migration.toPalote.Grillo2Palote;
 import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obscomp.SPGroup;
@@ -246,6 +247,9 @@ public final class PioSpXmlParser {
 
         // Update pre-2023A programs
         To2023A.updateProgram(doc);
+
+        // Update pre-2025B programs
+        To2025B.updateProgram(doc);
 
         // We will special case the Phase 1 container.
         Container p1Container = null;
