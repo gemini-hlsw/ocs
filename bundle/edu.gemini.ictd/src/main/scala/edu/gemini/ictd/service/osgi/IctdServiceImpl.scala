@@ -1,14 +1,13 @@
 package edu.gemini.ictd.service.osgi
 
 import java.security.{AccessControlException, Permission, Principal}
-
 import edu.gemini.ictd.IctdDatabase
+import edu.gemini.ictd.IctdDatabase.Configuration
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.ictd.{IctdService, IctdSummary}
 import edu.gemini.util.security.permission.StaffPermission
 import edu.gemini.util.security.policy.ImplicitPolicy
-
 import scalaz.effect.IO
 
 /**
