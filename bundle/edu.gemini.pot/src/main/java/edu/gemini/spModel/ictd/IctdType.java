@@ -7,7 +7,7 @@ package edu.gemini.spModel.ictd;
 public interface IctdType {
 
     /**
-     * Describes how to termine the availability of the associated instrument
+     * Describes how to determine the availability of the associated instrument
      * feature.
      */
     IctdTracking ictdTracking();
