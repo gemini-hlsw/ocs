@@ -58,8 +58,7 @@ public final class Flamingos2Rule implements IRule {
                 "Exposure time (%.1f) below minimum for read mode (%.1f).";
 
         private static final String MILLISEC_MESSAGE =
-                "Millisecond percision exposure times are only allowed for sub " +
-                      Flamingos2.FRACTIONAL_EXP_TIME_MAX + " second exposures.";
+                "Exposure time must be an integer.";
 
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
             Double expTime = SequenceRule.getExposureTime(config);
@@ -77,7 +76,7 @@ public final class Flamingos2Rule implements IRule {
                 }
             }
 
-            if ((expTime > Flamingos2.FRACTIONAL_EXP_TIME_MAX) && (expTime != Math.floor(expTime))) {
+            if ((expTime != Math.floor(expTime))) {
                 return new Problem(ERROR, PREFIX+"EXPOSURE_TIME_RULE_MILLISEC_MESSAGE", MILLISEC_MESSAGE,
                         SequenceRule.getInstrumentOrSequenceNode(step, elems, config));
             }

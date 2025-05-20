@@ -93,9 +93,9 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
                 if (val < min) {
                     fg = FATAL_FG_COLOR;
                     txt = String.format("Below minimum (%.1f sec).", min);
-                } else if ((val > Flamingos2.FRACTIONAL_EXP_TIME_MAX) && (val != Math.floor(val))) {
+                } else if (val != Math.floor(val)) {
                     fg = FATAL_FG_COLOR;
-                    txt = "Millisec precision not supported over " + Flamingos2.FRACTIONAL_EXP_TIME_MAX + " sec.";
+                    txt = "Exposure time must be an integer.";
                 } else if (val < rec) {
                     fg = WARNING_FG_COLOR;
                     final String formatStr = (rec < Flamingos2.FRACTIONAL_EXP_TIME_MAX) ? "%.1f" : "%.0f";
