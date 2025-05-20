@@ -19,13 +19,16 @@ public class Platform {
     
     public static final boolean IS_MAC = System.getProperty("os.name").contains("Mac");
     public static final boolean IS_WINDOWS = System.getProperty("os.name").contains("Windows");
-    
+    public static final boolean IS_LINUX = System.getProperty("os.name").contains("Linux");
+
     public static final int MENU_ACTION_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask(); 
     
     public static final int TOGGLE_ACTION_MASK = 
         IS_MAC ? InputEvent.META_DOWN_MASK : InputEvent.CTRL_DOWN_MASK;
     
     static {
+
+        LOGGER.fine("os.name = " + System.getProperty("os.name"));
 
         // Make sure all the editor keys are mapped to ACTION_MASK instead of just using
         // CTRL. This only changes things on the Mac.
@@ -68,17 +71,11 @@ public class Platform {
             if (IS_WINDOWS) {
                 Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + url);
             } else if (IS_MAC) {
-                Runtime.getRuntime().exec("/usr/bin/open " + url);                
+                Runtime.getRuntime().exec("/usr/bin/open " + url);
+            } else if (IS_LINUX) {
+                Runtime.getRuntime().exec("xdg-open " + url);
             } else {
-                Process p = Runtime.getRuntime().exec("firefox -remote openURL(" + url + ")");
-                try {
-                    int exitCode = p.waitFor();
-                    if (exitCode != 0)
-                        Runtime.getRuntime().exec("firefox " + url);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    throw new IOException("Operation was interrupted.");
-                }                
+                Runtime.getRuntime().exec("firefox " + url);
             }
             return false;
         } catch (IOException ioe) {
