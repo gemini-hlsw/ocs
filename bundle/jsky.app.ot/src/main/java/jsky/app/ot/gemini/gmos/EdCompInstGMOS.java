@@ -456,7 +456,9 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
             _w.centralSpectrumButton.setText("Central Spectrum: spectroscopy of central 75\" FOV");
             _w.centralStampButton.setText("Central Stamp: 22\" x 22\" imaging FOV");
             _w.customButton.setText("Custom ROI");
-            _w.detectorManufacturerComboBox.setEnabled(true); // Only allow to ever change from E2V to Hammamatsu
+            // Only allow to ever change from E2V to Hammamatsu
+            // for  incomplete observations. Non staff can change it according to REL-4509
+            _w.detectorManufacturerComboBox.setEnabled(isEnabled());
         } else {// HAMAMATSU:
             if (OTOptions.isStaff(getProgram().getProgramID())) {
                 _w.ccd3AmpButton.setVisible(false);
@@ -467,7 +469,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
                 _w.ccd6AmpButton.setVisible(false);
                 _w.ccd12AmpButton.setVisible(false);
             }
-            _w.detectorManufacturerComboBox.setEnabled(false); // Only allow to ever change from E2V to Hammamatsu
+            _w.detectorManufacturerComboBox.setEnabled(false); // Never allow to change from Hammamatsu to E2V
             _w.noROIButton.setText("Full Frame Readout");
             _w.ccd2Button.setText("CCD2: 2.75' x 5.5' imaging FOV");
             _w.centralSpectrumButton.setText("Central Spectrum: spectroscopy of central 80\" FOV");
