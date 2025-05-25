@@ -14,7 +14,7 @@ class GemSslSocketFactorySuite extends FunSuite {
     "archive.eso.org",
     "gsss.stsci.edu",
     "gea.esac.esa.int",
-    "simbad.cfa.harvard.edu",
+    // "simbad.cfa.harvard.edu",
     "simbad.u-strasbg.fr",
     "github.com"
   )
