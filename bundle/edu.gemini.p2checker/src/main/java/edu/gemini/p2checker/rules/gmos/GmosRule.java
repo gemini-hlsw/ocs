@@ -1290,7 +1290,9 @@ public final class GmosRule implements IRule {
     }
 
     /**
-     * E2V p2 rule
+     * E2V p2 rule: If GMOS-[N|S] is used with E2V after a given semester.
+     * This can happen when PIs copy parts of old programs into new ones. PIs will be able to change the detector
+     * settings themselves only once from E2V to Hammamtsu.
      */
     private static IConfigRule createE2VRule(
             final SPComponentType instrumentType,
@@ -1319,15 +1321,13 @@ public final class GmosRule implements IRule {
     }
 
     /**
-     * ERROR: If GMOS-S is used with E2V after semester 2014A.
-     * This can happen when PIs copy parts of old programs into new ones. PIs will not be able to change the detector
-     * settings themselves and will have to have a staff member help them.
+     * If GMOS-S is used with E2V after semester 2014B.
      */
     private static final Semester SEMESTER_2014B = new Semester(2014, Semester.Half.B);
-    private static final IConfigRule POST_2014A_GMOSS_WITH_E2V = createE2VRule(
+    private static final IConfigRule POST_2014B_GMOSS_WITH_E2V = createE2VRule(
             InstGmosSouth.SP_TYPE,
             SEMESTER_2014B,
-            "POST_2014A_GMOSS_WITH_E2V_RULE"
+            "POST_2014B_GMOSS_WITH_E2V_RULE"
     );
 
     /**
@@ -1989,7 +1989,7 @@ public final class GmosRule implements IRule {
         GMOS_RULES.add(NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE);
         GMOS_RULES.add(new MdfMaskNameRule(Problem.Type.ERROR));
         GMOS_RULES.add(new MdfMaskNameRule(Problem.Type.WARNING));
-        GMOS_RULES.add(POST_2014A_GMOSS_WITH_E2V);
+        GMOS_RULES.add(POST_2014B_GMOSS_WITH_E2V);
         GMOS_RULES.add(POST_2017A_GMOSN_WITH_E2V);
     }
 
