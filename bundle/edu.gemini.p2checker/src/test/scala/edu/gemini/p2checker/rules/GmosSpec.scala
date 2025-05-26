@@ -14,12 +14,12 @@ final class GmosSpec extends RuleSpec {
   val ruleSet = new GmosRule()
 
   // === REL-4509: Don't allow E2V CCDs.
-  "No E2V for GMOS" should {
+  "No E2V for GMOS-S after 2014B" should {
 
     import GmosCommonType.DetectorManufacturer._
     import SPComponentType._
 
-    val E2VErrId = "GmosRule_POST_2014A_GMOS_WITH_E2V_RULE"
+    val E2VErrId = "GmosRule_POST_2014B_GMOSS_WITH_E2V_RULE"
 
     "give an error for unknown semester with E2V" in {
       expectAllOf(E2VErrId) { setup[InstGmosSouth](INSTRUMENT_GMOSSOUTH) { d =>
@@ -68,10 +68,48 @@ final class GmosSpec extends RuleSpec {
         d.setDetectorManufacturer(HAMAMATSU)
       }}
     }
+  }
 
-    "give an error for GMOS-N for semester 2015A with E2V" in {
-      expectAllOf(E2VErrId) { setup[InstGmosNorth](INSTRUMENT_GMOS, "GN-2015A-Q-34") { d =>
+  "No E2V for GMOS-N after 2017A" should {
+
+    import GmosCommonType.DetectorManufacturer._
+    import SPComponentType._
+
+    val E2VErrId = "GmosRule_POST_2017A_GMOSN_WITH_E2V_RULE"
+
+    "give an error for GMOS-N for unknown semester with E2V" in {
+      expectAllOf(E2VErrId) { setup[InstGmosNorth](INSTRUMENT_GMOS) { d =>
         d.setDetectorManufacturer(E2V)
+      }}
+    }
+
+    "give no error for GMOS-N for semester 2015A with E2V" in {
+      expectNoneOf(E2VErrId) { setup[InstGmosNorth](INSTRUMENT_GMOS, "GN-2015A-Q-34") { d =>
+        d.setDetectorManufacturer(E2V)
+      }}
+    }
+
+    "give no error for GMOS-N for semester 2016B with E2V" in {
+      expectNoneOf(E2VErrId) { setup[InstGmosNorth](INSTRUMENT_GMOS, "GN-2016B-Q-34") { d =>
+        d.setDetectorManufacturer(E2V)
+      }}
+    }
+
+    "give no error for GMOS-N for semester 2017A with E2V" in {
+      expectAllOf(E2VErrId) { setup[InstGmosNorth](INSTRUMENT_GMOS, "GN-2017A-Q-34") { d =>
+        d.setDetectorManufacturer(E2V)
+      }}
+    }
+
+    "give an error for GMOS-N for semester 2017B with E2V" in {
+      expectAllOf(E2VErrId) { setup[InstGmosNorth](INSTRUMENT_GMOS, "GN-2017B-Q-34") { d =>
+        d.setDetectorManufacturer(E2V)
+      }}
+    }
+
+    "give no error for GMOS-N for semester 2018A with Hamamatsu" in {
+      expectNoneOf(E2VErrId) { setup[InstGmosNorth](INSTRUMENT_GMOS, "GN-2018A-Q-34") { d =>
+        d.setDetectorManufacturer(HAMAMATSU)
       }}
     }
   }
