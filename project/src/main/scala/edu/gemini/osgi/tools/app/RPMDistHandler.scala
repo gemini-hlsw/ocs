@@ -64,7 +64,7 @@ class RPMDistHandler(jre: Option[String]) extends DistHandler {
       val jas = new File(wd, "rpm.spec")
       Files.copy(s.toPath, jas.toPath)
       // Replace
-      val lines = Source.fromFile(jas).getLines // use fromFile here 
+      val lines = Source.fromFile(jas).getLines // use fromFile here
       val  out = for {
           in  <- lines
         } yield in.replaceAll("@VERSION@", version)
@@ -93,6 +93,7 @@ class RPMDistHandler(jre: Option[String]) extends DistHandler {
     session.setPassword(remoteBuildInfo.password)
     session.setTimeout(remoteBuildInfo.timeout)
     session.connect
+    log.info(s"ssh connection to ${remoteBuildInfo.hostname} done.")
 
     // Create an SFTP session to transfer to / from Linux VM.
     val rpmBuildDir = "rpmbuild"
@@ -109,17 +110,17 @@ class RPMDistHandler(jre: Option[String]) extends DistHandler {
       }
 
     // Create remote directories if they don't exist and cd into rpmbuild since we do everything in here.
-    log.info("Creating remote directories.")
+    log.info(s"Creating remote directories $rpmBuildDir.")
     remoteMkdir(rpmBuildDir)
     sftp.cd(rpmBuildDir)
     remoteMkdir("SOURCES")
 
-    log.info("Copying tarball.")
     val destArchiveFile = s"SOURCES/${name}.tar.gz"
+    log.info(s"Copying tarball from ${archiveName.getAbsolutePath} ${destArchiveFile}.")
     sftp.put(archiveName.getAbsolutePath, destArchiveFile)
 
-    log.info("Copying RPM spec file.")
     val destSpecFile = "rpm.spec"
+    log.info(s"Copying RPM spec file ${specPath.getAbsolutePath} $destSpecFile.")
     sftp.put(specPath.getAbsolutePath, destSpecFile)
 
     // Remote execution of rpmbuild.
@@ -127,13 +128,20 @@ class RPMDistHandler(jre: Option[String]) extends DistHandler {
     log.info("Opening ssh channel.")
     val ssh = session.openChannel("exec").asInstanceOf[ChannelExec]
     val cmd = s"rm -rf /home/software/.rpmmacros && cd $rpmBuildDir && rpmbuild -bb $destSpecFile"
+    log.info(s"Command $cmd")
     ssh.setCommand(cmd)
 
-    log.info("Executing remote rpmbuild.")
+    log.info(s"Executing remote rpmbuild with timeout ${remoteBuildInfo.timeout}.")
     ssh.connect(remoteBuildInfo.timeout)
 
+    var counter = 0
     // Unfortunately, the only way to wait for rpmbuild to finish is to continuously poll until isClosed returns true.
-    while (!ssh.isClosed) Thread.sleep(1000)
+    while (!ssh.isClosed) {
+      counter = counter + 1
+      log.info(s"Command wait step $counter.")
+      Thread.sleep(1000)
+    }
+    log.info(s"Completed rpm build command")
     ssh.disconnect
 
     // Retrieve the constructed RPMs.
@@ -142,10 +150,12 @@ class RPMDistHandler(jre: Option[String]) extends DistHandler {
 
     val rpmName = execName.replace("_", "-")
     sftp.ls(s"RPMS/${rpmName}*.rpm").foreach { f =>
+      log.info(s"remote file $f")
       val fStr           = f.toString
       val remoteRpmFilename = fStr.substring(fStr.lastIndexOf(" ")+1)
       val remoteRpmFile     = s"RPMS/$remoteRpmFilename"
       val localRpmFile      = new File(rpmOutputDir, remoteRpmFilename).toPath.toString
+      log.info(s"get remote: $remoteRpmFile to local $localRpmFile")
       sftp.get(remoteRpmFile, localRpmFile)
       sftp.rm(remoteRpmFile)
     }
