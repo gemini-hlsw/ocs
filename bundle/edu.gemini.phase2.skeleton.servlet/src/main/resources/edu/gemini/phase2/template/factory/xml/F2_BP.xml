@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2023A-1" subtype="basic" key="9508d5f0-e7fb-4d57-a28d-ae46b81397ed" name="F2-BP-2025A">
+  <container kind="program" type="Program" version="2025B-1" subtype="basic" key="9508d5f0-e7fb-4d57-a28d-ae46b81397ed" name="F2-BP-2025A">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="FLAMINGOS-2 PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -42,7 +42,9 @@
 2016-Feb-10: Put ABBA offsets into Repeat iterators.  Change Tellurc "Night Baseline GCAL" to Arc. (astephens)
 2019-Apr-20: Updated Imaging, Spectroscopy and MOS templates. The notes were also expanded.
 2020-May-12: Updated Imaging, Spectroscopy and MOS templates. The notes were also expanded (rdiaz).
-2025-Apr-17: Use smart flat for MOS mask daytime image</value>
+2025-Apr-17: Use smart flat for MOS mask daytime image
+2025-Apr-30: Put arcs/flats at the end of MOS science sequences
+2025-May-25: Set class for MOS mask daytime image to dayCal</value>
         </param>
       </paramset>
     </container>
@@ -1884,6 +1886,7 @@ Additional calibration targets and resources are located at the webpage http://w
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="202d6c0a-92ff-4978-8331-477f0742de02" name="Flat">
               <paramset name="Flat" kind="dataObj">
                 <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
                 <param name="coadds" value="1"/>
                 <param name="exposureTime" value="10.0"/>
               </paramset>
@@ -2791,6 +2794,7 @@ Additional calibration targets and resources are located at the webpage http://w
     <paramset name="node">
       <param name="key" value="c72e6397-db0f-40d9-a8f0-d4a05c998f64"/>
       <param name="c194f5a0-a3bc-4d68-b98d-2b51e6d54414" value="1"/>
+      <param name="343a8640-5b0d-41b1-850e-38114b1333dd" value="144"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d26d02c9-a616-4b76-b52c-c8dfb0ae93ea"/>
@@ -3533,6 +3537,7 @@ Additional calibration targets and resources are located at the webpage http://w
     <paramset name="node">
       <param name="key" value="202d6c0a-92ff-4978-8331-477f0742de02"/>
       <param name="c194f5a0-a3bc-4d68-b98d-2b51e6d54414" value="1"/>
+      <param name="343a8640-5b0d-41b1-850e-38114b1333dd" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="1a3aa3b5-5c1d-457f-8b73-c8ee993743e0"/>
