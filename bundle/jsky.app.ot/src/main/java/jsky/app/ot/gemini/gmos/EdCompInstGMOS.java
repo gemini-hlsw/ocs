@@ -497,6 +497,10 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
             _w.xRange.setEditable(false);
             _w.yRange.setEditable(false);
         }
+        // Make sure for the nth time nobody can edit these
+        _w.ccd3AmpButton.setEnabled(false);
+        _w.ccd6AmpButton.setEnabled(false);
+        _w.ccd12AmpButton.setEnabled(false);
 
     }
 
