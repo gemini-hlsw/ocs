@@ -147,12 +147,14 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
             // Calculate the S/N and verify that the answer is the same:
             Log.fine(String.format("Predicted S/N = %.3f e-", calculateSNR(signal, background, darkNoise, readNoise, skyAper, initialNumberExposures)));
 
-            double maxExposureTime = Math.min(300, maxFlux / 2. / peakFlux * initialExposureTime);
+            // The maximum exposure time is that which gives 60% of the maximum allowed flux, up to a maximum of 600s:
+            double maxExposureTime = Math.min(600, 0.6 * maxFlux / peakFlux * initialExposureTime);
             Log.fine(String.format("maxExposureTime = %.2f seconds", maxExposureTime));
 
-            if (maxExposureTime < 1) throw new RuntimeException(String.format(
+            // If the maximum exposure time for this target + configuration is less than the minimum then throw an error:
+            if (maxExposureTime < 2) throw new RuntimeException(String.format(
                     "This target is too bright for this configuration.\n" +
-                            "The detector will reach %.0f ADU in %.2f seconds.", maxFlux/2., maxExposureTime));
+                            "The detector will reach %.0f ADU in %.2f seconds.", 0.6 * maxFlux, maxExposureTime));
 
             // Step through each of the read modes and see which works best.
             List<ReadMode> readModes = Arrays.asList(ReadMode.FAINT_OBJECT_SPEC, ReadMode.MEDIUM_OBJECT_SPEC, ReadMode.BRIGHT_OBJECT_SPEC);
@@ -194,11 +196,13 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
             Log.fine("=== The read mode, exposure time, and number of exposures have been decided ===");
             Log.fine("readMode = " + readMode.toString());
             Log.fine(String.format("numberExposures = %d", numberExposures));
+            if (numberExposures > 1000) {
+                throw new RuntimeException("Configuration would require " + numberExposures + " exposures");
+            }
             if (exposureTime < readMode.minimumExpTimeSec()) {
                 Log.fine("Increasing exposure time to the minimum allowed for the read mode");
                 exposureTime = readMode.minimumExpTimeSec();
             }
-
             exposureTime = Math.ceil(exposureTime);  // finally round up to an integer
             Log.fine(String.format("exposureTime = %.0f", exposureTime));
         }
