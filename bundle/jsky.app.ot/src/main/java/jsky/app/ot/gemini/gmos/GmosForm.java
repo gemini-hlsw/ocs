@@ -142,6 +142,9 @@ public class GmosForm<T extends InstGmosCommon> extends JPanel {
         xRange.setAllowNegative(false);
         yRange.setAllowNegative(false);
 
+        ccd3AmpButton.setEnabled(false);
+        ccd6AmpButton.setEnabled(false);
+        ccd12AmpButton.setEnabled(false);
         //======== this ========
         setLayout(new GridBagLayout());
         setBorder(PANEL_BORDER);
