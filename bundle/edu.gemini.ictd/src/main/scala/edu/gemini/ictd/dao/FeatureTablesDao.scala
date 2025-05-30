@@ -1,14 +1,9 @@
 package edu.gemini.ictd.dao
 
-import edu.gemini.ictd._
 import edu.gemini.pot.sp.Instrument
-import edu.gemini.spModel.ictd.Availability
 
 import doobie.imports._
 
-import scala.collection.immutable.TreeMap
-
-import scalaz._
 import scalaz.Scalaz._
 
 import shapeless.tag.@@
@@ -19,6 +14,7 @@ object FeatureTablesDao {
 
   final case class Feature(
     name:       String,
+    id:         Option[String],
     instrument: Instrument,
     location:   Location
   )
@@ -52,7 +48,7 @@ object FeatureTablesDao {
   ): Map[Instrument, FeatureTables] = {
 
     def toAvailabilityTable[T](features: List[Feature @@ T]): AvailabilityTable @@ T =
-      tag[T][AvailabilityTable](features.map(f => (f.name, f.location.availability)).toMap)
+      tag[T][AvailabilityTable](features.map(f => s"${f.id.fold(f.name)(id => s"${f.name}_$id")}" -> f.location.availability).toMap)
 
     def group[T](features: List[Feature @@ T]): Instrument => AvailabilityTable @@ T =
       features.groupBy(_.instrument)
@@ -77,10 +73,23 @@ object FeatureTablesDao {
     import InstrumentMeta._
     import LocationMeta._
 
+    def selectFeatureWithId[T](tableName: String): Query0[Feature @@ T] =
+      Query[HNil, Feature](
+        s"""
+           SELECT f.Name,
+                  f.GeminiID,
+                  c.Instrument,
+                  c.Location
+             FROM $tableName f
+                  LEFT OUTER JOIN Component c
+                    ON c.ComponentID = f.ComponentID
+         """).toQuery0(HNil).map(tag[T][Feature])
+
     def selectFeature[T](tableName: String): Query0[Feature @@ T] =
       Query[HNil, Feature](
         s"""
            SELECT f.Name,
+                  null as GeminiID,
                   c.Instrument,
                   c.Location
              FROM $tableName f
@@ -95,7 +104,7 @@ object FeatureTablesDao {
       selectFeature[FilterTag]("Filter")
 
     val selectGrating: Query0[Grating] =
-      selectFeature[GratingTag]("Grating")
+      selectFeatureWithId[GratingTag]("Grating")
 
     val selectIfu: Query0[Ifu] =
       selectFeature[IfuTag]("IFU")
