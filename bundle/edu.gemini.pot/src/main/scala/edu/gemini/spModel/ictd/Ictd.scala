@@ -21,6 +21,9 @@ object Ictd {
   def track(name: String): IctdTracking =
     IctdTracking.track(name)
 
+  def trackWithID(name: String, id: String): IctdTracking =
+    IctdTracking.track(s"${name}_$id")
+
   @annotation.varargs
   def trackAll(name: String, names: String*): IctdTracking =
     IctdTracking.trackAll(name, names: _*)
