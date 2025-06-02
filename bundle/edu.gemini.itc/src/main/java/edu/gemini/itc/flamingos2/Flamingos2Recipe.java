@@ -147,8 +147,8 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
             // Calculate the S/N and verify that the answer is the same:
             Log.fine(String.format("Predicted S/N = %.3f e-", calculateSNR(signal, background, darkNoise, readNoise, skyAper, initialNumberExposures)));
 
-            // The maximum exposure time is that which gives 60% of the maximum allowed flux, up to a maximum of 600s:
-            double maxExposureTime = Math.min(600, 0.6 * maxFlux / peakFlux * initialExposureTime);
+            // The maximum exposure time is that which gives 60% of the maximum allowed flux, up to a maximum of 900s:
+            double maxExposureTime = Math.min(900, 0.6 * maxFlux / peakFlux * initialExposureTime);
             Log.fine(String.format("maxExposureTime = %.2f seconds", maxExposureTime));
 
             // If the maximum exposure time for this target + configuration is less than the minimum then throw an error:
