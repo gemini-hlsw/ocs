@@ -94,21 +94,32 @@ object Recipe {
   }
 
   // === Imaging
-
-  def toCcdData(r: ImagingResult): ItcCcd =
+  private def toCcdData(r: ImagingResult): ItcCcd =
     ItcCcd(r.is2nCalc.singleSNRatio(), r.is2nCalc.totalSNRatio(), r.peakPixelCount, r.instrument.wellDepth, r.instrument.gain, Warning.collectWarnings(r))
+
+  private def calculateSignalToNoiseAtForImaging(r: ImagingResult): SignalToNoiseAt = {
+      val effectiveWavelength = r.instrument.getEffectiveWavelength.toDouble
+      val singleSNRatio = r.is2nCalc.singleSNRatio()
+      val totalSNRatio = r.is2nCalc.totalSNRatio()
+      SignalToNoiseAt(effectiveWavelength, singleSNRatio, totalSNRatio)
+  }
 
   def serviceResult(r: ImagingResult): ItcImagingResult =
     ItcImagingResult(
       List(toCcdData(r)),
-      r.times.getOrElse(AllIntegrationTimes.empty)
+      r.times.getOrElse(AllIntegrationTimes.empty),
+      Some(calculateSignalToNoiseAtForImaging(r))
     )
 
   def serviceResult(r: Array[ImagingResult]): ItcImagingResult = {
     val ccds = r.map(toCcdData).toList
+    val snAtArray = r.map(calculateSignalToNoiseAtForImaging)
+    // Use the same logic as spectroscopy: find first non-zero S/N or first if all are zero
+    val snAt = snAtArray.find(_.finalSignalToNoise > 0).orElse(snAtArray.headOption)
     ItcImagingResult(
       ccds,
-      r.map(_.times).toList.headOption.flatten.getOrElse(AllIntegrationTimes.empty)) // FIXME: Review how many result are we gettingg
+      r.map(_.times).toList.headOption.flatten.getOrElse(AllIntegrationTimes.empty), // FIXME: Review how many result are we gettingg
+      snAt)
   }
 
   // === Spectroscopy

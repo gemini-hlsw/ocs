@@ -8,9 +8,10 @@ trait ItcImagingResultCodec {
   import itcccd._
 
   val ItcImagingResultCodec: CodecJson[ItcImagingResult] =
-    casecodec2(ItcImagingResult.apply, ItcImagingResult.unapply)(
+    casecodec3(ItcImagingResult.apply, ItcImagingResult.unapply)(
       "ccds",
-      "times"
+      "times",
+      "signalToNoiseAt"
     )
 
 }

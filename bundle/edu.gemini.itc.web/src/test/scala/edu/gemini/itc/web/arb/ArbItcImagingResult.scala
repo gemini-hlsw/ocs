@@ -1,6 +1,7 @@
 package edu.gemini.itc.web.arb
 
 import edu.gemini.itc.shared._
+import edu.gemini.itc.web.arb.itcspectroscopyresult.genSignalToNoiseAt
 import org.scalacheck._
 import org.scalacheck.Arbitrary._
 import scalaz.\/
@@ -21,7 +22,8 @@ trait ArbItcImagingResult {
       for {
         ccds  <- genItcCcd
         calcs <- genExposureCalculation.map(e => AllIntegrationTimes(e, 0))
-      } yield ItcImagingResult(ccds, calcs)
+        snAt        <- Gen.option(genSignalToNoiseAt)
+      } yield ItcImagingResult(ccds, calcs, snAt)
     }
 
 }

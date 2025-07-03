@@ -9,7 +9,6 @@ import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.trecs.TRecs;
 
 public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
-
     protected final double Npix;
     protected final double source_fraction;
     protected final double dark_current;

@@ -84,7 +84,7 @@ object ItcResult {
 
 // === IMAGING RESULTS
 
-final case class ItcImagingResult(ccds: List[ItcCcd], times: AllIntegrationTimes) extends ItcResult
+final case class ItcImagingResult(ccds: List[ItcCcd], times: AllIntegrationTimes, snAt: Option[SignalToNoiseAt]) extends ItcResult
 
 // === SPECTROSCOPY RESULTS
 
