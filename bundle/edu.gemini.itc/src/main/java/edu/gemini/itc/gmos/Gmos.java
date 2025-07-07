@@ -52,7 +52,7 @@ public abstract class Gmos extends Instrument implements BinningProvider, Spectr
 
     private int _detectorCcdIndex = 0; // 0, 1, or 2 when there are multiple CCDs in the detector
 
-    private GmosSaturLimitRule gmosSaturLimitWarning;  // GMOS-specific saturation limit warning
+    private final GmosSaturLimitRule gmosSaturLimitWarning;  // GMOS-specific saturation limit warning
 
     public Gmos(final GmosParameters gp, final ObservationDetails odp, final String FILENAME, final int detectorCcdIndex) {
         super(gp.site(), Bands.VISIBLE, INSTR_DIR, FILENAME);
