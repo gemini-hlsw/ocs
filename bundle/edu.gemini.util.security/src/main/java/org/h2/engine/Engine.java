@@ -181,9 +181,10 @@ public class Engine implements SessionFactory {
             // we found a database that is currently closing
             // wait a bit to avoid a busy loop (the method is synchronized)
             try {
-                if (waitRun < 20)
+                if (waitRun < 20) {
                     logger.info("Database is closing, waiting before retrying to open session: " + ci + " run: " + waitRun);
-                waitRun++;
+                    waitRun++;
+                }
                 Thread.sleep(1);
             } catch (InterruptedException e) {
                 e.printStackTrace();
