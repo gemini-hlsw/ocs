@@ -1,19 +1,22 @@
 package edu.gemini.util.security.auth.keychain
 
-import edu.gemini.spModel.core.Site
 import java.io.File
 import scalaz._
 import Scalaz._
 import scalaz.effect.IO
+
 import java.security.KeyPair
 import edu.gemini.util.security.principal._
 import edu.gemini.util.security.auth.DSA
+
+import java.util.logging.Logger
 
 trait KeyMailer {
   def notifyPassword(u: UserPrincipal, pass: String): IO[Unit]
 }
 
 class KeyServer private (keyPair: KeyPair, mailer: KeyMailer, db: KeyDatabase) { ks =>
+  private val logger = Logger.getLogger(getClass.getName)
 
   /** Action to retrieve the key for the specified principal using the given password. */
   def tryKey(principal: GeminiPrincipal, pass: String): Action[Key] =
@@ -87,7 +90,7 @@ class KeyServer private (keyPair: KeyPair, mailer: KeyMailer, db: KeyDatabase) {
 
     /** Action to validates the given key. May fail with `InvalidSignature` or `InvalidVersion`. */
     def validateKey(key: Key): \/[KeyFailure, Unit] =
-      ks.validateKey(key).run.unsafePerformIO
+      ks.validateKey(key).run).unsafePerformIO
 
     /** Action to set a user's password to a random value and notify via email. */
     def resetPasswordAndNotify(u: UserPrincipal): \/[KeyFailure, Unit] =

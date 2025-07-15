@@ -6,10 +6,6 @@ name := "edu.gemini.sp.vcs.log"
 
 // version set in ThisBuild
 
-unmanagedJars in Compile ++= Seq(
-  new File(baseDirectory.value, "../../lib/bundle/h2-1.3.170.jar")
-)
-
 libraryDependencies ++= Seq(
   "org.scalaz"     %% "scalaz-core"       % ScalaZVersion,
   "org.scalaz"     %% "scalaz-effect"     % ScalaZVersion,
