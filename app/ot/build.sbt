@@ -64,7 +64,6 @@ def common(version: Version) = AppConfig(
     BundleSpec("edu.gemini.services.client",   version),
     BundleSpec("slf4j.api",                    Version(1, 6, 4)),
     BundleSpec("slf4j.jdk14",                  Version(1, 6, 4)),
-    BundleSpec("org.h2",                       Version(1, 3, 170)),
     BundleSpec("org.apache.commons.io",        Version(2, 0, 1)),
     BundleSpec("jsky.app.ot",                  version),
     BundleSpec("jsky.app.ot.visitlog",         version),

@@ -131,7 +131,6 @@ def common(version: Version) = AppConfig(
     BundleSpec("edu.gemini.wdba.xmlrpc.server",          version),
     BundleSpec("jsky.app.ot.shared",                     version),
     BundleSpec("org.apache.commons.io",                  Version(2, 0, 1)),
-    BundleSpec("org.h2",                                 Version(1, 3, 170)),
     BundleSpec("org.ops4j.pax.web.pax-web-extender-war", Version(1, 1, 13)),
     BundleSpec("org.ops4j.pax.web.pax-web-jetty-bundle", Version(1, 1, 13)),
     BundleSpec("org.ops4j.pax.web.pax-web-jsp",          Version(1, 1, 13)),
