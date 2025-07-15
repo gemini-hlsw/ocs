@@ -7,6 +7,8 @@
 package org.h2.engine;
 
 import java.util.HashMap;
+import java.util.logging.Logger;
+
 import org.h2.command.CommandInterface;
 import org.h2.command.Parser;
 import org.h2.command.dml.SetTypes;
@@ -26,6 +28,7 @@ import org.h2.util.Utils;
  * This is a singleton class.
  */
 public class Engine implements SessionFactory {
+    private Logger logger = Logger.getLogger(getClass().getName());
 
     private static final Engine INSTANCE = new Engine();
     private static final HashMap<String, Database> DATABASES = New.hashMap();
@@ -46,9 +49,11 @@ public class Engine implements SessionFactory {
             database = null;
         } else {
             database = DATABASES.get(name);
+            logger.info("database from the local cache " + name);
         }
         User user = null;
         boolean opened = false;
+        logger.info("Opening database " + name + " with cipher " + cipher + ", ifExists: " + ifExists + ", openNew: " + openNew + ", unnamedInMemory: " + ci.isUnnamedInMemory());
         if (database == null) {
             if (ifExists && !Database.exists(name)) {
                 throw DbException.get(ErrorCode.DATABASE_NOT_FOUND_1, name);
@@ -67,11 +72,15 @@ public class Engine implements SessionFactory {
                 DATABASES.put(name, database);
             }
         }
+
+        logger.info("Attempt to hold a lock on " + database);
         synchronized (database) {
+            logger.info("Lock on " + database + " acquired, db opened: " + opened);
             if (opened) {
                 // start the thread when already synchronizing on the database
                 // otherwise a deadlock can occur when the writer thread
                 // opens a new database (as in recovery testing)
+                logger.info("Waiting for database to open: " + name);
                 database.opened();
             }
             if (database.isClosing()) {
@@ -97,8 +106,11 @@ public class Engine implements SessionFactory {
                 throw DbException.get(ErrorCode.WRONG_USER_OR_PASSWORD);
             }
             checkClustering(ci, database);
+            logger.info("Creating session for user: " + user.getName() + " in database: " + name);
             Session session = database.createSession(user);
+            logger.info("Session created: " + session);
             if (ci.getProperty("JMX", false)) {
+                logger.info("Notify jmx");
                 try {
                     Utils.callStaticMethod("org.h2.jmx.DatabaseInfo.registerMBean", ci, database);
                 } catch (Exception e) {
@@ -107,6 +119,7 @@ public class Engine implements SessionFactory {
                 }
                 jmx = true;
             }
+            logger.info("End of lock block");
             return session;
         }
     }

@@ -86,11 +86,11 @@ class KeyServer private (keyPair: KeyPair, mailer: KeyMailer, db: KeyDatabase) {
 
     /** Action to retrieve the key for the specified principal using the given password. */
     def tryKey(principal: GeminiPrincipal, pass: String): \/[KeyFailure, Key] =
-      ks.tryKey(principal, pass).run.unsafePerformIO
+      (IO(logger.info("attempt to validate key")) *> ks.tryKey(principal, pass).run).unsafePerformIO
 
     /** Action to validates the given key. May fail with `InvalidSignature` or `InvalidVersion`. */
     def validateKey(key: Key): \/[KeyFailure, Unit] =
-      ks.validateKey(key).run).unsafePerformIO
+      (IO(logger.info("attempt to validate key")) *> ks.validateKey(key).run).unsafePerformIO
 
     /** Action to set a user's password to a random value and notify via email. */
     def resetPasswordAndNotify(u: UserPrincipal): \/[KeyFailure, Unit] =
