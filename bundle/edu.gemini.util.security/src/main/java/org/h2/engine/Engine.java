@@ -47,9 +47,10 @@ public class Engine implements SessionFactory {
         boolean openNew = ci.getProperty("OPEN_NEW", false);
         if (openNew || ci.isUnnamedInMemory()) {
             database = null;
+            logger.info("database not found in the local cache, openNew: " + openNew + ", unnamedInMemory: " + ci.isUnnamedInMemory());
         } else {
             database = DATABASES.get(name);
-            logger.info("database from the local cache " + name);
+            logger.info("database from the local cache " + name + ": " + database);
         }
         User user = null;
         boolean opened = false;
@@ -84,6 +85,7 @@ public class Engine implements SessionFactory {
                 database.opened();
             }
             if (database.isClosing()) {
+                logger.info("Database is closing: " + name);
                 return null;
             }
             if (user == null) {
@@ -168,16 +170,23 @@ public class Engine implements SessionFactory {
         String cipher = ci.removeProperty("CIPHER", null);
         String init = ci.removeProperty("INIT", null);
         Session session;
+        int waitRun = 0;
+        logger.info("Attempting to open session for connection info: " + ci);
         while (true) {
             session = openSession(ci, ifExists, cipher);
             if (session != null) {
+                logger.info("Session opened successfully for connection info: " + ci);
                 break;
             }
             // we found a database that is currently closing
             // wait a bit to avoid a busy loop (the method is synchronized)
             try {
+                if (waitRun < 20)
+                    logger.info("Database is closing, waiting before retrying to open session: " + ci + " run: " + waitRun);
+                waitRun++;
                 Thread.sleep(1);
             } catch (InterruptedException e) {
+                e.printStackTrace();
                 // ignore
             }
         }
