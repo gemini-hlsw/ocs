@@ -43,7 +43,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
               i.visitor must beFalse
           }
 
-          proposal.semester must beEqualTo(Semester(2025, SemesterOption.B))
+          proposal.semester must beEqualTo(Semester(2026, SemesterOption.A))
       }
 
       UpConverter.upConvert(xml) must beSuccessful.like {
