@@ -906,6 +906,17 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           result must \\("name") \> "GMOS-N MOS N+S 1.0 arcsec slit B480 g + OG515 (536 nm) "
       }
     }
+    "REL-4756 Hide grism B600 from GMOS-S" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_gmoss_b600.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 4
+          changes must contain("B600 is no longer offered. Converting B600 observations to B480.")
+          result must \\("name") \> "GMOS-S Longslit B480 RG610 (> 615 nm) 0.5 arcsec slit"
+      }
+    }
     "REL-4306 Fix NIRI to GNIRS conversion in PIT" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("kilonova_2023A.xml")))
 
