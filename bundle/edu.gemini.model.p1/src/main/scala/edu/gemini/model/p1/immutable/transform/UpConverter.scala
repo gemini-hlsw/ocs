@@ -187,7 +187,9 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter supports migrating to 2026A
  */
 case object SemesterConverter2025BTo2026A extends SemesterConverter {
-  override val transformers: List[TransformFunction] = Nil
+  val (gsaoiRemover, _) = removeBlueprint("gsaoi", "GSAOI")
+
+  override val transformers: List[TransformFunction] = List(gsaoiRemover)
 }
 
 /**

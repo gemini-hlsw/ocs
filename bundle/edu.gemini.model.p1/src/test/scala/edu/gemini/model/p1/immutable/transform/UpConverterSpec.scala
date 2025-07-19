@@ -20,7 +20,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have size 6
+          changes must have size 7
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
 
           val proposal = ProposalIo.read(result.toString())
@@ -32,16 +32,9 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           proposal.investigators.all must have size 1
           proposal.targets must beEmpty
           proposal.conditions must beEmpty
-          proposal.blueprints must have size 1
-          proposal.observations must have size 2
+          proposal.blueprints must beEmpty
+          proposal.observations must be size 2
           Option(proposal.proposalClass) must beSome
-
-          // Check the instruments
-          proposal.blueprints.headOption.foreach {
-            i =>
-              i.name must beEqualTo("GSAOI K(short) (2.150 um)")
-              i.visitor must beFalse
-          }
 
           proposal.semester must beEqualTo(Semester(2026, SemesterOption.A))
       }
@@ -50,7 +43,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
         case ConversionResult(transformed, from, changes, root) =>
           transformed must beTrue
           from must beEqualTo(Semester(2014, SemesterOption.A))
-          changes must have length 6
+          changes must have length 7
       }
 
     }
@@ -59,7 +52,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have size 7
+          changes must have size 8
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2013A to view the unmodified proposal")
@@ -73,7 +66,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           proposal.investigators.all must have size 1
           proposal.targets must beEmpty
           proposal.conditions must beEmpty
-          proposal.blueprints must have size 1
+          proposal.blueprints must beEmpty
           proposal.observations must have size 2
           Option(proposal.proposalClass) must beSome
 
@@ -91,7 +84,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
         case ConversionResult(transformed, from, changes, _) =>
           transformed must beTrue
           from must beEqualTo(Semester(2013, SemesterOption.A))
-          changes must have length 7
+          changes must have length 8
       }
 
     }
@@ -100,7 +93,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have size 7
+          changes must have size 8
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2013A to view the unmodified proposal")
@@ -116,7 +109,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           proposal.investigators.all must have size 1
           proposal.targets must beEmpty
           proposal.conditions must beEmpty
-          proposal.blueprints must have size 1
+          proposal.blueprints must beEmpty
           proposal.observations must have size 2
           Option(proposal.proposalClass) must beSome
 
@@ -128,13 +121,14 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 9
+          changes must have length 10
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2012B to view the unmodified proposal")
           changes must contain("Band3 Option is missing, set as false")
           changes must contain("Affiliate override flag is missing")
           changes must contain("Updated existing attachment value")
+          changes must contain("The original proposal contained GSAOI observations. The instrument is not available and those resources have been removed.")
 
           (result \\ "meta") must ==/(<meta band3optionChosen="false">
             <firstAttachment>file.pdf</firstAttachment>
@@ -149,7 +143,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
         case ConversionResult(transformed, from, changes, root) =>
           transformed must beTrue
           from must beEqualTo(Semester(2012, SemesterOption.B))
-          changes must have length 9
+          changes must have length 10
       }
     }
     "add enabled attribute if missing" in {
