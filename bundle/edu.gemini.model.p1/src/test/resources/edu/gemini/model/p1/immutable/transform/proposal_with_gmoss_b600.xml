@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2025.1.1">
+    <meta band3optionChosen="false" overrideAffiliate="false"/>
+    <semester year="2025" half="A"/>
+    <title></title>
+    <abstract></abstract>
+    <scheduling></scheduling>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName></firstName>
+            <lastName></lastName>
+            <status>PhD</status>
+            <gender>None selected</gender>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets/>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC Any, IQ Any, SB Any/Bright, WV Any</name>
+            <cc>Any</cc>
+            <iq>Any</iq>
+            <sb>Any/Bright</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <gmosS>
+            <regime>optical</regime>
+            <longslit id="blueprint-0">
+                <name>GMOS-S Longslit B600 RG610 (&gt; 615 nm) 0.5 arcsec slit</name>
+                <visitor>false</visitor>
+                <filter>RG610 (&gt; 615 nm)</filter>
+                <disperser>B600</disperser>
+                <fpu>0.5 arcsec slit</fpu>
+            </longslit>
+        </gmosS>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" condition="condition-0" blueprint="blueprint-0"/>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None" jwstSynergy="false" usLongTerm="false"/>
+    </proposalClass>
+</proposal>

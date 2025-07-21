@@ -8,8 +8,8 @@ class RootSpec extends Specification {
 
   "The Root Spec" should {
     "include Gsaoi" in {
-      val root = new Root(Semester(2016, A))
-      root.choices.contains(Instrument.Gsaoi) must beTrue
+      val root = new Root(Semester(2066, A))
+      root.choices.contains(Instrument.Gsaoi) must beFalse
     }
     "includes Texes" in {
       val root = new Root(Semester(2020, A))
