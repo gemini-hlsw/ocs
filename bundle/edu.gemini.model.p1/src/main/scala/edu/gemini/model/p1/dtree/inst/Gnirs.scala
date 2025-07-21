@@ -112,10 +112,7 @@ object Gnirs {
     extends SingleSelectNode[(Altair, GnirsPixelScale, GnirsDisperser, GnirsCrossDisperser, GnirsFpu), GnirsCentralWavelength, GnirsBlueprintSpectroscopy](s) {
     val title = "Central Wavelength"
     val description = "Please select a central wavelength range."
-    def choices = s._2 match {
-      case GnirsPixelScale.PS_005 => GnirsCentralWavelength.values.toList
-      case GnirsPixelScale.PS_015 => List(GnirsCentralWavelength.LT_25)
-    }
+    def choices = GnirsCentralWavelength.values.toList
     override def default = Option(GnirsCentralWavelength.LT_25)
     def apply(c:GnirsCentralWavelength) = Right(GnirsBlueprintSpectroscopy(s._1, s._2, s._3, s._4, s._5, c))
     def unapply = {
