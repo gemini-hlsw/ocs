@@ -2,7 +2,7 @@ Gemini Phase I Schema Changes
 
 # Version 2026.1.1 - 2026A
 ##########################
-* GSAOI instrument is now available for queue proposals, no model changes
+* GSAOI instrument is not available for queue proposals, no model changes
 
 # Version 2025.2.1 - 2025B
 ##########################
