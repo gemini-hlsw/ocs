@@ -26,6 +26,8 @@ import java.io.FileWriter;
 import java.sql.Timestamp;
 import java.util.logging.Logger;
 
+import static java.lang.Math.min;
+
 /**
  * This class encapsulates the process of creating a Spectral Energy
  * Distribution (SED).  (e.g. from a data file)
@@ -37,6 +39,28 @@ import java.util.logging.Logger;
  */
 public final class SEDFactory {
     private static final Logger Log = Logger.getLogger( SEDFactory.class.getName() );
+
+    public enum SpectrumType {
+        BLACK_BODY, EMISSION_LINE, POWER_LAW, USER_DEFINED, LIBRARY_STAR, LIBRARY_NON_STAR
+    }
+
+    public static SpectrumType getSpectrumType(final SourceDefinition sdp) {
+        if (sdp.distribution() instanceof BlackBody) {
+            return SpectrumType.BLACK_BODY;
+        } else if (sdp.distribution() instanceof EmissionLine) {
+            return SpectrumType.EMISSION_LINE;
+        } else if (sdp.distribution() instanceof PowerLaw) {
+            return SpectrumType.POWER_LAW;
+        } else if (sdp.distribution() instanceof UserDefinedSpectrum) {
+            return SpectrumType.USER_DEFINED;
+        } else if (sdp.distribution() instanceof LibraryStar) {
+            return SpectrumType.LIBRARY_STAR;
+        } else if (sdp.distribution() instanceof LibraryNonStar) {
+            return SpectrumType.LIBRARY_NON_STAR;
+        } else {
+            throw new Error("invalid spectral distribution type");
+        }
+    }
 
     /**
      * The resulting source intensity, sky intensity and, if applicable, the halo produced by the AO system.
@@ -115,77 +139,72 @@ public final class SEDFactory {
     }
 
     private static VisitableSampledSpectrum getSED(final SourceDefinition sdp, final Instrument instrument) {
-
         final VisitableSampledSpectrum temp;
-
+        final SpectrumType spectrumType = getSpectrumType(sdp);
         final double sampling = instrument.getSampling() / (1.0 + sdp.redshift().z());
         Log.fine(String.format("Sampling = %.5f nm", sampling));
 
-        if (sdp.distribution() instanceof BlackBody) {
-            return BlackBodySpectrum.apply(
-                    ((BlackBody) sdp.distribution()).temperature(),
-                    sampling,
-                    sdp.norm(),
-                    sdp.units(),
-                    sdp.normBand(),
-                    sdp.redshift());
+        switch (spectrumType) {
+            case BLACK_BODY:
+                return BlackBodySpectrum.apply(
+                        ((BlackBody) sdp.distribution()).temperature(),
+                        sampling,
+                        sdp.norm(),
+                        sdp.units(),
+                        sdp.normBand(),
+                        sdp.redshift());
 
-        } else if (sdp.distribution() instanceof EmissionLine) {
-            final EmissionLine eLine = (EmissionLine) sdp.distribution();
-            return new EmissionLineSpectrum(
-                    // Wavelength is a value class, on the Java side wavelength() therefore returns just a Length
-                    // and not a Wavelength object, so we need to repackage it to make it a wavelength. Blech.
-                    new Wavelength(eLine.wavelength()),
-                    eLine.width(),
-                    eLine.flux(),
-                    eLine.continuum(),
-                    sdp.redshift(),
-                    sampling);
+            case EMISSION_LINE:
+                final EmissionLine eLine = (EmissionLine) sdp.distribution();
+                return new EmissionLineSpectrum(
+                        // Wavelength is a value class, on the Java side wavelength() therefore returns just a Length
+                        // and not a Wavelength object, so we need to repackage it to make it a wavelength. Blech.
+                        new Wavelength(eLine.wavelength()),
+                        eLine.width(),
+                        eLine.flux(),
+                        eLine.continuum(),
+                        sdp.redshift(),
+                        sampling);
 
-        } else if (sdp.distribution() instanceof PowerLaw) {
-            return new PowerLawSpectrum(
-                    ((PowerLaw) sdp.distribution()).index(),
-                    instrument.getObservingStart(),
-                    instrument.getObservingEnd(),
-                    sampling,
-                    sdp.redshift());
+            case POWER_LAW:
+                return new PowerLawSpectrum(
+                        ((PowerLaw) sdp.distribution()).index(),
+                        instrument.getObservingStart(),
+                        instrument.getObservingEnd(),
+                        sampling,
+                        sdp.redshift());
 
-        } else if (sdp.distribution() instanceof UserDefinedSpectrum) {
-            final UserDefinedSpectrum userDefined = (UserDefinedSpectrum) sdp.distribution();
-            final MagnitudeBand band = sdp.normBand();
-            double inst_start_wave = instrument.getObservingStart();
-            double inst_end_wave = instrument.getObservingEnd();
+            case USER_DEFINED:
+                final UserDefinedSpectrum userDefined = (UserDefinedSpectrum) sdp.distribution();
+                final MagnitudeBand band = sdp.normBand();
+                double inst_start_wave = instrument.getObservingStart();
+                double inst_end_wave = instrument.getObservingEnd();
 
-            // GNIRS overrides getObservingStart and getObservingEnd for each order,
-            // so use the full GNIRS XD wavelength range:
-            if (instrument instanceof Gnirs) {
-                if (((Gnirs) instrument).XDisp_IsUsed()) {
-                    inst_start_wave = 750.0;
-                    inst_end_wave = 2600.0;
-                }
-            }
+                final double[] adjustedRange = adjustInstrumentRangeForGnirs(instrument, inst_start_wave, inst_end_wave);
+                inst_start_wave = adjustedRange[0];
+                inst_end_wave = adjustedRange[1];
 
-            // The user-supplied SED must cover the range of the instrument configuration AND the normalization band:
-            temp = getUserSED(userDefined,
-                    Math.min(inst_start_wave, band.start().toNanometers()),
-                    Math.max(inst_end_wave, band.end().toNanometers()),
-                    sampling,
-                    sdp.redshift().z());
-            temp.applyWavelengthCorrection();
-            return temp;
+                // The user-supplied SED must cover the range of the instrument configuration AND the normalization band:
+                temp = getUserSED(userDefined,
+                        Math.min(inst_start_wave, band.start().toNanometers()),
+                        Math.max(inst_end_wave, band.end().toNanometers()),
+                        sampling,
+                        sdp.redshift().z());
+                temp.applyWavelengthCorrection();
+                return temp;
 
-        } else if (sdp.distribution() instanceof LibraryStar) {
-            temp = getSED(getLibraryResource(STELLAR_LIB, sdp), sampling);
-            temp.applyWavelengthCorrection();
-            return temp;
+            case LIBRARY_STAR:
+                temp = getSED(getLibraryResource(STELLAR_LIB, sdp), sampling);
+                temp.applyWavelengthCorrection();
+                return temp;
 
-        } else if (sdp.distribution() instanceof LibraryNonStar) {
-            temp = getSED(getLibraryResource(NON_STELLAR_LIB, sdp), sampling);
-            temp.applyWavelengthCorrection();
-            return temp;
+            case LIBRARY_NON_STAR:
+                temp = getSED(getLibraryResource(NON_STELLAR_LIB, sdp), sampling);
+                temp.applyWavelengthCorrection();
+                return temp;
 
-        } else {
-            throw new Error("invalid spectral distribution type");
+            default:
+                throw new Error("invalid spectral distribution type");
         }
     }
 
@@ -227,36 +246,16 @@ public final class SEDFactory {
         // calculates: redshifted SED
         // output: redshifted SED
 
-        final VisitableSampledSpectrum sed = SEDFactory.getSED(sdp, instrument);
-        final SampledSpectrumVisitor redshift = new RedshiftVisitor(sdp.redshift());
-        Log.fine("Accepting redshift...");
-        sed.accept(redshift);
-
         // Must check to see if the redshift has moved the spectrum beyond
         // useful range. The shifted spectrum must completely overlap
         // both the normalization waveband and the observation waveband
         // (filter region).
+        validateSpectrumRanges(sdp, instrument);
 
-        final MagnitudeBand band = sdp.normBand();
-        final double start = band.start().toNanometers();
-        final double end = band.end().toNanometers();
-
-        // TODO: which instruments need this check, why only some and others not? Do all near-ir instruments need it?
-        // TODO: what about Nifs and Gnirs (other near-ir instruments)?
-        if (instrument instanceof Gsaoi || instrument instanceof Niri || instrument instanceof Flamingos2) {
-            if (sed.getStart() > instrument.getObservingStart() || sed.getEnd() < instrument.getObservingEnd()) {
-                throw new IllegalArgumentException(String.format("Redshifted SED (%.1f - %.1f nm) does not cover range of instrument configuration (%.1f - %.1f nm).",
-                        sed.getStart(), sed.getEnd(), instrument.getObservingStart(), instrument.getObservingEnd()));
-            }
-        }
-
-        // any sed except BBODY and ELINE have normalization regions
-        if (!(sdp.distribution() instanceof EmissionLine) && !(sdp.distribution() instanceof BlackBody)) {
-            if (sed.getStart() > start || sed.getEnd() < end) {
-                throw new IllegalArgumentException(String.format("Redshifted SED (%.1f - %.1f nm) does not cover the specified normalization waveband (%.1f - %.1f nm).",
-                        sed.getStart(), sed.getEnd(), start, end));
-            }
-        }
+        final VisitableSampledSpectrum sed = SEDFactory.getSED(sdp, instrument);
+        final SampledSpectrumVisitor redshift = new RedshiftVisitor(sdp.redshift());
+        Log.fine("Accepting redshift...");
+        sed.accept(redshift);
 
         // Module 2
         // Convert input into standard internally-used units.
@@ -414,5 +413,95 @@ public final class SEDFactory {
         else
             return "20";
     }
+
+    private static double[] adjustInstrumentRangeForGnirs(final Instrument instrument, double startWave, double endWave) {
+        // GNIRS overrides getObservingStart and getObservingEnd for each order,
+        // so use the full GNIRS XD wavelength range:
+        if (instrument instanceof Gnirs) {
+            if (((Gnirs) instrument).XDisp_IsUsed()) {
+                startWave = 750.0;
+                endWave = 2600.0;
+            }
+        }
+        return new double[]{startWave, endWave};
+    }
+
+    public static void validateUserSpectrumRange(final ArraySpectrum spectrum, final double requiredStart, final double requiredEnd, final double redshift) {
+        final double spectrumStart = (1.0 + redshift) * spectrum.getStart();
+        final double spectrumEnd = (1.0 + redshift) * spectrum.getEnd();
+
+        if (spectrumStart > requiredStart || spectrumEnd < requiredEnd) {
+            throw new IllegalArgumentException(
+                    String.format("Redshifted SED (%.1f - %.1f nm) does not cover the range of the instrument and normalization band " +
+                            "(%.1f - %.1f nm).", spectrumStart, spectrumEnd, requiredStart, requiredEnd));
+        }
+    }
+
+    private static void validateSpectrumRanges(final SourceDefinition sdp, final Instrument instrument) {
+        final double redshift = sdp.redshift().z();
+        final SpectrumType spectrumType = getSpectrumType(sdp);
+
+        switch (spectrumType) {
+            case BLACK_BODY:
+            case EMISSION_LINE:
+            case POWER_LAW:
+                break;
+
+            case USER_DEFINED:
+                final UserDefinedSpectrum userDefined = (UserDefinedSpectrum) sdp.distribution();
+                final MagnitudeBand band = sdp.normBand();
+                double inst_start_wave = instrument.getObservingStart();
+                double inst_end_wave = instrument.getObservingEnd();
+
+                final double[] adjustedRange = adjustInstrumentRangeForGnirs(instrument, inst_start_wave, inst_end_wave);
+                inst_start_wave = adjustedRange[0];
+                inst_end_wave = adjustedRange[1];
+
+                final double requiredStart = min(inst_start_wave, band.start().toNanometers());
+                final double requiredEnd = Math.max(inst_end_wave, band.end().toNanometers());
+
+                try {
+                    final DefaultArraySpectrum as = DefaultArraySpectrum.fromUserSpectrum(userDefined.spectrum());
+                    validateUserSpectrumRange(as, requiredStart, requiredEnd, redshift);
+                } catch (final Exception e) {
+                    throw new IllegalArgumentException("Could not parse user SED " + userDefined.name() + ": " + e.getMessage());
+                }
+                break;
+
+            case LIBRARY_STAR:
+            case LIBRARY_NON_STAR:
+                final DefaultArraySpectrum as;
+                if (spectrumType == SpectrumType.LIBRARY_STAR) {
+                    as = new DefaultArraySpectrum(getLibraryResource(STELLAR_LIB, sdp));
+                } else {
+                    as = new DefaultArraySpectrum(getLibraryResource(NON_STELLAR_LIB, sdp));
+                }
+                final double spectrumStart = (1.0 + redshift) * as.getStart();
+                final double spectrumEnd = (1.0 + redshift) * as.getEnd();
+
+                // TODO: which instruments need this check, why only some and others not? Do all near-ir instruments need it?
+                // TODO: what about Nifs and Gnirs (other near-ir instruments)?
+                if (instrument instanceof Gsaoi || instrument instanceof Niri || instrument instanceof Flamingos2) {
+                    if (spectrumStart > instrument.getObservingStart() || spectrumEnd < instrument.getObservingEnd()) {
+                        throw new IllegalArgumentException(String.format("Redshifted SED (%.1f - %.1f nm) does not cover range of instrument configuration (%.1f - %.1f nm).",
+                                spectrumStart, spectrumEnd, instrument.getObservingStart(), instrument.getObservingEnd()));
+                    }
+                }
+
+                // any sed except BBODY and ELINE have normalization regions
+                final MagnitudeBand normBand = sdp.normBand();
+                final double bandStart = normBand.start().toNanometers();
+                final double bandEnd = normBand.end().toNanometers();
+                if (spectrumStart > bandStart || spectrumEnd < bandEnd) {
+                    throw new IllegalArgumentException(String.format("Redshifted SED (%.1f - %.1f nm) does not cover the specified normalization waveband (%.1f - %.1f nm).",
+                            spectrumStart, spectrumEnd, bandStart, bandEnd));
+                }
+                break;
+
+            default:
+                throw new Error("invalid spectral distribution type");
+        }
+    }
+
 
 }
