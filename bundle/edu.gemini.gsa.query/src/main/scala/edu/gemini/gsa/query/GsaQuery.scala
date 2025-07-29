@@ -18,7 +18,7 @@ import edu.gemini.util.ssl.GemSslSocketFactory
 import javax.net.ssl.HttpsURLConnection
 
 /** GsaQuery handles the grim procedural details of making get and post
-  * requests to the GSA server with an HttpURLConnection.
+  * requests to the GOA server with an HttpURLConnection.
   *
   * Someday, we'd like to use the http4s client code to do this type of
   * thing. */
@@ -43,7 +43,7 @@ private [query] object GsaQuery {
       con.setRequestProperty("Cookie",       s"gemini_api_authorization=${auth.value}")
 
       val json = a.asJson.spaces2
-      logIf(JsonLevel) { s"GSA QA state update post:\n$json" }
+      logIf(JsonLevel) { s"GOA QA state update post:\n$json" }
       val data = json.getBytes(Cset)
       con.setRequestProperty("Content-Length", data.length.toString)
       con.setFixedLengthStreamingMode(data.length)
@@ -53,7 +53,7 @@ private [query] object GsaQuery {
     }
 
   private def query[A : DecodeJson](url: URL)(prep: HttpURLConnection => Unit): GsaResponse[A] = {
-    logIf(DetailLevel) { s"Start GSA query: ${url.toString}" }
+    logIf(DetailLevel) { s"Start GOA query: ${url.toString}" }
 
     val startTime = Instant.now()
     val result    = catchingNonFatal { unsafeDoQuery[A](url, prep) }.fold({
@@ -64,10 +64,10 @@ private [query] object GsaQuery {
     if (Log.isLoggable(DetailLevel)) {
       val duration       = Duration.between(startTime, Instant.now())
       val (message, ex)  = result match {
-        case \/-(_)     => (s"Retrieved result from GSA.", none[Throwable])
+        case \/-(_)     => (s"Retrieved result from GOA.", none[Throwable])
         case -\/(error) => (error.explain, error.exception)
       }
-      Log.log(DetailLevel, s"End GSA query (${duration.toMillis} ms) ${url.toString}. " + message, ex.orNull)
+      Log.log(DetailLevel, s"End GOA query (${duration.toMillis} ms) ${url.toString}. " + message, ex.orNull)
     }
 
     result
@@ -90,6 +90,7 @@ private [query] object GsaQuery {
     con.setConnectTimeout(ConnectTimeout)
     con.setReadTimeout(ReadTimeout)
     con.setRequestProperty("Accept-Charset", Cset)
+    con.setRequestProperty("User-Agent",   s"GeminiPIT/${System.getProperty("edu.gemini.model.p1.schemaVersion")} (GOA Query Client)")
 
     prep(con)
 
@@ -97,9 +98,9 @@ private [query] object GsaQuery {
       con.getResponseCode match {
         case HTTP_OK   =>
           val s = read(con.getInputStream)
-          logIf(JsonLevel) { s"GSA response ($url):\n$s" }
+          logIf(JsonLevel) { s"GOA response ($url):\n$s" }
           \/.fromEither(Parse.decodeEither[A](s).leftMap { _ =>
-            InvalidResponse(s"Could not parse GSA server response:\n$s")
+            InvalidResponse(s"Could not parse GOA server response:\n$s")
           })
         case errorCode =>
           RequestError(errorCode, read(con.getErrorStream)).left
