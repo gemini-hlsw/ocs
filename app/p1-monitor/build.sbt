@@ -105,10 +105,10 @@ def v2025B(ov: Version, pv: Version) = AppConfig(
 
 // 2026A
 def v2026A(ov: Version, pv: Version) = AppConfig(
-  id = "2026B",
+  id = "2026A",
   props = Map(
-    "org.osgi.framework.storage" -> "${user.home}/.edu.gemini.p1monitor.2026B/felix-cache",
-    "p1monitor.config" -> "conf.production-2026B.xml",
+    "org.osgi.framework.storage" -> "${user.home}/.edu.gemini.p1monitor.2026A/felix-cache",
+    "p1monitor.config" -> "conf.production-2026A.xml",
     "org.osgi.service.http.port" -> "9007",
     "p1monitor.host" -> "phase1.gemini.edu"
   ),
