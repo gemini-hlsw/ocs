@@ -616,7 +616,10 @@
                     <fo:inline font-weight="bold">
                         Scheduling Constraints: </fo:inline>
                     <fo:inline>
-                        <xsl:value-of select="scheduling"/>
+                        <xsl:call-template name="truncate-scheduling">
+                            <xsl:with-param name="text" select="scheduling"/>
+                            <xsl:with-param name="maxLength" select="800"/>
+                        </xsl:call-template>
                     </fo:inline>
                 </fo:block>
                 <!-- END scheduling -->
