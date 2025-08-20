@@ -1,5 +1,6 @@
 package edu.gemini.itc.base;
 import java.util.logging.Logger;
+import edu.gemini.itc.shared.SourceDefinition;
 
 /**
  * Default implementation of SampledSpectrum interface.
@@ -71,11 +72,8 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         Log.fine("xStart = " + xStart + " nm (specified)");
         Log.fine("xEnd = " + xEnd + " nm");
 
-        if ( (1+z) * sp.getStart() > xStart || (1+z) * sp.getEnd() < xEnd ) {
-            throw new IllegalArgumentException(
-                    String.format("Redshifted SED (%.1f - %.1f nm) does not cover the range of the instrument and normalization band " +
-                                    "(%.1f - %.1f nm).", (1+z)*sp.getStart(), (1+z)*sp.getEnd(), xStart, xEnd));
-        }
+        // Validate spectrum range covers required range after redshift
+        SEDFactory.validateUserSpectrumRange(sp, xStart, xEnd, z);
 
         // The SED will be redshifted later so resample over range / (1+z):
         xStart /= 1+z;
