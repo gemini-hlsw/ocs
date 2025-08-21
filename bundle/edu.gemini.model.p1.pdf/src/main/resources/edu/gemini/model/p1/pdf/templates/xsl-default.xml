@@ -819,7 +819,10 @@
                                 </fo:inline>
                             </fo:block>
                             <fo:block font-style="italic" font-size="11pt" space-after="12pt" linefeed-treatment="preserve">
-                                 <xsl:value-of select="scheduling"/>
+                                <xsl:call-template name="truncate-scheduling">
+                                    <xsl:with-param name="text" select="scheduling"/>
+                                    <xsl:with-param name="maxLength" select="800"/>
+                                </xsl:call-template>
                             </fo:block>
                             <!-- END scheduling -->
 

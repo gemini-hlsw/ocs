@@ -473,4 +473,18 @@
         </xsl:for-each>
     </xsl:template>
 
+    <xsl:template name="truncate-scheduling">
+        <xsl:param name="text"/>
+        <xsl:param name="maxLength" select="800"/>
+        <xsl:choose>
+            <xsl:when test="string-length($text) &gt; $maxLength">
+                <xsl:value-of select="substring($text, 1, $maxLength)"/>
+                <xsl:text>...</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="$text"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
 </xsl:stylesheet>
