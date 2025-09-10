@@ -185,20 +185,36 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
         }
     }
 
-    @Override public void smoothY(int smoothing_element) {
-        Log.fine(String.format("Smoothing Y by %.5f pix", smoothing_element));
-        if (smoothing_element == 1.0) return;
-        for (int i = 0; i < getLength(); ++i) {
-            try {
-                if (i + smoothing_element > getLength())
-                    _data[1][i] = getAverage(i, getLength());
-                else
-                    _data[1][i] = getAverage(i, i + smoothing_element);
+    @Override public void smoothY(int windowSize) {
+        Log.fine(String.format("Smoothing Y by %d pix", windowSize));
+        if (windowSize <= 1) return;
 
-            } catch (Exception e) {
-                System.out.println(e.toString());
+        final int length = getLength();
+        if (length == 0) return;
+
+        final double[] smoothed = new double[length];
+        final int halfWindow = windowSize / 2;
+
+        // For each point, calculate centered moving average
+        for (int i = 0; i < length; i++) {
+            double sum = 0.0;
+            int count = 0;
+
+            // Calculate window bounds
+            int startIdx = Math.max(0, i - halfWindow);
+            int endIdx = Math.min(length - 1, i + halfWindow);
+
+            // Sum values in window
+            for (int j = startIdx; j <= endIdx; j++) {
+                sum += _data[1][j];
+                count++;
             }
+
+            smoothed[i] = sum / count;
         }
+
+        // Copy smoothed values back to original array
+        System.arraycopy(smoothed, 0, _data[1], 0, length);
     }
 
 
