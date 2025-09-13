@@ -106,7 +106,7 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
 
     public double singleSNRatio() {
         // Handle negative signal and invalid noise gracefully
-        if (Double.isNaN(noise) || noise <= 0.0) {
+        if (noise <= 0.0) {
             return 0.0;
         } else {
           return Math.sqrt(coadds) * Math.max(0.0, signal) / noise;
