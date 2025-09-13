@@ -424,7 +424,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         final double noiseVariance = signal + noiseFactor * sourcelessNoise * sourcelessNoise;
 
         if (noiseVariance <= 0.0) {
-            // f noise calculation is negative, return 0 S/N
+            // if noise calculation is negative, return 0 S/N
             return 0.0;
         }
 
