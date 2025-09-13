@@ -63,10 +63,18 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
         var_dark = dark_current * Npix * exposure_time;
         var_readout = read_noise * read_noise * Npix;
 
-        noise = Math.sqrt(var_source + var_background + var_dark + var_readout);
-        sourceless_noise = Math.sqrt(var_background + var_dark + var_readout);
+        // Sometimes we get negative source, often from noise on UserSED.
+        // However this can make variance total variance negative producing a NaN
+        // Let's clamp it at 0
+        final double noiseComponent = Math.max(0.0, var_source + var_background + var_dark + var_readout);
+        // a negative sourceless is not obvious here but better be safe
+        final double sourcelessComponent = Math.max(0.0, var_background + var_dark + var_readout);
+
+        noise = Math.sqrt(noiseComponent);
+        sourceless_noise = Math.sqrt(sourcelessComponent);
         signal = sed_integral * source_fraction * exposure_time +
                 secondary_integral * secondary_source_fraction * exposure_time;
+
     }
 
     public void setSecondaryIntegral(double secondary_integral) {
@@ -85,7 +93,14 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
     public double getSignal() { return signal; }
 
     @Override public double totalSNRatio() {
-        return Math.sqrt(numberSourceExposures()) * signal / Math.sqrt(signal + noiseFactor * sourceless_noise * sourceless_noise);
+        final double noiseComponent = signal + noiseFactor * sourceless_noise * sourceless_noise;
+        if (noiseComponent > 0) {
+          return Math.sqrt(numberSourceExposures()) * signal / noise;
+        } else {
+          // Is this a sensitvie fallback? 0 is good in the sense that a s/n is 
+          // equivalent to no result I thin
+          return 0.0;
+        }
     }
 
     public double singleSNRatio() {
