@@ -414,13 +414,21 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         final VisitableSampledSpectrum finalS2N = (VisitableSampledSpectrum) sourceFlux.clone();
         for (int i = 0; i < finalS2N.getLength(); ++i) { finalS2N.setY(i, 0); }
         for (int i = firstCcdPixel; i <= lastCcdPixel(finalS2N.getLength()); ++i)
-            finalS2N.setY(i, Math.sqrt(spec_number_source_exposures) *
-                    signal.getY(i) /
-                    Math.sqrt(signal.getY(i) + noiseFactor *
-                            spec_sourceless_noise.getY(i) *
-                            spec_sourceless_noise.getY(i)));
+            finalS2N.setY(i, pixelS2N(signal.getY(i), spec_sourceless_noise.getY(i), spec_number_source_exposures, noiseFactor));
 
         return finalS2N;
+    }
+
+    private double pixelS2N(double signal, double sourcelessNoise, double numberExposures, double noiseFactor) {
+        // Handle negative signal, if the value is negative make it 0
+        final double noiseVariance = signal + noiseFactor * sourcelessNoise * sourcelessNoise;
+
+        if (noiseVariance <= 0.0) {
+            // if noise calculation is negative, return 0 S/N
+            return 0.0;
+        }
+
+        return Math.sqrt(numberExposures) * signal / Math.sqrt(noiseVariance);
     }
 
     // Calculate the flux per pixel given the input flux, the slit throughput, and the dispersion:
