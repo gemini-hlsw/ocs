@@ -72,10 +72,7 @@ object ItcResult {
   import edu.gemini.itc.shared.ItcService._
 
   /** Creates an ITC result in case of an error. */
-  def forException(e: Throwable): Result = {
-    e.printStackTrace()
-    ItcError(e.getMessage).left
-  }
+  def forException(e: Throwable): Result = ItcError(e.getMessage).left
 
   /** Creates an ITC result with a single problem/error message. */
   def forMessage(msg: String): Result = ItcError(msg).left
