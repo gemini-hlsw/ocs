@@ -311,8 +311,6 @@ public class AbstractRuleTest {
         obscomps.add(targetObsComp);
         //obs.putClientData(IConfigBuilder.USER_OBJ_KEY, new TargetObsCompCB(targetObsComp));
         obs.setObsComponents(obscomps);
-
-
     }
 
     private ISPSeqComponent addGmosIteratorFor(SPComponentType ct) throws Exception {
@@ -359,6 +357,18 @@ public class AbstractRuleTest {
 
         Asterism dualTarget = GhostAsterism$.MODULE$.createEmptyAsterism(AsterismType.GhostDualTarget);
         final TargetEnvironment env = TargetEnvironment.create(dualTarget);
+        target.setTargetEnvironment(env);
+        ISPObsComponent targetObsComp = createObsComp(target);
+        obscomps.add(targetObsComp);
+        obs.setObsComponents(obscomps);
+    }
+
+    protected void addTargetObsCompWithName(String targetName) throws SPUnknownIDException, SPTreeStateException, SPNodeNotLocalException {
+        TargetObsComp target = new TargetObsComp();
+        SPTarget sptarget = new SPTarget();
+        sptarget.setName(targetName);
+
+        final TargetEnvironment env = TargetEnvironment.create(sptarget);
 
         target.setTargetEnvironment(env);
         ISPObsComponent targetObsComp = createObsComp(target);

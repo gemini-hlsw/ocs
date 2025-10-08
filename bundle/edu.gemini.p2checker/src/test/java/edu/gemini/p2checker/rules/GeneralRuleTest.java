@@ -162,4 +162,25 @@ public final class GeneralRuleTest extends AbstractRuleTest {
             }
         }
     }
+
+    @Test
+    public void testAsciiTargetName() throws SPUnknownIDException, SPTreeStateException, SPNodeNotLocalException {
+        // Create a target with a name containing non-ASCII characters
+        addTargetObsCompWithName("Target\u00E9");
+
+        final ObservationElements elems = new ObservationElements(obs);
+        final GeneralRule rules = new GeneralRule();
+        final List<Problem> problems = rules.check(elems).getProblems();
+        // Should have at least one error about non-ASCII characters
+        assertTrue(problems.size() >= 1);
+        boolean foundAsciiError = false;
+        for (Problem p : problems) {
+            if (p.toString().contains("non-ASCII")) {
+                foundAsciiError = true;
+                assertEquals(Problem.Type.ERROR, p.getType());
+            }
+        }
+        assertTrue("Expected to find non-ASCII character error", foundAsciiError);
+    }
+
 }
