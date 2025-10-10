@@ -581,8 +581,9 @@ public class GeneralRule implements IRule {
             if (templateFolderNode != null) {
 
                 final Asterism a = getObsAsterism(elements);
-                if (a != null && a.asterismType() == AsterismType.Single) {
-                    // There should be only one target here, namely the science target.
+                if (a != null) {
+                    // Validate all targets in the asterism (works for dual GHOST)
+                    // Should flag both targets
                     a.allSpTargetsJava().foreach(obsTarget -> {
                         // We're going to drive this off the target, so we first want to narrow it
                         // down to the TemplateParameters that correspond with this target.

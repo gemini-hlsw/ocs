@@ -5,6 +5,7 @@ import edu.gemini.p2checker.api.Problem;
 import edu.gemini.p2checker.rules.general.GeneralRule;
 import edu.gemini.pot.sp.*;
 import edu.gemini.spModel.gemini.altair.AltairParams;
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import org.junit.Test;
 
 import java.util.List;
@@ -114,5 +115,51 @@ public final class GeneralRuleTest extends AbstractRuleTest {
         final Problem p = problems.get(0);
         assertEquals(Problem.Type.ERROR, p.getType());
         assertTrue(p.toString(), p.toString().contains("unsupported asterism"));
+    }
+
+    @Test
+    public void testGhostDualTargetOk() throws Exception {
+        SPSiteQuality p1 = new SPSiteQuality();
+        p1.setCloudCover(SPSiteQuality.CloudCover.PERCENT_50);
+        addTemplateFolder(p1);
+
+        addGhost();
+        addGhostDualTarget();
+        addSiteQuality(SPSiteQuality.ImageQuality.DEFAULT,
+                SPSiteQuality.CloudCover.PERCENT_50, // Match Conditions
+                SPSiteQuality.SkyBackground.DEFAULT,
+                SPSiteQuality.WaterVapor.DEFAULT);
+
+        final ObservationElements elems = new ObservationElements(obs);
+        final GeneralRule rules = new GeneralRule();
+        final List<Problem> problems = rules.check(elems).getProblems();
+
+        assertTrue(problems.isEmpty());
+    }
+
+    @Test
+    public void testGhostDualTargetBad() throws Exception {
+        SPSiteQuality p1 = new SPSiteQuality();
+        p1.setCloudCover(SPSiteQuality.CloudCover.PERCENT_80);
+        addTemplateFolder(p1);
+
+        addGhost();
+        addGhostDualTarget();
+        addSiteQuality(SPSiteQuality.ImageQuality.DEFAULT,
+                SPSiteQuality.CloudCover.PERCENT_50, // better conditions than p1
+                SPSiteQuality.SkyBackground.DEFAULT,
+                SPSiteQuality.WaterVapor.DEFAULT);
+
+        final ObservationElements elems = new ObservationElements(obs);
+        final GeneralRule rules = new GeneralRule();
+        final List<Problem> problems = rules.check(elems).getProblems();
+
+        // I'd have expected 2 problems, one per target but they are smashed into a set
+        assertEquals(problems.size(), 1);
+        for (Problem p : problems) {
+            if (p.toString().contains("Conditions have to be the same")) {
+                assertEquals(Problem.Type.ERROR, p.getType());
+            }
+        }
     }
 }

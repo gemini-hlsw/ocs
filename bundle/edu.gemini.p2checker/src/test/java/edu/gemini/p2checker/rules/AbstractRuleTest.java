@@ -4,6 +4,7 @@ import edu.gemini.pot.sp.*;
 import edu.gemini.pot.spdb.DBIDClashException;
 import edu.gemini.pot.spdb.DBLocalDatabase;
 import edu.gemini.pot.spdb.IDBDatabaseService;
+import edu.gemini.shared.util.TimeValue;
 import edu.gemini.shared.util.immutable.ImCollections;
 import edu.gemini.spModel.core.SPBadIDException;
 import edu.gemini.spModel.core.SPProgramID;
@@ -13,6 +14,7 @@ import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.calunit.CalUnitParams;
 import edu.gemini.spModel.gemini.ghost.Ghost;
+import edu.gemini.spModel.gemini.ghost.GhostAsterism$;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import edu.gemini.spModel.gemini.michelle.InstMichelle;
@@ -25,6 +27,7 @@ import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
+import edu.gemini.spModel.template.TemplateParameters;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -330,5 +333,36 @@ public class AbstractRuleTest {
         final ISPSeqComponent sq = fact.createSeqComponent(prog, SPComponentType.ITERATOR_OFFSET, null);
         obs.getSeqComponent().addSeqComponent(sq);
         return sq;
+    }
+
+    protected void addTemplateFolder(SPSiteQuality phase1Conditions) throws Exception {
+        final ISPTemplateFolder templateFolder = fact.createTemplateFolder(prog, null);
+        prog.setTemplateFolder(templateFolder);
+
+        final ISPTemplateGroup templateGroup = fact.createTemplateGroup(prog, null);
+        templateFolder.addTemplateGroup(templateGroup);
+
+        final ISPTemplateParameters templateParams = fact.createTemplateParameters(prog, null);
+        SPTarget target = new SPTarget();
+        TemplateParameters params =
+                TemplateParameters.newInstance(
+                        target,
+                        phase1Conditions,
+                        new TimeValue(1, TimeValue.Units.hours)
+                );
+        templateParams.setDataObject(params);
+        templateGroup.addTemplateParameters(templateParams);
+    }
+
+    protected void addGhostDualTarget() throws SPUnknownIDException, SPTreeStateException, SPNodeNotLocalException {
+        TargetObsComp target = new TargetObsComp();
+
+        Asterism dualTarget = GhostAsterism$.MODULE$.createEmptyAsterism(AsterismType.GhostDualTarget);
+        final TargetEnvironment env = TargetEnvironment.create(dualTarget);
+
+        target.setTargetEnvironment(env);
+        ISPObsComponent targetObsComp = createObsComp(target);
+        obscomps.add(targetObsComp);
+        obs.setObsComponents(obscomps);
     }
 }
