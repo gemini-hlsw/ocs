@@ -675,6 +675,41 @@ public class GeneralRule implements IRule {
     };
 
     /**
+     * Check that target names contain only printable ASCII characters per FITS standard.
+     * FITS requires chars in the range 32-126 (hex 20-7E), excluding control characters and DEL.
+     * See https://archive.stsci.edu/fits/fits_standard/
+     */
+    private static IRule TARGET_ASCII_RULE = new IRule() {
+
+        private static final String NON_ASCII_TARGET_NAME = "Target name '%s' contains non-ASCII characters.";
+
+        private boolean containsNonAscii(final String str) {
+            if (str == null || str.trim().isEmpty()) return false;
+            // This excludes ISO control characters (0-31, 127) and extended ASCII (128+)
+            return str.chars().anyMatch(c -> Character.isISOControl(c) || c > 127);
+        }
+
+        public IP2Problems check(final ObservationElements elements) {
+            return elements.getTargetObsComp().map((e) -> {
+
+                final P2Problems problems = new P2Problems();
+                final TargetEnvironment env = e.getTargetEnvironment();
+
+                // Check science targets, ghost may have more than one
+                // Should we check the other targets?
+                elements.getTargetObsComp().getValue().getAsterism().allSpTargetsJava().stream()
+                        .map(SPTarget::getName)
+                        .filter(this::containsNonAscii)
+                        .forEach(name -> problems.addError(PREFIX + "NON_ASCII_TARGET",
+                                String.format(NON_ASCII_TARGET_NAME, name),
+                                elements.getTargetObsComponentNode().getValue()));
+
+                return problems;
+            }).getOrElse(new P2Problems());
+        }
+    };
+
+    /**
      * Register all the general rules
      */
     static  {
@@ -689,6 +724,7 @@ public class GeneralRule implements IRule {
         GENERAL_RULES.add(NO_DAYTIME_CALS_AT_NIGHT_RULE);
         GENERAL_RULES.add(TEMPLATE_RULE);
         GENERAL_RULES.add(AGS_OFF_RULE);
+        GENERAL_RULES.add(TARGET_ASCII_RULE);
     }
 
 }
