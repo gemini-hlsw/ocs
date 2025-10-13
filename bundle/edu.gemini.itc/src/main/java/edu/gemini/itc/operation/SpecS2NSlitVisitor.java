@@ -32,6 +32,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     private double pixelWidth;
     private double obsStart;
     private double obsEnd;
+    private double skyAper;
 
     // signal and background
     private VisitableSampledSpectrum sourceFlux;
@@ -153,11 +154,17 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         this.readNoise      = readNoise;
         this.forceResample  = forceResample;
         this.calcMethod      = odp.calculationMethod();
-        // Currently SpectroscopySN is the only supported calculation method for spectroscopy.
+
         final CalculationMethod calcMethod = odp.calculationMethod();
-        if (!(calcMethod instanceof SpectroscopyS2N)) throw new Error("Unsupported calculation method");
+        if (calcMethod instanceof SpectroscopyS2N) {
+            this.numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
+        } else if (calcMethod instanceof SpectroscopyIntegrationTime) {
+            this.numberExposures = ((SpectroscopyIntegrationTime) calcMethod).exposures();
+        } else {
+            throw new Error("Unsupported calculation method: " + calcMethod.toString());
+        }
+
         this.coadds = calcMethod.coaddsOrElse(1);
-        this.numberExposures = ((SpectroscopyS2N) calcMethod).exposures();
         this.sourceFraction  = calcMethod.sourceFraction();
         this.exposureTime    = calcMethod.exposureTime();
 
@@ -394,6 +401,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         } else {
             throw new Error();
         }
+        this.skyAper = skyAper;
         Log.fine("skyAper = " + skyAper);
 
         // calculate the noise factor for the given skyAper
@@ -502,6 +510,10 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
     public int getSlitLengthPixels() {
         return output_slit.lengthPixels();
+    }
+
+    public double getSkyAper() {
+        return skyAper;
     }
 
 }
