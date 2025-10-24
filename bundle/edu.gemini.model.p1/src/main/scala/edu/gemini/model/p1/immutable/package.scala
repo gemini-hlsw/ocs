@@ -114,7 +114,7 @@ package object immutable {
     val B480  = M.GmosNDisperser.B480_G5309
     val B600  = M.GmosNDisperser.B600_G5307
     val R600  = M.GmosNDisperser.R600_G5304
-    val R400  = M.GmosNDisperser.R400_G5305
+    val R400  = M.GmosNDisperser.R400_G5310
     val R150  = M.GmosNDisperser.R150_G5308
   }
 
