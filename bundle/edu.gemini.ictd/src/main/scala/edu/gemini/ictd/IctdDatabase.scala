@@ -1,15 +1,13 @@
 package edu.gemini.ictd
 
 import edu.gemini.spModel.core.Site
-import edu.gemini.spModel.ictd.{ Availability, CustomMaskKey }
-
+import edu.gemini.spModel.ictd.{Availability, CustomMaskKey}
 import doobie.imports._
+import edu.gemini.ictd.service.osgi.IctdServiceImpl
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.TreeMap
-
 import scalaz.effect.IO
-
 
 /** Entry point for clients. Two categories of availability information are
   * obtainable.  One is the availability of custom masks and the other is the
@@ -82,5 +80,13 @@ object IctdDatabase {
     ): java.util.Map[Enum[_], Availability] =
       feature.unsafeSelect(c).availabilityMap(s).asJava
 
+  }
+
+  def main(args: Array[String]): Unit = {
+    val testConf = Configuration.forTesting
+
+    // Uncomment to print GS masks
+    //mask.unsafeSelect(testConf, Site.GS).foreach(println)
+    feature.unsafeSelect(testConf).gmosNorth.dispersers.foreach(println)
   }
 }

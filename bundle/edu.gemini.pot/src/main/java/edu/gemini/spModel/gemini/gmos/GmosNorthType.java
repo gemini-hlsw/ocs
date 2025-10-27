@@ -70,21 +70,21 @@ public class GmosNorthType {
 
     public enum DisperserNorth implements GmosCommonType.Disperser, ObsoletableSpType, IctdType {
         // Mirror isn't tracked but is always installed.
-        MIRROR(     "Mirror",     "mirror",    0, Ictd.installed()),
-        B1200_G5301("B1200_G5301", "B1200", 1200, Ictd.track("B1200")),
-        R831_G5302(  "R831_G5302",  "R831",  831, Ictd.track("R831")),
-        B600_G5303(  "B600_G5303",  "B600",  600, Ictd.unavailable()) {
+        MIRROR(     "Mirror",      "mirror",  0, Ictd.installed()),
+        B1200_G5301("B1200",  "B1200",  "G5301", 1200),
+        R831_G5302( "R831",   "R831",   "G5302",  831),
+        B600_G5303( "B600_G5303",  "B600",  600, Ictd.unavailable()) {
             @Override public boolean isObsolete() { return true; }
         },
-        B600_G5307(  "B600_G5307",  "B600",  600, Ictd.track("B600")),
-        R600_G5304(  "R600_G5304",  "R600",  600, Ictd.track("R600")),
-        B480_G5309(  "B480_G5309",  "B480",  480, Ictd.track("B480")),
-        R400_G5305(  "R400_G5305",  "R400",  400, Ictd.track("R400")),
-        R400_G5310(  "R400_G5310",  "R400",  400, Ictd.track("R400")),
-        R150_G5306(  "R150_G5306",  "R150",  150, Ictd.unavailable()) {
+        B600_G5307( "B600",   "B600",   "G5307",  600),
+        R600_G5304( "R600",   "R600",   "G5304",  600),
+        B480_G5309( "B480",   "B480",   "G5309",  480),
+        R400_G5305( "R400",   "R400",   "G5305",  400),
+        R400_G5310( "R400",   "R400",   "G5310",  400),
+        R150_G5306( "R150_G5306",  "R150",  150, Ictd.unavailable()) {
             @Override public boolean isObsolete() { return true; }
         },
-        R150_G5308(  "R150_G5308",  "R150",  150, Ictd.track("R150")),
+        R150_G5308( "R150",   "R150",   "G5308",  150),
         ;
 
         /** The default Disperser value **/
@@ -100,6 +100,13 @@ public class GmosNorthType {
             this.logValue      = logValue;
             this.rulingDensity = rulingDensity;     // [lines/mm]
             this.ictd          = ictd;
+        }
+
+        DisperserNorth(final String name, final String logValue, final String geminiID, final int rulingDensity) {
+            this.displayValue  = name + "_" + geminiID;
+            this.logValue      = logValue;
+            this.rulingDensity = rulingDensity;     // [lines/mm]
+            this.ictd          = Ictd.trackWithID(name, geminiID);
         }
 
         public String displayValue() {
