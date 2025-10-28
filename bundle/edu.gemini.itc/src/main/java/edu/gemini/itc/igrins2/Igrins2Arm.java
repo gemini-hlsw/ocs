@@ -16,8 +16,8 @@ public enum Igrins2Arm {
             0.0225,
             100000,
             100000,
-            80000,
-            80000),
+            20000,
+            20000),
     K("K",
             MagnitudeBand.unsafeFromString("K"),
             1960.0,
@@ -29,10 +29,10 @@ public enum Igrins2Arm {
             2048,
             2.5,
             0.04,
-            93600,
-            93600,
-            75000,
-            75000);
+            130000,
+            130000,
+            26000,
+            26000);
 
     private final String _name;
     private final MagnitudeBand _magnitudeBand;
