@@ -91,6 +91,30 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
     }
 
     /**
+     * @return the x value of the first non-zero (>0.1%) y value
+     */
+    public double getFirstNonZero() {
+        for (int i = 0; i < getLength(); ++i) {
+             if (_data[1][i] > 0.001) {
+                return _data[0][i];
+            }
+        }
+        throw new RuntimeException("Array has no positive values");
+    }
+
+    /**
+     * @return the x value of the last non-zero (>0.1%) y value
+     */
+    public double getLastNonZero() {
+        for (int i = getLength()-1; i >= 0; --i) {
+            if (_data[1][i] > 0.001) {
+                return _data[0][i];
+            }
+        }
+        throw new RuntimeException("Array has no positive values");
+    }
+
+    /**
      * Returns x value of specified data point.
      */
     @Override public double getX(int index) {

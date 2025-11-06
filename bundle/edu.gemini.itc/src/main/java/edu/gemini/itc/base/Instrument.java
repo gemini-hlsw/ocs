@@ -195,6 +195,36 @@ public abstract class Instrument {
         return e;
     }
 
+    public double getFirstNonZero() {
+        double firstNonZero = getStart();
+        if (disperser.isDefined() && disperser.get().get_trans() instanceof DefaultArraySpectrum) {
+            double disperserFirstNonZero = ((DefaultArraySpectrum) disperser.get().get_trans()).getFirstNonZero();
+            Log.fine("Disperser turns on at " + disperserFirstNonZero + " nm");
+            firstNonZero = Math.max(firstNonZero, disperserFirstNonZero);
+        }
+        if (filter.isDefined() && filter.get().get_trans() instanceof DefaultArraySpectrum) {
+            double filterFirstNonZero = ((DefaultArraySpectrum) filter.get().get_trans()).getFirstNonZero();
+            Log.fine("Filter turns on at " + filterFirstNonZero + " nm");
+            firstNonZero = Math.max(firstNonZero, filterFirstNonZero);
+        }
+        return firstNonZero;
+    }
+
+    public double getLastNonZero() {
+        double lastNonZero = getEnd();
+        if (disperser.isDefined() && disperser.get().get_trans() instanceof DefaultArraySpectrum) {
+            double disperserLastNonZero = ((DefaultArraySpectrum) disperser.get().get_trans()).getLastNonZero();
+            Log.fine("Disperser turns off at " + disperserLastNonZero + " nm");
+            lastNonZero = Math.min(lastNonZero, disperserLastNonZero);
+        }
+        if (filter.isDefined() && filter.get().get_trans() instanceof DefaultArraySpectrum) {
+            double filterLastNonZero = ((DefaultArraySpectrum) filter.get().get_trans()).getLastNonZero();
+            Log.fine("Filter turns off at " + filterLastNonZero + " nm");
+            lastNonZero = Math.min(lastNonZero, filterLastNonZero);
+        }
+        return lastNonZero;
+    }
+
     public double getSampling() {
         return params.sampling();
     }

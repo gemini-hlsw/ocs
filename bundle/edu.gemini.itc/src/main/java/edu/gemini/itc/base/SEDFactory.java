@@ -426,14 +426,46 @@ public final class SEDFactory {
         return new double[]{startWave, endWave};
     }
 
-    public static void validateUserSpectrumRange(final ArraySpectrum spectrum, final double requiredStart, final double requiredEnd, final double redshift) {
+    /**
+     * Validate that the input spectrum covers the normalization band and the wavelength range
+     * to which the selected instrument configuration is sensitive.
+     */
+    public static void validateSpectrumRange(final ArraySpectrum spectrum, final Instrument instrument,
+                                             final MagnitudeBand normBand, final double redshift) {
+
         final double spectrumStart = (1.0 + redshift) * spectrum.getStart();
         final double spectrumEnd = (1.0 + redshift) * spectrum.getEnd();
+        Log.fine(String.format("Input spectrum limits = %.1f - %.1f nm", spectrumStart, spectrumEnd));
+
+        final double normBandStart = normBand.start().toNanometers();
+        final double normBandEnd = normBand.end().toNanometers();
+        Log.fine(String.format("Normalization band limits = %.1f - %.1f nm", normBandStart, normBandEnd));
+
+        if (spectrumStart > normBandStart || spectrumEnd < normBandEnd) {
+            throw new IllegalArgumentException(String.format(
+                    "Redshifted SED (%.1f - %.1f nm) does not cover the specified normalization waveband (%.1f - %.1f nm).",
+                    spectrumStart, spectrumEnd, normBandStart, normBandEnd));
+        }
+
+        double firstPixelWavelength = instrument.getObservingStart();
+        double lastPixelWavelength = instrument.getObservingEnd();
+        double[] adjustedRange = adjustInstrumentRangeForGnirs(instrument, firstPixelWavelength, lastPixelWavelength);
+        firstPixelWavelength = adjustedRange[0];
+        lastPixelWavelength= adjustedRange[1];
+        Log.fine(String.format("First pixel to last pixel = %.1f - %.1f nm", firstPixelWavelength, lastPixelWavelength));
+
+        double firstNonZeroWavelength = instrument.getFirstNonZero();
+        double lastNonZeroWavelength = instrument.getLastNonZero();
+        Log.fine(String.format("Range of instrument throughput = %.1f - %.1f nm", firstNonZeroWavelength, lastNonZeroWavelength));
+
+        final double requiredStart = Math.max(firstPixelWavelength, firstNonZeroWavelength);
+        final double requiredEnd = Math.min(lastPixelWavelength, lastNonZeroWavelength);
+        Log.fine(String.format("Required range of configuration = %.1f - %.1f nm", requiredStart, requiredEnd));
 
         if (spectrumStart > requiredStart || spectrumEnd < requiredEnd) {
-            throw new IllegalArgumentException(
-                    String.format("Redshifted SED (%.1f - %.1f nm) does not cover the range of the instrument and normalization band " +
-                            "(%.1f - %.1f nm).", spectrumStart, spectrumEnd, requiredStart, requiredEnd));
+            throw new IllegalArgumentException(String.format(
+                    "Redshifted SED (%.1f - %.1f nm) does not cover range of instrument configuration (%.1f - %.1f nm).",
+                    spectrumStart, spectrumEnd, requiredStart, requiredEnd));
         }
     }
 
@@ -449,20 +481,10 @@ public final class SEDFactory {
 
             case USER_DEFINED:
                 final UserDefinedSpectrum userDefined = (UserDefinedSpectrum) sdp.distribution();
-                final MagnitudeBand band = sdp.normBand();
-                double inst_start_wave = instrument.getObservingStart();
-                double inst_end_wave = instrument.getObservingEnd();
-
-                final double[] adjustedRange = adjustInstrumentRangeForGnirs(instrument, inst_start_wave, inst_end_wave);
-                inst_start_wave = adjustedRange[0];
-                inst_end_wave = adjustedRange[1];
-
-                final double requiredStart = min(inst_start_wave, band.start().toNanometers());
-                final double requiredEnd = Math.max(inst_end_wave, band.end().toNanometers());
-
                 try {
+                    Log.fine("Reading " +  userDefined.name());
                     final DefaultArraySpectrum as = DefaultArraySpectrum.fromUserSpectrum(userDefined.spectrum());
-                    validateUserSpectrumRange(as, requiredStart, requiredEnd, redshift);
+                    validateSpectrumRange(as, instrument, sdp.normBand(), redshift);
                 } catch (final Exception e) {
                     throw new IllegalArgumentException("Could not parse user SED " + userDefined.name() + ": " + e.getMessage());
                 }
@@ -476,26 +498,7 @@ public final class SEDFactory {
                 } else {
                     as = new DefaultArraySpectrum(getLibraryResource(NON_STELLAR_LIB, sdp));
                 }
-                final double spectrumStart = (1.0 + redshift) * as.getStart();
-                final double spectrumEnd = (1.0 + redshift) * as.getEnd();
-
-                // TODO: which instruments need this check, why only some and others not? Do all near-ir instruments need it?
-                // TODO: what about Nifs and Gnirs (other near-ir instruments)?
-                if (instrument instanceof Gsaoi || instrument instanceof Niri || instrument instanceof Flamingos2) {
-                    if (spectrumStart > instrument.getObservingStart() || spectrumEnd < instrument.getObservingEnd()) {
-                        throw new IllegalArgumentException(String.format("Redshifted SED (%.1f - %.1f nm) does not cover range of instrument configuration (%.1f - %.1f nm).",
-                                spectrumStart, spectrumEnd, instrument.getObservingStart(), instrument.getObservingEnd()));
-                    }
-                }
-
-                // any sed except BBODY and ELINE have normalization regions
-                final MagnitudeBand normBand = sdp.normBand();
-                final double bandStart = normBand.start().toNanometers();
-                final double bandEnd = normBand.end().toNanometers();
-                if (spectrumStart > bandStart || spectrumEnd < bandEnd) {
-                    throw new IllegalArgumentException(String.format("Redshifted SED (%.1f - %.1f nm) does not cover the specified normalization waveband (%.1f - %.1f nm).",
-                            spectrumStart, spectrumEnd, bandStart, bandEnd));
-                }
+                validateSpectrumRange(as, instrument, sdp.normBand(), redshift);
                 break;
 
             default:

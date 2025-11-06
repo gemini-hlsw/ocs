@@ -7,13 +7,13 @@ GMOS-S
 # Starting wavelength (nm)
 300
 # Ending wavelength (nm)
-1000
+1100
 # Sampling (nm)
 0.25
 # Background filename
 gmos_s_background.dat
-# Plate Scale
-0.072
+# Plate Scale (set in gmos.java)
+0.0
 # Read Noise (set in gmos.java)
 0.0
 # Dark Current (electrons per pixel per second)

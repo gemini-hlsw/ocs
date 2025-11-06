@@ -48,4 +48,5 @@ public interface Disperser {
         return resolutionHalfArcsecSlit() * width / 0.5;
     }
 
+    ArraySpectrum get_trans();
 }

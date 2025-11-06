@@ -73,7 +73,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         Log.fine("xEnd = " + xEnd + " nm");
 
         // Validate spectrum range covers required range after redshift
-        SEDFactory.validateUserSpectrumRange(sp, xStart, xEnd, z);
+        // SEDFactory.validateUserSpectrumRange(sp, xStart, xEnd, z);
 
         // The SED will be redshifted later so resample over range / (1+z):
         xStart /= 1+z;
