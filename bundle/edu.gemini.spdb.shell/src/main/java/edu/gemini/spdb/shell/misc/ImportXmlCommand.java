@@ -61,8 +61,11 @@ public class ImportXmlCommand {
     // The argument is a list of File objects.
     private void importFiles(List<File> files) {
         final List<File> inputFiles = filesToImport(files);
-        System.out.println("Importing " + inputFiles.size() + " file(s).");
-        for (File f : inputFiles) importFile(f);
+        final int total = inputFiles.size();
+        System.out.println("Importing " + total + " file(s).");
+        for (int i = 0; i < total; i++) {
+            importFile(inputFiles.get(i), i + 1, total);
+        }
     }
 
     public void importXML() {
@@ -82,8 +85,8 @@ public class ImportXmlCommand {
     }
 
     // Import the given XML file.
-    private void importFile(File file) {
-        System.out.println("Importing: " + file.getName() + " ...");
+    private void importFile(File file, int current, int total) {
+        System.out.println("Importing: " + file.getName() + " (" + current + "/" + total + ") ...");
         try {
             final String xml = Charset.forName("UTF-8")
                     .decode(new FileInputStream(file).getChannel().map(MapMode.READ_ONLY, 0, file.length()))
