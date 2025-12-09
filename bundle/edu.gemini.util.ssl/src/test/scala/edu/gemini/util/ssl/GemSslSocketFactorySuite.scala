@@ -13,7 +13,7 @@ class GemSslSocketFactorySuite extends FunSuite {
     "ssd.jpl.nasa.gov",
     "archive.eso.org",
     "gsss.stsci.edu",
-    "gea.esac.esa.int",
+    // "gea.esac.esa.int", // Gaia is offline
     // "simbad.cfa.harvard.edu",
     "simbad.u-strasbg.fr",
     "github.com"
