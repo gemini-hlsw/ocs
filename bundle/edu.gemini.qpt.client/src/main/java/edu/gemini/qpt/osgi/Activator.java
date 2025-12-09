@@ -59,6 +59,12 @@ public final class Activator implements BundleActivator {
             LOGGER.warning("Missing bundle.properties value edu.gemini.qpt.ltts.services.south.url");
         }
 
+        String northEnabled = context.getProperty("edu.gemini.qpt.ltts.services.north.enabled");
+        LttsServicesClient.LTTS_SERVICES_NORTH_ENABLED = !"false".equalsIgnoreCase(northEnabled);
+
+        String southEnabled = context.getProperty("edu.gemini.qpt.ltts.services.south.enabled");
+        LttsServicesClient.LTTS_SERVICES_SOUTH_ENABLED = !"false".equalsIgnoreCase(southEnabled);
+
         this.context = context;
 
         // TODO: this is set to the application install dir where we can find
