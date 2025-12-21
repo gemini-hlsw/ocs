@@ -307,7 +307,7 @@ public final class SEDFactory {
         final SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(instrument, tp);
         sky.accept(tb);
 
-        // FOR GSAOI and NIRI ADD AO STUFF HERE
+        // FOR GSAOI and NIRI and GNIRS - ADD AO STUFF HERE
         if (instrument instanceof Gsaoi || instrument instanceof Niri || instrument instanceof Gnirs) {
             // Moved section where sky/sed is convolved with instrument below Altair/Gems
             // section
@@ -317,6 +317,7 @@ public final class SEDFactory {
             // input: instrument, source and background SED
             // output: total flux of source and background.
             // TODO: for GSAOI and NIRI convolve here, why??
+            Log.fine("Applying instrument throughput to sed...");
             instrument.convolveComponents(sed);
             if (ao.isDefined()) {
                 halo = Option.apply(SEDFactory.applyAoSystem(ao.get(), sky, sed));
@@ -338,10 +339,10 @@ public final class SEDFactory {
         // output: total flux of source and background.
         if (!(instrument instanceof Gsaoi) && !(instrument instanceof Niri) && !(instrument instanceof Gnirs)) {
             // TODO: for any instrument other than GSAOI and NIRI convolve here, why?
-            Log.fine("Applying instrument throughput to the SED...");
+            Log.fine("Applying instrument throughput to sed...");
             instrument.convolveComponents(sed);
         }
-        Log.fine("Applying instrument throughput to the SKY...");
+        Log.fine("Applying instrument throughput to sky...");
          //creatingFile(instrument.getSampling(),  sky, "skyBconv");
         instrument.convolveComponents(sky);
 
@@ -355,10 +356,12 @@ public final class SEDFactory {
     }
 
     public static VisitableSampledSpectrum applyAoSystem(final AOSystem ao, final VisitableSampledSpectrum sky, final VisitableSampledSpectrum sed) {
+        Log.fine("Including AO system background and transmission...");
         sky.accept(ao.getBackgroundVisitor());
         sed.accept(ao.getTransmissionVisitor());
         sky.accept(ao.getTransmissionVisitor());
 
+        Log.fine("Initializing halo SED as a clone of the source SED...");
         final VisitableSampledSpectrum halo = (VisitableSampledSpectrum) sed.clone();
         halo.accept(ao.getHaloFluxAttenuationVisitor());
         sed.accept(ao.getFluxAttenuationVisitor());

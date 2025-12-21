@@ -258,6 +258,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
      */
     @Override
     public void visit(final SampledSpectrum sed) {
+        Log.fine("Visiting " + sed.toString());
         // step one: do some resampling and preprocessing
         resample();
         // step two: calculate S2N for single and final exposure for given slit
@@ -297,12 +298,12 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         // forceResample attribute was introduced and a jira ticket will be created to find a good solution.
 
         if (smoothingElement > 2 || this.forceResample) {
-            Log.fine("Smoothing source; element = " + (smoothingElement + 1));
+            Log.fine("Smoothing source flux; smoothing element = " + (smoothingElement + 1));
             sourceFlux.smoothY(smoothingElement + 1);
         }
 
         if (backgroundSmoothingElement > 2 || this.forceResample) {
-            Log.fine("Smoothing background; element = " + (backgroundSmoothingElement + 1));
+            Log.fine("Smoothing background flux; smoothing element = " + (backgroundSmoothingElement + 1));
             backgroundFlux.smoothY(backgroundSmoothingElement + 1);
         }
 
@@ -397,7 +398,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
         final VisitableSampledSpectrum signal = (VisitableSampledSpectrum) sourceFlux.clone();
         final int lastPixel = lastCcdPixel(signal.getLength());
-        Log.fine(String.format("Calculating signal/pixel: throughput = %.3f on detector pixels %d - %d", throughput, firstCcdPixel, lastPixel));
+        Log.fine(String.format("Calculating signal: throughput = %.3f on detector pixels %d - %d", throughput, firstCcdPixel, lastPixel));
 
         for (int i = 0; i < signal.getLength(); ++i) { signal.setY(i, 0); } // zero data array before use per REL-2992
 
@@ -408,18 +409,25 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         return signal;
     }
 
-    /** Calculates total source flux (signal) in the aperture. */
+    /** Calculates total source flux (signal) in the aperture per coadd including the AO halo. */
     private VisitableSampledSpectrum signalWithHalo(final double throughput, final double haloThroughput) {
 
         final VisitableSampledSpectrum signal = (VisitableSampledSpectrum) sourceFlux.clone();
         final int lastPixel = lastCcdPixel(signal.getLength());
-        Log.fine(String.format("Calculating signal with halo: throughput = %.3f on detector pixels %d - %d", throughput, firstCcdPixel, lastPixel));
+        Log.fine(String.format("Calculating signal: throughput = %.3f and halo throughput = %.3f on detector pixels %d - %d",
+                throughput, haloThroughput, firstCcdPixel, lastPixel));
 
         for (int i = 0; i < signal.getLength(); ++i) { signal.setY(i, 0); }
 
         for (int i = firstCcdPixel; i <= lastPixel; ++i) {
-            signal.setY(i, totalFlux(sourceFlux.getY(i), throughput, sourceFlux.getX(i)) + totalFlux(haloFlux.getY(i), haloThroughput, haloFlux.getX(i)));
+            signal.setY(i,
+                    totalFlux(sourceFlux.getY(i), throughput, sourceFlux.getX(i)) +
+                    totalFlux(haloFlux.getY(i), haloThroughput, haloFlux.getX(i)));
         }
+
+        Log.fine(String.format("Average source flux = %.1f (%.1f - %.1f nm)", sourceFlux.getAverage(sourceFlux.getStart(), sourceFlux.getEnd()),sourceFlux.getStart(), sourceFlux.getEnd()));
+        Log.fine(String.format("Average halo flux = %.1f (%.1f - %.1f nm)", haloFlux.getAverage(haloFlux.getStart(), haloFlux.getEnd()), haloFlux.getStart(), haloFlux.getEnd()));
+        Log.fine(String.format("Average signal = %.1f (%.1f - %.1f nm)", signal.getAverage(signal.getStart(), signal.getEnd()), signal.getStart(), signal.getEnd()));
 
         return signal;
     }
@@ -530,10 +538,13 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     }
 
     public void setHaloSpectrum(final VisitableSampledSpectrum sed, final SlitThroughput throughput, final double imgQuality) {
+        Log.fine("Setting halo spectrum.  Throughput = " + throughput.throughput() + "  IQ = " + imgQuality);
         haloIsUsed      = true;
         haloFlux        = sed;
         haloThroughput  = throughput;
         haloImgQuality  = imgQuality;
+        Log.fine(String.format("Average halo flux = %.1f (%.1f - %.1f nm)",
+                haloFlux.getAverage(haloFlux.getStart(), haloFlux.getEnd()), haloFlux.getStart(), haloFlux.getEnd()));
     }
 
     public void setBackgroundSpectrum(final VisitableSampledSpectrum sed) {

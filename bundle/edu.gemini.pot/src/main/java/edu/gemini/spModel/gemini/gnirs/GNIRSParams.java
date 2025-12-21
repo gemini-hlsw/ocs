@@ -512,9 +512,21 @@ public class GNIRSParams {
             return dvalue;
         }
 
+        /**
+         * Return an Order by its integer order number (1–8).
+         */
+        public static Order getOrderByNumber(int orderNumber) {
+            for (Order o : values()) {
+                if (o == XD) continue;  // skip XD
+                if (o._order == orderNumber) {
+                    return o;
+                }
+            }
+            return null;
+        }
 
         /**
-         * Return an Order by index
+         * Return an Order by index.  Note that index 3 is XD.
          */
         static public Order getOrderByIndex(int index) {
             return SpTypeUtil.valueOf(Order.class, index, DEFAULT);

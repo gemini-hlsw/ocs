@@ -20,6 +20,21 @@ public final class ImageQualityCalculationFactory {
             ObservingConditions observingConditions,
             TelescopeDetails telescope,
             Instrument instrument) {
+       return getCalculationInstance(
+               sourceDefinition,
+               observingConditions,
+               telescope,
+               instrument.getEffectiveWavelength());
+    }
+
+    /**
+     * @param wavelength [nanometers]
+     */
+    public static ImageQualityCalculatable getCalculationInstance(
+            SourceDefinition sourceDefinition,
+            ObservingConditions observingConditions,
+            TelescopeDetails telescope,
+            int wavelength) {
 
         Log.fine("Source Profile: " + sourceDefinition.profile());
 
@@ -49,11 +64,11 @@ public final class ImageQualityCalculationFactory {
             final GuideProbe.Type wfs =
                     telescope.getWFS() == GuideProbe.Type.AOWFS ? GuideProbe.Type.OIWFS : telescope.getWFS();
 
-             return new ImageQualityCalculation(
+            return new ImageQualityCalculation(
                     wfs,
                     observingConditions.javaIq().toOption().getValue(),
                     observingConditions.airmass(),
-                    instrument.getEffectiveWavelength());
+                    wavelength);
         }
     }
 }

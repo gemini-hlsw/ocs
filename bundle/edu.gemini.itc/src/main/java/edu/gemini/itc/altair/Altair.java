@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 public class Altair implements AOSystem {
     private static final Logger Log = Logger.getLogger( Altair.class.getName() );
 
-   /**
+    /**
      * Related files will be in this subdir of lib
      */
     public static final String ALTAIR_LIB = "/altair";
@@ -106,7 +106,9 @@ public class Altair implements AOSystem {
     }
 
     public double getr0() {
-        return (0.1031 / uncorrectedSeeing) * Math.pow(wavelength / 500, 1.2);
+        double r0 = (0.1031 / uncorrectedSeeing) * Math.pow(wavelength / 500, 1.2);
+        Log.fine(String.format("r0 @ %.1f nm = %.3f m", wavelength, r0));
+        return r0;
     }
 
     public double getWavelength() {
@@ -128,11 +130,10 @@ public class Altair implements AOSystem {
             corr = 0.37; //if LGS
         }
 
-
         //double sigma = 0.04*Math.pow((telescopeDiameter/r0),1.66);  //old equation
         double sigma = corr * Math.pow((telescopeDiameter / r0), r0power);
         double strehl = Math.exp(-1 * sigma);
-
+        Log.fine(String.format("Strehl = %.3f @ %.1f nm", strehl, wavelength));
         return strehl;
     }
 
@@ -179,7 +180,9 @@ public class Altair implements AOSystem {
 
     public double getAOCorrectedFWHM() {
         double fwhmAO = Math.sqrt(6.817E-10 * Math.pow(wavelength, 2) + 6.25E-4);
-        return Math.sqrt(fwhmAO * fwhmAO + fwhmInst * fwhmInst); // REL-472
+        double fwhmDelivered = Math.sqrt(fwhmAO * fwhmAO + fwhmInst * fwhmInst); // REL-472
+        Log.fine(String.format("Image quality with Altair = %.5f arcsec at %.1f nm with Strehl = %.3f", fwhmDelivered, wavelength, getStrehl()));
+        return fwhmDelivered;
     }
 
     private boolean fieldLensIsIn() {

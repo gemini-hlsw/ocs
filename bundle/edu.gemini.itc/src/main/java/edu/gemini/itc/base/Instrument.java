@@ -90,7 +90,7 @@ public abstract class Instrument {
      * accept method of each component to a sed.
      */
     public void convolveComponents(VisitableSampledSpectrum sed) {
-        Log.fine("Applying each instrument component...");
+        Log.fine("Applying transmission of each component...");
         for (final TransmissionElement te : components) {
             Log.fine("Accepting " + te._file);
             sed.accept(te);
