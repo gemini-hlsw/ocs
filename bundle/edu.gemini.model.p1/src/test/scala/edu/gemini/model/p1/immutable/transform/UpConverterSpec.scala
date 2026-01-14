@@ -36,7 +36,7 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
           proposal.observations must be size 2
           Option(proposal.proposalClass) must beSome
 
-          proposal.semester must beEqualTo(Semester(2026, SemesterOption.A))
+          proposal.semester must beEqualTo(Semester(2026, SemesterOption.B))
       }
 
       UpConverter.upConvert(xml) must beSuccessful.like {
@@ -976,4 +976,3 @@ class UpConverterSpec extends Specification with SemesterProperties with XmlMatc
     }
   }
 }
-
