@@ -7,6 +7,7 @@ import edu.gemini.itc.flamingos2.Flamingos2Recipe
 import edu.gemini.itc.gmos.GmosRecipe
 import edu.gemini.itc.gnirs.GnirsRecipe
 import edu.gemini.itc.gsaoi.GsaoiRecipe
+import edu.gemini.itc.igrins2.Igrins2Recipe
 import edu.gemini.itc.nifs.NifsRecipe
 import edu.gemini.itc.niri.NiriRecipe
 import edu.gemini.itc.shared._
@@ -109,6 +110,7 @@ class ItcServiceImpl extends ItcService {
       case i: GnirsParameters             => spectroscopyResult   (new GnirsRecipe(p, i),      includeCharts )
       case i: NifsParameters              => spectroscopyResult   (new NifsRecipe(p, i),       includeCharts )
       case i: NiriParameters              => spectroscopyResult   (new NiriRecipe(p, i),       includeCharts )
+      case i: Igrins2Parameters           => spectroscopyResult   (new Igrins2Recipe(p, i),   includeCharts )
       case _                              => ItcResult.forMessage (s"Spectroscopy with this instrument: ${p.instrument} is not supported by ITC.")
 
     }
@@ -122,6 +124,7 @@ class ItcServiceImpl extends ItcService {
       case i: GnirsParameters             => spectroscopyResult(new GnirsRecipe(p, i),      includeCharts = false )
       case i: NifsParameters              => spectroscopyResult(new NifsRecipe(p, i),       includeCharts = false )
       case i: NiriParameters              => spectroscopyResult(new NiriRecipe(p, i),       includeCharts = false )
+      case i: Igrins2Parameters           => spectroscopyResult(new Igrins2Recipe(p, i),   includeCharts = false )
       case _                              => ItcResult.forMessage (s"Spectroscopy with this instrument: ${p.instrument} is not supported by ITC.")
 
     }

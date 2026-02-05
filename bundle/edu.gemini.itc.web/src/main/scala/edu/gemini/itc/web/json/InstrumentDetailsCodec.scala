@@ -208,7 +208,7 @@ trait InstrumentDetailsCodec {
       .withCase("NifsParameters",           NifsParametersCodec)           { case a: NifsParameters           => a }
       .withCase("NiriParameters",           NiriParametersCodec)           { case a: NiriParameters           => a }
       .withCase("TRecsParameters",          TRecsParametersCodec)          { case a: TRecsParameters          => a }
-      .withCase("Igrins2Parameters",       Igrins2ParametersCodec)       { case a: Igrins2Parameters       => a }
+      .withCase("Igrins2Parameters",        Igrins2ParametersCodec)       { case a: Igrins2Parameters       => a }
       .asCodecJson
 
 }

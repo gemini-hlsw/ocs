@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 
 
 // This class performs the calculations for IGRINS2
-public final class Igrins2Recipe {
+public final class Igrins2Recipe implements SpectroscopyArrayRecipe {
     private static final Logger Log = Logger.getLogger(Igrins2Recipe.class.getName());
     private final ItcParameters p;
     private final Igrins2[] _mainInstrument;
