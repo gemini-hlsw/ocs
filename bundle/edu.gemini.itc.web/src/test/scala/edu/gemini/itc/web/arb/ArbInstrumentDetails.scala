@@ -148,6 +148,11 @@ trait ArbInstrumentDetails {
       mask               <- arbitrary[TReCSParams.Mask]
     } yield TRecsParameters(filter, instrumentWindow, grating, centralWavelength, mask)
 
+  val genIgrins2Parameters: Gen[Igrins2Parameters] =
+    for {
+      altair <- arbitrary[Option[AltairParameters]]
+    } yield Igrins2Parameters(altair)
+
   val genInstrumentDetails: Gen[InstrumentDetails] =
     Gen.oneOf(
       genAcquisitionCamParameters,
@@ -158,7 +163,8 @@ trait ArbInstrumentDetails {
       genMichelleParameters,
       genNifsParameters,
       genNiriParameters,
-      genTRecsParameters
+      genTRecsParameters,
+      genIgrins2Parameters
     )
 
   implicit val arbInstrumentDetails: Arbitrary[InstrumentDetails] =

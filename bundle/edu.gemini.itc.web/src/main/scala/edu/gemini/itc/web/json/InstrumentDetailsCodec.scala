@@ -192,6 +192,11 @@ trait InstrumentDetailsCodec {
       "mask"
     )
 
+  private implicit val Igrins2ParametersCodec: CodecJson[Igrins2Parameters] =
+    casecodec1(Igrins2Parameters.apply, Igrins2Parameters.unapply)(
+      "altair"
+    )
+
   implicit val InstrumentDetailsDecodeJson: CodecJson[InstrumentDetails] =
     CoproductCodec[InstrumentDetails]
       .withCase("AcquisitionCamParameters", AcquisitionCamParametersCodec) { case a: AcquisitionCamParameters => a }
@@ -203,6 +208,7 @@ trait InstrumentDetailsCodec {
       .withCase("NifsParameters",           NifsParametersCodec)           { case a: NifsParameters           => a }
       .withCase("NiriParameters",           NiriParametersCodec)           { case a: NiriParameters           => a }
       .withCase("TRecsParameters",          TRecsParametersCodec)          { case a: TRecsParameters          => a }
+      .withCase("Igrins2Parameters",       Igrins2ParametersCodec)       { case a: Igrins2Parameters       => a }
       .asCodecJson
 
 }
