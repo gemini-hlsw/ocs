@@ -110,7 +110,7 @@ class ItcServiceImpl extends ItcService {
       case i: GnirsParameters             => spectroscopyResult   (new GnirsRecipe(p, i),      includeCharts )
       case i: NifsParameters              => spectroscopyResult   (new NifsRecipe(p, i),       includeCharts )
       case i: NiriParameters              => spectroscopyResult   (new NiriRecipe(p, i),       includeCharts )
-      case i: Igrins2Parameters           => spectroscopyResult   (new Igrins2Recipe(p, i),   includeCharts )
+      case i: Igrins2Parameters           => spectroscopyResult   (new Igrins2Recipe(toMicrons(p), i), includeCharts)
       case _                              => ItcResult.forMessage (s"Spectroscopy with this instrument: ${p.instrument} is not supported by ITC.")
 
     }
@@ -124,7 +124,7 @@ class ItcServiceImpl extends ItcService {
       case i: GnirsParameters             => spectroscopyResult(new GnirsRecipe(p, i),      includeCharts = false )
       case i: NifsParameters              => spectroscopyResult(new NifsRecipe(p, i),       includeCharts = false )
       case i: NiriParameters              => spectroscopyResult(new NiriRecipe(p, i),       includeCharts = false )
-      case i: Igrins2Parameters           => spectroscopyResult(new Igrins2Recipe(p, i),   includeCharts = false )
+      case i: Igrins2Parameters           => spectroscopyResult(new Igrins2Recipe(toMicrons(p), i), includeCharts = false)
       case _                              => ItcResult.forMessage (s"Spectroscopy with this instrument: ${p.instrument} is not supported by ITC.")
 
     }
@@ -139,6 +139,18 @@ class ItcServiceImpl extends ItcService {
     val r = recipe.calculateSpectroscopy()
     val s = recipe.serviceResult(r, includeCharts)
     ItcResult.forResult(s)
+  }
+
+  private def toMicrons(p: ItcParameters): ItcParameters = {
+    val obs = p.observation
+    val converted = obs.calculationMethod match {
+      case s: SpectroscopyIntegrationTime =>
+        obs.copy(calculationMethod = s.copy(wavelengthAt = s.wavelengthAt / 1000.0))
+      case s: SpectroscopyS2N =>
+        obs.copy(calculationMethod = s.copy(wavelengthAt = s.wavelengthAt.map(_ / 1000.0)))
+      case other => obs
+    }
+    p.copy(observation = converted)
   }
 
 }

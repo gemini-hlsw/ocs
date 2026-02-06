@@ -89,10 +89,7 @@ public final class Igrins2Recipe implements SpectroscopyArrayRecipe {
             double desiredSNR = ((SpectroscopyIntegrationTime) _calcMethod).sigma();
             Log.fine(String.format("desiredSNR = %.2f", desiredSNR));
 
-            SnrWavelength = ((SpectroscopyIntegrationTime) _obsDetailParameters.calculationMethod()).wavelengthAt();
-            System.out.println("SnrWavelength: " + SnrWavelength);
-            System.out.println("H Wav: " + Igrins2Arm.H.getWavelengthStart() + " to " + Igrins2Arm.H.getWavelengthEnd());
-            System.out.println("K Wav: " + Igrins2Arm.K.getWavelengthStart() + " to " + Igrins2Arm.K.getWavelengthEnd());
+            SnrWavelength = ((SpectroscopyIntegrationTime) _obsDetailParameters.calculationMethod()).wavelengthAt() * 1000.;
             Log.fine(String.format("Wavelength = %.2f nm", SnrWavelength));
 
             if (Igrins2Arm.H.getWavelengthStart() <= SnrWavelength && SnrWavelength <= Igrins2Arm.H.getWavelengthEnd()) {
