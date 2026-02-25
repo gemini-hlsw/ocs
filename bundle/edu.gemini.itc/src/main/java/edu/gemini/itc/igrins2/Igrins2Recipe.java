@@ -83,6 +83,9 @@ public final class Igrins2Recipe implements SpectroscopyArrayRecipe {
         if (_calcMethod instanceof SpectroscopyS2N) {  // user has specified exposure time and number of exposures
             exposureTime = _obsDetailParameters.exposureTime();
             numberExposures = ((SpectroscopyS2N) _calcMethod).exposures();
+            // Set SnrWavelength for arm selection
+            Option<Object> atOpt = ((SpectroscopyS2N) _obsDetailParameters.calculationMethod()).wavelengthAt();
+            SnrWavelength = atOpt.isDefined() ? ((Double) atOpt.get()) : Igrins2Arm.H.getWavelengthCentral();
 
         } else if (_calcMethod instanceof SpectroscopyIntegrationTime) {  // determine the optimal exposure time and number of exposures
 
@@ -195,11 +198,19 @@ public final class Igrins2Recipe implements SpectroscopyArrayRecipe {
         Log.fine(String.format("Exposure Time = %.2f", exposureTime));
         Log.fine("Number of Exposures = " + numberExposures);
 
-        // Run the ITC calculations for each arm
+        // Build integration times list for all arms
+        List<IntegrationTime> allCalculations = new ArrayList<>();
+        for (int i = 0; i < _mainInstrument.length; i++) {
+            allCalculations.add(new IntegrationTime(exposureTime, numberExposures));
+        }
+        int selectedIndex = determineSelectedArmIndex();
+
+        // Run calculations and attach combined times
         final SpectroscopyResult[] results = new SpectroscopyResult[_mainInstrument.length];
         for (int i = 0; i < _mainInstrument.length; i++) {
             Log.fine("----- Final run of " + _mainInstrument[i].getArm().getName());
-            results[i] = calculateSpectroscopy(_mainInstrument[i], exposureTime, numberExposures);
+            results[i] = calculateSpectroscopy(_mainInstrument[i], exposureTime, numberExposures)
+                    .withTimes(AllIntegrationTimes.fromJavaList(allCalculations, selectedIndex));
         }
         return results;
     }
@@ -308,6 +319,16 @@ public final class Igrins2Recipe implements SpectroscopyArrayRecipe {
         double exposureTime = (-b + Math.sqrt(b*b - 4.*a*c)) / (2.*a);
         Log.fine(String.format("exposureTime = %.3f", exposureTime));
         return exposureTime;
+    }
+
+    private int determineSelectedArmIndex() {
+        if (Igrins2Arm.H.getWavelengthStart() <= SnrWavelength && SnrWavelength <= Igrins2Arm.H.getWavelengthEnd()) {
+            return 0;
+        }
+        if (Igrins2Arm.K.getWavelengthStart() <= SnrWavelength && SnrWavelength <= Igrins2Arm.K.getWavelengthEnd()) {
+            return 1;
+        }
+        return 0;  // Default to H-band
     }
 
     public double getExposureTime() { return exposureTime; }
