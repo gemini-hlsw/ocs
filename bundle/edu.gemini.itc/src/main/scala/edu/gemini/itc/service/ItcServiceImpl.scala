@@ -7,6 +7,7 @@ import edu.gemini.itc.flamingos2.Flamingos2Recipe
 import edu.gemini.itc.gmos.GmosRecipe
 import edu.gemini.itc.gnirs.GnirsRecipe
 import edu.gemini.itc.gsaoi.GsaoiRecipe
+import edu.gemini.itc.igrins2.Igrins2Recipe
 import edu.gemini.itc.nifs.NifsRecipe
 import edu.gemini.itc.niri.NiriRecipe
 import edu.gemini.itc.shared._
@@ -104,11 +105,12 @@ class ItcServiceImpl extends ItcService {
 
   private def calculateSpectroscopy(p: ItcParameters, includeCharts: Boolean): Result =
     p.instrument match {
-      case i: Flamingos2Parameters        => spectroscopyResult   (new Flamingos2Recipe(p, i), includeCharts )
-      case i: GmosParameters              => spectroscopyResult   (new GmosRecipe(p, i),       includeCharts )
-      case i: GnirsParameters             => spectroscopyResult   (new GnirsRecipe(p, i),      includeCharts )
-      case i: NifsParameters              => spectroscopyResult   (new NifsRecipe(p, i),       includeCharts )
-      case i: NiriParameters              => spectroscopyResult   (new NiriRecipe(p, i),       includeCharts )
+      case i: Flamingos2Parameters        => spectroscopyResult   (new Flamingos2Recipe(p, i),               includeCharts)
+      case i: GmosParameters              => spectroscopyResult   (new GmosRecipe(p, i),                     includeCharts)
+      case i: GnirsParameters             => spectroscopyResult   (new GnirsRecipe(p, i),                    includeCharts)
+      case i: NifsParameters              => spectroscopyResult   (new NifsRecipe(p, i),                     includeCharts)
+      case i: NiriParameters              => spectroscopyResult   (new NiriRecipe(p, i),                     includeCharts)
+      case i: Igrins2Parameters           => spectroscopyResult   (new Igrins2Recipe(paramsInMicrons(p), i), includeCharts)
       case _                              => ItcResult.forMessage (s"Spectroscopy with this instrument: ${p.instrument} is not supported by ITC.")
 
     }
@@ -117,11 +119,12 @@ class ItcServiceImpl extends ItcService {
 
   private def calculateSpectroscopyCharts(p: ItcParameters): Result =
     p.instrument match {
-      case i: GmosParameters              => spectroscopyResult(new GmosRecipe(p, i),       includeCharts = false)
-      case i: Flamingos2Parameters        => spectroscopyResult(new Flamingos2Recipe(p, i), includeCharts = false)
-      case i: GnirsParameters             => spectroscopyResult(new GnirsRecipe(p, i),      includeCharts = false )
-      case i: NifsParameters              => spectroscopyResult(new NifsRecipe(p, i),       includeCharts = false )
-      case i: NiriParameters              => spectroscopyResult(new NiriRecipe(p, i),       includeCharts = false )
+      case i: GmosParameters              => spectroscopyResult(new GmosRecipe(p, i),                     includeCharts = false)
+      case i: Flamingos2Parameters        => spectroscopyResult(new Flamingos2Recipe(p, i),               includeCharts = false)
+      case i: GnirsParameters             => spectroscopyResult(new GnirsRecipe(p, i),                    includeCharts = false)
+      case i: NifsParameters              => spectroscopyResult(new NifsRecipe(p, i),                     includeCharts = false)
+      case i: NiriParameters              => spectroscopyResult(new NiriRecipe(p, i),                     includeCharts = false)
+      case i: Igrins2Parameters           => spectroscopyResult(new Igrins2Recipe(paramsInMicrons(p), i), includeCharts = false)
       case _                              => ItcResult.forMessage (s"Spectroscopy with this instrument: ${p.instrument} is not supported by ITC.")
 
     }
@@ -136,6 +139,21 @@ class ItcServiceImpl extends ItcService {
     val r = recipe.calculateSpectroscopy()
     val s = recipe.serviceResult(r, includeCharts)
     ItcResult.forResult(s)
+  }
+
+  // The web page has the fields in microns and they are passed directly as doubles so the recipe expects micros
+  // but json takes nanometers thus we need to convert them here.
+  // The correct way should be to include units but we want this to be a limited change and avoid impacting old itc too much
+  private def paramsInMicrons(p: ItcParameters): ItcParameters = {
+    val obs = p.observation
+    val micros = obs.calculationMethod match {
+      case s: SpectroscopyIntegrationTime =>
+        obs.copy(calculationMethod = s.copy(wavelengthAt = s.wavelengthAt / 1000.0))
+      case s: SpectroscopyS2N =>
+        obs.copy(calculationMethod = s.copy(wavelengthAt = s.wavelengthAt.map(_ / 1000.0)))
+      case other => obs
+    }
+    p.copy(observation = micros)
   }
 
 }
