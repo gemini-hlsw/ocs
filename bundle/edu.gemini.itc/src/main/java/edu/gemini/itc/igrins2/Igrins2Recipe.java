@@ -26,6 +26,10 @@ public final class Igrins2Recipe implements SpectroscopyArrayRecipe {
     private int numberExposures;
     private double SnrWavelength;
 
+    // Define indices for the arms for readability
+    private static final int H_INDEX = Igrins2Arm.H.ordinal();
+    private static final int K_INDEX = Igrins2Arm.K.ordinal();
+
     // Construct an Igrins2Recipe
     public Igrins2Recipe(final ItcParameters p, final Igrins2Parameters instr)
     {
@@ -47,13 +51,14 @@ public final class Igrins2Recipe implements SpectroscopyArrayRecipe {
 
     private void validateInputParameters() {
         if (_calcMethod instanceof SpectroscopyS2N) {
-            if (_obsDetailParameters.exposureTime() < _mainInstrument[0].getMinExposureTime()) {
-                throw new IllegalArgumentException("The minimum exposure time is " + _mainInstrument[0].getMinExposureTime() + " seconds.");
-            } else if (_obsDetailParameters.exposureTime() > _mainInstrument[0].getMaxExposureTime()) {
-                throw new IllegalArgumentException("The maximum exposure time is " + _mainInstrument[0].getMaxExposureTime() + " seconds.");
+            // we only check on h-band only as the limits are the same
+            if (_obsDetailParameters.exposureTime() < _mainInstrument[H_INDEX].getMinExposureTime()) {
+                throw new IllegalArgumentException("The minimum exposure time is " + _mainInstrument[H_INDEX].getMinExposureTime() + " seconds.");
+            } else if (_obsDetailParameters.exposureTime() > _mainInstrument[H_INDEX].getMaxExposureTime()) {
+                throw new IllegalArgumentException("The maximum exposure time is " + _mainInstrument[H_INDEX].getMaxExposureTime() + " seconds.");
             }
         }
-        Validation.validate(_mainInstrument[0], _obsDetailParameters, _sdParameters);  // other general validations
+        Validation.validate(_mainInstrument[H_INDEX], _obsDetailParameters, _sdParameters);  // other general validations
     }
 
     public ItcSpectroscopyResult serviceResult(final SpectroscopyResult[] result, final boolean headless) {
@@ -95,15 +100,8 @@ public final class Igrins2Recipe implements SpectroscopyArrayRecipe {
             SnrWavelength = ((SpectroscopyIntegrationTime) _obsDetailParameters.calculationMethod()).wavelengthAt() * 1000.;
             Log.fine(String.format("Wavelength = %.2f nm", SnrWavelength));
 
-            if (Igrins2Arm.H.getWavelengthStart() <= SnrWavelength && SnrWavelength <= Igrins2Arm.H.getWavelengthEnd()) {
-                instIndex = 0;
-                arm = Igrins2Arm.H;
-            } else if (Igrins2Arm.K.getWavelengthStart() <= SnrWavelength && SnrWavelength <= Igrins2Arm.K.getWavelengthEnd()) {
-                instIndex = 1;
-                arm = Igrins2Arm.K;
-            } else {
-                throw new RuntimeException("The wavelength where the S/N is to be measured is not in the output.");
-            }
+            arm = selectedArm();
+            instIndex = arm.ordinal();
             Log.fine("Arm = " + arm.getName());
 
             Igrins2 instrument = _mainInstrument[instIndex];
@@ -203,7 +201,7 @@ public final class Igrins2Recipe implements SpectroscopyArrayRecipe {
         for (int i = 0; i < _mainInstrument.length; i++) {
             allCalculations.add(new IntegrationTime(exposureTime, numberExposures));
         }
-        int selectedIndex = determineSelectedArmIndex();
+        int selectedIndex = selectedArm().ordinal();
 
         // Run calculations and attach combined times
         final SpectroscopyResult[] results = new SpectroscopyResult[_mainInstrument.length];
@@ -321,14 +319,14 @@ public final class Igrins2Recipe implements SpectroscopyArrayRecipe {
         return exposureTime;
     }
 
-    private int determineSelectedArmIndex() {
+    private Igrins2Arm selectedArm() {
         if (Igrins2Arm.H.getWavelengthStart() <= SnrWavelength && SnrWavelength <= Igrins2Arm.H.getWavelengthEnd()) {
-            return 0;
+            return Igrins2Arm.H;
         }
         if (Igrins2Arm.K.getWavelengthStart() <= SnrWavelength && SnrWavelength <= Igrins2Arm.K.getWavelengthEnd()) {
-            return 1;
+            return Igrins2Arm.K;
         }
-        return 0;  // Default to H-band
+        return Igrins2Arm.H;  // Default to H-band
     }
 
     public double getExposureTime() { return exposureTime; }
