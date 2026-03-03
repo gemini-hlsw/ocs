@@ -90,7 +90,8 @@ public final class Igrins2Recipe implements SpectroscopyArrayRecipe {
             numberExposures = ((SpectroscopyS2N) _calcMethod).exposures();
             // Set SnrWavelength for arm selection
             Option<Object> atOpt = ((SpectroscopyS2N) _obsDetailParameters.calculationMethod()).wavelengthAt();
-            SnrWavelength = atOpt.isDefined() ? ((Double) atOpt.get()) : Igrins2Arm.H.getWavelengthCentral();
+
+            SnrWavelength = atOpt.isDefined() ? ((Double) atOpt.get()) * 1000. : Igrins2Arm.H.getWavelengthCentral();
 
         } else if (_calcMethod instanceof SpectroscopyIntegrationTime) {  // determine the optimal exposure time and number of exposures
 
