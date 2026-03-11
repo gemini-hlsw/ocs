@@ -1,6 +1,7 @@
 package edu.gemini.itc.ghost;
 
 import edu.gemini.itc.base.*;
+import edu.gemini.itc.shared.GhostCameraParameters;
 import edu.gemini.itc.shared.GhostParameters;
 import edu.gemini.itc.shared.IfuMethod;
 import edu.gemini.itc.shared.ObservationDetails;
@@ -26,6 +27,7 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
      */
     public static final String INSTR_PREFIX = "ghost_";
     private final GhostParameters gp;
+    private final GhostCameraParameters camera;
     private final ObservationDetails odp;
     private final GhostGratingOptics _gratingOptics;
     private final edu.gemini.itc.base.Detector _detector;
@@ -45,6 +47,7 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
         this.gp     = gp;
 
         _ccdColor = ccdColor;
+         camera = getCamera();
         _detector = new edu.gemini.itc.base.Detector(getDirectory() + "/",
                                                      getPrefix(),
                                                      _ccdColor.getModel(),
@@ -72,7 +75,7 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
                 "gratings",                                                // ghost_gratings.dat
                 gp.centralWavelength().toNanometers(),
                 _detector.getDetectorPixels(),
-                gp.binning().getSpectralBinning());
+                camera.binning().getSpectralBinning());
         _gratingOptics.setDescription(gp.resolution().displayValue());
         addDisperser(_gratingOptics);
         _sampling = super.getSampling();
@@ -80,6 +83,14 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
         addComponent(_ifu);
 
         _ghostResolution = new TransmissionElement(getDirectory()+"/" + Ghost.INSTR_PREFIX + resolutionFileEnding(gp)+ "_perResolution" +getSuffix());
+    }
+
+    public GhostCameraParameters getCamera() {
+        switch (_ccdColor) {
+                case RED: return gp.redCamera();
+                case BLUE: return gp.blueCamera();
+                default: throw new RuntimeException("Invalid CCD field color");
+        }
     }
 
     private String resolutionFileEnding(GhostParameters gp) {
@@ -133,7 +144,7 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
     @Override
     public double gain() {
         Log.info("TODO. Venu has to confirm the gain for each read Mode");
-        switch (gp.readMode()) {
+        switch (camera.readMode()) {
             case SLOW_LOW:
                 return (_ccdColor == Detector.BLUE) ? 0.75 : 0.7; // e-/DN
             case MEDIUM_LOW:
@@ -148,7 +159,7 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
 
     public double getPixelSize() {
         // The E2V_PIXEL_SIZE should be in arcsecs/pixel.
-        return Detector.PIXEL_SIZE * gp.binning().getSpatialBinning();  // Both detectors has the same pixel size.
+        return Detector.PIXEL_SIZE * camera.binning().getSpatialBinning();  // Both detectors has the same pixel size.
     }
 
     public double getSpectralPixelWidth() {
@@ -161,11 +172,11 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
     }
 
     public int getSpectralBinning() {
-        return gp.binning().getSpectralBinning();
+        return camera.binning().getSpectralBinning();
     }
 
     public int getSpatialBinning() {
-        return gp.binning().getSpatialBinning();
+        return camera.binning().getSpatialBinning();
     }
 
     public Option<IfuMethod> getIfuMethod() {
@@ -223,35 +234,17 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
 	    These values were obtained from https://docs.google.com/document/d/1CJi5mh0012CHj4oj7fCtz4I8qXAsxcTY/edit
      */
     public double getReadNoise() {
-        switch (_ccdColor) {
-            case RED: {
-                switch (gp.readMode()) {
-                    case SLOW_LOW:
+        // There used to be a swich on _ccdColor here, but the read noise values were the same for both detectors
+        switch (camera.readMode()) {
+                case SLOW_LOW:
                         return 4.5;  // e-
-                    case MEDIUM_LOW:
-                        return 4.5;
-                    case FAST_LOW:
-                        return 2.3;
-                    default:
-                        Log.warning("Bad option provided by GhostParamenter read Mode, return 0 for read noise in the Detector Red");
-                        return 0;
-                }
-            }
-            case BLUE:
-                switch (gp.readMode()) {
-                    case SLOW_LOW:
-                        return 4.5;  // e-
-                    case MEDIUM_LOW:
-                        return 4.5;
-                    case FAST_LOW:
-                        return 2.3;
-                    default:
-                        Log.warning("Bad option provided by GhostParamenter read Mode, return 0 for read noise in the Detector Blue");
-                        return 0;
-                }
-            default:
-                Log.warning("Bad CCD field built. Please check the class definition. ");
-                return 0;
+                case MEDIUM_LOW:
+                       return 4.5;
+                case FAST_LOW:
+                       return 2.3;
+                default:
+                       Log.warning("Bad option provided by GhostParamenter read Mode, return 0 for read noise in the Detector Red");
+                       return 0;
         }
     }
 

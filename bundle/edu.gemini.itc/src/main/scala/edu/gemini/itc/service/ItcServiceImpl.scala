@@ -4,6 +4,7 @@ import edu.gemini.auxfile.client.AuxFileClient
 import edu.gemini.itc.acqcam.AcqCamRecipe
 import edu.gemini.itc.base._
 import edu.gemini.itc.flamingos2.Flamingos2Recipe
+import edu.gemini.itc.ghost.GHostRecipe
 import edu.gemini.itc.gmos.GmosRecipe
 import edu.gemini.itc.gnirs.GnirsRecipe
 import edu.gemini.itc.gsaoi.GsaoiRecipe
@@ -111,6 +112,7 @@ class ItcServiceImpl extends ItcService {
       case i: NifsParameters              => spectroscopyResult   (new NifsRecipe(p, i),                     includeCharts)
       case i: NiriParameters              => spectroscopyResult   (new NiriRecipe(p, i),                     includeCharts)
       case i: Igrins2Parameters           => spectroscopyResult   (new Igrins2Recipe(paramsInMicrons(p), i), includeCharts)
+      case i: GhostParameters             => spectroscopyResult   (new GHostRecipe(p, i),                    includeCharts)
       case _                              => ItcResult.forMessage (s"Spectroscopy with this instrument: ${p.instrument} is not supported by ITC.")
 
     }
@@ -125,10 +127,10 @@ class ItcServiceImpl extends ItcService {
       case i: NifsParameters              => spectroscopyResult(new NifsRecipe(p, i),                     includeCharts = false)
       case i: NiriParameters              => spectroscopyResult(new NiriRecipe(p, i),                     includeCharts = false)
       case i: Igrins2Parameters           => spectroscopyResult(new Igrins2Recipe(paramsInMicrons(p), i), includeCharts = false)
+      case i: GhostParameters             => spectroscopyResult(new GHostRecipe(p, i),                    includeCharts = false)
       case _                              => ItcResult.forMessage (s"Spectroscopy with this instrument: ${p.instrument} is not supported by ITC.")
 
     }
-
   private def spectroscopyResult(recipe: SpectroscopyRecipe, includeCharts: Boolean): Result = {
     val r = recipe.calculateSpectroscopy()
     val s = recipe.serviceResult(r, includeCharts)

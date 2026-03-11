@@ -115,6 +115,9 @@ trait ArbObservationDetails {
       a <- genAnalysisMethod
     } yield ObservationDetails(c, a)
 
+  implicit val arbCalculationMethod: Arbitrary[CalculationMethod] =
+    Arbitrary(genCalculationMethod)
+
   implicit val arbObservationDetails: Arbitrary[ObservationDetails] =
     Arbitrary(genObservationDetails)
 

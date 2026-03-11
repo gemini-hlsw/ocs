@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 /**
  * This class performs the calculations for Ghost used for imaging.
  */
-public final class GHostRecipe  {
+public final class GHostRecipe implements SpectroscopyArrayRecipe {
 
     private static final Logger Log = Logger.getLogger(GHostRecipe.class.getName());
     private final ItcParameters p;
@@ -41,6 +41,7 @@ public final class GHostRecipe  {
         // some general validations
         Validation.validate(_mainInstrument[0], _obsDetailParameters, _sdParameters);
     }
+
     public ItcSpectroscopyResult serviceResult(final SpectroscopyResult[] r, final boolean headless) {
         final List<List<SpcChartData>> groups = new ArrayList<>();
         final List<SpcChartData> combined = new ArrayList<SpcChartData>();
@@ -143,6 +144,13 @@ public final class GHostRecipe  {
         Log.fine(String.format("slitLength = %.2f, throughput = %.5f, onePix = %.5f, numfibers = %d, centerFiber = %d",
            instrument.getSlitLength(), totalspsf, sf_list.get((sf_list.size() - 1) / 2), numfibers, (sf_list.size() - 1) / 2));
 
+
+        // GPP will supply a calculation method per camera, but the itc web page does not. So, we will use the 
+	// camera one if avaiable, but drop back to the one in the observation details if not. It isn't ideal to 
+	// always create a whole new calculation method, but it is hard to work with the Scala option in Java.
+	final CalculationMethod calcMethod = instrument.getCamera().calculationMethodOrDefault(_obsDetailParameters.calculationMethod());
+	final ObservationDetails cameraObsDetails = new ObservationDetails(calcMethod, _obsDetailParameters.analysisMethod());
+
         final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
                 slit,
                 slit,
@@ -154,7 +162,7 @@ public final class GHostRecipe  {
                 IQcalc.getImageQuality(),
                 instrument.getReadNoise(),
                 instrument.getDarkCurrent() * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
-                _obsDetailParameters,
+                cameraObsDetails,
                  false);
 
         specS2N.setSourceSpectrum(sed.sed);
