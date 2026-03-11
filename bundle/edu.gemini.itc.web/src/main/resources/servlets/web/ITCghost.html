@@ -229,10 +229,16 @@
 
             </tr>
 
-            <tr stype="padding-top:2%;"><td colspan="2"><b>Detector Binning:</b></td></tr>
+            <tr>
+                <td colspan="2">
+                    <hr />
+                </td>
+            </tr>
+
+            <tr stype="padding-top:2%;"><td colspan="2"><b>Blue Camera</b></td></tr>
             <tr stype="padding-top:2%;">
                <td colspan="1">
-                   Blue Binning
+                   Detector Binning
                    <select name="BlueBinning" size="1">
                        <option value="ONE_BY_ONE" selected>1 x 1</option>
                        <option value="ONE_BY_TWO">1 x 2</option>
@@ -245,9 +251,41 @@
                    </select> (spectral,spatial)
                 </td>
             </tr>
+
+            <tr style="padding-top:2%">
+                <td colspan="1"><b>Read Mode:</b>
+                <select name="BlueReadMode"  id="BlueReadMode" size="1">
+                     <option selected value="SLOW_LOW" selected>Slow</option>
+                     <option value="MEDIUM_LOW">Medium</option>
+                     <option value="FAST_LOW">Fast</option>
+                </select> &nbsp;&nbsp;
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2" height="50" valign="bottom"><b>Calculation method:</b> <i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false">more info</a>)</span></i><br />
+                    <i>Select calculation method (note: second method is not available for spectroscopy)</i></td>
+            </tr>
+            <tr style="visibility:hidden">
+                <td><input value="s2n" name="calcMethod" checked="checked" type="radio" /></td>
+            </tr>
+            <tr>
+                <td colspan="2">Total S/N ratio resulting from <input name="numExpA" size="5" value="1" type="text" />
+                    exposures each having an exposure time of <input name="expTimeA" size="5" value="900" type="text" /> secs and with a fraction
+                    <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2">
+                    <hr />
+                </td>
+            </tr>
+
+            <tr stype="padding-top:2%;"><td colspan="2"><b>Red Camera</b></td></tr>
             <tr stype="padding-top:2%;">
                <td colspan="1">
-                   Red Binning
+                   Detector Binning
                    <select name="RedBinning" size="1">
                        <option value="ONE_BY_ONE" selected>1 x 1</option>
                        <option value="ONE_BY_TWO">1 x 2</option>
@@ -261,16 +299,7 @@
                 </td>
             </tr>
             <tr style="padding-top:2%">
-                <td colspan="1"><b>Blue Read Mode:</b>
-                <select name="BlueReadMode"  id="BlueReadMode" size="1">
-                     <option selected value="SLOW_LOW" selected>Slow</option>
-                     <option value="MEDIUM_LOW">Medium</option>
-                     <option value="FAST_LOW">Fast</option>
-                </select> &nbsp;&nbsp;
-                </td>
-            </tr>
-            <tr style="padding-top:2%">
-                <td colspan="1"><b>Red Read Mode:</b>
+                <td colspan="1"><b>Read Mode:</b>
                 <select name="RedReadMode"  id="RedReadMode" size="1">
                      <option value="SLOW_LOW" selected>Slow</option>
                      <option selected value="MEDIUM_LOW">Medium</option>
@@ -278,7 +307,24 @@
                 </select> &nbsp;&nbsp;
                 </td>
             </tr>
+
+            <tr>
+                <td colspan="2" height="50" valign="bottom"><b>Calculation method:</b> <i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false">more info</a>)</span></i><br />
+                    <i>Select calculation method (note: second method is not available for spectroscopy)</i></td>
+            </tr>
+            <tr>
+                <td colspan="2">Total S/N ratio resulting from <input name="numExpARed" size="5" value="1" type="text" />
+                    exposures each having an exposure time of <input name="expTimeARed" size="5" value="900" type="text" /> secs and with a fraction
+                    <input name="fracOnSourceARed" size="4" value="1.0" type="text" /> of exposures that observe the source
+                </td>
+            </tr>
                 <!-- Telescope definition-->
+            <tr>
+                <td colspan="2">
+                    <hr />
+                </td>
+            </tr>
+
             <tr>
                 <td colspan="2" height="50" valign="bottom"><b>Telescope configuration:</b> <i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10271','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false">more info</a>)</span></i></td>
             </tr>
@@ -378,18 +424,6 @@
         </p>
         <table background="https://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0" height="70" width="100%">
             <tbody>
-            <tr>
-                <td colspan="2" height="50" valign="bottom"><b>Calculation method:</b> <i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false">more info</a>)</span></i><br />
-                    <i>Select calculation method (note: second method is not available for spectroscopy)</i></td>
-            </tr>
-            <tr>
-                <td><input value="s2n" name="calcMethod" checked="checked" type="radio" /></td>
-                <td>Total S/N ratio resulting from <input name="numExpA" size="5" value="1" type="text" />
-                    exposures each having an exposure time of <input name="expTimeA" size="5" value="900" type="text" /> secs and with a fraction
-                    <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source
-                </td>
-            </tr>
-            </tr>
             <tr style="visibility:hidden">
                 <td colspan="1" valign="bottom"><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/sciops/instruments/gnirs/spectroscopy/observing-strategies#offsetting','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
                 <td colspan="1" ><input name="offset" size="5" value="0.0" type="text" /></td>

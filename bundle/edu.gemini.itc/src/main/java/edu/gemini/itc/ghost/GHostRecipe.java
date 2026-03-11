@@ -146,10 +146,10 @@ public final class GHostRecipe implements SpectroscopyArrayRecipe {
 
 
         // GPP will supply a calculation method per camera, but the itc web page does not. So, we will use the 
-	// camera one if avaiable, but drop back to the one in the observation details if not. It isn't ideal to 
-	// always create a whole new calculation method, but it is hard to work with the Scala option in Java.
-	final CalculationMethod calcMethod = instrument.getCamera().calculationMethodOrDefault(_obsDetailParameters.calculationMethod());
-	final ObservationDetails cameraObsDetails = new ObservationDetails(calcMethod, _obsDetailParameters.analysisMethod());
+        // camera one if avaiable, but drop back to the one in the observation details if not. It isn't ideal to 
+        // always create a whole new calculation method, but it is hard to work with the Scala option in Java.
+        final CalculationMethod calcMethod = instrument.getCamera().calculationMethodOrDefault(_obsDetailParameters.calculationMethod());
+        final ObservationDetails cameraObsDetails = new ObservationDetails(calcMethod, _obsDetailParameters.analysisMethod());
 
         final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
                 slit,
