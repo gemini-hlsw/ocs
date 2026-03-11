@@ -232,8 +232,23 @@
             <tr stype="padding-top:2%;"><td colspan="2"><b>Detector Binning:</b></td></tr>
             <tr stype="padding-top:2%;">
                <td colspan="1">
-                   Binning
-                   <select name="binning" size="1">
+                   Blue Binning
+                   <select name="BlueBinning" size="1">
+                       <option value="ONE_BY_ONE" selected>1 x 1</option>
+                       <option value="ONE_BY_TWO">1 x 2</option>
+                       <option value="ONE_BY_FOUR">1 x 4</option>
+                       <option value="ONE_BY_EIGHT">1 x 8</option>
+                       <option value="TWO_BY_TWO">2 x 2</option>
+                       <option value="TWO_BY_FOUR">2 x 4</option>
+                       <option value="TWO_BY_EIGHT">2 x 8</option>
+                       <option value="FOUR_BY_FOUR">4 x 4</option>
+                   </select> (spectral,spatial)
+                </td>
+            </tr>
+            <tr stype="padding-top:2%;">
+               <td colspan="1">
+                   Red Binning
+                   <select name="RedBinning" size="1">
                        <option value="ONE_BY_ONE" selected>1 x 1</option>
                        <option value="ONE_BY_TWO">1 x 2</option>
                        <option value="ONE_BY_FOUR">1 x 4</option>
@@ -246,10 +261,19 @@
                 </td>
             </tr>
             <tr style="padding-top:2%">
-                <td colspan="1"><b>Read Modes:</b>
-                <select name="ReadMode"  id="ReadMode" size="1">
-                     <option value="SLOW_LOW" selected>Slow</option>
+                <td colspan="1"><b>Blue Read Mode:</b>
+                <select name="BlueReadMode"  id="BlueReadMode" size="1">
+                     <option selected value="SLOW_LOW" selected>Slow</option>
                      <option value="MEDIUM_LOW">Medium</option>
+                     <option value="FAST_LOW">Fast</option>
+                </select> &nbsp;&nbsp;
+                </td>
+            </tr>
+            <tr style="padding-top:2%">
+                <td colspan="1"><b>Red Read Mode:</b>
+                <select name="RedReadMode"  id="RedReadMode" size="1">
+                     <option value="SLOW_LOW" selected>Slow</option>
+                     <option selected value="MEDIUM_LOW">Medium</option>
                      <option value="FAST_LOW">Fast</option>
                 </select> &nbsp;&nbsp;
                 </td>

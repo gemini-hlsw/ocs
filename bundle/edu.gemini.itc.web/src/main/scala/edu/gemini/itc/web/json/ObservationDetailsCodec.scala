@@ -64,7 +64,8 @@ trait ObservationDetailsCodec {
       .withCase("SpectroscopyS2N", SpectroscopyS2NCodec) { case a: SpectroscopyS2N => a }
       .asCodecJson
 
-  private implicit val CalculationMethodCodec: CodecJson[CalculationMethod] =
+  // needed by the ghost parameters codec
+  implicit val CalculationMethodCodec: CodecJson[CalculationMethod] =
     CoproductCodec[CalculationMethod]
       .withCase("IntegrationTimeMethod", IntMethodCodec)     { case a: IntegrationTimeMethod => a }
       .withCase("ExposureCountMethod", ImagingExpCountCodec) { case a: ImagingExposureCount => a }
