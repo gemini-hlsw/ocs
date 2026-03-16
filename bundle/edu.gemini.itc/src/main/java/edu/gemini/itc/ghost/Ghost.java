@@ -132,14 +132,13 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
 
     @Override
     public double gain() {
-        Log.info("TODO. Venu has to confirm the gain for each read Mode");
         switch (gp.readMode()) {
             case SLOW_LOW:
-                return (_ccdColor == Detector.BLUE) ? 0.75 : 0.7; // e-/DN
+                return (_ccdColor == Detector.BLUE) ? 0.40 : 0.30; // e-/DN
             case MEDIUM_LOW:
-                return (_ccdColor == Detector.BLUE) ? 0.63 : 0.57;
+                return (_ccdColor == Detector.BLUE) ? 0.60 : 0.52;
             case FAST_LOW:
-                return (_ccdColor == Detector.BLUE) ? 0.58 : 0.53;
+                return (_ccdColor == Detector.BLUE) ? 0.75 : 0.68;
             default:
                 Log.warning("Bad definition of the readMode");
                 return 0;
@@ -227,11 +226,11 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
             case RED: {
                 switch (gp.readMode()) {
                     case SLOW_LOW:
-                        return 4.5;  // e-
+                        return 1.3;  // e-
                     case MEDIUM_LOW:
-                        return 4.5;
+                        return 2.0;
                     case FAST_LOW:
-                        return 2.3;
+                        return 4.7;
                     default:
                         Log.warning("Bad option provided by GhostParamenter read Mode, return 0 for read noise in the Detector Red");
                         return 0;
@@ -240,11 +239,11 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
             case BLUE:
                 switch (gp.readMode()) {
                     case SLOW_LOW:
-                        return 4.5;  // e-
+                        return 1.5;  // e-
                     case MEDIUM_LOW:
-                        return 4.5;
+                        return 2.6;
                     case FAST_LOW:
-                        return 2.3;
+                        return 4.8;
                     default:
                         Log.warning("Bad option provided by GhostParamenter read Mode, return 0 for read noise in the Detector Blue");
                         return 0;
