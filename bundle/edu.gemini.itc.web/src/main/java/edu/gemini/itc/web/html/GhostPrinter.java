@@ -46,7 +46,9 @@ public final class GhostPrinter extends PrinterBase implements OverheadTablePrin
         final double iqAtSource = result.iqCalc().getImageQuality();
         Log.info("calculateSpectroscopy getImageQuality[0]: " + results[0].iqCalc().getImageQuality() + " [1]: "+ results[1].iqCalc().getImageQuality() + "  " + iqAtSource);
         _print("<br>", false);
-        _println("Read noise: " + mainInstrument.getReadNoise());
+        _println(String.format("Read noise: %.2f e- in %s, and %.2f e- in %s.",
+                ((Ghost) results[0].instrument()).getReadNoise(), ((Ghost) results[0].instrument()).getDetectorName(),
+                ((Ghost) results[1].instrument()).getReadNoise(), ((Ghost) results[1].instrument()).getDetectorName()));
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", iqAtSource));
         _printRequestedIntegrationTime(result);
         _print("<br>", false);
@@ -114,7 +116,7 @@ public final class GhostPrinter extends PrinterBase implements OverheadTablePrin
             int saturationLimit = ((Ghost) results[i].instrument()).getSaturationLimit();
             double peakPixelFlux = s.ccd(i).get().peakPixelFlux();
             int peakPixelToADU = s.ccd(i).get().adu();
-            _print(String.format("%s%s %s: The peak pixel signal + background is %.0f e- (%d ADU) where the limit is %d %s",
+            _print(String.format("%s%s %s: The peak pixel signal + background is %.0f e- (%d ADU) where the limit is %d e-.%s",
                                     "<p style=\"margin:0;margin-left:2%;",
                                     (peakPixelToADU >= saturationLimit) ? "color:red;\"> Warning" : "\">",
                                     ((Ghost) results[i].instrument()).getDetectorName(),
