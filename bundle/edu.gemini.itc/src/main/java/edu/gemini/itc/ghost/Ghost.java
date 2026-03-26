@@ -233,16 +233,15 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
 	    These values were obtained from https://docs.google.com/document/d/1CJi5mh0012CHj4oj7fCtz4I8qXAsxcTY/edit
      */
     public double getReadNoise() {
-        // There used to be a swich on _ccdColor here, but the read noise values were the same for both detectors
         switch (camera.readMode()) {
                 case SLOW_LOW:
-                        return 4.5;  // e-
+                       return (_ccdColor == Detector.BLUE) ? 1.5 : 1.3; // e-
                 case MEDIUM_LOW:
-                       return 4.5;
+                       return (_ccdColor == Detector.BLUE) ? 2.6 : 2.0;
                 case FAST_LOW:
-                       return 2.3;
+                       return (_ccdColor == Detector.BLUE) ? 4.8 : 4.7;
                 default:
-                       Log.warning("Bad option provided by GhostParamenter read Mode, return 0 for read noise in the Detector Red");
+                       Log.warning("Bad option provided by GhostParamenter read Mode, return 0 for read noise in the Detector " + _ccdColor.displayValue());
                        return 0;
         }
     }
