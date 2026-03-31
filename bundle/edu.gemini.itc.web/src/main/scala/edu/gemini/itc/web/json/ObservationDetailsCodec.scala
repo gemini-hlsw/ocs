@@ -118,12 +118,18 @@ trait ObservationDetailsCodec {
       "isIfu2"
     )
 
+  private val IfuSkyCodec: CodecJson[Ifu] =
+    casecodec1(Ifu.apply, Ifu.unapply)(
+      "skyFibres"
+    )
+
   private val IfuMethodCodec: CodecJson[IfuMethod] =
     CoproductCodec[IfuMethod]
       .withCase("IfuSingle", IfuSingleCodec) { case a: IfuSingle => a }
       .withCase("IfuRadial", IfuRadialCodec) { case a: IfuRadial => a }
       .withCase("IfuSummed", IfuSummedCodec) { case a: IfuSummed => a }
       .withCase("IfuSum",    IfuSumCodec)    { case a: IfuSum    => a }
+      .withCase("IfuSky",    IfuSkyCodec)    { case a: Ifu       => a }
       .asCodecJson
 
 
