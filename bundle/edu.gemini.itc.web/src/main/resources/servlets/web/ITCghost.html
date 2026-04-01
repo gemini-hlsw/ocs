@@ -229,17 +229,10 @@
 
             </tr>
 
-            <tr>
-                <td colspan="2">
-                    <hr />
-                </td>
-            </tr>
-
-            <tr stype="padding-top:2%;"><td colspan="2"><b>Blue Camera</b></td></tr>
             <tr stype="padding-top:2%;">
                <td colspan="1">
                    Detector Binning
-                   <select name="BlueBinning" size="1">
+                   <select name="binning" size="1">
                        <option value="ONE_BY_ONE" selected>1 x 1</option>
                        <option value="ONE_BY_TWO">1 x 2</option>
                        <option value="ONE_BY_FOUR">1 x 4</option>
@@ -251,6 +244,14 @@
                    </select> (spectral,spatial)
                 </td>
             </tr>
+
+            <tr>
+                <td colspan="2">
+                    <hr />
+                </td>
+            </tr>
+
+            <tr stype="padding-top:2%;"><td colspan="2"><b>Blue Camera</b></td></tr>
 
             <tr style="padding-top:2%">
                 <td colspan="1"><b>Read Mode:</b>
@@ -264,9 +265,8 @@
 
             <tr>
                 <td colspan="2" height="50" valign="bottom"><b>Calculation method:</b> <i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false">more info</a>)</span></i><br />
-                    <i>Select calculation method (note: second method is not available for spectroscopy)</i></td>
             </tr>
-            <tr style="visibility:hidden">
+            <tr style="visibility:collapse">
                 <td><input value="s2n" name="calcMethod" checked="checked" type="radio" /></td>
             </tr>
             <tr>
@@ -283,21 +283,7 @@
             </tr>
 
             <tr stype="padding-top:2%;"><td colspan="2"><b>Red Camera</b></td></tr>
-            <tr stype="padding-top:2%;">
-               <td colspan="1">
-                   Detector Binning
-                   <select name="RedBinning" size="1">
-                       <option value="ONE_BY_ONE" selected>1 x 1</option>
-                       <option value="ONE_BY_TWO">1 x 2</option>
-                       <option value="ONE_BY_FOUR">1 x 4</option>
-                       <option value="ONE_BY_EIGHT">1 x 8</option>
-                       <option value="TWO_BY_TWO">2 x 2</option>
-                       <option value="TWO_BY_FOUR">2 x 4</option>
-                       <option value="TWO_BY_EIGHT">2 x 8</option>
-                       <option value="FOUR_BY_FOUR">4 x 4</option>
-                   </select> (spectral,spatial)
-                </td>
-            </tr>
+
             <tr style="padding-top:2%">
                 <td colspan="1"><b>Read Mode:</b>
                 <select name="RedReadMode"  id="RedReadMode" size="1">
@@ -310,7 +296,6 @@
 
             <tr>
                 <td colspan="2" height="50" valign="bottom"><b>Calculation method:</b> <i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false">more info</a>)</span></i><br />
-                    <i>Select calculation method (note: second method is not available for spectroscopy)</i></td>
             </tr>
             <tr>
                 <td colspan="2">Total S/N ratio resulting from <input name="numExpARed" size="5" value="1" type="text" />

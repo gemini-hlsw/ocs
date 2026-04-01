@@ -199,8 +199,7 @@ object ITCRequest {
   // GHOST
   def ghostParameters(r: ITCRequest): GhostParameters = {
 
-    val blueBinning   = r.enumParameter(classOf[GhostBinning],"BlueBinning")
-    val redBinning    = r.enumParameter(classOf[GhostBinning],"RedBinning")
+    val binning       = r.enumParameter(classOf[GhostBinning],"binning")
     val centralWl     = r.centralWavelengthInNanometers()
     val blueReadMode  = r.enumParameter(classOf[GhostReadNoiseGain], "BlueReadMode")
     val redReadMode   = r.enumParameter(classOf[GhostReadNoiseGain], "RedReadMode")
@@ -226,8 +225,8 @@ object ITCRequest {
           None
         )
 
-    val blueCamera    = GhostCameraParameters(blueReadMode, blueBinning, Some(blueCalcMethod))
-    val redCamera     = GhostCameraParameters(redReadMode, redBinning, Some(redCalcMethod))
+    val blueCamera    = GhostCameraParameters(blueReadMode, binning, Some(blueCalcMethod))
+    val redCamera     = GhostCameraParameters(redReadMode, binning, Some(redCalcMethod))
 
     GhostParameters(centralWl, nSkyMicrolens, resolution, redCamera = redCamera, blueCamera = blueCamera)
   }
