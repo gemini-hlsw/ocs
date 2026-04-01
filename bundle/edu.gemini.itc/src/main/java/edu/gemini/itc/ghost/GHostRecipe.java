@@ -98,16 +98,29 @@ public final class GHostRecipe implements SpectroscopyArrayRecipe {
 
     public SpectroscopyResult[] calculateSpectroscopy() {
         int length = _mainInstrument.length;
+
+        // Need to build integration times list for for both cameras because the serviceResult methods
+        // discards all but the first one.
+        List<IntegrationTime> allCalculations = new ArrayList<>();
+        for (int i = 0; i < length; i++) {
+            final SpectroscopyS2N calcMethod = getSpectroscopyS2N(_mainInstrument[i].getCamera());
+            allCalculations.add(new IntegrationTime(calcMethod.exposureTime(), calcMethod.exposures()));
+        }
+        // Not sure what to use for this. IGRINS2 selects this based on wavelength.
+        int selectedIndex = 0;
+
+        AllIntegrationTimes allTimes = AllIntegrationTimes.fromJavaList(allCalculations, selectedIndex);
+
         final SpectroscopyResult[] results = new SpectroscopyResult[length];
         for (int i = 0; i < length; i++) {
-            results[i] = calculateSpectroscopy(_mainInstrument[i], length);
+            results[i] = calculateSpectroscopy(_mainInstrument[i]).withTimes(allTimes);
         }
         Log.info("calculateSpectroscopy getImageQuality[0]: " +
                             results[0].iqCalc().getImageQuality() + " [1]: "+ results[1].iqCalc().getImageQuality());
         return results;
     }
 
-    private SpectroscopyResult calculateSpectroscopy(Ghost instrument, int length) {
+    private SpectroscopyResult calculateSpectroscopy(Ghost instrument) {
         Log.fine("Calculating...");
 
         // In this first step is defined a source energy function (as function of wavelength).
@@ -145,11 +158,8 @@ public final class GHostRecipe implements SpectroscopyArrayRecipe {
            instrument.getSlitLength(), totalspsf, sf_list.get((sf_list.size() - 1) / 2), numfibers, (sf_list.size() - 1) / 2));
 
 
-        // GPP will supply a calculation method per camera, but the itc web page does not. So, we will use the 
-        // camera one if avaiable, but drop back to the one in the observation details if not. It isn't ideal to 
-        // always create a whole new calculation method, but it is hard to work with the Scala option in Java.
-        final CalculationMethod calcMethod = instrument.getCamera().calculationMethodOrDefault(_obsDetailParameters.calculationMethod());
-        final ObservationDetails cameraObsDetails = new ObservationDetails(calcMethod, _obsDetailParameters.analysisMethod());
+        final SpectroscopyS2N specS2NCalcMethod = getSpectroscopyS2N(instrument.getCamera());
+        final ObservationDetails cameraObsDetails = new ObservationDetails(specS2NCalcMethod, _obsDetailParameters.analysisMethod());
 
         final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
                 slit,
@@ -170,11 +180,27 @@ public final class GHostRecipe implements SpectroscopyArrayRecipe {
         sed.sed.accept(specS2N);
 
         final SpecS2N[] specS2Narr = new SpecS2N[] {specS2N};
-        // FIXME Return the real GHOST exposure
-        AllIntegrationTimes exposure = AllIntegrationTimes.empty();
-        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), Option.empty(), exposure);
+
+        VisitableSampledSpectrum singleS2NSpectrum = specS2N.getExpS2NSpectrum();
+        VisitableSampledSpectrum finalS2NSpectrum = specS2N.getFinalS2NSpectrum();
+
+        return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(),
+                RecipeUtil.instance().signalToNoiseAt(specS2NCalcMethod.atWithDefault(), singleS2NSpectrum, finalS2NSpectrum),
+                AllIntegrationTimes.empty());
     }
 
+    private SpectroscopyS2N getSpectroscopyS2N(GhostCameraParameters camera) {
+        // GPP will supply a calculation method per camera, but some places do not. So, we will use the 
+        // camera one if available, but drop back to the one in the observation details if not. It isn't ideal to 
+        // always create a whole new calculation method, but it is hard to work with the Scala option in Java.
+        // final CalculationMethod calcMethod = instrument.getCamera().calculationMethodOrDefault(_obsDetailParameters.calculationMethod());
+        final CalculationMethod calcMethod = camera.calculationMethodOrDefault(_obsDetailParameters.calculationMethod());
+        if (calcMethod instanceof SpectroscopyS2N) {
+            return (SpectroscopyS2N) calcMethod;
+        } else {
+            throw new Error("Ghost only supports SpectroscopyS2N calculation method");
+        }
+    }
 
     private Ghost[] createGhost(final GhostParameters parameters, final ObservationDetails observationDetails) {
         return new Ghost[] {new Ghost(parameters, observationDetails, Detector.BLUE),
