@@ -888,7 +888,8 @@ public final class GmosRule implements IRule {
             final Disperser disperser = getDisperser(config);
             if (disperser == null) return false;
             //the following 2 dispersers generate a warning no matter what wavelength
-            if (disperser == DisperserNorth.R150_G5306 || disperser == DisperserSouth.R150_G5326)
+            // REL-4878 switch from G5306 to G5308
+            if (disperser == DisperserNorth.R150_G5308 || disperser == DisperserSouth.R150_G5326)
                 return true;
 
             final Double limitWavelength = DISPERSER_LIMITS_MAP.get(disperser);
