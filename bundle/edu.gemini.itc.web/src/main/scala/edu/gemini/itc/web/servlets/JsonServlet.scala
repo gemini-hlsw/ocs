@@ -29,6 +29,7 @@ object ItcCalculation extends ItcParametersCodec with ItcResultCodec {
     } yield itcRes.asJson.nospaces).toString
   }
 
+  // The next two methods are the same and could be combined.
   def calculateExposureTime(json: String): String = {
     val itc: ItcService = new ItcServiceImpl
 

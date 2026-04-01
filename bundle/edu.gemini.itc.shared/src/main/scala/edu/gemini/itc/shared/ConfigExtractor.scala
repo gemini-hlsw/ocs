@@ -135,12 +135,14 @@ object ConfigExtractor {
 
   private def extractGhost(c: Config): String \/ GhostParameters = {
     for {
+      // TODO: using the same read mode and binning for both blue and red channels
       readMode      <- extract[GhostReadNoiseGain](c, ReadModeKey)
       binning       <- extract[GhostBinning]      (c, BinningKey)
       resolution    <- extract[ResolutionMode]    (c, InsResolution)
       nSkyMicrolens <- extract[Int]               (c, InsNskyMicrolens)
       wavelen       <- extractObservingWavelength(c)
-    } yield GhostParameters(wavelen, nSkyMicrolens, resolution, readMode, binning)
+      camera         = GhostCameraParameters(readMode, binning)
+    } yield GhostParameters(wavelen, nSkyMicrolens, resolution, camera, camera)
   }
 
   private def extractGmos(c: Config): String \/ GmosParameters = {

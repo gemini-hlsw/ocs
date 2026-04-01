@@ -8,6 +8,7 @@ import edu.gemini.spModel.data.YesNoType
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
+import edu.gemini.spModel.gemini.ghost.{GhostBinning, GhostReadNoiseGain}
 import edu.gemini.spModel.gemini.gmos.{GmosSouthType, GmosNorthType, GmosCommonType}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
@@ -15,9 +16,11 @@ import edu.gemini.spModel.gemini.michelle.MichelleParams
 import edu.gemini.spModel.gemini.nifs.NIFSParams
 import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.gemini.trecs.TReCSParams
+import edu.gemini.spModel.target.env.ResolutionMode
 
 trait ArbInstrumentDetails {
   import core._
+  import observationdetails._
 
   val genAltairParameters: Gen[AltairParameters] =
     for {
@@ -153,6 +156,22 @@ trait ArbInstrumentDetails {
       altair <- arbitrary[Option[AltairParameters]]
     } yield Igrins2Parameters(altair)
 
+  val genGhostCameraParameters: Gen[GhostCameraParameters] =
+    for {
+      readMode   <- arbitrary[GhostReadNoiseGain]
+      binning    <- arbitrary[GhostBinning]
+      calcMethod <- arbitrary[Option[CalculationMethod]]
+    } yield GhostCameraParameters(readMode, binning, calcMethod)
+
+  val genGhostParameters: Gen[GhostParameters] =
+    for {
+      centralWavelength  <- arbitrary[Wavelength]
+      nSkyMicroLens      <- arbitrary[Int]
+      resolution         <- arbitrary[ResolutionMode]
+      blueCamera         <- genGhostCameraParameters
+      redCamera          <- genGhostCameraParameters
+    } yield GhostParameters(centralWavelength, nSkyMicroLens, resolution, blueCamera, redCamera)
+
   val genInstrumentDetails: Gen[InstrumentDetails] =
     Gen.oneOf(
       genAcquisitionCamParameters,
@@ -164,7 +183,8 @@ trait ArbInstrumentDetails {
       genNifsParameters,
       genNiriParameters,
       genTRecsParameters,
-      genIgrins2Parameters
+      genIgrins2Parameters,
+      genGhostParameters
     )
 
   implicit val arbInstrumentDetails: Arbitrary[InstrumentDetails] =

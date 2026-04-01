@@ -64,7 +64,8 @@ trait ObservationDetailsCodec {
       .withCase("SpectroscopyS2N", SpectroscopyS2NCodec) { case a: SpectroscopyS2N => a }
       .asCodecJson
 
-  private implicit val CalculationMethodCodec: CodecJson[CalculationMethod] =
+  // needed by the ghost parameters codec
+  implicit val CalculationMethodCodec: CodecJson[CalculationMethod] =
     CoproductCodec[CalculationMethod]
       .withCase("IntegrationTimeMethod", IntMethodCodec)     { case a: IntegrationTimeMethod => a }
       .withCase("ExposureCountMethod", ImagingExpCountCodec) { case a: ImagingExposureCount => a }
@@ -117,12 +118,18 @@ trait ObservationDetailsCodec {
       "isIfu2"
     )
 
+  private val IfuSkyCodec: CodecJson[Ifu] =
+    casecodec1(Ifu.apply, Ifu.unapply)(
+      "skyFibres"
+    )
+
   private val IfuMethodCodec: CodecJson[IfuMethod] =
     CoproductCodec[IfuMethod]
       .withCase("IfuSingle", IfuSingleCodec) { case a: IfuSingle => a }
       .withCase("IfuRadial", IfuRadialCodec) { case a: IfuRadial => a }
       .withCase("IfuSummed", IfuSummedCodec) { case a: IfuSummed => a }
       .withCase("IfuSum",    IfuSumCodec)    { case a: IfuSum    => a }
+      .withCase("IfuSky",    IfuSkyCodec)    { case a: Ifu       => a }
       .asCodecJson
 
 

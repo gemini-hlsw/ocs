@@ -33,13 +33,20 @@ final case class Flamingos2Parameters(
                      customSlitWidth:   Option[Flamingos2.CustomSlitWidth],
                      readMode:          Flamingos2.ReadMode) extends InstrumentDetails
 
+final case class GhostCameraParameters(
+                     readMode:          GhostReadNoiseGain,
+                     binning:           GhostBinning,
+                     calculationMethod: Option[CalculationMethod] = None) {
+                      def calculationMethodOrDefault(default: CalculationMethod): CalculationMethod =
+                        calculationMethod.getOrElse(default)
+                     }
 
 final case class GhostParameters(
-                                  centralWavelength: Wavelength,
-                                  nSkyMicrolens    : Int,
-                                  resolution       : ResolutionMode,
-                                  readMode         : GhostReadNoiseGain,
-                                  binning: GhostBinning) extends InstrumentDetails
+                     centralWavelength: Wavelength,
+                     nSkyMicrolens    : Int,
+                     resolution       : ResolutionMode,
+                     redCamera        : GhostCameraParameters,
+                     blueCamera       : GhostCameraParameters) extends InstrumentDetails
 
 final case class GmosParameters(
                      filter:            GmosCommonType.Filter,

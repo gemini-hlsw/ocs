@@ -201,11 +201,34 @@ object ITCRequest {
 
     val binning       = r.enumParameter(classOf[GhostBinning],"binning")
     val centralWl     = r.centralWavelengthInNanometers()
-    val readMode      = r.enumParameter(classOf[GhostReadNoiseGain], "ReadMode")
+    val blueReadMode  = r.enumParameter(classOf[GhostReadNoiseGain], "BlueReadMode")
+    val redReadMode   = r.enumParameter(classOf[GhostReadNoiseGain], "RedReadMode")
     val resolution    = r.enumParameter(classOf[ResolutionMode],"instResolution")
     val nSkyMicrolens = ghostGetNumSky(r)
 
-    GhostParameters(centralWl, nSkyMicrolens, resolution, readMode, binning)
+    // blue uses the default names so as not to break ObservationDetails
+    val blueCalcMethod = SpectroscopyS2N(
+          r.intParameter("numExpA"),
+          None,
+          r.doubleParameter("expTimeA"),
+          r.doubleParameter("fracOnSourceA"),
+          r.doubleParameter("offset"),
+          None
+        )
+
+    val redCalcMethod = SpectroscopyS2N(
+          r.intParameter("numExpARed"),
+          None,
+          r.doubleParameter("expTimeARed"),
+          r.doubleParameter("fracOnSourceARed"),
+          r.doubleParameter("offset"),
+          None
+        )
+
+    val blueCamera    = GhostCameraParameters(blueReadMode, binning, Some(blueCalcMethod))
+    val redCamera     = GhostCameraParameters(redReadMode, binning, Some(redCalcMethod))
+
+    GhostParameters(centralWl, nSkyMicrolens, resolution, redCamera = redCamera, blueCamera = blueCamera)
   }
 
   def gmosParameters(r: ITCRequest): GmosParameters = {

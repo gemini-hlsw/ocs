@@ -7,6 +7,7 @@ import edu.gemini.spModel.data.YesNoType
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
+import edu.gemini.spModel.gemini.ghost.{GhostBinning, GhostReadNoiseGain}
 import edu.gemini.spModel.gemini.gmos.{ GmosSouthType, GmosNorthType, GmosCommonType }
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
@@ -14,10 +15,12 @@ import edu.gemini.spModel.gemini.michelle.MichelleParams
 import edu.gemini.spModel.gemini.nifs.NIFSParams
 import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.gemini.trecs.TReCSParams
+import edu.gemini.spModel.target.env.ResolutionMode
 
 trait InstrumentDetailsCodec {
   import edu.gemini.json.coproduct._
   import edu.gemini.json.keyed._
+  import observationdetails._
   import wavelength._
 
   // All our enum types must be declared explicitly
@@ -29,6 +32,8 @@ trait InstrumentDetailsCodec {
   private implicit val Flamingos2FilterCodec = enumCodec[Flamingos2.Filter]
   private implicit val Flamingos2FPUnitCodec = enumCodec[Flamingos2.FPUnit]
   private implicit val Flamingos2ReadModeCodec = enumCodec[Flamingos2.ReadMode]
+  private implicit val GhostBinningCodec = enumCodec[GhostBinning]
+  private implicit val GhostReadNoiseGainCodec = enumCodec[GhostReadNoiseGain]
   private implicit val GmosCommonTypeAmpGainCodec = enumCodec[GmosCommonType.AmpGain]
   private implicit val GmosCommonTypeAmpReadModeCodec = enumCodec[GmosCommonType.AmpReadMode]
   private implicit val GmosCommonTypeBuiltinROICodec = enumCodec[GmosCommonType.BuiltinROI]
@@ -57,6 +62,7 @@ trait InstrumentDetailsCodec {
   private implicit val NiriMaskCodec = enumCodec[Niri.Mask]
   private implicit val NiriReadModeCodec = enumCodec[Niri.ReadMode]
   private implicit val NiriWellDepthCodec = enumCodec[Niri.WellDepth]
+  private implicit val ResolutionModeCodec = enumCodec[ResolutionMode]
   private implicit val SiteCodec = enumCodec[Site]
   private implicit val TReCSParamsDisperserCodec = enumCodec[TReCSParams.Disperser]
   private implicit val TReCSParamsFilterCodec = enumCodec[TReCSParams.Filter]
@@ -197,6 +203,22 @@ trait InstrumentDetailsCodec {
       "altair"
     )
 
+  private implicit val GhostCameraParametersCodec: CodecJson[GhostCameraParameters] =
+    casecodec3(GhostCameraParameters.apply, GhostCameraParameters.unapply)(
+      "readMode",
+       "binning",
+       "calculationMethod"
+     )
+
+  private implicit val GhostParametersCodec: CodecJson[GhostParameters] =
+    casecodec5(GhostParameters.apply, GhostParameters.unapply)(
+      "centralWavelength",
+      "nSkyMicroLens",
+      "resolution",
+      "blueCamera",
+      "redCamera"
+    )
+
   implicit val InstrumentDetailsDecodeJson: CodecJson[InstrumentDetails] =
     CoproductCodec[InstrumentDetails]
       .withCase("AcquisitionCamParameters", AcquisitionCamParametersCodec) { case a: AcquisitionCamParameters => a }
@@ -209,6 +231,7 @@ trait InstrumentDetailsCodec {
       .withCase("NiriParameters",           NiriParametersCodec)           { case a: NiriParameters           => a }
       .withCase("TRecsParameters",          TRecsParametersCodec)          { case a: TRecsParameters          => a }
       .withCase("Igrins2Parameters",        Igrins2ParametersCodec)        { case a: Igrins2Parameters        => a }
+      .withCase("GhostParameters",          GhostParametersCodec)          { case a: GhostParameters          => a }
       .asCodecJson
 
 }

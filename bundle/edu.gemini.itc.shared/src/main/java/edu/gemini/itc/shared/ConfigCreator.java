@@ -156,18 +156,20 @@ public final class ConfigCreator {
         final ConfigCreatorResult result = createCommonConfig(numExp);
         for (final Config step : result.getConfig()) {
             step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GHOST);
-            step.putItem(CcdXBinning, ghostParameters.binning());
-            step.putItem(ReadModeKey, ghostParameters.readMode());
+            // saving the blue read mode and binning in the "generic" parameters
+            step.putItem(CcdXBinning, ghostParameters.blueCamera().binning());
+            step.putItem(ReadModeKey, ghostParameters.blueCamera().readMode());
             step.putItem(DetectorManufacturerKey, (Detector.DEFAULT));
+            // I don't think these values are ever actually used in the itc...
             step.putItem(Ghost.RED_EXPOSURE_COUNT_OBS_KEY(), 1);
             step.putItem(Ghost.RED_EXPOSURE_TIME_OBS_KEY(),obsDetailParams.exposureTime() );
-            step.putItem(Ghost.RED_READ_NOISE_GAIN_KEY(), ghostParameters.readMode());
-            step.putItem(Ghost.RED_BINNING_KEY(), ghostParameters.binning());
+            step.putItem(Ghost.RED_READ_NOISE_GAIN_KEY(), ghostParameters.redCamera().readMode());
+            step.putItem(Ghost.RED_BINNING_KEY(), ghostParameters.redCamera().binning());
 
             step.putItem(Ghost.BLUE_EXPOSURE_COUNT_OBS_KEY(), 1);
             step.putItem(Ghost.BLUE_EXPOSURE_TIME_OBS_KEY(),obsDetailParams.exposureTime() );
-            step.putItem(Ghost.BLUE_READ_NOISE_GAIN_KEY(), ghostParameters.readMode());
-            step.putItem(Ghost.BLUE_BINNING_KEY(), ghostParameters.binning());
+            step.putItem(Ghost.BLUE_READ_NOISE_GAIN_KEY(), ghostParameters.blueCamera().readMode());
+            step.putItem(Ghost.BLUE_BINNING_KEY(), ghostParameters.blueCamera().binning());
         }
         return result;
     }
