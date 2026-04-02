@@ -140,9 +140,8 @@ object ConfigExtractor {
       binning       <- extract[GhostBinning]      (c, BinningKey)
       resolution    <- extract[ResolutionMode]    (c, InsResolution)
       nSkyMicrolens <- extract[Int]               (c, InsNskyMicrolens)
-      wavelen       <- extractObservingWavelength(c)
       camera         = GhostCameraParameters(readMode, binning)
-    } yield GhostParameters(wavelen, nSkyMicrolens, resolution, camera, camera)
+    } yield GhostParameters(nSkyMicrolens, resolution, camera, camera)
   }
 
   private def extractGmos(c: Config): String \/ GmosParameters = {

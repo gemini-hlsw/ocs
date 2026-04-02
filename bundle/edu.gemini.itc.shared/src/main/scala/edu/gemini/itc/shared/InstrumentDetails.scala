@@ -42,11 +42,13 @@ final case class GhostCameraParameters(
                      }
 
 final case class GhostParameters(
-                     centralWavelength: Wavelength,
                      nSkyMicrolens    : Int,
                      resolution       : ResolutionMode,
                      redCamera        : GhostCameraParameters,
-                     blueCamera       : GhostCameraParameters) extends InstrumentDetails
+                     blueCamera       : GhostCameraParameters) extends InstrumentDetails {
+                      val centralWavelength: Wavelength = Wavelength.fromNanometers(530)
+                     }
+    
 
 final case class GmosParameters(
                      filter:            GmosCommonType.Filter,

@@ -211,9 +211,8 @@ trait InstrumentDetailsCodec {
      )
 
   private implicit val GhostParametersCodec: CodecJson[GhostParameters] =
-    casecodec5(GhostParameters.apply, GhostParameters.unapply)(
-      "centralWavelength",
-      "nSkyMicroLens",
+    casecodec4(GhostParameters.apply, GhostParameters.unapply)(
+      "nSkyMicrolens",
       "resolution",
       "blueCamera",
       "redCamera"

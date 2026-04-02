@@ -165,12 +165,11 @@ trait ArbInstrumentDetails {
 
   val genGhostParameters: Gen[GhostParameters] =
     for {
-      centralWavelength  <- arbitrary[Wavelength]
       nSkyMicroLens      <- arbitrary[Int]
       resolution         <- arbitrary[ResolutionMode]
       blueCamera         <- genGhostCameraParameters
       redCamera          <- genGhostCameraParameters
-    } yield GhostParameters(centralWavelength, nSkyMicroLens, resolution, blueCamera, redCamera)
+    } yield GhostParameters(nSkyMicroLens, resolution, blueCamera, redCamera)
 
   val genInstrumentDetails: Gen[InstrumentDetails] =
     Gen.oneOf(
