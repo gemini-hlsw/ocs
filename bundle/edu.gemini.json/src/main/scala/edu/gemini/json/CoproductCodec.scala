@@ -26,7 +26,7 @@ trait CoproductCodec {
   class CoproductCodec[A] private { prev =>
 
     def encode(a: A): Json =
-      sys.error("Can't encode. No case was provided for $a.")
+      sys.error(s"Can't encode. No case was provided for $a.")
 
     def decode(c: HCursor): DecodeResult[A] =
       DecodeResult.fail[A]("Invalid tagged type", c.history)
