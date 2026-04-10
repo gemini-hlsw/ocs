@@ -66,7 +66,7 @@ class ItcServiceImpl extends ItcService {
     // execute ITC service call with updated parameters
     p.observation.calculationMethod match {
       case _: Imaging       => ItcResult.forMessage ("Imaging not implemented.")
-      case _: Spectroscopy  => calculateSpectroscopyCharts(p)
+      case _: Spectroscopy  => calculateSpectroscopy(p, excludeCharts = false)
     }
 
   } catch {
@@ -104,43 +104,36 @@ class ItcServiceImpl extends ItcService {
 
   // === Spectroscopy
 
-  private def calculateSpectroscopy(p: ItcParameters, includeCharts: Boolean): Result =
+  private def calculateSpectroscopy(p: ItcParameters, excludeCharts: Boolean): Result =
     p.instrument match {
-      case i: Flamingos2Parameters        => spectroscopyResult   (new Flamingos2Recipe(p, i),               includeCharts)
-      case i: GmosParameters              => spectroscopyResult   (new GmosRecipe(p, i),                     includeCharts)
-      case i: GnirsParameters             => spectroscopyResult   (new GnirsRecipe(p, i),                    includeCharts)
-      case i: NifsParameters              => spectroscopyResult   (new NifsRecipe(p, i),                     includeCharts)
-      case i: NiriParameters              => spectroscopyResult   (new NiriRecipe(p, i),                     includeCharts)
-      case i: Igrins2Parameters           => spectroscopyResult   (new Igrins2Recipe(paramsInMicrons(p), i), includeCharts)
-      case i: GhostParameters             => spectroscopyResult   (new GHostRecipe(p, i),                    includeCharts)
+      case i: Flamingos2Parameters        => spectroscopyResult   (new Flamingos2Recipe(p, i),               excludeCharts)
+      case i: GmosParameters              => spectroscopyResult   (new GmosRecipe(p, i),                     excludeCharts)
+      case i: GnirsParameters             => spectroscopyResult   (new GnirsRecipe(p, i),                    excludeCharts)
+      case i: NifsParameters              => spectroscopyResult   (new NifsRecipe(p, i),                     excludeCharts)
+      case i: NiriParameters              => spectroscopyResult   (new NiriRecipe(p, i),                     excludeCharts)
+      case i: Igrins2Parameters           => spectroscopyResult   (new Igrins2Recipe(paramsInMicrons(p), i), excludeCharts)
+      case i: GhostParameters             => ghostSpectroscopyResult(new GHostRecipe(p, i),                    excludeCharts)
       case _                              => ItcResult.forMessage (s"Spectroscopy with this instrument: ${p.instrument} is not supported by ITC.")
 
     }
 
-  // === Spectroscopy
-
-  private def calculateSpectroscopyCharts(p: ItcParameters): Result =
-    p.instrument match {
-      case i: GmosParameters              => spectroscopyResult(new GmosRecipe(p, i),                     includeCharts = false)
-      case i: Flamingos2Parameters        => spectroscopyResult(new Flamingos2Recipe(p, i),               includeCharts = false)
-      case i: GnirsParameters             => spectroscopyResult(new GnirsRecipe(p, i),                    includeCharts = false)
-      case i: NifsParameters              => spectroscopyResult(new NifsRecipe(p, i),                     includeCharts = false)
-      case i: NiriParameters              => spectroscopyResult(new NiriRecipe(p, i),                     includeCharts = false)
-      case i: Igrins2Parameters           => spectroscopyResult(new Igrins2Recipe(paramsInMicrons(p), i), includeCharts = false)
-      case i: GhostParameters             => spectroscopyResult(new GHostRecipe(p, i),                    includeCharts = false)
-      case _                              => ItcResult.forMessage (s"Spectroscopy with this instrument: ${p.instrument} is not supported by ITC.")
-
-    }
-  private def spectroscopyResult(recipe: SpectroscopyRecipe, includeCharts: Boolean): Result = {
+  private def spectroscopyResult(recipe: SpectroscopyRecipe, excludeCharts: Boolean): Result = {
     val r = recipe.calculateSpectroscopy()
-    val s = recipe.serviceResult(r, includeCharts)
+    val s = recipe.serviceResult(r, excludeCharts)
     ItcResult.forResult(s)
   }
 
-  private def spectroscopyResult(recipe: SpectroscopyArrayRecipe, includeCharts: Boolean): Result = {
+  private def spectroscopyResult(recipe: SpectroscopyArrayRecipe, excludeCharts: Boolean): Result = {
     val r = recipe.calculateSpectroscopy()
-    val s = recipe.serviceResult(r, includeCharts)
+    val s = recipe.serviceResult(r, excludeCharts)
     ItcResult.forResult(s)
+  }
+
+  private def ghostSpectroscopyResult(recipe: GHostRecipe, excludeCharts: Boolean): Result = {
+    val r = recipe.calculateSpectroscopy()
+    // we use a special method to not produce S2NChartPerRes charts or the combined charts.
+    val s = recipe.serviceResult(r, excludeCharts, true)
+    ItcResult.forResult(s.copy(chartGroups = s.chartGroups.take(2)))
   }
 
   // The web page has the fields in microns and they are passed directly as doubles so the recipe expects micros
