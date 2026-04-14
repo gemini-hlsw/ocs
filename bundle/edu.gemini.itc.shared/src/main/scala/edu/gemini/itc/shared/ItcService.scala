@@ -122,6 +122,11 @@ final case class SpcSeriesData(dataType: SpcDataType, title: String, data: Array
     ssdCopy
   }
 
+  def withSignificantFigures(n: Int): SpcSeriesData = {
+    val roundedData = data.map(_.map(d => SpcSeriesData.roundToSignificantFigures(BigDecimal(d), n)))
+    this.copy(data = roundedData)
+  }
+
   override def equals(other: Any): Boolean =
     other match {
       case SpcSeriesData(`dataType`, `title`, arr, `color`) =>
@@ -137,6 +142,23 @@ object SpcSeriesData {
   def withVisibility(visibility: Boolean, dataType: SpcDataType, title: String, data: Array[Array[Double]], color: Option[Color] = None): SpcSeriesData = {
     val ssd = new SpcSeriesData(dataType, title, data, color)
     ssd.withLegendVisibility(visibility)
+  }
+
+  import scala.math._
+
+  // Round the value to n significant figures, this to remove
+  // the extra precision produced by ITC calculations using doubles
+  // This will not work for extremely small numbers but we don't expect such
+  def roundToSignificantFigures(num: BigDecimal, n: Int): Double = {
+    if (num == 0) 0
+    else {
+      val d     = ceil(log10(abs(num.toDouble)))
+      val power = n - d.toInt
+
+      val magnitude = pow(10, power)
+      val shifted   = round(num.toDouble * magnitude)
+      shifted / magnitude
+    }
   }
 }
 
@@ -206,6 +228,11 @@ final case class ItcSpectroscopyResult(ccds: List[ItcCcd], chartGroups: List[Spc
     * This method will fail if the result (chart/data) you're looking for does not exist.
     */
   def allSeries(ct: SpcChartType, dt: SpcDataType): List[SpcSeriesData] = chart(ct).allSeries(dt)
+
+  def withSignificantFigures(n: Int): ItcSpectroscopyResult = {
+    val reducedCharts = chartGroups.map(g => g.copy(charts = g.charts.map(c => c.copy(series = c.series.map(_.withSignificantFigures(n))))))
+    this.copy(chartGroups = reducedCharts)
+  }
 
 }
 
