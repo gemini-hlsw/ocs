@@ -305,8 +305,10 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         //final VisitableSampledSpectrum sqrtBackground = background(input_slit);
 
         // create the Sqrt(Background) sed for plotting
-        for (int i = firstCcdPixel; i <= lastCcdPixel(sqrtBackground.getLength()); ++i)
-            sqrtBackground.setY(i, Math.sqrt(sqrtBackground.getY(i)));
+        for (int i = firstCcdPixel; i <= lastCcdPixel(sqrtBackground.getLength()); ++i) {
+            // SC-8430: Guard against negative background values that can produce a NaN
+            sqrtBackground.setY(i, Math.sqrt(Math.max(0.0, sqrtBackground.getY(i))));
+        }
 
         // -- assign results
         resultSignal = signal;
@@ -375,14 +377,16 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         final VisitableSampledSpectrum noise = (VisitableSampledSpectrum) sourceFlux.clone();
         for (int i = 0; i < noise.getLength(); ++i) { noise.setY(i, 0); }
         for (int i = firstCcdPixel; i <= lastCcdPixel(noise.getLength()); ++i) {
-            noise.setY(i, Math.sqrt(signal.getY(i)+ background.getY(i) + darkNoise + readNoise));
+            final double noiseVariance = signal.getY(i) + background.getY(i) + darkNoise + readNoise;
+            noise.setY(i, Math.sqrt(Math.max(0.0, noiseVariance)));
         }
 
         // calculate signal to noise
         final VisitableSampledSpectrum singleS2N = (VisitableSampledSpectrum) sourceFlux.clone();
         for (int i = 0; i < singleS2N.getLength(); ++i) { singleS2N.setY(i, 0); }
         for (int i = firstCcdPixel; i <= lastCcdPixel(singleS2N.getLength()); ++i) {
-            singleS2N.setY(i, Math.sqrt(coadds) * signal.getY(i) / noise.getY(i));
+            final double n = noise.getY(i);
+            singleS2N.setY(i, (n > 0.0) ? Math.sqrt(coadds) * signal.getY(i) / n : 0.0);
         }
 
         return singleS2N;
@@ -416,7 +420,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         for (int i = 0; i < spec_sourceless_noise.getLength(); ++i) { spec_sourceless_noise.setY(i, 0); }
         int spec_sourceless_noise_last = lastCcdPixel(spec_sourceless_noise.getLength());
         for (int i = firstCcdPixel; i <= spec_sourceless_noise_last; ++i) {
-            spec_sourceless_noise.setY(i, Math.sqrt(background.getY(i) + darkNoise + readNoise));
+            spec_sourceless_noise.setY(i, Math.sqrt(Math.max(0.0, background.getY(i) + darkNoise + readNoise)));
         }
 
         final VisitableSampledSpectrum finalS2N = (VisitableSampledSpectrum) sourceFlux.clone();
