@@ -45,7 +45,7 @@ public final class GHostRecipe implements SpectroscopyArrayRecipe {
     public ItcSpectroscopyResult serviceResult(final SpectroscopyResult[] r, final boolean headless) {
         return serviceResult(r, headless, false);
     }
-        
+
     public ItcSpectroscopyResult serviceResult(final SpectroscopyResult[] r, final boolean headless, final boolean forGPP) {
         final List<List<SpcChartData>> groups = new ArrayList<>();
         List<VisitableSampledSpectrum> listPerResElement = new ArrayList<VisitableSampledSpectrum>();
@@ -102,27 +102,15 @@ public final class GHostRecipe implements SpectroscopyArrayRecipe {
                     ITCChart.DarkGreen, ITCChart.DarkRed));
             groups.add(combined);
         }
-    return Recipe$.MODULE$.serviceGroupedResult(r, groups, headless);
+    return Recipe$.MODULE$.serviceGhostResult(r, groups, headless);
 }
 
-public SpectroscopyResult[] calculateSpectroscopy() {
-    int length = _mainInstrument.length;
-
-    // Need to build integration times list for for both cameras because the serviceResult methods
-    // discards all but the first one.
-    List<IntegrationTime> allCalculations = new ArrayList<>();
-    for (int i = 0; i < length; i++) {
-        final SpectroscopyS2N calcMethod = getSpectroscopyS2N(_mainInstrument[i].getCamera());
-            allCalculations.add(new IntegrationTime(calcMethod.exposureTime(), calcMethod.exposures()));
-        }
-        // Not sure what to use for this. IGRINS2 selects this based on wavelength.
-        int selectedIndex = 0;
-
-        AllIntegrationTimes allTimes = AllIntegrationTimes.fromJavaList(allCalculations, selectedIndex);
+    public SpectroscopyResult[] calculateSpectroscopy() {
+        int length = _mainInstrument.length;
 
         final SpectroscopyResult[] results = new SpectroscopyResult[length];
         for (int i = 0; i < length; i++) {
-            results[i] = calculateSpectroscopy(_mainInstrument[i]).withTimes(allTimes);
+            results[i] = calculateSpectroscopy(_mainInstrument[i]);
         }
         Log.info("calculateSpectroscopy getImageQuality[0]: " +
                             results[0].iqCalc().getImageQuality() + " [1]: "+ results[1].iqCalc().getImageQuality());
@@ -193,14 +181,17 @@ public SpectroscopyResult[] calculateSpectroscopy() {
         VisitableSampledSpectrum singleS2NSpectrum = specS2N.getExpS2NSpectrum();
         VisitableSampledSpectrum finalS2NSpectrum = specS2N.getFinalS2NSpectrum();
 
+        final SpectroscopyS2N calcMethod = getSpectroscopyS2N(instrument.getCamera());
+        final AllIntegrationTimes times = AllIntegrationTimes.single(new IntegrationTime(calcMethod.exposureTime(), calcMethod.exposures()));
+
         return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(),
                 RecipeUtil.instance().signalToNoiseAt(specS2NCalcMethod.atWithDefault(), singleS2NSpectrum, finalS2NSpectrum),
-                AllIntegrationTimes.empty());
+                times);
     }
 
     private SpectroscopyS2N getSpectroscopyS2N(GhostCameraParameters camera) {
-        // GPP will supply a calculation method per camera, but some places do not. So, we will use the 
-        // camera one if available, but drop back to the one in the observation details if not. It isn't ideal to 
+        // GPP will supply a calculation method per camera, but some places do not. So, we will use the
+        // camera one if available, but drop back to the one in the observation details if not. It isn't ideal to
         // always create a whole new calculation method, but it is hard to work with the Scala option in Java.
         // final CalculationMethod calcMethod = instrument.getCamera().calculationMethodOrDefault(_obsDetailParameters.calculationMethod());
         final CalculationMethod calcMethod = camera.calculationMethodOrDefault(_obsDetailParameters.calculationMethod());

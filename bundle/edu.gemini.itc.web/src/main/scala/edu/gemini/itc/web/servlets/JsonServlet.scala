@@ -25,7 +25,7 @@ object ItcCalculation extends ItcParametersCodec with ItcResultCodec {
 
     (for {
       itcReq <- Parse.decodeEither[ItcParameters](json)
-      itcRes <- itc.calculateCharts(itcReq).toEither.leftMap(_.msg)
+      itcRes <- itc.calculate(itcReq, headless = false).toEither.leftMap(_.msg)
     } yield itcRes.asJson.nospaces).toString
   }
 
@@ -35,7 +35,7 @@ object ItcCalculation extends ItcParametersCodec with ItcResultCodec {
 
     (for {
       itcReq <- Parse.decodeEither[ItcParameters](json)
-      itcRes <- itc.calculate(itcReq, true).toEither.leftMap(_.msg)
+      itcRes <- itc.calculate(itcReq, headless = true).toEither.leftMap(_.msg)
     } yield itcRes.asJson.nospaces).toString
   }
 
@@ -44,7 +44,7 @@ object ItcCalculation extends ItcParametersCodec with ItcResultCodec {
 
     (for {
       itcReq <- Parse.decodeEither[ItcParameters](json)
-      itcRes <- itc.calculate(itcReq, true).toEither.leftMap(_.msg)
+      itcRes <- itc.calculate(itcReq, headless = true).toEither.leftMap(_.msg)
     } yield itcRes.asJson.nospaces).toString
   }
 }
@@ -115,7 +115,7 @@ class JsonChartServlet(versionToken: String = "") extends HttpServlet with ItcPa
     val result: Either[String, ItcResult] =
       for {
         itcReq <- Parse.decodeEither[ItcParameters](json)
-        itcRes <- itc.calculateCharts(itcReq).toEither.leftMap(_.msg)
+        itcRes <- itc.calculate(itcReq, headless = false).toEither.leftMap(_.msg)
       } yield itcRes
 
     // Send our result back.

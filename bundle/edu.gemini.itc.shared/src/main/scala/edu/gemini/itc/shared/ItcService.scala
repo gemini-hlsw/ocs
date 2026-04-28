@@ -254,9 +254,6 @@ trait ItcService {
    * @param headless pass `true` for headless applications that do not require chart data.
    */
   def calculate(p: ItcParameters, headless: Boolean): Result
-
-  def calculateCharts(p: ItcParameters): Result
-
 }
 
 sealed trait ItcMessage
