@@ -171,9 +171,38 @@ object Recipe {
       rs.map(_.times).headOption.getOrElse(AllIntegrationTimes.empty),
       snAt
     )
-
   }
 
+
+  // Based on serviceGroupedResult above, but specialized for GHOST
+  def serviceGhostResult(rs: Array[SpectroscopyResult], charts: JList[JList[SpcChartData]], excludeCharts: Boolean): ItcSpectroscopyResult = {
+    // We know that GHOST has 2 results
+    val rBlue = rs(0);
+    val rRed = rs(1);
+
+    // We return a single signalToNoiseAt response. From discussions with Andy, if we have choices we will
+    // return the one with the greatest final S/N. We'll also use that as the "selected" IntegrationTime,
+    // although I'm not sure that has much meaning for GHOST.
+    val (snAt, idx) = (rBlue.signalToNoiseAt, rRed.signalToNoiseAt) match {
+      case (Some(snBlue), Some(snRed)) if snBlue.finalSignalToNoise >= snRed.finalSignalToNoise => (Some(snBlue), 0)
+      case (Some(snBlue), Some(snRed))  => (Some(snRed), 1)
+      case (_, Some(snRed)) => (Some(snRed), 0)
+      case (b, _) => (b, 1)
+    }
+
+    // We also "know" that each result will have exactly 1 element in the AllIntegrationTimes lists.
+    // This isn't very meaningful for GHOST since we always receive the time and counts, but we need to return
+    // something
+    val integrationTimes: List[IntegrationTime] = rBlue.times.detectors ++ rRed.times.detectors
+    val times = AllIntegrationTimes(integrationTimes, if (idx < integrationTimes.length) idx else 0)
+
+    ItcSpectroscopyResult(
+      rs.map(r => toCcdData(r, charts.toList.flatten)).toList,
+      if (excludeCharts) Nil else charts.toList.map(l => SpcChartGroup(l.toList)),
+      times,
+      snAt
+    )
+  }
 }
 object RecipeUtil {
   val instance = this
@@ -181,7 +210,7 @@ object RecipeUtil {
   // We want to find sn at a specific wavelength.
   // if the wavelength is out of range return None, other wise return the value even if sn is 0
   def signalToNoiseAt(wavelengthAt: Double, signal: Spectrum, total: Spectrum): Option[SignalToNoiseAt] = {
-    // Both spectrums need the same range
+    // Both spectra need the same range
     require(signal.getStart == total.getStart)
     require(signal.getEnd == total.getEnd)
     val result = if (wavelengthAt >= signal.getStart && wavelengthAt <= signal.getEnd) {

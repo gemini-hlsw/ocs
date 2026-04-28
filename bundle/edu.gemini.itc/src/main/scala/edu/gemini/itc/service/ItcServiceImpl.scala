@@ -27,7 +27,7 @@ class ItcServiceImpl extends ItcService {
 
   import ItcService._
 
-  def calculate(p: ItcParameters, includeCharts: Boolean): Result = try {
+  def calculate(p: ItcParameters, excludeCharts: Boolean): Result = try {
 
     // update parameters sent from client with stuff that needs to be done on the server
     val updatedParams: ItcParameters = {
@@ -54,19 +54,9 @@ class ItcServiceImpl extends ItcService {
 
     // execute ITC service call with updated parameters
     updatedParams.observation.calculationMethod match {
+      case _: Imaging if !excludeCharts => ItcResult.forMessage("Charts not implemented for imaging.")
       case _: Imaging       => calculateImaging(updatedParams)
-      case _: Spectroscopy  => calculateSpectroscopy(updatedParams, includeCharts)
-    }
-
-  } catch {
-    case e: Throwable => ItcResult.forException(e)
-  }
-
-  def calculateCharts(p: ItcParameters): Result = try {
-    // execute ITC service call with updated parameters
-    p.observation.calculationMethod match {
-      case _: Imaging       => ItcResult.forMessage ("Imaging not implemented.")
-      case _: Spectroscopy  => calculateSpectroscopy(p, excludeCharts = false)
+      case _: Spectroscopy  => calculateSpectroscopy(updatedParams, excludeCharts)
     }
 
   } catch {
