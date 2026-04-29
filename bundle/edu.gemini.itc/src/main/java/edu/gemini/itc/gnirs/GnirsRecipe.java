@@ -513,15 +513,6 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final CalculationMethod calcMethod = _obsDetailParameters.calculationMethod();
         Log.fine("calcMethod = " + calcMethod);
 
-        int numberExposures = 0;
-        if (calcMethod instanceof ImagingS2N) {
-            ImagingS2N s2nMethod = (ImagingS2N) calcMethod;
-            numberExposures = s2nMethod.exposures() * s2nMethod.coaddsOrElse(1);
-        } else {
-            throw new Error("Unsupported calculation method");
-        }
-        Log.fine("numberExposures = " + numberExposures);
-
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
@@ -595,8 +586,22 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         }
         IS2Ncalc.calculate();
 
+        double expTime = 0;
+        int numberExposures = 0;
+        if (calcMethod instanceof ImagingS2N) {
+            ImagingS2N s2nMethod = (ImagingS2N) calcMethod;
+            expTime = s2nMethod.exposures();
+            numberExposures = s2nMethod.exposures() * s2nMethod.coaddsOrElse(1);
+        } else if (calcMethod instanceof ImagingIntegrationTime) {
+            expTime = IS2Ncalc.getExposureTime();
+            numberExposures = IS2Ncalc.numberSourceExposures(); // Already has coadds factored.
+        } else {
+            throw new Error("Unsupported calculation method");
+        }
+        Log.fine("numberExposures = " + numberExposures);
+
         final AllIntegrationTimes exp = AllIntegrationTimes.single(new IntegrationTime(_obsDetailParameters.exposureTime(), numberExposures));
-        return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair, Option.empty());
+        return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair, Option.apply(exp));
 
     }
 
