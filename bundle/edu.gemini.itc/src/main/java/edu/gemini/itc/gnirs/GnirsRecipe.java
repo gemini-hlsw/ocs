@@ -590,9 +590,12 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         int numberExposures = 0;
         if (calcMethod instanceof ImagingS2N) {
             ImagingS2N s2nMethod = (ImagingS2N) calcMethod;
-            expTime = s2nMethod.exposures();
+            expTime = s2nMethod.exposureTime();
             numberExposures = s2nMethod.exposures() * s2nMethod.coaddsOrElse(1);
         } else if (calcMethod instanceof ImagingIntegrationTime) {
+            expTime = IS2Ncalc.getExposureTime();
+            numberExposures = IS2Ncalc.numberSourceExposures(); // Already has coadds factored.
+        } else if (calcMethod instanceof ImagingExposureCount) {
             expTime = IS2Ncalc.getExposureTime();
             numberExposures = IS2Ncalc.numberSourceExposures(); // Already has coadds factored.
         } else {
