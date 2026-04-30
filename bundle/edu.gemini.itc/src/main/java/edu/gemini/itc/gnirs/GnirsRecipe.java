@@ -603,7 +603,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         }
         Log.fine("numberExposures = " + numberExposures);
 
-        final AllIntegrationTimes exp = AllIntegrationTimes.single(new IntegrationTime(_obsDetailParameters.exposureTime(), numberExposures));
+        final AllIntegrationTimes exp = AllIntegrationTimes.single(new IntegrationTime(expTime, numberExposures));
         return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair, Option.apply(exp));
 
     }
