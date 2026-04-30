@@ -105,6 +105,21 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // calculates: redshifted SED
         // output: redshifted SED
 
+        final CalculationMethod calcMethod = _obsDetailParameters.calculationMethod();
+        Log.fine("calcMethod = " + calcMethod);
+
+        int numberExposures = 0;
+        double wavelengthAt = 0;
+        if (calcMethod instanceof SpectroscopyS2N) {
+            SpectroscopyS2N s2nMethod = (SpectroscopyS2N) calcMethod;
+            numberExposures = s2nMethod.exposures() * s2nMethod.coaddsOrElse(1);
+            wavelengthAt = s2nMethod.atWithDefault();
+        } else {
+            throw new Error("Unsupported calculation method");
+        }
+        Log.fine("numberExposures = " + numberExposures);
+        Log.fine(String.format("WavelengthAt = %.2f nm", wavelengthAt));
+
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
@@ -355,10 +370,10 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                     specS2Narr[i] = s2n;
                 }
 
-                return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), altair, Option.empty(), AllIntegrationTimes.empty());
-
+                final scala.Option<SignalToNoiseAt> sn = RecipeUtil.instance().signalToNoiseAt(wavelengthAt, specS2N.getExpS2NSpectrum(), specS2N.getFinalS2NSpectrum());
+                final AllIntegrationTimes exp = AllIntegrationTimes.single(new IntegrationTime(calcMethod.exposureTime(), numberExposures));
+                return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), altair, sn, exp);
             } else {  // === NOT XD ===
-
                 sed.accept(instrument.getGratingOrderNTransmission(instrument.getOrder()));
 
                 specS2N.setSourceSpectrum(sed);
@@ -369,7 +384,9 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 sed.accept(specS2N);
 
                 final SpecS2N[] specS2Narr = new SpecS2N[]{specS2N};
-                return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), altair, Option.empty(), AllIntegrationTimes.empty());
+                final scala.Option<SignalToNoiseAt> sn = RecipeUtil.instance().signalToNoiseAt(wavelengthAt, specS2N.getExpS2NSpectrum(), specS2N.getFinalS2NSpectrum());
+                final AllIntegrationTimes exp = AllIntegrationTimes.single(new IntegrationTime(calcMethod.exposureTime(), numberExposures));
+                return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), altair, sn, exp);
             }
 
         }
@@ -493,6 +510,9 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // calculates: redshifted SED
         // output: redshifteed SED
 
+        final CalculationMethod calcMethod = _obsDetailParameters.calculationMethod();
+        Log.fine("calcMethod = " + calcMethod);
+
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
         IQcalc.calculate();
@@ -566,7 +586,25 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         }
         IS2Ncalc.calculate();
 
-        return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair, Option.empty());
+        double expTime = 0;
+        int numberExposures = 0;
+        if (calcMethod instanceof ImagingS2N) {
+            ImagingS2N s2nMethod = (ImagingS2N) calcMethod;
+            expTime = s2nMethod.exposureTime();
+            numberExposures = s2nMethod.exposures() * s2nMethod.coaddsOrElse(1);
+        } else if (calcMethod instanceof ImagingIntegrationTime) {
+            expTime = IS2Ncalc.getExposureTime();
+            numberExposures = IS2Ncalc.numberSourceExposures(); // Already has coadds factored.
+        } else if (calcMethod instanceof ImagingExposureCount) {
+            expTime = IS2Ncalc.getExposureTime();
+            numberExposures = IS2Ncalc.numberSourceExposures(); // Already has coadds factored.
+        } else {
+            throw new Error("Unsupported calculation method");
+        }
+        Log.fine("numberExposures = " + numberExposures);
+
+        final AllIntegrationTimes exp = AllIntegrationTimes.single(new IntegrationTime(expTime, numberExposures));
+        return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair, Option.apply(exp));
 
     }
 
