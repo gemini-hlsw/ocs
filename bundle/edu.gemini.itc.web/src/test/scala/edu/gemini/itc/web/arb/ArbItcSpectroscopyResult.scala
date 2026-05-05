@@ -14,6 +14,7 @@ trait ArbItcSpectroscopyResult {
     Gen.oneOf(
       SignalChart,
       S2NChart,
+      S2NChartPerRes,
       SignalPixelChart
     )
 
@@ -37,7 +38,9 @@ trait ArbItcSpectroscopyResult {
       SingleS2NData,
       FinalS2NData,
       PixSigData,
-      PixBackData
+      PixBackData,
+      FinalS2NPerResEle,
+      SingleS2NPerResEle
     )
 
   val genSpcSeriesData: Gen[SpcSeriesData] =

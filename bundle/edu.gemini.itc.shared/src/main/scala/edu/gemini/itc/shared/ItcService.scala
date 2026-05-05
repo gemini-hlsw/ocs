@@ -122,11 +122,6 @@ final case class SpcSeriesData(dataType: SpcDataType, title: String, data: Array
     ssdCopy
   }
 
-  def withSignificantFigures(n: Int): SpcSeriesData = {
-    val roundedData = data.map(_.map(d => SpcSeriesData.roundToSignificantFigures(BigDecimal(d), n)))
-    this.copy(data = roundedData)
-  }
-
   override def equals(other: Any): Boolean =
     other match {
       case SpcSeriesData(`dataType`, `title`, arr, `color`) =>
@@ -228,11 +223,6 @@ final case class ItcSpectroscopyResult(ccds: List[ItcCcd], chartGroups: List[Spc
     * This method will fail if the result (chart/data) you're looking for does not exist.
     */
   def allSeries(ct: SpcChartType, dt: SpcDataType): List[SpcSeriesData] = chart(ct).allSeries(dt)
-
-  def withSignificantFigures(n: Int): ItcSpectroscopyResult = {
-    val reducedCharts = chartGroups.map(g => g.copy(charts = g.charts.map(c => c.copy(series = c.series.map(_.withSignificantFigures(n))))))
-    this.copy(chartGroups = reducedCharts)
-  }
 
 }
 
