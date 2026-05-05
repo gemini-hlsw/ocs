@@ -8,6 +8,27 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - name: Network Debug
+        run: |
+          echo "Testing jline dependency resolution..."
+          curl -I https://repo1.maven.org/maven2/org/scala-lang/jline/2.10.7/jline-2.10.7.pom || echo "Failed to resolve jline dependency."
+          curl -L https://repo1.maven.org/maven2/org/scala-lang/jline/2.10.7/jline-2.10.7.pom --output test.pom
+          ls -lh test.pom
+          echo "Getting the pom sha1 file..."
+          curl -L https://repo1.maven.org/maven2/org/scala-lang/jline/2.10.7/jline-2.10.7.pom.sha1 --output test.pom.sha1
+          echo "Contents of the sha1 file:"
+          cat test.pom.sha1
+          echo
+          echo "Getting the jar file..."
+          curl -L https://repo1.maven.org/maven2/org/scala-lang/jline/2.10.7/jline-2.10.7.jar --output test.jar
+          echo "Listing the jar file..."
+          ls -lh test.jar
+          echo "sha1sum of the jar file:"
+          sha1sum test.jar
+          curl -L https://repo1.maven.org/maven2/org/scala-lang/jline/2.10.7/jline-2.10.7.jar.sha1 --output test.jar.sha1
+          echo "Contents of the jar sha1 file:"
+          cat test.jar.sha1
+          echo
       - name: Set up JDK 1.8
         uses: olafurpg/setup-scala@v12
         with:
