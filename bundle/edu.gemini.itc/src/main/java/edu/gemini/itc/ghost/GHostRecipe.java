@@ -23,7 +23,8 @@ public final class GHostRecipe implements SpectroscopyArrayRecipe {
     private final ObservingConditions _obsConditionParameters;
     private final TelescopeDetails _telescope;
 
-    private final short WAVELENGTH_BLUE_END = 542; // nm . Range 347 - 542 nm
+    private static final double WAVELENGTH_BLUE_END = 542;  // nm. Blue arm range: ~347 – 542 nm
+    private static final double WAVELENGTH_RED_START = 520; // nm. Red arm range:  520 – redEnd nm
 
     /**
      * Constructs a GhostRecipe given the parameters. Useful for testing.
@@ -69,23 +70,31 @@ public final class GHostRecipe implements SpectroscopyArrayRecipe {
         }
 
         if (!forGPP) {
-            // This part creates a single graph to include the blue and red band.
-            // This last graph is the one shown as the final result in the Ghost Web result.
-            VisitableSampledSpectrum singleS2NCombPerRes = (VisitableSampledSpectrum) listPerResElement.get(2).clone();
-            VisitableSampledSpectrum finalS2NSpecCombPerRes = (VisitableSampledSpectrum) listPerResElement.get(3).clone();
-            VisitableSampledSpectrum sigSpectrumComb = (VisitableSampledSpectrum) r[1].specS2N()[0].getSignalSpectrum().clone();
-            VisitableSampledSpectrum backGroundSpectComb = (VisitableSampledSpectrum) r[1].specS2N()[0].getBackgroundSpectrum().clone();
-            VisitableSampledSpectrum expS2NComb = (VisitableSampledSpectrum) r[1].specS2N()[0].getExpS2NSpectrum().clone();
-            VisitableSampledSpectrum finalS2NSpecComb = (VisitableSampledSpectrum) r[1].specS2N()[0].getFinalS2NSpectrum().clone();
-            int indexWV = r[0].specS2N()[0].getSignalSpectrum().getLowerIndex(WAVELENGTH_BLUE_END);
-            for (int i = 0; i <= indexWV; ++i) {
-                sigSpectrumComb.setY(i, r[0].specS2N()[0].getSignalSpectrum().getY(i));
-                backGroundSpectComb.setY(i, r[0].specS2N()[0].getBackgroundSpectrum().getY(i));
-                expS2NComb.setY(i, r[0].specS2N()[0].getExpS2NSpectrum().getY(i));
-                finalS2NSpecComb.setY(i, r[0].specS2N()[0].getFinalS2NSpectrum().getY(i));
-                singleS2NCombPerRes.setY(i, listPerResElement.get(0).getY(i));
-                finalS2NSpecCombPerRes.setY(i, listPerResElement.get(1).getY(i));
-            }
+            // Build combined full-range spectra by stitching blue and red arm spectra.
+            // Blue arm data is used up to its computed end (≈ WAVELENGTH_BLUE_END);
+            // red arm data covers the remainder. The combined grid uses blue's pixel
+            // width and spans from blueStart to redEnd.
+            //
+            // listPerResElement layout: [0]=blue single/res, [1]=blue final/res,
+            //                           [2]=red  single/res, [3]=red  final/res
+            final VisitableSampledSpectrum sigSpectrumComb = buildCombinedSpectrum(
+                    r[0].specS2N()[0].getSignalSpectrum(),
+                    r[1].specS2N()[0].getSignalSpectrum());
+            final VisitableSampledSpectrum backGroundSpectComb = buildCombinedSpectrum(
+                    r[0].specS2N()[0].getBackgroundSpectrum(),
+                    r[1].specS2N()[0].getBackgroundSpectrum());
+            final VisitableSampledSpectrum expS2NComb = buildCombinedSpectrum(
+                    r[0].specS2N()[0].getExpS2NSpectrum(),
+                    r[1].specS2N()[0].getExpS2NSpectrum());
+            final VisitableSampledSpectrum finalS2NSpecComb = buildCombinedSpectrum(
+                    r[0].specS2N()[0].getFinalS2NSpectrum(),
+                    r[1].specS2N()[0].getFinalS2NSpectrum());
+            final VisitableSampledSpectrum singleS2NCombPerRes = buildCombinedSpectrum(
+                    listPerResElement.get(0),
+                    listPerResElement.get(2));
+            final VisitableSampledSpectrum finalS2NSpecCombPerRes = buildCombinedSpectrum(
+                    listPerResElement.get(1),
+                    listPerResElement.get(3));
 
             final List<SpcChartData> combined = new ArrayList<SpcChartData>();
             combined.add(Recipe$.MODULE$.createSignalChart(sigSpectrumComb, "Signal",
@@ -158,19 +167,30 @@ public final class GHostRecipe implements SpectroscopyArrayRecipe {
         final SpectroscopyS2N specS2NCalcMethod = getSpectroscopyS2N(instrument.getCamera());
         final ObservationDetails cameraObsDetails = new ObservationDetails(specS2NCalcMethod, _obsDetailParameters.analysisMethod());
 
+        // Each arm covers only its own wavelength sub-range:
+        //   Blue: instrument.getObservingStart() .. WAVELENGTH_BLUE_END (542 nm)
+        //   Red:  WAVELENGTH_RED_START (520 nm)  .. instrument.getObservingEnd()
+        final double effectiveStart = (instrument.getDetector() == Detector.BLUE)
+                ? instrument.getObservingStart()
+                : WAVELENGTH_RED_START;
+        final double effectiveEnd = (instrument.getDetector() == Detector.BLUE)
+                // Apparently the calculation is done with obsEnd - 1, so adding one gets the full range of blue
+                ? WAVELENGTH_BLUE_END + 1
+                : instrument.getObservingEnd();
+
         final SpecS2NSlitVisitor specS2N = new SpecS2NSlitVisitor(
                 slit,
                 slit,
                 instrument.disperser.get(),
                 throughput,
                 instrument.getSpectralPixelWidth(),   // using the grating dispersion * spectralBinning
-                 instrument.getObservingStart(),
-                instrument.getObservingEnd(),
+                effectiveStart,
+                effectiveEnd,
                 IQcalc.getImageQuality(),
                 instrument.getReadNoise(),
                 instrument.getDarkCurrent() * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
                 cameraObsDetails,
-                 false);
+                false);
 
         specS2N.setSourceSpectrum(sed.sed);
         specS2N.setBackgroundSpectrum(sed.sky);
@@ -187,6 +207,30 @@ public final class GHostRecipe implements SpectroscopyArrayRecipe {
         return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(),
                 RecipeUtil.instance().signalToNoiseAt(specS2NCalcMethod.atWithDefault(), singleS2NSpectrum, finalS2NSpectrum),
                 times);
+    }
+
+    /**
+     * Builds a combined full-range spectrum by stitching blue and red arm spectra.
+     * Blue arm data is used for wavelengths up to its computed end (≈ WAVELENGTH_BLUE_END);
+     * red arm data is used beyond that point.
+     * The result has uniform sampling equal to the blue arm's pixel width and spans
+     * from blueSpec.getStart() to redSpec.getEnd(). Linear interpolation (getY(double))
+     * maps each arm onto the combined pixel grid, returning 0 outside a spectrum's range.
+     */
+    private VisitableSampledSpectrum buildCombinedSpectrum(
+            final VisitableSampledSpectrum blueSpec,
+            final VisitableSampledSpectrum redSpec) {
+        final double start      = blueSpec.getStart();
+        final double pixelWidth = blueSpec.getSampling();
+        final double end        = redSpec.getEnd();
+        final int n             = (int) ((end - start) / pixelWidth) + 1;
+        final double[] y        = new double[n];
+        for (int i = 0; i < n; i++) {
+            final double x = start + i * pixelWidth;
+            // Use blue arm data up to its computed end; red arm data beyond that.
+            y[i] = (x <= blueSpec.getEnd()) ? blueSpec.getY(x) : redSpec.getY(x);
+        }
+        return new DefaultSampledSpectrum(y, start, pixelWidth);
     }
 
     private SpectroscopyS2N getSpectroscopyS2N(GhostCameraParameters camera) {
