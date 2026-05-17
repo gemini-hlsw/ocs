@@ -464,6 +464,14 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
         }
     }
 
+    public int getOrderAt(double wavelength) {
+        try {
+            return GnirsOrderSelector.getOrder(wavelength);
+        } catch (Exception e) {
+            throw new Error("No order contains wavelength " + wavelength);
+        }
+    }
+
     public SlitWidth getFocalPlaneMask() {
         return params.slitWidth();
     }
@@ -505,8 +513,27 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
         return 13.5;
     }
 
+    public GNIRSParams.ReadMode getReadMode() {
+        return params.readMode();
+    }
+
     @Override public double getMinExposureTime() {
         return params.readMode().getMinExp();
+    }
+
+    public double getMinRecommendedExpTime(GNIRSParams.ReadMode readMode) {
+        switch (readMode) {
+            case VERY_BRIGHT:
+                return 0.2;
+            case BRIGHT:
+                return 0.6;
+            case FAINT:
+                return 20.0;
+            case VERY_FAINT:
+                return 60.0;
+            default:
+                throw new IllegalArgumentException("Unknown read mode: " + readMode);
+        }
     }
 
     public double maxFlux() {

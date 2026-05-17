@@ -295,4 +295,6 @@ public final class GmosPrinter extends PrinterBase implements OverheadTablePrint
     @Override
     public int getNumberExposures() { return numberExposures; }
 
+    public int getNumberCoadds() { return 1; }
+
 }

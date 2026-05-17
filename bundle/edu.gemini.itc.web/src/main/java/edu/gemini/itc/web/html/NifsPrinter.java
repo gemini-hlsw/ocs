@@ -148,4 +148,7 @@ public final class NifsPrinter extends PrinterBase implements OverheadTablePrint
     }
 
     public int getNumberExposures() { throw new Error("Not implemented"); }
+
+    public int getNumberCoadds() { return 1; }
+
 }

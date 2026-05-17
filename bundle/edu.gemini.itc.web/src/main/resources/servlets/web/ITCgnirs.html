@@ -8,6 +8,17 @@
 	<script src="./jQuery/jquery-3.6.1.js" type="text/javascript"></script>
 	<script>$(function(){$("#seds_stellar").load("./seds_stellar.html");});</script>
 	<script>$(function(){$("#seds_nonstellar").load("./seds_nonstellar.html");});</script>
+	<style>
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+        }
+        input[type=number] { -moz-appearance: textfield; }
+		input[type=number]:invalid {
+        	border: 2px solid red;
+        	background-color: #ffe0e0;
+    	}
+    </style>
 </head>
 
 <body link="#0000FF" vlink="#8B0000" text="#000000" bgcolor="#ffffff">
@@ -160,8 +171,11 @@
 			</tr>
 
 			<tr>
-				<td colspan="3">with the <b>spectrum mapped</b> to a redshift <input name="Recession" value="REDSHIFT" checked="checked" type="radio" /> z = <input name="z" size="5" value="0.0" type="text" /> or a radial velocity <input name="Recession" value="VELOCITY" type="radio" /> v
-				= <input name="v" size="5" value="0.0" type="text" /> km/s</td>
+				<td colspan="3">with the <b>spectrum mapped</b> to a redshift
+					<input name="Recession" value="REDSHIFT" checked="checked" type="radio" />
+					z = <input name="z" size="5" value="0.0" type="text" />
+					or a radial velocity <input name="Recession" value="VELOCITY" type="radio" />
+					v = <input name="v" size="5" value="0.0" type="text" /> km/s</td>
 			</tr>
 
 			<tr>
@@ -221,7 +235,7 @@
 				</td>
 
 				<td height="25">Spectrum central wavelength:
-					<input name="instrumentCentralWavelength" size="5" value=" 2.15" type="text" /> µm
+					<input name="instrumentCentralWavelength" size="5" type="number" value="2.15" min="0.78" max="6.0" step="any" /> µm
 				</td>
 			</tr>
 
@@ -330,24 +344,26 @@
 					<input value="AOWFS" name="Type" type="radio" /> Altair
                 </td>
 			</tr>
+
 			<tr>
 				<td colspan="4" height="50" valign="bottom"><b>Altair properties:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10269','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
 			</tr>
 			<tr>
-				<td align="left">AO guide star separation: <input name="guideSep" size="5" value="0.0" type="text" /> arcsec</td>
+				<td align="left">AO guide star separation:
+					<input name="guideSep" size="5" type="number" value="0" min="0" max="25" step="any"/> arcsec</td>
                 <td> AO guide star brightness (R-band):
-				<input name="guideMag" size="5" value="12.0" type="text" /> mag</td>
+					<input name="guideMag" size="5" type="number" value="12" step="any"/> mag</td>
 			</tr>
-			<tr>
 
+			<tr>
 				<td align="left">Field Lens:
 					<input value="OUT" name="FieldLens" checked="checked" type="radio" /> OUT
 					<input value="IN" name="FieldLens" size="1" type="radio" /> IN (Required for LGS)</td>
 				<td>
                   Altair Mode:
 					<input value="NGS" name="GuideStarType" checked="checked" type="radio" /> NGS
-					<input value="LGS" name="GuideStarType" size="1" type="radio" />LGS </td>
-
+					<input value="LGS" name="GuideStarType" size="1" type="radio" /> LGS
+				</td>
 			</tr>
 
             <tr>
@@ -382,7 +398,7 @@
                 <td><input name="ImageQuality" value="PERCENT_70" type="radio" /> 70%/Good</td>
                 <td><input name="ImageQuality" value="PERCENT_85" type="radio" checked /> 85%/Poor</td>
                 <td><input name="ImageQuality" value="ANY"        type="radio" /> Any</td>
-				<td><input name="ImageQuality" value="EXACT"      type="radio" /> <input name="ExactIQ" type="text" value="1.1" size="4"> arcsec</td>
+				<td><input name="ImageQuality" value="EXACT"      type="radio" /> <input name="ExactIQ" size="4" type="number" value="1.1" min=0 step="any"> arcsec</td>
 			</tr>
             <tr>
                 <td><b>Cloud Cover:</b></td>
@@ -390,7 +406,7 @@
                 <td><input name="CloudCover" value="PERCENT_70" type="radio" checked /> 70%/Cirrus</td>
                 <td><input name="CloudCover" value="PERCENT_80" type="radio" /> 80%/Cloudy</td>
                 <td><input name="CloudCover" value="ANY"        type="radio" /> Any</td>
-				<td><input name="CloudCover" value="EXACT"      type="radio" /> <input name="ExactCC" type="text" value="0.3" size="4"> mag</td>
+				<td><input name="CloudCover" value="EXACT"      type="radio" /> <input name="ExactCC" size="4" type="number" value="0.3" min="0" step="any"> mag</td>
             </tr>
             <tr>
                 <td><b>Water Vapor:</b></td>
@@ -440,19 +456,48 @@
 			</tr>
 
 			<tr>
-			<td width="20"><input value="s2n" name="calcMethod" checked="checked" type="radio" /></td>
-			<td colspan="2">Total S/N ratio resulting from <input name="numExpA" size="5" value="30" type="text" />
-				exposures each having <input name="numCoaddsA" size="5" value="1" type="text" /> coadds
-				with exposure time of <input name="expTimeA" size="5" value="120" type="text" /> secs,
-				and with a fraction <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
+				<td width="20"><input value="s2n" name="calcMethod" checked="checked" type="radio" /></td>
+				<td colspan="2">Total S/N ratio resulting from
+					<input name="numExpA" size="5" type="number" value="30" min="1" step="1" />
+					exposures each having
+					<input name="numCoaddsA" size="5" type="number" value="1" min="1" step="1" /> coadds
+					with exposure time of
+					<input name="expTimeA" size="5" type="number" value="120" min="0.2" step="any" /> secs,
+					and with a fraction
+					<input name="fracOnSourceA" size="4" type="number" value="1.0" min="0" max="1.0" step="any" />
+					of exposures that observe the source </td>
 			</tr>
 
 			<tr>
 				<td><input value="intTime" name="calcMethod" type="radio" /></td>
-				<td colspan="2">Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" />
-					using an exposure time for each exposure of <input name="expTimeC" size="5" value="120" type="text" /> secs
-					and <input name="numCoaddsC" size="5" value="1" type="text" /> coadds,
-					and with a fraction <input name="fracOnSourceC" size="4" value="1.0" type="text" /> of exposures that observe the source</td>
+				<td colspan="2">Total integration time to achieve S/N ratio of
+					<input name="sigmaC" size="3" type="number" value="5" min="0" step="any" />
+					using an exposure time for each exposure of
+					<input name="expTimeC" size="5" type="number" value="120" min="0.2" step="any" /> secs
+					and <input name="numCoaddsC" size="5" type="number" value="1" min="1" step="1" /> coadds,
+					and with a fraction
+					<input name="fracOnSourceC" size="4" type="number" value="1.0" min="0" max="1" />
+					of exposures that observe the source</td>
+			</tr>
+
+			<tr>
+				<td><input value="intTimeSpec" name="calcMethod" type="radio" /></td>
+				<td colspan="2"><b>Spectroscopy</b> integration time to achieve S/N ratio of
+					<input name="sigmaE" size="3" type="number" value="5" min="0" step="any" />
+					measured at
+					<input name="wavelengthE" size="5" type="number" value="2.14" min="0.6" max="7" step="any" /> &mu;m.
+					<input name="coaddsE" value="1" type="hidden"/>
+					<input name="fracOnSourceE" value="1" type="hidden"/>
+				</td>
+			</tr>
+
+			<tr>
+				<td><input value="expTime" name="calcMethod" type="radio" /></td>
+				<td colspan="2"><b>Imaging</b> integration time to achieve S/N ratio of
+					<input name="sigmaD" size="3" type="number" value="5" min="0" step="any" />
+					<input name="coaddsD" value="1" type="hidden"/>
+					<input name="fracOnSourceD" value="1" type="hidden"/>
+				</td>
 			</tr>
 
 			<tr>
@@ -492,7 +537,8 @@
 			<tr>
 				<td>&nbsp;</td>
 				<td><input value="userAper" name="analysisMethod" type="radio" /></td>
-				<td>Software aperture of diameter (or slit length) <input name="userAperDiam" size="4" value="2" type="text" /> arcsec </td>
+				<td>Software aperture of diameter (or slit length)
+					<input name="userAperDiam" size="4" type="number" value="2" min="0" step="any" /> arcsec </td>
 			</tr>
 
 			<tr>
@@ -514,8 +560,8 @@
 				<td>&nbsp;</td>
 				<td><input value="summedIFU" name="analysisMethod" type="radio" /></td>
 				<td>Sum of
-					<input name="ifuNumX" size="3" value="5" type="text" /> &times;
-					<input name="ifuNumY" size="3" value="5" type="text" /> elements at the center
+					<input name="ifuNumX" size="3" type="number" value="5" min="1" step="1" /> &times;
+					<input name="ifuNumY" size="3" type="number" value="5" min="1" step="1" /> elements at the center
 					<input name="ifuCenterX" size="5" value="0.0" type="hidden" />
 					<input name="ifuCenterY" size="5" value="0.0" type="hidden" /></td>
 			</tr>
@@ -539,8 +585,9 @@
 
 			<tr>
 				<td><input value="USER" name="PlotLimits" type="radio" /></td>
-				<td colspan="2">Display the range <input name="plotWavelengthL" size="6" value="2.10" type="text" /> to
-					<input name="plotWavelengthU" size="6" value="2.20" type="text" /> microns</td>
+				<td colspan="2">Display the range
+					<input name="plotWavelengthL" size="6" type="number" value="2.10" min="0.9" max="5.6" step="any"/> to
+					<input name="plotWavelengthU" size="6" type="number" value="2.20" min="0.9"	max="5.6" step="any" /> microns</td>
 			</tr>
 
 			<tr>

@@ -53,6 +53,7 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
     private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result, final ItcSpectroscopyResult s) {
 
         final Gnirs instrument = (Gnirs) result.instrument();
+        final CalculationMethod calcMethod = p.observation().calculationMethod();
         final double iqAtSource = result.iqCalc().getImageQuality();
 
         _println("");
@@ -74,14 +75,30 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
             _println("");
         }
 
-        _printRequestedIntegrationTime(result);
-
+        if (calcMethod instanceof SpectroscopyIntegrationTime) {
+            double exposureTime = recipe.getExposureTime();
+            int numberCoadds = recipe.getNumberCoadds();
+            int numberExposures = recipe.getNumberExposures();
+            double totalTime = numberExposures * exposureTime;
+            double timeOnSource = totalTime * result.observation().sourceFraction();
+            if (numberCoadds == 1) {
+                _println(String.format(
+                    "Total integration time = %.1f seconds (%d &times; %.1f s), of which %.1f seconds is on source.",
+                    totalTime, numberExposures, exposureTime, timeOnSource));
+            } else {
+                   _println(String.format(
+                    "Total integration time = %.1f seconds (%d &times; %.1f s &times; %d coadds), of which %.1f seconds is on source.",
+                    totalTime, numberExposures, exposureTime, numberCoadds, timeOnSource));
+            }
+        } else {
+            _printRequestedIntegrationTime(result);
+        }
         _println("");
 
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
-        _print(OverheadTablePrinter.print(this, p, getReadoutTimePerCoadd(),result));
+        _print(OverheadTablePrinter.print(this, p, getReadoutTimePerCoadd(), result));
 
         _print("<HR align=left SIZE=3>");
 
@@ -154,7 +171,7 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
         _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
-        _print(OverheadTablePrinter.print(this, p, getReadoutTimePerCoadd(),result));
+        _print(OverheadTablePrinter.print(this, p, getReadoutTimePerCoadd(), result));
 
         printConfiguration(result.parameters(), instrument, result.aoSystem(), iqAtSource);
 
@@ -178,22 +195,40 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
     }
 
     public static String printParameterSummary(final ObservationDetails odp, final Gnirs instrument) {
+        CalculationMethod calcMethod = odp.calculationMethod();
+        Log.fine("CalculationMethod = " + calcMethod);
         final StringBuilder sb = new StringBuilder();
         sb.append("Calculation and analysis methods:\n");
+
         sb.append("<LI>Mode: ");
-        sb.append((odp.calculationMethod() instanceof Imaging ? "imaging" : "spectroscopy"));
+        sb.append((calcMethod instanceof Imaging ? "imaging" : "spectroscopy"));
         sb.append("\n");
+
         sb.append("<LI>Calculation of ");
-        if (odp.calculationMethod() instanceof S2NMethod) {
-            sb.append(String.format("S/N ratio with %d", ((S2NMethod) odp.calculationMethod()).exposures()));
-        } else {
+        if (calcMethod instanceof S2NMethod){
+            sb.append(String.format("S/N ratio with %d", ((S2NMethod) calcMethod).exposures()));
+
+        } else if (calcMethod instanceof ImagingExposureCount) {
             sb.append(String.format("integration time from a S/N ratio of %.2f for", ((ImagingExposureCount) odp.calculationMethod()).sigma()));
+
+        } else if (calcMethod instanceof ImagingIntegrationTime) {
+            sb.append(String.format("exposure time for a S/N ratio of %.2f.", ((ImagingIntegrationTime) calcMethod).sigma()));
+
+        } else if (calcMethod instanceof SpectroscopyIntegrationTime) {
+            sb.append(String.format("exposure time and number of exposures for a S/N ratio of %.1f at wavelength %.2f um.",
+                    ((SpectroscopyIntegrationTime) calcMethod).sigma(), ((SpectroscopyIntegrationTime) calcMethod).wavelengthAt()));
+        } else {
+            throw new Error("Unsupported calculation method");
         }
-        sb.append(String.format(" exposures of %.2f secs", odp.exposureTime()));
-        if (odp.calculationMethod().coaddsOrElse(1) > 1) {
-            sb.append(String.format(" and %d coadds", odp.calculationMethod().coaddsOrElse(1)));
+        if (    calcMethod instanceof ImagingS2N ||
+                calcMethod instanceof S2NMethod ||
+                calcMethod instanceof ImagingExposureCount) {
+            sb.append(String.format(" exposures of %.2f secs", odp.exposureTime()));
+            if (calcMethod.coaddsOrElse(1) > 1) {
+                sb.append(String.format(" and %d coadds", calcMethod.coaddsOrElse(1)));
+            }
+            sb.append(String.format(", and %.2f%% of them on source.\n", odp.sourceFraction() * 100));
         }
-        sb.append(String.format(", and %.2f%% of them on source.\n", odp.sourceFraction() * 100));
 
         sb.append("<LI>Analysis performed ");
         if (odp.analysisMethod() instanceof AutoAperture) {
@@ -238,7 +273,14 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
             s += "<LI>Grating: " + instrument.getGrating().displayValue() + "\n"; // REL-469
         }
 
-        s += "<LI>Read Noise: " + instrument.getReadNoise() + "\n";
+        // Highlight the read mode if what was specified in the web form does not match what was calculated:
+        Log.fine("readMode (instrument) = " + instrument.getReadMode().toString());
+        Log.fine("readMode (recipe) = " + recipe.getReadMode().toString());
+
+        s += (instrument.getReadMode() != recipe.getReadMode()) ? "<LI style=\"color:darkorange\">" : "<LI>";
+        s += "Read Mode: " + recipe.getReadMode().toString() + "\n";
+
+        s += "<LI>Read Noise: " + recipe.getReadMode().getReadNoise() + "\n";
         s += "<LI>Well Depth: " + instrument.getWellDepth() + "\n";
         s += "\n";
 
@@ -285,7 +327,7 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
 
     public ConfigCreator.ConfigCreatorResult createInstConfig(int numberExposures) {
         ConfigCreator cc = new ConfigCreator(p);
-        return cc.createGnirsConfig(instr, numberExposures);
+        return cc.createGnirsConfig(instr, recipe.getReadMode(), numberExposures, recipe.getExposureTime(), recipe.getNumberCoadds());
     }
 
     public ItcOverheadProvider getInst() {
@@ -293,7 +335,7 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
     }
 
     public double getReadoutTimePerCoadd() {
-        return GnirsReadoutTime.getReadoutOverheadPerCoadd(instr.readMode());
+        return GnirsReadoutTime.getReadoutOverheadPerCoadd(recipe.getReadMode());
     }
 
     @Override
@@ -306,5 +348,8 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
         return this.getRecentInterval();
     }
 
-    public int getNumberExposures() { throw new Error("Not implemented"); }
+    public int getNumberExposures() { return recipe.getNumberExposures(); }
+
+    public int getNumberCoadds() { return recipe.getNumberCoadds(); }
+
 }

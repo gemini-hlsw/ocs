@@ -122,4 +122,6 @@ public final class GsaoiPrinter extends PrinterBase
     }
 
     public int getNumberExposures() { throw new Error("Not implemented"); }
+
+    public int getNumberCoadds() { return 1; }
 }

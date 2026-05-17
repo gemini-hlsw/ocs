@@ -154,4 +154,7 @@ public final class GhostPrinter extends PrinterBase implements OverheadTablePrin
     }
 
     public int getNumberExposures() { throw new Error("Not implemented"); }
+
+    public int getNumberCoadds() { throw new Error("Not implemented"); }
+
 }

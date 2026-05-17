@@ -13,12 +13,14 @@ import edu.gemini.spModel.guide.StandardGuideOptions;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import edu.gemini.spModel.gemini.ghost.Ghost;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Using the ITC parameters creates a mini-config containing the items
@@ -50,6 +52,7 @@ public final class ConfigCreator {
     public static final ItemKey GuideWithCWFS1 = new ItemKey("telescope:guideWithCWFS1");
     public static final ItemKey AOGuideStarTypeKey = new ItemKey("adaptive optics:guideStarType");
     public static final ItemKey AOSystemKey = new ItemKey("adaptive optics:aoSystem");
+    private static final Logger Log = Logger.getLogger(ConfigCreator.class.getName());
 
     private final ItcParameters itcParams;
     private final ObservationDetails obsDetailParams;
@@ -99,18 +102,24 @@ public final class ConfigCreator {
     }
 
     private ConfigCreatorResult createCommonConfig(final int numberExposures) {
-        return createCommonConfig(numberExposures, obsDetailParams.exposureTime());
+        return createCommonConfig(
+                numberExposures,
+                obsDetailParams.exposureTime(),
+                obsDetailParams.calculationMethod().coaddsOrElse(1)
+        );
     }
 
     // create part of config common for all instruments
-    private ConfigCreatorResult createCommonConfig(final int numberExposures, final double exposureTime) {
+    private ConfigCreatorResult createCommonConfig(
+            final int numberExposures,
+            final double exposureTime,
+            final int numberCoadds) {
         if (numberExposures <= 0) {
             throw new IllegalArgumentException("The number of exposures must be at least 1.");
         }
         
         final CalculationMethod calcMethod = obsDetailParams.calculationMethod();
         final ConfigCreatorResult result = new ConfigCreatorResult(new DefaultConfig[numberExposures]);
-        final int numberCoadds = calcMethod.coaddsOrElse(1);
         final double offset = calcMethod.offset();
         // for spectroscopic observations we consider ABBA offset pattern
         final List<Double> spectroscopyOffsets = new ArrayList<>(Arrays.asList(0.0, offset, offset, 0.0));
@@ -174,11 +183,17 @@ public final class ConfigCreator {
         return result;
     }
 
-    public final ConfigCreatorResult createGnirsConfig(final GnirsParameters gnirsParams, final int numExp) {
-        final ConfigCreatorResult result = createCommonConfig(numExp);
+    public final ConfigCreatorResult createGnirsConfig(
+            final GnirsParameters gnirsParams,
+            final GNIRSParams.ReadMode readMode,
+            final int numExp,
+            final double exposureTime,
+            final int numberCoadds) {
+
+        final ConfigCreatorResult result = createCommonConfig(numExp, exposureTime, numberCoadds);
 
         for (final Config step : result.getConfig()) {
-            step.putItem(ReadModeKey, (gnirsParams.readMode()));
+            step.putItem(ReadModeKey, readMode);
             step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_GNIRS);
             step.putItem(SlitWidthKey, gnirsParams.slitWidth());
 
@@ -209,8 +224,11 @@ public final class ConfigCreator {
         return result;
     }
 
-    public final ConfigCreatorResult createGmosConfig(final GmosParameters gmosParams, final int numExp, final int exposureTime) {
-        final ConfigCreatorResult result = createCommonConfig(numExp, exposureTime);
+    public final ConfigCreatorResult createGmosConfig(
+            final GmosParameters gmosParams,
+            final int numExp,
+            final int exposureTime) {
+        final ConfigCreatorResult result = createCommonConfig(numExp, exposureTime, 1);
 
         for (final Config step : result.getConfig()) {
             if (gmosParams.site().equals(Site.GN)) {
@@ -248,8 +266,11 @@ public final class ConfigCreator {
         return result;
     }
 
-    public final ConfigCreatorResult createIgrins2Config(final Igrins2Parameters igrins2Params, final int numExp, final double exposureTime) {
-        final ConfigCreatorResult result = createCommonConfig(numExp, exposureTime);
+    public final ConfigCreatorResult createIgrins2Config(
+            final Igrins2Parameters igrins2Params,
+            final int numExp,
+            final double exposureTime) {
+        final ConfigCreatorResult result = createCommonConfig(numExp, exposureTime, 1);
         for (final Config step : result.getConfig()) {
             step.putItem(InstInstrumentKey, SPComponentType.INSTRUMENT_IGRINS2);
             if (igrins2Params.altair().isDefined()) {
@@ -388,7 +409,7 @@ public final class ConfigCreator {
             final int numExp,
             final int exposureTime) {
 
-        final ConfigCreatorResult result = createCommonConfig(numExp, exposureTime);
+        final ConfigCreatorResult result = createCommonConfig(numExp, exposureTime, 1);
 
         for (final Config step : result.getConfig()) {
             step.putItem(ReadModeKey, readMode);
