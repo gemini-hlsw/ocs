@@ -46,9 +46,15 @@ public final class GhostPrinter extends PrinterBase implements OverheadTablePrin
         final double iqAtSource = result.iqCalc().getImageQuality();
         Log.info("calculateSpectroscopy getImageQuality[0]: " + results[0].iqCalc().getImageQuality() + " [1]: "+ results[1].iqCalc().getImageQuality() + "  " + iqAtSource);
         _print("<br>", false);
-        _println(String.format("Read noise: %.2f e- in %s, and %.2f e- in %s.",
+
+        _println(String.format("Read noise: %.2f e- (%s), and %.2f e- (%s).",
                 ((Ghost) results[0].instrument()).getReadNoise(), ((Ghost) results[0].instrument()).getDetectorName(),
                 ((Ghost) results[1].instrument()).getReadNoise(), ((Ghost) results[1].instrument()).getDetectorName()));
+
+        _println(String.format("Gain: %.2f e-/ADU (%s), and %.2f e-/ADU (%s).",
+                ((Ghost) results[0].instrument()).gain(), ((Ghost) results[0].instrument()).getDetectorName(),
+                ((Ghost) results[1].instrument()).gain(), ((Ghost) results[1].instrument()).getDetectorName()));
+
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", iqAtSource));
         _printRequestedIntegrationTime(result);
         _print("<br>", false);
