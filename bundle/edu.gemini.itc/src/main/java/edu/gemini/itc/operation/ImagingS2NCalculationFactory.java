@@ -13,8 +13,14 @@ public final class ImagingS2NCalculationFactory {
     private static final Logger Log = Logger.getLogger(ImagingS2NCalculationFactory.class.getName());
     private ImagingS2NCalculationFactory() {}
 
-    public static ImagingS2NCalculatable getCalculationInstance(final ObservationDetails obs, final Instrument instrument, final SourceFraction srcFrac, final double sed_integral, final double sky_integral) {
-
+    public static ImagingS2NCalculatable getCalculationInstance(
+            final ObservationDetails obs,
+            final Instrument instrument,
+            final SourceFraction srcFrac,
+            final double sed_integral,
+            final double sky_integral
+    ) {
+        Log.fine("calculationMethod = " + obs.calculationMethod().toString());
         if (obs.calculationMethod() instanceof S2NMethod) {
             return new ImagingS2NMethodACalculation(obs, instrument, srcFrac, sed_integral, sky_integral);
         } else {

@@ -176,4 +176,6 @@ public final class Igrins2Printer extends PrinterBase implements OverheadTablePr
     @Override
     public int getNumberExposures() { return numberExposures; }
 
+    public int getNumberCoadds() { return 1; }
+
 }

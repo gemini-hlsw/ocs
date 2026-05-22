@@ -56,7 +56,8 @@ public final class ImagingMethodExptime extends ImagingS2NCalculation {
         Log.fine(String.format("Max acceptable flux = %.0f e-", maxFlux));
 
         double timeToHalfMax = maxFlux / 2. / peakFlux * exposure_time;  // time to reach half of the maximum (our goal)
-        Log.fine(String.format("timeToHalfMax = %.2f seconds", timeToHalfMax));
+        Log.fine(String.format("timeToHalfMax = %.3f seconds", timeToHalfMax));
+        Log.fine(String.format("minExpTime = %.3f seconds", instrument.getMinExposureTime()));
 
         if (timeToHalfMax < instrument.getMinExposureTime()) {
             Log.fine("Minimum exposure time = " + instrument.getMinExposureTime());
@@ -65,14 +66,15 @@ public final class ImagingMethodExptime extends ImagingS2NCalculation {
                             "The detector well is half filled in %.2f seconds.", timeToHalfMax));
         }
 
-        int maxExptime = Math.min(1200, (int) timeToHalfMax);  // 1200s is the (GMOS) maximum due to cosmic rays
-        Log.fine(String.format("maxExptime = %d seconds", maxExptime));
+        // This should be instrument-specific.  GMOS: 1200, F2: , GNIRS:
+        double maxExptime = Math.min(1200, timeToHalfMax);
+        Log.fine(String.format("maxExptime = %.3f seconds", maxExptime));
 
         double desiredSNR = ((ImagingIntegrationTime) calcMethod).sigma();
         Log.fine(String.format("desiredSNR = %.2f", desiredSNR));
 
         double totalTime = exposure_time * numberExposures * (desiredSNR / snr) * (desiredSNR / snr);
-        Log.fine(String.format("totalTime = %.3f sec", totalTime));
+        Log.fine(String.format("Required totalTime = %.5f seconds", totalTime));
 
         numberExposures = (int) Math.ceil(totalTime / maxExptime);
         Log.fine(String.format("numberExposures = %d", numberExposures));
@@ -83,14 +85,39 @@ public final class ImagingMethodExptime extends ImagingS2NCalculation {
             exposure_time = instrument.getMinExposureTime();
         }
 
-        // Supported instruments are GMOS and F2, and both require integer exposure times, so round up:
-        exposure_time = Math.ceil(exposure_time);
-        Log.fine(String.format("exposureTime = %.2f", exposure_time));
+        // GMOS and F2 require integer exposure times, so round up:
+        if (instrument.getName().matches("GMOS-[SN]|Flamingos_2")) {
+            exposure_time = Math.ceil(exposure_time);
+        } else {
+            exposure_time = roundExposureTime(exposure_time);
+        }
+        Log.fine(String.format("Rounding exposureTime up to %.2f sec", exposure_time));
 
         // TODO: for instruments that can coadd - calculate the number of coadds
 
         super.calculate();
         Log.fine("totalSNRatio = " + totalSNRatio());
+    }
+
+    /**
+     *  Round exposure times up to nice values.
+    */
+    private static final double[][] ROUNDING_RULES = {
+        {600, 30},
+        {100, 10},
+        {10,   1},
+        {1,    0.1},
+        {0.1,  0.01},
+        {0.01, 0.001}
+    };
+
+    private static double roundExposureTime(double exposureTime) {
+        for (double[] rule : ROUNDING_RULES) {
+            if (exposureTime > rule[0]) {
+                return Math.ceil(exposureTime / rule[1]) * rule[1];
+            }
+        }
+        return exposureTime;
     }
 
     @Override public int numberSourceExposures() { return numberExposures; }

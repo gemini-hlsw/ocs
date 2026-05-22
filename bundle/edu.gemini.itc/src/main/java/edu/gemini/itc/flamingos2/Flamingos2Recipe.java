@@ -119,7 +119,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
 
             VisitableSampledSpectrum backgroundSpectrum = specS2N.getTotalBackgroundSpectrum();
             if (wavelength > 0 && (wavelength < backgroundSpectrum.getStart() || wavelength > backgroundSpectrum.getEnd()))
-                throw new RuntimeException(String.format("Wavelength %.1f out of range", wavelength));
+                throw new RuntimeException(String.format("Wavelength %.1f nm is out of range", wavelength));
             double background = backgroundSpectrum.getY(wavelength);
             Log.fine(String.format("Background @ %.1f nm = %.2f e- (summed over aperture)", wavelength, background));
 
@@ -145,16 +145,17 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
             Log.fine(String.format("S/N @ %.1f nm = %.3f", wavelength, finalS2NSpectrum.getY(wavelength)));
 
             // Calculate the S/N and verify that the answer is the same:
-            Log.fine(String.format("Predicted S/N = %.3f e-", calculateSNR(signal, background, darkNoise, readNoise, skyAper, initialNumberExposures)));
+            Log.fine(String.format("Predicted S/N = %.3f", calculateSNR(signal, background, darkNoise, readNoise, skyAper, initialNumberExposures)));
 
-            // The maximum exposure time is that which gives 60% of the maximum allowed flux, up to a maximum of 900s:
-            double maxExposureTime = Math.min(900, 0.6 * maxFlux / peakFlux * initialExposureTime);
+            // Calculate the maximum exposure time, up to a maximum of 900s:
+            double safetyBuffer = 0.6;  // Use a 60% safety buffer to avoid saturating in better conditions
+            double maxExposureTime = Math.min(900, maxFlux * safetyBuffer / peakFlux * initialExposureTime);
             Log.fine(String.format("maxExposureTime = %.2f seconds", maxExposureTime));
 
             // If the maximum exposure time for this target + configuration is less than the minimum then throw an error:
             if (maxExposureTime < 2) throw new RuntimeException(String.format(
                     "This target is too bright for this configuration.\n" +
-                            "The detector will reach %.0f ADU in %.2f seconds.", 0.6 * maxFlux, maxExposureTime));
+                            "The detector will reach %.0f e- in %.2f seconds.", maxFlux * safetyBuffer, maxExposureTime));
 
             // Step through each of the read modes and see which works best.
             List<ReadMode> readModes = Arrays.asList(ReadMode.FAINT_OBJECT_SPEC, ReadMode.MEDIUM_OBJECT_SPEC, ReadMode.BRIGHT_OBJECT_SPEC);

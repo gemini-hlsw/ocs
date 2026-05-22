@@ -7,6 +7,7 @@ import edu.gemini.itc.niri.Niri;
 import edu.gemini.itc.shared.ApertureMethod;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.trecs.TRecs;
+import java.util.logging.Logger;
 
 public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
     protected final double Npix;
@@ -32,6 +33,7 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
 
     protected double secondary_integral = 0;
     protected double secondary_source_fraction = 0;
+    private static final Logger Log = Logger.getLogger(ImagingS2NCalculation.class.getName());
 
     public ImagingS2NCalculation( final ObservationDetails obs, final Instrument instrument, final SourceFraction sourceFrac, final double sed_integral, final double sky_integral) {
         this.sed_integral    = sed_integral;
@@ -50,6 +52,8 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
     }
 
     public void calculate() {
+        Log.fine(String.format("exposure_time = %.3f seconds", exposure_time));
+        Log.fine(String.format("read_noise = %.1f e-", read_noise));
         noiseFactor = 1 + (1 / skyAper);
         var_source = sed_integral * source_fraction * exposure_time;
         var_source = var_source + secondary_integral * secondary_source_fraction * exposure_time;

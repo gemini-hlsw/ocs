@@ -17,57 +17,60 @@ public final class PeakPixelFlux {
     private final double dark_current;
     private final double[][] data;
 
-    public static double calculate(final Instrument instrument,
-                                   final SourceDefinition _sdParameters,
-                                   final ObservationDetails _obsDetailParameters,
-                                   final SourceFraction SFcalc,
-                                   final double im_qual,
-                                   final double sed_integral,
-                                   final double sky_integral) {
-        final PeakPixelFlux ppfc  = new PeakPixelFlux(im_qual, instrument.getPixelSize(), _obsDetailParameters.exposureTime(), sed_integral, sky_integral, instrument.getDarkCurrent());
-        if (!_sdParameters.isUniform()) {
-            return ppfc.getFluxInPeakPixel();
-        } else {
-            return ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix());
-        }
+    public static double calculate(
+            final Instrument instrument,
+            final SourceDefinition _sdParameters,
+            final ObservationDetails _obsDetailParameters,
+            final SourceFraction SFcalc,
+            final double im_qual,
+            final double sed_integral,
+            final double sky_integral) {
+        return calculate(instrument, _sdParameters, _obsDetailParameters.exposureTime(), SFcalc, im_qual, sed_integral, sky_integral);
     }
 
-    public static double calculate(final Instrument instrument,
-                                   final SourceDefinition _sdParameters,
-                                   final double exposureTime,
-                                   final SourceFraction SFcalc,
-                                   final double im_qual,
-                                   final double sed_integral,
-                                   final double sky_integral) {
-
+    public static double calculate(
+            final Instrument instrument,
+            final SourceDefinition _sdParameters,
+            final double exposureTime,
+            final SourceFraction SFcalc,
+            final double im_qual,
+            final double sed_integral,
+            final double sky_integral) {
         final PeakPixelFlux ppfc = new PeakPixelFlux(im_qual, instrument.getPixelSize(), exposureTime, sed_integral, sky_integral, instrument.getDarkCurrent());
-
-        if (!_sdParameters.isUniform()) {
-            return ppfc.getFluxInPeakPixel();
-        } else {
-            return ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix());
-        }
+        return _sdParameters.isUniform()
+                ? ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix())
+                : ppfc.getFluxInPeakPixel();
     }
 
-    public static double calculateWithHalo(final Instrument instrument,
-                                           final SourceDefinition  _sdParameters,
-                                           final ObservationDetails _obsDetailParameters,
-                                           final SourceFraction SFcalc,
-                                           final double im_qual,
-                                           final double orig_im_qual,
-                                           final double halo_integral,
-                                           final double sed_integral,
-                                           final double sky_integral) {
-        final PeakPixelFlux ppfc = new PeakPixelFlux(im_qual, instrument.getPixelSize(), _obsDetailParameters.exposureTime(), sed_integral, sky_integral, instrument.getDarkCurrent());
-        if (!_sdParameters.isUniform()) {
+    public static double calculateWithHalo(
+            final Instrument instrument,
+            final SourceDefinition _sdParameters,
+            final ObservationDetails _obsDetailParameters,
+            final SourceFraction SFcalc,
+            final double im_qual,
+            final double orig_im_qual,
+            final double halo_integral,
+            final double sed_integral,
+            final double sky_integral) {
+        return calculateWithHalo(instrument, _sdParameters, _obsDetailParameters.exposureTime(), SFcalc, im_qual, orig_im_qual, halo_integral, sed_integral, sky_integral);
+    }
 
-            final double peak_pixel_count = ppfc.getFluxInPeakPixel();
-            final PeakPixelFlux ppfc_halo = new PeakPixelFlux(orig_im_qual, instrument.getPixelSize(), _obsDetailParameters.exposureTime(), halo_integral, sky_integral, instrument.getDarkCurrent());
-            return peak_pixel_count + ppfc_halo.getFluxInPeakPixel();
-
-        } else  {
+    public static double calculateWithHalo(
+            final Instrument instrument,
+            final SourceDefinition _sdParameters,
+            final double exp_time,
+            final SourceFraction SFcalc,
+            final double im_qual,
+            final double orig_im_qual,
+            final double halo_integral,
+            final double sed_integral,
+            final double sky_integral) {
+        final PeakPixelFlux ppfc = new PeakPixelFlux(im_qual, instrument.getPixelSize(), exp_time, sed_integral, sky_integral, instrument.getDarkCurrent());
+        if (_sdParameters.isUniform()) {
             return ppfc.getFluxInPeakPixelUSB(SFcalc.getSourceFraction(), SFcalc.getNPix());
         }
+        final PeakPixelFlux ppfcHalo = new PeakPixelFlux(orig_im_qual, instrument.getPixelSize(), exp_time, halo_integral, sky_integral, instrument.getDarkCurrent());
+        return ppfc.getFluxInPeakPixel() + ppfcHalo.getFluxInPeakPixel();
     }
 
     private PeakPixelFlux(final double im_qual,

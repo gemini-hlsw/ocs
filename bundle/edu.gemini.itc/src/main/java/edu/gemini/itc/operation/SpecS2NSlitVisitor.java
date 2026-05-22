@@ -75,7 +75,7 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         this(slit, slit, disperser, throughput, pixelWidth, obsWaveLow, obsEnd, imgQuality, readNoise, darkCurrent, odp);
     }
 
-    // Constructor using custom exposureTime and numberExposures (not from input form)
+    // Constructor using custom exposureTime and numberExposures (not from the input form)
     public SpecS2NSlitVisitor(final Slit slit,
                               final Disperser disperser,
                               final SlitThroughput throughput,
@@ -105,6 +105,83 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         this.sourceFraction  = calcMethod.sourceFraction();
         this.exposureTime    = exposureTime;
         this.forceResample   = true;
+    }
+
+    // Constructor using custom exposureTime, numberCoadds, and numberExposures (not from the input form)
+    public SpecS2NSlitVisitor(final Slit slit,
+                              final Disperser disperser,
+                              final SlitThroughput throughput,
+                              final double pixelWidth,
+                              final double obsWaveLow,
+                              final double obsEnd,
+                              final double imgQuality,
+                              final double readNoise,
+                              final double darkCurrent,
+                              final ObservationDetails odp,
+                              final double exposureTime,
+                              final int numberCoadds,
+                              final int numberExposures) {
+        this.odp            = odp;
+        this.input_slit     = slit;
+        this.output_slit    = slit;
+        this.disperser      = disperser;
+        this.throughput     = throughput;
+        this.pixelWidth     = pixelWidth;
+        this.obsStart       = obsWaveLow;
+        this.obsEnd         = obsEnd;
+        this.imgQuality     = imgQuality;
+        this.darkCurrent    = darkCurrent;
+        this.readNoise      = readNoise;
+        this.calcMethod      = odp.calculationMethod();
+        this.coadds          = numberCoadds;
+        this.numberExposures = numberExposures;
+        this.sourceFraction  = calcMethod.sourceFraction();
+        this.exposureTime    = exposureTime;
+        this.forceResample   = true;
+        Log.fine("Exposure time = " + exposureTime + " sec");
+        Log.fine("numberExposures = " + numberExposures);
+        Log.fine("readNoise = " + readNoise + " e-");
+    }
+
+    /**
+    * Constructor using different input and output slits and custom exposureTime, numberCoadds, and numberExposures.
+    * The total number of exposures is numberExposures x numberCoadds
+    */
+    public SpecS2NSlitVisitor(
+            final Slit input_slit,
+            final Slit output_slit,
+            final Disperser disperser,
+            final SlitThroughput throughput,
+            final double pixelWidth,
+            final double obsWaveLow,
+            final double obsEnd,
+            final double imgQuality,
+            final double readNoise,
+            final double darkCurrent,
+            final ObservationDetails odp,
+            final double exposureTime,
+            final int numberCoadds,
+            final int numberExposures) {
+        this.odp            = odp;
+        this.input_slit     = input_slit;
+        this.output_slit    = output_slit;
+        this.disperser      = disperser;
+        this.throughput     = throughput;
+        this.pixelWidth     = pixelWidth;
+        this.obsStart       = obsWaveLow;
+        this.obsEnd         = obsEnd;
+        this.imgQuality     = imgQuality;
+        this.darkCurrent    = darkCurrent;
+        this.readNoise      = readNoise;
+        this.calcMethod      = odp.calculationMethod();
+        this.coadds          = numberCoadds;
+        this.numberExposures = numberExposures;
+        this.sourceFraction  = calcMethod.sourceFraction();
+        this.exposureTime    = exposureTime;
+        this.forceResample   = true;
+        Log.fine("Exposure time = " + exposureTime + " sec");
+        Log.fine("numberExposures = " + numberExposures);
+        Log.fine("readNoise = " + readNoise + " e-");
     }
 
     // Constructor for cases where the input slit dimensions are different from the output slit dimensions

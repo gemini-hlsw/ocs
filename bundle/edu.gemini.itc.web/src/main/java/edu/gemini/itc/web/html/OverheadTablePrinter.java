@@ -27,7 +27,7 @@ public class OverheadTablePrinter {
     private final ItcSpectroscopyResult r;
     private final SPComponentType instrumentName;
     private final int numOfExposures;
-
+    private int coadds;
     private final double visit_time;
 
     private final double recenterInterval;
@@ -52,6 +52,8 @@ public class OverheadTablePrinter {
         double getRecenterInterval();
 
         int getNumberExposures();
+
+        int getNumberCoadds();
     }
 
     public static String print (PrinterWithOverhead printer, final ItcParameters params,
@@ -90,10 +92,9 @@ public class OverheadTablePrinter {
     {
         final ObservationDetails obs = result.observation();
         final CalculationMethod calcMethod = obs.calculationMethod();
+        coadds = params.observation().calculationMethod().coaddsOrElse(1);
 
         if (calcMethod instanceof ImagingExposureCount) {
-            int coadds = params.observation().calculationMethod().coaddsOrElse(1);
-            Log.fine("Number of coadds = " + coadds);
             numOfExposures = (int)(((ImagingResult) result).is2nCalc().numberSourceExposures() / coadds / obs.sourceFraction());
         } else if (calcMethod instanceof ImagingS2N) {
             numOfExposures = ((ImagingS2N) calcMethod).exposures();
@@ -103,10 +104,12 @@ public class OverheadTablePrinter {
             numOfExposures = printer.getNumberExposures();
         } else if (calcMethod instanceof SpectroscopyIntegrationTime) {
             numOfExposures = printer.getNumberExposures();
+            coadds = printer.getNumberCoadds();
         } else {
             numOfExposures = 1;
         }
         Log.fine("Number of exposures = " + numOfExposures);
+        Log.fine("Number of coadds = " + coadds);
         this.visit_time = printer.getVisitTime();
         this.recenterInterval = printer.getRecenterInterval();
 
@@ -270,7 +273,6 @@ public class OverheadTablePrinter {
             cts = m.get(c);
             if (cts == null) continue;
             PlannedTime.CategorizedTime ct = cts.max(Comparator.naturalOrder());
-            int coadds = p.observation().calculationMethod().coaddsOrElse(1);
             String category = ct.category.display;
 
             buf.append("<tr>");

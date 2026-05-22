@@ -188,4 +188,7 @@ public final class NiriPrinter extends PrinterBase implements OverheadTablePrint
     }
 
     public int getNumberExposures() { throw new Error("Not implemented"); }
+
+    public int getNumberCoadds() { throw new Error("Not implemented"); }
+
 }

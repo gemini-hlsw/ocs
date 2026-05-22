@@ -189,4 +189,8 @@ public final class Flamingos2Printer extends PrinterBase implements OverheadTabl
     public int getNumberExposures() {
         return recipe.getNumberExposures();
     }
+
+    public int getNumberCoadds() {
+        return 1;
+    }
 }
