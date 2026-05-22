@@ -98,6 +98,10 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
         }
     }
 
+    public Detector getDetector() {
+        return _ccdColor;
+    }
+
     private String resolutionFileEnding(GhostParameters gp) {
         switch (gp.resolution()) {
             case GhostStandard: return "SR";

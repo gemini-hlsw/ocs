@@ -110,20 +110,20 @@ class ItcServiceImpl extends ItcService {
   private def spectroscopyResult(recipe: SpectroscopyRecipe, excludeCharts: Boolean): Result = {
     val r = recipe.calculateSpectroscopy()
     val s = recipe.serviceResult(r, excludeCharts)
-    ItcResult.forResult(s.withSignificantFigures(6))
+    ItcResult.forResult(s)
   }
 
   private def spectroscopyResult(recipe: SpectroscopyArrayRecipe, excludeCharts: Boolean): Result = {
     val r = recipe.calculateSpectroscopy()
     val s = recipe.serviceResult(r, excludeCharts)
-    ItcResult.forResult(s.withSignificantFigures(6))
+    ItcResult.forResult(s)
   }
 
   private def ghostSpectroscopyResult(recipe: GHostRecipe, excludeCharts: Boolean): Result = {
     val r = recipe.calculateSpectroscopy()
     // we use a special method to not produce S2NChartPerRes charts or the combined charts.
     val s = recipe.serviceResult(r, excludeCharts, true)
-    ItcResult.forResult(s.copy(chartGroups = s.chartGroups.take(2)).withSignificantFigures(6))
+    ItcResult.forResult(s.copy(chartGroups = s.chartGroups.take(2)))
   }
 
   // The web page has the fields in microns and they are passed directly as doubles so the recipe expects micros
