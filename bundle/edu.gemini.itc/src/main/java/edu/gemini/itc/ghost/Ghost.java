@@ -7,8 +7,13 @@ import edu.gemini.itc.shared.IfuMethod;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.ghost.Detector;
+import edu.gemini.spModel.gemini.ghost.GhostReadNoiseGain;
+import static edu.gemini.spModel.gemini.ghost.GhostReadNoiseGain.*;
 import scala.Option;
+import java.util.HashMap;
 import java.util.logging.Logger;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Ghost specification class
@@ -141,24 +146,9 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
         return WellDepth;
     }
 
-    @Override
-    public double gain() {
-        switch (camera.readMode()) {
-            case SLOW_LOW:
-                return (_ccdColor == Detector.BLUE) ? 0.40 : 0.30; // e-/DN
-            case MEDIUM_LOW:
-                return (_ccdColor == Detector.BLUE) ? 0.60 : 0.52;
-            case FAST_LOW:
-                return (_ccdColor == Detector.BLUE) ? 0.75 : 0.68;
-            default:
-                Log.warning("Bad definition of the readMode");
-                return 0;
-        }
-    }
-
     public double getPixelSize() {
         // The E2V_PIXEL_SIZE should be in arcsecs/pixel.
-        return Detector.PIXEL_SIZE * camera.binning().getSpatialBinning();  // Both detectors has the same pixel size.
+        return Detector.PIXEL_SIZE * camera.binning().getSpatialBinning();  // Both detectors have the same pixel size.
     }
 
     public double getSpectralPixelWidth() {
@@ -221,29 +211,56 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
         return slitLength;
     }
 
-
     public double getDarkCurrent() {
         return _ccdColor.getDarkCurrent().doubleValue();
     }
 
-    /*
-        READ MODES- Standard science mode (slow read, low gain) Default: Standard science mode
-	    Fast read (fast read, low gain)
-	    Bright targets (fast read, fast gain).
-	    These values were obtained from https://docs.google.com/document/d/1CJi5mh0012CHj4oj7fCtz4I8qXAsxcTY/edit
-     */
-    public double getReadNoise() {
-        switch (camera.readMode()) {
-                case SLOW_LOW:
-                       return (_ccdColor == Detector.BLUE) ? 1.5 : 1.3; // e-
-                case MEDIUM_LOW:
-                       return (_ccdColor == Detector.BLUE) ? 2.6 : 2.0;
-                case FAST_LOW:
-                       return (_ccdColor == Detector.BLUE) ? 4.8 : 4.7;
-                default:
-                       Log.warning("Bad option provided by GhostParamenter read Mode, return 0 for read noise in the Detector " + _ccdColor.displayValue());
-                       return 0;
+    private static final class ReadModePair {
+        final GhostReadNoiseGain blue, red;
+        ReadModePair(GhostReadNoiseGain blue, GhostReadNoiseGain red) {
+            this.blue = blue;
+            this.red  = red;
         }
+
+        @Override public boolean equals(Object o) {
+            if (!(o instanceof ReadModePair)) return false;
+            ReadModePair other = (ReadModePair) o;
+            return blue == other.blue && red == other.red;
+        }
+        @Override public int hashCode() { return Objects.hash(blue, red); }
+    }
+
+    private static final Map<ReadModePair, double[]> READMODE_TABLE = new HashMap<>();
+    // double[] = { blueGain, redGain, blueReadNoise, redReadNoise }               ___Gain___     _Read_Noise_
+    static {  //                                                                   Blue   Red     Blue    Red
+        READMODE_TABLE.put(new ReadModePair(SLOW_LOW,   SLOW_LOW),   new double[]{ 0.40,  0.30,   1.48,   1.30 });
+        READMODE_TABLE.put(new ReadModePair(SLOW_LOW,   MEDIUM_LOW), new double[]{ 0.56,  0.52,   2.23,   2.31 });
+        READMODE_TABLE.put(new ReadModePair(MEDIUM_LOW, SLOW_LOW),   new double[]{ 0.60,  0.49,   2.56,   1.96 });
+        READMODE_TABLE.put(new ReadModePair(MEDIUM_LOW, MEDIUM_LOW), new double[]{ 0.60,  0.52,   2.55,   2.26 });
+        READMODE_TABLE.put(new ReadModePair(MEDIUM_LOW, FAST_LOW),   new double[]{ 0.59,  0.69,   2.52,   4.70 });
+        READMODE_TABLE.put(new ReadModePair(FAST_LOW,   FAST_LOW),   new double[]{ 0.75,  0.68,   4.79,   4.66 });
+    }
+
+    private double[] lookupDetectorValues() {
+        GhostReadNoiseGain blueMode = gp.blueCamera().readMode();
+        GhostReadNoiseGain redMode  = gp.redCamera().readMode();
+        double[] values = READMODE_TABLE.get(new ReadModePair(blueMode, redMode));
+        if (values == null) {
+            throw new IllegalArgumentException(
+                String.format("Unsupported combination of '%s' + '%s'", blueMode, redMode));
+        }
+        return values;
+    }
+
+    @Override
+    public double gain() {
+        double[] v = lookupDetectorValues();
+        return (_ccdColor == Detector.BLUE) ? v[0] : v[1];
+    }
+
+    public double getReadNoise() {
+        double[] v = lookupDetectorValues();
+        return (_ccdColor == Detector.BLUE) ? v[2] : v[3];
     }
 
     public IFUComponent getIFU() {
