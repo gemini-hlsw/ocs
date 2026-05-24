@@ -470,7 +470,7 @@
 
 			<tr>
 				<td><input value="intTime" name="calcMethod" type="radio" /></td>
-				<td colspan="2">Total integration time to achieve S/N ratio of
+				<td colspan="2"><b>Imaging</b> integration time to achieve S/N ratio of
 					<input name="sigmaC" size="3" type="number" value="5" min="0" step="any" />
 					using an exposure time for each exposure of
 					<input name="expTimeC" size="5" type="number" value="120" min="0.2" step="any" /> secs
@@ -481,6 +481,15 @@
 			</tr>
 
 			<tr>
+				<td><input value="expTime" name="calcMethod" type="radio" /></td>
+				<td colspan="2"><b>Imaging</b> integration time to achieve S/N ratio of
+					<input name="sigmaD" size="3" type="number" value="5" min="0" step="any" />
+					<input name="coaddsD" value="1" type="hidden"/>
+					<input name="fracOnSourceD" value="1" type="hidden"/>
+				</td>
+			</tr>
+
+			<tr>
 				<td><input value="intTimeSpec" name="calcMethod" type="radio" /></td>
 				<td colspan="2"><b>Spectroscopy</b> integration time to achieve S/N ratio of
 					<input name="sigmaE" size="3" type="number" value="5" min="0" step="any" />
@@ -488,15 +497,6 @@
 					<input name="wavelengthE" size="5" type="number" value="2.14" min="0.6" max="7" step="any" /> &mu;m.
 					<input name="coaddsE" value="1" type="hidden"/>
 					<input name="fracOnSourceE" value="1" type="hidden"/>
-				</td>
-			</tr>
-
-			<tr>
-				<td><input value="expTime" name="calcMethod" type="radio" /></td>
-				<td colspan="2"><b>Imaging</b> integration time to achieve S/N ratio of
-					<input name="sigmaD" size="3" type="number" value="5" min="0" step="any" />
-					<input name="coaddsD" value="1" type="hidden"/>
-					<input name="fracOnSourceD" value="1" type="hidden"/>
 				</td>
 			</tr>
 
