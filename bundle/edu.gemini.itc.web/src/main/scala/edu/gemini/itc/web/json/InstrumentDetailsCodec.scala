@@ -214,8 +214,8 @@ trait InstrumentDetailsCodec {
     casecodec4(GhostParameters.apply, GhostParameters.unapply)(
       "nSkyMicrolens",
       "resolution",
-      "blueCamera",
-      "redCamera"
+      "redCamera",
+      "blueCamera"
     )
 
   implicit val InstrumentDetailsDecodeJson: CodecJson[InstrumentDetails] =
