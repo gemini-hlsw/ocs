@@ -195,9 +195,9 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             // Calculate the S/N and verify that the answer is the same:
             Log.fine(String.format("Predicted S/N = %.3f", calculateSNR(signal, background, darkNoise, readNoise, skyAper, initialNumberExposures)));
 
-            // Calculate the maximum exposure time, up to a maximum of 900s:
+            // Calculate the maximum exposure time, up to a maximum of 350s:
             double safetyBuffer = 0.6;  // Use a 60% safety buffer to avoid saturating in better conditions
-            double maxExposureTime = Math.min(900, maxFlux * safetyBuffer / peakFlux * initialExposureTime);
+            double maxExposureTime = Math.min(350, maxFlux * safetyBuffer / peakFlux * initialExposureTime);
             Log.fine(String.format("maxExposureTime = %.2f seconds", maxExposureTime));
 
             // If the maximum exposure time for this target + configuration is less than the minimum then throw an error:
