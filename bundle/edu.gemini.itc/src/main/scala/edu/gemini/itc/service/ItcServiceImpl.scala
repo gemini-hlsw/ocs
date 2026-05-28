@@ -98,7 +98,7 @@ class ItcServiceImpl extends ItcService {
     p.instrument match {
       case i: Flamingos2Parameters        => spectroscopyResult   (new Flamingos2Recipe(p, i),               excludeCharts)
       case i: GmosParameters              => spectroscopyResult   (new GmosRecipe(p, i),                     excludeCharts)
-      case i: GnirsParameters             => spectroscopyResult   (new GnirsRecipe(p, i),                    excludeCharts)
+      case i: GnirsParameters             => spectroscopyResult   (new GnirsRecipe(paramsInMicrons(p), i),   excludeCharts)
       case i: NifsParameters              => spectroscopyResult   (new NifsRecipe(p, i),                     excludeCharts)
       case i: NiriParameters              => spectroscopyResult   (new NiriRecipe(p, i),                     excludeCharts)
       case i: Igrins2Parameters           => spectroscopyResult   (new Igrins2Recipe(paramsInMicrons(p), i), excludeCharts)
