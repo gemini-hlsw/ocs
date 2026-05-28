@@ -123,7 +123,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             SpectroscopyS2N s2nMethod = (SpectroscopyS2N) calcMethod;
             coadds = s2nMethod.coaddsOrElse(1);
             numberExposures = s2nMethod.exposures();
-            wavelengthAt = s2nMethod.atWithDefault();
+            wavelengthAt = s2nMethod.atWithDefault() * 1000.;
 
         } else if (calcMethod instanceof SpectroscopyIntegrationTime) { // determine optimal exposure time and number of exposures
             wavelengthAt = ((SpectroscopyIntegrationTime) _obsDetailParameters.calculationMethod()).wavelengthAt() * 1000.;
