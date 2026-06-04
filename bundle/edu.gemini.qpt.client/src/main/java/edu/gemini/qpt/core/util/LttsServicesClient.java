@@ -49,6 +49,9 @@ public class LttsServicesClient {
     public static String LTTS_SERVICES_NORTH_URL = "http://localhost:1973/ltts-services/test";
     public static String LTTS_SERVICES_SOUTH_URL = "http://localhost:1973/ltts-services/test";
 
+    public static boolean LTTS_SERVICES_NORTH_ENABLED = true;
+    public static boolean LTTS_SERVICES_SOUTH_ENABLED = true;
+
     private static LttsServicesClient instance;
 
     // Maps obs id to observation
@@ -85,6 +88,16 @@ public class LttsServicesClient {
     }
 
     LttsServicesClient(long start, Peer peer) {
+        observationMap = new HashMap<String, Observation>();
+
+        boolean enabled = (peer.site == Site.GN) ? LTTS_SERVICES_NORTH_ENABLED : LTTS_SERVICES_SOUTH_ENABLED;
+        // if disabled it is the same as an empty observationMap
+        if (!enabled) {
+            LOGGER.info("LTTS Service disabled for " + peer.site);
+            status = true;
+            return;
+        }
+
         Client client = Client.create();
         Date date = new Date(start);
         // See LCH-182: http://localhost:1973/ltts-services/nights?date=20130105&laserAltitudeLimit=40&full=true
@@ -96,8 +109,6 @@ public class LttsServicesClient {
                 + "&laserLimit=" + LimitsListener.MIN_ELEVATION_ERROR_LIMIT
                 + "&full=true";
         LOGGER.info("Accessing LCH web service at " + url);
-
-        observationMap = new HashMap<String, Observation>();
 
         try {
             WebResource webResource = client.resource(url);
