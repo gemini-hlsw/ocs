@@ -42,9 +42,11 @@ def common(version: Version) = AppConfig(
     "org.osgi.framework.storage.clean"                 -> "onFirstInit",
     "edu.gemini.spdb.mode"                             -> "api",
     "edu.gemini.qpt.ltts.services.south.url"           -> "http://gsltts.cl.gemini.edu:8080/ltts/services",
+    "edu.gemini.qpt.ltts.services.south.enabled"       -> "false",
     "org.osgi.framework.startlevel.beginning"          -> "100",
     "edu.gemini.util.security.auth.ui.showDatabaseTab" -> "true",
     "edu.gemini.qpt.ltts.services.north.url"           -> "http://gnltts.hi.gemini.edu:8080/ltts/services",
+    "edu.gemini.qpt.ltts.services.north.enabled"       -> "true",
     "org.osgi.framework.bootdelegation"                -> "*"
   ),
   log = Some("%a/log/qpt.%u.%g.log"),
@@ -143,5 +145,3 @@ def development(version: Version) = AppConfig(
     BundleSpec(99, "org.apache.felix.gogo.shell",   Version(0, 10, 0))
   )
 ) extending List(common(version), development_credentials(version))
-
-
