@@ -303,6 +303,9 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
 
     public ImagingResult calculateImaging() {
 
+        final CalculationMethod calcMethod = _obsDetailParameters.calculationMethod();
+        Log.fine("calcMethod = " + calcMethod);
+
         // Start of morphology section of ITC
 
         // Module 1a
@@ -313,6 +316,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         // Define the source morphology
         //
         // inputs: source morphology specification
+
         final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
 
         // Calculate image quality
@@ -334,10 +338,73 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         final double sky_integral = sky.getIntegral();
 
         // Calculate the Signal to Noise
-        final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument, SFcalc, im_qual, sed_integral, sky_integral);
-        IS2Ncalc.calculate();
-        exposureTime = (int) IS2Ncalc.getExposureTime();
-        numberExposures = IS2Ncalc.numberSourceExposures();
+        final ImagingS2NCalculatable IS2Ncalc;
+
+        if (calcMethod instanceof ImagingIntegrationTime) {
+
+            // Iterate over read modes to find the one that yields the desired S/N in the least amount of time.
+            ImagingMethodExptime bestCalc = null;
+            double bestTotalTime = Double.MAX_VALUE;
+
+            final List<ReadMode> readModes = Arrays.asList(ReadMode.BRIGHT_OBJECT_SPEC, ReadMode.MEDIUM_OBJECT_SPEC, ReadMode.FAINT_OBJECT_SPEC);
+            for (ReadMode rm : readModes) {
+                Log.fine("============================ " + rm + " ============================");
+
+                final ImagingMethodExptime calc = new ImagingMethodExptime(
+                        _obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral,
+                        _sdParameters, im_qual, rm.readNoise(), rm.minimumExpTimeSec());
+
+                try {
+                    calc.calculate();
+                } catch (RuntimeException e) {
+                    Log.fine(e.getMessage());
+                    if (e.getMessage().startsWith("This target is too bright")) {
+                        if (rm == ReadMode.BRIGHT_OBJECT_SPEC) throw e;  // if too bright for BRIGHT_OBJECT_SPEC then too bright.
+                        continue;
+                    } else if (e.getMessage().startsWith("This target is too faint")) {
+                        if (rm == ReadMode.FAINT_OBJECT_SPEC) throw e;   // if too faint for FAINT_OBJECT_SPEC then too faint.
+                        continue;
+                    }
+                    throw e;
+                }
+
+                // Calculate the total time = Nexp x (exptime + readout)
+                final double totalTime = calc.numberSourceExposures() * (calc.getExposureTime() + rm.minimumExpTimeSec());
+                Log.fine(String.format("Total time = %.3f sec", totalTime));
+                if (totalTime < bestTotalTime) {
+                    bestTotalTime = totalTime;
+                    bestCalc = calc;
+                    readMode = rm;
+                } else {
+                    Log.fine("Total time increasing, so stopping read mode search");
+                    break;
+                }
+            }
+            Log.fine("============================================================================");
+
+            // The loop can fall through for red filters when the source is too faint for VERY_BRIGHT
+            // and the background is too bright for VERY_FAINT.  Catch that here:
+            if (bestCalc == null) throw new RuntimeException("Could not find best read mode.");
+
+            Log.fine(String.format("The winner is: %s read mode with total time = %.2f sec", readMode, bestTotalTime));
+
+            IS2Ncalc = bestCalc;
+            exposureTime = IS2Ncalc.getExposureTime();
+            numberExposures = IS2Ncalc.numberSourceExposures();
+
+        } else if (calcMethod instanceof ImagingS2N || calcMethod instanceof ImagingExposureCount) {
+            IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_sdParameters, _obsDetailParameters, instrument, SFcalc, im_qual, sed_integral, sky_integral);
+            IS2Ncalc.calculate();
+            exposureTime = (int) IS2Ncalc.getExposureTime();
+            numberExposures = IS2Ncalc.numberSourceExposures();
+
+        } else {
+            throw new Error("Unsupported calculation method");
+        }
+
+        Log.fine("exposureTime = " + exposureTime);
+        Log.fine("numberExposures = " + numberExposures);
+        Log.fine("readMode = " + readMode);
 
         // Calculate the Peak Pixel Flux
         final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, exposureTime, SFcalc, im_qual, sed_integral, sky_integral);
