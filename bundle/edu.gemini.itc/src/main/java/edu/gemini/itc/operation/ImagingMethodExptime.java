@@ -15,6 +15,7 @@ public final class ImagingMethodExptime extends ImagingS2NCalculation {
     private final double maxFlux;
     private final double imageQuality;
     private int numberExposures;
+    private final double minExpTime;
     private static final Logger Log = Logger.getLogger(ImagingMethodExptime.class.getName());
 
     public ImagingMethodExptime(ObservationDetails obs,
@@ -37,18 +38,40 @@ public final class ImagingMethodExptime extends ImagingS2NCalculation {
         this.pixel_size = instrument.getPixelSize();
         this.maxFlux = instrument.maxFlux();
         this.imageQuality = imageQuality;
+        this.minExpTime = instrument.getMinExposureTime();
+    }
+
+    // Constructor using a read mode different from specified in the web form
+    public ImagingMethodExptime(ObservationDetails obs,
+                                final Instrument instrument,
+                                final SourceFraction srcFrac,
+                                final double sed_integral,
+                                final double sky_integral,
+                                final SourceDefinition _sdParameters,
+                                final double imageQuality,
+                                final double read_noise,
+                                final double minExpTime) {
+        super(obs, instrument, srcFrac, sed_integral, sky_integral);
+
+        this.instrument = instrument;
+        this.calcMethod = obs.calculationMethod();
+        this._sdParameters = _sdParameters;
+        this.srcFrac = srcFrac;
+        this.numberExposures = 1;
+        this.exposure_time = 10. * minExpTime;
+        this.coadds = 1;
+        this.read_noise = read_noise;
+        this.pixel_size = instrument.getPixelSize();
+        this.maxFlux = instrument.maxFlux();
+        this.imageQuality = imageQuality;
+        this.minExpTime = minExpTime;
     }
 
     public void calculate() {
 
-        // 1. Calculate the maximum exposure time
-        // 2. Calculate the total integration time required to achieve the requested S/N.
-        // 3. Calculate the number of exposures, if more than one are required.
-        // 4. Calculate the exposure time.
-
         super.calculate();  // perform an initial S/N calculation using the default values from the HTML form
-        double snr = totalSNRatio();
-        Log.fine(String.format("Total S/N = %.2f from %d x %.2f second exposures", snr, numberExposures, exposure_time));
+
+        Log.fine(String.format("Initial S/N = %.2f from %d x %.2f second exposures", totalSNRatio(), numberExposures, exposure_time));
 
         double peakFlux = PeakPixelFlux.calculate(instrument, _sdParameters, exposure_time, srcFrac, imageQuality, sed_integral, sky_integral);
         Log.fine(String.format("Peak Pixel Flux = %.0f e-", peakFlux));
@@ -57,32 +80,58 @@ public final class ImagingMethodExptime extends ImagingS2NCalculation {
 
         double timeToHalfMax = maxFlux / 2. / peakFlux * exposure_time;  // time to reach half of the maximum (our goal)
         Log.fine(String.format("timeToHalfMax = %.3f seconds", timeToHalfMax));
-        Log.fine(String.format("minExpTime = %.3f seconds", instrument.getMinExposureTime()));
+        Log.fine(String.format("minExpTime = %.3f seconds", minExpTime));
 
-        if (timeToHalfMax < instrument.getMinExposureTime()) {
-            Log.fine("Minimum exposure time = " + instrument.getMinExposureTime());
-            throw new RuntimeException(String.format(
-                    "This target is too bright for this configuration.\n" +
-                            "The detector well is half filled in %.2f seconds.", timeToHalfMax));
+        if (timeToHalfMax < minExpTime) {
+            throw new RuntimeException(String.format("This target is too bright for this configuration.\n" +
+                    "The detector well is half filled in %.2f seconds.", timeToHalfMax));
         }
 
-        // This should be instrument-specific.  GMOS: 1200, F2: , GNIRS:
-        double maxExptime = Math.min(1200, timeToHalfMax);
+        double maxExposureTime;
+        switch (instrument.getName()) {
+            case "Flamingos2": maxExposureTime = 300.0; break;
+            case "GMOS-N":     maxExposureTime = 600.0; break;
+            case "GMOS-S":     maxExposureTime = 600.0; break;
+            case "GNIRS":      maxExposureTime = 300.0; break;
+            default:           maxExposureTime = 300.0; break;
+        }
+        double maxExptime = Math.min(maxExposureTime, timeToHalfMax);
         Log.fine(String.format("maxExptime = %.3f seconds", maxExptime));
 
         double desiredSNR = ((ImagingIntegrationTime) calcMethod).sigma();
         Log.fine(String.format("desiredSNR = %.2f", desiredSNR));
 
-        double totalTime = exposure_time * numberExposures * (desiredSNR / snr) * (desiredSNR / snr);
-        Log.fine(String.format("Required totalTime = %.5f seconds", totalTime));
+        // Calculate rates from the initial super.calculate() results
+        final double signalPerSec     = var_source / exposure_time;
+        final double backgroundPerSec = var_background / exposure_time;
+        final double darkPerSec       = var_dark / exposure_time;
 
-        numberExposures = (int) Math.ceil(totalTime / maxExptime);
+        // Iterate to find the number of exposures and exposure time that will give the requested S/N.
+        // exposure_time is calculated exactly then numberExposures is updated from the resulting total time.
+        numberExposures = 1;
+        final int MAX_ITERATIONS = 10;
+        for (int iter = 0; iter < MAX_ITERATIONS; iter++) {
+            Log.fine("-------------------------------- iter " + iter + " --------------------------------");
+            exposure_time = ExposureTimeCalculator.calculate(signalPerSec, backgroundPerSec, darkPerSec,
+                    var_readout, skyAper, desiredSNR / Math.sqrt(numberExposures));
+            Log.fine(String.format("Iteration %d: %d x %.3f sec", iter, numberExposures, exposure_time));
+            int n = (int) Math.ceil(exposure_time * numberExposures / maxExptime);
+            if (n == numberExposures) {
+                Log.fine("------------------------------------------------------------------------");
+                break;
+            }
+            numberExposures = n;
+        }
         Log.fine(String.format("numberExposures = %d", numberExposures));
 
-        exposure_time = totalTime / numberExposures;
-        if (exposure_time < instrument.getMinExposureTime()) {
+        if (numberExposures > 10000) {
+            throw new RuntimeException(String.format("This target is too faint for this configuration.\n" +
+                    "%d exposures would be required to achieve the requested S/N.", numberExposures));
+        }
+
+        if (exposure_time < minExpTime) {
             Log.fine("Increasing exposure time to the minimum allowed");
-            exposure_time = instrument.getMinExposureTime();
+            exposure_time = minExpTime;
         }
 
         // GMOS and F2 require integer exposure times, so round up:
@@ -91,12 +140,12 @@ public final class ImagingMethodExptime extends ImagingS2NCalculation {
         } else {
             exposure_time = roundExposureTime(exposure_time);
         }
-        Log.fine(String.format("Rounding exposureTime up to %.2f sec", exposure_time));
+        Log.fine(String.format("Rounding exposureTime up to %.3f sec", exposure_time));
 
         // TODO: for instruments that can coadd - calculate the number of coadds
 
         super.calculate();
-        Log.fine("totalSNRatio = " + totalSNRatio());
+        Log.fine(String.format("Final: S/N = %.4f from %d x %.3f sec", totalSNRatio(), numberExposures, exposure_time));
     }
 
     /**
@@ -121,7 +170,5 @@ public final class ImagingMethodExptime extends ImagingS2NCalculation {
     }
 
     @Override public int numberSourceExposures() { return numberExposures; }
-
-    @Override public double getExposureTime() { return exposure_time; }
 
 }

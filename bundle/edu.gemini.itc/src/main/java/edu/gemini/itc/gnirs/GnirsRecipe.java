@@ -130,7 +130,6 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
             final double skyAper = 1.0;
             double readNoise;
-            double totalTime;
 
             double desiredSNR = ((SpectroscopyIntegrationTime) calcMethod).sigma();
             Log.fine(String.format("desired SNR = %.2f", desiredSNR));
@@ -139,13 +138,10 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             Log.fine(String.format("Maximum flux = %.0f e-", maxFlux));
 
             // Perform an initial run of the ITC to get the signal and background for this target at this wavelength
-
             readMode = ReadMode.FAINT;           // arbitrary
             Log.fine("readMode = " + readMode.toString());
-
             double initialExposureTime = 300.;   // arbitrary
             Log.fine(String.format("initialExposureTime = %.2f sec", initialExposureTime));
-
             int initialNumberExposures = 4;      // arbitrary
             Log.fine("initialNumberExposures = " + initialNumberExposures);
 
@@ -205,67 +201,56 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                     "This target is too bright for this configuration.\n" +
                     "The detector will reach %.0f e- in %.3f seconds.", maxFlux * safetyBuffer, maxExposureTime));
 
-            // Check each read mode and see which would be best.  This does NOT re-run the ITC calculations.
+            // Step through read modes and see which is best.  This does NOT re-run the ITC calculations.
             List<ReadMode> readModes = Arrays.asList(ReadMode.VERY_FAINT, ReadMode.FAINT, ReadMode.BRIGHT, ReadMode.VERY_BRIGHT);
             for (ReadMode rm : readModes) {
+                Log.fine("============================ " + rm + " ============================");
                 readMode = rm;
-                Log.fine("=== Checking " + readMode.toString() + " read mode ===");
-
                 readNoise = readMode.getReadNoise() * readMode.getReadNoise() * numberPixels;
                 Log.fine(String.format("Read Noise = %.2f e- (squared and summed)", readNoise));
                 Log.fine(String.format("S/N = %.3f", calculateSNR(signal, background, darkNoise, readNoise, skyAper, initialNumberExposures)));
 
-                int iterations = 0;
-                exposureTime = initialExposureTime;
                 numberExposures = initialNumberExposures;
-                int oldNumberExposures = -1;
-                double oldExposureTime = -1;
-                while ( (exposureTime != oldExposureTime || numberExposures != oldNumberExposures) && iterations < 10) {
-                    Log.fine("Iteration " + iterations + " ----------------");
-                    oldNumberExposures = numberExposures;
-                    oldExposureTime = exposureTime;
-                    exposureTime = calculateExposureTime(signal / initialExposureTime,
+                final int MAX_ITERATIONS = 10;
+                for (int iter = 0; iter < MAX_ITERATIONS; iter++) {
+                    Log.fine("-------------------------------- iter " + iter + " --------------------------------");
+                    exposureTime = ExposureTimeCalculator.calculate(signal / initialExposureTime,
                             background / initialExposureTime, darkNoise / initialExposureTime,
                             readNoise, skyAper, desiredSNR / Math.sqrt(numberExposures));
-                    Log.fine("exposureTime = " + exposureTime);
-                    totalTime = exposureTime * numberExposures;
-                    numberExposures = (int) Math.ceil(totalTime / maxExposureTime);
-                    if (numberExposures % 4 != 0) { numberExposures += 4 - numberExposures % 4;}  // make a multiple of 4
-                    exposureTime = totalTime / numberExposures;
-                    Log.fine("totalTime = " + totalTime);
-                    Log.fine("numberExposures = " + numberExposures);
-                    Log.fine(String.format("Iteration %d: -> %d x %.3f sec = %.3f sec (RN=%.2f e-)",
-                            iterations, numberExposures, exposureTime, totalTime, readMode.getReadNoise()));
-                    iterations += 1;
+                    int n = (int) Math.ceil(numberExposures * exposureTime / maxExposureTime);
+                    if (n % 4 != 0) n += 4 - n % 4;  // make a multiple of 4
+
+                    if (n == numberExposures) {
+                        Log.fine("------------------------------------------------------------------------");
+                        break;   // converged
+                    }
+                    numberExposures = n;
                 }
-                Log.fine("Converged");
-
                 exposureTime = roundExposureTime(exposureTime);
-                Log.fine(String.format("Rounded exposureTime = %.2f sec", exposureTime));
+                Log.fine(String.format("Rounded exposureTime = %.5f sec", exposureTime));
 
-                // Undecided whether to use "recommended" time or "minimum" time:
-                //if (exposureTime < instrument.getMinRecommendedExpTime(readMode)) {  // continue to the next read mode
-                //    Log.fine(String.format("This is shorter than recommended (%.0f sec)", instrument.getMinRecommendedExpTime(readMode)));
                 if (exposureTime < readMode.getMinExp()) {  // continue to the next read mode
                     Log.fine(String.format("This is shorter than the minimum (%.2f sec)", readMode.getMinExp()));
                 } else {  // Accept this read mode
                     break;
                 }
             }
-
-            Log.fine("=== The read mode, exposure time, and number of exposures have been decided ===");
+            Log.fine("============================================================================");
+            Log.fine("The read mode, exposure time, and number of exposures have been decided.");
             Log.fine("readMode = " + readMode.toString());
             Log.fine(String.format("numberExposures = %d", numberExposures));
+
             if (numberExposures > 1000) {
                 throw new RuntimeException("Configuration would require " + numberExposures + " exposures");
             }
+
             if (exposureTime < readMode.getMinExp()) {
                 Log.fine("Increasing exposure time to the minimum allowed for the read mode");
                 exposureTime = readMode.getMinExp();
             }
 
             Log.fine(String.format("exposureTime = %.2f", exposureTime));
-            coadds = calculateCoadds(exposureTime, numberExposures);
+            coadds = calculateCoadds(exposureTime, numberExposures, 4);
             numberExposures /= coadds;
 
         } else {
@@ -772,10 +757,9 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final double sky_integral = calcSource.sky.getIntegral();
         final double halo_integral = altair.isDefined() ? calcSource.halo.get().getIntegral() : 0.0;
 
-        final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(
-                _sdParameters, _obsDetailParameters, instrument, SFcalc, im_qual, sed_integral, sky_integral);
-
-        Log.fine("IS2Ncalc = " + IS2Ncalc);
+        // Compute Altair secondary source fraction once, before branching on calcMethod.
+        final double secondaryIntegral;
+        final double secondarySourceFraction;
         if (altair.isDefined()) {
             final SourceFraction SFcalcHalo;
             final double aoCorrImgQual = altair.get().getAOCorrectedFWHM();
@@ -784,26 +768,95 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             } else {
                 SFcalcHalo = SourceFractionFactory.calculate(_sdParameters, _obsDetailParameters, instrument, IQcalc.getImageQuality());
             }
-            IS2Ncalc.setSecondaryIntegral(halo_integral);
-            IS2Ncalc.setSecondarySourceFraction(SFcalcHalo.getSourceFraction());
+            secondaryIntegral = halo_integral;
+            secondarySourceFraction = SFcalcHalo.getSourceFraction();
+        } else {
+            secondaryIntegral = 0.0;
+            secondarySourceFraction = 0.0;
         }
-        IS2Ncalc.calculate();
+
+        ImagingS2NCalculatable IS2Ncalc;
 
         if (calcMethod instanceof ImagingS2N) {
+            IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(
+                    _sdParameters, _obsDetailParameters, instrument, SFcalc, im_qual, sed_integral, sky_integral);
+            Log.fine("IS2Ncalc = " + IS2Ncalc);
+            if (altair.isDefined()) {
+                IS2Ncalc.setSecondaryIntegral(secondaryIntegral);
+                IS2Ncalc.setSecondarySourceFraction(secondarySourceFraction);
+            }
+            IS2Ncalc.calculate();
             ImagingS2N s2nMethod = (ImagingS2N) calcMethod;
             exposureTime = s2nMethod.exposureTime();
             numberExposures = s2nMethod.exposures() * coadds;
 
         } else if (calcMethod instanceof ImagingIntegrationTime) {
+
+            // Iterate over read modes to find the one that yields the desired S/N in the least amount of time.
+            ImagingMethodExptime bestCalc = null;
+            double bestTotalTime = Double.MAX_VALUE;
+
+            final List<ReadMode> readModes = Arrays.asList(ReadMode.VERY_BRIGHT, ReadMode.BRIGHT, ReadMode.FAINT, ReadMode.VERY_FAINT);
+            for (ReadMode rm : readModes) {
+                Log.fine("============================ " + rm + " ============================");
+
+                final ImagingMethodExptime calc = new ImagingMethodExptime(
+                        _obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral,
+                        _sdParameters, im_qual, rm.getReadNoise(), rm.getMinExp());
+
+                if (altair.isDefined()) {
+                    calc.setSecondaryIntegral(secondaryIntegral);
+                    calc.setSecondarySourceFraction(secondarySourceFraction);
+                }
+
+                try {
+                    calc.calculate();
+                } catch (RuntimeException e) {
+                    Log.fine(e.getMessage());
+                    if (e.getMessage().startsWith("This target is too bright")) {
+                        if (rm == ReadMode.VERY_BRIGHT) throw e;  // if too bright for VERY_BRIGHT then too bright.
+                        continue;
+                    } else if (e.getMessage().startsWith("This target is too faint")) {
+                        if (rm == ReadMode.VERY_FAINT) throw e;  // if too faint for VERY_FAINT then too faint.
+                        continue;
+                    }
+                }
+
+                // Calculate the total time = Nexp x (exptime + readout)
+                double totalTime = calc.numberSourceExposures() * (calc.getExposureTime() + rm.getMinExp());
+                Log.fine(String.format("Total time = %.3f sec", totalTime));
+                if (totalTime < bestTotalTime) {
+                    bestTotalTime = totalTime;
+                    bestCalc = calc;
+                    readMode = rm;
+                } else {
+                    Log.fine("Total time increasing, so stopping read mode search");
+                    break;
+                }
+            }
+            Log.fine("============================================================================");
+
+            // The loop can fall through for red filters when the source is too faint for VERY_BRIGHT
+            // and the background is too bright for VERY_FAINT.  Catch that here:
+            if (bestCalc == null) throw new RuntimeException("Could not find best read mode.");
+
+            Log.fine(String.format("The winner is: %s read mode with total time = %.2f sec", readMode, bestTotalTime));
+
+            IS2Ncalc = bestCalc;
             exposureTime = IS2Ncalc.getExposureTime();
-            Log.fine(String.format("exposureTime = %.2f sec", exposureTime));
             numberExposures = IS2Ncalc.numberSourceExposures();
-            Log.fine("numberExposures (from IS2Ncalc) = " + numberExposures);
-            coadds = calculateCoadds(exposureTime, numberExposures);
-            Log.fine("coadds = " + coadds);
+            coadds = calculateCoadds(exposureTime, numberExposures, 1);
             numberExposures /= coadds;
 
         } else if (calcMethod instanceof ImagingExposureCount) {
+            IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(
+                    _sdParameters, _obsDetailParameters, instrument, SFcalc, im_qual, sed_integral, sky_integral);
+            Log.fine("IS2Ncalc = " + IS2Ncalc);
+            if (altair.isDefined()) {
+                IS2Ncalc.setSecondaryIntegral(secondaryIntegral);
+                IS2Ncalc.setSecondarySourceFraction(secondarySourceFraction);
+            }
+            IS2Ncalc.calculate();
             exposureTime = IS2Ncalc.getExposureTime();
             numberExposures = IS2Ncalc.numberSourceExposures(); // Already has coadds factored.
 
@@ -812,6 +865,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         }
         Log.fine("exposureTime = " + exposureTime);
         Log.fine("numberExposures = " + numberExposures);
+        Log.fine("coadds = " + coadds);
 
         // Calculate peak pixel flux
         final double peak_pixel_count = altair.isDefined() ?
@@ -828,42 +882,21 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
     }
 
     /**
-     * Calculate the exposure time required to achieve a desired Signal-to-Noise on a single frame.
-     * @param signal The signal per second summed over the pixels in the aperture.
-     * @param background The background per second summed over the pixels in the aperture.
-     * @param darkNoise The dark current per second summed over the pixels in the aperture.
-     * @param readNoise The squared read noise summed over the pixels in the aperture.
-     * @param skyAper
-     * @param SNR The desired Signal-to-Noise Ratio.
-     * @return The exposure time in seconds.
-     */
-    private double calculateExposureTime(double signal, double background, double darkNoise, double readNoise, double skyAper, double SNR) {
-        final double f = 1. + (1. / skyAper);  // noise factor
-        // SNR = S / sqrt(S + f(B + D + R)) = st / sqrt(st + f(bt + dt + R)) = x
-        // This can be expressed as a quadratic equation:  (ss/xx)t^2 - (s + fb + fd)t - fR = 0
-        // and solved using the quadratic formula: t = (-b + sqrt(b^2 - 4ac)) / 2a
-        double a = signal * signal / (SNR * SNR);
-        double b = -(signal + f * background + f * darkNoise);
-        double c = -f * readNoise;
-        double exposureTime = (-b + Math.sqrt(b*b - 4.*a*c)) / (2.*a);
-        Log.fine(String.format("exposureTime = %.3f", exposureTime));
-        return exposureTime;
-    }
-
-    /**
      * Calculate the optimal number of coadds.
-     * Assumes that at least 4 exposures are required and
-     * the maximum coadded integration time is 30 seconds.
+     * Assumes that at least 4 exposures are required, and
+     * the maximum coadded integration time is 30 seconds, and
+     * that the resulting number of exposures is a multiple of `multipleOf`.
     */
-    private int calculateCoadds(double expTime, int numberExposures) {
+    private int calculateCoadds(double expTime, int numberExposures, int multipleOf) {
         if (expTime <= 15 && numberExposures > 4) {
             int maxCoadds = (int) Math.floor(30.0 / expTime);
+            Log.fine("maxCoadds = " + maxCoadds);
             for (int c = maxCoadds; c >= 1; c--) {  // search downward for largest possible coadds
                 if (numberExposures % c != 0) {     // exposures must divide evenly
                     continue;
                 }
                 int newExposures = numberExposures / c;
-                if (newExposures % 4 != 0) {        // exposures must be a multiple of 4
+                if (newExposures % multipleOf != 0) { // number of exposures must be a multiple
                     continue;
                 }
                 return c;

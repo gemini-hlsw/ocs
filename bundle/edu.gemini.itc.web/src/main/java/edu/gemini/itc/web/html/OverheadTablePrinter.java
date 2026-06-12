@@ -102,6 +102,7 @@ public class OverheadTablePrinter {
             numOfExposures = ((SpectroscopyS2N) calcMethod).exposures();
         } else if (calcMethod instanceof ImagingIntegrationTime) {
             numOfExposures = printer.getNumberExposures();
+            coadds = printer.getNumberCoadds();
         } else if (calcMethod instanceof SpectroscopyIntegrationTime) {
             numOfExposures = printer.getNumberExposures();
             coadds = printer.getNumberCoadds();
