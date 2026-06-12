@@ -130,7 +130,6 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
             final double skyAper = 1.0;
             double readNoise;
-            double totalTime;
 
             double desiredSNR = ((SpectroscopyIntegrationTime) calcMethod).sigma();
             Log.fine(String.format("desired SNR = %.2f", desiredSNR));
@@ -139,13 +138,10 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             Log.fine(String.format("Maximum flux = %.0f e-", maxFlux));
 
             // Perform an initial run of the ITC to get the signal and background for this target at this wavelength
-
             readMode = ReadMode.FAINT;           // arbitrary
             Log.fine("readMode = " + readMode.toString());
-
             double initialExposureTime = 300.;   // arbitrary
             Log.fine(String.format("initialExposureTime = %.2f sec", initialExposureTime));
-
             int initialNumberExposures = 4;      // arbitrary
             Log.fine("initialNumberExposures = " + initialNumberExposures);
 
@@ -205,7 +201,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                     "This target is too bright for this configuration.\n" +
                     "The detector will reach %.0f e- in %.3f seconds.", maxFlux * safetyBuffer, maxExposureTime));
 
-            // Check each read mode and see which would be best.  This does NOT re-run the ITC calculations.
+            // Step through read modes and see which is best.  This does NOT re-run the ITC calculations.
             List<ReadMode> readModes = Arrays.asList(ReadMode.VERY_FAINT, ReadMode.FAINT, ReadMode.BRIGHT, ReadMode.VERY_BRIGHT);
             for (ReadMode rm : readModes) {
                 Log.fine("============================ " + rm + " ============================");
@@ -213,6 +209,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 readNoise = readMode.getReadNoise() * readMode.getReadNoise() * numberPixels;
                 Log.fine(String.format("Read Noise = %.2f e- (squared and summed)", readNoise));
                 Log.fine(String.format("S/N = %.3f", calculateSNR(signal, background, darkNoise, readNoise, skyAper, initialNumberExposures)));
+
                 numberExposures = initialNumberExposures;
                 final int MAX_ITERATIONS = 10;
                 for (int iter = 0; iter < MAX_ITERATIONS; iter++) {
@@ -221,10 +218,11 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                             background / initialExposureTime, darkNoise / initialExposureTime,
                             readNoise, skyAper, desiredSNR / Math.sqrt(numberExposures));
                     int n = (int) Math.ceil(numberExposures * exposureTime / maxExposureTime);
-                    if (n % 4 != 0) n += 4 - n % 4;
+                    if (n % 4 != 0) n += 4 - n % 4;  // make a multiple of 4
+
                     if (n == numberExposures) {
                         Log.fine("------------------------------------------------------------------------");
-                        break;
+                        break;   // converged
                     }
                     numberExposures = n;
                 }
@@ -241,9 +239,11 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             Log.fine("The read mode, exposure time, and number of exposures have been decided.");
             Log.fine("readMode = " + readMode.toString());
             Log.fine(String.format("numberExposures = %d", numberExposures));
+
             if (numberExposures > 1000) {
                 throw new RuntimeException("Configuration would require " + numberExposures + " exposures");
             }
+
             if (exposureTime < readMode.getMinExp()) {
                 Log.fine("Increasing exposure time to the minimum allowed for the read mode");
                 exposureTime = readMode.getMinExp();
