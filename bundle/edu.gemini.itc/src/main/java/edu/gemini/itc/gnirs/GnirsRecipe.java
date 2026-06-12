@@ -208,52 +208,37 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             // Check each read mode and see which would be best.  This does NOT re-run the ITC calculations.
             List<ReadMode> readModes = Arrays.asList(ReadMode.VERY_FAINT, ReadMode.FAINT, ReadMode.BRIGHT, ReadMode.VERY_BRIGHT);
             for (ReadMode rm : readModes) {
+                Log.fine("============================ " + rm + " ============================");
                 readMode = rm;
-                Log.fine("=== Checking " + readMode.toString() + " read mode ===");
-
                 readNoise = readMode.getReadNoise() * readMode.getReadNoise() * numberPixels;
                 Log.fine(String.format("Read Noise = %.2f e- (squared and summed)", readNoise));
                 Log.fine(String.format("S/N = %.3f", calculateSNR(signal, background, darkNoise, readNoise, skyAper, initialNumberExposures)));
-
-                int iterations = 0;
-                exposureTime = initialExposureTime;
                 numberExposures = initialNumberExposures;
-                int oldNumberExposures = -1;
-                double oldExposureTime = -1;
-                while ( (exposureTime != oldExposureTime || numberExposures != oldNumberExposures) && iterations < 10) {
-                    Log.fine("Iteration " + iterations + " ----------------");
-                    oldNumberExposures = numberExposures;
-                    oldExposureTime = exposureTime;
+                final int MAX_ITERATIONS = 10;
+                for (int iter = 0; iter < MAX_ITERATIONS; iter++) {
+                    Log.fine("-------------------------------- iter " + iter + " --------------------------------");
                     exposureTime = ExposureTimeCalculator.calculate(signal / initialExposureTime,
                             background / initialExposureTime, darkNoise / initialExposureTime,
                             readNoise, skyAper, desiredSNR / Math.sqrt(numberExposures));
-                    Log.fine("exposureTime = " + exposureTime);
-                    totalTime = exposureTime * numberExposures;
-                    numberExposures = (int) Math.ceil(totalTime / maxExposureTime);
-                    if (numberExposures % 4 != 0) { numberExposures += 4 - numberExposures % 4;}  // make a multiple of 4
-                    exposureTime = totalTime / numberExposures;
-                    Log.fine("totalTime = " + totalTime);
-                    Log.fine("numberExposures = " + numberExposures);
-                    Log.fine(String.format("Iteration %d: -> %d x %.3f sec = %.3f sec (RN=%.2f e-)",
-                            iterations, numberExposures, exposureTime, totalTime, readMode.getReadNoise()));
-                    iterations += 1;
+                    int n = (int) Math.ceil(numberExposures * exposureTime / maxExposureTime);
+                    if (n % 4 != 0) n += 4 - n % 4;
+                    if (n == numberExposures) {
+                        Log.fine("------------------------------------------------------------------------");
+                        break;
+                    }
+                    numberExposures = n;
                 }
-                Log.fine("Converged");
-
                 exposureTime = roundExposureTime(exposureTime);
-                Log.fine(String.format("Rounded exposureTime = %.2f sec", exposureTime));
+                Log.fine(String.format("Rounded exposureTime = %.5f sec", exposureTime));
 
-                // Undecided whether to use "recommended" time or "minimum" time:
-                //if (exposureTime < instrument.getMinRecommendedExpTime(readMode)) {  // continue to the next read mode
-                //    Log.fine(String.format("This is shorter than recommended (%.0f sec)", instrument.getMinRecommendedExpTime(readMode)));
                 if (exposureTime < readMode.getMinExp()) {  // continue to the next read mode
                     Log.fine(String.format("This is shorter than the minimum (%.2f sec)", readMode.getMinExp()));
                 } else {  // Accept this read mode
                     break;
                 }
             }
-
-            Log.fine("=== The read mode, exposure time, and number of exposures have been decided ===");
+            Log.fine("============================================================================");
+            Log.fine("The read mode, exposure time, and number of exposures have been decided.");
             Log.fine("readMode = " + readMode.toString());
             Log.fine(String.format("numberExposures = %d", numberExposures));
             if (numberExposures > 1000) {

@@ -30,11 +30,12 @@ public final class ExposureTimeCalculator {
         // SNR = S / sqrt(S + f(B + D + R)) = st / sqrt(st + f(bt + dt + R)) = x
         // This can be expressed as a quadratic equation:  (ss/xx)t^2 - (s + fb + fd)t - fR = 0
         // and solved using the quadratic formula: t = (-b + sqrt(b^2 - 4ac)) / 2a
+        if (signal <= 0) throw new Error("Signal is <= 0");
         double a = signal * signal / (SNR * SNR);
         double b = -(signal + f * background + f * darkNoise);
         double c = -f * readNoise;
         double exposureTime = (-b + Math.sqrt(b*b - 4.*a*c)) / (2.*a);
-        Log.fine(String.format("Exposure time must be %.3f s to achieve S/N = %.2f in 1 exposure", exposureTime, SNR));
+        Log.fine(String.format("Exposure time must be %.5f sec to achieve S/N = %.2f in 1 exposure", exposureTime, SNR));
         return exposureTime;
     }
 }
