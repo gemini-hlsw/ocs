@@ -40,6 +40,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
     private final VisitableSampledSpectrum[] signalOrder;
     private final VisitableSampledSpectrum[] backGroundOrder;
     private final VisitableSampledSpectrum[] finalS2NOrder;
+    private final VisitableSampledSpectrum[] singleS2NOrder;
     private final VisitableSampledSpectrum[] totalSignalOrder;
     private final VisitableSampledSpectrum[] totalBackgroundOrder;
     private final double[] totalDarkNoise;
@@ -64,6 +65,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         signalOrder = new VisitableSampledSpectrum[ORDERS];
         backGroundOrder = new VisitableSampledSpectrum[ORDERS];
         finalS2NOrder = new VisitableSampledSpectrum[ORDERS];
+        singleS2NOrder = new VisitableSampledSpectrum[ORDERS];
         totalSignalOrder = new VisitableSampledSpectrum[ORDERS];
         totalBackgroundOrder = new VisitableSampledSpectrum[ORDERS];
         totalDarkNoise = new double[ORDERS];
@@ -536,6 +538,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                     sed.accept(specS2N);
 
                     finalS2NOrder[i] = (VisitableSampledSpectrum) specS2N.getFinalS2NSpectrum().clone();
+                    singleS2NOrder[i] = (VisitableSampledSpectrum) specS2N.getExpS2NSpectrum().clone();
                 }
 
                 final SpecS2N[] specS2Narr = new SpecS2N[ORDERS];
@@ -544,12 +547,23 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                             signalOrder[i], backGroundOrder[i],
                             totalSignalOrder[i], totalBackgroundOrder[i],
                             totalDarkNoise[i], slitLengthPixels[i],
-                            null, finalS2NOrder[i]
+                            singleS2NOrder[i], finalS2NOrder[i]
                     );
                     specS2Narr[i] = s2n;
                 }
 
-                final scala.Option<SignalToNoiseAt> sn = RecipeUtil.instance().signalToNoiseAt(wavelengthAt, specS2N.getExpS2NSpectrum(), specS2N.getFinalS2NSpectrum());
+                // The signal-to-noise at the requested wavelength must come from the order
+                // that actually contains it, not from the leftover state of the visitor
+                // (which holds the last order processed). If no order covers the requested
+                // wavelength (e.g. none was requested), there is no value to report.
+                scala.Option<SignalToNoiseAt> sn = scala.Option.empty();
+                for (final SpecS2N orderS2N : specS2Narr) {
+                    final VisitableSampledSpectrum finalSpectrum = orderS2N.getFinalS2NSpectrum();
+                    if (wavelengthAt >= finalSpectrum.getStart() && wavelengthAt <= finalSpectrum.getEnd()) {
+                        sn = RecipeUtil.instance().signalToNoiseAt(wavelengthAt, orderS2N.getExpS2NSpectrum(), finalSpectrum);
+                        break;
+                    }
+                }
                 final AllIntegrationTimes exp = AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures));
                 return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), altair, sn, exp);
 
@@ -588,11 +602,14 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
     }
 
     private static SpcChartData createGnirsS2NChart(final SpectroscopyResult result) {
-        final String title = "Final S/N";
+        final String title = "Intermediate Single Exp and Final S/N";
         final String xAxis = "Wavelength (nm)";
         final String yAxis = "Signal / Noise per spectral pixel";
         final List<SpcSeriesData> data = new ArrayList<>();
         for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
+           data.add(new SpcSeriesData(SingleS2NData.instance(),
+                   "Single Exp S/N Order "   + (i + 3), result.specS2N()[i].getExpS2NSpectrum().getData(),
+                   new Some<>(ITCChart.colorByIndex(2*i))));
            data.add(new SpcSeriesData(FinalS2NData.instance(),
                    "Final S/N Order "        + (i + 3), result.specS2N()[i].getFinalS2NSpectrum().getData(),
                    new Some<>(ITCChart.colorByIndex(2*i + 1))));
