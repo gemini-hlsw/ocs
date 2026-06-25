@@ -552,7 +552,11 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                     specS2Narr[i] = s2n;
                 }
 
-                final scala.Option<SignalToNoiseAt> sn = RecipeUtil.instance().signalToNoiseAt(wavelengthAt, specS2N.getExpS2NSpectrum(), specS2N.getFinalS2NSpectrum());
+                // The signal-to-noise at the requested wavelength must come from the order
+                // that actually contains it, not from the leftover state of the visitor
+                // (which holds the last order processed and would be out of range).
+                final SpecS2N snS2N = specS2Narr[instrument.getOrderAt(wavelengthAt) - 3];  // first XD order is 3
+                final scala.Option<SignalToNoiseAt> sn = RecipeUtil.instance().signalToNoiseAt(wavelengthAt, snS2N.getExpS2NSpectrum(), snS2N.getFinalS2NSpectrum());
                 final AllIntegrationTimes exp = AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures));
                 return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), altair, sn, exp);
 
