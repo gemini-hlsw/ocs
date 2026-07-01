@@ -2,7 +2,7 @@ package edu.gemini.itc.web.servlets
 
 import argonaut._
 import Argonaut._
-import edu.gemini.itc.shared.{ItcParameters, ItcResult, ItcService, SpcSeriesData}
+import edu.gemini.itc.shared.{Imaging, ItcParameters, ItcResult, ItcService, SpcSeriesData}
 import edu.gemini.itc.service.ItcServiceImpl
 import edu.gemini.itc.web.json.{ItcParametersCodec, ItcResultCodec, ItcSpectroscopyResultCodec}
 
@@ -64,7 +64,11 @@ object ItcCalculation extends ItcParametersCodec with ItcResultCodec with ItcSpe
 
     (for {
       itcReq <- Parse.decodeEither[ItcParameters](json)
-      itcRes <- itc.calculate(itcReq, headless = false).toEither.leftMap(_.msg)
+      itcRes <- itcReq.observation.calculationMethod match {
+                  // REL-4959 We should produce the error at this level for gpp
+                  case _: Imaging => Left("Charts not implemented for imaging.")
+                  case _          => itc.calculate(itcReq, headless = false).toEither.leftMap(_.msg)
+                }
     } yield itcRes.asJson.nospaces).toString
   }
 
@@ -154,7 +158,11 @@ class JsonChartServlet(versionToken: String = "") extends HttpServlet with ItcPa
     val result: Either[String, ItcResult] =
       for {
         itcReq <- Parse.decodeEither[ItcParameters](json)
-        itcRes <- itc.calculate(itcReq, headless = false).toEither.leftMap(_.msg)
+        itcRes <- itcReq.observation.calculationMethod match {
+                    // REL-4959 We should produce the error at this level for gpp
+                    case _: Imaging => Left("Charts not implemented for imaging.")
+                    case _          => itc.calculate(itcReq, headless = false).toEither.leftMap(_.msg)
+                  }
       } yield itcRes
 
     // Send our result back.
