@@ -109,7 +109,7 @@ class P1MonitorConfig(ctx: BundleContext) {
     case "ds" | "dt" | "sv" | "pw" | "gt" | "lp"             => P1PDF.GeminiStandard
     case "cl"                                                => P1PDF.CL
     case "us"                                                => P1PDF.NOIRLabDARP
-    case "ft"                                                => P1PDF.GeminiDefaultNoInvestigatorsList
+    case "ft"                                                => P1PDF.GeminiDARP
     case _                                                   => P1PDF.GeminiDefaultListAtTheEnd
   }
 
