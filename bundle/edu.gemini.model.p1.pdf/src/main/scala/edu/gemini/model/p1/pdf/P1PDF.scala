@@ -145,6 +145,7 @@ object P1PDF {
     "kr"     -> GeminiDARP,
     "uh"     -> GeminiStandard,
     "da"     -> GeminiDARP,
+    "ft"     -> GeminiDARP,
     "gs"     -> GeminiStandard,
     "gsiend" -> GeminiDefaultListAtTheEnd,
     "gsnoi"  -> GeminiDefaultNoInvestigatorsList,
