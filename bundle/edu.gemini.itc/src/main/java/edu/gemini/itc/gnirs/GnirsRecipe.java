@@ -420,7 +420,16 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 specS2Narr[i++] = specS2N;
             }
 
-            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, null, 0, altair, Option.empty(), AllIntegrationTimes.empty());
+            // Report the signal-to-noise at the requested wavelength, as the slit cases do.
+            // Every IFU element covers the same wavelength range (they differ spatially), so
+            // the first one is representative; for the summed method it is the only one.
+            // If no wavelength was requested it will fall outside the range and yield no value.
+            final scala.Option<SignalToNoiseAt> sn = specS2Narr.length == 0
+                    ? scala.Option.<SignalToNoiseAt>empty()
+                    : RecipeUtil.instance().signalToNoiseAt(
+                            wavelengthAt, specS2Narr[0].getExpS2NSpectrum(), specS2Narr[0].getFinalS2NSpectrum());
+
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, null, 0, altair, sn, AllIntegrationTimes.empty());
 
         } else {  // === SLIT ===
 
