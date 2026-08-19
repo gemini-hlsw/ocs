@@ -41,10 +41,8 @@ object SpBlueprintFactorySpec extends Specification {
           val c = Class.forName(name, false, loader)
           if (classOf[SpBlueprint].isAssignableFrom(c) &&
               !Modifier.isAbstract(c.getModifiers) &&
+              // Altair is nested inside the blueprints that use it
               c != classOf[SpBlueprint] &&
-              // Altair is nested inside the blueprints that use it (see
-              // SpAltairReaders) rather than being a blueprint map entry of
-              // its own, so it is never looked up by name.
               !classOf[SpAltair].isAssignableFrom(c))
             List(c.asSubclass(classOf[SpBlueprint]))
           else Nil

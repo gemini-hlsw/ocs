@@ -76,8 +76,6 @@ public final class TemplateFolder extends AbstractDataObject {
                 final SpBlueprint value = SpBlueprintFactory.fromParamSet(ps);
                 blueprintMap.put(key, value);
             } else if (Pio.getValue(ps, PARAM_MAP_KEY) != null) {
-                // Add a warning in case we don't have a blueprint for this key.
-                // This is common problem when a template for an instrument wasn't wired up.
                 LOG.log(Level.WARNING, "Discarding unrecognized blueprint \"" + ps.getName() +
                         "\"; it is missing from SpBlueprintFactory.");
             }
