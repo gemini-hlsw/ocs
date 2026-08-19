@@ -10,8 +10,12 @@ import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public final class TemplateFolder extends AbstractDataObject {
+
+    private static final Logger LOG = Logger.getLogger(TemplateFolder.class.getName());
 
     public static final String DEFAULT_TITLE = "Templates";
     public static final String VERSION = "2015A-1";
@@ -71,6 +75,11 @@ public final class TemplateFolder extends AbstractDataObject {
                 final String key = Pio.getValue(ps, PARAM_MAP_KEY);
                 final SpBlueprint value = SpBlueprintFactory.fromParamSet(ps);
                 blueprintMap.put(key, value);
+            } else if (Pio.getValue(ps, PARAM_MAP_KEY) != null) {
+                // Add a warning in case we don't have a blueprint for this key.
+                // This is common problem when a template for an instrument wasn't wired up.
+                LOG.log(Level.WARNING, "Discarding unrecognized blueprint \"" + ps.getName() +
+                        "\"; it is missing from SpBlueprintFactory.");
             }
         }
         blueprints = Collections.unmodifiableMap(blueprintMap);

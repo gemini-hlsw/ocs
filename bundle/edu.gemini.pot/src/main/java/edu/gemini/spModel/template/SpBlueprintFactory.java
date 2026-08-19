@@ -3,12 +3,14 @@ package edu.gemini.spModel.template;
 import edu.gemini.spModel.gemini.flamingos2.blueprint.SpFlamingos2BlueprintImaging;
 import edu.gemini.spModel.gemini.flamingos2.blueprint.SpFlamingos2BlueprintLongslit;
 import edu.gemini.spModel.gemini.flamingos2.blueprint.SpFlamingos2BlueprintMos;
+import edu.gemini.spModel.gemini.ghost.blueprint.SpGhostBlueprint;
 import edu.gemini.spModel.gemini.gmos.blueprint.*;
 import edu.gemini.spModel.gemini.gnirs.blueprint.SpGnirsBlueprintImaging;
 import edu.gemini.spModel.gemini.gnirs.blueprint.SpGnirsBlueprintSpectroscopy;
 import edu.gemini.spModel.gemini.gpi.blueprint.SpGpiBlueprint;
 import edu.gemini.spModel.gemini.graces.blueprint.SpGracesBlueprint;
 import edu.gemini.spModel.gemini.gsaoi.blueprint.SpGsaoiBlueprint;
+import edu.gemini.spModel.gemini.igrins2.blueprint.SpIgrins2Blueprint;
 import edu.gemini.spModel.gemini.michelle.blueprint.SpMichelleBlueprintImaging;
 import edu.gemini.spModel.gemini.michelle.blueprint.SpMichelleBlueprintSpectroscopy;
 import edu.gemini.spModel.gemini.nici.blueprint.SpNiciBlueprintCoronagraphic;
@@ -26,8 +28,6 @@ import edu.gemini.spModel.pio.ParamSet;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 // SW: I lifted this from SpBlueprint itself because it caused cyclic class
 // loading.  As part of SpBlueprint, the first time loading any SpBlueprint
@@ -38,11 +38,13 @@ import java.util.logging.Logger;
  * Provides support for creating the proper SpBlueprint from a ParamSet.
  */
 public final class SpBlueprintFactory {
-    private static final Logger LOGGER = Logger.getLogger(SpBlueprint.class.getName());
 
         // A map from each blueprint's PARAM_SET_NAME to its ParamSet ctor. This is spiritually flawed.
     private static final Map<String, Constructor<? extends SpBlueprint>> ctors =
             new TreeMap<String, Constructor<? extends SpBlueprint>>();
+
+    private static final Set<Class<? extends SpBlueprint>> registered =
+            new LinkedHashSet<Class<? extends SpBlueprint>>();
 
     static {
 
@@ -51,6 +53,7 @@ public final class SpBlueprintFactory {
                 SpFlamingos2BlueprintImaging.class,
                 SpFlamingos2BlueprintLongslit.class,
                 SpFlamingos2BlueprintMos.class,
+                SpGhostBlueprint.class,
                 SpGmosNBlueprintIfu.class,
                 SpGmosNBlueprintImaging.class,
                 SpGmosNBlueprintLongslit.class,
@@ -67,6 +70,7 @@ public final class SpBlueprintFactory {
                 SpGpiBlueprint.class,
                 SpGracesBlueprint.class,
                 SpGsaoiBlueprint.class,
+                SpIgrins2Blueprint.class,
                 SpMichelleBlueprintImaging.class,
                 SpMichelleBlueprintSpectroscopy.class,
                 SpNiciBlueprintCoronagraphic.class,
@@ -80,25 +84,38 @@ public final class SpBlueprintFactory {
                 SpVisitorBlueprint.class
         );
 
-        // Map each class's PARAM_SET_NAME to its ParamSet ctor
+        // Map each class's PARAM_SET_NAME to its ParamSet ctor.  A blueprint
+        // that lacks either is a wiring mistake, not a data problem, so fail
+        // loudly here rather than losing the blueprint later on load.
         for (Class<? extends SpBlueprint> c: types) {
             try {
                 final String psn = (String) c.getField("PARAM_SET_NAME").get(null);
-                final Constructor<? extends SpBlueprint> ctor = c.getConstructor(ParamSet.class);
-                ctors.put(psn, ctor);
+                register(psn, c);
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Trouble mapping ctor for " + c.getName(), e);
+                throw new ExceptionInInitializerError(
+                        new RuntimeException("Trouble mapping ctor for " + c.getName(), e));
             }
         }
 
         // It's tricky to generate the required static field in Scala so we'll just do it this way.
         // This needs to be refactored ... it's awful.
         try {
-            ctors.put(SpPhoenixBlueprint$.MODULE$.PARAM_SET_NAME(), SpPhoenixBlueprint.class.getConstructor(ParamSet.class));
+            register(SpPhoenixBlueprint$.MODULE$.PARAM_SET_NAME(), SpPhoenixBlueprint.class);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Trouble mapping blueprint constructor.", e);
+            throw new ExceptionInInitializerError(
+                    new RuntimeException("Trouble mapping blueprint constructor.", e));
         }
 
+    }
+
+    private static void register(String psn, Class<? extends SpBlueprint> c) throws NoSuchMethodException {
+        ctors.put(psn, c.getConstructor(ParamSet.class));
+        registered.add(c);
+    }
+
+    /** The blueprint types this factory knows how to read. */
+    public static Set<Class<? extends SpBlueprint>> registeredTypes() {
+        return Collections.unmodifiableSet(registered);
     }
 
     /** Returns true if the given ParamSet represents an SpBlueprint. */
