@@ -423,6 +423,17 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
             double shift = 0;
 
+            // S/N at the requested wavelength. SpectroscopyResult carries a single value, so it
+            // has to come from one IFU element: use element 0, the first aperture IFUComponent
+            // builds (the one at IfuSingle.offset, or at IfuRadial.minOffset). That is the element
+            // the exposure time solve above already works from (it reads specS2N()[0]) and the one
+            // whose throughput this method returns below. The radial analysis lays further elements
+            // out from there in steps of one fibre, but reporting one of those would describe a
+            // different part of the field than the exposure time does.
+            // Within that element the two-slit IFU has both slits covering the wavelength, so keep
+            // whichever gives the higher S/N, as the exposure time solve does when picking a slit.
+            Option<SignalToNoiseAt> at = Option.empty();
+
             for (int i = 0; i < ifusToShow; i++) {
                 Log.fine(String.format("Processing IFU element %d of %d -----", i, ifusToShow));
                 GmosSpecS2N s2n = new GmosSpecS2N(numberOfSlits);
@@ -478,12 +489,21 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                     VisitableSampledSpectrum totalSignalSpectrum = (VisitableSampledSpectrum) specS2N.getTotalSignalSpectrum().clone();
                     VisitableSampledSpectrum totalBackgroundSpectrum = (VisitableSampledSpectrum) specS2N.getTotalBackgroundSpectrum().clone();
                     s2n.setSlitS2N(j, signalIFUSpec, totalSignalSpectrum, backGroundIFUSpec, totalBackgroundSpectrum, expS2NIFUSpec, finalS2NIFUSpec, specS2N.getSkyAper());
+
+                    if (i == 0) {
+                        final Option<SignalToNoiseAt> slitAt = RecipeUtil.instance().signalToNoiseAt(
+                                wavelengthAt, specS2N.getExpS2NSpectrum(), specS2N.getFinalS2NSpectrum());
+                        if (slitAt.isDefined() && (at.isEmpty() ||
+                                slitAt.get().finalSignalToNoise() > at.get().finalSignalToNoise())) {
+                            at = slitAt;
+                        }
+                    }
                 }
 
                 specS2Narr[i] = s2n;
             }
 
-            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, sf_list.get(0), Option.empty(), Option.empty(), AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures)));
+            return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, sf_list.get(0), Option.empty(), at, AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures)));
 
             // ==== SLIT
         } else {
