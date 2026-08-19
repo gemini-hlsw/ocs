@@ -4,7 +4,7 @@ import java.io.File
 import java.util.Locale
 
 import edu.gemini.ags.client.impl.AgsHttpClient
-import edu.gemini.model.p1.immutable.Semester
+import edu.gemini.model.p1.immutable.{Semester, SemesterOption}
 import edu.gemini.pit.model.Model
 import edu.gemini.pit.ui.ShellAdvisor
 import edu.gemini.pit.ui.robot.AgsRobot
@@ -18,8 +18,10 @@ object PITLauncher extends App {
   private val locale = Locale.getDefault
   Locale.setDefault(Locale.ENGLISH)
 
-  // Need to set this manually, as we are not inside OSGi
-  val version = s"${Semester.current.year}.2.2"
+  // Need to set this manually, as we are not inside OSGi. The middle digit tracks
+  // the semester half, matching what the OSGi bundle version resolves to.
+  private val half = if (Semester.current.half == SemesterOption.A) 1 else 2
+  val version = s"${Semester.current.year}.$half.1"
   System.setProperty("edu.gemini.model.p1.schemaVersion", version)
   System.setProperty(classOf[Workspace].getName + ".fonts.shrunk", "true")
 
