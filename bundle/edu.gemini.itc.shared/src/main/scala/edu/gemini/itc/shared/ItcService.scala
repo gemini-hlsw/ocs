@@ -144,14 +144,18 @@ object SpcSeriesData {
   // Round the value to n significant figures, this to remove
   // the extra precision produced by ITC calculations using doubles
   // This will not work for extremely small numbers but we don't expect such
-  def roundToSignificantFigures(num: BigDecimal, n: Int): Double = {
+  //
+  // Takes a Double rather than a BigDecimal on purpose. Every caller passes a Double, and the
+  // implicit widening made `num == 0` route through BigDecimal.longValueExact, which throws and
+  // fills in a stack trace for every non-integral value.
+  def roundToSignificantFigures(num: Double, n: Int): Double = {
     if (num == 0) 0
     else {
-      val d     = ceil(log10(abs(num.toDouble)))
+      val d     = ceil(log10(abs(num)))
       val power = n - d.toInt
 
       val magnitude = pow(10, power)
-      val shifted   = round(num.toDouble * magnitude)
+      val shifted   = round(num * magnitude)
       shifted / magnitude
     }
   }
