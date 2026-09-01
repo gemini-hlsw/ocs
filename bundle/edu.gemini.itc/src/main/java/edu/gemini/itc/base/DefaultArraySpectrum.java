@@ -12,9 +12,19 @@ import java.util.logging.Logger;
 public final class DefaultArraySpectrum implements ArraySpectrum {
     private static final Logger Log = Logger.getLogger(DefaultArraySpectrum.class.getName());
     // The spectral data.  _data = new double[2][num_data_points]
-    // data[0][i] = x values
+    // data[0][i] = x values (wavelength in nm)
     // data[1][i] = y values
+    // The x axis is assumed non-decreasing: the .dat resource files list wavelengths in
+    // ascending order by convention (nothing validates it), and getStart/getEnd, the
+    // interpolation in getY and the search in getLowerIndex all rely on that ordering.
     private final double[][] _data;
+
+    // The index getLowerIndex returned last time. Callers usually walk x in increasing order,
+    // so the next lookup tends to land in this bin or the one after.
+    // The cursor is only a hint and needs no synchronisation: getLowerIndex checks it against
+    // the data before using it, so at worst a bad value causes a fallback to the binary
+    // search, never a wrong result.
+    private int _lowerIndexCursor = 0;
 
     public static DefaultArraySpectrum fromUserSpectrum(String spectrum) {
         final double[][] data = DatFile.fromUserSpectrum(spectrum);
@@ -155,19 +165,37 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
      * Returns the index of the data point with largest x value less than x
      */
     @Override public int getLowerIndex(double x) {
-        // In a general spectrum we don't have an idea which bin a particular
-        // x value is in.  The only solution is to search for it.
-        // Could just walk through, but do a binary search for it.
+        final double[] xs = _data[0];
+        final int last = xs.length - 1;
+        if (last < 1) return 0;
+
+        // For a non-decreasing x axis exactly one index satisfies xs[i] < x <= xs[i+1], the same
+        // one the binary search converges on, so the fast paths return precisely what the search
+        // would. Anything else, including x outside the range and NaN, falls through.
+        // the data files were reviewd and all have strictly increasing x values (wavelength)
+        final int c = _lowerIndexCursor;
+        if (c >= 0 && c < last) {
+            if (xs[c] < x && x <= xs[c + 1]) return c;
+            final int next = c + 1;
+            if (next < last && xs[next] < x && x <= xs[next + 1]) {
+                _lowerIndexCursor = next;
+                return next;
+            }
+        }
+
+        // The binary search stays as the fallback: the first lookup of each scan, random access
+        // from getY(double) and getIntegral, and steps that cross more than one bin all miss
+        // the cursor.
         int low_index = 0;
-        int high_index = _data[0].length;
-        if (high_index - low_index <= 1) return low_index;
+        int high_index = xs.length;
         while (high_index - low_index > 1) {
             int index = (high_index + low_index) / 2;
-            if (getX(index) < x)
+            if (xs[index] < x)
                 low_index = index;
             else
                 high_index = index;
         }
+        _lowerIndexCursor = low_index;
         return low_index;
     }
 
