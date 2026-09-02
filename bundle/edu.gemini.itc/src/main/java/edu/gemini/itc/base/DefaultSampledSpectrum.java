@@ -55,7 +55,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         for (int i = 0; i <= numIntervals; ++i) {
             data[i] = sp.getY(i * xInterval + xStart);
         }
-        reset(data, xStart, xInterval);
+        adopt(data, xStart, xInterval);
     }
 
     /**
@@ -84,7 +84,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         for (int i = 0; i <= numIntervals; ++i) {
            data[i] = sp.getY(xStart + i * xInterval);
         }
-        reset(data, xStart, xInterval);
+        adopt(data, xStart, xInterval);
     }
 
     /**
@@ -93,7 +93,9 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     @Override public Object clone() {
         double[] data = new double[getLength()];
         System.arraycopy(getValues(), 0, data, 0, getLength());
-        return new DefaultSampledSpectrum(data, getStart(), getSampling());
+        DefaultSampledSpectrum copy = new DefaultSampledSpectrum();
+        copy.adopt(data, getStart(), getSampling());
+        return copy;
     }
 
     @Override public void trim(double newStart, double newEnd) {
@@ -111,7 +113,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         //System.out.println("startpos: " + new Double((newStart-getStart())/_xInterval).intValue() + "length: " + getLength() + " copylength: " + new Double((newEnd-newStart)/_xInterval).intValue());
 
         System.arraycopy(getValues(), new Double((newStart - getStart()) / _xInterval).intValue(), data, 0, new Double((newEnd - newStart) / _xInterval).intValue());
-        reset(data, newStart, _xInterval);
+        adopt(data, newStart, _xInterval);
     }
 
 
@@ -122,9 +124,20 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      */
     @Override public void reset(double[] y, double xStart,
                       double xInterval) {
-        _y = new double[y.length];
         // need our own copy so client can't mess with it.
-        System.arraycopy(y, 0, _y, 0, y.length);
+        double[] copy = new double[y.length];
+        System.arraycopy(y, 0, copy, 0, y.length);
+        adopt(copy, xStart, xInterval);
+    }
+
+    // Uninitialised instance for internal use; callers must adopt() before returning it.
+    private DefaultSampledSpectrum() {
+    }
+
+    // Takes ownership of y without copying. Only for arrays freshly allocated in this class
+    // that nothing else references.
+    private void adopt(double[] y, double xStart, double xInterval) {
+        _y = y;
         _xStart = xStart;
         _xInterval = xInterval;
         _xEnd = _xStart + (_y.length - 1) * _xInterval;
@@ -264,7 +277,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
             x = (double) i * getSampling() + xStart;
             data[i] = getY(x / factor);
         }
-        reset(data, xStart, getSampling());
+        adopt(data, xStart, getSampling());
     }
 
     /**
@@ -284,7 +297,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
             x = (double) i * sampling + xStart;
             data[i] = getY(x / factor);
         }
-        reset(data, xStart, sampling);
+        adopt(data, xStart, sampling);
     }
 
     /**
