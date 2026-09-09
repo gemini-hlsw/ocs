@@ -55,7 +55,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         for (int i = 0; i <= numIntervals; ++i) {
             data[i] = sp.getY(i * xInterval + xStart);
         }
-        reset(data, xStart, xInterval);
+        adopt(data, xStart, xInterval);
     }
 
     /**
@@ -84,7 +84,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         for (int i = 0; i <= numIntervals; ++i) {
            data[i] = sp.getY(xStart + i * xInterval);
         }
-        reset(data, xStart, xInterval);
+        adopt(data, xStart, xInterval);
     }
 
     /**
@@ -93,7 +93,9 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     @Override public Object clone() {
         double[] data = new double[getLength()];
         System.arraycopy(getValues(), 0, data, 0, getLength());
-        return new DefaultSampledSpectrum(data, getStart(), getSampling());
+        DefaultSampledSpectrum copy = new DefaultSampledSpectrum();
+        copy.adopt(data, getStart(), getSampling());
+        return copy;
     }
 
     @Override public void trim(double newStart, double newEnd) {
@@ -106,12 +108,11 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         if (newEnd < getStart() || newStart > getEnd()) {
             return;
         }
-        double[] data = new double[new Double((newEnd - newStart) / _xInterval).intValue() + 4];
-        //System.out.println("os: " + getStart() + "ns: " + newStart + " oe: " + getEnd() + " ne: " + newEnd);
-        //System.out.println("startpos: " + new Double((newStart-getStart())/_xInterval).intValue() + "length: " + getLength() + " copylength: " + new Double((newEnd-newStart)/_xInterval).intValue());
-
-        System.arraycopy(getValues(), new Double((newStart - getStart()) / _xInterval).intValue(), data, 0, new Double((newEnd - newStart) / _xInterval).intValue());
-        reset(data, newStart, _xInterval);
+        int copyLength = (int) ((newEnd - newStart) / _xInterval);
+        int startPos = (int) ((newStart - getStart()) / _xInterval);
+        double[] data = new double[copyLength + 4];
+        System.arraycopy(getValues(), startPos, data, 0, copyLength);
+        adopt(data, newStart, _xInterval);
     }
 
 
@@ -122,9 +123,20 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      */
     @Override public void reset(double[] y, double xStart,
                       double xInterval) {
-        _y = new double[y.length];
         // need our own copy so client can't mess with it.
-        System.arraycopy(y, 0, _y, 0, y.length);
+        double[] copy = new double[y.length];
+        System.arraycopy(y, 0, copy, 0, y.length);
+        adopt(copy, xStart, xInterval);
+    }
+
+    // Uninitialised instance for internal use; callers must adopt() before returning it.
+    private DefaultSampledSpectrum() {
+    }
+
+    // Takes ownership of y without copying. Only for arrays freshly allocated in this class
+    // that nothing else references.
+    private void adopt(double[] y, double xStart, double xInterval) {
+        _y = y;
         _xStart = xStart;
         _xInterval = xInterval;
         _xEnd = _xStart + (_y.length - 1) * _xInterval;
@@ -264,7 +276,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
             x = (double) i * getSampling() + xStart;
             data[i] = getY(x / factor);
         }
-        reset(data, xStart, getSampling());
+        adopt(data, xStart, getSampling());
     }
 
     /**
@@ -284,7 +296,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
             x = (double) i * sampling + xStart;
             data[i] = getY(x / factor);
         }
-        reset(data, xStart, sampling);
+        adopt(data, xStart, sampling);
     }
 
     /**
@@ -300,25 +312,21 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
 
     @Override public void smoothY(int smoothing_element) {
         Log.fine(String.format("Smoothing Y by %d pix", smoothing_element));
-        double[] _y_temp;
-        _y_temp = new double[_y.length];
-        if (smoothing_element == 1.0) return;
+        if (smoothing_element == 1) return;
+        int half = smoothing_element / 2;
+        double[] _y_temp = new double[_y.length];
         for (int i = 0; i < getLength() - 1; ++i) {
             try {
-                if (i + smoothing_element / 2 >= getLength())
+                if (i + half >= getLength())
                     _y_temp[i] = getAverage(i, getLength() - 1);
-                else if (i - smoothing_element / 2 > 0 && smoothing_element % 2 != 0) { //if odd
-                    //System.out.println(" mod: " +smoothing_element%2);
-                    //double temp = _y[i-2]+_y[i-1]+_y[i]+_y[i+1]+_y[i+2];
-                    _y_temp[i] = getAverage(i - (new Double((smoothing_element) / 2).intValue()), i + (new Double((smoothing_element) / 2).intValue()));
-                    //_y[i]=temp/5;
-                } else if (i - smoothing_element / 2 > 0) //if even
-                    _y_temp[i] = getAverage(new Double(i - smoothing_element / 2).intValue() + 1, new Double(i + smoothing_element / 2).intValue());
+                else if (i - half > 0 && smoothing_element % 2 != 0) //if odd
+                    _y_temp[i] = getAverage(i - half, i + half);
+                else if (i - half > 0) //if even
+                    _y_temp[i] = getAverage(i - half + 1, i + half);
             } catch (Exception e) {
                 System.out.println("Smooth: " + e.toString());
             }
         }
-        //System.out.println("End"+ new Double(smoothing_element/2).intValue()+ "  " + getSampling());
         _y = _y_temp;
     }
 
