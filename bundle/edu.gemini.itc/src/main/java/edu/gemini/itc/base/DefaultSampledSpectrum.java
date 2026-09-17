@@ -29,6 +29,11 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     private double _xStart, _xEnd;
     private double _xInterval;     //Size of each particular element
 
+    // x(i) = _xOrigin + (_xOffset + i) * _xInterval; a cut-out keeps the full spectrum's origin so
+    // its x values are the same doubles. Usually _xOffset is 0 and _xOrigin equals _xStart.
+    private double _xOrigin;
+    private int _xOffset;
+
     /**
      * Construct a DefaultSampledSpectrum.  End x value is determined by
      * number of data points and the specified interval.
@@ -71,7 +76,14 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         for (int i = first; i <= last; ++i) {
             data[i - first] = sp.getY(i * xInterval + xStart);
         }
-        adopt(data, first * xInterval + xStart, xInterval);
+        adoptAt(data, xStart, first, xInterval);
+    }
+
+    /** A cut-out starting at index xOffset of the grid with origin xOrigin. Takes ownership of y. */
+    public static DefaultSampledSpectrum offset(double[] y, double xOrigin, int xOffset, double xInterval) {
+        DefaultSampledSpectrum s = new DefaultSampledSpectrum();
+        s.adoptAt(y, xOrigin, xOffset, xInterval);
+        return s;
     }
 
     /**
@@ -110,7 +122,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         double[] data = new double[getLength()];
         System.arraycopy(getValues(), 0, data, 0, getLength());
         DefaultSampledSpectrum copy = new DefaultSampledSpectrum();
-        copy.adopt(data, getStart(), getSampling());
+        copy.adoptAt(data, _xOrigin, _xOffset, _xInterval);
         return copy;
     }
 
@@ -125,7 +137,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
             return;
         }
         int copyLength = (int) ((newEnd - newStart) / _xInterval);
-        int startPos = (int) ((newStart - getStart()) / _xInterval);
+        int startPos = getLowerIndex(newStart);
         double[] data = new double[copyLength + 4];
         System.arraycopy(getValues(), startPos, data, 0, copyLength);
         adopt(data, newStart, _xInterval);
@@ -152,10 +164,16 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     // Takes ownership of y without copying. Only for arrays freshly allocated in this class
     // that nothing else references.
     private void adopt(double[] y, double xStart, double xInterval) {
+        adoptAt(y, xStart, 0, xInterval);
+    }
+
+    private void adoptAt(double[] y, double xOrigin, int xOffset, double xInterval) {
         _y = y;
-        _xStart = xStart;
+        _xOrigin = xOrigin;
+        _xOffset = xOffset;
         _xInterval = xInterval;
-        _xEnd = _xStart + (_y.length - 1) * _xInterval;
+        _xStart = getX(0);
+        _xEnd = getX(_y.length - 1);
     }
 
 
@@ -219,7 +237,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * @return x of specified bin
      */
     @Override public double getX(int index) {
-        return getStart() + index * getSampling();
+        return _xOrigin + (_xOffset + index) * _xInterval;
     }
 
     /**
@@ -245,7 +263,8 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * Returns the index of the data point with largest x value less than x
      */
     @Override public int getLowerIndex(double x) {
-        return (int) ((x - getStart()) / getSampling());
+        // arithmetic on the untrimmed origin can round a point on the first sample to the one before it
+        return Math.max(0, (int) ((x - _xOrigin) / _xInterval) - _xOffset);
     }
 
     /**
@@ -262,11 +281,8 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
 
 
     @Override public void applyWavelengthCorrection() {
-        double start = getStart();
-        double sampling = getSampling();
-
         for (int i = 0; i < getLength(); ++i) {
-            _y[i] = _y[i] * (start + i * sampling);
+            _y[i] = _y[i] * getX(i);
         }
     }
 
@@ -308,13 +324,14 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         double xEnd = getEnd() * factor;
         double sampling = getSampling() * factor;
         Log.fine(String.format("New sampling = %.5f nm", sampling));
+        double origin = _xOrigin * factor;
         double[] data = new double[numIntervals];
         double x;
         for (int i = 0; i < numIntervals; ++i) {
-            x = (double) i * sampling + xStart;
+            x = (double) (_xOffset + i) * sampling + origin;
             data[i] = getY(x / factor);
         }
-        adopt(data, xStart, sampling);
+        adoptAt(data, origin, _xOffset, sampling);
     }
 
     /**
@@ -504,7 +521,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         if (minXIndex < 0) maxXIndex = 0;
         double data[][] = new double[2][maxXIndex - minXIndex + 1];
         for (int i = minXIndex; i <= maxXIndex; i++) {
-            data[0][i - minXIndex] = getStart() + i * getSampling();
+            data[0][i - minXIndex] = getX(i);
             data[1][i - minXIndex] = _y[i];
         }
         return data;

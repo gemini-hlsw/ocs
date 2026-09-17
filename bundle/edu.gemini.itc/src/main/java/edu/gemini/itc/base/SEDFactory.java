@@ -138,6 +138,8 @@ public final class SEDFactory {
         return new double[] { lo - margin, hi + margin };
     }
 
+
+
     private static double[] redshifted(final double[] range, final double z) {
         if (range == null) return null;
         return new double[] { range[0] / (1 + z), range[1] / (1 + z) };
@@ -177,6 +179,11 @@ public final class SEDFactory {
         final double sampling = instrument.getSampling() / (1.0 + sdp.redshift().z());
         Log.fine(String.format("Sampling = %.5f nm", sampling));
 
+        // rest frame range the calculation needs; null means everything
+        final double[] range = redshifted(samplingRange(instrument, sdp), sdp.redshift().z());
+        final double lo = range == null ? Double.NEGATIVE_INFINITY : range[0];
+        final double hi = range == null ? Double.POSITIVE_INFINITY : range[1];
+
         switch (spectrumType) {
             case BLACK_BODY:
                 return BlackBodySpectrum.apply(
@@ -185,7 +192,8 @@ public final class SEDFactory {
                         sdp.norm(),
                         sdp.units(),
                         sdp.normBand(),
-                        sdp.redshift());
+                        sdp.redshift(),
+                        lo, hi);
 
             case EMISSION_LINE:
                 final EmissionLine eLine = (EmissionLine) sdp.distribution();
@@ -197,7 +205,8 @@ public final class SEDFactory {
                         eLine.flux(),
                         eLine.continuum(),
                         sdp.redshift(),
-                        sampling);
+                        sampling,
+                        lo, hi);
 
             case POWER_LAW:
                 return new PowerLawSpectrum(
@@ -227,12 +236,12 @@ public final class SEDFactory {
                 return temp;
 
             case LIBRARY_STAR:
-                temp = getSED(getLibraryResource(STELLAR_LIB, sdp), sampling, redshifted(samplingRange(instrument, sdp), sdp.redshift().z()));
+                temp = getSED(getLibraryResource(STELLAR_LIB, sdp), sampling, range);
                 temp.applyWavelengthCorrection();
                 return temp;
 
             case LIBRARY_NON_STAR:
-                temp = getSED(getLibraryResource(NON_STELLAR_LIB, sdp), sampling, redshifted(samplingRange(instrument, sdp), sdp.redshift().z()));
+                temp = getSED(getLibraryResource(NON_STELLAR_LIB, sdp), sampling, range);
                 temp.applyWavelengthCorrection();
                 return temp;
 
