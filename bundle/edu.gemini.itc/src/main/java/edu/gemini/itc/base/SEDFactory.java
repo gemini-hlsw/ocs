@@ -24,6 +24,9 @@ import scala.Option;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 import static java.lang.Math.min;
@@ -276,11 +279,15 @@ public final class SEDFactory {
         }
     }
 
-    public static SourceResult calculate(final Instrument instrument,
-                                         final SourceDefinition sdp,
-                                         final ObservingConditions odp,
-                                         final TelescopeDetails tp,
-                                         final Option<AOSystem> ao) {
+    /**
+     * The source and sky spectra as they arrive at the telescope focal plane: redshifted, normalized,
+     * through clouds, water and telescope transmission, with the telescope background added to the sky.
+     * Nothing here depends on the instrument's components, so a multi-CCD instrument can share the result.
+     */
+    private static SourceResult atTelescope(final Instrument instrument,
+                                            final SourceDefinition sdp,
+                                            final ObservingConditions odp,
+                                            final TelescopeDetails tp) {
         Log.fine("Calculating...");
 
         // Module 1b
@@ -341,7 +348,6 @@ public final class SEDFactory {
 
         // Background spectrum is introduced here.
         final VisitableSampledSpectrum sky = SEDFactory.getSED(getSky(instrument, odp), instrument.getSampling(), range);
-        Option<VisitableSampledSpectrum> halo = Option.empty();
 
         // Apply telescope transmission to both sed and sky
         final SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(tp);
@@ -351,6 +357,30 @@ public final class SEDFactory {
         // Create and Add background for the telescope.
         final SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(instrument, tp);
         sky.accept(tb);
+
+        return new SourceResult(sed, sky, Option.empty());
+    }
+
+
+    public static SourceResult calculate(final Instrument instrument,
+                                         final SourceDefinition sdp,
+                                         final ObservingConditions odp,
+                                         final TelescopeDetails tp,
+                                         final Option<AOSystem> ao) {
+        final SourceResult at = atTelescope(instrument, sdp, odp, tp);
+        return atInstrument(instrument, at.sed, at.sky, ao);
+    }
+
+    /**
+     * Applies the instrument to spectra from atTelescope: components, instrument background and, for
+     * the AO instruments, the AO system. Modifies sed and sky in place.
+     */
+    private static SourceResult atInstrument(final Instrument instrument,
+                                             final VisitableSampledSpectrum sed,
+                                             final VisitableSampledSpectrum sky,
+                                             final Option<AOSystem> ao) {
+        Option<VisitableSampledSpectrum> halo = Option.empty();
+        final SampledSpectrumVisitor tel = new TelescopeApertureVisitor();
 
         // FOR GSAOI and NIRI and GNIRS - ADD AO STUFF HERE
         if (instrument instanceof Gsaoi || instrument instanceof Niri || instrument instanceof Gnirs) {
@@ -398,6 +428,53 @@ public final class SEDFactory {
 
         // End of the Spectral energy distribution portion of the ITC.
         return new SourceResult(sed, sky, halo);
+    }
+
+    /**
+     * Per request memo of {@link #calculate}. The telescope stage, everything before the instrument,
+     * runs once per distinct sampling setup; every call gets its own copy with the instrument and AO
+     * system applied. Lets recipes that run the pipeline per CCD, slit or order share the expensive part.
+     */
+    public static final class SourceCache {
+        private final SourceDefinition sdp;
+        private final ObservingConditions odp;
+        private final TelescopeDetails tp;
+        private final List<Instrument> atKeys = new ArrayList<>();
+        private final List<SourceResult> atValues = new ArrayList<>();
+
+        public SourceCache(final SourceDefinition sdp, final ObservingConditions odp, final TelescopeDetails tp) {
+            this.sdp = sdp;
+            this.odp = odp;
+            this.tp  = tp;
+        }
+
+        public SourceResult get(final Instrument instrument, final Option<AOSystem> ao) {
+            final SourceResult at = atTelescopeFor(instrument);
+            return atInstrument(instrument,
+                    (VisitableSampledSpectrum) at.sed.clone(),
+                    (VisitableSampledSpectrum) at.sky.clone(),
+                    ao);
+        }
+
+        private SourceResult atTelescopeFor(final Instrument instrument) {
+            for (int i = 0; i < atKeys.size(); i++) {
+                if (sameTelescopeStage(atKeys.get(i), instrument)) return atValues.get(i);
+            }
+            final SourceResult at = atTelescope(instrument, sdp, odp, tp);
+            atKeys.add(instrument);
+            atValues.add(at);
+            return at;
+        }
+
+        // Everything atTelescope reads from the instrument.
+        private boolean sameTelescopeStage(final Instrument a, final Instrument b) {
+            return a.getSampling() == b.getSampling()
+                && a.getObservingStart() == b.getObservingStart()
+                && a.getObservingEnd() == b.getObservingEnd()
+                && a.getBands() == b.getBands()
+                && a.getSite() == b.getSite()
+                && Arrays.equals(samplingRange(a, sdp), samplingRange(b, sdp));
+        }
     }
 
     public static VisitableSampledSpectrum applyAoSystem(final AOSystem ao, final VisitableSampledSpectrum sky, final VisitableSampledSpectrum sed) {
