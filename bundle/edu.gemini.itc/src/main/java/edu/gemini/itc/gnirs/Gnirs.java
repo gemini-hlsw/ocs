@@ -432,6 +432,24 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
         return _XDisp;
     }
 
+    /** Range [nm] of orders 3 to 8 in cross-dispersed mode, trimmed the way GnirsRecipe does. */
+    public double[] xdWavelengthRange() {
+        final double centralWavelength = gp.centralWavelength().toMicrons();
+        final GNIRSParams.Order at = GNIRSParams.Order.getOrder(centralWavelength, null);
+        if (at == null) throw new IllegalArgumentException("The order for this wavelength cannot be found");
+        final double d = at.getOrder() * centralWavelength;
+
+        double lo = Double.POSITIVE_INFINITY;
+        double hi = Double.NEGATIVE_INFINITY;
+        for (final GNIRSParams.Order o : GNIRSParams.Order.values()) {
+            if (o == GNIRSParams.Order.ONE || o == GNIRSParams.Order.TWO || o == GNIRSParams.Order.XD) continue;
+            final double wavelength = d / o.getOrder();
+            lo = Math.min(lo, o.getStartWavelength(wavelength, getGrating(), getPixelScale()) * 1000);
+            hi = Math.max(hi, o.getEndWavelength(wavelength, getGrating(), getPixelScale()) * 1000);
+        }
+        return new double[] { lo, hi };
+    }
+
     public IFUComponent getIFU() { return _IFU; }
 
     public boolean isIfuUsed() {

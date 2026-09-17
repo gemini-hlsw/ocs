@@ -58,6 +58,22 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         adopt(data, xStart, xInterval);
     }
 
+    /** Samples sp at xInterval keeping only [lo, hi] (nm), on the grid of the two argument constructor. */
+    public DefaultSampledSpectrum(ArraySpectrum sp, double xInterval, double lo, double hi) {
+        double xStart = sp.getStart();
+        double xEnd = sp.getEnd();
+        int numIntervals = (int) ((xEnd - xStart) / xInterval);
+        int first = Math.max(0, Math.min(numIntervals, (int) Math.floor((lo - xStart) / xInterval)));
+        int last  = Math.max(first, Math.min(numIntervals, (int) Math.ceil((hi - xStart) / xInterval)));
+        Log.fine("Sampling " + xStart + " - " + xEnd + " nm restricted to " + lo + " - " + hi + " nm: "
+                + (last - first + 1) + " of " + (numIntervals + 1) + " samples");
+        double[] data = new double[last - first + 1];
+        for (int i = first; i <= last; ++i) {
+            data[i - first] = sp.getY(i * xInterval + xStart);
+        }
+        adopt(data, first * xInterval + xStart, xInterval);
+    }
+
     /**
      * Construct a DefaultSampledSpectrum by sampling the given ArraySpectrum
      * over the specified wavelength range at the specified interval.

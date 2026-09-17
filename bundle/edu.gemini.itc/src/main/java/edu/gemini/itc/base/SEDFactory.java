@@ -105,9 +105,42 @@ public final class SEDFactory {
      *  ...
      * </pre>
      */
-    private static VisitableSampledSpectrum getSED(final String fileName, final double wavelengthInterval) {
+    private static VisitableSampledSpectrum getSED(final String fileName, final double wavelengthInterval, final double[] range) {
         final DefaultArraySpectrum as = new DefaultArraySpectrum(fileName);
-        return new DefaultSampledSpectrum(as, wavelengthInterval);
+        if (range == null) return new DefaultSampledSpectrum(as, wavelengthInterval);
+        return new DefaultSampledSpectrum(as, wavelengthInterval, range[0], range[1]);
+    }
+
+    /**
+     * Range [nm] the calculation needs: the intersection of the component files (the spectrum is zero
+     * outside it after convolution), plus the observing window, the normalization band and a margin
+     * for smoothing. Null means no restriction.
+     */
+    static double[] samplingRange(final Instrument instrument, final SourceDefinition sdp) {
+        final java.util.List<TransmissionElement> components = instrument.getComponents();
+        if (components.isEmpty()) return null;
+
+        double lo = Double.NEGATIVE_INFINITY;
+        double hi = Double.POSITIVE_INFINITY;
+        for (final TransmissionElement te : components) {
+            lo = Math.max(lo, te.get_trans().getStart());
+            hi = Math.min(hi, te.get_trans().getEnd());
+        }
+
+        // cross dispersion needs all orders, not the one getObservingStart and getObservingEnd report
+        final double[] obs = (instrument instanceof Gnirs && ((Gnirs) instrument).XDisp_IsUsed())
+                ? ((Gnirs) instrument).xdWavelengthRange()
+                : new double[] { instrument.getObservingStart(), instrument.getObservingEnd() };
+        lo = Math.min(lo, Math.min(obs[0], sdp.normBand().start().toNanometers()));
+        hi = Math.max(hi, Math.max(obs[1], sdp.normBand().end().toNanometers()));
+
+        final double margin = 5.0 + 100.0 * instrument.getSampling();
+        return new double[] { lo - margin, hi + margin };
+    }
+
+    private static double[] redshifted(final double[] range, final double z) {
+        if (range == null) return null;
+        return new double[] { range[0] / (1 + z), range[1] / (1 + z) };
     }
 
 
@@ -194,12 +227,12 @@ public final class SEDFactory {
                 return temp;
 
             case LIBRARY_STAR:
-                temp = getSED(getLibraryResource(STELLAR_LIB, sdp), sampling);
+                temp = getSED(getLibraryResource(STELLAR_LIB, sdp), sampling, redshifted(samplingRange(instrument, sdp), sdp.redshift().z()));
                 temp.applyWavelengthCorrection();
                 return temp;
 
             case LIBRARY_NON_STAR:
-                temp = getSED(getLibraryResource(NON_STELLAR_LIB, sdp), sampling);
+                temp = getSED(getLibraryResource(NON_STELLAR_LIB, sdp), sampling, redshifted(samplingRange(instrument, sdp), sdp.redshift().z()));
                 temp.applyWavelengthCorrection();
                 return temp;
 
@@ -295,7 +328,7 @@ public final class SEDFactory {
         sed.accept(water);
 
         // Background spectrum is introduced here.
-        final VisitableSampledSpectrum sky = SEDFactory.getSED(getSky(instrument, odp), instrument.getSampling());
+        final VisitableSampledSpectrum sky = SEDFactory.getSED(getSky(instrument, odp), instrument.getSampling(), samplingRange(instrument, sdp));
         Option<VisitableSampledSpectrum> halo = Option.empty();
 
         // Apply telescope transmission to both sed and sky
