@@ -35,7 +35,15 @@ public class TransmissionElement implements SampledSpectrumVisitor {
      * Apply the transmission convolution for this component.
      */
     public void visit(final SampledSpectrum sed) {
-        for (int i = 0; i < sed.getLength(); i++) {
+        final int n = sed.getLength();
+        if (_trans instanceof DefaultArraySpectrum) {
+            final DefaultArraySpectrum.Interpolator trans = ((DefaultArraySpectrum) _trans).interpolator();
+            for (int i = 0; i < n; i++) {
+                sed.setY(i, sed.getY(i) * trans.at(sed.getX(i)));
+            }
+            return;
+        }
+        for (int i = 0; i < n; i++) {
             final double startval = sed.getX(i);
             final double multiplier = _trans.getY(startval);
             sed.setY(i, sed.getY(i) * multiplier);
