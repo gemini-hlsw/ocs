@@ -115,6 +115,13 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         adopt(data, xStart, xInterval);
     }
 
+    /** A spectrum with the same axis as the given one and all values zero. */
+    public static DefaultSampledSpectrum zerosLike(SampledSpectrum s) {
+        DefaultSampledSpectrum z = new DefaultSampledSpectrum();
+        z.adopt(new double[s.getLength()], s.getStart(), s.getSampling());
+        return z;
+    }
+
     /**
      * Implements the Cloneable interface.
      */

@@ -1,6 +1,7 @@
 package edu.gemini.itc.operation;
 
 import java.util.logging.Logger;
+import edu.gemini.itc.base.DefaultSampledSpectrum;
 import edu.gemini.itc.base.Disperser;
 import edu.gemini.itc.base.SampledSpectrum;
 import edu.gemini.itc.base.SampledSpectrumVisitor;
@@ -396,11 +397,9 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     /** Calculates total source flux (signal) in the aperture per coadd. */
     private VisitableSampledSpectrum signal(final double throughput) {
 
-        final VisitableSampledSpectrum signal = (VisitableSampledSpectrum) sourceFlux.clone();
+        final VisitableSampledSpectrum signal = DefaultSampledSpectrum.zerosLike(sourceFlux);
         final int lastPixel = lastCcdPixel(signal.getLength());
         Log.fine(String.format("Calculating signal: throughput = %.3f on detector pixels %d - %d", throughput, firstCcdPixel, lastPixel));
-
-        for (int i = 0; i < signal.getLength(); ++i) { signal.setY(i, 0); } // zero data array before use per REL-2992
 
         for (int i = firstCcdPixel; i <= lastPixel; ++i) {
             signal.setY(i, totalFlux(sourceFlux.getY(i), throughput, sourceFlux.getX(i)));
@@ -412,12 +411,10 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     /** Calculates total source flux (signal) in the aperture per coadd including the AO halo. */
     private VisitableSampledSpectrum signalWithHalo(final double throughput, final double haloThroughput) {
 
-        final VisitableSampledSpectrum signal = (VisitableSampledSpectrum) sourceFlux.clone();
+        final VisitableSampledSpectrum signal = DefaultSampledSpectrum.zerosLike(sourceFlux);
         final int lastPixel = lastCcdPixel(signal.getLength());
         Log.fine(String.format("Calculating signal: throughput = %.3f and halo throughput = %.3f on detector pixels %d - %d",
                 throughput, haloThroughput, firstCcdPixel, lastPixel));
-
-        for (int i = 0; i < signal.getLength(); ++i) { signal.setY(i, 0); }
 
         for (int i = firstCcdPixel; i <= lastPixel; ++i) {
             signal.setY(i,
@@ -436,12 +433,10 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     /** Calculates the background in the aperture per coadd. */
     private VisitableSampledSpectrum background(final Slit slit) {
 
-        final VisitableSampledSpectrum background = (VisitableSampledSpectrum) backgroundFlux.clone();
+        final VisitableSampledSpectrum background = DefaultSampledSpectrum.zerosLike(backgroundFlux);
         final int lastPixel = lastCcdPixel(background.getLength());
 
         Log.fine("Calculating background in " + exposureTime + " sec in a " + slit.widthPixels() + " x " + slit.lengthPixels() + " pix slit on pixels " + firstCcdPixel + " - " + lastPixel);
-
-        for (int i = 0; i < background.getLength(); ++i) { background.setY(i, 0); }
 
         //Shot noise on background flux in aperture
         for (int i = firstCcdPixel; i <= lastPixel; ++i) {
@@ -458,19 +453,12 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
     /** Calculates the signal to noise ratio for a single exposure (per frame). */
     private VisitableSampledSpectrum singleS2N(final VisitableSampledSpectrum signal, final VisitableSampledSpectrum background, final double darkNoise, final double readNoise) {
 
-        // total noise in the aperture
-        final VisitableSampledSpectrum noise = (VisitableSampledSpectrum) sourceFlux.clone();
-        for (int i = 0; i < noise.getLength(); ++i) { noise.setY(i, 0); }
-        for (int i = firstCcdPixel; i <= lastCcdPixel(noise.getLength()); ++i) {
+        // total noise in the aperture and the resulting signal to noise
+        final VisitableSampledSpectrum singleS2N = DefaultSampledSpectrum.zerosLike(sourceFlux);
+        final int lastPixel = lastCcdPixel(singleS2N.getLength());
+        for (int i = firstCcdPixel; i <= lastPixel; ++i) {
             final double noiseVariance = signal.getY(i) + background.getY(i) + darkNoise + readNoise;
-            noise.setY(i, Math.sqrt(Math.max(0.0, noiseVariance)));
-        }
-
-        // calculate signal to noise
-        final VisitableSampledSpectrum singleS2N = (VisitableSampledSpectrum) sourceFlux.clone();
-        for (int i = 0; i < singleS2N.getLength(); ++i) { singleS2N.setY(i, 0); }
-        for (int i = firstCcdPixel; i <= lastCcdPixel(singleS2N.getLength()); ++i) {
-            final double n = noise.getY(i);
+            final double n = Math.sqrt(Math.max(0.0, noiseVariance));
             singleS2N.setY(i, (n > 0.0) ? Math.sqrt(coadds) * signal.getY(i) / n : 0.0);
         }
 
@@ -500,18 +488,13 @@ public class SpecS2NSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
         // the number of exposures measuring the source flux is
         final double spec_number_source_exposures = numberExposures * coadds * sourceFraction;
 
-        // noise in aperture
-        final VisitableSampledSpectrum spec_sourceless_noise = (VisitableSampledSpectrum) sourceFlux.clone();
-        for (int i = 0; i < spec_sourceless_noise.getLength(); ++i) { spec_sourceless_noise.setY(i, 0); }
-        int spec_sourceless_noise_last = lastCcdPixel(spec_sourceless_noise.getLength());
-        for (int i = firstCcdPixel; i <= spec_sourceless_noise_last; ++i) {
-            spec_sourceless_noise.setY(i, Math.sqrt(Math.max(0.0, background.getY(i) + darkNoise + readNoise)));
+        // sourceless noise in the aperture and the resulting final signal to noise
+        final VisitableSampledSpectrum finalS2N = DefaultSampledSpectrum.zerosLike(sourceFlux);
+        final int lastPixel = lastCcdPixel(finalS2N.getLength());
+        for (int i = firstCcdPixel; i <= lastPixel; ++i) {
+            final double sourcelessNoise = Math.sqrt(Math.max(0.0, background.getY(i) + darkNoise + readNoise));
+            finalS2N.setY(i, pixelS2N(signal.getY(i), sourcelessNoise, spec_number_source_exposures, noiseFactor));
         }
-
-        final VisitableSampledSpectrum finalS2N = (VisitableSampledSpectrum) sourceFlux.clone();
-        for (int i = 0; i < finalS2N.getLength(); ++i) { finalS2N.setY(i, 0); }
-        for (int i = firstCcdPixel; i <= lastCcdPixel(finalS2N.getLength()); ++i)
-            finalS2N.setY(i, pixelS2N(signal.getY(i), spec_sourceless_noise.getY(i), spec_number_source_exposures, noiseFactor));
 
         return finalS2N;
     }
