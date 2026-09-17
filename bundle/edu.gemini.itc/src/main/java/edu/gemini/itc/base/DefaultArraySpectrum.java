@@ -203,22 +203,33 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
         // For a non-decreasing x axis exactly one index satisfies xs[i] < x <= xs[i+1], the same
         // one the binary search converges on, so the fast paths return precisely what the search
         // would. Anything else, including x outside the range and NaN, falls through.
-        // the data files were reviewd and all have strictly increasing x values (wavelength)
+        // the data files were reviewed and all have strictly increasing x values (wavelength)
         final int c = _lowerIndexCursor;
+        int low_index = 0;
+        int high_index = xs.length;
         if (c >= 0 && c < last) {
             if (xs[c] < x && x <= xs[c + 1]) return c;
-            final int next = c + 1;
-            if (next < last && xs[next] < x && x <= xs[next + 1]) {
-                _lowerIndexCursor = next;
-                return next;
+            if (xs[c] < x) {
+                // Forward step of any size: gallop from the cursor to bracket x, then
+                // bisect only that bracket. This is the common case when the file grid is
+                // finer than the spectrum grid.
+                int step = 1;
+                int lo = c;
+                int hi = Math.min(last, c + step);
+                while (xs[hi] < x && hi < last) {
+                    lo = hi;
+                    step <<= 1;
+                    hi = Math.min(last, hi + step);
+                }
+                if (x <= xs[hi]) {
+                    low_index = lo;
+                    high_index = hi;
+                }
             }
         }
 
-        // The binary search stays as the fallback: the first lookup of each scan, random access
-        // from getY(double) and getIntegral, and steps that cross more than one bin all miss
-        // the cursor.
-        int low_index = 0;
-        int high_index = xs.length;
+        // The full binary search stays as the fallback for backward steps, x beyond the end
+        // and NaN.
         while (high_index - low_index > 1) {
             int index = (high_index + low_index) / 2;
             if (xs[index] < x)
