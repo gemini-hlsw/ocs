@@ -3,6 +3,7 @@ package edu.gemini.itc.base;
 import edu.gemini.itc.ghost.Ghost;
 import scala.collection.immutable.Map;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -68,6 +69,10 @@ public abstract class GratingOptics extends TransmissionElement implements Dispe
     }
 
     // Return the index of the value closest to val. v is ascending, as the dispersion files are.
+    // Lower bound found by the last getX. Callers walk wavelengths upwards, so the next one is
+    // usually at or just past it. Only a hint, checked before use, so no synchronisation.
+    private int _xCursor = 0;
+
     int getX(double[] v, double val) throws Exception {
         if (v.length == 0) {
             Log.warning("The vector provided does not have data");
@@ -80,13 +85,35 @@ public abstract class GratingOptics extends TransmissionElement implements Dispe
             return v.length-1;
         }
 
-        // first i with v[i] >= val
+        // first i with v[i] >= val; unique for a non-decreasing v, so bracketing from the cursor
+        // and bisecting inside the bracket gives the same index as the full search
         int lo = 0;
         int hi = v.length - 1;
+        final int c = _xCursor;
+        if (c > 0 && c < v.length && v[c - 1] < val) {
+            if (v[c] >= val) {
+                lo = c;
+                hi = c;
+            } else {
+                int step = 1;
+                int below = c;
+                while (true) {
+                    final int probe = Math.min(hi, below + step);
+                    if (v[probe] >= val) {
+                        lo = below + 1;
+                        hi = probe;
+                        break;
+                    }
+                    below = probe;
+                    step <<= 1;
+                }
+            }
+        }
         while (lo < hi) {
             final int mid = (lo + hi) >>> 1;
             if (v[mid] >= val) hi = mid; else lo = mid + 1;
         }
+        _xCursor = lo;
         if (lo - 1 >= 0 && Math.abs(v[lo] - val) > Math.abs(v[lo-1] - val)) {
             return lo - 1;
         }
@@ -131,7 +158,7 @@ public abstract class GratingOptics extends TransmissionElement implements Dispe
             throw new RuntimeException(e);
         }
         final double disp = data2[1][i] * _spectralBinning;
-        if ((wavelength % 100) < 0.003) Log.fine(String.format("Dispersion @ %7.3f nm = %7.5f", wavelength, disp));
+        if (Log.isLoggable(Level.FINE) && (wavelength % 100) < 0.003) Log.fine(String.format("Dispersion @ %7.3f nm = %7.5f", wavelength, disp));
         return disp;
     }
 
