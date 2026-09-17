@@ -2,6 +2,7 @@ package edu.gemini.itc.base
 
 import java.util.Scanner
 import java.util.logging.{Level, Logger}
+import java.util.LinkedHashMap
 import java.util.regex.Pattern
 import scala.collection._
 import scalaz._
@@ -79,15 +80,27 @@ object DatFile {
     }
   }
 
-  def fromUserSpectrum(s: String) = {
-    val scan = new Scanner(s).useDelimiter(Delimiters)
-    scanArray(scan)
+  // Parsed user spectra are held for a few requests: the same text is needed once for
+  // range validation and once for the SED, for every CCD of a request.
+  private val UserSpectra = new LinkedHashMap[String, Data](8, 0.75f, true) {
+    override def removeEldestEntry(e: java.util.Map.Entry[String, Data]) = size > 4
+  }
+
+  /** Parses a user supplied spectrum. The result is shared and must not be modified. */
+  def fromUserSpectrum(s: String): Data = UserSpectra.synchronized {
+    val cached = UserSpectra.get(s)
+    if (cached != null) cached
+    else {
+      val data = parseArray(s)
+      UserSpectra.put(s, data)
+      data
+    }
   }
 
   // ===== Cached data file loaders
 
   val arrays = cache { s =>
-    scanArray(s)
+    parseArray(s.useDelimiter("\\A").next())
   }
 
   val filters = cache { s =>
@@ -134,6 +147,53 @@ object DatFile {
     val data = new Array[Array[Double]](2)
     data(0) = l.map(_._1).toArray
     data(1) = l.map(_._2).toArray
+    data
+  }
+
+  private def isDelimiter(c: Char): Boolean =
+    c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f' || c == '\u000B' || c == ',' || c == ';'
+
+  /**
+   * Parses pairs of doubles separated by whitespace, commas or semicolons, with "#" comments running to
+   * the end of the line. Same tokens and same Double.parseDouble as the scanner version, without the regex.
+   */
+  private def parseArray(text: String): Data = {
+    val n = text.length
+    var xs = new Array[Double](1024)
+    var ys = new Array[Double](1024)
+    var count = 0
+    var i = 0
+    var pending = Double.NaN
+    var havePending = false
+    while (i < n) {
+      val c = text.charAt(i)
+      if (c == '#') {
+        while (i < n && text.charAt(i) != '\n') i += 1
+      } else if (isDelimiter(c)) {
+        i += 1
+      } else {
+        val start = i
+        while (i < n && { val d = text.charAt(i); d != '#' && !isDelimiter(d) }) i += 1
+        val v = java.lang.Double.parseDouble(text.substring(start, i))
+        if (havePending) {
+          if (count == xs.length) {
+            xs = java.util.Arrays.copyOf(xs, count * 2)
+            ys = java.util.Arrays.copyOf(ys, count * 2)
+          }
+          xs(count) = pending
+          ys(count) = v
+          count += 1
+          havePending = false
+        } else {
+          pending = v
+          havePending = true
+        }
+      }
+    }
+    if (havePending) throw new IllegalArgumentException("odd number of values, expected wavelength and flux pairs")
+    val data = new Array[Array[Double]](2)
+    data(0) = java.util.Arrays.copyOf(xs, count)
+    data(1) = java.util.Arrays.copyOf(ys, count)
     data
   }
 
