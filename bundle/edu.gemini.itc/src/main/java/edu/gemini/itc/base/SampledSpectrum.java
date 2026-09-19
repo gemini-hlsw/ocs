@@ -43,4 +43,28 @@ public interface SampledSpectrum extends ArraySpectrum {
 
     void trim(double wavelengthStart, double wavelengthEnd);
 
+    /**
+     * Applys a wavelength correction to the sed
+     */
+    void applyWavelengthCorrection();
+
+    /**
+     * Sets Y value at specified index.
+     */
+    void setY(int index, double y);
+
+    /**
+     * Rescales X axis by specified factor.
+     */
+    void rescaleX(double factor);
+
+    /**
+     * Rescales Y axis by specified factor.
+     */
+    void rescaleY(double factor);
+
+    /**
+     * Smooths the Y axis with a smoothing element
+     */
+    void smoothY(int smoothing_element);
 }

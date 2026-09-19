@@ -5,6 +5,7 @@ package edu.gemini.itc.base;
  * real numbers (doubles).  This spectrum is abstracted as an array
  * of data points are not necessarily at regular x intevals, but
  * with increasing x.  (i.e. if you connect the dots, this is a function).
+ * It is read-only; the mutating operations live on SampledSpectrum.
  */
 public interface ArraySpectrum extends Spectrum, Cloneable {
     // Adds the following methods to the Spectrum interface
@@ -28,31 +29,6 @@ public interface ArraySpectrum extends Spectrum, Cloneable {
      * Returns the index of the data point with largest x value less than x
      */
     int getLowerIndex(double x);
-
-    /**
-     * Applys a wavelength correction to the sed
-     */
-    void applyWavelengthCorrection();
-
-    /**
-     * Sets Y value at specified index.
-     */
-    void setY(int index, double y);
-
-    /**
-     * Rescales X axis by specified factor.
-     */
-    void rescaleX(double factor);
-
-    /**
-     * Rescales Y axis by specified factor.
-     */
-    void rescaleY(double factor);
-
-    /**
-     * Smooths the Y axis with a smoothing element
-     */
-    void smoothY(int smoothing_element);
 
     /**
      * This returns a 2d array of the SED data used to chart the SED

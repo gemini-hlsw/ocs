@@ -21,7 +21,7 @@ public final class Filter extends TransmissionElement {
     }
 
     private Filter(final String filter, final double[][] data, final double wl) {
-        super(new DefaultArraySpectrum(data));
+        super(DefaultArraySpectrum.sharing(data));
         _filter = filter;
         _effectiveWavelength = wl;
     }
