@@ -214,6 +214,8 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         if (x < getStart() || x > getEnd()) return 0;
         if (x == getEnd()) return getY(getLength() - 1);
         int low_index = getLowerIndex(x);
+        // x within rounding of the last sample can land on the last index and leave no upper neighbour
+        if (low_index >= getLength() - 1) return getY(getLength() - 1);
         int high_index = low_index + 1;
         double y1 = getY(low_index);
         double y2 = getY(high_index);
@@ -288,7 +290,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         int numIntervals = getLength();
         double xStart = getStart() * factor;
         double xEnd = getEnd() * factor;
-        double sampling = (xEnd - xStart) / numIntervals;
+        double sampling = getSampling() * factor;
         Log.fine(String.format("New sampling = %.5f nm", sampling));
         double[] data = new double[numIntervals];
         double x;
