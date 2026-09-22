@@ -23,13 +23,25 @@ import org.junit.{Ignore, Test}
  *
  * Since these tests are very time consuming and only meant to be executed manually they are marked as {{{@Ignore}}}.
  *
+ * When {{{checkAll()}}} fails, every fixture whose output differs from the baseline is printed to stderr.
+ * To see what actually changed, set the system property {{{baseline.dump}}} to a directory; the output of every
+ * fixture is then written there as {{{<key>.txt}}}. Run once on master and once on your branch, then diff the
+ * two directories (e.g. {{{diff -r /tmp/baseline-master /tmp/baseline-branch}}}).  From sbt:
+ * {{{
+ *   set fork in Test := true
+ *   set javaOptions in Test += "-Dbaseline.dump=/tmp/baseline"
+ * }}}
+ *
  */
 class BaselineTest {
+
+  /** A baseline together with the fixture and output that produced it, for diagnostics. */
+  private case class Result(fixture: Fixture[_ <: InstrumentDetails], output: Output, baseline: Baseline)
 
   @Ignore
   @Test
   def create(): Unit = {
-    val baseSeq = baselines()
+    val baseSeq = baselines().map(_.baseline)
     val baseMap = baseSeq.map(b => b.in -> b.out).toMap
     // --
     // make sure we don't run into the case where two baselines have identical keys
@@ -43,10 +55,28 @@ class BaselineTest {
 
   @Ignore
   @Test
-  def checkAll(): Unit =
-    baselines().foreach { b => assertTrue(Baseline.checkAgainstBaseline(b)) }
+  def checkAll(): Unit = {
+    val results = baselines()
 
-  private def baselines(): Seq[Baseline] =
+    // optionally write every fixture's output to disk so it can be diffed against another branch
+    sys.props.get("baseline.dump").foreach(dir => dumpOutputs(results, dir))
+
+    // collect all mismatches (instead of stopping at the first one) and report which fixtures they are
+    val failures = results.filterNot(r => Baseline.checkAgainstBaseline(r.baseline))
+    failures.foreach { r =>
+      System.err.println(
+        s"""
+           |===== Baseline MISMATCH =====
+           |fixture: ${r.fixture}
+           |key:     ${r.baseline.in}
+           |=============================""".stripMargin)
+    }
+    System.err.flush()
+
+    assertTrue(s"${failures.size} of ${results.size} baselines differ from baseline.txt", failures.isEmpty)
+  }
+
+  private def baselines(): Seq[Result] =
     executeAll(BaselineAcqCam.Fixtures, executeAcqCamRecipe) ++
     executeAll(BaselineF2.Fixtures, executeF2Recipe) ++
     executeAll(BaselineGmos.Fixtures, executeGmosRecipe) ++
@@ -57,9 +87,37 @@ class BaselineTest {
     executeAll(BaselineNiri.Fixtures, executeNiriRecipe) ++
     executeAll(BaselineTRecs.Fixtures, executeTrecsRecipe)
 
-  private def executeAll[T <: InstrumentDetails](fs: Seq[Fixture[T]], recipe: (Fixture[T]) => Output): Seq[Baseline] = {
+  private def executeAll[T <: InstrumentDetails](fs: Seq[Fixture[T]], recipe: (Fixture[T]) => Output): Seq[Result] = {
     require(fs.size > 10, "Not enough fixtures " + fs.size) // make sure there's a good number of fixtures
-    fs.par.map(f => Baseline.from(f, recipe(f))).seq
+    fs.par.map { f =>
+      val output =
+        try recipe(f)
+        catch {
+          case e: Throwable =>
+            // the fixtures run in parallel, so the stack trace alone doesn't say which one failed
+            System.err.println(
+              s"""
+                 |===== Baseline recipe FAILED =====
+                 |fixture: $f
+                 |error:   $e
+                 |==================================""".stripMargin)
+            System.err.flush()
+            throw e
+        }
+      Result(f, output, Baseline.from(f, output))
+    }.seq
+  }
+
+  /** Write each fixture and its output to `<dir>/<key>.txt`; the key is derived from the fixture,
+    * so the same configuration gets the same file name on every branch. */
+  private def dumpOutputs(results: Seq[Result], dir: String): Unit = {
+    val d = new java.io.File(dir)
+    d.mkdirs()
+    results.foreach { r =>
+      val w = new java.io.PrintWriter(new java.io.File(d, s"${r.baseline.in}.txt"))
+      try w.println(s"fixture: ${r.fixture}\n\n${r.output}") finally w.close()
+    }
+    System.out.println(s"Wrote ${results.size} baseline outputs to ${d.getAbsolutePath}")
   }
 
 }
