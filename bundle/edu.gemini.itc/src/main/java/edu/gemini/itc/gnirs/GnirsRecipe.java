@@ -430,30 +430,44 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             SlitThroughput throughput = null;
             Option<AOSystem> altair = null;
 
-            // Find the order corresponding to the user-supplied central wavelength
-            final double centralWavelength = _gnirsParameters.centralWavelength().toNanometers();
-            GNIRSParams.Order centerOrder = GNIRSParams.Order.getOrder(centralWavelength / 1000., null);
-            if (centerOrder == null) {
-                throw new IllegalArgumentException("The order for this wavelength cannot be found");
-            }
-            final double mLambda = centerOrder.getOrder() * centralWavelength;  // nanometers
-
             final GNIRSParams.PixelScale pixelScale = instrument.getPixelScale();
             final GNIRSParams.Disperser disperser = instrument.getGrating();
+            final boolean xd = instrument.XDisp_IsUsed();
 
-            int numberOrders = instrument.XDisp_IsUsed() ? ORDERS : 1;
-            SpecS2N[] specS2Narr = new SpecS2N[numberOrders];
+            // For XD, find the order containing the user-supplied central wavelength (m * lambda is constant)
+            final double mLambda;
+            if (xd) {
+                final double centralWavelength = _gnirsParameters.centralWavelength().toNanometers();
+                final GNIRSParams.Order centerOrder = GNIRSParams.Order.getOrder(centralWavelength / 1000., null);
+                if (centerOrder == null) {
+                    throw new IllegalArgumentException("The order for this wavelength cannot be found");
+                }
+                mLambda = centerOrder.getOrder() * centralWavelength;  // nm
+            } else {
+                mLambda = Double.NaN;  // not used for long-slit
+            }
+
+            final int numberOrders = xd ? ORDERS : 1;
+            final SpecS2N[] specS2Narr = new SpecS2N[numberOrders];
 
             for (int i = 0; i < numberOrders; i++) {
 
-                final int order = instrument.XDisp_IsUsed() ? i + 3 : instrument.getOrder();
-                GNIRSParams.Order Order = GNIRSParams.Order.getOrderByNumber(order);
-                Log.fine("Order = " + Order.displayValue() + " -----------------------------------------");
+                final int order = xd ? i + 3 : instrument.getOrder();
 
-                final double wavelength = mLambda / order;
-                final double startWavelength = Order.getStartWavelength(wavelength / 1000., disperser, pixelScale) * 1000.;
-                final double endWavelength = Order.getEndWavelength(wavelength / 1000., disperser, pixelScale) * 1000.;
-                Log.fine(String.format("Wavelength = %.1f (%.1f - %.1f) nm", wavelength, startWavelength, endWavelength));
+                final double wavelength, startWavelength, endWavelength;  // nm
+                if (xd) {
+                    final GNIRSParams.Order o = GNIRSParams.Order.getOrderByNumber(order);
+                    if (o == null) throw new IllegalStateException("Unknown GNIRS order " + order);
+                    wavelength      = mLambda / order;
+                    startWavelength = o.getStartWavelength(wavelength / 1000., disperser, pixelScale) * 1000.;
+                    endWavelength   = o.getEndWavelength(wavelength / 1000., disperser, pixelScale) * 1000.;
+                } else {
+                    wavelength      = instrument.getEffectiveWavelength();
+                    startWavelength = instrument.getObservingStart();
+                    endWavelength   = instrument.getObservingEnd();
+                }
+                Log.fine(String.format("Order %d: wavelength = %.1f (%.1f - %.1f) nm",
+                        order, wavelength, startWavelength, endWavelength));
 
                 // Calculate image quality
                 IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, (int) wavelength);
@@ -487,7 +501,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 Log.fine(String.format("Slit = %.3f x %.3f arcsec", slit.width(), slit.length()));
 
                 throughput = new SlitThroughput(_sdParameters, slit, im_qual);
-                Log.fine(String.format("Throughput = %.5f for order %d", throughput.throughput(), instrument.getOrder()));
+                Log.fine(String.format("Throughput = %.5f for order %d", throughput.throughput(), order));
 
                 final Option<SlitThroughput> haloThroughput = altair.isDefined()
                         ? Option.apply(new SlitThroughput(_sdParameters, slit, IQcalc.getImageQuality()))
@@ -560,6 +574,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                     }
                 }
                 IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, 1650);
+                IQcalc.calculate();
                 return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, null, Double.NaN, altair, sn, exp);
             } else {
                 final SpecS2N specS2N = specS2Narr[0];
