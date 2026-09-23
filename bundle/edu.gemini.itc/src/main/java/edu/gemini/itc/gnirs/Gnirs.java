@@ -432,20 +432,37 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
         return _XDisp;
     }
 
-    /** Range [nm] of orders 3 to 8 in cross-dispersed mode, trimmed the way GnirsRecipe does. */
-    public double[] xdWavelengthRange() {
-        final double centralWavelength = gp.centralWavelength().toMicrons();
-        final GNIRSParams.Order at = GNIRSParams.Order.getOrder(centralWavelength, null);
-        if (at == null) throw new IllegalArgumentException("The order for this wavelength cannot be found");
-        final double d = at.getOrder() * centralWavelength;
+    /** Order number of the first of the GnirsRecipe.ORDERS cross-dispersed orders. */
+    public static final int XD_FIRST_ORDER = 3;
 
+    /** m * lambda [nm], the same for every cross-dispersed order, from the order holding the central wavelength. */
+    private double xdMLambda() {
+        final double centralWavelength = gp.centralWavelength().toNanometers();
+        final GNIRSParams.Order centerOrder = GNIRSParams.Order.getOrder(centralWavelength / 1000., null);
+        if (centerOrder == null) throw new IllegalArgumentException("The order for this wavelength cannot be found");
+        return centerOrder.getOrder() * centralWavelength;
+    }
+
+    /** Central, start and end wavelength [nm] of the given order in cross-dispersed mode. */
+    public double[] xdOrderWavelengths(final int order) {
+        final GNIRSParams.Order o = GNIRSParams.Order.getOrderByNumber(order);
+        if (o == null) throw new IllegalStateException("Unknown GNIRS order " + order);
+        final double wavelength = xdMLambda() / order;
+        return new double[] {
+                wavelength,
+                o.getStartWavelength(wavelength / 1000., getGrating(), getPixelScale()) * 1000.,
+                o.getEndWavelength(wavelength / 1000., getGrating(), getPixelScale()) * 1000.
+        };
+    }
+
+    /** Range [nm] covered by all cross-dispersed orders. */
+    public double[] xdWavelengthRange() {
         double lo = Double.POSITIVE_INFINITY;
         double hi = Double.NEGATIVE_INFINITY;
-        for (final GNIRSParams.Order o : GNIRSParams.Order.values()) {
-            if (o == GNIRSParams.Order.ONE || o == GNIRSParams.Order.TWO || o == GNIRSParams.Order.XD) continue;
-            final double wavelength = d / o.getOrder();
-            lo = Math.min(lo, o.getStartWavelength(wavelength, getGrating(), getPixelScale()) * 1000);
-            hi = Math.max(hi, o.getEndWavelength(wavelength, getGrating(), getPixelScale()) * 1000);
+        for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
+            final double[] w = xdOrderWavelengths(XD_FIRST_ORDER + i);
+            lo = Math.min(lo, w[1]);
+            hi = Math.max(hi, w[2]);
         }
         return new double[] { lo, hi };
     }

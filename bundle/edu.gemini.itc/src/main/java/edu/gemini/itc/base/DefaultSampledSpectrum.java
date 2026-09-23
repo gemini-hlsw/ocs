@@ -63,7 +63,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         adopt(data, xStart, xInterval);
     }
 
-    /** Samples sp at xInterval keeping only [lo, hi] (nm), on the grid of the two argument constructor. */
+    /** Samples sp at xInterval keeping only the samples that cover [lo, hi] (nm), on the grid of the two argument constructor. */
     public DefaultSampledSpectrum(ArraySpectrum sp, double xInterval, double lo, double hi) {
         double xStart = sp.getStart();
         double xEnd = sp.getEnd();
@@ -263,8 +263,9 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * Returns the index of the data point with largest x value less than x
      */
     @Override public int getLowerIndex(double x) {
+        final int i = (int) ((x - _xOrigin) / _xInterval) - _xOffset;
         // arithmetic on the untrimmed origin can round a point on the first sample to the one before it
-        return Math.max(0, (int) ((x - _xOrigin) / _xInterval) - _xOffset);
+        return (i < 0 && x >= getStart()) ? 0 : i;
     }
 
     /**
@@ -296,32 +297,12 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     }
 
     /**
-     * Rescales X axis by specified factor. Doesn't change sampling size.
-     */
-    public void rescaleXwithFixedSampleSize(double factor) {
-        Log.fine(String.format("Rescaling X by %.5f", factor));
-        if (factor == 1.0) return;
-        double xStart = getStart() * factor;
-        double xEnd = getEnd() * factor;
-        int numIntervals = (int) ((xEnd - xStart) / getSampling());
-        double[] data = new double[numIntervals];
-        double x;
-        for (int i = 0; i < numIntervals; ++i) {
-            x = (double) i * getSampling() + xStart;
-            data[i] = getY(x / factor);
-        }
-        adopt(data, xStart, getSampling());
-    }
-
-    /**
      * Rescales X axis by specified factor.  Doesn't change the number of samples.
      */
     public void rescaleX(double factor) {
         Log.fine(String.format("Rescaling X by %.5f", factor));
         if (factor == 1.0) return;
         int numIntervals = getLength();
-        double xStart = getStart() * factor;
-        double xEnd = getEnd() * factor;
         double sampling = getSampling() * factor;
         Log.fine(String.format("New sampling = %.5f nm", sampling));
         double origin = _xOrigin * factor;

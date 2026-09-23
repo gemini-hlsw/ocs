@@ -112,9 +112,11 @@ public final class SEDFactory {
     }
 
     /**
-     * Range [nm] the calculation needs: the intersection of the component files (the spectrum is zero
-     * outside it after convolution), plus the observing window, the normalization band and a margin
-     * for smoothing. Null means no restriction.
+     * Range [nm] the calculation needs, null for no restriction. The result stays exact because the
+     * spectrum is zero outside the intersection of the component files after convolution; widening it
+     * by the observing window and the normalization band only keeps the resampling and normalization
+     * inside the samples. That window is not every window a recipe resamples over (GMOS IFU-2 shifts it
+     * by ifu2shift), so do not narrow the range to it.
      */
     static double[] samplingRange(final Instrument instrument, final SourceDefinition sdp) {
         final java.util.List<TransmissionElement> components = instrument.getComponents();
@@ -134,13 +136,13 @@ public final class SEDFactory {
         lo = Math.min(lo, Math.min(obs[0], sdp.normBand().start().toNanometers()));
         hi = Math.max(hi, Math.max(obs[1], sdp.normBand().end().toNanometers()));
 
+        // SpecS2NSlitVisitor.smoothY zeroes the first half smoothing width of samples, so that half width
+        // must stay below the margin; at least 100 samples keeps resolution elements up to ~200 samples exact
         final double margin = 5.0 + 100.0 * instrument.getSampling();
         return new double[] { lo - margin, hi + margin };
     }
 
-
-
-    private static double[] redshifted(final double[] range, final double z) {
+    private static double[] toRestFrame(final double[] range, final double z) {
         if (range == null) return null;
         return new double[] { range[0] / (1 + z), range[1] / (1 + z) };
     }
@@ -173,14 +175,14 @@ public final class SEDFactory {
         }
     }
 
-    private static VisitableSampledSpectrum getSED(final SourceDefinition sdp, final Instrument instrument) {
+    private static VisitableSampledSpectrum getSED(final SourceDefinition sdp, final Instrument instrument, final double[] observedRange) {
         final VisitableSampledSpectrum temp;
         final SpectrumType spectrumType = getSpectrumType(sdp);
         final double sampling = instrument.getSampling() / (1.0 + sdp.redshift().z());
         Log.fine(String.format("Sampling = %.5f nm", sampling));
 
         // rest frame range the calculation needs; null means everything
-        final double[] range = redshifted(samplingRange(instrument, sdp), sdp.redshift().z());
+        final double[] range = toRestFrame(observedRange, sdp.redshift().z());
         final double lo = range == null ? Double.NEGATIVE_INFINITY : range[0];
         final double hi = range == null ? Double.POSITIVE_INFINITY : range[1];
 
@@ -294,7 +296,8 @@ public final class SEDFactory {
         // (filter region).
         validateSpectrumRanges(sdp, instrument);
 
-        final VisitableSampledSpectrum sed = SEDFactory.getSED(sdp, instrument);
+        final double[] range = samplingRange(instrument, sdp);
+        final VisitableSampledSpectrum sed = SEDFactory.getSED(sdp, instrument, range);
         final SampledSpectrumVisitor redshift = new RedshiftVisitor(sdp.redshift());
         Log.fine("Accepting redshift...");
         sed.accept(redshift);
@@ -337,7 +340,7 @@ public final class SEDFactory {
         sed.accept(water);
 
         // Background spectrum is introduced here.
-        final VisitableSampledSpectrum sky = SEDFactory.getSED(getSky(instrument, odp), instrument.getSampling(), samplingRange(instrument, sdp));
+        final VisitableSampledSpectrum sky = SEDFactory.getSED(getSky(instrument, odp), instrument.getSampling(), range);
         Option<VisitableSampledSpectrum> halo = Option.empty();
 
         // Apply telescope transmission to both sed and sky

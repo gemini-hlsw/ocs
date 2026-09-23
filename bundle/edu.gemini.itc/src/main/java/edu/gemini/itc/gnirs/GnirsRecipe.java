@@ -430,37 +430,21 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             SlitThroughput throughput = null;
             Option<AOSystem> altair = null;
 
-            final GNIRSParams.PixelScale pixelScale = instrument.getPixelScale();
-            final GNIRSParams.Disperser disperser = instrument.getGrating();
             final boolean xd = instrument.XDisp_IsUsed();
-
-            // For XD, find the order containing the user-supplied central wavelength (m * lambda is constant)
-            final double mLambda;
-            if (xd) {
-                final double centralWavelength = _gnirsParameters.centralWavelength().toNanometers();
-                final GNIRSParams.Order centerOrder = GNIRSParams.Order.getOrder(centralWavelength / 1000., null);
-                if (centerOrder == null) {
-                    throw new IllegalArgumentException("The order for this wavelength cannot be found");
-                }
-                mLambda = centerOrder.getOrder() * centralWavelength;  // nm
-            } else {
-                mLambda = Double.NaN;  // not used for long-slit
-            }
 
             final int numberOrders = xd ? ORDERS : 1;
             final SpecS2N[] specS2Narr = new SpecS2N[numberOrders];
 
             for (int i = 0; i < numberOrders; i++) {
 
-                final int order = xd ? i + 3 : instrument.getOrder();
+                final int order = xd ? Gnirs.XD_FIRST_ORDER + i : instrument.getOrder();
 
                 final double wavelength, startWavelength, endWavelength;  // nm
                 if (xd) {
-                    final GNIRSParams.Order o = GNIRSParams.Order.getOrderByNumber(order);
-                    if (o == null) throw new IllegalStateException("Unknown GNIRS order " + order);
-                    wavelength      = mLambda / order;
-                    startWavelength = o.getStartWavelength(wavelength / 1000., disperser, pixelScale) * 1000.;
-                    endWavelength   = o.getEndWavelength(wavelength / 1000., disperser, pixelScale) * 1000.;
+                    final double[] w = instrument.xdOrderWavelengths(order);
+                    wavelength      = w[0];
+                    startWavelength = w[1];
+                    endWavelength   = w[2];
                 } else {
                     wavelength      = instrument.getEffectiveWavelength();
                     startWavelength = instrument.getObservingStart();

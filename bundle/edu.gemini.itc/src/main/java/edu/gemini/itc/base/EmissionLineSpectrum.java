@@ -27,7 +27,7 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
         this(wavelength, width, flux, continuum, redshift, interval, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
     }
 
-    /** As above, keeping only the samples in [lo, hi] (rest frame, nm) on the unrestricted grid. */
+    /** As above, keeping only the samples that cover [lo, hi] (rest frame, nm), one past each end, on the unrestricted grid. */
     public EmissionLineSpectrum(final Wavelength wavelength, final Velocity width, final Irradiance flux,
                                 final SpectralIrradiance continuum, final Redshift redshift, final double interval,
                                 final double lo, final double hi) {

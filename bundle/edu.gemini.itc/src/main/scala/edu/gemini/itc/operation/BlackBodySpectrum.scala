@@ -163,7 +163,7 @@ object BlackBodySpectrum {
   def apply(temp: Double, interval: Double, flux: Double, units: BrightnessUnit, band: MagnitudeBand, redshift: Redshift): BlackBodySpectrum =
     apply(temp, interval, flux, units, band, redshift, Double.NegativeInfinity, Double.PositiveInfinity)
 
-  /** As above, keeping only the samples in [lo, hi] (rest frame, nm) on the unrestricted grid. */
+  /** As above, keeping only the samples that cover [lo, hi] (rest frame, nm), one past each end, on the unrestricted grid. */
   def apply(temp: Double, interval: Double, flux: Double, units: BrightnessUnit, band: MagnitudeBand, redshift: Redshift, lo: Double, hi: Double): BlackBodySpectrum = {
 
     //rescale the start and end depending on the redshift
