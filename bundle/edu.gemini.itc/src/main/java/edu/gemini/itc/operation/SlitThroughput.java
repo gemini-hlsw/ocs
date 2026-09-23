@@ -76,6 +76,8 @@ public final class SlitThroughput {
         } else {
 
             // find the slit length in the aperture
+            Log.fine(String.format("Aperture (slit length) = %d pix = %.3f arcsec",
+                    slit.lengthPixels(), slit.lengthPixels() * slit.pixelSize()));
             double slit_spatial_ratio = slit.lengthPixels() * slit.pixelSize() / slit.width();
 
             // find the slit width
@@ -94,7 +96,8 @@ public final class SlitThroughput {
 
             // Do a 2D interpolation to find the return value using x= slit_spatial_ratio and y= slit_spec_ratio
             final double slitThroughput = getSTvalue(slit_spatial_ratio, slit_spec_ratio);
-            Log.fine("slitThroughput (" + slit.width() + " x " + slit.lengthPixels() * slit.pixelSize() + ") = " + slitThroughput);
+            Log.fine(String.format("Slit throughput (%.2f x %.2f arcsec) = %.5f",
+                    slit.width(), slit.lengthPixels() * slit.pixelSize(), slitThroughput));
 
             // return a value in the range 0..1
             return Math.min(1, slitThroughput);

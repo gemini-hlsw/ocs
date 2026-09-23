@@ -173,7 +173,7 @@ public final class Gnirs extends Instrument implements SpectroscopyInstrument {
 
         _centralWavelength = correctedCentralWavelength(); // correct central wavelength if cross dispersion is used
         _XDisp = isXDispUsed();
-        Log.fine("_centralWavelength = " + _centralWavelength);
+        Log.fine("Central Wavelength = " + _centralWavelength);
 
         if (_mode instanceof Spectroscopy) {
             if ((_XDisp) && (getCentralWavelengthXD() < 780 || getCentralWavelengthXD() > 2500))

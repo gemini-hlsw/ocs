@@ -13,6 +13,7 @@ import edu.gemini.spModel.obscomp.ItcOverheadProvider;
 import scala.Option;
 
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
 import java.util.logging.Logger;
 import java.util.UUID;
 
@@ -58,16 +59,18 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
 
         _println("");
 
-        if (! instrument.isIfuUsed()) {
-            _printSoftwareAperture(result, 1 / instrument.getSlitWidth());
-        }
-
-        // Altair specific section
-        if (result.aoSystem().isDefined()) {
-            _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
-            _println(String.format("derived image halo size (FWHM) for a point source = %.2f arcsec.\n", iqAtSource));
+        if (instrument.XDisp_IsUsed()) {
+            printXdSummaryTable(result);
         } else {
-            _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", iqAtSource));
+            if (! instrument.isIfuUsed()) {
+                _printSoftwareAperture(result, 1 / instrument.getSlitWidth());
+            }
+            if (result.aoSystem().isDefined()) {
+                _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
+                _println(String.format("Derived image halo size (FWHM) for a point source = %.2f arcsec.\n", iqAtSource));
+            } else {
+                _println(String.format("Derived image size(FWHM) for a point source = %.2f arcsec\n", iqAtSource));
+            }
         }
 
         if (! instrument.isIfuUsed()) {
@@ -175,6 +178,43 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
 
         printConfiguration(result.parameters(), instrument, result.aoSystem(), iqAtSource);
 
+    }
+
+    private void printXdSummaryTable(final SpectroscopyResult result) {
+        DecimalFormat df2 = new DecimalFormat("0.00");
+        DecimalFormat df3 = new DecimalFormat("0.000");
+        StringBuilder s = new StringBuilder();
+        s.append("<table style='text-align:center; margin-top:10px; border:1px solid black;'><tr>");
+        s.append("<th style='width:110px;'>Wavelength<br>(&mu;m)</th>");
+        s.append("<th style='width:80px;'>XD<br>Order</th>");
+        if (result.aoSystem().isDefined()) {
+            s.append("<th style='width:100px;'>AO<br>Strehl</th>");
+            s.append("<th style='width:110px;'>AO Core<br>FWHM</th>");
+            s.append("<th style='width:110px;'>AO Halo<br>FWHM</th>");
+        } else {
+            s.append("<th style='width:110px;'>FWHM</th>");
+        }
+        s.append("<th style='width:100px;'>Aperture<br>Size</th>");
+        s.append("<th style='width:150px;'>Source Fraction<br>In Aperture</th></tr>");
+        GnirsRecipe.GnirsSpecS2N r;
+        for (int i=GnirsRecipe.ORDERS-1; i>-1; i--) {
+            r = (GnirsRecipe.GnirsSpecS2N) result.specS2N()[i];
+            s.append("<tr>");
+            s.append("<td>").append(df3.format(r.getWavelength()/1000.)).append("</td>");
+            s.append("<td>").append(r.getOrder()).append("</td>");
+            if (result.aoSystem().isDefined()) {
+                s.append("<td>").append(df3.format(r.getStrehl())).append("</td>");
+                s.append("<td>").append(df3.format(r.getImageQuality())).append("&Prime;</td>");
+                s.append("<td>").append(df2.format(r.getAoHaloImageQuality())).append("&Prime;</td>");
+            } else {
+                s.append("<td>").append(df2.format(r.getImageQuality())).append("&Prime;</td>");
+            }
+            s.append("<td>").append(df2.format(r.getAperture())).append("&Prime;</td>");
+            s.append("<td>").append(df3.format(r.getThroughput())).append("</td>");
+            s.append("</tr>");
+        }
+        s.append("</table>");
+        _println(s.toString());
     }
 
     private void printConfiguration(final ItcParameters p, final Gnirs instrument, final Option<AOSystem> ao, final double iqAtSource) {

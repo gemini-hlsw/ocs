@@ -63,6 +63,11 @@ public class ResampleWithPaddingVisitor implements SampledSpectrumVisitor {
 
         int num_elements = (int) ((getEnd() - getStart()) / getSampling());//+ 1;
 
+        if (num_elements < 0) {
+            throw new IllegalStateException(String.format(
+                    "Bad resample: start=%f end=%f sampling=%g n=%d", getStart(), getEnd(), getSampling(), num_elements));
+        }
+
         // Sed is going to get a new array
         double[] data = new double[num_elements];
 
