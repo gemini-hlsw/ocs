@@ -24,6 +24,13 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
 
     public EmissionLineSpectrum(final Wavelength wavelength, final Velocity width, final Irradiance flux,
                                 final SpectralIrradiance continuum, final Redshift redshift, final double interval) {
+        this(wavelength, width, flux, continuum, redshift, interval, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+    }
+
+    /** As above, keeping only the samples that cover [lo, hi] (rest frame, nm), one past each end, on the unrestricted grid. */
+    public EmissionLineSpectrum(final Wavelength wavelength, final Velocity width, final Irradiance flux,
+                                final SpectralIrradiance continuum, final Redshift redshift, final double interval,
+                                final double lo, final double hi) {
 
         //shift start and end depending on redshift
         final double z     = redshift.z();
@@ -31,7 +38,9 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
         final double end = 30000 / (1 + z);
         Log.fine(String.format("Generating emission line SED from %.2f - %.2f nm with %.3f nm steps", start, end, interval));
         final int n = (int) ((end - start) / interval + 1);
-        final double[] fluxArray = new double[n];
+        final int first = Math.max(0, Math.min(n - 1, (int) Math.floor((lo - start) / interval)));
+        final int last  = Math.max(first, Math.min(n - 1, (int) Math.ceil((hi - start) / interval)));
+        final double[] fluxArray = new double[last - first + 1];
 
         // convert values to internal units
         final double _wavelength    = wavelength.toNanometers();
@@ -41,11 +50,11 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
         // calculate sigma
         final double sigma = width.toKilometersPerSecond() * _wavelength / 7.05e5;
 
-        for (int i = 0; i < n; ++i) {
-            fluxArray[i] = _elineFlux(start + i * interval, sigma, _flux, _continuumFlux, _wavelength);
+        for (int i = first; i <= last; ++i) {
+            fluxArray[i - first] = _elineFlux(start + i * interval, sigma, _flux, _continuumFlux, _wavelength);
         }
 
-        _spectrum = new DefaultSampledSpectrum(fluxArray, start, interval);
+        _spectrum = DefaultSampledSpectrum.offset(fluxArray, start, first, interval);
 
     }
 

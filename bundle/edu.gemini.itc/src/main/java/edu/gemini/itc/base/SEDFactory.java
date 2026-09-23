@@ -105,9 +105,46 @@ public final class SEDFactory {
      *  ...
      * </pre>
      */
-    private static VisitableSampledSpectrum getSED(final String fileName, final double wavelengthInterval) {
+    private static VisitableSampledSpectrum getSED(final String fileName, final double wavelengthInterval, final double[] range) {
         final DefaultArraySpectrum as = new DefaultArraySpectrum(fileName);
-        return new DefaultSampledSpectrum(as, wavelengthInterval);
+        if (range == null) return new DefaultSampledSpectrum(as, wavelengthInterval);
+        return new DefaultSampledSpectrum(as, wavelengthInterval, range[0], range[1]);
+    }
+
+    /**
+     * Range [nm] the calculation needs, null for no restriction. The result stays exact because the
+     * spectrum is zero outside the intersection of the component files after convolution; widening it
+     * by the observing window and the normalization band only keeps the resampling and normalization
+     * inside the samples. That window is not every window a recipe resamples over (GMOS IFU-2 shifts it
+     * by ifu2shift), so do not narrow the range to it.
+     */
+    static double[] samplingRange(final Instrument instrument, final SourceDefinition sdp) {
+        final java.util.List<TransmissionElement> components = instrument.getComponents();
+        if (components.isEmpty()) return null;
+
+        double lo = Double.NEGATIVE_INFINITY;
+        double hi = Double.POSITIVE_INFINITY;
+        for (final TransmissionElement te : components) {
+            lo = Math.max(lo, te.get_trans().getStart());
+            hi = Math.min(hi, te.get_trans().getEnd());
+        }
+
+        // cross dispersion needs all orders, not the one getObservingStart and getObservingEnd report
+        final double[] obs = (instrument instanceof Gnirs && ((Gnirs) instrument).XDisp_IsUsed())
+                ? ((Gnirs) instrument).xdWavelengthRange()
+                : new double[] { instrument.getObservingStart(), instrument.getObservingEnd() };
+        lo = Math.min(lo, Math.min(obs[0], sdp.normBand().start().toNanometers()));
+        hi = Math.max(hi, Math.max(obs[1], sdp.normBand().end().toNanometers()));
+
+        // SpecS2NSlitVisitor.smoothY zeroes the first half smoothing width of samples, so that half width
+        // must stay below the margin; at least 100 samples keeps resolution elements up to ~200 samples exact
+        final double margin = 5.0 + 100.0 * instrument.getSampling();
+        return new double[] { lo - margin, hi + margin };
+    }
+
+    private static double[] toRestFrame(final double[] range, final double z) {
+        if (range == null) return null;
+        return new double[] { range[0] / (1 + z), range[1] / (1 + z) };
     }
 
 
@@ -138,11 +175,16 @@ public final class SEDFactory {
         }
     }
 
-    private static VisitableSampledSpectrum getSED(final SourceDefinition sdp, final Instrument instrument) {
+    private static VisitableSampledSpectrum getSED(final SourceDefinition sdp, final Instrument instrument, final double[] observedRange) {
         final VisitableSampledSpectrum temp;
         final SpectrumType spectrumType = getSpectrumType(sdp);
         final double sampling = instrument.getSampling() / (1.0 + sdp.redshift().z());
         Log.fine(String.format("Sampling = %.5f nm", sampling));
+
+        // rest frame range the calculation needs; null means everything
+        final double[] range = toRestFrame(observedRange, sdp.redshift().z());
+        final double lo = range == null ? Double.NEGATIVE_INFINITY : range[0];
+        final double hi = range == null ? Double.POSITIVE_INFINITY : range[1];
 
         switch (spectrumType) {
             case BLACK_BODY:
@@ -152,7 +194,8 @@ public final class SEDFactory {
                         sdp.norm(),
                         sdp.units(),
                         sdp.normBand(),
-                        sdp.redshift());
+                        sdp.redshift(),
+                        lo, hi);
 
             case EMISSION_LINE:
                 final EmissionLine eLine = (EmissionLine) sdp.distribution();
@@ -164,7 +207,8 @@ public final class SEDFactory {
                         eLine.flux(),
                         eLine.continuum(),
                         sdp.redshift(),
-                        sampling);
+                        sampling,
+                        lo, hi);
 
             case POWER_LAW:
                 return new PowerLawSpectrum(
@@ -194,12 +238,12 @@ public final class SEDFactory {
                 return temp;
 
             case LIBRARY_STAR:
-                temp = getSED(getLibraryResource(STELLAR_LIB, sdp), sampling);
+                temp = getSED(getLibraryResource(STELLAR_LIB, sdp), sampling, range);
                 temp.applyWavelengthCorrection();
                 return temp;
 
             case LIBRARY_NON_STAR:
-                temp = getSED(getLibraryResource(NON_STELLAR_LIB, sdp), sampling);
+                temp = getSED(getLibraryResource(NON_STELLAR_LIB, sdp), sampling, range);
                 temp.applyWavelengthCorrection();
                 return temp;
 
@@ -252,7 +296,8 @@ public final class SEDFactory {
         // (filter region).
         validateSpectrumRanges(sdp, instrument);
 
-        final VisitableSampledSpectrum sed = SEDFactory.getSED(sdp, instrument);
+        final double[] range = samplingRange(instrument, sdp);
+        final VisitableSampledSpectrum sed = SEDFactory.getSED(sdp, instrument, range);
         final SampledSpectrumVisitor redshift = new RedshiftVisitor(sdp.redshift());
         Log.fine("Accepting redshift...");
         sed.accept(redshift);
@@ -295,7 +340,7 @@ public final class SEDFactory {
         sed.accept(water);
 
         // Background spectrum is introduced here.
-        final VisitableSampledSpectrum sky = SEDFactory.getSED(getSky(instrument, odp), instrument.getSampling());
+        final VisitableSampledSpectrum sky = SEDFactory.getSED(getSky(instrument, odp), instrument.getSampling(), range);
         Option<VisitableSampledSpectrum> halo = Option.empty();
 
         // Apply telescope transmission to both sed and sky

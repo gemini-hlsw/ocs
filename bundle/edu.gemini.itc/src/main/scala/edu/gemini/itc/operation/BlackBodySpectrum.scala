@@ -160,27 +160,35 @@ final class BlackBodySpectrum(spectrum: DefaultSampledSpectrum) extends Visitabl
 
 object BlackBodySpectrum {
 
-  def apply(temp: Double, interval: Double, flux: Double, units: BrightnessUnit, band: MagnitudeBand, redshift: Redshift) = {
+  def apply(temp: Double, interval: Double, flux: Double, units: BrightnessUnit, band: MagnitudeBand, redshift: Redshift): BlackBodySpectrum =
+    apply(temp, interval, flux, units, band, redshift, Double.NegativeInfinity, Double.PositiveInfinity)
+
+  /** As above, keeping only the samples that cover [lo, hi] (rest frame, nm), one past each end, on the unrestricted grid. */
+  def apply(temp: Double, interval: Double, flux: Double, units: BrightnessUnit, band: MagnitudeBand, redshift: Redshift, lo: Double, hi: Double): BlackBodySpectrum = {
 
     //rescale the start and end depending on the redshift
     val z         = redshift.z
     val start     =   300 / (1 + z)
     val end       = 30000 / (1 + z)
     val n         = ((end - start) / interval + 1).toInt
-    val fluxArray = new Array[Double](n + 40)
+    val total     = n + 40
+    val first     = math.max(0, math.min(total - 1, math.floor((lo - start) / interval).toInt))
+    val last      = math.max(first, math.min(total - 1, math.ceil((hi - start) / interval).toInt))
+    val fluxArray = new Array[Double](last - first + 1)
 
     //if units need to be converted do it.
     val magFlux = convertToMag(flux, units, band)
 
+    // The wavelength is accumulated rather than computed from the index, as it always was.
     var i = 0
     var wavelength = start
-    while (wavelength <= end) {
-      fluxArray(i) = blackbodyFlux(wavelength, temp)
+    while (wavelength <= end && i <= last) {
+      if (i >= first) fluxArray(i - first) = blackbodyFlux(wavelength, temp)
       i = i + 1
       wavelength += interval
     }
 
-    val spectrum = new DefaultSampledSpectrum(fluxArray, start, interval)
+    val spectrum = DefaultSampledSpectrum.offset(fluxArray, start, first, interval)
 
     //with blackbody convert W m^2 um^-1 to phot....
     val zeropoint = ZeroMagnitudeStar.getAverageFlux(band)
