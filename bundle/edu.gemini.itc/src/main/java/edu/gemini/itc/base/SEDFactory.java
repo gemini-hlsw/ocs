@@ -473,6 +473,8 @@ public final class SEDFactory {
                 && a.getObservingEnd() == b.getObservingEnd()
                 && a.getBands() == b.getBands()
                 && a.getSite() == b.getSite()
+                && a.getFirstNonZero() == b.getFirstNonZero()
+                && a.getLastNonZero() == b.getLastNonZero()
                 && Arrays.equals(samplingRange(a, sdp), samplingRange(b, sdp));
         }
     }
