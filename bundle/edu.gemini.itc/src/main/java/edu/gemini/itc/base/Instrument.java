@@ -79,7 +79,7 @@ public abstract class Instrument {
     /**
      * Method adds the instrument background flux to the specified spectrum.
      */
-    public void addBackground(ArraySpectrum sky) {
+    public void addBackground(SampledSpectrum sky) {
         for (int i = 0; i < sky.getLength(); i++) {
             sky.setY(i, background.getY(sky.getX(i)) + sky.getY(i));
         }

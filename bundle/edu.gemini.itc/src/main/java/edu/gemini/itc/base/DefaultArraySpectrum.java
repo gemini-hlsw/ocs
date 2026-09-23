@@ -8,6 +8,8 @@ import java.util.logging.Logger;
  * This interface represents a 2-D spectrum.  The x and y axes are the
  * real numbers (doubles).  Data points are not necessarily at regular
  * x intervals.
+ * Instances are immutable, so they can share the arrays of the DatFile cache and be
+ * used from any number of requests at once.
  */
 public final class DefaultArraySpectrum implements ArraySpectrum {
     private static final Logger Log = Logger.getLogger(DefaultArraySpectrum.class.getName());
@@ -27,8 +29,18 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
     private int _lowerIndexCursor = 0;
 
     public static DefaultArraySpectrum fromUserSpectrum(String spectrum) {
-        final double[][] data = DatFile.fromUserSpectrum(spectrum);
-        return new DefaultArraySpectrum(data);
+        return sharing(DatFile.fromUserSpectrum(spectrum));
+    }
+
+    /** Wraps the DatFile cache arrays without copying; the caller must never modify them afterwards. */
+    static DefaultArraySpectrum sharing(final double[][] data) {
+        return new DefaultArraySpectrum(data, false);
+    }
+
+    private DefaultArraySpectrum(final double[][] data, final boolean copy) {
+        assert data.length == 2;
+        assert data[0].length == data[1].length;
+        _data = copy ? new double[][] { data[0].clone(), data[1].clone() } : data;
     }
 
     /**
@@ -52,12 +64,7 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
      * data[1][i] = y values
      */
     public DefaultArraySpectrum(final double[][] data) {
-        assert data.length == 2;
-        assert data[0].length == data[1].length;
-
-        _data = new double[2][];
-        _data[0] = data[0].clone();
-        _data[1] = data[1].clone();
+        this(data, true);
     }
 
     /**
@@ -71,19 +78,14 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
      *                 separated by whitespace or comma.
      */
     public DefaultArraySpectrum(String fileName) {
-        final double[][] data = DatFile.arrays().apply(fileName);
-        // for now make a copy of cached values, just to be on the safe side
-        _data = new double[2][];
-        _data[0] = data[0].clone();
-        _data[1] = data[1].clone();
+        this(DatFile.arrays().apply(fileName), false);
     }
 
     /**
-     * Implements Cloneable interface
+     * Implements Cloneable interface. Immutable, so the clone is the instance itself.
      */
     @Override public Object clone() {
-        // constructor will clone the data array
-        return new DefaultArraySpectrum(_data);
+        return this;
     }
 
     /**
@@ -199,61 +201,6 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
         return low_index;
     }
 
-    @Override public void applyWavelengthCorrection() {
-
-        for (int i = 0; i < getLength(); ++i) {
-            _data[1][i] = _data[1][i] * _data[0][i];
-        }
-    }
-
-    /**
-     * Sets y value in specified x bin.
-     * If specified bin is out of range, this is a no-op.
-     */
-    @Override public void setY(int index, double y) {
-        if (index < 0 || index >= getLength()) return;  // no-op
-        _data[1][index] = y;
-    }
-
-    /**
-     * Rescales X axis by specified factor.
-     */
-    @Override public void rescaleX(double factor) {
-        Log.fine(String.format("Rescaling X by %.5f", factor));
-        if (factor == 1.0) return;
-        for (int i = 0; i < getLength(); ++i) {
-            _data[0][i] *= factor;
-        }
-    }
-
-    /**
-     * Rescales Y axis by specified factor.
-     */
-    @Override public void rescaleY(double factor) {
-        Log.fine(String.format("Scaling Y by %.5f", factor));
-        if (factor == 1.0) return;
-        for (int i = 0; i < getLength(); ++i) {
-            _data[1][i] *= factor;
-        }
-    }
-
-    @Override public void smoothY(int smoothing_element) {
-        Log.fine(String.format("Smoothing Y by %.5f pix", smoothing_element));
-        if (smoothing_element == 1.0) return;
-        for (int i = 0; i < getLength(); ++i) {
-            try {
-                if (i + smoothing_element > getLength())
-                    _data[1][i] = getAverage(i, getLength());
-                else
-                    _data[1][i] = getAverage(i, i + smoothing_element);
-
-            } catch (Exception e) {
-                System.out.println(e.toString());
-            }
-        }
-    }
-
-
     /**
      * Returns the integral of entire spectrum.
      */
@@ -351,7 +298,7 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
      * alter the return value.
      */
     @Override public double[][] getData() {
-        return _data;
+        return new double[][] { _data[0].clone(), _data[1].clone() };
     }
 
     /**
