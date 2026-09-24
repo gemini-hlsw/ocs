@@ -37,6 +37,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     private final ObservationDetails _obsDetailParameters;
     private final ObservingConditions _obsConditionParameters;
     private final TelescopeDetails _telescope;
+    private final SEDFactory.SourceCache _sources;
     private int exposureTime;
     private int numberExposures;
 
@@ -52,6 +53,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         _obsDetailParameters    = p.observation();
         _obsConditionParameters = p.conditions();
         _telescope              = p.telescope();
+        _sources                = new SEDFactory.SourceCache(_sdParameters, _obsConditionParameters, _telescope);
         this.exposureTime       = (int) p.observation().exposureTime();
 
         // some general validations
@@ -352,7 +354,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
         for (int i = 0; i < numberOfSlits; i++) {
             Log.fine("Starting slit " + i);
-            src[i] = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
+            src[i] = _sources.get(instrument, Option.empty());
         }
 
         // Start of morphology section of ITC
@@ -704,7 +706,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         //
         // inputs: source morphology specification
 
-        final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
+        final SEDFactory.SourceResult src = _sources.get(instrument, Option.empty());
         final double sed_integral = src.sed.getIntegral();
         final double sky_integral = src.sky.getIntegral();
 

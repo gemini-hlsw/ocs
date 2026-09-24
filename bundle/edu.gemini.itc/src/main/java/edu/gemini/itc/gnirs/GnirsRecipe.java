@@ -33,6 +33,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
     private final ObservingConditions _obsConditionParameters;
     private final GnirsParameters _gnirsParameters;
     private final TelescopeDetails _telescope;
+    private final SEDFactory.SourceCache _sources;
     private double exposureTime;
     private int numberExposures;
     private ReadMode readMode;
@@ -51,6 +52,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         _obsConditionParameters = p.conditions();
         _gnirsParameters        = instr;
         _telescope              = p.telescope();
+        _sources                = new SEDFactory.SourceCache(_sdParameters, _obsConditionParameters, _telescope);
         this.exposureTime       = p.observation().exposureTime();
         this.readMode           = instrument.getReadMode();
 
@@ -287,7 +289,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             }
 
             // Get the summed source and sky
-            final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope, altair);
+            final SEDFactory.SourceResult calcSource = _sources.get(instrument, altair);
             final VisitableSampledSpectrum sed = calcSource.sed;
             final VisitableSampledSpectrum sky = calcSource.sky;
             final Option<VisitableSampledSpectrum> halo = calcSource.halo;
@@ -469,7 +471,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 }
 
                 // Get the summed source and sky
-                final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope, altair);
+                final SEDFactory.SourceResult calcSource = _sources.get(instrument, altair);
                 final VisitableSampledSpectrum sed = calcSource.sed;
                 final VisitableSampledSpectrum sky = calcSource.sky;
                 final Option<VisitableSampledSpectrum> halo = calcSource.halo;
@@ -747,7 +749,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             altair = Option.empty();
         }
 
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope, altair);
+        final SEDFactory.SourceResult calcSource = _sources.get(instrument, altair);
 
         // End of the Spectral energy distribution portion of the ITC.
 
