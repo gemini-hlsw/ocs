@@ -59,6 +59,17 @@ class DefaultSampledSpectrumTest {
   }
 
   @Test
+  def zerosLikeKeepsTheGrid(): Unit = {
+    val c = cut
+    val z = DefaultSampledSpectrum.zerosLike(c)
+    assertEquals(c.getLength, z.getLength)
+    for (i <- 0 until c.getLength) {
+      assertEquals(c.getX(i), z.getX(i), 0.0)
+      assertEquals(0.0, z.getY(i), 0.0)
+    }
+  }
+
+  @Test
   def lowerIndexAtTheStartIsZero(): Unit = {
     val c = cut
     assertEquals(0, c.getLowerIndex(c.getStart))

@@ -484,12 +484,12 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
                     src[j].sed.accept(specS2N);
 
-                    VisitableSampledSpectrum signalIFUSpec      = (VisitableSampledSpectrum) specS2N.getSignalSpectrum().clone();
-                    VisitableSampledSpectrum backGroundIFUSpec  = (VisitableSampledSpectrum) specS2N.getBackgroundSpectrum().clone();
-                    VisitableSampledSpectrum expS2NIFUSpec      = (VisitableSampledSpectrum) specS2N.getExpS2NSpectrum().clone();
-                    VisitableSampledSpectrum finalS2NIFUSpec    = (VisitableSampledSpectrum) specS2N.getFinalS2NSpectrum().clone();
-                    VisitableSampledSpectrum totalSignalSpectrum = (VisitableSampledSpectrum) specS2N.getTotalSignalSpectrum().clone();
-                    VisitableSampledSpectrum totalBackgroundSpectrum = (VisitableSampledSpectrum) specS2N.getTotalBackgroundSpectrum().clone();
+                    VisitableSampledSpectrum signalIFUSpec      = specS2N.getSignalSpectrum();
+                    VisitableSampledSpectrum backGroundIFUSpec  = specS2N.getBackgroundSpectrum();
+                    VisitableSampledSpectrum expS2NIFUSpec      = specS2N.getExpS2NSpectrum();
+                    VisitableSampledSpectrum finalS2NIFUSpec    = specS2N.getFinalS2NSpectrum();
+                    VisitableSampledSpectrum totalSignalSpectrum = specS2N.getTotalSignalSpectrum();
+                    VisitableSampledSpectrum totalBackgroundSpectrum = specS2N.getTotalBackgroundSpectrum();
                     s2n.setSlitS2N(j, signalIFUSpec, totalSignalSpectrum, backGroundIFUSpec, totalBackgroundSpectrum, expS2NIFUSpec, finalS2NIFUSpec, specS2N.getSkyAper());
 
                     if (i == 0) {
@@ -536,12 +536,12 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
             src[0].sed.accept(specS2N);
 
-            VisitableSampledSpectrum signalIFUSpec = (VisitableSampledSpectrum) specS2N.getSignalSpectrum().clone();
-            VisitableSampledSpectrum backGroundIFUSpec = (VisitableSampledSpectrum) specS2N.getBackgroundSpectrum().clone();
-            VisitableSampledSpectrum expS2NIFUSpec = (VisitableSampledSpectrum) specS2N.getExpS2NSpectrum().clone();
-            VisitableSampledSpectrum finalS2NIFUSpec = (VisitableSampledSpectrum) specS2N.getFinalS2NSpectrum().clone();
-            VisitableSampledSpectrum totalSignalSpectrum = (VisitableSampledSpectrum) specS2N.getTotalSignalSpectrum().clone();
-            VisitableSampledSpectrum totalBackgroundSpectrum = (VisitableSampledSpectrum) specS2N.getTotalBackgroundSpectrum().clone();
+            VisitableSampledSpectrum signalIFUSpec = specS2N.getSignalSpectrum();
+            VisitableSampledSpectrum backGroundIFUSpec = specS2N.getBackgroundSpectrum();
+            VisitableSampledSpectrum expS2NIFUSpec = specS2N.getExpS2NSpectrum();
+            VisitableSampledSpectrum finalS2NIFUSpec = specS2N.getFinalS2NSpectrum();
+            VisitableSampledSpectrum totalSignalSpectrum = specS2N.getTotalSignalSpectrum();
+            VisitableSampledSpectrum totalBackgroundSpectrum = specS2N.getTotalBackgroundSpectrum();
             s2n.setSlitS2N(0, signalIFUSpec, totalSignalSpectrum, backGroundIFUSpec, totalBackgroundSpectrum, expS2NIFUSpec, finalS2NIFUSpec, specS2N.getSkyAper());
 
             specS2Narr[0] = s2n;

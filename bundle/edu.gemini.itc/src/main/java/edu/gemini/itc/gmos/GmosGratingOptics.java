@@ -25,12 +25,12 @@ public final class GmosGratingOptics extends GratingOptics {
 
     // IFU-2 case
     public double getStart(double shift) {
-        return centralWavelength - (data.apply(gratingName).dispersion() * detectorPixels / 2) + shift;
+        return centralWavelength - (grating.dispersion() * detectorPixels / 2) + shift;
     }
 
     // IFU-2 case
     public double getEnd(double shift) {
-        return centralWavelength + (data.apply(gratingName).dispersion() * detectorPixels / 2) + shift;
+        return centralWavelength + (grating.dispersion() * detectorPixels / 2) + shift;
     }
 
 }

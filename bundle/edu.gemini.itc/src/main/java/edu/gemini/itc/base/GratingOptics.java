@@ -16,6 +16,7 @@ public abstract class GratingOptics extends TransmissionElement implements Dispe
     protected final int detectorPixels;
     protected final int _spectralBinning;
     protected final Map<String, DatFile.Grating> data;
+    protected final DatFile.Grating grating;
 
     public GratingOptics(final String directory,
                          final String gratingName,
@@ -28,6 +29,7 @@ public abstract class GratingOptics extends TransmissionElement implements Dispe
 
         final String file = directory + gratingsName + Instrument.getSuffix();
         this.data = DatFile.gratings().apply(file);
+        this.grating = data.apply(gratingName);
         this.gratingName = gratingName;
         this._spectralBinning = spectralBinning;
         this.detectorPixels = detectorPixels;
@@ -36,13 +38,13 @@ public abstract class GratingOptics extends TransmissionElement implements Dispe
     }
 
     public double getStart() {  // wavelength of first pixel
-        double start = centralWavelength - (data.apply(gratingName).dispersion() * detectorPixels / 2);
+        double start = centralWavelength - (grating.dispersion() * detectorPixels / 2);
         Log.fine("start = " + start + " nm");
         return start;
     }
 
     public double getEnd() {
-        return centralWavelength + (data.apply(gratingName).dispersion() * detectorPixels / 2);
+        return centralWavelength + (grating.dispersion() * detectorPixels / 2);
     }
 
     public double getEffectiveWavelength() {
@@ -50,22 +52,22 @@ public abstract class GratingOptics extends TransmissionElement implements Dispe
     }
 
     public double getPixelWidth() {
-        return data.apply(gratingName).dispersion() * _spectralBinning;
+        return grating.dispersion() * _spectralBinning;
     }
 
     public double getGratingResolvingPower() {
-        return data.apply(gratingName).resolvingPower();
+        return grating.resolvingPower();
     }
 
     public double getGratingBlaze() {
-        return data.apply(gratingName).blaze();
+        return grating.blaze();
     }
 
     public double resolutionHalfArcsecSlit() {
-        return data.apply(gratingName).resolution();
+        return grating.resolution();
     }
 
-    // Return the closest value
+    // Return the index of the value closest to val. v is ascending, as the dispersion files are.
     int getX(double[] v, double val) throws Exception {
         if (v.length == 0) {
             Log.warning("The vector provided does not have data");
@@ -78,16 +80,17 @@ public abstract class GratingOptics extends TransmissionElement implements Dispe
             return v.length-1;
         }
 
-        for (int i=0; i < v.length; i++)
-            if (v[i] >= val) {
-                if (i-1>=0) {
-                    if (Math.abs(v[i] - val) > Math.abs(v[i-1] - val) )
-                        return i-1;
-                }
-                return i;
-            }
-        Log.fine("wavelength is: " + val);
-        return -1;
+        // first i with v[i] >= val
+        int lo = 0;
+        int hi = v.length - 1;
+        while (lo < hi) {
+            final int mid = (lo + hi) >>> 1;
+            if (v[mid] >= val) hi = mid; else lo = mid + 1;
+        }
+        if (lo - 1 >= 0 && Math.abs(v[lo] - val) > Math.abs(v[lo-1] - val)) {
+            return lo - 1;
+        }
+        return lo;
     }
 
     double getAverage(double[] array) {
@@ -107,12 +110,12 @@ public abstract class GratingOptics extends TransmissionElement implements Dispe
     public double dispersion(double wavelength) {
 
         // if an array is not defined then use the scalar value:
-        if (data.apply(gratingName).dispersionArray() == null) {
-            final double disp =data.apply(gratingName).dispersion() * _spectralBinning;
+        if (grating.dispersionArray() == null) {
+            final double disp =grating.dispersion() * _spectralBinning;
             //Log.fine(String.format("Dispersion = %7.5f nm/pix", disp));
             return disp;
         }
-        final double[][] data2 = data.apply(gratingName).dispersionArray();
+        final double[][] data2 = grating.dispersionArray();
 
         if (wavelength == -1) {
             final double disp = getAverage(data2[1]) * _spectralBinning;

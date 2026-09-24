@@ -116,6 +116,21 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     }
 
     /**
+     * A spectrum of zeros with the same start, sampling and length as s. For a DefaultSampledSpectrum
+     * it also keeps the grid, so getX matches s exactly.
+     */
+    public static DefaultSampledSpectrum zerosLike(SampledSpectrum s) {
+        DefaultSampledSpectrum z = new DefaultSampledSpectrum();
+        if (s instanceof DefaultSampledSpectrum) {
+            DefaultSampledSpectrum d = (DefaultSampledSpectrum) s;
+            z.adoptAt(new double[d.getLength()], d._xOrigin, d._xOffset, d._xInterval);
+        } else {
+            z.adopt(new double[s.getLength()], s.getStart(), s.getSampling());
+        }
+        return z;
+    }
+
+    /**
      * Implements the Cloneable interface.
      */
     @Override public Object clone() {
