@@ -115,10 +115,18 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         adopt(data, xStart, xInterval);
     }
 
-    /** A spectrum with the same axis as the given one and all values zero. */
+    /**
+     * A spectrum of zeros with the same start, sampling and length as s. For a DefaultSampledSpectrum
+     * it also keeps the grid, so getX matches s exactly.
+     */
     public static DefaultSampledSpectrum zerosLike(SampledSpectrum s) {
         DefaultSampledSpectrum z = new DefaultSampledSpectrum();
-        z.adopt(new double[s.getLength()], s.getStart(), s.getSampling());
+        if (s instanceof DefaultSampledSpectrum) {
+            DefaultSampledSpectrum d = (DefaultSampledSpectrum) s;
+            z.adoptAt(new double[d.getLength()], d._xOrigin, d._xOffset, d._xInterval);
+        } else {
+            z.adopt(new double[s.getLength()], s.getStart(), s.getSampling());
+        }
         return z;
     }
 
