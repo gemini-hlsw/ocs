@@ -82,7 +82,7 @@ public final class GnirsPrinter extends PrinterBase implements OverheadTablePrin
             double exposureTime = recipe.getExposureTime();
             int numberCoadds = recipe.getNumberCoadds();
             int numberExposures = recipe.getNumberExposures();
-            double totalTime = numberExposures * exposureTime;
+            double totalTime = numberExposures * exposureTime * numberCoadds;
             double timeOnSource = totalTime * result.observation().sourceFraction();
             if (numberCoadds == 1) {
                 _println(String.format(
