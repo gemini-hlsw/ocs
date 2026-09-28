@@ -34,8 +34,8 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
     private final GnirsParameters _gnirsParameters;
     private final TelescopeDetails _telescope;
     private final SEDFactory.SourceCache _sources;
-    private double exposureTime;
-    private int numberExposures;
+    private double exposureTime;   // per single exposure (per coadd), in seconds
+    private int numberFrames;      // coadded frames to take; single exposures = numberFrames * coadds
     private ReadMode readMode;
     private int coadds;
 
@@ -109,7 +109,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         if (calcMethod instanceof SpectroscopyS2N) { // user has specified exposure time and number of exposures
             SpectroscopyS2N s2nMethod = (SpectroscopyS2N) calcMethod;
             coadds = s2nMethod.coaddsOrElse(1);
-            numberExposures = s2nMethod.exposures();
+            numberFrames = s2nMethod.exposures();  // S2NMethod.exposures counts frames; coadds come separately
             wavelengthAt = s2nMethod.atWithDefault() * 1000.;
 
         } else if (calcMethod instanceof SpectroscopyIntegrationTime) { // determine optimal exposure time and number of exposures
@@ -189,6 +189,8 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                             "The detector will reach %.0f e- in %.3f seconds.", maxFlux * safetyBuffer, maxExposureTime));
 
             // Step through read modes and see which is best.  This does NOT re-run the ITC calculations.
+            // The search works in single exposures; coadds and frames are derived once it converges.
+            int numberExposures = initialNumberExposures;
             List<ReadMode> readModes = Arrays.asList(ReadMode.VERY_FAINT, ReadMode.FAINT, ReadMode.BRIGHT, ReadMode.VERY_BRIGHT);
             for (ReadMode rm : readModes) {
                 Log.fine("============================ " + rm + " ============================");
@@ -238,29 +240,29 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
             Log.fine(String.format("exposureTime = %.2f", exposureTime));
             coadds = calculateCoadds(exposureTime, numberExposures, 4);
-            numberExposures /= coadds;
+            numberFrames = numberExposures / coadds;
 
         } else {
             throw new Error("Unsupported calculation method");
         }
 
         Log.fine("Running ITC with final input parameters:");
-        Log.fine("numberExposures = " + numberExposures);
+        Log.fine("numberFrames = " + numberFrames);
         Log.fine("exposureTime = " + exposureTime);
         Log.fine("coadds = " + coadds);
         Log.fine("readMode = " + readMode + " -> readNoise = " + readMode.getReadNoise() + " e-");
         Log.fine(String.format("wavelengthAt = %.2f nm", wavelengthAt));
 
         // Run the ITC to generate the output graphs
-        return calculateSpectroscopy(instrument, readMode, exposureTime, numberExposures, coadds, wavelengthAt).withTimes(
-                AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures)));
+        return calculateSpectroscopy(instrument, readMode, exposureTime, numberFrames, coadds, wavelengthAt).withTimes(
+                AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberFrames)));
     }
 
     SpectroscopyResult calculateSpectroscopy(
             final Gnirs instrument,
             final ReadMode readMode,
             final double exposureTime,
-            final int numberExposures,
+            final int numberFrames,
             final int numberCoadds,
             final double wavelengthAt
     ) {
@@ -402,7 +404,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                         _obsDetailParameters,
                         exposureTime,
                         numberCoadds,
-                        numberExposures);
+                        numberFrames);
 
                 specS2N.setSourceSpectrum(sed);
                 specS2N.setBackgroundSpectrum(sky);
@@ -506,7 +508,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                         _obsDetailParameters,
                         exposureTime,
                         numberCoadds,
-                        numberExposures);
+                        numberFrames);
 
                 final TransmissionElement gratingTransmission = instrument.getGratingOrderNTransmission(order);
                 sed.accept(gratingTransmission);
@@ -545,7 +547,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 }
 
             }
-            final AllIntegrationTimes exp = AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures));
+            final AllIntegrationTimes exp = AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberFrames));
 
             if (instrument.XDisp_IsUsed()) {
                 // The signal-to-noise at the requested wavelength must come from the order
@@ -821,7 +823,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             IS2Ncalc.calculate();
             ImagingS2N s2nMethod = (ImagingS2N) calcMethod;
             exposureTime = s2nMethod.exposureTime();
-            numberExposures = s2nMethod.exposures() * coadds;
+            numberFrames = s2nMethod.exposures();
 
         } else if (calcMethod instanceof ImagingIntegrationTime) {
 
@@ -877,9 +879,9 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
             IS2Ncalc = bestCalc;
             exposureTime = IS2Ncalc.getExposureTime();
-            numberExposures = IS2Ncalc.numberSourceExposures();
+            final int numberExposures = IS2Ncalc.numberSourceExposures();
             coadds = calculateCoadds(exposureTime, numberExposures, 1);
-            numberExposures /= coadds;
+            numberFrames = numberExposures / coadds;
 
         } else if (calcMethod instanceof ImagingExposureCount) {
             IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(
@@ -891,13 +893,13 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             }
             IS2Ncalc.calculate();
             exposureTime = IS2Ncalc.getExposureTime();
-            numberExposures = IS2Ncalc.numberSourceExposures(); // Already has coadds factored.
+            numberFrames = IS2Ncalc.numberSourceExposures() / coadds; // numberSourceExposures counts single exposures
 
         } else {
             throw new Error("Unsupported calculation method");
         }
         Log.fine("exposureTime = " + exposureTime);
-        Log.fine("numberExposures = " + numberExposures);
+        Log.fine("numberFrames = " + numberFrames);
         Log.fine("coadds = " + coadds);
 
         // Calculate peak pixel flux
@@ -905,7 +907,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 PeakPixelFlux.calculateWithHalo(instrument, _sdParameters, exposureTime, SFcalc, im_qual, IQcalc.getImageQuality(), halo_integral, sed_integral, sky_integral) :
                 PeakPixelFlux.calculate(instrument, _sdParameters, exposureTime, SFcalc, im_qual, sed_integral, sky_integral);
 
-        final AllIntegrationTimes exp = AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures));
+        final AllIntegrationTimes exp = AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberFrames));
         return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair, Option.apply(exp));
     }
 
@@ -918,7 +920,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
      * Calculate the optimal number of coadds.
      * Assumes that at least 4 exposures are required, and
      * the maximum coadded integration time is 30 seconds, and
-     * that the resulting number of exposures is a multiple of `multipleOf`.
+     * that the resulting number of frames is a multiple of `multipleOf`.
      */
     private int calculateCoadds(double expTime, int numberExposures, int multipleOf) {
         if (expTime <= 15 && numberExposures > 4) {
@@ -928,8 +930,8 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 if (numberExposures % c != 0) {     // exposures must divide evenly
                     continue;
                 }
-                int newExposures = numberExposures / c;
-                if (newExposures % multipleOf != 0) { // number of exposures must be a multiple
+                int newFrames = numberExposures / c;
+                if (newFrames % multipleOf != 0) { // number of frames must be a multiple
                     continue;
                 }
                 return c;
@@ -970,8 +972,9 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         return exposureTime;
     }
 
+    /** The number of frames, kept under its historical name for the web printers. */
     public int getNumberExposures() {
-        return numberExposures;
+        return numberFrames;
     }
 
     public int getNumberCoadds() {
