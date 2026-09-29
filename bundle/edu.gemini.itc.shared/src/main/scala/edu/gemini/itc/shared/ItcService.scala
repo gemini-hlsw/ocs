@@ -190,11 +190,15 @@ final case class SpcChartData(chartType: SpcChartType, title: String, xAxis: Cha
 case class SignalToNoiseAt(wavelength: Double, singleSignalToNoise: Double, finalSignalToNoise: Double)
 
 /**
- * Exposure time per single exposure (per coadd, in seconds) and the number of frames to take.
- * A frame is what the detector delivers: `coadds` exposures summed. For instruments without
- * coadds a frame is one exposure.
+ * Exposure time per single exposure (per coadd, in seconds), the number of frames to take and
+ * the coadds per frame. A frame is what the detector delivers: `coadds` exposures summed. For
+ * instruments without coadds a frame is one exposure and `coadds` is 1. In integration-time
+ * mode the recipe chooses the coadds; otherwise they are the requested ones.
  */
-case class IntegrationTime(exposureTime: Double, frames: Int)
+case class IntegrationTime(exposureTime: Double, frames: Int, coadds: Int) {
+  // For the recipes of instruments without coadds, which construct this from Java.
+  def this(exposureTime: Double, frames: Int) = this(exposureTime, frames, 1)
+}
 
 case class AllIntegrationTimes(detectors: List[IntegrationTime], selectedIndex: Int) {
   // We could use a zipper but I don't want to overcomplicate it

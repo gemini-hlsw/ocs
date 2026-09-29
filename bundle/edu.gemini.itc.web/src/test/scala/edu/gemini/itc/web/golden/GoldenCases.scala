@@ -17,6 +17,7 @@ import squants.motion.VelocityConversions._
 import squants.radio.IrradianceConversions._
 import squants.radio.SpectralIrradianceConversions._
 
+import scalaz.-\/
 import scalaz.\/-
 
 /** A named ITC request whose full numeric output is pinned by [[ItcGoldenSpec]]. */
@@ -203,6 +204,30 @@ object GoldenCases {
       2.4.microns, SlitWidth.SW_3, None, WellDepth.SHALLOW, None)
   }
 
+  // The GNIRS long slit of Shortcut 10538, as GPP sends it: 0.15"/pix short blue camera, 32 l/mm,
+  // 0.30" slit, order 3 at 2.2 um.
+  private lazy val gnirsLongslitD32 = {
+    import GNIRSParams._
+    GnirsParameters(PixelScale.PS_015, Some(Filter.ORDER_3), Some(Disperser.D_32), ReadMode.BRIGHT, CrossDispersed.NO,
+      2.2.microns, SlitWidth.SW_4, Some(Camera.SHORT_BLUE), WellDepth.SHALLOW, None)
+  }
+
+  // Thermal-IR long slit: order 2 (L band) at 3.4 um through the short red camera.
+  private lazy val gnirsLongslitLBand = {
+    import GNIRSParams._
+    GnirsParameters(PixelScale.PS_015, Some(Filter.ORDER_2), Some(Disperser.D_32), ReadMode.VERY_BRIGHT, CrossDispersed.NO,
+      3.4.microns, SlitWidth.SW_4, Some(Camera.SHORT_RED), WellDepth.DEEP, None)
+  }
+
+  // The conditions of Shortcut 10538 as GPP sends them: exact IQ and CC, bright sky, wet, airmass 2.
+  private val storyConditions = ObservingConditions(
+    iq      = -\/(ExactIq.unsafeFromArcsec(1.0)),
+    cc      = -\/(ExactCc.unsafeFromExtinction(0.3)),
+    wv      = WaterVapor.ANY,
+    sb      = SkyBackground.ANY,
+    airmass = 2.0
+  )
+
   lazy val nir: List[GoldenCase] = List(
     GoldenCase("f2-longslit-r1200jh-s2n-a0v",
       ItcParameters(a0v(12.0, MagnitudeBand.H), s2n(6, 300.0, None), goodConditions, telescope, f2Longslit)),
@@ -212,6 +237,23 @@ object GoldenCases {
 
     GoldenCase("gnirs-longslit-d111-s2n-a0v",
       ItcParameters(a0v(12.0, MagnitudeBand.K), s2n(6, 300.0, None), goodConditions, telescope, gnirsLongslit)),
+
+    // Integration-time (S/N) mode cases where GnirsRecipe folds exposures into coadds.  They pin
+    // the coadds the recipe reports (times.N.coadds), which the GPP sequence takes as its own.
+    //
+    // Shortcut 10538: a K = 5 A0V star at S/N 1000, for which the web ITC prescribed 4 frames of
+    // 2 coadds x 2.3 s.  The star saturates a single long exposure.
+    GoldenCase("gnirs-longslit-d32-inttime-sc10538",
+      ItcParameters(a0v(5.0, MagnitudeBand.K),
+        ObservationDetails(SpectroscopyIntegrationTime(1000.0, 2140.0, None, 1.0, 0.0), AutoAperture(1.0)),
+        storyConditions, telescope, gnirsLongslitD32)),
+
+    // The thermal-IR case: in L band the sky caps the exposure at a second or so, so a modest S/N
+    // still takes many exposures.
+    GoldenCase("gnirs-longslit-lband-inttime-a0v",
+      ItcParameters(a0v(9.0, MagnitudeBand.K),
+        ObservationDetails(SpectroscopyIntegrationTime(100.0, 3400.0, None, 1.0, 0.0), AutoAperture(1.0)),
+        goodConditions, telescope, gnirsLongslitLBand)),
 
     // wavelengthAt is in nm here; the service converts IGRINS-2 requests to microns
     GoldenCase("igrins2-s2n-a0v",
