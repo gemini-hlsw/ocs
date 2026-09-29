@@ -35,7 +35,7 @@ object GoldenSnapshot {
       scalars += "times.selectedIndex" -> t.selectedIndex.toDouble
       t.detectors.zipWithIndex.foreach { case (d, i) =>
         scalars += s"times.$i.exposureTime" -> d.exposureTime
-        scalars += s"times.$i.exposures"    -> d.exposures.toDouble
+        scalars += s"times.$i.exposures"    -> d.frames.toDouble
       }
     }
 

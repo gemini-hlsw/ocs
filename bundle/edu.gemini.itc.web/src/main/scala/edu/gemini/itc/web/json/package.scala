@@ -18,7 +18,7 @@ package object json {
   implicit val IntegrationTimeCalculationCodec: CodecJson[IntegrationTime] =
     casecodec2(IntegrationTime.apply, IntegrationTime.unapply)(
       "exposureTime",
-      "exposures"
+      "frames"
     )
 
   implicit val AllIntegrationTimesCodec: CodecJson[AllIntegrationTimes] =
