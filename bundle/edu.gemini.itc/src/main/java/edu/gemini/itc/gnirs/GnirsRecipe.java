@@ -255,7 +255,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         // Run the ITC to generate the output graphs
         return calculateSpectroscopy(instrument, readMode, exposureTime, numberFrames, coadds, wavelengthAt).withTimes(
-                AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberFrames)));
+                AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberFrames, coadds)));
     }
 
     SpectroscopyResult calculateSpectroscopy(
@@ -547,7 +547,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 }
 
             }
-            final AllIntegrationTimes exp = AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberFrames));
+            final AllIntegrationTimes exp = AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberFrames, numberCoadds));
 
             if (instrument.XDisp_IsUsed()) {
                 // The signal-to-noise at the requested wavelength must come from the order
@@ -907,7 +907,7 @@ public final class GnirsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 PeakPixelFlux.calculateWithHalo(instrument, _sdParameters, exposureTime, SFcalc, im_qual, IQcalc.getImageQuality(), halo_integral, sed_integral, sky_integral) :
                 PeakPixelFlux.calculate(instrument, _sdParameters, exposureTime, SFcalc, im_qual, sed_integral, sky_integral);
 
-        final AllIntegrationTimes exp = AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberFrames));
+        final AllIntegrationTimes exp = AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberFrames, coadds));
         return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair, Option.apply(exp));
     }
 

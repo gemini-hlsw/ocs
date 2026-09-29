@@ -9,8 +9,9 @@ trait ArbExposureCalculation {
   val genExposureCalculation: Gen[IntegrationTime] =
     for {
       time  <- arbitrary[Double]
-      count <- arbitrary[Int]
-    } yield IntegrationTime(time, count)
+      count  <- arbitrary[Int]
+      coadds <- arbitrary[Int]
+    } yield IntegrationTime(time, count, coadds)
 
   implicit val arbExposureCalculation: Arbitrary[IntegrationTime] =
     Arbitrary(genExposureCalculation)

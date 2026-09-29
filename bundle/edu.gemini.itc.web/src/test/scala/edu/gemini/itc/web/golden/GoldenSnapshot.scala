@@ -36,6 +36,7 @@ object GoldenSnapshot {
       t.detectors.zipWithIndex.foreach { case (d, i) =>
         scalars += s"times.$i.exposureTime" -> d.exposureTime
         scalars += s"times.$i.exposures"    -> d.frames.toDouble
+        scalars += s"times.$i.coadds"       -> d.coadds.toDouble
       }
     }
 
