@@ -76,10 +76,11 @@ trait ArbItcSpectroscopyResult {
 
   val genExposureCalculation: Gen[IntegrationTime] =
     for {
-      time  <- arbitrary[Double]
-      count  <- arbitrary[Int]
-      coadds <- arbitrary[Int]
-    } yield IntegrationTime(time, count, coadds)
+      time     <- arbitrary[Double]
+      count    <- arbitrary[Int]
+      coadds   <- arbitrary[Int]
+      readMode <- arbitrary[Option[String]]
+    } yield IntegrationTime(time, count, coadds, readMode)
 
   val genSignalToNoiseAt: Gen[SignalToNoiseAt] =
     for {

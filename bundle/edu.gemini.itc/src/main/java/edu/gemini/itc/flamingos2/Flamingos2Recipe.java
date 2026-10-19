@@ -209,7 +209,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
 
         // Run the ITC to generate the output graphs
         return calculateSpectroscopy(instrument, readMode, exposureTime, numberExposures, wavelength).withTimes(
-                AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures)));
+                AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures, 1, readMode)));
     }
 
     private double calculateSNR(double signal, double background, double darkNoise, double readNoise, double skyAper, int numberExposures) {
@@ -296,7 +296,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
             throw new RuntimeException(String.format("Wavelength %.1f out of range", wavelength));
 
         final scala.Option<SignalToNoiseAt> sn = RecipeUtil.instance().signalToNoiseAt(wavelength, specS2N.getExpS2NSpectrum(), specS2N.getFinalS2NSpectrum());
-        final AllIntegrationTimes exp = AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures));
+        final AllIntegrationTimes exp = AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures, 1, readMode));
         return new SpectroscopyResult(p, instrument, IQcalc, specS2Narr, slit, throughput.throughput(), Option.empty(), sn, exp);
     }
 
@@ -408,7 +408,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         // Calculate the Peak Pixel Flux
         final double peak_pixel_count = PeakPixelFlux.calculate(instrument, _sdParameters, exposureTime, SFcalc, im_qual, sed_integral, sky_integral);
 
-        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, Option.empty(), Option.apply(AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures))));
+        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, Option.empty(), Option.apply(AllIntegrationTimes.single(new IntegrationTime(exposureTime, numberExposures, 1, readMode))));
     }
 
     public int getExposureTime() {

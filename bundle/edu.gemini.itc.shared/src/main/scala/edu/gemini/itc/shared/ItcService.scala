@@ -190,14 +190,19 @@ final case class SpcChartData(chartType: SpcChartType, title: String, xAxis: Cha
 case class SignalToNoiseAt(wavelength: Double, singleSignalToNoise: Double, finalSignalToNoise: Double)
 
 /**
- * Exposure time per single exposure (per coadd, in seconds), the number of frames to take and
- * the coadds per frame. A frame is what the detector delivers: `coadds` exposures summed. For
- * instruments without coadds a frame is one exposure and `coadds` is 1. In integration-time
- * mode the recipe chooses the coadds; otherwise they are the requested ones.
+ * Exposure time per single exposure (per coadd, in seconds), the number of frames to take, the
+ * coadds per frame and the read mode. A frame is what the detector delivers: `coadds` exposures
+ * summed. For instruments without coadds a frame is one exposure and `coadds` is 1. In
+ * integration-time mode the recipe chooses the coadds and the read mode; otherwise they are the
+ * requested ones. The read mode is the name of the instrument's read mode enum constant, `None`
+ * for the instruments whose recipe does not select one.
  */
-case class IntegrationTime(exposureTime: Double, frames: Int, coadds: Int) {
-  // For the recipes of instruments without coadds, which construct this from Java.
-  def this(exposureTime: Double, frames: Int) = this(exposureTime, frames, 1)
+case class IntegrationTime(exposureTime: Double, frames: Int, coadds: Int, readMode: Option[String]) {
+  // For the recipes of instruments without coadds nor a selected read mode, which construct this from Java.
+  def this(exposureTime: Double, frames: Int) = this(exposureTime, frames, 1, None)
+
+  // For the recipes that select a read mode, which construct this from Java.
+  def this(exposureTime: Double, frames: Int, coadds: Int, readMode: java.lang.Enum[_]) = this(exposureTime, frames, coadds, Some(readMode.name))
 }
 
 case class AllIntegrationTimes(detectors: List[IntegrationTime], selectedIndex: Int) {
