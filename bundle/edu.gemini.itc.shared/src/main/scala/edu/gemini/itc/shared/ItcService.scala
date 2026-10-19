@@ -1,13 +1,14 @@
 package edu.gemini.itc.shared
 
 import edu.gemini.spModel.core.Peer
-import edu.gemini.spModel.gemini.flamingos2.Flamingos2
-import edu.gemini.spModel.gemini.gnirs.GNIRSParams
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2.{ReadMode => F2ReadMode}
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams.{ReadMode => GnirsReadMode}
 import edu.gemini.util.trpc.client.TrpcClient
 
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Try
 import scala.swing.Color
 
 import scalaz._
@@ -201,19 +202,18 @@ sealed trait ItcReadMode {
 }
 
 object ItcReadMode {
-  final case class Gnirs(readMode: GNIRSParams.ReadMode) extends ItcReadMode {
+  final case class Gnirs(readMode: GnirsReadMode) extends ItcReadMode {
     def name: String = readMode.name
   }
 
-  // Fully qualified: in this scope `Flamingos2` is the case class.
-  final case class Flamingos2(readMode: edu.gemini.spModel.gemini.flamingos2.Flamingos2.ReadMode) extends ItcReadMode {
+  final case class Flamingos2(readMode: F2ReadMode) extends ItcReadMode {
     def name: String = readMode.name
   }
 
   // The instrument enum constant names do not overlap, so the name alone identifies the read mode.
   def fromName(name: String): Option[ItcReadMode] =
-    scala.util.Try(Gnirs(GNIRSParams.ReadMode.valueOf(name))).toOption orElse
-      scala.util.Try(Flamingos2(edu.gemini.spModel.gemini.flamingos2.Flamingos2.ReadMode.valueOf(name))).toOption
+    Try(Gnirs(GnirsReadMode.valueOf(name))).toOption orElse
+      Try(Flamingos2(F2ReadMode.valueOf(name))).toOption
 }
 
 /**
@@ -228,10 +228,10 @@ case class IntegrationTime(exposureTime: Double, frames: Int, coadds: Int, readM
   def this(exposureTime: Double, frames: Int) = this(exposureTime, frames, 1, None)
 
   // For the recipes that select a read mode, which construct this from Java.
-  def this(exposureTime: Double, frames: Int, coadds: Int, readMode: GNIRSParams.ReadMode) =
+  def this(exposureTime: Double, frames: Int, coadds: Int, readMode: GnirsReadMode) =
     this(exposureTime, frames, coadds, Some(ItcReadMode.Gnirs(readMode)))
 
-  def this(exposureTime: Double, frames: Int, coadds: Int, readMode: Flamingos2.ReadMode) =
+  def this(exposureTime: Double, frames: Int, coadds: Int, readMode: F2ReadMode) =
     this(exposureTime, frames, coadds, Some(ItcReadMode.Flamingos2(readMode)))
 }
 
