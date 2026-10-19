@@ -15,6 +15,12 @@ package object json {
       "final"
     )
 
+  implicit val ItcReadModeCodec: CodecJson[ItcReadMode] =
+    CodecJson(
+      r => jString(r.name),
+      c => c.as[String].flatMap(n => ItcReadMode.fromName(n).fold(DecodeResult.fail[ItcReadMode](s"Unknown read mode: $n", c.history))(DecodeResult.ok))
+    )
+
   implicit val IntegrationTimeCalculationCodec: CodecJson[IntegrationTime] =
     casecodec4(IntegrationTime.apply, IntegrationTime.unapply)(
       "exposureTime",

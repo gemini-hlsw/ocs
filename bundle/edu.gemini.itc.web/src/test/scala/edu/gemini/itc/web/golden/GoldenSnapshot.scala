@@ -37,7 +37,7 @@ object GoldenSnapshot {
         scalars += s"times.$i.exposureTime" -> d.exposureTime
         scalars += s"times.$i.exposures"    -> d.frames.toDouble
         scalars += s"times.$i.coadds"       -> d.coadds.toDouble
-        d.readMode.foreach(r => strings += s"times.$i.readMode" -> r)
+        d.readMode.foreach(r => strings += s"times.$i.readMode" -> r.name)
       }
     }
 

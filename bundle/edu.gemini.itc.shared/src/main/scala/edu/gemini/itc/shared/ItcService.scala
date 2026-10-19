@@ -1,6 +1,8 @@
 package edu.gemini.itc.shared
 
 import edu.gemini.spModel.core.Peer
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.util.trpc.client.TrpcClient
 
 import scala.collection.JavaConversions._
@@ -190,19 +192,47 @@ final case class SpcChartData(chartType: SpcChartType, title: String, xAxis: Cha
 case class SignalToNoiseAt(wavelength: Double, singleSignalToNoise: Double, finalSignalToNoise: Double)
 
 /**
+ * The read mode a recipe computed with, for the instruments whose recipe selects one. Each
+ * instrument has its own read mode enumeration; this names the one in use.
+ */
+sealed trait ItcReadMode {
+  // The instrument enum constant's name, which is how the read mode travels in JSON.
+  def name: String
+}
+
+object ItcReadMode {
+  final case class Gnirs(readMode: GNIRSParams.ReadMode) extends ItcReadMode {
+    def name: String = readMode.name
+  }
+
+  // Fully qualified: in this scope `Flamingos2` is the case class.
+  final case class Flamingos2(readMode: edu.gemini.spModel.gemini.flamingos2.Flamingos2.ReadMode) extends ItcReadMode {
+    def name: String = readMode.name
+  }
+
+  // The instrument enum constant names do not overlap, so the name alone identifies the read mode.
+  def fromName(name: String): Option[ItcReadMode] =
+    scala.util.Try(Gnirs(GNIRSParams.ReadMode.valueOf(name))).toOption orElse
+      scala.util.Try(Flamingos2(edu.gemini.spModel.gemini.flamingos2.Flamingos2.ReadMode.valueOf(name))).toOption
+}
+
+/**
  * Exposure time per single exposure (per coadd, in seconds), the number of frames to take, the
  * coadds per frame and the read mode. A frame is what the detector delivers: `coadds` exposures
  * summed. For instruments without coadds a frame is one exposure and `coadds` is 1. In
  * integration-time mode the recipe chooses the coadds and the read mode; otherwise they are the
- * requested ones. The read mode is the name of the instrument's read mode enum constant, `None`
- * for the instruments whose recipe does not select one.
+ * requested ones. The read mode is `None` for the instruments whose recipe does not select one.
  */
-case class IntegrationTime(exposureTime: Double, frames: Int, coadds: Int, readMode: Option[String]) {
+case class IntegrationTime(exposureTime: Double, frames: Int, coadds: Int, readMode: Option[ItcReadMode]) {
   // For the recipes of instruments without coadds nor a selected read mode, which construct this from Java.
   def this(exposureTime: Double, frames: Int) = this(exposureTime, frames, 1, None)
 
   // For the recipes that select a read mode, which construct this from Java.
-  def this(exposureTime: Double, frames: Int, coadds: Int, readMode: java.lang.Enum[_]) = this(exposureTime, frames, coadds, Some(readMode.name))
+  def this(exposureTime: Double, frames: Int, coadds: Int, readMode: GNIRSParams.ReadMode) =
+    this(exposureTime, frames, coadds, Some(ItcReadMode.Gnirs(readMode)))
+
+  def this(exposureTime: Double, frames: Int, coadds: Int, readMode: Flamingos2.ReadMode) =
+    this(exposureTime, frames, coadds, Some(ItcReadMode.Flamingos2(readMode)))
 }
 
 case class AllIntegrationTimes(detectors: List[IntegrationTime], selectedIndex: Int) {
