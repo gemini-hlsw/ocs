@@ -345,6 +345,11 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
             ImagingMethodExptime bestCalc = null;
             double bestTotalTime = Double.MAX_VALUE;
 
+            // Record why each read mode was rejected, so that if none succeeds the user is told why.
+            final StringBuilder tried = new StringBuilder();
+            RuntimeException tooFaint = null;    // last "too faint" failure = lowest-noise mode that was too faint
+            RuntimeException unexpected = null;  // first failure that was neither "too bright" nor "too faint"
+
             final List<ReadMode> readModes = Arrays.asList(ReadMode.BRIGHT_OBJECT_SPEC, ReadMode.MEDIUM_OBJECT_SPEC, ReadMode.FAINT_OBJECT_SPEC);
             for (ReadMode rm : readModes) {
                 Log.fine("============================ " + rm + " ============================");
@@ -356,15 +361,22 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
                 try {
                     calc.calculate();
                 } catch (RuntimeException e) {
-                    Log.fine(e.getMessage());
-                    if (e.getMessage().startsWith("This target is too bright")) {
+                    final String msg = e.getMessage() == null ? "" : e.getMessage();
+                    final String detail = msg.substring(msg.indexOf('\n') + 1).trim();  // whole msg if no newline
+                    Log.fine(msg);
+                    if (msg.startsWith("This target is too bright")) {
                         if (rm == ReadMode.BRIGHT_OBJECT_SPEC) throw e;  // if too bright for BRIGHT_OBJECT_SPEC then too bright.
-                        continue;
-                    } else if (e.getMessage().startsWith("This target is too faint")) {
+                        tried.append("\n").append(rm).append(": ").append(detail);
+                    } else if (msg.startsWith("This target is too faint")) {
                         if (rm == ReadMode.FAINT_OBJECT_SPEC) throw e;   // if too faint for FAINT_OBJECT_SPEC then too faint.
-                        continue;
+                        tried.append("\n").append(rm).append(": ").append(detail);
+                        tooFaint = e;
+                    } else {
+                        Log.warning(rm + " read mode failed: " + msg);
+                        tried.append("\n").append(rm).append(": error. ").append(detail);
+                        if (unexpected == null) unexpected = e;
                     }
-                    throw e;
+                    continue;  // never use a calc whose calculate() threw
                 }
 
                 // Calculate the total time = Nexp x (exptime + readout)
@@ -381,9 +393,17 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
             }
             Log.fine("============================================================================");
 
-            // The loop can fall through for red filters when the source is too faint for VERY_BRIGHT
-            // and the background is too bright for VERY_FAINT.  Catch that here:
-            if (bestCalc == null) throw new RuntimeException("Could not find best read mode.");
+            // The loop can fall through for red filters when the source is too faint for BRIGHT_OBJECT_SPEC
+            // and the background is too bright for FAINT_OBJECT_SPEC.  Catch that here:
+            if (bestCalc == null) {
+                // An unexpected error takes priority, since that mode might otherwise have succeeded.
+                if (unexpected != null) throw unexpected;
+                if (tooFaint != null) {
+                    throw new RuntimeException(
+                            "The requested S/N cannot be reached with any read mode:" + tried, tooFaint);
+                }
+                throw new RuntimeException("Could not find best read mode." + tried);
+            }
 
             Log.fine(String.format("The winner is: %s read mode with total time = %.2f sec", readMode, bestTotalTime));
 

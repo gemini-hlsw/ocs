@@ -84,7 +84,7 @@ public final class ImagingMethodExptime extends ImagingS2NCalculation {
 
         if (timeToHalfMax < minExpTime) {
             throw new RuntimeException(String.format("This target is too bright for this configuration.\n" +
-                    "The detector well is half filled in %.2f seconds.", timeToHalfMax));
+                    "The detector well is half filled in %.2f seconds (minimum is %.2f seconds).", timeToHalfMax, minExpTime));
         }
 
         double maxExposureTime;
@@ -124,7 +124,7 @@ public final class ImagingMethodExptime extends ImagingS2NCalculation {
         }
         Log.fine(String.format("numberExposures = %d", numberExposures));
 
-        if (numberExposures > 10000) {
+        if (numberExposures > 100000) {
             throw new RuntimeException(String.format("This target is too faint for this configuration.\n" +
                     "%d exposures would be required to achieve the requested S/N.", numberExposures));
         }
