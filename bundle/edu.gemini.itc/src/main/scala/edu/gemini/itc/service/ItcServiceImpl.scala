@@ -27,7 +27,14 @@ class ItcServiceImpl extends ItcService {
 
   import ItcService._
 
-  def calculate(p: ItcParameters, excludeCharts: Boolean): Result = try {
+  def calculate(p: ItcParameters, excludeCharts: Boolean): Result =
+    try calculateOrThrow(p, excludeCharts)
+    catch {
+      case e: Throwable => ItcResult.forException(e)
+    }
+
+  /** Like `calculate`, but lets exceptions escape so that callers can inspect their type. */
+  def calculateOrThrow(p: ItcParameters, excludeCharts: Boolean): Result = {
 
     // update parameters sent from client with stuff that needs to be done on the server
     val updatedParams: ItcParameters = {
@@ -58,8 +65,6 @@ class ItcServiceImpl extends ItcService {
       case _: Spectroscopy  => calculateSpectroscopy(updatedParams, excludeCharts)
     }
 
-  } catch {
-    case e: Throwable => ItcResult.forException(e)
   }
 
   // === Imaging
