@@ -2,6 +2,7 @@ package edu.gemini.itc.web.servlets
 
 import argonaut._
 import Argonaut._
+import edu.gemini.itc.base.SourceTooBrightException
 import edu.gemini.itc.shared.{Imaging, ItcParameters, ItcResult, ItcService, SpcSeriesData}
 import edu.gemini.itc.service.ItcServiceImpl
 import edu.gemini.itc.web.json.{ItcParametersCodec, ItcResultCodec, ItcSpectroscopyResultCodec}
@@ -47,7 +48,7 @@ object ItcCalculation extends ItcParametersCodec with ItcResultCodec with ItcSpe
     )
 
   def calculateCharts(json: String): String = {
-    val itc: ItcService = new ItcServiceImpl
+    val itc: ItcServiceImpl = new ItcServiceImpl
 
     // Shadow the default SpcSeriesDataCodec with a custom one for GPP that
     // sends x-axis data and only the y data values to save encoding time and bandwidth.
@@ -63,33 +64,52 @@ object ItcCalculation extends ItcParametersCodec with ItcResultCodec with ItcSpe
       )
 
     (for {
-      itcReq <- Parse.decodeEither[ItcParameters](json)
+      itcReq <- Parse.decodeEither[ItcParameters](json).leftMap(generalError)
       itcRes <- itcReq.observation.calculationMethod match {
                   // REL-4959 We should produce the error at this level for gpp
-                  case _: Imaging => Left("Charts not implemented for imaging.")
-                  case _          => itc.calculate(itcReq, headless = false).toEither.leftMap(_.msg)
+                  case _: Imaging => Left(generalError("Charts not implemented for imaging."))
+                  case _          => calculateOrError(itc, itcReq, headless = false)
                 }
-    } yield itcRes.asJson.nospaces).toString
+    } yield itcRes.asJson).bimap(_.nospaces, _.nospaces).toString
   }
 
   // The next two methods are the same and could be combined.
   def calculateExposureTime(json: String): String = {
-    val itc: ItcService = new ItcServiceImpl
+    val itc: ItcServiceImpl = new ItcServiceImpl
 
     (for {
-      itcReq <- Parse.decodeEither[ItcParameters](json)
-      itcRes <- itc.calculate(itcReq, headless = true).toEither.leftMap(_.msg)
-    } yield itcRes.asJson.nospaces).toString
+      itcReq <- Parse.decodeEither[ItcParameters](json).leftMap(generalError)
+      itcRes <- calculateOrError(itc, itcReq, headless = true)
+    } yield itcRes.asJson).bimap(_.nospaces, _.nospaces).toString
   }
 
   def calculateSignalToNoise(json: String): String = {
-    val itc: ItcService = new ItcServiceImpl
+    val itc: ItcServiceImpl = new ItcServiceImpl
 
     (for {
-      itcReq <- Parse.decodeEither[ItcParameters](json)
-      itcRes <- itc.calculate(itcReq, headless = true).toEither.leftMap(_.msg)
-    } yield itcRes.asJson.nospaces).toString
+      itcReq <- Parse.decodeEither[ItcParameters](json).leftMap(generalError)
+      itcRes <- calculateOrError(itc, itcReq, headless = true)
+    } yield itcRes.asJson).bimap(_.nospaces, _.nospaces).toString
   }
+
+  // Errors go back to gpp as JSON so that it can tell them apart without parsing the message text.
+  private def calculateOrError(itc: ItcServiceImpl, itcReq: ItcParameters, headless: Boolean): Either[Json, ItcResult] =
+    try itc.calculateOrThrow(itcReq, headless).toEither.leftMap(e => generalError(e.msg))
+    catch {
+      case e: SourceTooBrightException =>
+        Left(
+          ("errorType"       := "SourceTooBright")     ->:
+          ("message"         := e.getMessage)          ->:
+          ("halfWellTime"    := e.getHalfWellTime)     ->:
+          ("minExposureTime" := e.getMinExposureTime)  ->:
+          jEmptyObject
+        )
+      case e: Throwable                =>
+        Left(generalError(Option(e.getMessage).getOrElse(e.getClass.getName)))
+    }
+
+  private def generalError(msg: String): Json =
+    ("errorType" := "General") ->: ("message" := msg) ->: jEmptyObject
 }
 
 /**

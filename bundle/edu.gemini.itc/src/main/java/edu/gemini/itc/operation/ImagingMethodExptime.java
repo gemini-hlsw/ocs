@@ -1,6 +1,7 @@
 package edu.gemini.itc.operation;
 
 import edu.gemini.itc.base.Instrument;
+import edu.gemini.itc.base.SourceTooBrightException;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.ImagingIntegrationTime;
 import edu.gemini.itc.shared.ObservationDetails;
@@ -83,8 +84,7 @@ public final class ImagingMethodExptime extends ImagingS2NCalculation {
         Log.fine(String.format("minExpTime = %.3f seconds", minExpTime));
 
         if (timeToHalfMax < minExpTime) {
-            throw new RuntimeException(String.format("This target is too bright for this configuration.\n" +
-                    "The detector well is half filled in %.2f seconds (minimum is %.2f seconds).", timeToHalfMax, minExpTime));
+            throw new SourceTooBrightException(timeToHalfMax, minExpTime);
         }
 
         double maxExposureTime;
