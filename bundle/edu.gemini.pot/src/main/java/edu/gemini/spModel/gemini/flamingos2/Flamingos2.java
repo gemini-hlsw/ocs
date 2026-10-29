@@ -910,7 +910,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     }
 
     public static Duration getSpectroscopySetup() {
-        return Duration.ofMinutes(20);
+        return Duration.ofMinutes(10);
 	}
 
 	public static Duration getCustomMaskSetup() {
