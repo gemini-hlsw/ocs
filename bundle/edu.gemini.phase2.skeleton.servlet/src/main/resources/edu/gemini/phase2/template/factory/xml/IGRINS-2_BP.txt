@@ -5,6 +5,7 @@ Version November 22, 2023 - Bryan M, remove telluric acquisition, other fixes
 Version February 23, 2024 - Bryan M, update rules for notes based on latest libraries
 Version April 15, 2024 - Bryan M, renumber libraries to be in final order
 Version May 14, 2024 - Bryan M, update for reworded nod options
+Version October 30, 2026 - Bryan M, remove SVC image observation
 
 Observations identified by LibraryIDs indicated with {}.
 
@@ -13,18 +14,16 @@ Blueprint library:
 {3} Point source (ABBA) science observation
 {4} Extended source (On-off) science observation
 {5} After telluric observation
-{2} SVC image
 
 The instantiated scheduling group should look like
 Observer Instructions note
 Before Telluric
-SVC Image
 Science
 After Telluric
 
 INCLUDE note "Phase II Checklist" at the program level.
 
-INCLUDE {1}, {2} IN target-specific Scheduling Group
+INCLUDE {1} IN target-specific Scheduling Group
 
 If NODDING OPTION == Nod along slit:
 	INCLUDE {3}

@@ -31,18 +31,16 @@ case class Igrins2(blueprint: SpIgrins2Blueprint) extends GroupInitializer[SpIgr
   //  {3} Point source (ABBA) science observation
   //  {4} Extended source (On-off) science observation
   //  {5} After telluric observation
-  //  {2} SVC image
   //
   //  The instantiated scheduling group should look like
   //  Observer Instructions note
   //  Before Telluric
-  //  SVC Image
   //  Science
   //  After Telluric
   //
   //  INCLUDE note "Phase II Checklist" at the program level.
   //
-  //  INCLUDE {1}, {2} IN target-specific Scheduling Group
+  //  INCLUDE {1} IN target-specific Scheduling Group
   //
   //  If NODDING OPTION == Nod along slit:
   //    INCLUDE {3}
@@ -60,7 +58,7 @@ case class Igrins2(blueprint: SpIgrins2Blueprint) extends GroupInitializer[SpIgr
     case NoddingOption.NOD_ALONG_SLIT => 3
     case NoddingOption.NOD_TO_SKY     => 4
   }
-  include(1, 2, n, 5) in TargetGroup
+  include(1, n, 5) in TargetGroup
 
   addNote("Observer Instructions") in TargetGroup
 }
