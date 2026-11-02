@@ -141,10 +141,6 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
     }
 
     /**
-     * @return y value at specified x using linear interpolation.
-     * Silently returns zero if x is out of spectrum range.
-     */
-    /**
      * Same values as getY(double), for callers that evaluate many x in increasing order: the bin
      * and its slope are kept between calls, so consecutive x in one bin skip the lookup. The
      * expression is the one getY uses with the same operands, hence bit-identical results.
@@ -173,6 +169,10 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
         return new Interpolator();
     }
 
+    /**
+     * @return y value at specified x using linear interpolation.
+     * Silently returns zero if x is out of spectrum range.
+     */
     @Override public double getY(double x) {
         if (x < getStart() || x > getEnd()) return 0;
         int low_index = getLowerIndex(x);
