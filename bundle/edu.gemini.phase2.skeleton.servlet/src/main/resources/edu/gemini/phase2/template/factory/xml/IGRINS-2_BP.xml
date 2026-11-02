@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2023A-1" subtype="basic" key="5a36d246-f2a1-4f11-9f67-ba0f1de71670" name="">
+  <container kind="program" type="Program" version="2025B-1" subtype="basic" key="5a36d246-f2a1-4f11-9f67-ba0f1de71670" name="">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="IGRINS-2 INSTRUMENT PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -26,8 +26,8 @@
     </paramset>
     <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="81876a3c-4b9a-4662-8279-c351ba5a75d0" name="Note">
       <paramset name="Note" kind="dataObj">
-        <param name="title" value="Next libID = 5"/>
-        <param name="NoteText" value=""/>
+        <param name="title" value="Next libID = 6"/>
+        <param name="NoteText" value="{2} SVC image was removed"/>
       </paramset>
     </container>
     <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="6b7e3b78-b8d5-46c7-9e2a-7df4adcb2cc3" name="Note">
@@ -375,72 +375,6 @@ A predefined number of SVC images will be saved during the science exposure, tog
           </container>
         </container>
       </container>
-      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="88da1ab6-b9f2-4dc0-b619-983f72686427" name="">
-        <paramset name="Observation" kind="dataObj">
-          <param name="title" value="SVC Image (Optional)"/>
-          <param name="libraryId" value="2"/>
-          <param name="priority" value="LOW"/>
-          <param name="tooOverrideRapid" value="false"/>
-          <param name="phase2Status" value="INACTIVE"/>
-          <paramset name="schedulingBlock">
-            <param name="start" value="1698773400000"/>
-            <paramset name="duration">
-              <param name="tag" value="unstated"/>
-            </paramset>
-          </paramset>
-          <param name="qaState" value="UNDEFINED"/>
-          <param name="overrideQaState" value="false"/>
-          <param name="setupTimeType" value="FULL"/>
-        </paramset>
-        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="IGRINS-2" key="cae7267e-2a1c-4735-8b02-904d1fdc7ba8" name="IGRINS-2">
-          <paramset name="IGRINS-2" kind="dataObj">
-            <param name="exposureTime" value="1.63"/>
-            <param name="posAngle" value="0"/>
-            <param name="coadds" value="1"/>
-            <param name="posAngleConstraint" value="PARALLACTIC_OVERRIDE"/>
-            <param name="issPort" value="UP_LOOKING"/>
-          </paramset>
-        </container>
-        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="73db073b-5532-42b5-8b45-a6b8e440cdbf" name="Observing Log">
-          <paramset name="Observing Log" kind="dataObj">
-            <paramset name="obsQaRecord"/>
-          </paramset>
-        </container>
-        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="be2f73b5-4ec7-4b50-8613-6f0a573102ae" name="Observation Exec Log">
-          <paramset name="Observation Exec Log" kind="dataObj">
-            <paramset name="obsExecRecord">
-              <paramset name="datasets"/>
-              <paramset name="events"/>
-              <paramset name="configMap"/>
-            </paramset>
-          </paramset>
-        </container>
-        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="7c3ce5a6-0406-423b-b321-6e2bf2d74046" name="Sequence">
-          <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="e61f7176-e485-4e2c-bf3e-b0ec5bbc358a" name="Offset">
-            <paramset name="Offset" kind="dataObj">
-              <paramset name="offsets">
-                <paramset name="Offset2" sequence="0">
-                  <param name="p" value="0.0"/>
-                  <param name="q" value="0.0"/>
-                  <param name="defaultGuideOption" value="on"/>
-                </paramset>
-                <paramset name="Offset3" sequence="1">
-                  <param name="p" value="5.0"/>
-                  <param name="q" value="0.0"/>
-                  <param name="defaultGuideOption" value="on"/>
-                </paramset>
-              </paramset>
-            </paramset>
-            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="927edb96-d277-4d05-9e04-593245817bcc" name="Observe">
-              <paramset name="Observe" kind="dataObj">
-                <param name="repeatCount" value="1"/>
-                <param name="class" value="ACQ"/>
-              </paramset>
-            </container>
-          </container>
-        </container>
-      </container>
     </container>
   </container>
   <container kind="versions" type="versions" version="1.0">
@@ -456,6 +390,7 @@ A predefined number of SVC images will be saved during the science exposure, tog
       <param name="key" value="befd3e34-d720-46ba-9e16-c9cb5293692f"/>
       <param name="04867c3c-f7fd-41ff-b100-6aad593b8e3c" value="1"/>
       <param name="24ce0a75-78f6-4549-aff7-aa6a86cad528" value="2"/>
+      <param name="54937687-844f-4ff9-b9b8-885538bceca5" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="002e0afc-e3a4-4be2-92b3-1f0089e0121d"/>
@@ -511,6 +446,7 @@ A predefined number of SVC images will be saved during the science exposure, tog
     <paramset name="node">
       <param name="key" value="81876a3c-4b9a-4662-8279-c351ba5a75d0"/>
       <param name="04867c3c-f7fd-41ff-b100-6aad593b8e3c" value="1"/>
+      <param name="54937687-844f-4ff9-b9b8-885538bceca5" value="53"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f5ef37c4-aa13-48a3-bfa3-62349d064f8b"/>
@@ -536,6 +472,7 @@ A predefined number of SVC images will be saved during the science exposure, tog
     <paramset name="node">
       <param name="key" value="ea1b2513-a21c-4b63-9e63-343bfad56471"/>
       <param name="04867c3c-f7fd-41ff-b100-6aad593b8e3c" value="1"/>
+      <param name="54937687-844f-4ff9-b9b8-885538bceca5" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="21ca0dc3-433a-4354-bc94-975e0746468f"/>
