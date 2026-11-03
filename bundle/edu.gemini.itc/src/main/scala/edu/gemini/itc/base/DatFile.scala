@@ -79,9 +79,21 @@ object DatFile {
     }
   }
 
-  def fromUserSpectrum(s: String) = {
+  def fromUserSpectrum(s: String): Data = {
     val scan = new Scanner(s).useDelimiter(Delimiters)
-    scanArray(scan)
+    sortedByWavelength(scanArray(scan))
+  }
+
+  /** The interpolation needs a non-decreasing wavelength axis; user files are not guaranteed to have one. */
+  private[base] def sortedByWavelength(data: Data): Data = {
+    val xs = data(0)
+    if ((1 until xs.length).forall(i => xs(i - 1) <= xs(i))) data
+    else {
+      Log.warning("User spectrum wavelengths are not in increasing order, sorting them")
+      // stable, so repeated wavelengths keep their file order
+      val order = xs.indices.sortBy(xs(_))
+      Array(order.map(xs(_)).toArray, order.map(data(1)(_)).toArray)
+    }
   }
 
   // ===== Cached data file loaders
