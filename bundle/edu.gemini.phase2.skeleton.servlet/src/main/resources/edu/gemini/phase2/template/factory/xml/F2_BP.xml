@@ -1629,8 +1629,23 @@ When modifying the exposure times set at the library example sequences, or on-th
       </container>
       <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="adf7a09a-9646-48d6-9bfa-8eece7044505" name="Note">
         <paramset name="Note" kind="dataObj">
-          <param name="title" value="Use the same PA for the MOS science target and telluric"/>
-          <param name="NoteText" value="This will save telescope time, and will also diminish the effect of flexure."/>
+          <param name="title" value="PA in MOS observations"/>
+          <param name="NoteText">
+            <value>The PA in OT is NOT the same as the PA the ODF, since one is clockwise positive and the other is anti-clockwise positive
+
+The golden rule is: PA(OT) + PA(ODF) = 360
+
+PA(ODF) can be found when opening the ODF with GMMPS
+
+Enter the same PA in both the acquisition and science observtions. This must match the PA used in any pre-imaging observations.
+
+Use the same PA for the MOS science target and telluric. This will save telescope time, and will also diminish the effect of flexure.
+
+Set the exact same coordinates that were used when creating the mask.
+
+These coordinates can be found when opening the ODF with GMMPS.
+</value>
+          </param>
         </paramset>
       </container>
       <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="110a8a37-abb7-42ed-bd87-e144013bf294" name="Note">
@@ -3710,6 +3725,7 @@ Additional calibration targets and resources are located at the webpage http://w
     <paramset name="node">
       <param name="key" value="adf7a09a-9646-48d6-9bfa-8eece7044505"/>
       <param name="c194f5a0-a3bc-4d68-b98d-2b51e6d54414" value="1"/>
+      <param name="9a6db046-924b-4d70-8309-e2b98b1f7b26" value="280"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="635bd052-2220-4461-abbc-f084b9b40ce8"/>
