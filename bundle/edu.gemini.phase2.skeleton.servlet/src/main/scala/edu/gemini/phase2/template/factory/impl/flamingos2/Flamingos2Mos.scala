@@ -47,7 +47,7 @@ final case class Flamingos2Mos(blueprint:SpFlamingos2BlueprintMos) extends Flami
   override val notes: Seq[String] =
     Seq(
       "F2 MOS Notes",
-      "Use the same PA for the MOS science target and telluric",
+      "PA in MOS observations",
       "Detector readout modes",
       "Libraries",
       "MOS Baseline calibrations",

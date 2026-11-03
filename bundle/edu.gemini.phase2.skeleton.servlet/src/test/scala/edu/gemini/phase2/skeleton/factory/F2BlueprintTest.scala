@@ -84,7 +84,7 @@ class F2BlueprintTest extends TemplateSpec("F2_BP.xml") with SpecificationLike w
         expand(proposal(b, Nil, MagnitudeBand.R)) { (_, sp) =>
           val notes = List(
             "F2 MOS Notes",
-            "Use the same PA for the MOS science target and telluric",
+            "PA in MOS observations",
             "Detector readout modes",
             "Libraries",
             "MOS Baseline calibrations",
