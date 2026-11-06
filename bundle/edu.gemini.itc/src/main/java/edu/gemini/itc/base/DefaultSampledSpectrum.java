@@ -57,9 +57,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         Log.fine("xEnd = " + xEnd + " nm");
         int numIntervals = (int) ((xEnd - xStart) / xInterval);
         double[] data = new double[numIntervals + 1];
-        for (int i = 0; i <= numIntervals; ++i) {
-            data[i] = sp.getY(i * xInterval + xStart);
-        }
+        sample(sp, data, 0, xStart, xInterval);
         adopt(data, xStart, xInterval);
     }
 
@@ -73,10 +71,19 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         Log.fine("Sampling " + xStart + " - " + xEnd + " nm restricted to " + lo + " - " + hi + " nm: "
                 + (last - first + 1) + " of " + (numIntervals + 1) + " samples");
         double[] data = new double[last - first + 1];
-        for (int i = first; i <= last; ++i) {
-            data[i - first] = sp.getY(i * xInterval + xStart);
-        }
+        sample(sp, data, first, xStart, xInterval);
         adoptAt(data, xStart, first, xInterval);
+    }
+
+    /** Fills data with sp at (first + j) * xInterval + xStart, walking a DefaultArraySpectrum with its own interpolator. */
+    private static void sample(final ArraySpectrum sp, final double[] data, final int first,
+                               final double xStart, final double xInterval) {
+        if (sp instanceof DefaultArraySpectrum) {
+            final DefaultArraySpectrum.Interpolator in = ((DefaultArraySpectrum) sp).interpolator();
+            for (int j = 0; j < data.length; ++j) data[j] = in.at((first + j) * xInterval + xStart);
+        } else {
+            for (int j = 0; j < data.length; ++j) data[j] = sp.getY((first + j) * xInterval + xStart);
+        }
     }
 
     /** A cut-out starting at index xOffset of the grid with origin xOrigin. Takes ownership of y. */
@@ -109,9 +116,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
 
         int numIntervals = (int) Math.round((xEnd - xStart) / xInterval + 2); // +2 to allow for truncation
         double[] data = new double[numIntervals + 1];
-        for (int i = 0; i <= numIntervals; ++i) {
-           data[i] = sp.getY(xStart + i * xInterval);
-        }
+        sample(sp, data, 0, xStart, xInterval);
         adopt(data, xStart, xInterval);
     }
 

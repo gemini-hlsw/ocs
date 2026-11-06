@@ -8,7 +8,7 @@ import edu.gemini.itc.base.*;
  */
 public class AltairBackgroundVisitor implements SampledSpectrumVisitor {
 
-    private ArraySpectrum _altairBack = null;
+    private DefaultArraySpectrum _altairBack = null;
 
     /**
      * Constructs AltairBackgroundVisitor.
@@ -27,8 +27,9 @@ public class AltairBackgroundVisitor implements SampledSpectrumVisitor {
      * Implements the SampledSpectrumVisitor interface
      */
     public void visit(SampledSpectrum sed) {
+        final DefaultArraySpectrum.Interpolator back = _altairBack.interpolator();
         for (int i = 0; i < sed.getLength(); i++) {
-            sed.setY(i, _altairBack.getY(sed.getX(i)) + sed.getY(i));
+            sed.setY(i, back.at(sed.getX(i)) + sed.getY(i));
         }
     }
 

@@ -6,8 +6,9 @@ import org.junit.Assert._
 import scala.util.Random
 
 /**
- * The cursor and gallop paths in getLowerIndex must return exactly what a plain binary search
- * over the x axis returns, whatever order the lookups come in.
+ * The gallop in lowerIndexFrom must return exactly what a plain binary search over the x axis
+ * returns, whatever order the lookups come in, and the Interpolator built on it must match getY
+ * bit for bit.
  */
 class DefaultArraySpectrumLookupTest {
 
@@ -22,7 +23,7 @@ class DefaultArraySpectrumLookupTest {
   }
 
   private def spectrum(xs: Array[Double]): DefaultArraySpectrum =
-    new DefaultArraySpectrum(Array(xs.clone, xs.map(_ => 1.0)))
+    new DefaultArraySpectrum(Array(xs.clone, xs.map(x => math.sin(x / 7.0) + 2.0)))
 
   private def axis(r: Random, n: Int, withRepeats: Boolean): Array[Double] = {
     var x = r.nextDouble() * 100
@@ -53,8 +54,15 @@ class DefaultArraySpectrumLookupTest {
 
   private def check(xs: Array[Double], qs: Seq[Double]): Unit = {
     val s = spectrum(xs)
+    val in = s.interpolator()
+    var hint = 0
     qs.foreach { q =>
-      assertEquals(s"x = $q", reference(xs, q), s.getLowerIndex(q))
+      val r = reference(xs, q)
+      assertEquals(s"getLowerIndex x = $q", r, s.getLowerIndex(q))
+      hint = DefaultArraySpectrum.lowerIndexFrom(xs, hint, q)
+      assertEquals(s"lowerIndexFrom x = $q", r, hint)
+      if (xs.length > 1)
+        assertEquals(s"interpolator x = $q", 0, java.lang.Double.compare(s.getY(q), in.at(q)))
     }
   }
 
@@ -77,6 +85,11 @@ class DefaultArraySpectrumLookupTest {
   @Test def ascendingScanOverFinerGrid(): Unit = {
     val xs = (0 until 5000).map(i => 300.0 + i * 0.05).toArray
     check(xs, (0 until 700).map(i => 299.0 + i * 0.37))
+  }
+
+  @Test def pastTheEndAfterGallop(): Unit = {
+    val xs = (0 until 100).map(_.toDouble).toArray
+    check(xs, Seq(0.5, 3.5, 150.0, 200.0, 98.5, 99.0, 1000.0))
   }
 
   @Test def tinyAxes(): Unit = {
