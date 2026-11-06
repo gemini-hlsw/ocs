@@ -614,10 +614,8 @@ public final class SPTree extends JPanel {
             return false;
         }
 
-        // Program notes are gemini-internal and should not be shown unless the OT
-        // is running in onsite mode. This shouldn't happen since the OODB will
-        // filter out these nodes on fetch, but just in case...
-        return !((dataObject instanceof ProgramNote) && !isStaff);
+        // Planning notes are Gemini-internal: only a staff key may see them.
+        return !((dataObject instanceof ProgramNote) && !OTOptions.hasStaffKey());
     }
 
     /**

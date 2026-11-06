@@ -183,7 +183,7 @@ public final class SPViewerActions {
         addInfoSchedulingNoteAction = new AddObsCompAction(viewer, SPComponentType.INFO_SCHEDNOTE, Resources.getIcon("post-it-note-blue18.gif"));
         addInfoProgramNoteAction = new AddObsCompAction(viewer, SPComponentType.INFO_PROGRAMNOTE, Resources.getIcon("post-it-note-red18.gif")) {
             public boolean computeEnabledState() {
-                return super.computeEnabledState() && OTOptions.isStaff(getProgram().getProgramID());
+                return super.computeEnabledState() && OTOptions.hasStaffKey();
             }
         };
 
