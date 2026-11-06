@@ -115,6 +115,12 @@ public class OTOptions {
 
     }
 
+    // True only when the selected key is a Gemini staff key. Program contact
+    // or visitor keys do not count (REL-5065).
+    public static boolean hasStaffKey() {
+        return hasPermission(new StaffPermission());
+    }
+
     public static boolean hasPermission(Permission p) {
         return ImplicitPolicyForJava.hasPermission(SPDB.get(), OT.getKeyChain(), p);
     }
