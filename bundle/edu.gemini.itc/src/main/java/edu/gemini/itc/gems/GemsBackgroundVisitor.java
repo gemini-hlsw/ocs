@@ -8,7 +8,7 @@ import edu.gemini.itc.base.*;
  */
 public class GemsBackgroundVisitor implements SampledSpectrumVisitor {
 
-    private ArraySpectrum _gemsBack = null;
+    private DefaultArraySpectrum _gemsBack = null;
 
     /**
      * Constructs GemsBackgroundVisitor.
@@ -27,8 +27,9 @@ public class GemsBackgroundVisitor implements SampledSpectrumVisitor {
      * Implements the SampledSpectrumVisitor interface
      */
     public void visit(SampledSpectrum sed) {
+        final DefaultArraySpectrum.Interpolator back = _gemsBack.interpolator();
         for (int i = 0; i < sed.getLength(); i++) {
-            sed.setY(i, _gemsBack.getY(sed.getX(i)) + sed.getY(i));
+            sed.setY(i, back.at(sed.getX(i)) + sed.getY(i));
         }
     }
 

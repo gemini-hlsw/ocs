@@ -202,4 +202,18 @@ class DatFileTest {
     assert(data(1).size == 25)
   }
 
+  @Test
+  def userSpectrumSortedAsIs(): Unit = {
+    val data = DatFile.fromUserSpectrum("300 1.0\n400 2.0\n400 2.5\n500 3.0")
+    assert(data(0).toSeq == Seq(300.0, 400.0, 400.0, 500.0))
+    assert(data(1).toSeq == Seq(1.0, 2.0, 2.5, 3.0))
+  }
+
+  @Test
+  def userSpectrumUnsortedIsSortedAsPairs(): Unit = {
+    val data = DatFile.fromUserSpectrum("# unsorted\n500 3.0\n300 1.0\n400 2.0\n200 0.5\n400 2.5")
+    assert(data(0).toSeq == Seq(200.0, 300.0, 400.0, 400.0, 500.0))
+    assert(data(1).toSeq == Seq(0.5, 1.0, 2.0, 2.5, 3.0))
+  }
+
 }

@@ -21,13 +21,6 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
     // interpolation in getY and the search in getLowerIndex all rely on that ordering.
     private final double[][] _data;
 
-    // The index getLowerIndex returned last time. Callers usually walk x in increasing order,
-    // so the next lookup tends to land in this bin or the one after.
-    // The cursor is only a hint and needs no synchronisation: getLowerIndex checks it against
-    // the data before using it, so at worst a bad value causes a fallback to the binary
-    // search, never a wrong result.
-    private int _lowerIndexCursor = 0;
-
     public static DefaultArraySpectrum fromUserSpectrum(String spectrum) {
         return sharing(DatFile.fromUserSpectrum(spectrum));
     }
@@ -142,18 +135,21 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
 
     /**
      * Same values as getY(double), for callers that evaluate many x in increasing order: the bin
-     * and its slope are kept between calls, so consecutive x in one bin skip the lookup. The
-     * expression is the one getY uses with the same operands, hence bit-identical results.
+     * and its slope are kept between calls, so consecutive x in one bin skip the lookup, and a
+     * miss gallops forward from the previous bin. The expression is the one getY uses with the
+     * same operands, hence bit-identical results. Not thread safe; use one per scan.
      */
     public final class Interpolator {
         private boolean haveBin = false;
+        private int cursor = 0;
         private double x1, x2, y1, slope;
 
         public double at(final double x) {
             final double[] xs = _data[0];
             if (x < xs[0] || x > xs[xs.length - 1]) return 0;
             if (!haveBin || !(x1 < x && x <= x2)) {
-                final int low = getLowerIndex(x);
+                final int low = lowerIndexFrom(xs, cursor, x);
+                cursor = low;
                 final double[] ys = _data[1];
                 x1 = xs[low];
                 x2 = xs[low + 1];
@@ -196,38 +192,47 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
      * Returns the index of the data point with largest x value less than x
      */
     @Override public int getLowerIndex(double x) {
-        final double[] xs = _data[0];
+        return lowerIndexFrom(_data[0], -1, x);
+    }
+
+    /**
+     * Same index as getLowerIndex(x), found by galloping forward from hint. On a non-decreasing
+     * axis exactly one i satisfies xs[i] < x <= xs[i+1] and the bisection converges on it from any
+     * bracket that contains it, so the result does not depend on hint. A negative hint, backward
+     * steps and NaN use the full search. Kept as one method without calls so the JIT can inline
+     * it whole into the scan loops.
+     */
+    static int lowerIndexFrom(final double[] xs, final int hint, final double x) {
         final int last = xs.length - 1;
-        if (last < 1) return 0;
+        int low = 0;
+        int high = xs.length;
+        if (hint >= 0 && hint < last && xs[hint] < x) {
+            if (x <= xs[hint + 1]) return hint;
+            // the usual miss of an ascending scan is the next bin, so check it before galloping
+            final int next = hint + 1;
+            if (next < last && x <= xs[next + 1]) return next;
 
-        // For a non-decreasing x axis exactly one index satisfies xs[i] < x <= xs[i+1], the same
-        // one the binary search converges on, so the fast paths return precisely what the search
-        // would. Anything else, including x outside the range and NaN, falls through.
-        // the data files were reviewd and all have strictly increasing x values (wavelength)
-        final int c = _lowerIndexCursor;
-        if (c >= 0 && c < last) {
-            if (xs[c] < x && x <= xs[c + 1]) return c;
-            final int next = c + 1;
-            if (next < last && xs[next] < x && x <= xs[next + 1]) {
-                _lowerIndexCursor = next;
-                return next;
+            int step = 1;
+            int lo = hint;
+            int hi = next;
+            while (xs[hi] < x && hi < last) {
+                lo = hi;
+                step <<= 1;
+                hi = Math.min(last, hi + step);
             }
+            // every x value is below x, which is the answer the full search gives past the end
+            if (xs[hi] < x) return last;
+            low = lo;
+            high = hi;
         }
-
-        // The binary search stays as the fallback: the first lookup of each scan, random access
-        // from getY(double) and getIntegral, and steps that cross more than one bin all miss
-        // the cursor.
-        int low_index = 0;
-        int high_index = xs.length;
-        while (high_index - low_index > 1) {
-            int index = (high_index + low_index) / 2;
+        while (high - low > 1) {
+            final int index = (high + low) >>> 1;
             if (xs[index] < x)
-                low_index = index;
+                low = index;
             else
-                high_index = index;
+                high = index;
         }
-        _lowerIndexCursor = low_index;
-        return low_index;
+        return low;
     }
 
     /**

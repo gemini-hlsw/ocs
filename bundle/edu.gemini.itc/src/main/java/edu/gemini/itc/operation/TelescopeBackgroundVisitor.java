@@ -10,7 +10,7 @@ import edu.gemini.spModel.core.Site;
  */
 public class TelescopeBackgroundVisitor implements SampledSpectrumVisitor {
 
-    private final ArraySpectrum telescopeBack;
+    private final DefaultArraySpectrum telescopeBack;
     private final String setup;
 
     /**
@@ -71,8 +71,9 @@ public class TelescopeBackgroundVisitor implements SampledSpectrumVisitor {
      * Implements the SampledSpectrumVisitor interface
      */
     public void visit(SampledSpectrum sed) {
+        final DefaultArraySpectrum.Interpolator back = telescopeBack.interpolator();
         for (int i = 0; i < sed.getLength(); i++) {
-            sed.setY(i, telescopeBack.getY(sed.getX(i)) + sed.getY(i));
+            sed.setY(i, back.at(sed.getX(i)) + sed.getY(i));
         }
     }
 
