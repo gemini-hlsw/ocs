@@ -136,6 +136,14 @@ object Recipe {
     ItcCcd(singleSNRatio, totalSNRatio, r.peakPixelCount, r.instrument.wellDepth, r.instrument.gain, Warning.collectWarnings(r))
   }
 
+  /** For instruments that build one chart group per detector (GHOST and IGRINS-2 arms), so that each detector takes
+    * its S/N from its own charts rather than from the first group. Groups beyond the results, such as GHOST's
+    * combined web charts, are ignored. */
+  private def toCcdDataPerGroup(rs: Array[SpectroscopyResult], charts: JList[JList[SpcChartData]]): List[ItcCcd] = {
+    require(charts.size >= rs.length, s"Expected a chart group for each of the ${rs.length} detectors, got ${charts.size}")
+    rs.toList.zip(charts.toList).map { case (r, group) => toCcdData(r, group.toList) }
+  }
+
   // === Java helpers
 
   // One result (CCD) and a simple set of charts, this covers most cases.
@@ -160,13 +168,20 @@ object Recipe {
 
   // A set of results and a set of groups of charts, this covers GMOS (3 CCDs and potentially separate groups
   // for IFU cases, if IFU is activated).
-  def serviceGroupedResult(rs: Array[SpectroscopyResult], charts: JList[JList[SpcChartData]], excludeCharts: Boolean): ItcSpectroscopyResult = {
+  def serviceGroupedResult(rs: Array[SpectroscopyResult], charts: JList[JList[SpcChartData]], excludeCharts: Boolean): ItcSpectroscopyResult =
+    groupedResult(rs, rs.map(r => toCcdData(r, charts.toList.flatten)).toList, charts, excludeCharts)
+
+  // A set of results and one group of charts per result, in the same order. This covers IGRINS-2 (H and K arms).
+  def serviceArmGroupedResult(rs: Array[SpectroscopyResult], charts: JList[JList[SpcChartData]], excludeCharts: Boolean): ItcSpectroscopyResult =
+    groupedResult(rs, toCcdDataPerGroup(rs, charts), charts, excludeCharts)
+
+  private def groupedResult(rs: Array[SpectroscopyResult], ccds: List[ItcCcd], charts: JList[JList[SpcChartData]], excludeCharts: Boolean): ItcSpectroscopyResult = {
     val snAtArray = rs.flatMap(_.signalToNoiseAt)
     // if all the snAt ar empty it means we are out of range, so return none
     // else filter out the ones containing 0 and return the first. If none is over 0 just return the first.
     val snAt = snAtArray.find(_.finalSignalToNoise > 0).orElse(snAtArray.headOption)
     ItcSpectroscopyResult(
-      rs.map(r => toCcdData(r, charts.toList.flatten)).toList,
+      ccds,
       if (excludeCharts) Nil else charts.toList.map(l => SpcChartGroup(l.toList)),
       rs.map(_.times).headOption.getOrElse(AllIntegrationTimes.empty),
       snAt
@@ -197,7 +212,7 @@ object Recipe {
     val times = AllIntegrationTimes(integrationTimes, if (idx < integrationTimes.length) idx else 0)
 
     ItcSpectroscopyResult(
-      rs.map(r => toCcdData(r, charts.toList.flatten)).toList,
+      toCcdDataPerGroup(rs, charts),
       if (excludeCharts) Nil else charts.toList.map(l => SpcChartGroup(l.toList)),
       times,
       snAt
