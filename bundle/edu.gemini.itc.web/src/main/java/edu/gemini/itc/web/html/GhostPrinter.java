@@ -58,8 +58,10 @@ public final class GhostPrinter extends PrinterBase implements OverheadTablePrin
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", iqAtSource));
         _printRequestedIntegrationTime(result);
         _print("<br>", false);
+        // The only GHOST warning is the per-arm saturation rule, which _printPeakPixelInfo already
+        // flags on each detector's line, so the generic warnings block is not printed. Revisit this
+        // if GHOST gains other warning rules.
         _printPeakPixelInfo(s, results);
-        _printWarnings(s.warnings());
         _print(OverheadTablePrinter.print(this, p, results[0], s));
         Log.info("CCD lengh: " + s.ccds().length() );
         _print("<HR align=left SIZE=3>");
@@ -122,9 +124,12 @@ public final class GhostPrinter extends PrinterBase implements OverheadTablePrin
             int saturationLimit = ((Ghost) results[i].instrument()).getSaturationLimit();
             double peakPixelFlux = s.ccd(i).get().peakPixelFlux();
             int peakPixelToADU = s.ccd(i).get().adu();
-            _print(String.format("%s%s %s: The peak pixel signal + background is %.0f e- (%d ADU) where the limit is %d e-.%s",
+            // Red when the detector's saturation rule (Ghost.warnings) fired, so the page and the
+            // JSON warnings sent to GPP always agree.
+            boolean saturated = !s.ccd(i).get().warnings().isEmpty();
+            _print(String.format("%s%s %s: The peak pixel signal + background is %.0f e- (%d ADU) where the limit is %d ADU.%s",
                                     "<p style=\"margin:0;margin-left:2%;",
-                                    (peakPixelToADU >= saturationLimit) ? "color:red;\"> Warning" : "\">",
+                                    saturated ? "color:red;\"> Warning" : "\">",
                                     ((Ghost) results[i].instrument()).getDetectorName(),
                                     peakPixelFlux,
                                     peakPixelToADU,

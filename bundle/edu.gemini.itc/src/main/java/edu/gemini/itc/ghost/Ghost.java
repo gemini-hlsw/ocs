@@ -10,7 +10,9 @@ import edu.gemini.spModel.gemini.ghost.Detector;
 import edu.gemini.spModel.gemini.ghost.GhostReadNoiseGain;
 import static edu.gemini.spModel.gemini.ghost.GhostReadNoiseGain.*;
 import scala.Option;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Logger;
 import java.util.Map;
 import java.util.Objects;
@@ -285,6 +287,14 @@ public final class Ghost extends Instrument implements BinningProvider, Spectros
 
     public double maxFlux() {
         return _ccdColor.getSaturationLimit() * gain();
+    }
+
+    // Each arm has its own Ghost instance, so each detector (CCD) is checked against its own
+    // saturation limit and gain. Warn only once the peak reaches the limit, as the web output
+    // has always done.
+    @Override
+    public List<WarningRule> warnings() {
+        return Collections.singletonList(new GhostSaturationLimitRule(getSaturationLimit(), gain(), 1.0));
     }
 
     @Override public double getMinExposureTime() { throw new Error("NOT IMPLEMENTED"); }
