@@ -72,7 +72,7 @@ public final class Igrins2Recipe implements SpectroscopyArrayRecipe {
                     "Intermediate Single-Exposure S/N and Final S/N with Sky Sub: " + b,0));
             groups.add(dataSets);
         }
-        return Recipe$.MODULE$.serviceGroupedResult(result, groups, headless);
+        return Recipe$.MODULE$.serviceArmGroupedResult(result, groups, headless);
     }
 
     public SpectroscopyResult[] calculateSpectroscopy() {
